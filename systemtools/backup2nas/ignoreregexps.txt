@@ -1,0 +1,10 @@
+pagefile\.sys
+/temp/
+/WINDOWS/system32/config
+/i386/
+c:/windows
+^~
+/RECYCLER/
+/Temporary internet files/
+/Cache/
+\.lock$

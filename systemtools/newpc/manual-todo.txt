@@ -1,0 +1,47 @@
+# put each todo-item on a separate line.
+# move items to done.txt when done.
+* make a manual-done.txt in d:\temp\install
+* perftoolset: cruisecontrol.sh: port conflicts and remove & (ampersand) at the end of the call
+* perftoolset: check if once, prod etc are really symlinks to cruisecontrol-once.tcl etc
+* perftoolset: gnuplot: check if using minimal version 4.2
+* perftoolset: ActivePerl 5.10
+* perftoolset: Test PSCP en PLINK (evt met plink-acc.tcl) zodat certificates zijn gezet.
+* perftoolset: Cruise and Ant: check -Xmx params.
+* jedit: Ctrl-Sh-R om readonly vlag te switchen.
+* TC: F4 gaat naar jEdit.
+* Firefox: bookmarks. Check bv bookmarks file (lokatie?) en of hier bepaalde dingen instaan.
+* Programma's uit start menu starten, met -s optie.
+* Scheduler installeren en config voor backup opnemen/checken.
+* TomTom home met TomTom ingeplugd.
+* Dell PDA Sync. Eerst Outlook.
+* Poptray in startmenu, met settings.
+* Keertje opnieuw opstarten: kijken of systemschedule en poptray worden gestart.
+* Java -version
+* GHCI: Haskell. :q om te eindigen.
+* subst t: d:\perftoolset
+* Calc-model SOABOek: LQN en gnuplot
+* Irfan view opstarten en file associations opnieuw zetten, kan in prog zelf: options/set file associations
+* Protege/tools: genereren incl GraphViz dot.
+* Outlook keertje starten.
+* PFE Settings, oa ctrl-f om te zoeken.
+* jedit tcl edit mode: spaties ipv tabs
+* putty sessions vanuit registry: current user/software/SimonTatham/Putty
+* PFE keys in c:\windows\pfe32.key, ini bestaat niet.
+* normal.dot in docs&settings\nvr00537\appdata\ms\sjablonen, nu in templates
+* Printers ITX: Xerox Workcentre Pro 265 (A7)
+* IND: HP Laserjet 4100 series PCL (4200 mag ook): draait op port IP_192.168.6.124
+
+=== Op moment van overgaan - op oude pc: ===
+* alles met SVN ingecheckt? dus 'svn st' geeft geen resultaten?
+* outlook gesloten en .pst gekopieerd
+* apps op mysql gesloten (protege, perf toolset), backup gemaakt en veilig gesteld?
+* laatste backup van alles files op d: (\nico, \projecten, i:\)
+* schedule backup uitzetten.
+* scheduler: backup uitzetten.
+* Drives: I en J drive overzetten: ofwel gizmo, ofwel na PointSec goed.
+===
+=== Op moment van overgaan - op nieuwe pc: ===
+* scheduler: backup. pas aanzetten nadat 'ie op oude is uitgezet.
+* Check Outlook: laatste mails hierin, werkt send/receive? werkt outlookbatch?
+* Check Protege: werkt het nog, laatste versie?
+

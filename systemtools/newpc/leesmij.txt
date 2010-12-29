@@ -1,0 +1,3 @@
+Tooling om te checken of nieuwe PC volledig en goed is geinstalleerd. Checks zoveel mogelijk automatisch, maar deels ook handmatig. Het regelen is vooral handmaige actie.
+
+NdV, 3-10-2009.

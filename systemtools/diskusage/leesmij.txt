@@ -1,0 +1,18 @@
+Aanzet tot systeem om disk-gebruik te monitoren.
+
+In eerste instantie de volgende dingen:
+* gebruik du.exe, filteren op groottes groter dan een treshold (10MB?). Dit met tclscr en
+  batchfile.
+* Eigen C, D, E en F samennemen in een commando. (en uitvoer in een file)
+* standen bewaren, zodat vergeleken kan worden (fcompare of script)
+
+* Resultaat is per keer dus 1 dir-file met info over alle drives (evt. ook netwerk)
+
+* Scheiding batchfile en tclscr:
+  * batchfile start du.exe
+  * tclscr levert met du-output ook een output.
+  * batch zet deze met echo en >> wel weer aan elkaar.
+
+  
+
+

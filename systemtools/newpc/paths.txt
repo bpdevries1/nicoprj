@@ -1,0 +1,17 @@
+c:/bin
+C:/Documents and Settings/nvr00537
+c:/util
+D:/bieb
+d:/cruiseresults
+d:/develop
+d:/install
+d:/Mijn documenten
+d:/MySQL
+d:/nico
+d:/perf
+d:/perfeng
+d:/perftoolset
+d:/projecten
+d:/util
+i:/
+j:/
