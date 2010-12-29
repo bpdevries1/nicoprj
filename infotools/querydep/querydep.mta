@@ -1,0 +1,15 @@
+idField=id
+
+# gebruikt voor oplossen 4.3.5 en 5.7 of 5.8
+
+query	bestand_id	bestand	id
+tabel	bestand_id	bestand	id
+query_tabel	query_id	query	id
+query_tabel	tabel_id	tabel	id
+
+# andere tabellen met id-velden
+qqq	qqq	bestand	id
+qqq	qqq	query	id
+qqq	qqq	tabel	id
+qqq	qqq	query_tabel	id
+

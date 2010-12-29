@@ -1,0 +1,75 @@
+* Sommige files lijken andere encoding te hebben, lijkt UTF-16 te zijn:
+ c r e a t e   n o n c l u s t e r e d   i n d e x   [ _ d t a _ i n d e x _ f o
+ r _ k e y s _ 6 _ 5 0 6 7 0 5 8 4 9 _ _ k 1 _ 2 _ 4 _ 1 4 ]   o n   [ v s ] . [
+ f o r _ k e y s ]   ♦201
+ 
+* HTML: stukje javascript om formatting en line numbers toe te voegen? Zie bv Web2Py.
+* heuristiek: bij lege regel de query splitsen?
+* Splitsen van queries:
+onderstaande best lastig: de tweede select kan best een eerste regel zijn, alleen door de UNION ALL kan dit niet.
+
+* Is het voldoende alleen naar de regels voor en na de evt splitsing te kijken: de regel ervoor moet een laatste regel
+  kunnen zijn en de regel erna moet een eerste regel kunnen zijn.
+* Verder ook tellen of de haakjes nog kloppen in beide stukken, alleen ronde haakjes lijken genoeg.
+* Als er 2x INSERT of UPDATE of DELETE voorkomt, weet je volgens mij wel dat je het nog moet splitsen. Bij 1 update en 1 insert geldt
+  dit trouwens ook.
+
+* Laatste regel:
+  - wel: FROM, WHERE, AND, GROUP BY
+  - wel: eerste karakter is geen space
+  - niet: UNION (ALL)
+* Eerste regel:
+  - mogelijk: SELECT, als ergens hierna (kan vele regels verder zijn) een INTO volgt.
+  - zeker: INSERT INTO,UPDATE, DELETE
+  - wel: eerste karakter is geen space
+* Kan ook heuristieken opbouwen: wat komt concreet voor als eerste en laatste regel waarbij je zeker weet
+  dat het een begin/einde betreft?
+
+BEGIN TRANSACTION 
+
+INSERT INTO [DCF].[TempZaak]
+           ([Crv_num]
+           ,[Res_Proc_No])
+SELECT	R.Crv_num,
+		R.Res_proc_no
+FROM	VS.resid_proc R
+WHERE	R.res_proc_no > 0
+UNION ALL
+SELECT	R.Crv_num,
+		Max(R.Res_proc_no)
+FROM	VS.resid_proc R
+WHERE	R.res_proc_no < 0
+GROUP BY R.crv_num, R.prev_proc_no
+GO
+
+
+
+Textarea-javascript-onload:
+* niet direct te gebruiken, text ook eerst omzetten naar js-code, dus voegt niet veel toe aan inline gebruik.
+* Misschien wel eigen templating engine (perftoolset) gebruiken, om ${content} te vervangen door inhoud v.e. file.
+* Zie C:\aaa\editarea_0_8_2\exemples\ex_sql.html
+
+Here is an example...----your HTML file----
+<html>
+<head>
+<script>
+function loadContent(){
+document.forms[0].myText.value = content;
+}
+</script>
+<script language="JavaScript" src="content.js" type="text/javascript"></script>
+</head>
+<body>
+<form>
+<textarea name="myText" cols="40" rows="10"></textarea>
+</form>
+<span onClick="loadContent()">HELLO</span>
+</body>
+</html>
+
+
+##########################################
+
+----content.js----
+
+var content = 'Whatever you want to go into the text area. Use the \r symbol for a line break in the text area. So if I write, Hello\rMy name is Jesse, it will appear: Hello (next line) My name is Jesse'Hope this helps. The key is the red code above - the link to the js file. The function at the top of the HTML file sets the value of the text area to the variable from your js file. This would almost be easier if you just created that variable in the head of your HTML doc, but it's not my project. Good luck.
