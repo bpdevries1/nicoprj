@@ -1,0 +1,78 @@
+<testsuite>
+
+	<percentiles>90;95;98</percentiles>
+	<!-- maxtimes: semicolon seperated list: 2.0;3.0. The percentage of responsetimes below the maxtime (seconds) will be calculated -->
+	<maxtimes>2.0</maxtimes>
+	<!-- maxtimess_percentiles: semicolon seperated list; "90:2.0" means that 90% of the responsetimes should be less than 2.0 seconds -->
+	<!-- the use of the less-than sign is not permitted here in XML -->
+	<maxtimes_percentiles>95:1.0</maxtimes_percentiles>
+
+<!--	
+	<graph1>
+		<title>R, X en D tov N (ikt1, Z=1)</title>
+		<xlabel>Aantal gebruikers</xlabel>
+		<y2label>Responsetijd (R)</y2label>
+		<ylabel>Throughput (X, per sec)</ylabel>
+		<line1>
+			<axes>x1y2</axes>
+			<title>Responsetijd</title>
+			<xvalue>nthreads</xvalue>
+			<yvalue>avgRespTime</yvalue>
+			<regexp>testclient-ikt1_202-[0-9]+sec-[0-9]+thr-Z1000-berichten$</regexp>
+		</line1>
+		<line2>
+			<axes>x1y2</axes>
+			<title>R (90%)</title>
+			<xvalue>nthreads</xvalue>
+			<yvalue>percentile90</yvalue>
+			<regexp>testclient-ikt1_202-[0-9]+sec-[0-9]+thr-Z1000-berichten$</regexp>
+		</line2>
+		<line3>
+			<axes>x1y1</axes>
+			<title>Throughput</title>
+			<xvalue>nthreads</xvalue>
+			<yvalue>rate</yvalue>
+			<regexp>testclient-ikt1_202-[0-9]+sec-[0-9]+thr-Z1000-berichten$</regexp>
+		</line3>
+	</graph1>
+-->
+
+
+
+<!-- testrun_tc {service datfile duration nthreads loops sleeptime rampup perftest} -->
+<!-- nu even niet perftest mode, zodat alle data wordt bewaard -->
+	<testrun>
+	    <extrapubdir>${testrun.personen.threads}thr-Z${testrun.personen.sleeptime}-personen</extrapubdir>
+			<testomgeving>ikt1_202</testomgeving>
+			<testcase>testclient</testcase>
+			<duration>60</duration>
+			<keepalive>true</keepalive>
+			<headerkeepaliveseconds>300</headerkeepaliveseconds>
+			<personen>
+				<klantendat>klanten-personen-ikt1.dat</klantendat>
+				<threads>1</threads>
+				<loops>10</loops>
+				<rampup>0</rampup>
+				<sleeptime>0</sleeptime>
+				<targetthroughput>10000</targetthroughput>
+				<perftest></perftest>
+			</personen>
+			<waitbefore>0</waitbefore>
+			<waitafter>0</waitafter>
+			<waitanalysis>300</waitanalysis>
+	</testrun>
+
+
+<!-- 1 bsn met verschillende aantallen codes meegeven. Werkt voorlopig alleen met deze bsn -->
+
+
+
+
+
+
+
+
+
+
+</testsuite>
+

@@ -1,0 +1,4 @@
+paramvalues soms groot, alleen eerste stuk op scherm zetten.
+Deze versie nog in lib zetten en install doen.
+
+NdV 4-11-2010.

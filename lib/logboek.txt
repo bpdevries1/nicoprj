@@ -1,0 +1,46 @@
+Logboek Tcl library functies.
+
+Doel: periodiek checken of recent gemaakte scripts functies bevatten die tot library functies gepromoveerd kunnen worden.
+
+24-10-2010
+==========
+* find . -name "*lib*.tcl" gedaan in nicoprj: libmusic.tcl, lib/generallib.tcl en outlook/../lib-agenda.tcl gevonden.
+* ook ./systemtools/check-sync-dirs/check-files-lib.tcl gevonden, maar geen algemene lib dingen.
+* find . -name "*lib*.tcl" gedaan in perftoolset:
+
+./tools/tcl-tracing/callgraph/CClassLib.tcl - specifiek.
+./tools/genvugen/lib.tcl - subst_no_variables in generallib.tcl gezet.
+./tools/conversie/jtllib.tcl - JTL specifiek, en ook hierbinnen nog vrij specifiek.
+./tools/log2analysis/lib_analysis.tcl - get_array_values en file_block_splitter toegevoegd aan generallib.tcl
+./tools/clientscripts/libmakescript.tcl - behoorlijk specifiek.
+./tools/SubRequests/db-lib.tcl - alleen specifiek voor benaderen DB.
+./toolset/cruise/checkout/script/tool/clientscripts/libmakescript.tcl - geen generieke dingen.
+./toolset/cruise/checkout/lib/statslib.tcl - wel aardig, zou het nu met R doen, maar kan wel zo. File in nicoprj/lib gezet.
+./toolset/cruise/checkout/lib/opanlib.tcl - specifiek Operationele Analyse, en wel 'oude' tcl.
+./toolset/cruise/checkout/lib/perflib.tcl - ook de oorspronkelijke.
+./toolset/tools-3rdparty/Tcl85/repository/package/win32-ix86/lib/Tclx-8.4/convlib.tcl - Tcl zelf.
+./toolset/tools-3rdparty/Tcl85/repository/package/win32-ix86/lib/Tclx-8.4/tcllib.tcl - Tcl zelf.
+./lib/tcl/perflib.tcl - de oorspronkelijke, zit al in generallib.tcl
+
+* Dan nog de tekst 'lib' in *.tcl files, eerst in toolset: 
+perftoolset/lib/tcl/CHtmlHelper.tcl - al in lib.
+perftoolset/lib/tcl/CLogger.tcl - al in lib.
+perftoolset/lib/tcl/CProgressCalculator.tcl - leuk, in lib gezet.
+* find . -name "*.tcl" | xargs grep "^#.*lib" | grep -v source
+* in fp.tcl functies proc_to_lambda en lambda_to_proc toegevoegd, voor bv struct::list map functies.
+* in fp.tcl functie lst_partition toegevoegd, vanuit ./tools/Workflow/Workflowdef.tcl
+* in generallib xls2csv toegevoegd, gebruikt .vbs script.
+* ./toolset/cruise/checkout/lib/teststats.tcl:# java::import -package nl.ndv.statslib Stats. Kan blijkbaar ook, nu niets mee gedaan.
+* Dan tekst 'lib' in nicoprj.
+
+./mediatools/organise/sync-singles-db.tcl: functie stond al in music-lib, verwijderd uit dit script.
+./misctools/playingscheme/playingscheme.tcl: General helper procs, moved to lib.ndv: random functies en iden.
+./misctools/scheids/maak-voorstel-gen.tcl: dict_get_multi en array_values
+./misctools/scheids/insert-input.tcl: lees_tsv
+
+Voor volgende keer, meer automatisch, met script:
+- in een run door lib in naam en lib in tekst doorzoeken.
+- als de lib op een 'source xxx' line staat, telt 'ie niet.
+- alleen gewijzigde of nieuwe files sinds 24-10-2010.
+
+
