@@ -1,0 +1,4 @@
+Onderwerp	Begindatum	Begintijd	Einddatum	Eindtijd
+scheidsen: Wilh D4	26-1-2007	19:45	26-1-2007	21:15
+scheidsen: Wilh D3	9-2-2007	19:45	9-2-2007	21:15
+

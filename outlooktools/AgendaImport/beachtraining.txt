@@ -1,0 +1,12 @@
+Onderwerp	Begindatum	Begintijd
+Beachtraining Aalsmeer	12-12-2006	21:00
+Beachtraining Aalsmeer	19-12-2006	21:00
+Beachtraining Aalsmeer	2-1-2007	21:00
+Beachtraining Aalsmeer	9-1-2007	21:00
+Beachtraining Aalsmeer	16-1-2007	21:00
+Beachtraining Aalsmeer	23-1-2007	21:00
+Beachtraining Aalsmeer	30-1-2007	21:00
+Beachtraining Aalsmeer	6-2-2007	21:00
+Beachtraining Aalsmeer	13-2-2007	21:00
+Beachtraining Aalsmeer	20-2-2007	21:00
+

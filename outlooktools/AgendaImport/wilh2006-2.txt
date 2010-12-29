@@ -1,0 +1,13 @@
+nr.  	datum  	tijd  	teams  	zaal  	veld  	uitsl.
+H4I HF 	vr 12/01/2007 	19:30 	Almere Buiten H2 - Wilhelmina H5 	Polderdreef 	2 	 
+H4I BF 	wo 17/01/2007 	21:30 	Touche '86 H4 - Wilhelmina H5 	Sph. De Trits 	4 	 
+H4I LF 	za 20/01/2007 	17:30 	A.G.A.V.S. H3 - Wilhelmina H5 	Sph Banninghal 	4 	 
+H4I FE 	vr 26/01/2007 	21:15 	Wilhelmina H5 - Touche '86 H3 	Sph.Schuilenburg 	1 	 
+H4I DF 	za 03/02/2007 	15:30 	ODIS H2 - Wilhelmina H5 	Sph De Fuik 	2 	 
+H4I FC 	vr 09/02/2007 	21:15 	Wilhelmina H5 - VIF H2 	Sph.Schuilenburg 	3 	 
+H4I FA 	vr 09/03/2007 	21:15 	Wilhelmina H5 - Voleem H5 	Sph.Schuilenburg 	3 	 
+H4I KF 	za 17/03/2007 	18:00 	Voleem H3 - Wilhelmina H5 	Sph. De Hilt 	2 	 
+H4I FJ 	vr 23/03/2007 	21:15 	Wilhelmina H5 - VC Omniworld H8 	Sph.Schuilenburg 	3 	 
+H4I IF 	vr 30/03/2007 	20:15 	Switch H2 - Wilhelmina H5 	Spz De Dissel 	1 	 
+H4I FH 	vr 13/04/2007 	21:15 	Wilhelmina H5 - Almere Buiten H2 	Sph.Schuilenburg 	3 	 
+H4I GF 	vr 20/04/2007 	21:30 	Unicornus H4 - Wilhelmina H5 	Sph. De Kuil 	2 	 

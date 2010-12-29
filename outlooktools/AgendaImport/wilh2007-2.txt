@@ -1,0 +1,11 @@
+H3J CI 	vr 18/01/2008 	20:15 	Oberon HS 4 - Wilhelmina HS 4 	Sph Aetsveld 	  	 
+H3J AI 	vr 01/02/2008 	21:00 	StamSovoco HS 4 - Wilhelmina HS 4 	De Bunt 	  	 
+H3J IK 	vr 08/02/2008 	19:45 	Wilhelmina HS 4 - K.O.-Trivolley HS 3 	Sph.Schuilenburg 	  	 
+H3J JI 	vr 15/02/2008 	21:30 	Unicornus HS 3 - Wilhelmina HS 4 	Sph. De Kuil 	  	 
+H3J LI 	za 08/03/2008 	14:30 	A.G.A.V.S. HS 2 - Wilhelmina HS 4 	Sph Banninghal 	  	 
+H3J IH 	vr 14/03/2008 	19:45 	Wilhelmina HS 4 - AVV Keistad HS 9 	Sph.Schuilenburg 	  	 
+H3J GI 	vr 28/03/2008 	20:15 	Afas-LEOS HS 3 - Wilhelmina HS 4 	Sph De Korf 	  	 
+H3J IF 	vr 04/04/2008 	19:45 	Wilhelmina HS 4 - Afas-LEOS HS 4 	Sph.Schuilenburg 	  	 
+H3J EI 	vr 11/04/2008 	21:00 	Almere Buiten HS 1 - Wilhelmina HS 4 	Polderdreef 	  	 
+H3J ID 	vr 18/04/2008 	19:45 	Wilhelmina HS 4 - Gemini S HS 6 	Sph.Schuilenburg 	  	 
+

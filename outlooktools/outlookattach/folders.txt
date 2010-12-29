@@ -1,0 +1,19 @@
+# 1e kolom is foldernaam, 2e kolom is dirnaam (zonder backslash)
+Personal/Afgehandeld	c:\aaa\mail-attachments
+#Persoonlijke mappen/Archief	d:\temp\inmail
+#Persoonlijke mappen/OFU/Diversen	d:\ofbs\Diversen
+#Persoonlijke mappen/OFU/Persoonlijk	d:\ofbs\Persoonlijk
+#Persoonlijke mappen/OFU/PerfEng	d:\perfeng\vanmail
+
+# even tijdelijk
+# Persoonlijke mappen/DeltaLloyd	e:\ps
+# Persoonlijke mappen/OFU/Algemeen/E-Enabling	d:\ofbs\E-Enabling
+#Persoonlijke mappen/OFU/Thema Perfmod	d:\ofbs\Perfmod
+#Persoonlijke mappen/OFU/Thema Perfmod/Afgerond	d:\ofbs\Perfmod\Afgerond
+#Persoonlijke mappen/Centraal Beheer - AOL	e:\cb\vanmail
+# Persoonlijke mappen/OFU/Afst Remco Nijland	d:\ofbs\Afst Remco Nijland
+
+
+
+
+

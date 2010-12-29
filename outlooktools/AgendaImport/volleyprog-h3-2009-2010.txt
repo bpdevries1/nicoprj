@@ -1,0 +1,23 @@
+Datum  	Tijd  	Veld  	Code  	Wedstrijd  	Locatie  	Poule  	Meer informatie
+Vr 25-9-2009 	21:15 	2 	H2F DI 	Wilhelmina HS 3 - Lovoc HS 1 	Sph.Schuilenbur... 	H2F 	Details
+Za 3-10-2009 	14:45 	1 	H2F HD 	ODIS HS 1 - Wilhelmina HS 3 	Sph De Fuik 	H2F 	Details
+Vr 9-10-2009 	21:15 	2 	H2F DG 	Wilhelmina HS 3 - Keizer Otto/... HS 1 	Sph.Schuilenbur... 	H2F 	Details
+Za 17-10-2009 	13:00 	1 	H2F FD 	Prima Donna ... HS 3 - Wilhelmina HS 3 	Sporthal Huizer... 	H2F 	Details
+Vr 30-10-2009 	21:15 	2 	H2F DE 	Wilhelmina HS 3 - Unitas HS 1 	Sph.Schuilenbur... 	H2F 	Details
+Vr 6-11-2009 	21:30 	1 	H2F LD 	Vv Nederhors... HS 2 - Wilhelmina HS 3 	Sph De Blijk 	H2F 	Details
+Vr 13-11-2009 	21:00 	1 	H2F CD 	VIF HS 1 - Wilhelmina HS 3 	De Lieberg 	H2F 	Details
+Vr 20-11-2009 	21:15 	3 	H2F DB 	Wilhelmina HS 3 - Oberon HS 2 	Sph.Schuilenbur... 	H2F 	Details
+Vr 11-12-2009 	19:30 	2 	H2F AD 	Almere-Haven HS 1 - Wilhelmina HS 3 	Indoor-Sportcom... 	H2F 	Details
+Vr 18-12-2009 	21:15 	3 	H2F DK 	Wilhelmina HS 3 - VC Allvo HS 4 	Sph.Schuilenbur... 	H2F 	Details
+Za 9-1-2010 	16:30 	1 	H2F JD 	Voleem HS 1 - Wilhelmina HS 3 	Sph. De Hilt 	H2F 	Details
+Vr 15-1-2010 	21:15 	2 	H2F DH 	Wilhelmina HS 3 - ODIS HS 1 	Sph.Schuilenbur... 	H2F 	Details
+Vr 29-1-2010 	21:15 	2 	H2F DF 	Wilhelmina HS 3 - Prima Donna ... HS 3 	Sph.Schuilenbur... 	H2F 	Details
+Wo 3-2-2010 	19:30 	1 	H2F ED 	Unitas HS 1 - Wilhelmina HS 3 	Sporthal Phoeni... 	H2F 	Details
+Vr 12-2-2010 	21:15 	2 	H2F DL 	Wilhelmina HS 3 - Vv Nederhors... HS 2 	Sph.Schuilenbur... 	H2F 	Details
+Do 18-2-2010 	20:00 	3 	H2F GD 	Keizer Otto/... HS 1 - Wilhelmina HS 3 	Sph De Lunet 	H2F 	Details
+Vr 5-3-2010 	21:15 	3 	H2F DC 	Wilhelmina HS 3 - VIF HS 1 	Sph.Schuilenbur... 	H2F 	Details
+Vr 12-3-2010 	20:00 	1 	H2F BD 	Oberon HS 2 - Wilhelmina HS 3 	Sph Aetsveld 	H2F 	Details
+Vr 19-3-2010 	21:15 	3 	H2F DA 	Wilhelmina HS 3 - Almere-Haven HS 1 	Sph.Schuilenbur... 	H2F 	Details
+Vr 26-3-2010 	20:15 	3 	H2F KD 	VC Allvo HS 4 - Wilhelmina HS 3 	Topsportcentrum... 	H2F 	Details
+Vr 9-4-2010 	21:15 	2 	H2F DJ 	Wilhelmina HS 3 - Voleem HS 1 	Sph.Schuilenbur... 	H2F 	Details
+Vr 16-4-2010 	21:30 	1 	H2F ID 	Lovoc HS 1 - Wilhelmina HS 3 	Spz Eikenrode 	H2F 	Details

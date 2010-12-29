@@ -1,0 +1,12 @@
+Idee was outlook attach nieuw leven in te blazen, via tcom, want optcl is niet te vinden, en tcom
+maakt std deel uit van ActiveTcl.
+
+Maar een outlook attachment plugin gevonden, en lijkt best aardig. Wel via UI, maar wel meteen
+een hele folder met alle subfolders te doen. Nu eerst een 30-dagen versie, misschien aanschaffen,
+kost $25.
+
+Nog paar andere URL's, voor zelfbouw:
+* http://www.outlook-tips.net/code/saveatt.htm
+* http://www.scip.be/index.php?Page=ArticlesNET27&Lang=NL
+
+NdV, 26-7-2010.

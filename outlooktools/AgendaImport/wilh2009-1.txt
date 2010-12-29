@@ -1,0 +1,22 @@
+Datum  	Tijd  	Veld  	Code  	Wedstrijd  	Locatie  	Poule  	Meer informatie
+Vr 25-9-2009 	21:15 	3 	H3J BK 	Wilhelmina HS 4 - VC Allvo HS 5 	Sph.Schuilenbur... 	H3J 	Details
+Vr 9-10-2009 	21:15 	3 	H3J BI 	Wilhelmina HS 4 - Forza Hoogla... HS 4 	Sph.Schuilenbur... 	H3J 	Details
+Vr 16-10-2009 	21:15 	1 	H3J HB 	Oberon HS 3 - Wilhelmina HS 4 	Sph Aetsveld 	H3J 	Details
+Vr 30-10-2009 	21:15 	3 	H3J BG 	Wilhelmina HS 4 - Afas-LEOS HS 2 	Sph.Schuilenbur... 	H3J 	Details
+Za 7-11-2009 	13:30 	1 	H3J FB 	Sovoco HS 4 - Wilhelmina HS 4 	De Bunt 	H3J 	Details
+Vr 13-11-2009 	21:15 	3 	H3J BE 	Wilhelmina HS 4 - Prima Donna ... HS 5 	Sph.Schuilenbur... 	H3J 	Details
+Wo 18-11-2009 	21:00 	3 	H3J DB 	Touché '86 HS 3 - Wilhelmina HS 4 	Sph. De Trits 	H3J 	Details
+Vr 11-12-2009 	21:15 	3 	H3J BC 	Wilhelmina HS 4 - Switch HS 2 	Sph.Schuilenbur... 	H3J 	Details
+Za 19-12-2009 	16:00 	3 	H3J LB 	Voleem HS 3 - Wilhelmina HS 4 	Sph. De Hilt 	H3J 	Details
+Vr 8-1-2010 	21:15 	2 	H3J AB 	AVV Keistad HS 8 - Wilhelmina HS 4 	Midland 	H3J 	Details
+Za 23-1-2010 	16:00 	2 	H3J IB 	Forza Hoogla... HS 4 - Wilhelmina HS 4 	Nieuwland 	H3J 	Details
+Vr 29-1-2010 	21:15 	3 	H3J BH 	Wilhelmina HS 4 - Oberon HS 3 	Sph.Schuilenbur... 	H3J 	Details
+Vr 5-2-2010 	21:45 	4 	H3J GB 	Afas-LEOS HS 2 - Wilhelmina HS 4 	Sph De Korf 	H3J 	Details
+Vr 12-2-2010 	21:15 	3 	H3J BF 	Wilhelmina HS 4 - Sovoco HS 4 	Sph.Schuilenbur... 	H3J 	Details
+Za 6-3-2010 	12:00 	3 	H3J EB 	Prima Donna ... HS 5 - Wilhelmina HS 4 	Sph. De Hilt 	H3J 	Details
+Vr 12-3-2010 	21:15 	3 	H3J BD 	Wilhelmina HS 4 - Touché '86 HS 3 	Sph.Schuilenbur... 	H3J 	Details
+Vr 19-3-2010 	21:45 	2 	H3J CB 	Switch HS 2 - Wilhelmina HS 4 	Spz De Dissel 	H3J 	Details
+Vr 26-3-2010 	21:15 	3 	H3J BL 	Wilhelmina HS 4 - Voleem HS 3 	Sph.Schuilenbur... 	H3J 	Details
+Vr 9-4-2010 	21:15 	3 	H3J BA 	Wilhelmina HS 4 - AVV Keistad HS 8 	Sph.Schuilenbur... 	H3J 	Details
+Vr 16-4-2010 	20:15 	2 	H3J KB 	VC Allvo HS 5 - Wilhelmina HS 4 	Topsportcentrum... 	H3J 	Details
+

@@ -1,0 +1,12 @@
+H3J IC  vr 05/10/2007  	19:45  	Wilhelmina H4 - Oberon H4 	Sph.Schuilenburg  	3  	 
+H3J BI 	za 13/10/2007 	12:00 	Prima Donna Kaas Huizen H5 - Wilhelmina H4 	Sporthal Huizermaat 	2 	 
+H3J IA 	vr 26/10/2007 	19:45 	Wilhelmina H4 - StamSovoco H4 	Sph.Schuilenburg 	3 	 
+H3J KI 	do 01/11/2007 	19:30 	K.O.-Trivolley H3 - Wilhelmina H4 	Sph De Lunet 	3 	 
+H3J IJ 	vr 09/11/2007 	19:45 	Wilhelmina H4 - Unicornus H3 	Sph.Schuilenburg 	3 	 
+H3J IL 	vr 16/11/2007 	19:45 	Wilhelmina H4 - A.G.A.V.S. H2 	Sph.Schuilenburg 	3 	 
+H3J HI 	vr 23/11/2007 	19:30 	AVV Keistad H9 - Wilhelmina H4 	Midland 	2 	 
+H3J DI 	vr 30/11/2007 	21:30 	Gemini S H6 - Wilhelmina H4 	Spc. Dudok-Arena 	5 	 
+H3J IG 	vr 07/12/2007 	19:45 	Wilhelmina H4 - Afas-LEOS H3 	Sph.Schuilenburg 	3 	 
+H3J FI 	vr 14/12/2007 	21:45 	Afas-LEOS H4 - Wilhelmina H4 	Sph De Korf 	3 	 
+H3J IE 	vr 11/01/2008 	19:45 	Wilhelmina H4 - Almere Buiten H1 	Sph.Schuilenburg 	3
+

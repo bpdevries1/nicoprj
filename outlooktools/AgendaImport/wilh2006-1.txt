@@ -1,0 +1,11 @@
+nr.  	datum  	tijd  	teams  	zaal  	veld  	uitsl.
+H4I FG 	vr 29/09/2006 	21:15 	Wilhelmina H5 - Unicornus H4 	Sph.Schuilenburg 	3 	 
+H4I FL 	vr 06/10/2006 	19:45 	Wilhelmina H5 - A.G.A.V.S. H3 	Sph.Schuilenburg 	2 	 
+H4I EF 	wo 11/10/2006 	20:15 	Touche '86 H3 - Wilhelmina H5 	Sph. De Trits 	4 	 
+H4I FD 	vr 20/10/2006 	21:15 	Wilhelmina H5 - ODIS H2 	Sph.Schuilenburg 	1 	 
+H4I CF 	vr 03/11/2006 	21:00 	VIF H2 - Wilhelmina H5 	Sph. Oost 	1 	 
+H4I FB 	vr 10/11/2006 	21:15 	Wilhelmina H5 - Touche '86 H4 	Sph.Schuilenburg 	3 	 
+H4I AF 	za 18/11/2006 	15:00 	Voleem H5 - Wilhelmina H5 	Sph. De Hilt 	1 	 
+H4I FK 	vr 24/11/2006 	21:15 	Wilhelmina H5 - Voleem H3 	Sph.Schuilenburg 	3 	 
+H4I FI 	vr 15/12/2006 	21:15 	Wilhelmina H5 - Switch H2 	Sph.Schuilenburg 	3 	 
+H4I HF 	vr 12/01/2007 	19:30 	Almere Buiten H2 - Wilhelmina H5 	Polderdreef 	2 	 
