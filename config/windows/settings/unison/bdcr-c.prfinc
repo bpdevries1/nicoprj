@@ -1,0 +1,19 @@
+# check mountpoint
+mountpoint = _checkmounted
+
+# paths
+# path = uitwissel
+# path = nico/settings/unison
+
+# tijdelijk even uit, duurt lang.
+path = vreen00_CxR_Int2/CxR_IKT/Performance
+path = vreen00_toolset2/CxR_Toolset/Perf
+path = nico/data
+
+# ignore
+ignore = Regex .*/HP
+ignore = Name generated*
+ignore = Name deletefiles*
+ignore = Name ccaddfiles*
+ignore = Name newfiles.txt
+

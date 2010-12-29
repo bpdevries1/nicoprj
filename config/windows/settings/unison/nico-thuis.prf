@@ -1,0 +1,10 @@
+# Unison preferences file
+include common.prfinc
+
+root = d:\
+root = f:\unisonroot\nico
+
+# include common settings for this profile
+include nico.prfinc
+
+

@@ -1,0 +1,10 @@
+# check mountpoint
+mountpoint = _checkmounted
+
+# paths
+path = perftoolset
+
+# target-dir van woko projecten wordt erg groot.
+ignore = Name target
+
+

@@ -1,0 +1,10 @@
+# Unison preferences file
+include common.prfinc
+
+root = d:\
+root = f:\unisonroot
+
+# include common settings for this profile
+include perftoolset.prfinc
+
+

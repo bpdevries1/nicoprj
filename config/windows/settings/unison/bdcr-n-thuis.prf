@@ -1,0 +1,10 @@
+# Unison preferences file
+include common.prfinc
+
+root = d:\projecten\bdcr\n-drive
+root = f:\unisonroot\bdcr\n-drive
+
+# include common settings for this profile
+include bdcr-n.prfinc
+
+

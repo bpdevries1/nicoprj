@@ -1,0 +1,22 @@
+# check mountpoint
+mountpoint = _checkmounted
+
+# paths
+# path = uitwissel
+# path = nico/settings/unison
+
+# niet de hele n:/nico dir, staat veel te veel in.
+# path = nico
+# @todo ordina helemaal wel, dus grote dingen weg.
+# @todo prive ook opnemen.
+path = nico/data
+# path = nico/ordina/CV
+# path = nico/ordina/HPM2008
+# path = nico/planning
+# path = nico/settings
+# path = nico/uren
+# path = nico/werkdocs
+
+# ignore
+
+

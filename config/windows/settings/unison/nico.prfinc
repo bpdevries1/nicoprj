@@ -1,0 +1,15 @@
+# check mountpoint
+mountpoint = _checkmounted
+
+# paths
+path = uitwissel
+path = nico/settings/unison
+path = nico/data
+
+# ignore alle logfiles in de unison-dir.
+ignore = Path nico/settings/unison/*
+ignorenot = Path nico/settings/unison/*.bat
+ignorenot = Path nico/settings/unison/*.prf
+ignorenot = Path nico/settings/unison/*.prfinc
+
+
