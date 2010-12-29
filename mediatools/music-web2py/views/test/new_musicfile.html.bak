@@ -1,0 +1,4 @@
+
+{{extend 'layout.html'}}
+<h1>This is the test/new_musicfile.html template</h1>
+{{=BEAUTIFY(response._vars)}}

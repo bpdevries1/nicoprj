@@ -1,0 +1,13 @@
+{{extend 'layout.html'}}
+<h1>List musicfiles</h1>
+{{=form}}
+<table>
+{{for musicfile in records:}}
+<tr>
+<td>{{=A(musicfile.trackname,_href=URL(r=request,f='show?id=%s'%musicfile.id))}}</td>
+<td>{{=musicfile.artist}}</td>
+</tr>
+{{pass}}
+</table>
+
+{{=A('create new musicfile',_href=URL(r=request,f='new_musicfile'))}}

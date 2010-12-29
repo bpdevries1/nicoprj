@@ -1,0 +1,89 @@
+Cassettes
+=========
+* 25-9-2010 oude cassette.sql gevonden, in cassette tabel in music DB (mysql) gezet op PC linux.
+* (dit geheel op wiki zetten)
+* artiest-naam aangepast: voornamen gewoon voor de achternamen.
+* moest ' door '' vervangen om weer in te voegen.
+
+Doel: lijst van CD's om te downloaden of te kopen.
+Bron: eerst alleen cassettes, daarna ook de CDxxxx records.
+Idee: alles minus aantal zaken: heb al, niet leuk, diversen.
+
+Gebruik veld 'notes' in cassette tabel.
+
+update cassette
+set notes = 'Diversen'
+where artiest like '%Diversen%'
+
+update cassette set notes='Download'
+where titel like 'Miami Vice I'
+
+-- bestaand
+select * from cassette c
+left join albums a on a.path like concat('%', c.artiest, '%') and a.path like concat('%', c.titel, '%')
+where c.notes = 'Download';
+
+select * from cassette c
+left join albums a on a.path like concat('%', c.artiest, ' - ', c.titel, '%') 
+where c.notes = 'Download';
+
+update cassette
+set notes = 'Heb al'
+where exists (
+  select 1 from albums a
+  where a.path like concat('%', cassette.artiest, ' - ', cassette.titel, '%')
+  and not a.path like '%partial%'
+)
+and notes = 'Download';
+
+update cassette
+set notes = 'Heb al'
+where exists (
+  select 1 from albums a
+  where a.path like concat('%', cassette.artiest, ' - %', cassette.titel, '%')
+  and not a.path like '%partial%'
+)
+and notes = 'Download';
+
+
+update cassette
+set notes = 'Heb al partial'
+where exists (
+  select 1 from albums a
+  where a.path like concat('%', cassette.artiest, ' - ', cassette.titel, '%')
+  and a.path like '%partial%'
+)
+and notes = 'Download';
+
+-- check welke nu in lijst.
+select * from cassette
+where notes = 'Download'
+and length(bandnr) = 4
+order by artiest;
+
+Deus - Worst case scenario
+Gala - Come into my life
+Katell Keineg - O Seasons O Castles
+Max Sharam - A million year girl
+10,000 Maniacs
+Bruce Cockburn (if I had a rocket launcher)
+Eric's Trip - Purple Blue
+God Bullies - Kill the king
+Jennifer Warnes - <nu nog niets van?>
+Life's addiction - Inner Shade
+Loreena McKennitt
+Nicole Franks - Beggin' for favors
+Out of my hair - Drop the Roof
+P'etra - Shellfire
+Rebecca Moore - Admiral Charcoal's song
+Robbie Robertson
+Sam Phillips
+Sky Cries Mary - This Timeless Turning
+OST - Young Americans
+Suddenly, Tammy! - (we get there when we do)
+Sugar Cubes 
+Sundays 
+Terri Nunn (alweer)
+World Party
+
+
