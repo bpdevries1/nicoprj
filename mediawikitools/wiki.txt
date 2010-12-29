@@ -1,0 +1,93 @@
+
+== Performance ==
+* [file:///c:/nico/java/ant-jmeter/JMeter%20Ant%20Task.htm JMeter Ant Task]
+* [file:///c:/nico/java/jakarta-jmeter-2.2/docs/index.html JMeter - Apache JMeter 2.2]
+* [http://10.79.106.56:8088/cruisecontrol/buildresults Perf Test Results (106.56)]
+* [http://127.0.0.1:8088/cruisecontrol/buildresults Perf Test Results (127.0.0.1)]
+* [file:///C:/nico/sourcedep/publish/index.html Sourcedep Index]
+
+== Portals - wiki's ==
+* [http://10.75.99.121/wiki/index.php/Hoofdpagina Wiki CR]
+* [http://10.79.106.58:8080/JSPWiki/Wiki.jsp?page=Main Wiki Portals]
+* [http://arwiki.belastingdienst.nl/index.php/Hoofdpagina Wiki van Architectuur - ArchWiki]
+* [http://10.73.116.13:90/wiki/ Wiki WES, MQS, WFS]
+* [http://10.73.23.82:8080/JSPWiki/Wiki.jsp?page=Main Webdiensten Wiki: Main]
+
+== Portals - servers ==
+* [http://10.75.99.121/wiki/index.php/Portals-Infrastructuur Wiki infra server links (CR wiki)]
+* [http://10.73.24.47:10038/wps/portal Portal op xp224 (47)]
+* [http://10.75.99.140:80/wps/portal Demo op aix140 (:80)]
+* [http://10.75.99.141:10038/wps/portal Showcase op aix141 (:10038)]
+* [http://10.75.99.141:80/wps/portal Showcase op aix141 (:80)]
+* [http://10.75.99.151:10000/klopklopClient/ Showcase omgeving LAB (151)]
+* [http://10.73.24.93:10000/klopklopClient/ Eigen omgeving (Joost)]
+
+== Develop ==
+* [file:///c:/nico/java/apache-ant-1.6.5/docs/manual/index.html Apache Ant User Manual]
+* [file:///c:/nico/java/ant-contrib/docs/manual/tasks/index.html Ant-Contrib Tasks]
+* [http://h6155wp0371757:8080/manuals/ Bassie's documentatie bibliotheek]
+* [file:///c:/nico/java/cruisecontrol-2.2.1/docs/index.html CruiseControl Home]
+* [http://h6155wp0371757:8080/cruisecontrol/ CruiseControl Status Page]
+* [file:///c:/nico_share/bieb/manuals/jdk1.3/index.html Java(TM) 2 SDK Documentation]
+* [file:///c:/nico_share/bieb/manuals/jdk1.3/api/index.html Java 2 Platform SE v1.3]
+* [file:///c:/nico_share/bieb/manuals/log4j/docs/index.html Log4j project - Introduction]
+
+== Belastingdienst ==
+* [http://belastingnet.belastingdienst.nl/bldkrant/lezen/editie/vandaag/index.htm Beeldkrant]
+* [http://route.belastingdienst.nl/ RoutePlanner]
+* [http://10.131.129.81/citrix/nfuse17/login.asp Belastingdienst Citrix Farm Login]
+
+== Webdiensten ==
+
+== 75 (Ontwikkelomgeving) ==
+* [https://ol116u75.silabwb.apd.belastingdienst.nl:9043/admin/logon.jsp WasAdmin 75]
+* [http://ol116u75.silabwb.apd.belastingdienst.nl:9080/WebdienstenBeheerWeb/login/login.jsp Webdiensten Beheer (75)]
+* [http://ol116u75.silabwb.apd.belastingdienst.nl:9080/Webdiensten/login/login.jsp Webdiensten Ondernemers 75 (T)]
+* [http://ol116u75.silabwb.apd.belastingdienst.nl:9080/Webdiensten Webdiensten Ondernemers 75 (T) 2]
+* [http://10.73.116.75:9080/IDSWebApp/IDSjsp/Login.jsp LDAP Admin (T 75)]
+* [http://h6155wp0371757:8080/cruisecontrol/ CruiseControl Status Page]
+
+== 76 (Testomgeving) ==
+* [https://ol116u76.silabwb.apd.belastingdienst.nl:9043/admin/logon.jsp WasAdmin 76]
+* [http://ol116u76.silabwb.apd.belastingdienst.nl:9080/WebdienstenBeheerWeb/login/login.jsp Webdiensten Beheer (76)]
+* [http://ol116u76.silabwb.apd.belastingdienst.nl:9080/Webdiensten/login/login.jsp Webdiensten Ondernemers 76 (T)]
+* [http://ol116u76.silabwb.apd.belastingdienst.nl:9080/Webdiensten Webdiensten Ondernemers 76 (T) 2]
+* [http://10.73.116.76:9080/IDSWebApp/IDSjsp/Login.jsp LDAP Admin (T 76)]
+* [http://h6155wp0371757:8080/cruisecontrol/ CruiseControl Status Page]
+
+== 148 (Ontwikkel omgeving) ==
+* [https://ol16u148.silabwb.apd.belastingdienst.nl:9043/admin/logon.jsp WasAdmin 148]
+* [http://ol16u148.silabwb.apd.belastingdienst.nl:9080/WebdienstenBeheerWeb/login/login.jsp Webdiensten Beheer (148)]
+* [http://ol16u148.silabwb.apd.belastingdienst.nl:9080/Webdiensten/login/login.jsp Webdiensten Ondernemers (148) (T)]
+* [http://10.73.116.148:9080/IDSWebApp/IDSjsp/Login.jsp LDAP Admin (T 148)]
+
+== 149 (Test omgeving) ==
+* [https://ol16u149.silabwb.apd.belastingdienst.nl:9043/admin/logon.jsp WasAdmin (149)]
+* [http://ol16u149.silabwb.apd.belastingdienst.nl:9080/WebdienstenBeheerWeb/login/login.jsp Webdiensten Beheer (149)]
+* [http://ol16u149.silabwb.apd.belastingdienst.nl:9080/Webdiensten/login/login.jsp Webdiensten Ondernemers (149)]
+* [http://ol16u149.silabwb.apd.belastingdienst.nl:9080/IDSWebApp/IDSjsp/Login.jsp LDAP Admin (149)]
+
+== TAO ==
+* [https://apaa1u52.belastingdienst.nl:9043/admin/logon.jsp TAO WAS Admin Extern ]
+* [https://apaa1u55.belastingdienst.nl:9043/admin/logon.jsp TAO WAS Admin Intern]
+* [https://apaa1u52.belastingdienst.nl:9043/eVatOnlineWeb/login/login.jsp TAO Extern eVatOnlineWeb]
+* [http://apaa1u52.belastingdienst.nl:51000/eVatOnlineWeb/login/login.jsp TAO Extern eVatOnlineWeb 51000]
+* [https://apaa1u55.belastingdienst.nl:51043/eVatOnlineBeheerWeb/login/login.jsp TAO Intern eVatOnlineBeheer]
+* [https://apaa1u55.belastingdienst.nl:9043/IDSWebApp/IDSjsp/Login.jsp TAO LDAP Admin]
+* [https://apaa1u52.belastingdienst.nl:9043/Webdiensten/login/login.jsp TAO Webdiensten ondernemers (SSL)]
+* [https://apaa1u55.belastingdienst.nl:9043/WebdienstenBeheerWeb/ TAO Webdiensten Beheer (SSL)]
+* [http://apaa1u52.belastingdienst.nl:9090/Webdiensten/toonServiceBerichten.do TAO Inloggen ondernemers (http)]
+* [http://apaa1u55.belastingdienst.nl:9090/WebdienstenBeheerWeb/ TAO Inloggen beheer (http)]
+
+== Local ==
+* [http://localhost:9080/eVatOnlineWeb/ eVat online local (ondernemers)]
+* [http://localhost:9080/eVatOnlineBeheerWeb/login/login.jsp evat Beheer local]
+* [https://localhost:9043/admin/logon.jsp WAS Admin localhost]
+* [http://localhost:9090/admin/ Localhost was admin (security uit)]
+* [http://localhost:9080/Webdiensten/login/login.jsp Webdiensten Ondernemers Local]
+
+== Win43Prof ==
+* [http://10.73.23.43:9080/Webdiensten/toonServiceBerichten.do Inloggen ondernemers]
+* [http://10.73.23.82/ Project Portal voor Webdiensten]
+* [http://10.73.23.40:8090/cruisecontrol/buildresults cruise Paul]
+* [about:blank about:blank]

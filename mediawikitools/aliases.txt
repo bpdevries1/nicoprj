@@ -1,0 +1,2 @@
+wiki2tsv=c:\nico\tools\mediawiki\tbl-wiki2tsv.bat
+tsv2wiki=c:\nico\tools\mediawiki\tbl-tsv2wiki.bat

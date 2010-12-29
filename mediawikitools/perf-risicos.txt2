@@ -1,0 +1,23 @@
+Prio	Onderwerp	Wanneer	MoSCoW	Contact-persoon	Opmerkingen
+1	Communicatie achterkant: BSB, BVR, ABS				
+2	Eisen OTAP	IN	M	Huig	
+2	Infra ontwerp incl schaalbaarheid	EL1	M	Huig/Joost	
+2	TAM install	EL1	S	Joost	check Jeroen, wo voor het laatst.
+2	TAM PoC	EL1	S	Joost	
+3	PSP Arch: front office DB	IN	M	FrankW	
+3	PSP Arch: parallelle calls	IN	M	FrankW	
+3	PSP Arch: process server	IN	M	FrankW	
+3	PSP Arch: remoting protocol ((incl hoog beschikbaar))	IN	M	FrankW	
+4	ECM bouw	CO	 -	 -	
+4	ECM onderzoek	EL1	M	Huig/Bastiaan/PeterS	Als 1-op-1 van ECM overnemen, dan verder niets.
+4	Lotus Domino (o.a. frobos') verschillende manieren van aanroep.	EL1	S	Ed/Huig	
+4	Telefonie (papieren exercitie?)	EL1	S	Jacob	
+5	Spring MVC Implementatie	EL2	M	 -	
+5	Spring MVC PoC	EL1	M	Ed/Bastiaan	Vanaf eind EL1 - PoC
+	Audit trail (incl perf info in messages)	EL1	 -	 -	ism Productiebesturing
+	Opstellen eisen OTAP	IN	M	 -	
+	Portlet factory	EL1	M	Pascal/Maarten	Generatie tool, eerst PoC
+	PSP PoC	EL2	M	 -	
+	Role based security?	EL1	M	Joost	Ander mechanisme, wordt std. J2EE, zou sneller moeten zijn.
+	Security keten	CO	 -	 -	
+	Wiring over pagina's	EL1	M	PeterO/Pascal	Niet direct invloed op perf, wel keuze portlets op perf

@@ -1,0 +1,20 @@
+Onderwerp	Wanneer	MoSCoW	Contactpersoon
+Opstellen eisen OTAP	IN	Must	
+Infra ontwerp incl schaalbaarheid	EL1		
+PSP Arch: process server	EL1		
+PSP Arch: remoting protocol<br/>(incl hoog beschikbaar)	EL1		
+PSP Arch: front office DB	EL1		
+PSP Arch: parallelle calls	EL1	Must	Hermen/Frank
+Lotus Domino (frobos')	EL1	Must	
+Telefonie (papieren exercitie?)	EL1	Must	
+Spring MVC	EL1	Must	
+Wiring over pagina's	EL1	Must	
+TAM install	EL1	Should	
+TAM PoC	EL1/2	Should	
+Role based security?	EL1		
+ECM onderzoek	EL1		
+Portlet factory	EL1		
+Audit trail (incl perf info in messages)	EL1		
+ECM bouw	CO		
+Security keten	CO		
+
