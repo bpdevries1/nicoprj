@@ -1,0 +1,9 @@
+09-26 11:10:31 jdbc[2]: SQLException
+org.h2.jdbc.JdbcSQLException: Table "SESSIONS" not found; SQL statement:
+SELECT * FROM sessions LIMIT 1 [42102-137]
+09-26 12:06:46 jdbc[2]: SQLException
+org.h2.jdbc.JdbcSQLException: Table "MESSAGES" not found; SQL statement:
+select * from messages where true [42102-137]
+09-26 12:08:47 jdbc[2]: SQLException
+org.h2.jdbc.JdbcSQLException: Table "SCHEMA_INFO" not found; SQL statement:
+SELECT * FROM schema_info LIMIT 1 [42102-137]

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- @todo: opschonen ongebruikte properties -->
+<project name="PHP Tutorial" basedir="." default="install">
+
+	<property environment="env"/>
+<!--
+	<property name="install.dir" value="D:/develop/PHP/ZWAMP/vdrive/web"/>
+-->
+	<property name="install.dir" value="D:/develop/PHP/EasyPHP-5.3.2i/www"/>
+	<tstamp>
+		<format property="runtest.time" pattern="yyyyMMdd-HHmm"/>
+	</tstamp>
+
+	<target name="install" description="Install PHP Files in ZWAMP directory" 
+					depends="">
+
+    <copy todir="${install.dir}" failonerror="true">
+      <fileset dir="${basedir}">
+        <include name="*.php"/>
+        <include name="*.htm*"/>
+      </fileset>
+    </copy>
+	</target>
+
+</project>

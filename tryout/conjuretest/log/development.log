@@ -1,0 +1,813 @@
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SELECT * FROM sessions LIMIT 1"]
+DEBUG [conjure.core.db.flavors.h2]: Create table: :sessions with specs: (("id" "INT" "NOT NULL" "AUTO_INCREMENT" "PRIMARY KEY") ["created_at" "TIMESTAMP"] ("session_id" "VARCHAR(255)") ["data" "TEXT"])
+INFO  [conjure.core.server.server]: Server Initialized.
+INFO  [conjure.core.server.server]: Initializing plugins...
+INFO  [conjure.core.server.server]: Plugins initialized.
+INFO  [conjure.core.server.server]: Initializing app controller...
+INFO  [conjure.core.server.server]: App controller initialized.
+DEBUG [conjure.core.server.server]: Requested uri: /
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 2494 ms
+DEBUG [conjure.core.server.server]: Requested uri: /
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1139 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1105 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1101 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1254 ms
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SELECT * FROM sessions LIMIT 1"]
+INFO  [conjure.core.server.server]: Server Initialized.
+INFO  [conjure.core.server.server]: Initializing plugins...
+INFO  [conjure.core.server.server]: Plugins initialized.
+INFO  [conjure.core.server.server]: Initializing app controller...
+INFO  [conjure.core.server.server]: App controller initialized.
+INFO  [conjure.core.migration.builder]: Migrate directory already exists.
+INFO  [conjure.core.migration.builder]: Creating migration file 001_create_messages.clj...
+INFO  [conjure.core.model.builder]: Creating model file message.clj...
+INFO  [conjure.core.util.file-utils]: Creating unit directory in test...
+INFO  [conjure.core.util.file-utils]: Creating model directory in unit...
+INFO  [conjure.core.util.file-utils]: Creating file message_model_test.clj...
+INFO  [conjure.core.util.file-utils]: Creating fixture directory in test...
+INFO  [conjure.core.util.file-utils]: Creating file message.clj...
+INFO  [conjure.core.controller.builder]: Creating controller file message_controller.clj...
+INFO  [conjure.core.util.file-utils]: Creating functional directory in test...
+INFO  [conjure.core.util.file-utils]: Creating file message_controller_test.clj...
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1303 ms
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SELECT * FROM sessions LIMIT 1"]
+INFO  [conjure.core.server.server]: Server Initialized.
+INFO  [conjure.core.server.server]: Initializing plugins...
+INFO  [conjure.core.server.server]: Plugins initialized.
+INFO  [conjure.core.server.server]: Initializing app controller...
+INFO  [conjure.core.server.server]: App controller initialized.
+DEBUG [conjure.core.server.server]: Requested uri: /
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 2313 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 292 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/list_records
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/list-records
+DEBUG [conjure.core.binding.util]: Running binding: bindings.templates.list-records
+DEBUG [conjure.core.db.flavors.h2]: Describe table: messages
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SHOW COLUMNS FROM messages"]
+ERROR [conjure.core.server.ring-adapter]: An error occurred while processing the request.
+org.h2.jdbc.JdbcSQLException: Table "MESSAGES" not found; SQL statement:
+select * from messages where true [42102-137]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:327)
+	at org.h2.message.DbException.get(DbException.java:167)
+	at org.h2.message.DbException.get(DbException.java:144)
+	at org.h2.command.Parser.readTableOrView(Parser.java:4386)
+	at org.h2.command.Parser.readTableFilter(Parser.java:1002)
+	at org.h2.command.Parser.parseSelectSimpleFromPart(Parser.java:1536)
+	at org.h2.command.Parser.parseSelectSimple(Parser.java:1633)
+	at org.h2.command.Parser.parseSelectSub(Parser.java:1530)
+	at org.h2.command.Parser.parseSelectUnion(Parser.java:1375)
+	at org.h2.command.Parser.parseSelect(Parser.java:1363)
+	at org.h2.command.Parser.parsePrepared(Parser.java:395)
+	at org.h2.command.Parser.parse(Parser.java:278)
+	at org.h2.command.Parser.parse(Parser.java:250)
+	at org.h2.command.Parser.prepareCommand(Parser.java:222)
+	at org.h2.engine.Session.prepareLocal(Session.java:420)
+	at org.h2.engine.Session.prepareCommand(Session.java:381)
+	at org.h2.jdbc.JdbcConnection.prepareCommand(JdbcConnection.java:1071)
+	at org.h2.jdbc.JdbcPreparedStatement.<init>(JdbcPreparedStatement.java:71)
+	at org.h2.jdbc.JdbcConnection.prepareStatement(JdbcConnection.java:234)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:597)
+	at clojure.lang.Reflector.invokeMatchingMethod(Reflector.java:90)
+	at clojure.lang.Reflector.invokeInstanceMethod(Reflector.java:28)
+	at clojure.contrib.sql.internal$with_query_results_STAR___7366.invoke(internal.clj:190)
+	at clj_record.core$find_by_sql__4948$func__4920__auto____4950.invoke(core.clj:72)
+	at clj_record.core$find_by_sql__4948$fn__4956.invoke(core.clj:71)
+	at clojure.contrib.sql.internal$with_connection_STAR___7339.invoke(internal.clj:105)
+	at clj_record.core$find_by_sql__4948.invoke(core.clj:71)
+	at clj_record.core$find_records__4961.invoke(core.clj:85)
+	at helpers.template_helper$find_records__5282.invoke(template_helper.clj:19)
+	at helpers.template_helper$all_records__5285.invoke(template_helper.clj:24)
+	at bindings.templates.list_records$eval__5241$fn__5243.invoke(list_records.clj:10)
+	at clojure.lang.AFn.applyToHelper(AFn.java:173)
+	at clojure.lang.AFn.applyTo(AFn.java:164)
+	at clojure.core$apply__4370.invoke(core.clj:436)
+	at conjure.core.binding.util$run_binding__3122.invoke(util.clj:136)
+	at conjure.core.binding.util$call_binding__3127.invoke(util.clj:146)
+	at conjure.core.controller.base$bind_by_controller_action__3131.invoke(base.clj:14)
+	at controllers.template_controller$eval__4601$fn__4603.invoke(template_controller.clj:60)
+	at conjure.core.controller.util$create_interceptor_chain__1368$fn__1370.invoke(util.clj:388)
+	at conjure.core.controller.util$run_interceptors__1375.invoke(util.clj:394)
+	at conjure.core.controller.util$run_action__1378.invoke(util.clj:403)
+	at conjure.core.controller.util$call_controller__1383.invoke(util.clj:411)
+	at conjure.core.config.routes_util$call_controller__1423.invoke(routes_util.clj:66)
+	at conjure.core.config.routes_util$route_request__1426.invoke(routes_util.clj:73)
+	at conjure.core.server.server$call_controller__1962.invoke(server.clj:66)
+	at conjure.core.server.server$process_request__1965.invoke(server.clj:80)
+	at conjure.core.server.ring_adapter$call_server__2852.invoke(ring_adapter.clj:24)
+	at conjure.core.server.ring_adapter$wrap_response_time__2857$fn__2859.invoke(ring_adapter.clj:34)
+	at ring.middleware.stacktrace$wrap_stacktrace__2846$fn__2848.invoke(stacktrace.clj:59)
+	at conjure.core.server.ring_adapter$wrap_resource_dir__2865$fn__2867.invoke(ring_adapter.clj:49)
+	at conjure.core.server.ring_adapter$conjure__2871.invoke(ring_adapter.clj:56)
+	at ring.adapter.jetty$proxy_handler__2971$fn__2973.invoke(jetty.clj:17)
+	at ring.adapter.jetty.proxy$org.mortbay.jetty.handler.AbstractHandler$0.handle(Unknown Source)
+	at org.mortbay.jetty.handler.HandlerWrapper.handle(HandlerWrapper.java:152)
+	at org.mortbay.jetty.Server.handle(Server.java:324)
+	at org.mortbay.jetty.HttpConnection.handleRequest(HttpConnection.java:534)
+	at org.mortbay.jetty.HttpConnection$RequestHandler.headerComplete(HttpConnection.java:864)
+	at org.mortbay.jetty.HttpParser.parseNext(HttpParser.java:533)
+	at org.mortbay.jetty.HttpParser.parseAvailable(HttpParser.java:207)
+	at org.mortbay.jetty.HttpConnection.handle(HttpConnection.java:403)
+	at org.mortbay.jetty.bio.SocketConnector$Connection.run(SocketConnector.java:228)
+	at org.mortbay.thread.QueuedThreadPool$PoolThread.run(QueuedThreadPool.java:522)
+DEBUG [conjure.core.server.server]: Requested uri: /favicon.ico
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/error-404
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.error-404
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1232 ms
+DEBUG [conjure.core.server.server]: Requested uri: /favicon.ico
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/error-404
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.error-404
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1064 ms
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SELECT * FROM sessions LIMIT 1"]
+INFO  [conjure.core.server.server]: Server Initialized.
+INFO  [conjure.core.server.server]: Initializing plugins...
+INFO  [conjure.core.server.server]: Plugins initialized.
+INFO  [conjure.core.server.server]: Initializing app controller...
+INFO  [conjure.core.server.server]: App controller initialized.
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SELECT * FROM schema_info LIMIT 1"]
+INFO  [conjure.core.migration.runner]: schema_info does not exist. Creating table...
+DEBUG [conjure.core.db.flavors.h2]: Create table: schema_info with specs: (("version" "INT" "NOT NULL"))
+INFO  [conjure.core.migration.runner]: Setting the initial version to 0.
+DEBUG [conjure.core.db.flavors.h2]: insert into: schema_info records: ({:version 0})
+INFO  [conjure.core.migration.runner]: Current database version: 0
+INFO  [conjure.core.migration.runner]: Updating to version: 1
+INFO  [conjure.core.migration.runner]: Running 001_create_messages.clj up...
+DEBUG [conjure.core.db.flavors.h2]: Create table: messages with specs: (("id" "INT" "NOT NULL" "AUTO_INCREMENT" "PRIMARY KEY") ("text" "VARCHAR(255)"))
+DEBUG [conjure.core.db.flavors.h2]: Update table: schema_info where: ["true"] record: {:version 1}
+INFO  [conjure.core.migration.runner]: Migrated to version: 1
+DEBUG [conjure.core.server.server]: Requested uri: /message/list_records
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/list-records
+DEBUG [conjure.core.binding.util]: Running binding: bindings.templates.list-records
+DEBUG [conjure.core.db.flavors.h2]: Describe table: messages
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SHOW COLUMNS FROM messages"]
+DEBUG [conjure.core.server.ring-adapter]: Response time: 2044 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/ajax_add
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/ajax-add
+DEBUG [conjure.core.binding.util]: Running binding: bindings.templates.ajax-add
+DEBUG [conjure.core.db.flavors.h2]: Describe table: messages
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SHOW COLUMNS FROM messages"]
+DEBUG [conjure.core.server.ring-adapter]: Response time: 2155 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/ajax_show/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/ajax-show
+DEBUG [conjure.core.binding.util]: Running binding: bindings.templates.ajax-show
+DEBUG [conjure.core.db.flavors.h2]: Describe table: messages
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SHOW COLUMNS FROM messages"]
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1837 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/ajax_row/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/ajax-row
+DEBUG [conjure.core.binding.util]: Running binding: bindings.templates.ajax-row
+DEBUG [conjure.core.db.flavors.h2]: Describe table: messages
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SHOW COLUMNS FROM messages"]
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1894 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/ajax_show/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/ajax-show
+DEBUG [conjure.core.binding.util]: Running binding: bindings.templates.ajax-show
+DEBUG [conjure.core.db.flavors.h2]: Describe table: messages
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SHOW COLUMNS FROM messages"]
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1784 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/ajax_row/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/ajax-row
+DEBUG [conjure.core.binding.util]: Running binding: bindings.templates.ajax-row
+DEBUG [conjure.core.db.flavors.h2]: Describe table: messages
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SHOW COLUMNS FROM messages"]
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1889 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+ERROR [conjure.core.server.ring-adapter]: An error occurred while processing the request.
+java.lang.Exception: No such var: message/find-first (index.clj:8)
+	at clojure.lang.Compiler.analyze(Compiler.java:4420)
+	at clojure.lang.Compiler.analyze(Compiler.java:4366)
+	at clojure.lang.Compiler$InvokeExpr.parse(Compiler.java:2828)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4594)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.analyze(Compiler.java:4366)
+	at clojure.lang.Compiler$InvokeExpr.parse(Compiler.java:2832)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4594)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.analyze(Compiler.java:4366)
+	at clojure.lang.Compiler$InvokeExpr.parse(Compiler.java:2832)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4594)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.analyze(Compiler.java:4366)
+	at clojure.lang.Compiler$BodyExpr$Parser.parse(Compiler.java:3942)
+	at clojure.lang.Compiler$TryExpr$Parser.parse(Compiler.java:1931)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4592)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.analyze(Compiler.java:4366)
+	at clojure.lang.Compiler$BodyExpr$Parser.parse(Compiler.java:3942)
+	at clojure.lang.Compiler$LetExpr$Parser.parse(Compiler.java:4189)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4592)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4580)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4580)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4580)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4580)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4580)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.analyze(Compiler.java:4366)
+	at clojure.lang.Compiler$BodyExpr$Parser.parse(Compiler.java:3942)
+	at clojure.lang.Compiler$FnMethod.parse(Compiler.java:3777)
+	at clojure.lang.Compiler$FnMethod.access$1100(Compiler.java:3654)
+	at clojure.lang.Compiler$FnExpr.parse(Compiler.java:3024)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4590)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4580)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.analyze(Compiler.java:4366)
+	at clojure.lang.Compiler$InvokeExpr.parse(Compiler.java:2832)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4594)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.analyze(Compiler.java:4366)
+	at clojure.lang.Compiler$BodyExpr$Parser.parse(Compiler.java:3942)
+	at clojure.lang.Compiler$FnMethod.parse(Compiler.java:3777)
+	at clojure.lang.Compiler$FnMethod.access$1100(Compiler.java:3654)
+	at clojure.lang.Compiler$FnExpr.parse(Compiler.java:3024)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4590)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.eval(Compiler.java:4640)
+	at clojure.lang.Compiler.load(Compiler.java:4972)
+	at clojure.lang.RT.loadResourceScript(RT.java:330)
+	at clojure.lang.RT.loadResourceScript(RT.java:321)
+	at clojure.lang.RT.load(RT.java:399)
+	at clojure.lang.RT.load(RT.java:371)
+	at clojure.core$load__6449$fn__6458.invoke(core.clj:4171)
+	at clojure.core$load__6449.doInvoke(core.clj:4170)
+	at clojure.lang.RestFn.invoke(RestFn.java:413)
+	at clojure.core$load_one__6379.invoke(core.clj:4007)
+	at clojure.core$load_lib__6400.doInvoke(core.clj:4044)
+	at clojure.lang.RestFn.applyTo(RestFn.java:147)
+	at clojure.core$apply__4370.invoke(core.clj:438)
+	at clojure.core$load_libs__6417.doInvoke(core.clj:4070)
+	at clojure.lang.RestFn.applyTo(RestFn.java:142)
+	at clojure.core$apply__4370.invoke(core.clj:438)
+	at clojure.core$require__6440.doInvoke(core.clj:4138)
+	at clojure.lang.RestFn.invoke(RestFn.java:426)
+	at conjure.core.binding.util$load_binding__3112.invoke(util.clj:113)
+	at conjure.core.binding.util$call_binding__3127.invoke(util.clj:145)
+	at conjure.core.controller.base$bind_by_controller_action__3131.invoke(base.clj:14)
+	at conjure.core.controller.base$bind__3134.doInvoke(base.clj:19)
+	at clojure.lang.RestFn.invoke(RestFn.java:402)
+	at controllers.home_controller$eval__8286$fn__8288.invoke(home_controller.clj:6)
+	at conjure.core.controller.util$create_interceptor_chain__1368$fn__1370.invoke(util.clj:388)
+	at conjure.core.controller.util$run_interceptors__1375.invoke(util.clj:394)
+	at conjure.core.controller.util$run_action__1378.invoke(util.clj:403)
+	at conjure.core.controller.util$call_controller__1383.invoke(util.clj:411)
+	at conjure.core.config.routes_util$call_controller__1423.invoke(routes_util.clj:66)
+	at conjure.core.config.routes_util$route_request__1426.invoke(routes_util.clj:73)
+	at conjure.core.server.server$call_controller__1962.invoke(server.clj:66)
+	at conjure.core.server.server$process_request__1965.invoke(server.clj:80)
+	at conjure.core.server.ring_adapter$call_server__2852.invoke(ring_adapter.clj:24)
+	at conjure.core.server.ring_adapter$wrap_response_time__2857$fn__2859.invoke(ring_adapter.clj:34)
+	at ring.middleware.stacktrace$wrap_stacktrace__2846$fn__2848.invoke(stacktrace.clj:59)
+	at conjure.core.server.ring_adapter$wrap_resource_dir__2865$fn__2867.invoke(ring_adapter.clj:49)
+	at conjure.core.server.ring_adapter$conjure__2871.invoke(ring_adapter.clj:56)
+	at ring.adapter.jetty$proxy_handler__2971$fn__2973.invoke(jetty.clj:17)
+	at ring.adapter.jetty.proxy$org.mortbay.jetty.handler.AbstractHandler$0.handle(Unknown Source)
+	at org.mortbay.jetty.handler.HandlerWrapper.handle(HandlerWrapper.java:152)
+	at org.mortbay.jetty.Server.handle(Server.java:324)
+	at org.mortbay.jetty.HttpConnection.handleRequest(HttpConnection.java:534)
+	at org.mortbay.jetty.HttpConnection$RequestHandler.headerComplete(HttpConnection.java:864)
+	at org.mortbay.jetty.HttpParser.parseNext(HttpParser.java:533)
+	at org.mortbay.jetty.HttpParser.parseAvailable(HttpParser.java:207)
+	at org.mortbay.jetty.HttpConnection.handle(HttpConnection.java:403)
+	at org.mortbay.jetty.bio.SocketConnector$Connection.run(SocketConnector.java:228)
+	at org.mortbay.thread.QueuedThreadPool$PoolThread.run(QueuedThreadPool.java:522)
+Caused by: java.lang.Exception: No such var: message/find-first
+	at clojure.lang.Compiler.resolveIn(Compiler.java:4773)
+	at clojure.lang.Compiler.resolve(Compiler.java:4743)
+	at clojure.lang.Compiler.analyzeSymbol(Compiler.java:4720)
+	at clojure.lang.Compiler.analyze(Compiler.java:4387)
+	... 100 more
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SELECT * FROM sessions LIMIT 1"]
+INFO  [conjure.core.server.server]: Server Initialized.
+INFO  [conjure.core.server.server]: Initializing plugins...
+INFO  [conjure.core.server.server]: Plugins initialized.
+INFO  [conjure.core.server.server]: Initializing app controller...
+INFO  [conjure.core.server.server]: App controller initialized.
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 3107 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 297 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/list_records
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/list-records
+DEBUG [conjure.core.binding.util]: Running binding: bindings.templates.list-records
+DEBUG [conjure.core.db.flavors.h2]: Describe table: messages
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SHOW COLUMNS FROM messages"]
+DEBUG [conjure.core.server.ring-adapter]: Response time: 2152 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/ajax_show/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/ajax-show
+DEBUG [conjure.core.binding.util]: Running binding: bindings.templates.ajax-show
+DEBUG [conjure.core.db.flavors.h2]: Describe table: messages
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SHOW COLUMNS FROM messages"]
+DEBUG [conjure.core.server.ring-adapter]: Response time: 2215 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/ajax_edit/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/ajax-edit
+DEBUG [conjure.core.binding.util]: Running binding: bindings.templates.ajax-edit
+DEBUG [conjure.core.db.flavors.h2]: Describe table: messages
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SHOW COLUMNS FROM messages"]
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1853 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/ajax_save
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/ajax-save
+DEBUG [conjure.core.binding.util]: Running binding: bindings.templates.ajax-save
+DEBUG [conjure.core.db.flavors.h2]: Describe table: messages
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SHOW COLUMNS FROM messages"]
+DEBUG [conjure.core.server.ring-adapter]: Response time: 2225 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1397 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 158 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/list_records
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/list-records
+DEBUG [conjure.core.binding.util]: Running binding: bindings.templates.list-records
+DEBUG [conjure.core.db.flavors.h2]: Describe table: messages
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SHOW COLUMNS FROM messages"]
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1802 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/ajax_add
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/ajax-add
+DEBUG [conjure.core.binding.util]: Running binding: bindings.templates.ajax-add
+DEBUG [conjure.core.db.flavors.h2]: Describe table: messages
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SHOW COLUMNS FROM messages"]
+DEBUG [conjure.core.server.ring-adapter]: Response time: 2380 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1264 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1455 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1263 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+ERROR [conjure.core.server.ring-adapter]: An error occurred while processing the request.
+java.lang.IllegalArgumentException: Record does not exist
+	at clj_record.core$get_record__3535.invoke(core.clj:108)
+	at models.message$get_record__9385.invoke(message.clj:5)
+	at bindings.home.index$eval__9352$fn__9354.invoke(index.clj:8)
+	at clojure.lang.AFn.applyToHelper(AFn.java:171)
+	at clojure.lang.AFn.applyTo(AFn.java:164)
+	at clojure.core$apply__4370.invoke(core.clj:436)
+	at conjure.core.binding.util$run_binding__3122.invoke(util.clj:136)
+	at conjure.core.binding.util$call_binding__3127.invoke(util.clj:146)
+	at conjure.core.controller.base$bind_by_controller_action__3131.invoke(base.clj:14)
+	at conjure.core.controller.base$bind__3134.doInvoke(base.clj:19)
+	at clojure.lang.RestFn.invoke(RestFn.java:402)
+	at controllers.home_controller$eval__9300$fn__9302.invoke(home_controller.clj:6)
+	at conjure.core.controller.util$create_interceptor_chain__1368$fn__1370.invoke(util.clj:388)
+	at conjure.core.controller.util$run_interceptors__1375.invoke(util.clj:394)
+	at conjure.core.controller.util$run_action__1378.invoke(util.clj:403)
+	at conjure.core.controller.util$call_controller__1383.invoke(util.clj:411)
+	at conjure.core.config.routes_util$call_controller__1423.invoke(routes_util.clj:66)
+	at conjure.core.config.routes_util$route_request__1426.invoke(routes_util.clj:73)
+	at conjure.core.server.server$call_controller__1962.invoke(server.clj:66)
+	at conjure.core.server.server$process_request__1965.invoke(server.clj:80)
+	at conjure.core.server.ring_adapter$call_server__2852.invoke(ring_adapter.clj:24)
+	at conjure.core.server.ring_adapter$wrap_response_time__2857$fn__2859.invoke(ring_adapter.clj:34)
+	at ring.middleware.stacktrace$wrap_stacktrace__2846$fn__2848.invoke(stacktrace.clj:59)
+	at conjure.core.server.ring_adapter$wrap_resource_dir__2865$fn__2867.invoke(ring_adapter.clj:49)
+	at conjure.core.server.ring_adapter$conjure__2871.invoke(ring_adapter.clj:56)
+	at ring.adapter.jetty$proxy_handler__2971$fn__2973.invoke(jetty.clj:17)
+	at ring.adapter.jetty.proxy$org.mortbay.jetty.handler.AbstractHandler$0.handle(Unknown Source)
+	at org.mortbay.jetty.handler.HandlerWrapper.handle(HandlerWrapper.java:152)
+	at org.mortbay.jetty.Server.handle(Server.java:324)
+	at org.mortbay.jetty.HttpConnection.handleRequest(HttpConnection.java:534)
+	at org.mortbay.jetty.HttpConnection$RequestHandler.headerComplete(HttpConnection.java:864)
+	at org.mortbay.jetty.HttpParser.parseNext(HttpParser.java:533)
+	at org.mortbay.jetty.HttpParser.parseAvailable(HttpParser.java:207)
+	at org.mortbay.jetty.HttpConnection.handle(HttpConnection.java:403)
+	at org.mortbay.jetty.bio.SocketConnector$Connection.run(SocketConnector.java:228)
+	at org.mortbay.thread.QueuedThreadPool$PoolThread.run(QueuedThreadPool.java:522)
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1315 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1241 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1272 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1384 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1300 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1485 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1351 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1396 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1534 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1413 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1898 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1807 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1470 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1596 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1474 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1488 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1674 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1547 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1594 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1813 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1509 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1728 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1826 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1474 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1911 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1427 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1559 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1820 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1507 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1625 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1577 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1624 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+ERROR [conjure.core.server.ring-adapter]: An error occurred while processing the request.
+java.lang.Exception: Unable to resolve symbol: old-def-binding in this context (index.clj:6)
+	at clojure.lang.Compiler.analyze(Compiler.java:4420)
+	at clojure.lang.Compiler.analyze(Compiler.java:4366)
+	at clojure.lang.Compiler$InvokeExpr.parse(Compiler.java:2828)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4594)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.analyze(Compiler.java:4366)
+	at clojure.lang.Compiler$BodyExpr$Parser.parse(Compiler.java:3942)
+	at clojure.lang.Compiler$FnMethod.parse(Compiler.java:3777)
+	at clojure.lang.Compiler$FnMethod.access$1100(Compiler.java:3654)
+	at clojure.lang.Compiler$FnExpr.parse(Compiler.java:3024)
+	at clojure.lang.Compiler.analyzeSeq(Compiler.java:4590)
+	at clojure.lang.Compiler.analyze(Compiler.java:4405)
+	at clojure.lang.Compiler.eval(Compiler.java:4640)
+	at clojure.lang.Compiler.load(Compiler.java:4972)
+	at clojure.lang.RT.loadResourceScript(RT.java:330)
+	at clojure.lang.RT.loadResourceScript(RT.java:321)
+	at clojure.lang.RT.load(RT.java:399)
+	at clojure.lang.RT.load(RT.java:371)
+	at clojure.core$load__6449$fn__6458.invoke(core.clj:4171)
+	at clojure.core$load__6449.doInvoke(core.clj:4170)
+	at clojure.lang.RestFn.invoke(RestFn.java:413)
+	at clojure.core$load_one__6379.invoke(core.clj:4007)
+	at clojure.core$load_lib__6400.doInvoke(core.clj:4044)
+	at clojure.lang.RestFn.applyTo(RestFn.java:147)
+	at clojure.core$apply__4370.invoke(core.clj:438)
+	at clojure.core$load_libs__6417.doInvoke(core.clj:4070)
+	at clojure.lang.RestFn.applyTo(RestFn.java:142)
+	at clojure.core$apply__4370.invoke(core.clj:438)
+	at clojure.core$require__6440.doInvoke(core.clj:4138)
+	at clojure.lang.RestFn.invoke(RestFn.java:426)
+	at conjure.core.binding.util$load_binding__3112.invoke(util.clj:113)
+	at conjure.core.binding.util$call_binding__3127.invoke(util.clj:145)
+	at conjure.core.controller.base$bind_by_controller_action__3131.invoke(base.clj:14)
+	at conjure.core.controller.base$bind__3134.doInvoke(base.clj:19)
+	at clojure.lang.RestFn.invoke(RestFn.java:402)
+	at controllers.home_controller$eval__21437$fn__21439.invoke(home_controller.clj:6)
+	at conjure.core.controller.util$create_interceptor_chain__1368$fn__1370.invoke(util.clj:388)
+	at conjure.core.controller.util$run_interceptors__1375.invoke(util.clj:394)
+	at conjure.core.controller.util$run_action__1378.invoke(util.clj:403)
+	at conjure.core.controller.util$call_controller__1383.invoke(util.clj:411)
+	at conjure.core.config.routes_util$call_controller__1423.invoke(routes_util.clj:66)
+	at conjure.core.config.routes_util$route_request__1426.invoke(routes_util.clj:73)
+	at conjure.core.server.server$call_controller__1962.invoke(server.clj:66)
+	at conjure.core.server.server$process_request__1965.invoke(server.clj:80)
+	at conjure.core.server.ring_adapter$call_server__2852.invoke(ring_adapter.clj:24)
+	at conjure.core.server.ring_adapter$wrap_response_time__2857$fn__2859.invoke(ring_adapter.clj:34)
+	at ring.middleware.stacktrace$wrap_stacktrace__2846$fn__2848.invoke(stacktrace.clj:59)
+	at conjure.core.server.ring_adapter$wrap_resource_dir__2865$fn__2867.invoke(ring_adapter.clj:50)
+	at conjure.core.server.ring_adapter$conjure__2871.invoke(ring_adapter.clj:56)
+	at ring.adapter.jetty$proxy_handler__2971$fn__2973.invoke(jetty.clj:17)
+	at ring.adapter.jetty.proxy$org.mortbay.jetty.handler.AbstractHandler$0.handle(Unknown Source)
+	at org.mortbay.jetty.handler.HandlerWrapper.handle(HandlerWrapper.java:152)
+	at org.mortbay.jetty.Server.handle(Server.java:324)
+	at org.mortbay.jetty.HttpConnection.handleRequest(HttpConnection.java:534)
+	at org.mortbay.jetty.HttpConnection$RequestHandler.content(HttpConnection.java:879)
+	at org.mortbay.jetty.HttpParser.parseNext(HttpParser.java:741)
+	at org.mortbay.jetty.HttpParser.parseAvailable(HttpParser.java:213)
+	at org.mortbay.jetty.HttpConnection.handle(HttpConnection.java:403)
+	at org.mortbay.jetty.bio.SocketConnector$Connection.run(SocketConnector.java:228)
+	at org.mortbay.thread.QueuedThreadPool$PoolThread.run(QueuedThreadPool.java:522)
+Caused by: java.lang.Exception: Unable to resolve symbol: old-def-binding in this context
+	at clojure.lang.Compiler.resolveIn(Compiler.java:4797)
+	at clojure.lang.Compiler.resolve(Compiler.java:4743)
+	at clojure.lang.Compiler.analyzeSymbol(Compiler.java:4720)
+	at clojure.lang.Compiler.analyze(Compiler.java:4387)
+	... 59 more
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+ERROR [conjure.core.server.ring-adapter]: An error occurred while processing the request.
+java.lang.Exception: Unmatched delimiter: ] (index.clj:30)
+	at clojure.lang.Compiler.load(Compiler.java:4978)
+	at clojure.lang.RT.loadResourceScript(RT.java:330)
+	at clojure.lang.RT.loadResourceScript(RT.java:321)
+	at clojure.lang.RT.load(RT.java:399)
+	at clojure.lang.RT.load(RT.java:371)
+	at clojure.core$load__6449$fn__6458.invoke(core.clj:4171)
+	at clojure.core$load__6449.doInvoke(core.clj:4170)
+	at clojure.lang.RestFn.invoke(RestFn.java:413)
+	at clojure.core$load_one__6379.invoke(core.clj:4007)
+	at clojure.core$load_lib__6400.doInvoke(core.clj:4044)
+	at clojure.lang.RestFn.applyTo(RestFn.java:147)
+	at clojure.core$apply__4370.invoke(core.clj:438)
+	at clojure.core$load_libs__6417.doInvoke(core.clj:4070)
+	at clojure.lang.RestFn.applyTo(RestFn.java:142)
+	at clojure.core$apply__4370.invoke(core.clj:438)
+	at clojure.core$require__6440.doInvoke(core.clj:4138)
+	at clojure.lang.RestFn.invoke(RestFn.java:426)
+	at conjure.core.view.util$load_view__2153.invoke(util.clj:96)
+	at conjure.core.view.util$load_view__2153.invoke(util.clj:93)
+	at conjure.core.view.util$render_by_symbol__2164.doInvoke(util.clj:116)
+	at clojure.lang.RestFn.applyTo(RestFn.java:144)
+	at clojure.core$apply__4370.invoke(core.clj:438)
+	at conjure.core.view.util$render_view__2168.doInvoke(util.clj:123)
+	at clojure.lang.RestFn.applyTo(RestFn.java:142)
+	at clojure.core$apply__4370.invoke(core.clj:436)
+	at conjure.core.binding.base$render_view__3332.doInvoke(base.clj:12)
+	at clojure.lang.RestFn.invoke(RestFn.java:426)
+	at bindings.home.index$eval__21563$fn__21565.invoke(index.clj:10)
+	at clojure.lang.AFn.applyToHelper(AFn.java:171)
+	at clojure.lang.AFn.applyTo(AFn.java:164)
+	at clojure.core$apply__4370.invoke(core.clj:436)
+	at conjure.core.binding.util$run_binding__3122.invoke(util.clj:136)
+	at conjure.core.binding.util$call_binding__3127.invoke(util.clj:146)
+	at conjure.core.controller.base$bind_by_controller_action__3131.invoke(base.clj:14)
+	at conjure.core.controller.base$bind__3134.doInvoke(base.clj:19)
+	at clojure.lang.RestFn.invoke(RestFn.java:402)
+	at controllers.home_controller$eval__21505$fn__21507.invoke(home_controller.clj:6)
+	at conjure.core.controller.util$create_interceptor_chain__1368$fn__1370.invoke(util.clj:388)
+	at conjure.core.controller.util$run_interceptors__1375.invoke(util.clj:394)
+	at conjure.core.controller.util$run_action__1378.invoke(util.clj:403)
+	at conjure.core.controller.util$call_controller__1383.invoke(util.clj:411)
+	at conjure.core.config.routes_util$call_controller__1423.invoke(routes_util.clj:66)
+	at conjure.core.config.routes_util$route_request__1426.invoke(routes_util.clj:73)
+	at conjure.core.server.server$call_controller__1962.invoke(server.clj:66)
+	at conjure.core.server.server$process_request__1965.invoke(server.clj:80)
+	at conjure.core.server.ring_adapter$call_server__2852.invoke(ring_adapter.clj:24)
+	at conjure.core.server.ring_adapter$wrap_response_time__2857$fn__2859.invoke(ring_adapter.clj:34)
+	at ring.middleware.stacktrace$wrap_stacktrace__2846$fn__2848.invoke(stacktrace.clj:59)
+	at conjure.core.server.ring_adapter$wrap_resource_dir__2865$fn__2867.invoke(ring_adapter.clj:50)
+	at conjure.core.server.ring_adapter$conjure__2871.invoke(ring_adapter.clj:56)
+	at ring.adapter.jetty$proxy_handler__2971$fn__2973.invoke(jetty.clj:17)
+	at ring.adapter.jetty.proxy$org.mortbay.jetty.handler.AbstractHandler$0.handle(Unknown Source)
+	at org.mortbay.jetty.handler.HandlerWrapper.handle(HandlerWrapper.java:152)
+	at org.mortbay.jetty.Server.handle(Server.java:324)
+	at org.mortbay.jetty.HttpConnection.handleRequest(HttpConnection.java:534)
+	at org.mortbay.jetty.HttpConnection$RequestHandler.content(HttpConnection.java:879)
+	at org.mortbay.jetty.HttpParser.parseNext(HttpParser.java:741)
+	at org.mortbay.jetty.HttpParser.parseAvailable(HttpParser.java:213)
+	at org.mortbay.jetty.HttpConnection.handle(HttpConnection.java:403)
+	at org.mortbay.jetty.bio.SocketConnector$Connection.run(SocketConnector.java:228)
+	at org.mortbay.thread.QueuedThreadPool$PoolThread.run(QueuedThreadPool.java:522)
+Caused by: java.lang.Exception: Unmatched delimiter: ]
+	at clojure.lang.LispReader$UnmatchedDelimiterReader.invoke(LispReader.java:1018)
+	at clojure.lang.LispReader.read(LispReader.java:145)
+	at clojure.lang.Compiler.load(Compiler.java:4969)
+	... 60 more
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1727 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/ajax_message/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/ajax-message
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.ajax-message
+DEBUG [conjure.core.server.ring-adapter]: Response time: 397 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/ajax_message/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/ajax-message
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.ajax-message
+DEBUG [conjure.core.server.ring-adapter]: Response time: 425 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1528 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/ajax_message/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/ajax-message
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.ajax-message
+DEBUG [conjure.core.server.ring-adapter]: Response time: 388 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/ajax_message/1
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/ajax-message
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.ajax-message
+DEBUG [conjure.core.server.ring-adapter]: Response time: 427 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 2279 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/ajax_message
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/ajax-message
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.ajax-message
+DEBUG [conjure.core.server.ring-adapter]: Response time: 388 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/ajax_message
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/ajax-message
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.ajax-message
+DEBUG [conjure.core.server.ring-adapter]: Response time: 441 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/ajax_message
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/ajax-message
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.ajax-message
+DEBUG [conjure.core.server.ring-adapter]: Response time: 426 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index/2
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+ERROR [conjure.core.server.ring-adapter]: An error occurred while processing the request.
+java.lang.Exception: Unmatched delimiter: } (index.clj:28)
+	at clojure.lang.Compiler.load(Compiler.java:4978)
+	at clojure.lang.RT.loadResourceScript(RT.java:330)
+	at clojure.lang.RT.loadResourceScript(RT.java:321)
+	at clojure.lang.RT.load(RT.java:399)
+	at clojure.lang.RT.load(RT.java:371)
+	at clojure.core$load__6449$fn__6458.invoke(core.clj:4171)
+	at clojure.core$load__6449.doInvoke(core.clj:4170)
+	at clojure.lang.RestFn.invoke(RestFn.java:413)
+	at clojure.core$load_one__6379.invoke(core.clj:4007)
+	at clojure.core$load_lib__6400.doInvoke(core.clj:4044)
+	at clojure.lang.RestFn.applyTo(RestFn.java:147)
+	at clojure.core$apply__4370.invoke(core.clj:438)
+	at clojure.core$load_libs__6417.doInvoke(core.clj:4070)
+	at clojure.lang.RestFn.applyTo(RestFn.java:142)
+	at clojure.core$apply__4370.invoke(core.clj:438)
+	at clojure.core$require__6440.doInvoke(core.clj:4138)
+	at clojure.lang.RestFn.invoke(RestFn.java:426)
+	at conjure.core.view.util$load_view__2153.invoke(util.clj:96)
+	at conjure.core.view.util$load_view__2153.invoke(util.clj:93)
+	at conjure.core.view.util$render_by_symbol__2164.doInvoke(util.clj:116)
+	at clojure.lang.RestFn.applyTo(RestFn.java:144)
+	at clojure.core$apply__4370.invoke(core.clj:438)
+	at conjure.core.view.util$render_view__2168.doInvoke(util.clj:123)
+	at clojure.lang.RestFn.applyTo(RestFn.java:142)
+	at clojure.core$apply__4370.invoke(core.clj:436)
+	at conjure.core.binding.base$render_view__3332.doInvoke(base.clj:12)
+	at clojure.lang.RestFn.invoke(RestFn.java:426)
+	at bindings.home.index$eval__24369$fn__24371.invoke(index.clj:10)
+	at clojure.lang.AFn.applyToHelper(AFn.java:171)
+	at clojure.lang.AFn.applyTo(AFn.java:164)
+	at clojure.core$apply__4370.invoke(core.clj:436)
+	at conjure.core.binding.util$run_binding__3122.invoke(util.clj:136)
+	at conjure.core.binding.util$call_binding__3127.invoke(util.clj:146)
+	at conjure.core.controller.base$bind_by_controller_action__3131.invoke(base.clj:14)
+	at conjure.core.controller.base$bind__3134.doInvoke(base.clj:19)
+	at clojure.lang.RestFn.invoke(RestFn.java:402)
+	at controllers.home_controller$eval__24311$fn__24313.invoke(home_controller.clj:6)
+	at conjure.core.controller.util$create_interceptor_chain__1368$fn__1370.invoke(util.clj:388)
+	at conjure.core.controller.util$run_interceptors__1375.invoke(util.clj:394)
+	at conjure.core.controller.util$run_action__1378.invoke(util.clj:403)
+	at conjure.core.controller.util$call_controller__1383.invoke(util.clj:411)
+	at conjure.core.config.routes_util$call_controller__1423.invoke(routes_util.clj:66)
+	at conjure.core.config.routes_util$route_request__1426.invoke(routes_util.clj:73)
+	at conjure.core.server.server$call_controller__1962.invoke(server.clj:66)
+	at conjure.core.server.server$process_request__1965.invoke(server.clj:80)
+	at conjure.core.server.ring_adapter$call_server__2852.invoke(ring_adapter.clj:24)
+	at conjure.core.server.ring_adapter$wrap_response_time__2857$fn__2859.invoke(ring_adapter.clj:34)
+	at ring.middleware.stacktrace$wrap_stacktrace__2846$fn__2848.invoke(stacktrace.clj:59)
+	at conjure.core.server.ring_adapter$wrap_resource_dir__2865$fn__2867.invoke(ring_adapter.clj:49)
+	at conjure.core.server.ring_adapter$conjure__2871.invoke(ring_adapter.clj:56)
+	at ring.adapter.jetty$proxy_handler__2971$fn__2973.invoke(jetty.clj:17)
+	at ring.adapter.jetty.proxy$org.mortbay.jetty.handler.AbstractHandler$0.handle(Unknown Source)
+	at org.mortbay.jetty.handler.HandlerWrapper.handle(HandlerWrapper.java:152)
+	at org.mortbay.jetty.Server.handle(Server.java:324)
+	at org.mortbay.jetty.HttpConnection.handleRequest(HttpConnection.java:534)
+	at org.mortbay.jetty.HttpConnection$RequestHandler.headerComplete(HttpConnection.java:864)
+	at org.mortbay.jetty.HttpParser.parseNext(HttpParser.java:533)
+	at org.mortbay.jetty.HttpParser.parseAvailable(HttpParser.java:207)
+	at org.mortbay.jetty.HttpConnection.handle(HttpConnection.java:403)
+	at org.mortbay.jetty.bio.SocketConnector$Connection.run(SocketConnector.java:228)
+	at org.mortbay.thread.QueuedThreadPool$PoolThread.run(QueuedThreadPool.java:522)
+Caused by: java.lang.Exception: Unmatched delimiter: }
+	at clojure.lang.LispReader$UnmatchedDelimiterReader.invoke(LispReader.java:1018)
+	at clojure.lang.LispReader.readDelimitedList(LispReader.java:1048)
+	at clojure.lang.LispReader$ListReader.invoke(LispReader.java:897)
+	at clojure.lang.LispReader.readDelimitedList(LispReader.java:1048)
+	at clojure.lang.LispReader$VectorReader.invoke(LispReader.java:995)
+	at clojure.lang.LispReader.readDelimitedList(LispReader.java:1048)
+	at clojure.lang.LispReader$ListReader.invoke(LispReader.java:897)
+	at clojure.lang.LispReader.read(LispReader.java:145)
+	at clojure.lang.Compiler.load(Compiler.java:4969)
+	... 60 more
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1614 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/ajax_message
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/ajax-message
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.ajax-message
+DEBUG [conjure.core.server.ring-adapter]: Response time: 432 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/ajax_message
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/ajax-message
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.ajax-message
+DEBUG [conjure.core.server.ring-adapter]: Response time: 439 ms

@@ -1,0 +1,2 @@
+Op 19-3-2010 de hele repo gemoved van /svn/nicoprj naar /var/idokserver/projects/foo/nicoprj.
+
