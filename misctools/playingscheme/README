@@ -1,0 +1,463 @@
+Playing scheme (speel schema)
+============================
+(nog wiki pagina van maken)
+ 
+Testcase bij elke oplossing is of de optimale oplossing voor 4+4 gevonden kan worden, kostte wel wat moeite met uitgeprogrammeerde oplossing.
+
+zoektermen google etc:
+Create Playing Scheme Doubles Mixed groups (genetic) algorithm
+ook: LISP, scheme, haskell, prolog.
+manage tournaments
+king queen tournament playing scheme
+king of the beach
+round robin pool play (download)
+calculator scheduler
+different partners and against different opponents, changing partners
+
+doubles spot rotation rotating partners
+
+andere naam voor 'happy doubles': Progressive Doubles, Scrambled Doubles, and Waterford Doubles
+mixer format
+
+eigenlijk wil ik wel een combi van happy doubles en ladder systeem.
+
+alternatief: zwitsers ladder, swiss system tournaments.
+
+normale pool en hoe je moet seeden, evt verkorte pool: http://www.spike.net/Beach/BeachPools.htm
+
+round robin systeem uitgelegd op: http://en.wikipedia.org/wiki/Round-robin_tournament. Dit is het standaard competitie systeem.
+
+tool: http://double-happy.software.informer.com/
+      www.promato.com/doublehappy - kost 79 US dollar 
+
+POOL PLAY DOUBLES
+
+"During pool play, you'll be constantly changing opposite sex partners to play against all the same sex players in your pool. In other words, if you're a woman, you're going to play against all the other women in your pool and you'll play at least one game with all the men in your pool. The players that advance to playoffs will be determined by total points scored during pool play. Therefore it's very important to accurately keep track of the points scored in all games."
+
+Software van derden: testen met 4+4, of er dan een goede oplossing uitkomt.
+
+Double happy text:
+Double Happy is a social Tennis Doubles event organizer. It is designed to make it simple (and even fun) to run social doubles events for Tennis, Badminton, Table Tennis, or any activity where 2 people play as partners against 2 others.
+A typical scenario. You have a number of players, often of varying ability, and a number of courts. You want to run an event where each person plays several games with different partners and against different opponents. Double Happy will generate, round by round, a mix of players to be assigned to each court for up to 21 courts and 200 players. However, you can influence the mix for each round by using the following features;
+* Grouping players by any criteria you like such as gender or skill.
+* Selecting one of 5 different Mix Types that will generate a different mix of players based on the player groups.
+* Resting players who want to take time out.
+* Manually over-riding any player assignments.
+
+Double Happy is best used live for the most flexibility. This allows you to add new players as they arrive, rest players if they request it, and generally react to whatever situation arises. If another court suddenly becomes available then no problem - just tell Double Happy and it will start using the extra court.
+Double Happy also has a built-in Timer that you can use to countdown the time that a Round has been on court. In the meantime you can get on with preparing the next Round.
+If you know in advance of your event just who will be playing, and on how many courts, then Double Happy can be used to prepare and print all the Rounds in advance.
+You can learn more about Double Happy by visiting www.promato.com/doublehappy 
+
+
+Een voorbeeld:
+There is one schedule that I am aware of that may be useful if you have 16 players and play 4 sets.  This has optimal social balance since each player gets to play with all 8 players of the opposite gender (4 as partners and the other 4 as opponents).  
+
+(M1 F1 v M2 F3) (M5 F2 v M7 F5) (M3 F4 v M6 F7) (M4 F6 v M8 F8)
+(M1 F2 v M3 F6) (M4 F1 v M5 F7) (M7 F3 v M8 F4) (M2 F5 v M6 F8)
+(M1 F4 v M4 F5) (M3 F3 v M5 F8) (M6 F1 v M7 F6) (M2 F2 v M8 F7)
+(M1 F7 v M7 F8) (M4 F2 v M6 F3) (M2 F4 v M5 F6) (M3 F1 v M8 F5)
+
+Nog een voor 8 spelers (http://www.livewild.org/tennis_combinatorics.html):
+First set:   12 v 34, 56 v 78
+Second set:  13 v 57, 24 v 68
+Third set:   14 v 58, 23 v 67
+Fourth set:  15 v 26, 37 v 48
+Fifth set:   16 v 38, 25 v 47
+Sixth set:   17 v 46, 28 v 35
+Seventh set: 18 v 27, 36 v 45
+
+Had een oud DOS programma, met claim dat het de enige is. Invoeren was al lastig, daarna ook crash. Nog even gekeken naar decompiler, maar is niet de moeite.
+
+Double Happy werkt wel wat, maar moet steeds met de hand een nieuwe ronde maken, hiermee niet helder dat je een optimale verdeling krijgt.
+
+Verder nog wat excel schema's met Waterford doubles. Deze lijken wel ok, maar zijn alleen voor homogene groepen, niet om te mixen.
+
+
+Verder zoektermen
+create schedule genetic programming/algorithm
+create schedule backtracking / brute force
+evt in combi met: skeleton, design pattern, framework.
+
+Ideeen voor oplossing
+1. std backtracking, vgl scheids-plaatsing. Wel met early-fail, als oplossing niet beter is, of sowieso niet goed, dan vooral niet verder gaan.
+1a. alles op volgorde langslopen of
+1b. random kiezen, maar dan lastiger bij te houden waar je bent.
+
+2. monte carlo methode: random oplossing kiezen en score bepalen. Beste score handhaven, tijdje laten lopen.
+
+3. (combi met 1 of met 2): ga uit van een oplossing, verander iets (2 switchen) en kijk of oplossing beter is. Ga wel iets switchen dat verbeterd kan worden, bv iemand 
+  speelt met of tegen iemand aantal keer meer dan gemiddeld. En dan ook echt meer. 4 is bv meer dan 3.5, maar bij gemiddelde van 3.5 is de helft 3 en de helft 4, dus dan
+   geen verbetering.
+   Mogelijk is dit gelijk aan genetic algorithm.
+   
+Genetic Algorithm notes
+========================
+* Crossover om 2 eerdere oplossingen te kruisen. Vraag is hoe dit in mijn probleemgebied gaat. Moet wel op een manier kruisen zodat iedereen nog steeds evenveel speelt. Dit is
+  wat anders dat mutatie (denk ik), waarbij ik posities van 2 (of meer) spelers wissel. Vraag is wat spelers 'op de bank' te doen. Hier mee wisselen creert situatie waarbij niet
+  iedereen evenveel speelt. Dit lijkt ook niet nodig:
+* met homogene groep steeds iemand anders op de bank zetten, als er 1 over is. Met 2 over kan dit ook, is toch willekeurig wie er op de bank zitten.
+* met 2 groepen eigenlijk hetzelfde, met bv 7+7 steeds willekeurige M+V op de bank.
+* Ook beetje sudoku achtig: kan bv bankzitters van verschillende rondes wisselen, maar moet dan ook de spelers wisselen. Voorbeeld:
+  ronde 1: 1+2 x 3+4 bank:5
+  ronde 2: 1+3 x 5+2 bank:4
+  wissel bank 5 en 4, dan ook: 
+  ronde 1: 1+2 x 3+5, bank 4:
+  ronde 2: 1+3 x 4+2, bank 5:
+* Als aantal wedstrijden er niet voor zorgt dat iedereen evenveel op de bank zit (onwenselijk), dan evt wel spelers met bankzitters te wisselen, zolang gemiddeldes maar akkoord zijn.
+
+* Maar echte kruising, bv:
+  ronde 1: 1+2 x 3+4 bank:5
+  ronde 2: 1+3 x 5+2 bank:4
+  kruisen met:
+  ronde 1: 1+4 x 2+3 bank:5
+  ronde 2: 2+4 x 5+3 bank:1
+  
+  hoe kruisen:
+  * per positie 1 van de 2 kiezen: speler, combi, hele wedstrijd, of hele ronde. Bij hele ronde verandert er wat weinig, dan ook zeker mutaties nodig. Oplossing blijft wel geldig,
+    zolang iedereen bij elke ronde dezelfde bankzitters heeft. Het lijkt erop dat dit alleen ofwel erg veel foute oplossingen genereert, ofwel te weinig variatie. Eens kijken hoe
+    dit bij voorbeelden wordt opgelost.
+  * In natuur toch anders: voor elk min-of-meer onafhankelijk element een gen kiezen: haarkleur, ogen, jukbeenderen, gedrag, ziektes, etc. Een willekeurige combi levert dan wat
+    'goeds' op.
+    
+* Weer mutaties: wel handig iets grotere groep te hebben. Dan hoeft niet elke mutatie die een iets mindere oplossing heeft, meteen overboord gezet te worden. Je zou bv van elke
+  parent 2 mutaties kunnen doen, en dan verder kunnen gaan met de beste. Bv van 100 parents leveren 200 children, hier dan weer 100 van kiezen. Of met de 100 parents 100 children
+  maken, en van deze 200 de 100 beste kiezen. Zo houd je ook betere die je al eerder hebt gemaakt.
+  
+* Idee (had ik al eerder) dat je een framework hebt. Want nu is het elke oplossing helemaal uitprogrammeren.
+
+* GA combineren met 'hill climbing'. Denk dat dit iets is wat ik al bedacht had, steeds kleine variatie doen die ook echt beter moet zijn.
+* Ga's inderdaad gebruikt voor scheduling problemen:   
+  
+* Marco B heeft er wel eens wat mee gedaan (met spel spelen?), Pim K misschien ook?
+
+* A very successful (slight) variant of the general process of constructing a new population is to allow some of the better organisms from the current generation to carry over to the next, unaltered. This strategy is known as elitist selection.
+* It can be quite effective to combine GA with other optimization methods. GA tends to be quite good at finding generally good global solutions, but quite inefficient at finding the last few mutations to find the absolute optimum. Other techniques (such as simple hill climbing) are quite efficient at finding absolute optimum in a limited region. Alternating GA and hill climbing can improve the efficiency of GA while overcoming the lack of robustness of hill climbing.
+* Problems which appear to be particularly appropriate for solution by genetic algorithms include timetabling and scheduling problems, and many scheduling software packages are based on GAs.
+
+Zoekterm: language for genetic algorithm
+
+vraag: hoeveel optimalisatie aan de voorkant is nodig, bv zorgen dat iedereen even veel speelt, en in ieder geval een keer met iedereen?
+
+testcase: niet alleen 4+4, ook 15 wedstrijden met 5 personen, of dan alle verschillende combi's er uit komen, dan wel definieren welke beter is, bv aantal verschillende wedstrijden,
+dan ook wel kanonieke vorm voor wedstrijd, bv dame met laagste nummer altijd links.
+ 
+Evolutionary programming (EP) lijkt meer op iets wat ik nodig heb, meer gebaseerd op mutations.
+Extremal optimization (EO) kan misschien ook, hier heb je een oplossing die je steeds gaat verbeteren, misschien efficienter. Dan wel onderdelen zoeken die verbeterd kunnen worden,
+maar dit is sowieso nodig.
+Genetic Programming (GP) heb ik nu niet nodig, dit is dat je een heel programma gaat evolueren, wel bv op speel strategieen van toepassing.
+
+
+# deze nu even niet, met 'genetic algorithm' (idee, nog weinig theorie gelezen).
+proc make_schema_rec_old {curr_round} {
+  global ar_argv log nrounds ngamespp ncourts
+  if {$curr_round > $nrounds} {
+    if {[better_solution]} {
+      set_better_solution
+      puts_solution
+    }
+  } else {
+    # calculate another round
+    # first select (all?) players who have played (strictly) less than average so far.
+    # these players don't necessarily play with/against each other.
+    
+    # probably need another (sub) recursive function, to place a player in the round
+    # choice to either fill positions on the court (yes, that's the way) or give players a position (no).
+    # so the structure is something like ar_schedule
+    
+    # maybe use combinatorics library to choose n players from a set of m. But should use continuations, because don't need all the (millions of) possibilities
+    
+    # can use  set r [incr a(2) 0]
+    # or if {[incr a(4) 0]} {puts "has value"}
+    
+    # ook eerst: maak spelers aan: H1-n, V1-n etc.
+    # en ook: bepaal aantal bankzitters per ronde: als dit er weinig zijn: 1 bij homogeen of 2 bij 2 groepen, evt 2 bij homogeen, dan deze van te voren vastleggen, dat wordt
+    # oplossings bereik kleiner.
+  }
+}
+
+25-3-2010 22:42 nu eerste versie met iteraties en mutaties, maar lijkt niet tot een oplossing te komen. Lijkt combi van:
+* met 1 mutatie kom je niet tot een betere oplossing
+* oude oplossing wordt verkozen boven een nieuwe
+=> geheel is zo dus te statisch, je komt niet 'boven op de berg'
+
+Mogelijke oplossingen:
+* Verkies bij gelijke fitness de nieuwste
+* Doe meer changes tegelijk.
+* Bepaal dat een change toch de goede richting opgaat, iets fijner dan max_played - min_played.
+
+Al een aardige oplossing voor 4+4:
+The final solutions:
+Solution: 1 (id: ::rec_solution8)
+---------
+fitness: 3254
+min_played: 8
+max_played: 8
+total_diff_partners: 32
+total_diff_opponents: 54
+note: Initial solution
+sol_parent: 
+Rounds:
+1: 1: (D3 H4 v D1 H1)	2: (D2 H3 v D4 H2)	bench: 
+2: 1: (D2 H2 v D3 H4)	2: (D4 H1 v D1 H3)	bench: 
+3: 1: (D4 H2 v D3 H1)	2: (D2 H4 v D1 H3)	bench: 
+4: 1: (D2 H3 v D1 H4)	2: (D4 H1 v D3 H2)	bench: 
+5: 1: (D1 H3 v D4 H4)	2: (D3 H1 v D2 H2)	bench: 
+6: 1: (D1 H1 v D2 H2)	2: (D3 H4 v D4 H3)	bench: 
+7: 1: (D4 H4 v D2 H1)	2: (D1 H2 v D3 H3)	bench: 
+8: 1: (D4 H1 v D3 H4)	2: (D2 H3 v D1 H2)	bench: 
+Player statistics:
+player: D1; ngames: 8; ndiff_partners: 4; ndiff_opponents: 7
+player: D2; ngames: 8; ndiff_partners: 4; ndiff_opponents: 7
+player: D3; ngames: 8; ndiff_partners: 4; ndiff_opponents: 6
+player: D4; ngames: 8; ndiff_partners: 4; ndiff_opponents: 7
+player: H1; ngames: 8; ndiff_partners: 4; ndiff_opponents: 7
+player: H2; ngames: 8; ndiff_partners: 4; ndiff_opponents: 7
+player: H3; ngames: 8; ndiff_partners: 4; ndiff_opponents: 7
+player: H4; ngames: 8; ndiff_partners: 4; ndiff_opponents: 6
+
+Dit is dus een bijna perfecte oplossing, waarbij wel 2 wedstrijden tegelijk gespeeld kunnen worden. In de bekende 32/56 oplossing kan dit niet, maar misschien zijn er nog andere?
+
+Volgens http://www.aip.de/~ast/EvolCompFAQ/Q1_2.htm ben ik nu meer met evolutionary strategy bezig
+
+Wat ik doe lijkt ook op http://en.wikipedia.org/wiki/Hill_climbing
+
+http://en.wikipedia.org/wiki/Genetic_programming: algemene site met refs naar implementations.
+
+Geheugen gebruik voor optimalisatie:
+[27-03-10 21:38:05] [playingscheme.tcl] [info] Iteration 400
+[27-03-10 21:38:05] [playingscheme.tcl] [info] #records for rec_solution: 4010
+[27-03-10 21:38:05] [playingscheme.tcl] [info] #records for rec_round: 4040
+[27-03-10 21:38:05] [playingscheme.tcl] [info] #records for rec_game: 6773
+[27-03-10 21:38:06] [playingscheme.tcl] [info] #records for rec_player_stats: 32080
+[27-03-10 21:38:14] [playingscheme.tcl] [info] Iteration 500
+[27-03-10 21:38:14] [playingscheme.tcl] [info] #records for rec_solution: 5010
+[27-03-10 21:38:14] [playingscheme.tcl] [info] #records for rec_round: 5040
+[27-03-10 21:38:14] [playingscheme.tcl] [info] #records for rec_game: 8449
+[27-03-10 21:38:14] [playingscheme.tcl] [info] #records for rec_player_stats: 40080
+[27-03-10 21:38:22] [playingscheme.tcl] [info] Iteration 600
+[27-03-10 21:38:22] [playingscheme.tcl] [info] #records for rec_solution: 6010
+[27-03-10 21:38:22] [playingscheme.tcl] [info] #records for rec_round: 6040
+[27-03-10 21:38:22] [playingscheme.tcl] [info] #records for rec_game: 10098
+[27-03-10 21:38:22] [playingscheme.tcl] [info] #records for rec_player_stats: 48080
+[27-03-10 21:38:31] [playingscheme.tcl] [info] Iteration 700
+[27-03-10 21:38:31] [playingscheme.tcl] [info] #records for rec_solution: 7010
+[27-03-10 21:38:31] [playingscheme.tcl] [info] #records for rec_round: 7040
+[27-03-10 21:38:31] [playingscheme.tcl] [info] #records for rec_game: 11767
+[27-03-10 21:38:31] [playingscheme.tcl] [info] #records for rec_player_stats: 56080
+
+27-3-2010 22:11 Na optimalisatie, maar tegelijk een lokaal maximum te zien. De solutions veranderen niet meer, terwijl een mutatie met hetzelfde resultaat de voorkeur verdient boven het origineel.
+Blijkbaar is elke mutatie op de oplossing een verslechtering. Een mutatie is hier slechts een enkele swap van 2 spelers in een ronde.
+
+[27-03-10 22:09:40] [playingscheme.tcl] [info] Iteration 160
+[27-03-10 22:09:40] [playingscheme.tcl] [info] #records for rec_solution: 10
+[27-03-10 22:09:40] [playingscheme.tcl] [info] #records for rec_round: 19
+[27-03-10 22:09:40] [playingscheme.tcl] [info] #records for rec_game: 38
+[27-03-10 22:09:40] [playingscheme.tcl] [info] #records for rec_player_stats: 80
+[27-03-10 22:09:40] [playingscheme.tcl] [info] solutions: ::rec_solution109 ::rec_solution148 ::rec_solution179 ::rec_solution237 ::rec_solution239 ::rec_solution266 ::rec_solution267 ::rec_solution288 ::rec_solution469 ::rec_solution91
+[27-03-10 22:09:45] [playingscheme.tcl] [info] Iteration 170
+[27-03-10 22:09:45] [playingscheme.tcl] [info] #records for rec_solution: 10
+[27-03-10 22:09:45] [playingscheme.tcl] [info] #records for rec_round: 19
+[27-03-10 22:09:45] [playingscheme.tcl] [info] #records for rec_game: 38
+[27-03-10 22:09:45] [playingscheme.tcl] [info] #records for rec_player_stats: 80
+[27-03-10 22:09:45] [playingscheme.tcl] [info] solutions: ::rec_solution109 ::rec_solution148 ::rec_solution179 ::rec_solution237 ::rec_solution239 ::rec_solution266 ::rec_solution267 ::rec_solution288 ::rec_solution469 ::rec_solution91
+[27-03-10 22:09:49] [playingscheme.tcl] [info] Iteration 180
+[27-03-10 22:09:49] [playingscheme.tcl] [info] #records for rec_solution: 10
+[27-03-10 22:09:49] [playingscheme.tcl] [info] #records for rec_round: 19
+[27-03-10 22:09:49] [playingscheme.tcl] [info] #records for rec_game: 38
+[27-03-10 22:09:49] [playingscheme.tcl] [info] #records for rec_player_stats: 80
+[27-03-10 22:09:49] [playingscheme.tcl] [info] solutions: ::rec_solution109 ::rec_solution148 ::rec_solution179 ::rec_solution237 ::rec_solution239 ::rec_solution266 ::rec_solution267 ::rec_solution288 ::rec_solution469 ::rec_solution91
+[27-03-10 22:09:54] [playingscheme.tcl] [info] Iteration 190
+[27-03-10 22:09:54] [playingscheme.tcl] [info] #records for rec_solution: 10
+[27-03-10 22:09:54] [playingscheme.tcl] [info] #records for rec_round: 19
+[27-03-10 22:09:54] [playingscheme.tcl] [info] #records for rec_game: 38
+[27-03-10 22:09:54] [playingscheme.tcl] [info] #records for rec_player_stats: 80
+[27-03-10 22:09:54] [playingscheme.tcl] [info] solutions: ::rec_solution109 ::rec_solution148 ::rec_solution179 ::rec_solution237 ::rec_solution239 ::rec_solution266 ::rec_solution267 ::rec_solution288 ::rec_solution469 ::rec_solution91
+[27-03-10 22:09:58] [playingscheme.tcl] [info] Iteration 200
+[27-03-10 22:09:58] [playingscheme.tcl] [info] #records for rec_solution: 10
+[27-03-10 22:09:58] [playingscheme.tcl] [info] #records for rec_round: 19
+[27-03-10 22:09:58] [playingscheme.tcl] [info] #records for rec_game: 38
+[27-03-10 22:09:58] [playingscheme.tcl] [info] #records for rec_player_stats: 80
+[27-03-10 22:09:58] [playingscheme.tcl] [info] solutions: ::rec_solution109 ::rec_solution148 ::rec_solution179 ::rec_solution237 ::rec_solution239 ::rec_solution266 ::rec_solution267 ::rec_solution288 ::rec_solution469 ::rec_solution91
+
+27-3-2010 22:18 oude en nieuwe fitnesses erbij, en het blijkt dat bij een enkele mutatie de fitness altijd achteruit gaat!!! Alles wat op 32xx stond, staat hierna op 28yy
+
+[27-03-10 22:17:55] [playingscheme.tcl] [info] Iteration 120
+[27-03-10 22:17:55] [playingscheme.tcl] [info] #records for rec_solution: 20
+[27-03-10 22:17:55] [playingscheme.tcl] [info] #records for rec_round: 33
+[27-03-10 22:17:55] [playingscheme.tcl] [info] #records for rec_game: 67
+[27-03-10 22:17:55] [playingscheme.tcl] [info] #records for rec_player_stats: 160
+[27-03-10 22:17:55] [playingscheme.tcl] [info] solutions: ::rec_solution1200 ::rec_solution1201 ::rec_solution1202 ::rec_solution1203 ::rec_solution1204 ::rec_solution1205 ::rec_solution1206 ::rec_solution1207 ::rec_solution1208 ::rec_solution1209 ::rec_solution132 ::rec_solution174 ::rec_solution178 ::rec_solution256 ::rec_solution258 ::rec_solution298 ::rec_solution349 ::rec_solution358 ::rec_solution409 ::rec_solution63
+[27-03-10 22:17:55] [playingscheme.tcl] [info] Old fitnesses: 3248 3248 3248 3244 3244 3244 3244 3244 3244 3232
+[27-03-10 22:17:55] [playingscheme.tcl] [info] New fitnesses: 2844 2844 2848 2842 2848 2840 2836 2848 2844 2836
+
+27-3-2010 22:19 ofwel, moet meerdere mutaties doen per evolutie iteratie! Eerst eens altijd 2 proberen, binomiale met meestal 1 heeft hier geen zin.
+Zie nu 2 dingen: nu wel nieuwe oplossingen af en toe, maar meestal slechter, hooguit gelijk. En verder is Garbage Collection niet meer goed, komt omdat objecten worden gemaakt en
+meteen hierna ge-orphaned worden, zonder eerst de sweeper door te gaan.
+
+27-3-2010 22:46 al eerder idee: terug redeneren vanuit de 32/56 oplossing, die er dus wel is. Hoeveel changes heb je nodig om hier een 32/48 of 32/52 van te maken?
+
+27-3-2010 22:55 nog TODO: eerdere algoritme was brute-force, en ook specifiek op 4+4 gericht. Wanneer eerste mail aan Koen gestuurd, wanneer nieuwe laptop gekregen (HP/4GB) en wanneer
+was pointsec geregeld, in de mail.
+* 16-9-2009 : mail naar Koen gestuurd
+* 6-11-2009 : mail naar Pointsec gestuurd dat het de goede oplossing is.
+=> best kans dat het op de oude laptop is geweest!
+=> en idd gevonden, ook in backups op NAS, in d:\aaa, deze wordt altijd aangevuld, niet gewist. En hierna ook idd op oude laptop in d:\aaa\speelschema gevonden. Hier verder geen
+andere interessante dingen meer.
+
+29-3-2010 revelatie: met 2 games tegelijk is het niet mogelijk optimale oplossing te vinden (32/56). Heb in bekende oplossing zelfs geen 2 wedstrijden die tegelijk gespeeld kunnen
+worden, alle hebben een overlap van minimaal 1 speler.
+
+29-3-2010 met deze kennis de prog nogmaals gestart met 1 court, maar komt niet echt verder dan 2844 met de huidige strategie: in elke ronde een speler met een andere wisselen. Met 1
+wedstrijd heb je dan ook niet zoveel mogelijkheden. Beter dus de nieuwe strategie, een koppel wisselen met een andere ronde.
+
+01-04-2010 (geen grapje): oplossing gevonden, met 1 wedstrijd tegelijk gespeeld. Verschillende strategieen naast en door elkaar: eerst iedereen evenveel wedstrijden, door met bank te 
+switchen, dan iedereen alle partners, door steeds in 2 ronden met bank te switchen. Als dit gelukt is per team wisselen, met check of het mag. De oplossing:
+
+Rounds:
+1: 1: (D1 H2 v D2 H4)	bench: D4, H4, D3, H3
+2: 1: (D4 H2 v D3 H3)	bench: D3, H1, D2, H3
+3: 1: (D4 H1 v D2 H2)	bench: D1, H1, D3, H4
+4: 1: (D4 H4 v D3 H1)	bench: D2, H2, D1, H1
+5: 1: (D1 H4 v D4 H3)	bench: D1, H2, D3, H3
+6: 1: (D2 H3 v D3 H4)	bench: D1, H2, D4, H1
+7: 1: (D1 H1 v D3 H2)	bench: D4, H4, D2, H3
+8: 1: (D2 H1 v D1 H3)	bench: D2, H2, D4, H4
+
+Alternatief:
+Rounds:
+1: 1: (D1 H2 v D2 H3)	bench: D3, H2, D1, H1
+2: 1: (D3 H2 v D4 H3)	bench: D2, H4, D3, H2
+3: 1: (D3 H4 v D1 H1)	bench: D4, H1, D1, H3
+4: 1: (D4 H4 v D2 H1)	bench: D3, H3, D4, H4
+5: 1: (D1 H4 v D4 H2)	bench: D1, H4, D2, H1
+6: 1: (D4 H1 v D1 H3)	bench: D3, H2, D2, H4
+7: 1: (D2 H2 v D3 H1)	bench: D4, H2, D2, H3
+8: 1: (D3 H3 v D2 H4)	bench: D4, H3, D1, H1
+Vraag is of een mapping van spelers gemaakt kan worden zodat dit eigenlijk hetzelfde schema is.
+
+Check of je hier 2 wedstrijden tegelijk kunt spelen, ofwel dat een bench gelijk is aan spelers van een wedstrijd. En hier dus ook niet!
+
+lengte: 22:22:35 - 22:35:10, ofwel klein kwartiertje.
+
+Nog een keer: 22:51:41 - 23:07:27, iets langer dan een kwartier.
+
+TODO hierna: alle andere vormen, ook zorgen dat de volgorde goed is.
+
+Bij veel teams: als aantal games nog niet goed is, kijken hoeveel het minimum of maximum hebben, bij meer een slechtere score. Alles wat binnen de min-max valt (exclusief) is goed.
+
+Garbage Collection
+==================
+* XOTcl: volatile keyword, -volatile switch, call to gc
+* Alg: mark-and-sweep: kan ook, door huidige oplossingen langs te lopen, alles wat niet door dezen gebruikt wordt, verwijderen.
+* Eigenlijk niet zo veel zin om dit zelf te gaan verzinnen, misschien overstappen van struct -> XOTcl en dan automatisch? Of iig sneller?
+
+Tcl regexp
+==========
+% regexp -all -inline {a(.)} "abcabc abc"
+ab b ab b ab b
+ofwel alle matches vinden. Deed dit eerder met regsub, met dit is wat directer, dan meestal ook geen subst nodig.
+
+dict ipv struct::record
+=========================
+* 11-4-2010 struct::record is traag, en wat problemen met garbage collection, omdat procs gemaakt worden. Met gewone tcl lists hier geen last van. Dict werkt ook erg goed, oplossing 
+  nu een combi met dict (ook een tcl list) en list-van-lists met oplossing-rondes-games-spelers.
+* 11-4-2010 had eerder dit weekend ook al nieuw ldeep* functies gemaakt, maar gebruik ze nog niet.
+* 11-4-2010 de 32/56 oplossing wordt nu in 45 seconden gevonden! En de 2e keer in 13 seconden!
+* 11-4-2010 ook veel gelezen in 'how to solve it', en best veel ideeen (zie kladjes) om het sneller te maken, maar vraag is of dit nu wel nodig is. Misschien nog wel voor mix-toernooi,
+  als er veel meer teampjes zijn.
+* 11-4-2010 op deze manier dus ook geen IncrTcl of XoTcl nodig hier!
+* 11-4-2010 met 6+6 duurt het toch een stuk langer, dan 18 wedstrijden totaal, misschien op meerdere velden. Dan lijkt het dus zinvol alle partners te bepalen en in een volgorde te zetten.
+  Kan deze dan 5 keer doen. Kan ook kiezen obv 1 solution er meerdere nieuwe te maken, en dan steeds de beste x over te houden. Wanneer niet iedereen met iedereen kan spelen, wel met random
+  de partners bij elkaar zetten, en hier eigenlijk ook mutaties in mogelijk. Zoals bv weer bij het mixtoernooi.
+  
+13-4-2010
+=========
+* Weer even lijst van strategies weer teruggezet: app loopt nu wel door, geheugen blijft ook ok (18 MB). Mogelijke reden is dat elke strategie nu evenveel kans heeft, onafhankelijk
+  van de status/fitness van de oplossing die gemuteerd wordt.
+* Verder idee is om een guard op een strategy te zetten, mag alleen worden gekozen als de fitness ok is.
+* Met guards nu gelukt, wel wat problemen met global vars, hier nu replace_vars 'macro' voor gemaakt, gaat goed.
+* had nog bug in een van de twee strategieen om #partners te max-en, waardoor eigenlijk altijd de foute strategie werd gekozen. Aangepast. Als ik binnen nieuwe oplossing alleen deze
+  def, gaat het goed en snel, maar bij alletwee duurt het toch weer lang. Met debug gezien dat wel degelijk random tussen de 2 wordt gekozen.
+* Met weer 1 strategie blijft 'ie even hangen op 32/48, dus max_partners al wel ok, soort lokaal maximum?
+
+total_diff_partners: 32
+total_diff_opponents: 48
+note: mutate_round_bench for two (possibly the same) rounds
+Rounds:
+1: (D2 H1 v D3 H4)	bench: D1, D4, H2, H3
+2: (D2 H4 v D3 H2)	bench: D1, D4, H1, H3
+3: (D4 H4 v D1 H3)	bench: D2, D3, H1, H2
+4: (D3 H1 v D4 H3)	bench: D1, D2, H2, H4
+5: (D1 H2 v D3 H3)	bench: D2, D4, H1, H4
+6: (D4 H1 v D2 H3)	bench: D1, D3, H2, H4
+7: (D4 H2 v D1 H1)	bench: D2, D3, H3, H4
+8: (D1 H4 v D2 H2)	bench: D3, D4, H1, H3
+Player statistics:
+player: D1; ngames: 4; ndiff_partners: 4; ndiff_opponents: 6
+player: D2; ngames: 4; ndiff_partners: 4; ndiff_opponents: 6
+player: D3; ngames: 4; ndiff_partners: 4; ndiff_opponents: 7
+player: D4; ngames: 4; ndiff_partners: 4; ndiff_opponents: 5
+player: H1; ngames: 4; ndiff_partners: 4; ndiff_opponents: 6
+player: H2; ngames: 4; ndiff_partners: 4; ndiff_opponents: 6
+player: H3; ngames: 4; ndiff_partners: 4; ndiff_opponents: 6
+player: H4; ngames: 4; ndiff_partners: 4; ndiff_opponents: 6
+
+* Nog een keer uitvoeren en weer 32/48 blijven hangen. Zou timestamp iets te veel met random-init en keuze te maken hebben?
+* Derde keer wel weer, na iteratie 484, dus niet heel snel. En nog een keer na iteratie 880.
+* Dus toch raar dat het met de strategieen als functies minder gaat. Is het (random) toeval?
+
+15-4-2010
+=========
+Heb nu de volgende als tijdelijke oplossing:
+fitness: 32050
+min_played: 4
+max_played: 4
+total_diff_partners: 32
+total_diff_opponents: 50
+note: mutate_round_bench for two (possibly the same) rounds
+Rounds:
+1: (D2 H1 v D3 H3)	bench: D1, D4, H2, H4
+2: (D2 H3 v D1 H4)	bench: D3, D4, H1, H2
+3: (D2 H4 v D1 H1)	bench: D3, D4, H2, H3
+4: (D4 H3 v D3 H2)	bench: D1, D2, H1, H4
+5: (D1 H2 v D3 H4)	bench: D2, D4, H1, H3
+6: (D4 H2 v D1 H3)	bench: D2, D3, H1, H4
+7: (D4 H4 v D3 H1)	bench: D1, D2, H2, H3
+8: (D4 H1 v D2 H2)	bench: D1, D3, H3, H4
+Player statistics:
+player: D1; ngames: 4; ndiff_partners: 4; ndiff_opponents: 6
+player: D2; ngames: 4; ndiff_partners: 4; ndiff_opponents: 6
+player: D3; ngames: 4; ndiff_partners: 4; ndiff_opponents: 7
+player: D4; ngames: 4; ndiff_partners: 4; ndiff_opponents: 6
+player: H1; ngames: 4; ndiff_partners: 4; ndiff_opponents: 6
+player: H2; ngames: 4; ndiff_partners: 4; ndiff_opponents: 6
+player: H3; ngames: 4; ndiff_partners: 4; ndiff_opponents: 7
+player: H4; ngames: 4; ndiff_partners: 4; ndiff_opponents: 6
+
+* vanaf 1700-3500 iteraties geen verbetering. Mogelijk is dit een lokaal maximum
+* alternatief is per oplossing alle swaps van 2 teams die geldig zijn te testen, of de fitness beter wordt. Mocht dit niet zo zijn, dan:
+  - ofwel oplossing 'vergeten' en met hele nieuwe beginnen.
+  - ofwel beste swap kiezen, hoewel deze minder is dan de huidige (A). Bij de volgende (B) dan wel zorgen dat je niet terug gaat naar (A), soort Tabu-search wordt het dan.
+* Maar vlak na de 3500 toch de 32/56 oplossing gevonden.
+* toch maar de strategy met apply als nieuwe kiezen, en het oude gebeuren naar de old-dir.
+
+* Iets anders: de combi van struct::list en apply gevonden op http://wiki.tcl.tk/17471. Eieren eten is dat je de apply nog zelf aanroept.
+# squaring
+  % ::struct::list map {1 2 3 4 5} {apply {x {expr {$x*$x}}}}
+  1 4 9 16 25
+* Ook: list en concat functions mogelijk te gebruiken ipv nu gedefinieerd replace_vars. Maar replace_vars best aardig ook. Maar replace vars wat beperkter, want moet meteen gebeuren,
+  wat als je in een apply dan pas externe vars (closure?) wilt gebruiken.
+
+17-4-2010
+=========
+* Prog verder lispify-en voorlopig niet.
+* Verder met schema's voor mixtoernooi.
+* Lijkt erop dat op Windows de garbage collection niet goed gaat: zie in task manager dat het groeit, en bij run op gegeven moment een alloc probleem en script gestopt.
+* Nu ook stdev voor npartners en nopponents bepaald en meegenomen in fitness. werkt wel, maar meerwaarde nog niet meteen te zien.
+
+18-4-2010
+=========
+* Raar: (ook?) in laatste strategie (swap teams) stond nog: set lst_rounds [::struct::list map $lst_rounds mutate_round_bench]. Deze stond ook in 2e, tijdje geleden verwijderd.
+
+

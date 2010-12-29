@@ -1,0 +1,8 @@
+new time group, start a report
+new time group, start a report
+Determining group of: Tools  Protégé 3.4.1     (file:\I:\Architectuur\Tools\Tools.pprj, Protégé Database)
+Determining group of: Tools  Protégé 3.4.1     (file:\I:\Architectuur\Tools\Tools.pprj, Protégé Database)
+Determining group of: Tools  Protégé 3.4.1     (file:\I:\Architectuur\Tools\Tools.pprj, Protégé Database)
+new time group, start a report
+Determining group of: I:\Architectuur\Tools\generated\dataflow_all.png - IrfanView
+Not 4 items in line (#0): 

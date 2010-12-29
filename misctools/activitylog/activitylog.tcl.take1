@@ -1,0 +1,44 @@
+# log currently active window to a file, every 5 seconds.
+
+package require twapi
+
+# set LOGFILE "d:/aaa/activitylog.txt"
+# set INTERVAL 5000 ; # 5 seconds
+
+# met <none> en vorige << huidige - interval is duidelijk wanneer screensaver en suspend zijn.
+
+proc main {argc argv} {
+	global LOGFILE INTERVAL
+	check_params $argc $argv
+	set logfile [lindex $argv 0]
+	set interval [expr [lindex $argv 1] * 1000]
+	
+	set f [open $logfile a]
+	while {1} {
+		set title [get_active_window_title]
+		puts $f "[clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"] $title"
+		flush $f
+		after $interval
+	}
+	close $f ; # never reached.
+}
+
+proc check_params {argc argv} {
+	global stderr argv0
+	if {$argc != 2} {
+		puts stderr "syntax: [info nameofexecutable] $argv0 <logfile> <interval in sec>"
+		exit 1
+	}
+}
+
+proc get_active_window_title {} {
+	set hwnd [twapi::get_foreground_window]
+	if {$hwnd == ""} {
+		return "<none>"
+	} else {
+		return [twapi::get_window_text $hwnd]
+	}
+}
+
+main $argc $argv
+

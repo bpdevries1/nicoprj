@@ -1,0 +1,148 @@
+Schema's mix toernooi.
+
+met 12 teams op 2 velden, 9 rondes:
+fitness: 72121.5735985673
+min_played: 6
+max_played: 6
+total_diff_partners: 72
+total_diff_opponents: 122
+note: Keep teams together, change two teams if possible
+Rounds:
+1: (T11 T05 v T02 T04)  (T01 T10 v T12 T03)     bench: T06, T07, T08, T09
+2: (T05 T03 v T08 T04)  (T02 T11 v T06 T12)     bench: T01, T07, T09, T10
+3: (T11 T12 v T03 T08)  (T07 T04 v T01 T02)     bench: T05, T06, T09, T10
+4: (T06 T01 v T08 T09)  (T03 T07 v T12 T02)     bench: T04, T05, T10, T11
+5: (T10 T08 v T09 T02)  (T06 T11 v T01 T05)     bench: T03, T04, T07, T12
+6: (T06 T08 v T10 T11)  (T04 T09 v T07 T12)     bench: T01, T02, T03, T05
+7: (T10 T02 v T01 T04)  (T05 T06 v T09 T07)     bench: T03, T08, T11, T12
+8: (T03 T11 v T10 T09)  (T05 T08 v T01 T07)     bench: T02, T04, T06, T12
+9: (T04 T12 v T06 T09)  (T07 T05 v T03 T10)     bench: T01, T02, T08, T11
+Player statistics:
+player: T01; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: T02; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: T03; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: T04; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: T05; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: T06; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: T07; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: T08; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: T09; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: T10; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: T11; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: T12; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+
+
+met 16 teams op 3 velden, 8 rondes.
+*** Nog beetje jammer dat 1 team maar 9 tegenstanders heeft.
+fitness: 96175.18350341907
+min_played: 6
+max_played: 6
+total_diff_partners: 96
+total_diff_opponents: 176
+note: Keep teams together, change two teams if possible
+Rounds:
+1: (T02 T01 v T16 T06)	(T04 T12 v T10 T09)	(T11 T15 v T07 T05)	bench: T03, T08, T13, T14
+2: (T13 T03 v T02 T09)	(T08 T12 v T05 T04)	(T14 T10 v T06 T15)	bench: T01, T07, T11, T16
+3: (T03 T02 v T07 T12)	(T11 T14 v T15 T16)	(T08 T09 v T05 T06)	bench: T01, T04, T10, T13
+4: (T14 T02 v T01 T10)	(T07 T08 v T09 T16)	(T12 T03 v T06 T13)	bench: T04, T05, T11, T15
+5: (T04 T09 v T02 T16)	(T08 T01 v T12 T15)	(T13 T07 v T06 T11)	bench: T03, T05, T10, T14
+6: (T12 T13 v T14 T15)	(T16 T05 v T01 T03)	(T06 T10 v T11 T04)	bench: T02, T07, T08, T09
+7: (T08 T14 v T02 T11)	(T13 T09 v T01 T07)	(T03 T05 v T04 T10)	bench: T06, T12, T15, T16
+8: (T08 T03 v T15 T01)	(T14 T04 v T11 T07)	(T13 T16 v T10 T05)	bench: T02, T06, T09, T12
+Player statistics:
+player: T01; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: T02; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T03; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T04; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: T05; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: T06; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T07; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: T08; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: T09; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: T10; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: T11; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: T12; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T13; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T14; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: T15; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: T16; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+
+met 18 teams op 3 velden, 9 rondes.
+fitness: 108207.23303501116
+min_played: 6
+max_played: 6
+total_diff_partners: 108
+total_diff_opponents: 208
+note: Keep teams together, change two teams if possible
+Rounds:
+1: (T09 T16 v T17 T14)	(T06 T10 v T13 T02)	(T05 T07 v T11 T08)	bench: T01, T03, T04, T12, T15, T18
+2: (T04 T08 v T03 T12)	(T11 T05 v T16 T15)	(T14 T10 v T17 T06)	bench: T01, T02, T07, T09, T13, T18
+3: (T06 T11 v T12 T08)	(T15 T10 v T04 T14)	(T03 T07 v T13 T01)	bench: T02, T05, T09, T16, T17, T18
+4: (T04 T18 v T05 T17)	(T16 T12 v T07 T13)	(T10 T09 v T15 T08)	bench: T01, T02, T03, T06, T11, T14
+5: (T14 T09 v T11 T01)	(T15 T02 v T03 T16)	(T05 T18 v T06 T12)	bench: T04, T07, T08, T10, T13, T17
+6: (T08 T13 v T17 T18)	(T07 T02 v T05 T14)	(T12 T11 v T06 T01)	bench: T03, T04, T09, T10, T15, T16
+7: (T02 T03 v T17 T09)	(T01 T07 v T16 T04)	(T15 T05 v T13 T18)	bench: T06, T08, T10, T11, T12, T14
+8: (T03 T10 v T16 T18)	(T15 T13 v T08 T01)	(T09 T04 v T02 T06)	bench: T05, T07, T11, T12, T14, T17
+9: (T10 T04 v T09 T11)	(T03 T18 v T07 T14)	(T17 T02 v T01 T12)	bench: T05, T06, T08, T13, T15, T16
+Player statistics:
+player: T01; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T02; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: T03; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T04; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T05; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: T06; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: T07; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: T08; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T09; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: T10; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T11; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T12; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: T13; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T14; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T15; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T16; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: T17; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T18; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+
+Met 24 teams op 4 velden, 9 rondes:
+fitness: 144288.0
+min_played: 6
+max_played: 6
+total_diff_partners: 144
+total_diff_opponents: 288
+note: Keep teams together, change two teams if possible
+Rounds:
+1: (T10 T18 v T19 T11)	(T04 T06 v T01 T16)	(T21 T07 v T05 T22)	(T23 T02 v T14 T08)	bench: T03, T09, T12, T13, T15, T17, T20, T24
+2: (T15 T18 v T20 T07)	(T05 T09 v T02 T03)	(T22 T16 v T24 T08)	(T21 T17 v T14 T01)	bench: T04, T06, T10, T11, T12, T13, T19, T23
+3: (T24 T09 v T20 T21)	(T10 T23 v T15 T16)	(T17 T13 v T03 T19)	(T08 T18 v T06 T12)	bench: T01, T02, T04, T05, T07, T11, T14, T22
+4: (T20 T13 v T17 T02)	(T12 T11 v T09 T03)	(T05 T23 v T18 T22)	(T04 T01 v T07 T10)	bench: T06, T08, T14, T15, T16, T19, T21, T24
+5: (T10 T16 v T13 T21)	(T04 T03 v T02 T22)	(T05 T06 v T23 T24)	(T15 T19 v T12 T09)	bench: T01, T07, T08, T11, T14, T17, T18, T20
+6: (T13 T08 v T21 T09)	(T06 T16 v T02 T05)	(T11 T14 v T01 T20)	(T19 T10 v T07 T24)	bench: T03, T04, T12, T15, T17, T18, T22, T23
+7: (T12 T20 v T01 T06)	(T17 T23 v T04 T09)	(T05 T14 v T10 T11)	(T13 T15 v T24 T18)	bench: T02, T03, T07, T08, T16, T19, T21, T22
+8: (T16 T23 v T19 T17)	(T14 T20 v T04 T08)	(T24 T03 v T01 T07)	(T12 T15 v T11 T22)	bench: T02, T05, T06, T09, T10, T13, T18, T21
+9: (T06 T08 v T03 T15)	(T12 T22 v T13 T14)	(T07 T19 v T21 T02)	(T04 T17 v T11 T18)	bench: T01, T05, T09, T10, T16, T20, T23, T24
+Player statistics:
+player: T01; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T02; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T03; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T04; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T05; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T06; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T07; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T08; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T09; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T10; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T11; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T12; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T13; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T14; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T15; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T16; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T17; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T18; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T19; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T20; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T21; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T22; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T23; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12
+player: T24; ngames: 6; ndiff_partners: 6; ndiff_opponents: 12

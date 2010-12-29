@@ -1,0 +1,122 @@
+Mix toernooi oplossingen:
+
+* 12 teams:
+Voorlopig beste voor 12 teams op 2 velden:
+fitness: 48089.261451054124
+min_played: 4
+max_played: 4
+total_diff_partners: 48
+total_diff_opponents: 90
+note: Keep teams together, change two teams if possible
+Rounds:
+1: (M12 M08 v M11 M02)	(M09 M07 v M10 M03)	bench: M01, M04, M05, M11
+2: (M10 M02 v M04 M05)	(M03 M07 v M01 M11)	bench: M03, M07, M08, M09
+3: (M04 M03 v M05 M06)	(M08 M01 v M10 M09)	bench: M01, M02, M03, M12
+4: (M11 M07 v M06 M02)	(M04 M12 v M03 M08)	bench: M02, M08, M10, M11
+5: (M01 M06 v M09 M05)	(M10 M04 v M12 M11)	bench: M06, M07, M09, M10
+6: (M07 M01 v M06 M12)	(M09 M08 v M05 M02)	bench: M04, M05, M06, M12
+Player statistics:
+player: M01; ngames: 4; ndiff_partners: 4; ndiff_opponents: 7
+player: M02; ngames: 4; ndiff_partners: 4; ndiff_opponents: 7
+player: M03; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M04; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M05; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M06; ngames: 4; ndiff_partners: 4; ndiff_opponents: 7
+player: M07; ngames: 4; ndiff_partners: 4; ndiff_opponents: 7
+player: M08; ngames: 4; ndiff_partners: 4; ndiff_opponents: 7
+player: M09; ngames: 4; ndiff_partners: 4; ndiff_opponents: 7
+player: M10; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M11; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M12; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+
+
+* 16 teams: nog niet zo goed, veel spelers met 5 partners, ipv 6.
+fitness: 96167.18350341907
+min_played: 6
+max_played: 6
+total_diff_partners: 96
+total_diff_opponents: 168
+note: Keep teams together, change two teams if possible
+Rounds:
+1: (M07 M13 v M03 M15)	(M16 M06 v M11 M01)	(M02 M12 v M04 M10)	bench: M01, M09, M11, M12
+2: (M06 M14 v M03 M09)	(M08 M07 v M02 M10)	(M13 M15 v M05 M16)	bench: M09, M12, M13, M15
+3: (M08 M10 v M14 M16)	(M07 M02 v M06 M01)	(M04 M13 v M11 M03)	bench: M05, M07, M08, M14
+4: (M06 M05 v M16 M11)	(M04 M01 v M08 M15)	(M03 M07 v M09 M12)	bench: M02, M04, M08, M10
+5: (M03 M14 v M05 M13)	(M09 M10 v M12 M11)	(M15 M01 v M04 M08)	bench: M04, M06, M14, M16
+6: (M11 M13 v M01 M08)	(M06 M09 v M02 M14)	(M15 M05 v M10 M12)	bench: M01, M07, M15, M16
+7: (M12 M14 v M04 M11)	(M13 M16 v M07 M09)	(M05 M03 v M02 M01)	bench: M03, M05, M06, M10
+8: (M08 M02 v M05 M12)	(M15 M07 v M14 M09)	(M06 M04 v M10 M16)	bench: M02, M03, M11, M13
+Player statistics:
+player: M01; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: M02; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: M03; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: M04; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: M05; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: M06; ngames: 6; ndiff_partners: 6; ndiff_opponents: 9
+player: M07; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: M08; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: M09; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: M10; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: M11; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: M12; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: M13; ngames: 6; ndiff_partners: 6; ndiff_opponents: 10
+player: M14; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: M15; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+player: M16; ngames: 6; ndiff_partners: 6; ndiff_opponents: 11
+
+* 18 teams: Ook een perfecte oplossing voor 18 teams, in 6 ronden op 3 velden:
+fitness: 72144.0
+min_played: 4
+max_played: 4
+total_diff_partners: 72
+total_diff_opponents: 144
+note: Keep teams together, change two teams if possible
+Rounds:
+1: (M03 M06 v M15 M09)	(M04 M10 v M11 M13)	(M14 M07 v M17 M08)	bench: M01, M05, M07, M12, M13, M16
+2: (M14 M01 v M10 M16)	(M15 M17 v M11 M02)	(M06 M18 v M13 M03)	bench: M02, M05, M07, M08, M09, M18
+3: (M16 M18 v M10 M09)	(M15 M13 v M12 M01)	(M14 M03 v M05 M02)	bench: M10, M11, M12, M15, M16, M17
+4: (M11 M07 v M03 M12)	(M14 M18 v M06 M04)	(M09 M08 v M05 M01)	bench: M03, M04, M10, M13, M14, M15
+5: (M01 M04 v M02 M07)	(M09 M17 v M08 M12)	(M13 M05 v M11 M16)	bench: M01, M04, M06, M11, M17, M18
+6: (M18 M07 v M15 M16)	(M02 M12 v M06 M08)	(M10 M05 v M17 M04)	bench: M02, M03, M06, M08, M09, M14
+
+
+* Op laptop bezig met 24p, 6r, 4c, perfecte oplossing gevonden (met alleen stdev op ngames)!:
+fitness: 96192
+min_played: 4
+max_played: 4
+total_diff_partners: 96
+total_diff_opponents: 192
+note: mutate_round_bench for two (possibly the same) rounds
+Rounds:
+1: (M11 M03 v M10 M16)  (M22 M02 v M01 M09)     (M20 M19 v M14 M13)     (M04 M23 v M08 M15)     bench: M05, M06, M07, M12, M17, M18, M21, M24
+2: (M04 M17 v M12 M01)  (M19 M06 v M11 M05)     (M14 M21 v M07 M15)     (M22 M18 v M23 M10)     bench: M02, M03, M08, M09, M13, M16, M20, M24
+3: (M02 M08 v M03 M07)  (M24 M20 v M06 M23)     (M16 M13 v M10 M15)     (M21 M12 v M19 M05)     bench: M01, M04, M09, M11, M14, M17, M18, M22
+4: (M02 M03 v M06 M22)  (M01 M16 v M09 M24)     (M11 M13 v M08 M12)     (M05 M15 v M18 M17)     bench: M04, M07, M10, M14, M19, M20, M21, M23
+5: (M03 M24 v M21 M18)  (M09 M08 v M10 M14)     (M02 M17 v M20 M23)     (M04 M13 v M05 M07)     bench: M01, M06, M11, M12, M15, M16, M19, M22
+6: (M04 M22 v M14 M16)  (M17 M07 v M19 M24)     (M11 M21 v M09 M20)     (M12 M06 v M18 M01)     bench: M02, M03, M05, M08, M10, M13, M15, M23
+Player statistics:
+player: M01; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M02; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M03; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M04; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M05; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M06; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M07; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M08; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M09; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M10; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M11; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M12; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M13; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M14; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M15; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M16; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M17; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M18; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M19; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M20; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M21; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M22; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M23; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+player: M24; ngames: 4; ndiff_partners: 4; ndiff_opponents: 8
+

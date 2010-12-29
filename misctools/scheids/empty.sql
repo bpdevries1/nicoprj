@@ -1,0 +1,9 @@
+delete from kan_wedstrijd_fluiten;
+delete from scheids;
+delete from wedstrijd;
+delete from afwezig;
+delete from kan_team_fluiten;
+delete from persoon_team;
+delete from persoon;
+delete from team;
+delete from zeurfactor;

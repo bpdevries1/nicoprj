@@ -1,0 +1,8 @@
+TODO
+
+Rekening houden met al ingeplande wedstrijden, eerste deel van het seizoen. 2 situaties:
+- deels al gepland, niet opnieuw inlezen, gewoon maak-voorstel-gen.tcl opnieuw aanroepen. Dan kijken wat je qua fitness/som_zf met al bestaande wedstrijden doet. Eigenlijk wil ik dit wel meenemen, misschien wel lastig als er een nieuwe scheids bijkomt, die zou dan in het nadeel zijn.
+- opnieuw van de site inlezen, dan eerst alles weg wat nog niet vast staat en rest opnieuw inlezen. Wel kijken of de wedstrijd al bestaat, en dus al is vastgelegd. Evt een balanced line tussen beide doen, kan ook zijn dat een wedstrijd is verdwenen.
+
+
+
