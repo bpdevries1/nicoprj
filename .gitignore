@@ -1,0 +1,5 @@
+# files which git should ignore
+*.bak
+*~
+*.log
+

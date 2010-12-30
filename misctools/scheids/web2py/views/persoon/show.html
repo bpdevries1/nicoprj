@@ -1,0 +1,10 @@
+{{extend 'layout.html'}}
+<h1>{{=persoon.naam}}</h1>
+[ {{=A('edit', _href=URL('edit', args=request.args))}} ] <br/>
+Naam: {{=persoon.naam}}<br/>
+Email: {{=persoon.email}}<br/>
+Telnrs: {{=persoon.telnrs}}<br/>
+Speelt in: {{=persoon.speelt_in.naam}}<br/>
+Opmerkingen: {{=persoon.opmerkingen}}<br/>
+
+{{# =BEAUTIFY(response._vars)}}
