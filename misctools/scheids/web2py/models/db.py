@@ -32,6 +32,9 @@ auth.define_tables()                         # creates all needed tables
 crud=Crud(globals(),db)                      # for CRUD helpers using auth
 service=Service(globals())                   # for json, xml, jsonrpc, xmlrpc, amfrpc
 
+# 1-1-2011 NdV webgrid opgehaald van http://web2pyslices.com/main/slices/take_slice/39
+webgrid = local_import('webgrid')
+
 # crud.settings.auth=auth                      # enforces authorization on crud
 # mail=Mail()                                  # mailer
 # mail.settings.server='smtp.gmail.com:587'    # your SMTP server
@@ -86,10 +89,13 @@ db.define_table('zeurfactor',
                 Field('factor', 'double'),
                 Field('opmerkingen', length=255))
 
-db.define_table('afwezig',
+# 1-1-2010 NdV datum vervangen door eerstedag en laatstedag, was in tcl scripts al langer zo. Ook 'nomigration' doen? 
+db.define_table('afwezig', 
                 Field('persoon', db.persoon),
-                Field('datum', 'date'),
-                Field('opmerkingen', length=255))
+                Field('eerstedag', 'date'),
+                Field('laatstedag', 'date'),
+                Field('opmerkingen', length=255),
+                migrate=False)
 
 # lokatie: alleen uit of thuis
 # ook naam nodig, om naar te verwijzen
@@ -138,10 +144,14 @@ db.zeurfactor.speelt_zelfde_dag.requires = IS_NOT_EMPTY()
 db.zeurfactor.factor.requires = IS_NOT_EMPTY()
 
 db.afwezig.persoon.requires = IS_IN_DB(db, 'persoon.id', 'persoon.naam')
-db.afwezig.datum.requires = [IS_NOT_EMPTY(), IS_DATE()]
+db.afwezig.eerstedag.requires = [IS_NOT_EMPTY(), IS_DATE()]
+db.afwezig.laatstedag.requires = [IS_NOT_EMPTY(), IS_DATE()]
 
 db.persoon.naam.requires = [IS_NOT_EMPTY(), IS_NOT_IN_DB(db, 'persoon.naam')]
-db.persoon.speelt_in.requires = IS_IN_DB(db, 'team.id', 'team.naam')
+
+# 1-1-2011 speelt_in doet ook vaag, ook aanpassen, helpt alleen niet, nog steeds overal 'None'
+# db.persoon.speelt_in.requires = IS_IN_DB(db, 'team.id', 'team.naam')
+db.persoon.speelt_in.requires = IS_IN_DB(db, db.team.id, '%(naam)s')
 
 # @todo andere dynamische identificatie van team bepalen, hoe dit moet.
 db.wedstrijd.naam.requires = [IS_NOT_EMPTY(), IS_NOT_IN_DB(db, 'wedstrijd.naam')]
@@ -159,3 +169,13 @@ db.kan_team_fluiten.team.requires = IS_IN_DB(db, 'team.id', 'team.naam')
 
 db.kan_wedstrijd_fluiten.scheids.requires = IS_IN_DB(db, 'persoon.id', 'persoon.naam')
 db.kan_wedstrijd_fluiten.wedstrijd.requires = IS_IN_DB(db, 'wedstrijd.id', 'wedstrijd.naam')
+
+# 1-1-2010 NdV wat experimenten met represent, zou eigenlijk in controller/view moeten.
+def speelt_in_rep(speelt_in):
+  if speelt_in: 
+    db.team[speelt_in].naam
+  else:
+    'Geen team'
+
+db.persoon.speelt_in.represent = speelt_in_rep
+

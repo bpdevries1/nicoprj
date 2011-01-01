@@ -14,10 +14,14 @@ def index():
     rendered by views/default/index.html or views/generic.html
     """
     # response.flash = T('Welcome to web2py')
-    return dict(message=T('Hoofdmenu'))
+    redirect(URL('scheidsrechters', 'wedstrijd', 'wedstrijden'))
+    # return dict(message=T('Hoofdmenu'))
 
 def wedstrijden():
     return dict(message=T('Wedstrijden'))
+
+def data():
+    return dict(form=crud())
 
 def first():
     form = FORM(INPUT(_name='visitor_name', requires=IS_NOT_EMPTY()),

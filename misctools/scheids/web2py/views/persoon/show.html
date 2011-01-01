@@ -1,10 +1,18 @@
 {{extend 'layout.html'}}
-<h1>{{=persoon.naam}}</h1>
+<h1>Persoon</h1>
 [ {{=A('edit', _href=URL('edit', args=request.args))}} ] <br/>
-Naam: {{=persoon.naam}}<br/>
-Email: {{=persoon.email}}<br/>
-Telnrs: {{=persoon.telnrs}}<br/>
-Speelt in: {{=persoon.speelt_in.naam}}<br/>
-Opmerkingen: {{=persoon.opmerkingen}}<br/>
+{{=form}}
 
-{{# =BEAUTIFY(response._vars)}}
+<h2>Zeur factoren:</h2>
+
+{{=zeur_factor_grid}}
+
+<h2>Afwezig:</h2>
+{{=afwezig_grid}}
+<h2>Wedstrijden:</h2>
+{{=wedstrijden_grid}}
+<hr/>
+Todo: naam van persoon afleiden uit form-object, iets als form.naam<br/>
+Todo: speelt_in staat hier altijd op None, klopt niet.<br/>
+
+

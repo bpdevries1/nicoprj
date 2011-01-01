@@ -44,10 +44,12 @@ if 'auth' in globals():
 ##########################################
 
 response.menu = [
-    [T('Index'), False, 
-     URL(request.application,'default','index'), []],
     [T('Personen'), False, 
      URL(request.application,'persoon','index'), []],
+    [T('Wedstrijden'), False, 
+     URL(request.application,'wedstrijd','index'), []],
+    [T('Tabellen'), False, 
+     URL(request.application,'default','data/tables'), []],
     ]
 
 
