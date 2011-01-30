@@ -12,7 +12,8 @@ if request.env.web2py_runtime_gae:            # if running on Google App Engine
     # from google.appengine.api.memcache import Client
     # session.connect(request, response, db=MEMDB(Client())
 else:                                         # else use a normal relational database
-    db = DAL("mysql://nico:pclip01;@localhost:3306/scheids")
+    # db = DAL("mysql://nico:pclip01;@localhost:3306/scheids")
+    db = DAL("mysql://scheids:scheids@localhost:3306/scheids")
 ## if no need for session
 # session.forget()
 
@@ -69,25 +70,29 @@ import datetime; now = datetime.datetime.now()
 db.define_table('team',
                 Field('naam', length=10),
                 Field('scheids_nodig', 'integer'),
-                Field('opmerkingen', length=255))
+                Field('opmerkingen', length=255),
+                migrate=False)
 
 db.define_table('persoon',
                 Field('naam', length=255),
                 Field('email', length=255),
                 Field('telnrs', length=255),
                 Field('speelt_in', db.team),
-                Field('opmerkingen', length=255))
+                Field('opmerkingen', length=255),
+                migrate=False)
 
 db.define_table('persoon_team',
                 Field('persoon', db.persoon),
                 Field('team', db.team),
-                Field('soort', length=40))
+                Field('soort', length=40),
+                migrate=False)
 
 db.define_table('zeurfactor',
                 Field('persoon', db.persoon),
                 Field('speelt_zelfde_dag', 'integer'),
                 Field('factor', 'double'),
-                Field('opmerkingen', length=255))
+                Field('opmerkingen', length=255),
+                migrate=False)
 
 # 1-1-2010 NdV datum vervangen door eerstedag en laatstedag, was in tcl scripts al langer zo. Ook 'nomigration' doen? 
 db.define_table('afwezig', 
@@ -107,7 +112,8 @@ db.define_table('wedstrijd',
                 Field('scheids_nodig', 'integer'),
                 Field('opmerkingen', length=255),
                 Field('date_inserted', 'datetime', default=now),
-                Field('date_checked', 'datetime', default=now))
+                Field('date_checked', 'datetime', default=now),
+                migrate=False)
 
 db.define_table('scheids',
                 Field('scheids', db.persoon),
@@ -116,13 +122,15 @@ db.define_table('scheids',
                 Field('opmerkingen', length=255),
                 Field('date_inserted', 'datetime', default=now),
                 Field('status', length=20),
-                Field('waarde', 'double'))
+                Field('waarde', 'double'),
+                migrate=False)
 
 db.define_table('kan_team_fluiten',
                 Field('scheids', db.persoon),
                 Field('team', db.team),
                 Field('waarde', 'double', default=1.0),
-                Field('opmerkingen', length=255))
+                Field('opmerkingen', length=255),
+                migrate=False)
 
 db.define_table('kan_wedstrijd_fluiten',
                 Field('scheids', db.persoon),
@@ -130,7 +138,8 @@ db.define_table('kan_wedstrijd_fluiten',
                 Field('waarde', 'double', default=1.0),
                 Field('speelt_zelfde_dag', 'integer'),
                 Field('opmerkingen', length=255),
-                Field('date_inserted', 'datetime', default=now))
+                Field('date_inserted', 'datetime', default=now),
+                migrate=False)
 
 db.team.naam.requires = [IS_NOT_EMPTY(), IS_NOT_IN_DB(db, 'team.naam')]
 
@@ -178,4 +187,17 @@ def speelt_in_rep(speelt_in):
     'Geen team'
 
 db.persoon.speelt_in.represent = speelt_in_rep
+
+# andere dingen met represent, dat altijd de links getoond worden.
+# sommige schermen zijn er (nog) niet, dan ook nog even geen link.
+db.persoon.id.represent = lambda val: A(T(str(val)), _href=URL('scheidsrechters', 'persoon','show', args=str(val)))
+db.wedstrijd.id.represent = lambda val: A(T(str(val)), _href=URL('scheidsrechters', 'wedstrijd','show', args=str(val)))
+# db.afwezig.id.represent = lambda val: A(T(str(val)), _href=URL('scheidsrechters', 'afwezig','show', args=str(val)))
+# db.kan_team_fluiten.id.represent = lambda val: A(T(str(val)), _href=URL('scheidsrechters', 'kan_team_fluiten','show', args=str(val)))
+# db.kan_wedstrijd_fluiten.id.represent = lambda val: A(T(str(val)), _href=URL('scheidsrechters', 'kan_wedstrijd_fluiten','show', args=str(val)))
+db.persoon_team.id.represent = lambda val: A(T(str(val)), _href=URL('scheidsrechters', 'persoon_team','show', args=str(val)))
+db.scheids.id.represent = lambda val: A(T(str(val)), _href=URL('scheidsrechters', 'scheids','show', args=str(val)))
+db.team.id.represent = lambda val: A(T(str(val)), _href=URL('scheidsrechters', 'team','show', args=str(val)))
+#db.zeurfactor.id.represent = lambda val: A(T(str(val)), _href=URL('scheidsrechters', 'zeurfactor','show', args=str(val)))
+
 

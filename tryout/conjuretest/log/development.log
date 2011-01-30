@@ -811,3 +811,44 @@ DEBUG [conjure.core.server.server]: Requested uri: /home/ajax_message
 DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/ajax-message
 DEBUG [conjure.core.binding.util]: Running binding: bindings.home.ajax-message
 DEBUG [conjure.core.server.ring-adapter]: Response time: 439 ms
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SELECT * FROM sessions LIMIT 1"]
+INFO  [conjure.core.server.server]: Server Initialized.
+INFO  [conjure.core.server.server]: Initializing plugins...
+INFO  [conjure.core.server.server]: Plugins initialized.
+INFO  [conjure.core.server.server]: Initializing app controller...
+INFO  [conjure.core.server.server]: App controller initialized.
+DEBUG [conjure.core.server.server]: Requested uri: /
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 3241 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/ajax_message
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/ajax-message
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.ajax-message
+DEBUG [conjure.core.server.ring-adapter]: Response time: 601 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/ajax_message
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/ajax-message
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.ajax-message
+DEBUG [conjure.core.server.ring-adapter]: Response time: 531 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1366 ms
+DEBUG [conjure.core.server.server]: Requested uri: /home/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.home-controller/index
+DEBUG [conjure.core.binding.util]: Running binding: bindings.home.index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 2147 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/index
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/index
+DEBUG [conjure.core.server.ring-adapter]: Response time: 286 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/list_records
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/list-records
+DEBUG [conjure.core.binding.util]: Running binding: bindings.templates.list-records
+DEBUG [conjure.core.db.flavors.h2]: Describe table: messages
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SHOW COLUMNS FROM messages"]
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1679 ms
+DEBUG [conjure.core.server.server]: Requested uri: /message/ajax_add
+DEBUG [conjure.core.controller.util]: Running action: controllers.message-controller/ajax-add
+DEBUG [conjure.core.binding.util]: Running binding: bindings.templates.ajax-add
+DEBUG [conjure.core.db.flavors.h2]: Describe table: messages
+DEBUG [conjure.core.db.flavors.h2]: Executing query: ["SHOW COLUMNS FROM messages"]
+DEBUG [conjure.core.server.ring-adapter]: Response time: 1650 ms

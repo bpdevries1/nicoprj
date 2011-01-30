@@ -71,7 +71,7 @@ def links_right(tablerow,rowtype,rowdata):
 def make_grid(field):
     grid = webgrid.WebGrid(crud)
     grid.datasource = db(field == request.args(0)).select()
-    grid.enabled_rows = ['header']
+    grid.enabled_rows = ['header', 'add_links']
     grid.action_links = ['view', 'edit']
     grid.action_headers = ['view', 'edit']
     grid.row_created = links_right
@@ -90,8 +90,55 @@ def make_grid_wedstrijden():
     grid.row_created = links_right
     return grid
 
+# ktf: kan_team_fluiten
+def make_grid_ktf():
+    grid = webgrid.WebGrid(crud)
+    query = (db.kan_team_fluiten.scheids == request.args(0)) & (db.kan_team_fluiten.team == db.team.id)
+    grid.datasource = db(query).select(db.kan_team_fluiten.id, db.team.naam, db.kan_team_fluiten.waarde, db.kan_team_fluiten.opmerkingen)
+    grid.enabled_rows = ['header', 'add_links']
+    grid.action_links = ['view', 'edit']
+    grid.action_headers = ['view', 'edit']
+    grid.view_link = lambda row: A(T("view"), _href=URL('scheidsrechters','default','data/read/kan_team_fluiten', args=row['kan_team_fluiten']['id']))
+    grid.edit_link = lambda row: A(T("edit"), _href=URL('scheidsrechters','default','data/update/kan_team_fluiten', args=row['kan_team_fluiten']['id']))
+    
+    grid.row_created = links_right
+    return grid
+
+# @todo van webgrid
+# kan er misschien zelf inbouwen, evt alleen als optie:
+# elk veld weergeven als link, ga naar view of edit page van dit object/record
+# met de hele row en datarow info moet dit lukken. Dan ook koppelen aan crud object of iets wat kwaakt als een crud object (eigen links).
+# hieronder de orig def van view_link.
+#            self.view_link = lambda row: A(self.messages.view_link, _href=self.crud.url(f=self.crud_function, 
+#                                                       args=['read', self.tablenames[0], 
+#                                                             row[self.tablenames[0]]['id'] \
+#                                                              if self.joined else row['id']]))          
+#
+
 @auth.requires_login()
 def show():
+    "shows a persoon"
+    form = crud.read(db.persoon, request.args(0)) or redirect(URL('personen'))
+
+    # testje met represent
+    # db.zeurfactor.speelt_zelfde_dag.represent = lambda val: 2 * val
+    # db.zeurfactor.id.represent = lambda val: A(T(str(val)), _href=URL('scheidsrechters', 'zeurfactor','show', args=str(val)))
+    
+    zeur_factor_grid = make_grid(db.zeurfactor.persoon)
+    zeur_factor_grid.fields = ['zeurfactor.id', 'zeurfactor.speelt_zelfde_dag', 'zeurfactor.factor', 'zeurfactor.opmerkingen']
+    # zeur_factor_grid.fields = ['zeurfactor.speelt_zelfde_dag', 'zeurfactor.factor']
+    zeur_factor_grid.field_headers = ['id', 'zelfde dag', 'factor', 'opmerkingen']
+    zeur_factor_grid.view_link = lambda row: A(T("View"), _href=URL('scheidsrechters','zeurfactor','show', args=row['id']))
+    # zeur_factor_grid.datarow = 'abc'
+    # zeur_factor_grid.datarow = lambda row: row
+    afwezig_grid = make_grid(db.afwezig.persoon)
+    wedstrijden_grid = make_grid_wedstrijden()
+    ktf_grid = make_grid_ktf()
+    return dict(form=form, zeur_factor_grid=zeur_factor_grid(), afwezig_grid=afwezig_grid(), wedstrijden_grid=wedstrijden_grid(), ktf_grid=ktf_grid())
+    # return dict(form=form)
+
+@auth.requires_login()
+def show_orig():
     "shows a persoon"
     form = crud.read(db.persoon, request.args(0)) or redirect(URL('personen'))
 
@@ -101,7 +148,8 @@ def show():
     zeur_factor_grid.view_link = lambda row: A(T("View"), _href=URL('scheidsrechters','zeurfactor','show', args=row['id']))
     afwezig_grid = make_grid(db.afwezig.persoon)
     wedstrijden_grid = make_grid_wedstrijden()
-    return dict(form=form, zeur_factor_grid=zeur_factor_grid(), afwezig_grid=afwezig_grid(), wedstrijden_grid=wedstrijden_grid())
+    ktf_grid = make_grid_ktf()
+    return dict(form=form, zeur_factor_grid=zeur_factor_grid(), afwezig_grid=afwezig_grid(), wedstrijden_grid=wedstrijden_grid(), ktf_grid=ktf_grid())
     # return dict(form=form)
 
 @auth.requires_login()

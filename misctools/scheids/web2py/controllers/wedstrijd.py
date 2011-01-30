@@ -60,15 +60,6 @@ def create():
     form = crud.create(db.wedstrijd, next=URL('index'))
     return dict(form=form)
   
-def make_grid(field):
-    grid = webgrid.WebGrid(crud)
-    grid.datasource = db(field == request.args(0)).select()
-    grid.enabled_rows = ['header']
-    grid.action_links = ['view', 'edit']
-    grid.action_headers = ['view', 'edit']
-    grid.row_created = links_right
-    return grid
-
 @auth.requires_login()
 def show():
     "shows a wedstrijd"
