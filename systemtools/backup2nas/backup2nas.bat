@@ -4,5 +4,11 @@ rem beschikbaar is. Credentials zijn blijkbaar goed geregeld.
 rem tclsh backup-files.tcl -t \\iomega-020326\public\backups\DellLaptop -paths paths.txt -r results.txt -p -ignoreregexps ignoreregexps.txt -use4nt
 
 rem 1-11-2010 nu zonder 4NT.
-tclsh backup-files.tcl -t \\iomega-020326\public\backups\DellLaptop -paths paths.txt -r results.txt -p -ignoreregexps ignoreregexps.txt
+rem tclsh backup-files.tcl -t \\iomega-020326\public\backups\DellLaptop -paths paths.txt -r results.txt -p -ignoreregexps ignoreregexps.txt
+
+rem 16-1-2011 iomega-020326 werkt niet, 192.168.2.200 werkt wel, is wat vaag.
+tclsh backup-files.tcl -t \\192.168.2.200\public\backups\DellLaptop -paths paths.txt -r results.txt -p -ignoreregexps ignoreregexps.txt
+
+rem 16-1-2011 even een pauze inzetten, even kijken of het goed gaat. Evt later alleen een pauze als het fout gaat.
+pause "Check results and press a key"
 

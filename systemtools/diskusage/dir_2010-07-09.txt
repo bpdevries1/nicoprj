@@ -1,0 +1,300 @@
+Disk usage op 2010-07-09
+# root_dir: C:/
+# treshold (kB): 100000
+2409256	c:\aaa/encoding
+126405	c:\aaa/indquerydep/tabel
+128202	c:\aaa/indquerydep
+162418	c:\aaa/_Archief/Projects - ODMS/05 ISO 27001
+210841	c:\aaa/_Archief/Projects - ODMS/12 Werkwijze ODMS
+162418	c:\aaa/_Archief/Projects - ODMS/ODMS/05 ISO 27001
+210841	c:\aaa/_Archief/Projects - ODMS/ODMS/12 Werkwijze ODMS
+608695	c:\aaa/_Archief/Projects - ODMS/ODMS
+1223047	c:\aaa/_Archief/Projects - ODMS
+1340723	c:\aaa/_Archief
+3898321	c:\aaa
+493902	c:\Documents and Settings/nvr00537/My Documents/Downloads
+724176	c:\Documents and Settings/nvr00537/My Documents/My Videos/DivX Movies/Temporary Downloaded Files
+724180	c:\Documents and Settings/nvr00537/My Documents/My Videos/DivX Movies
+724180	c:\Documents and Settings/nvr00537/My Documents/My Videos
+1242757	c:\Documents and Settings/nvr00537/My Documents
+1387017	c:\Documents and Settings/nvr00537
+1413130	c:\Documents and Settings
+105664	c:\hp/Drivers/sw/windvd
+105664	c:\hp/Drivers/sw
+410397	c:\hp/Drivers
+410397	c:\hp
+101536	c:\I386/LANG
+488615	c:\I386
+101833	c:\install/38 Pointsec/PointSec612/1_Pointsec for PC/Tools
+137331	c:\install/38 Pointsec/PointSec612/1_Pointsec for PC
+141076	c:\install/38 Pointsec/PointSec612
+183173	c:\install/38 Pointsec
+259529	c:\install
+148683	c:\Program Files/Adobe/Acrobat
+448278	c:\Program Files/Adobe
+249621	c:\Program Files/Common Files/Microsoft Shared
+126632	c:\Program Files/Common Files/Symantec Shared/VirusDefs/20100617.003
+128458	c:\Program Files/Common Files/Symantec Shared/VirusDefs/20100702.003
+126654	c:\Program Files/Common Files/Symantec Shared/VirusDefs/BinHub
+382313	c:\Program Files/Common Files/Symantec Shared/VirusDefs
+396172	c:\Program Files/Common Files/Symantec Shared
+831779	c:\Program Files/Common Files
+194927	c:\Program Files/HPOVCMD/Lib/SYSTEM/Radia/Software/ZSERVICE
+195295	c:\Program Files/HPOVCMD/Lib/SYSTEM/Radia/Software
+220305	c:\Program Files/HPOVCMD/Lib/SYSTEM/Radia
+220362	c:\Program Files/HPOVCMD/Lib/SYSTEM
+339025	c:\Program Files/HPOVCMD/Lib
+387232	c:\Program Files/HPOVCMD
+143909	c:\Program Files/Microsoft Office/OFFICE11/1033
+153769	c:\Program Files/Microsoft Office/OFFICE11/1043
+468544	c:\Program Files/Microsoft Office/OFFICE11
+124065	c:\Program Files/Microsoft Office/Visio11
+732853	c:\Program Files/Microsoft Office
+123696	c:\Program Files/OpenOffice.org 3/Basis
+189446	c:\Program Files/OpenOffice.org 3/program
+377149	c:\Program Files/OpenOffice.org 3
+275275	c:\Program Files/SAP/FrontEnd/SAPgui
+303978	c:\Program Files/SAP/FrontEnd
+303978	c:\Program Files/SAP
+3475182	c:\Program Files
+199279	c:\progs/Inkscape
+143038	c:\progs/logicaldoc-5.1-RC2-tomcat-bundle/tomcat/webapps
+148552	c:\progs/logicaldoc-5.1-RC2-tomcat-bundle/tomcat
+149001	c:\progs/logicaldoc-5.1-RC2-tomcat-bundle
+106448	c:\progs/qtjambi-win32-lgpl-4.5.2_01/doc/html/com/trolltech/qt
+106448	c:\progs/qtjambi-win32-lgpl-4.5.2_01/doc/html/com/trolltech
+106448	c:\progs/qtjambi-win32-lgpl-4.5.2_01/doc/html/com
+115524	c:\progs/qtjambi-win32-lgpl-4.5.2_01/doc/html
+115524	c:\progs/qtjambi-win32-lgpl-4.5.2_01/doc
+209076	c:\progs/qtjambi-win32-lgpl-4.5.2_01
+644485	c:\progs
+162914	c:\WINDOWS/assembly
+146799	c:\WINDOWS/Fonts
+116751	c:\WINDOWS/Help
+118522	c:\WINDOWS/Microsoft.NET/Framework
+118522	c:\WINDOWS/Microsoft.NET
+779907	c:\WINDOWS/system32
+144296	c:\WINDOWS/Temp/OHotfix
+179292	c:\WINDOWS/Temp
+1984465	c:\WINDOWS
+12680080	c:\
+# root_dir: D:/
+# treshold (kB): 100000
+145158	d:\aaa/Temp/jdks
+491425	d:\aaa/Temp/media
+120019	d:\aaa/Temp/modules
+756702	d:\aaa/Temp
+873492	d:\aaa
+222602	d:\bieb/ICT-books/Donald Knuth
+744443	d:\bieb/ICT-books
+846880	d:\bieb
+182625	d:\cruiseresults
+131305	d:\dell-laptop/c-drive/Program Files
+195203	d:\dell-laptop/c-drive/WINDOWS/assembly/NativeImages_v2.0.50727_32
+350413	d:\dell-laptop/c-drive/WINDOWS/assembly
+115347	d:\dell-laptop/c-drive/WINDOWS/Driver Cache/i386
+115347	d:\dell-laptop/c-drive/WINDOWS/Driver Cache
+106896	d:\dell-laptop/c-drive/WINDOWS/Fonts
+190412	d:\dell-laptop/c-drive/WINDOWS/Microsoft.NET/Framework
+190412	d:\dell-laptop/c-drive/WINDOWS/Microsoft.NET
+514568	d:\dell-laptop/c-drive/WINDOWS/ServicePackFiles/i386
+517796	d:\dell-laptop/c-drive/WINDOWS/ServicePackFiles
+155292	d:\dell-laptop/c-drive/WINDOWS/SoftwareDistribution
+171981	d:\dell-laptop/c-drive/WINDOWS/system32/spool/drivers/w32x86
+174020	d:\dell-laptop/c-drive/WINDOWS/system32/spool/drivers
+187007	d:\dell-laptop/c-drive/WINDOWS/system32/spool
+609851	d:\dell-laptop/c-drive/WINDOWS/system32
+2271026	d:\dell-laptop/c-drive/WINDOWS
+2403815	d:\dell-laptop/c-drive
+2403936	d:\dell-laptop
+343509	d:\develop/haskell/ghc/ghc-6.6.1
+343509	d:\develop/haskell/ghc
+343509	d:\develop/haskell
+103986	d:\develop/java/jdk1.6.0_14/jre
+204165	d:\develop/java/jdk1.6.0_14
+135923	d:\develop/java/maven-repo/repository/GMV
+132431	d:\develop/java/maven-repo/repository/org
+143877	d:\develop/java/maven-repo/repository/PBS/PBSWebservice
+206568	d:\develop/java/maven-repo/repository/PBS
+846175	d:\develop/java/maven-repo/repository
+846175	d:\develop/java/maven-repo
+178038	d:\develop/java/NetBeans 6.7.1
+179100	d:\develop/java/TR221/NetBeans
+292362	d:\develop/java/TR221
+2055302	d:\develop/java
+135923	d:\develop/maven-repo/repository/GMV
+132431	d:\develop/maven-repo/repository/org
+143877	d:\develop/maven-repo/repository/PBS/PBSWebservice
+206568	d:\develop/maven-repo/repository/PBS
+846175	d:\develop/maven-repo/repository
+846175	d:\develop/maven-repo
+145898	d:\develop/python
+144722	d:\develop/ruby
+113711	d:\develop/soapUI-Pro-2.5.1
+4140137	d:\develop
+166676	d:\install/cygwin/http%3a%2f%2fcygwin.basemirror.de%2f/release
+167867	d:\install/cygwin/http%3a%2f%2fcygwin.basemirror.de%2f
+169669	d:\install/cygwin
+327628	d:\install/DMS
+226271	d:\install/GMV-toolkit
+296174	d:\install/JasperReports
+224558	d:\install/java
+219676	d:\install/linux (redhat)
+274831	d:\install/mysql
+136117	d:\install/OpenOffice
+1558161	d:\install/OracleJMS
+102165	d:\install/perftoolset/windows/installed/develop/java/jdk1.6.0_14/jre
+183165	d:\install/perftoolset/windows/installed/develop/java/jdk1.6.0_14
+401736	d:\install/perftoolset/windows/installed/develop/java
+584410	d:\install/perftoolset/windows/installed/develop
+100446	d:\install/perftoolset/windows/installed/perftoolset
+106704	d:\install/perftoolset/windows/installed/util/perf/lqn
+114496	d:\install/perftoolset/windows/installed/util/perf
+175739	d:\install/perftoolset/windows/installed/util
+884460	d:\install/perftoolset/windows/installed
+235024	d:\install/perftoolset/windows/not
+1183546	d:\install/perftoolset/windows
+1183546	d:\install/perftoolset
+144246	d:\install/PGP
+179193	d:\install/Schedule-wincron
+113254	d:\install/SoapUI
+522110	d:\install/Talend
+137557	d:\install/Tcl
+412413	d:\install/ThinkingRock
+7764034	d:\install
+122516	d:\ITX/Fabriek
+126357	d:\ITX/Klanten/IND/Performance/input
+160179	d:\ITX/Klanten/IND/Performance
+235554	d:\ITX/Klanten/IND
+272008	d:\ITX/Klanten
+150401	d:\ITX/Remote/IND-sharepoint/02. Datamodellen/SAT (mirror van IND sharepoint)
+187919	d:\ITX/Remote/IND-sharepoint/02. Datamodellen
+122548	d:\ITX/Remote/IND-sharepoint/08. Referentietabellen
+531128	d:\ITX/Remote/IND-sharepoint
+303091	d:\ITX/Remote/svn/ind/tags/0.9/Oplevering
+324088	d:\ITX/Remote/svn/ind/tags/0.9
+342955	d:\ITX/Remote/svn/ind/tags
+209257	d:\ITX/Remote/svn/ind/trunk/data/OVK
+222626	d:\ITX/Remote/svn/ind/trunk/data
+151372	d:\ITX/Remote/svn/ind/trunk/doc
+372778	d:\ITX/Remote/svn/ind/trunk/src/Oplevering
+492298	d:\ITX/Remote/svn/ind/trunk/src
+133859	d:\ITX/Remote/svn/ind/trunk/testdata
+1007300	d:\ITX/Remote/svn/ind/trunk
+1350256	d:\ITX/Remote/svn/ind
+166973	d:\ITX/Remote/svn/odmsdocs/tags/ISMS2.0/10 GMP
+188963	d:\ITX/Remote/svn/odmsdocs/tags/ISMS2.0
+217595	d:\ITX/Remote/svn/odmsdocs/tags
+167125	d:\ITX/Remote/svn/odmsdocs/trunk/docs/10 Planning/10 GMP
+191028	d:\ITX/Remote/svn/odmsdocs/trunk/docs/10 Planning
+101957	d:\ITX/Remote/svn/odmsdocs/trunk/docs/20 Uitvoering
+269609	d:\ITX/Remote/svn/odmsdocs/trunk/docs/90 Historie
+567668	d:\ITX/Remote/svn/odmsdocs/trunk/docs
+567668	d:\ITX/Remote/svn/odmsdocs/trunk
+785263	d:\ITX/Remote/svn/odmsdocs
+166511	d:\ITX/Remote/svn/odmsdocs-rev71/trunk/docs/05 ISO 27001
+133094	d:\ITX/Remote/svn/odmsdocs-rev71/trunk/docs/10 GMP
+226510	d:\ITX/Remote/svn/odmsdocs-rev71/trunk/docs/12 Werkwijze ODMS
+689502	d:\ITX/Remote/svn/odmsdocs-rev71/trunk/docs
+689502	d:\ITX/Remote/svn/odmsdocs-rev71/trunk
+718134	d:\ITX/Remote/svn/odmsdocs-rev71
+2891470	d:\ITX/Remote/svn
+3501712	d:\ITX/Remote
+4078433	d:\ITX
+112612	d:\logicaldoc/data
+115979	d:\logicaldoc
+716706	d:\media
+954130	d:\Mijn documenten/TomTom/HOME/FromDevice
+955661	d:\Mijn documenten/TomTom/HOME
+955661	d:\Mijn documenten/TomTom
+996992	d:\Mijn documenten
+110122	d:\MySQL/MySQLServer5.0/bin
+410983	d:\MySQL/MySQLServer5.0/data
+522667	d:\MySQL/MySQLServer5.0
+554945	d:\MySQL
+2097153	d:\nico/encrypted
+323276	d:\nico/nicoprj/systemtools/backup2nas
+325607	d:\nico/nicoprj/systemtools
+350330	d:\nico/nicoprj
+1678984	d:\nico/outlook
+155167	d:\nico/outlook-docset
+179852	d:\nico/prive
+145137	d:\nico/projecten
+101258	d:\nico/volley
+4939775	d:\nico
+130449	d:\Oracle/10.1.3.1/OracleAS_1/bpel
+130695	d:\Oracle/10.1.3.1/OracleAS_1/j2ee/home/applications
+192476	d:\Oracle/10.1.3.1/OracleAS_1/j2ee/home
+192594	d:\Oracle/10.1.3.1/OracleAS_1/j2ee
+107392	d:\Oracle/10.1.3.1/OracleAS_1/jdk
+831834	d:\Oracle/10.1.3.1/OracleAS_1
+831834	d:\Oracle/10.1.3.1
+157057	d:\Oracle/Middleware/jdk160_14_R27.6.5-32
+171384	d:\Oracle/Middleware/jrockit_160_14_R27.6.5-32
+121753	d:\Oracle/Middleware/modules
+194618	d:\Oracle/Middleware/oepe_11gR1PS1/eclipse/dropins
+250820	d:\Oracle/Middleware/oepe_11gR1PS1/eclipse
+251231	d:\Oracle/Middleware/oepe_11gR1PS1
+146694	d:\Oracle/Middleware/wlserver_10.3/server/lib/consoleapp/consolehelp
+194808	d:\Oracle/Middleware/wlserver_10.3/server/lib/consoleapp
+319688	d:\Oracle/Middleware/wlserver_10.3/server/lib
+472101	d:\Oracle/Middleware/wlserver_10.3/server
+484632	d:\Oracle/Middleware/wlserver_10.3
+1234655	d:\Oracle/Middleware
+2066489	d:\Oracle
+194507	d:\perfeng/Bieb
+550146	d:\perfeng
+110035	d:\perftoolset/testprj
+251921	d:\perftoolset
+114625	d:\progs/iReport-3.7.1
+155668	d:\progs/jasperreports-3.7.1
+106858	d:\progs/Talend/TOS-Win32-r26090-V3.1.3/plugins/org.talend.designer.components.localprovider_3.1.3.r26090/components
+107023	d:\progs/Talend/TOS-Win32-r26090-V3.1.3/plugins/org.talend.designer.components.localprovider_3.1.3.r26090
+361973	d:\progs/Talend/TOS-Win32-r26090-V3.1.3/plugins
+367431	d:\progs/Talend/TOS-Win32-r26090-V3.1.3
+367431	d:\progs/Talend
+261265	d:\progs/vmware
+1497830	d:\progs
+228833	d:\projecten/GMV-2009/divers-toby
+201192	d:\projecten/GMV-2009/TestRun december 2008/TestRun december 2008/UC08
+350444	d:\projecten/GMV-2009/TestRun december 2008/TestRun december 2008
+350444	d:\projecten/GMV-2009/TestRun december 2008
+861638	d:\projecten/GMV-2009
+1311024	d:\projecten/OSB/DVD/cruiseresults/s1124
+1311024	d:\projecten/OSB/DVD/cruiseresults
+1478041	d:\projecten/OSB/DVD
+1543364	d:\projecten/OSB
+2575414	d:\projecten
+163617	d:\svn/odmsdocs/trunk/docs/10 Planning/10 GMP
+186624	d:\svn/odmsdocs/trunk/docs/10 Planning
+103718	d:\svn/odmsdocs/trunk/docs/80 Diversen
+269609	d:\svn/odmsdocs/trunk/docs/90 Historie
+650750	d:\svn/odmsdocs/trunk/docs
+650750	d:\svn/odmsdocs/trunk
+679382	d:\svn/odmsdocs
+679382	d:\svn
+124279	d:\talend/TOS-Win32-r35653-V4.0.0M2/lib/java
+124279	d:\talend/TOS-Win32-r35653-V4.0.0M2/lib
+151525	d:\talend/TOS-Win32-r35653-V4.0.0M2/plugins/org.talend.designer.components.localprovider_4.0.0.M2_r35653/components
+151703	d:\talend/TOS-Win32-r35653-V4.0.0M2/plugins/org.talend.designer.components.localprovider_4.0.0.M2_r35653
+470317	d:\talend/TOS-Win32-r35653-V4.0.0M2/plugins
+151389	d:\talend/TOS-Win32-r35653-V4.0.0M2/workspace
+757607	d:\talend/TOS-Win32-r35653-V4.0.0M2
+759379	d:\talend
+204236	d:\util/cygwin/lib
+242369	d:\util/cygwin/usr/share
+249009	d:\util/cygwin/usr
+550881	d:\util/cygwin
+129268	d:\util/Graphviz2.26.3
+223885	d:\util/jobschedule
+106704	d:\util/perf/lqn
+114496	d:\util/perf
+125107	d:\util/soapui-2.5/doc
+165249	d:\util/soapui-2.5
+106858	d:\util/Talend/TOS-Win32-r26090-V3.1.3/plugins/org.talend.designer.components.localprovider_3.1.3.r26090/components
+107023	d:\util/Talend/TOS-Win32-r26090-V3.1.3/plugins/org.talend.designer.components.localprovider_3.1.3.r26090
+361973	d:\util/Talend/TOS-Win32-r26090-V3.1.3/plugins
+367436	d:\util/Talend/TOS-Win32-r26090-V3.1.3
+367436	d:\util/Talend
+2050824	d:\util
+38104763	d:\

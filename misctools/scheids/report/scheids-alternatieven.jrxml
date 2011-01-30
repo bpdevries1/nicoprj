@@ -17,9 +17,8 @@ and not exists (
   and s2.scheids = p.id
   and date(w2.datumtijd) = date(w.datumtijd)
 )
-and w.datumtijd < '2011-01-01'
-order by w.datumtijd, w.naam
-]]>
+and w.datumtijd > '2011-01-01'
+order by w.datumtijd, w.naam]]>
 	</queryString>
 	<field name="wedstrijd" class="java.lang.String">
 		<fieldDescription><![CDATA[]]></fieldDescription>
