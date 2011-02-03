@@ -117,15 +117,21 @@ proc backup_path {path target tempext time_treshold} {
   file mkdir $target_path
   set totalfiles 0
   set totalbytes 0.0
-  foreach filename [glob -nocomplain -directory $path -type f *] {
-    lassign [handle_file $filename $target $tempext $time_treshold] nfiles nbytes
-    incr totalfiles $nfiles
-    set totalbytes [expr $totalbytes + $nbytes] 
-  }
-  foreach dirname [glob -nocomplain -directory $path -type d *] {
-    lassign [backup_path $dirname $target $tempext $time_treshold] nfiles nbytes
-    incr totalfiles $nfiles
-    set totalbytes [expr $totalbytes + $nbytes] 
+  foreach filepattern {* .*} {
+    foreach filename [glob -nocomplain -directory $path -type f $filepattern] {
+      lassign [handle_file $filename $target $tempext $time_treshold] nfiles nbytes
+      incr totalfiles $nfiles
+      set totalbytes [expr $totalbytes + $nbytes] 
+    }
+    foreach dirname [glob -nocomplain -directory $path -type d $filepattern] {
+      set tail [file tail $dirname]
+      if {($tail == ".") || ($tail == "..")} {
+        continue
+      }
+      lassign [backup_path $dirname $target $tempext $time_treshold] nfiles nbytes
+      incr totalfiles $nfiles
+      set totalbytes [expr $totalbytes + $nbytes] 
+    }
   }
   list $totalfiles $totalbytes
 }
@@ -222,8 +228,8 @@ proc det_target_path {path target} {
   set lst [file split $path]
   # $log debug $lst
   set res [file join $target [det_from_drive $path] {*}[lrange [file split $path] 1 end]]
-  # $log debug "res: $res"
-  # exit
+  #$log info "res: $res"
+  #exit
   return $res
 }
 
@@ -233,6 +239,9 @@ proc det_from_drive {path} {
     return $drive 
   } elseif {[regexp {^([a-z]):} [pwd] z drive]} {
     return $drive
+  } elseif {[regexp {^/} $path]} {
+    # waarschijnlijk linux
+    return ""
   } else {
     error "Cannot determine drive from $path (pwd=[pwd])" 
   }

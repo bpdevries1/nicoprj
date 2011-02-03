@@ -4,7 +4,10 @@ pagefile\.sys
 /i386/
 c:/windows
 ^~
+~$
 /RECYCLER/
 /Temporary internet files/
 /Cache/
 \.lock$
+\.bak$
+

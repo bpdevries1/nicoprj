@@ -1,0 +1,4 @@
+/home/nico/nicoprj
+/home/nico/perftoolset
+/opt/imap-mail/nicomail/Maildir
+
