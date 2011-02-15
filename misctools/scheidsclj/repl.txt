@@ -1,0 +1,66 @@
+dingen voor in de REPL
+======================
+
+(def lig (query-input-games))
+
+(init-globals lig)
+
+(def sol (make-solution lig))
+
+
+(def lst-input-games lig)
+
+
+
+(def lst-opl-scheids (map #(choose-random-scheids (:wedstrijd-id %1)) lst-input-games))
+
+(add-statistics lst-opl-scheids "Initial solution" 0)
+
+(def opl-values (det-opl-values *lst-inp-personen* lst-opl-scheids))
+  (def lst-persoon-wedstrijden (det-persoon-wedstrijden *lst-inp-personen* lst-opl-scheids)) -> ok
+
+(def n-versch-scheids (count (for [n (:lst-aantallen opl-values) :when (> n 0)] 1)))
+
+(def lst-zeurfactoren (:lst-zeurfactoren opl-values))
+
+
+
+(map #(* (:zeurfactor %1)
+                          (apply * (for [opl (:lst-wedstrijden %1)] 
+                             (/ (:zeurfactor opl) (:waarde opl))))) lst-persoon-wedstrijden)
+                             
+(def pers-wedstr (first lst-persoon-wedstrijden))
+
+
+(map #(* (:zeurfactor %1)
+                          (apply * (for [opl (:lst-wedstrijden %1)] 
+                             (/ (:zeurfactor opl) (:waarde opl))))) (list pers-wedstr)) -> nok
+                             
+(apply * (for [opl (:lst-wedstrijden pers-wedstr)] 
+                             (/ (:zeurfactor opl) (:waarde opl)))) -> nok
+                             
+(for [opl (:lst-wedstrijden pers-wedstr)] 
+                             (/ (:zeurfactor opl) (:waarde opl)))   
+                             
+scheidsclj.core=> (query-lst-kan-fluiten 1372)
+({:scheids-id 229, :scheids-naam "Annette Wolda", :zelfde-dag 0, :waarde 1.0, :zeurfactor 8.0} {:scheids-id 232, :scheids-naam "Debby Meerveld", :zelfde-dag 0, :waarde 1.0, :zeurfactor 8.0} {:scheids-id 234, :scheids-naam "Gerard Kraan", :zelfde-dag 0, :waarde 1.0, :zeurfactor 4.0} {:scheids-id 236, :scheids-naam "Henry van der Heide", :zelfde-dag 0, :waarde 1.0, :zeurfactor 10.0} {:scheids-id 239, :scheids-naam "Jeanet Wattimena", :zelfde-dag 0, :waarde 1.0, :zeurfactor 8.0} {:scheids-id 245, :scheids-naam "Rob van Zonneveld", :zelfde-dag 0, :waarde 1.0, :zeurfactor 8.0} {:scheids-id 246, :scheids-naam "Ronald Schreuder", :zelfde-dag 0, :waarde 1.0, :zeurfactor 8.0} {:scheids-id 247, :scheids-naam "Yvonne Bokhorst", :zelfde-dag 0, :waarde 1.0, :zeurfactor 8.0})
+=> ok, geen nil.
+
+(choose-random-scheids 1372)
+=> nok, wel een nil
+
+(def inp-wedstrijd (*ar-inp-wedstrijden* 1372))
+=> nok, ineens weer zeurfactor nil, allemaal trouwens.
+
+dan waarsch in ar fout.
+
+(zipmap (map :wedstrijd-id lst-input-games) lst-input-games)
+(zipmap (map :wedstrijd-id lst-input-games) lig1)
+
+(calc-fitness (:prod-wedstrijden-persoon-dag opl-values) 
+                                   (apply max (:lst-aantallen opl-values)) 
+                                   n-versch-scheids 
+                                   (apply + lst-zeurfactoren) 
+                                   (apply max lst-zeurfactoren)) => nok, cast to number
+                                   
+                                   
