@@ -73,6 +73,7 @@ proc make_copy_sd {lst to_drive bat_filename} {
      puts $f [make_copy_line $path $to_drive $index]
      incr index
    }
+   puts "rem draai remomedia/maak_m3u_f.tcl"
    close $f
 }
 

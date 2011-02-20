@@ -1,4 +1,4 @@
-e#!/home/nico/bin/tclsh
+#!/home/nico/bin/tclsh
 
 # 13-03-2010 deze lijkt vooral voor albums. Voor singles toch ook, zie upsert_musicfile, regel 155. 
 
