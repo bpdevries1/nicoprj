@@ -1,3 +1,5 @@
+#!/home/nico/bin/tclsh
+
 package require ndv ; # logging
 package require cmdline 
 package require struct::list
