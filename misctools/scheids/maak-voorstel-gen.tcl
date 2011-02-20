@@ -203,7 +203,7 @@ proc log_inp_wedstrijden {lst_inp_wedstrijden} {
 }
 
 proc det_gepland_scheids {scheids_id} {
-  global db conn log 
+  # global db conn log 
   global db conn log ar_scheids_nfluit ar_zeurfactor
   set query "select s.scheids, zf.factor
              from scheids s, zeurfactor zf
@@ -215,7 +215,8 @@ proc det_gepland_scheids {scheids_id} {
   set aantal 0
   set factor 1.0
   foreach el $qresult {
-    foreach {p_id zeurfactor} $el break
+    # foreach {p_id zeurfactor} $el break
+    lassign $el p_id zeurfactor
     incr aantal
     set factor [expr $factor * $zeurfactor]
     #incr ar_scheids_nfluit($p_id)
