@@ -1,0 +1,18 @@
+
+Mutate-solution
+================
+[2011-02-20 17:00:09] @todo: bij zoeken naar een betere oplossing kijken naar het product van zeurfactoren van de scheidsen. 
+[2011-02-20 17:00:32] bij de grootste zeurfactor meer kans op aanpassing van een wedstrijd. Hierdoor wel kans
+[2011-02-20 17:00:57] op flippen tussen 2 scheidsrechters.
+
+[2011-02-20 22:31:21] @todo: meerdere constraints inbouwen, bv dat Baukelien max 6 (?) wedstrijden fluit in een seizoen. Bij meer dan 6 komt er een grote penalty bij, wel afhankelijk van hoeveel meer dan 6.
+
+Opbouw/structuur code
+=====================
+[2011-02-20 22:52:41] @todo: alle var/functie namen in het engels. Ook tekst/output in het engels. En ook de comments.
+[2011-02-25 22:04:39] @todo minder (geen?) globals gebruiken, de vars met *sterretjes*.
+[2011-02-26 10:53:49] geneticlib is nu nog leeg, hier wat inzetten?
+
+Technisch
+=========
+[2011-02-26 10:55:56] Ctrl-C detection and handling.
