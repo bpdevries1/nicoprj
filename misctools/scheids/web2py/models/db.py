@@ -79,6 +79,7 @@ db.define_table('persoon',
                 Field('telnrs', length=255),
                 Field('speelt_in', db.team),
                 Field('opmerkingen', length=255),
+                Field('nevobocode', length=10),
                 migrate=False)
 
 db.define_table('persoon_team',

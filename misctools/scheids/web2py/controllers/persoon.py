@@ -32,6 +32,7 @@ def personen():
     grid.datasource = db(query).select(db.persoon.id, db.persoon.naam,
       db.persoon_team.soort, db.team.naam,
       db.persoon.telnrs, db.persoon.email,
+      db.persoon.nevobocode,
       left = ((db.persoon_team.on(db.persoon_team.persoon == db.persoon.id), (db.team.on(db.persoon_team.team == db.team.id)))),
       orderby = db.persoon.naam)
     
@@ -55,7 +56,8 @@ def data():
 # The WebGrid will use a field's represent function if present when rendering the cell. If you need more control, you can completely override the way a row is rendered.
 # The functions that render each row can be replaced with your own lambda or function:
 
-@auth.requires_login()
+# 6-3-2011 wil vooralsnog geen login.
+# @auth.requires_login()
 def create():
     "creates a new persoon"
     form = crud.create(db.persoon, next=URL('index'))
@@ -115,7 +117,7 @@ def make_grid_ktf():
 #                                                              if self.joined else row['id']]))          
 #
 
-@auth.requires_login()
+# @auth.requires_login()
 def show():
     "shows a persoon"
     form = crud.read(db.persoon, request.args(0)) or redirect(URL('personen'))
@@ -137,7 +139,7 @@ def show():
     return dict(form=form, zeur_factor_grid=zeur_factor_grid(), afwezig_grid=afwezig_grid(), wedstrijden_grid=wedstrijden_grid(), ktf_grid=ktf_grid())
     # return dict(form=form)
 
-@auth.requires_login()
+# @auth.requires_login()
 def show_orig():
     "shows a persoon"
     form = crud.read(db.persoon, request.args(0)) or redirect(URL('personen'))
@@ -152,7 +154,7 @@ def show_orig():
     return dict(form=form, zeur_factor_grid=zeur_factor_grid(), afwezig_grid=afwezig_grid(), wedstrijden_grid=wedstrijden_grid(), ktf_grid=ktf_grid())
     # return dict(form=form)
 
-@auth.requires_login()
+# @auth.requires_login()
 def edit():
     # persoon = db(db.persoon.id==request.args(0)).select().first()
     this_persoon = db.persoon(request.args(0)) or redirect(URL('personen'))

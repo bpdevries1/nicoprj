@@ -16,6 +16,7 @@
     `telnrs` varchar(255) default NULL,
     `speelt_in` int(11) default NULL,
     `opmerkingen` varchar(255) default NULL,
+    `nevobocode` varchar(10) default NULL,
     PRIMARY KEY  (`id`),
     KEY `speelt_in__idx` (`speelt_in`),
     CONSTRAINT `persoon_ibfk_1` FOREIGN KEY (`speelt_in`) REFERENCES `team` (`id`) ON DELETE CASCADE

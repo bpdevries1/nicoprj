@@ -54,13 +54,13 @@ def data():
 # The WebGrid will use a field's represent function if present when rendering the cell. If you need more control, you can completely override the way a row is rendered.
 # The functions that render each row can be replaced with your own lambda or function:
 
-@auth.requires_login()
+# @auth.requires_login()
 def create():
     "creates a new wedstrijd"
     form = crud.create(db.wedstrijd, next=URL('index'))
     return dict(form=form)
   
-@auth.requires_login()
+# @auth.requires_login()
 def show():
     "shows a wedstrijd"
     form = crud.read(db.wedstrijd, request.args(0)) or redirect(URL('wedstrijden'))
@@ -92,7 +92,7 @@ def show():
     
     return dict(form=form, scheids_grid=scheids_grid(), alt_grid=alt_grid())
 
-@auth.requires_login()
+# @auth.requires_login()
 def edit():
     this_wedstrijd = db.wedstrijd(request.args(0)) or redirect(URL('wedstrijden'))
     form = crud.update(db.wedstrijd, this_wedstrijd, 
