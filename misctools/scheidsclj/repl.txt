@@ -7,9 +7,19 @@ dingen voor in de REPL
 
 (def lig *lst-inp-games*)
 
-
-
 (def sol (make-solution lig))
+
+(def mapped (map #(hash-map
+      :scheids (:scheids-id %)
+      :wedstrijd (:wedstrijd-id %)
+      :speelt_zelfde_dag (:zelfde-dag %)
+      :status "voorstel") (:vec-opl-scheids sol)))
+      
+(clojureql.core/conj! (clojureql.core/table :scheids)
+  (first mapped))
+
+(clojureql.core/conj! (clojureql.core/table :scheids)
+  mapped)
 
 (print-solution sol *ar-inp-wedstrijden*)
 

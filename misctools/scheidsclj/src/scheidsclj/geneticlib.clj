@@ -1,6 +1,5 @@
-; geneticlib - functions die in een GA lib zouden kunnen
-; of deze functies vervangen door een al beschikbare GA lib.
+; geneticlib - functions that could be present in a GA lib.
+; or replace these functions by an external available GA lib.
 
-;( ; deze als haakjes niet kloppen.
 (ns scheidsclj.geneticlib)
 

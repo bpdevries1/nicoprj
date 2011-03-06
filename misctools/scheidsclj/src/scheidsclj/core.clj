@@ -1,15 +1,6 @@
 ;( ; deze als haakjes niet kloppen.
-; @todo in core de clojureql en time dingen niet nodig, alleen in db gebruikt.
 (ns scheidsclj.core
   (:gen-class)
-  ; (:use clojureql.core)
-  ; vb:  [:use [clojure.contrib.math :exclude [sqrt]]]
-  ; disj! gebruik ik nu, conj! waarschijnlijk later ook wel.
-;  (:use [clojureql.core :exclude (extend distinct conj! disj! case compile drop take sort )])
-;  (:require [clojureql.core :only (conj! disj!)])
-;  (:use [clj-time.core :exclude (extend)])
-;  (:use clj-time.format)
-;  (:use clj-time.coerce)
   
   (:require clojure.contrib.repl-utils) ; nodig voor ctrl-c handling
 
@@ -18,10 +9,6 @@
   (:use scheidsclj.lib)
   (:use scheidsclj.util)
   (:use scheidsclj.print))
-
-;(use 'clojureql.core) ; hoeft niet, hierboven is genoeg.
-
-; @todo code splitsen in modules, vooral specifiek voor scheids, algemeen evolutionary programming, lib functions.
 
 ; globale vars, eenmaal gezet.
 (declare *lst-inp-games* *lst-inp-personen* *ar-inp-wedstrijden*) 
@@ -172,9 +159,12 @@
                      (range (count (:vec-opl-scheids sol)))))
     (:fitness sol)))
 
+; @todo alleen saven bij een minimale fitness.
 (defn handle-best-solution [proposition]
   (print-best-solution proposition *ar-inp-wedstrijden* kan-naar-betere)
-  (println "@todo: save the solution in the database"))
+  (let [sol (first (:lst-solutions @proposition))]
+    (if (> (:fitness sol) -2000)
+      (save-solution sol))))
 
 ; @note evol-iteration functioneel opzetten: je krijgt iteratie en lijst oplossingen binnen, en retourneert deze ook.
 ; opties 1) handle-best-solution een sol meegeven. 2) de swap! in deze functie, dan handle aanroepen

@@ -90,7 +90,22 @@
 
 
 
+; @todo kan blijkbaar toch sql functies toepassen: :function/col 
+; dit dan gebruiken ipv datetime-to-date
 (defn query-input-games []
+  ; dubbele -> binnenste voor query opbouw, buitenste voor nabewerking
+  (->> @(-> (table :wedstrijd)
+           (outer-join (table :scheids) :left (where (= :scheids.wedstrijd :wedstrijd.id)))
+           (select (where (= :wedstrijd.scheids_nodig 1)))
+           (select (where (= :scheids.wedstrijd nil)))
+           (project [:wedstrijd.id :wedstrijd.naam :date/wedstrijd.datumtijd])
+           (sort [:wedstrijd.datumtijd]))
+      (map #(hash-map :wedstrijd-id (:id %1) 
+                      :wedstrijd-naam (:naam %1)
+                      :datum (:datumtijd %1)
+                      :lst-kan-fluiten (query-lst-kan-fluiten (:id %1))))))
+
+(defn query-input-games-old []
   ; dubbele -> binnenste voor query opbouw, buitenste voor nabewerking
   ; todo: datumtijd naar date omzetten, kan dit binnen de query?
   (->> @(-> (table :wedstrijd)
@@ -103,6 +118,16 @@
                       :wedstrijd-naam (:naam %1)
                       :datum (datetime-to-date (:datumtijd %1))
                       :lst-kan-fluiten (query-lst-kan-fluiten (:id %1))))))
+
+(defn save-solution [sol]
+  (delete-oude-voorstel)
+  (println "Saving solution...")
+  (clojureql.core/conj! (table :scheids) 
+    (map #(hash-map
+      :scheids (:scheids-id %)
+      :wedstrijd (:wedstrijd-id %)
+      :speelt_zelfde_dag (:zelfde-dag %)
+      :status "voorstel") (:vec-opl-scheids sol))))
 
 (def db
  {:classname   "com.mysql.jdbc.Driver"
