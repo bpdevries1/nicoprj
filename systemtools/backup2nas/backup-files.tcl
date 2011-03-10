@@ -36,7 +36,7 @@ set 4NT_EXE "c:\\util\\4nt\\4nt.exe"
 ::ndv::CLogger::set_logfile "backup2nas.log"
 
 proc main {argc argv} {
-  global log fres lst_ignore_regexps BACKUPDATETIME
+  global log fres fstash lst_ignore_regexps BACKUPDATETIME 
   $log info START
   $log debug "argv: $argv"
   set options {
@@ -83,6 +83,8 @@ proc main {argc argv} {
   
   set totalfiles 0
   set totalbytes 0.0
+  set stashfilename [file join $params(settingsdir) filestobackup.txt]
+  set fstash [open $stashfilename a]
   foreach path $lst_paths {
     if {$params(use4nt)} {
       lappend res [backup_path_4nt $path $target $params(tempext) $time_treshold]
@@ -93,6 +95,8 @@ proc main {argc argv} {
     }
   }
   close $fres
+  close $fstash
+  handle_stashed_files $stashfilename  
   
   # pas hier de tijd schrijven, pas hier is (volledige) backup gelukt.
   set f [open [file join $params(settingsdir) $BACKUPDATETIME] w]
@@ -143,7 +147,7 @@ proc backup_path {path target tempext time_treshold} {
 
 # @note if a copy fails, notify with log.
 # @note files will be puth in [file join $target [drive $path] $path
-proc backup_path_4nt {path target tempext time_treshold} {
+proc backup_path_4nt_old {path target tempext time_treshold} {
   global log fres 4NT_EXE
   $log debug "Backup up $path => $target"
   try_eval {
@@ -197,8 +201,30 @@ proc handle_file {filename target tempext time_treshold} {
     # file is older than a week.
     return [list 0 0]
   }
-  backup_file $filename $target $tempext
+  stash_backup_file $filename $target $tempext
 }
+
+proc stash_backup_file {filename target tempext} {
+  global fstash
+  puts $fstash "$filename\t$target\t$tempext"
+  list 1 [file size $filename]
+}
+
+proc handle_stashed_files {stashfilename} {
+  global log
+  $log info "Copy stashed files: start"
+  set f [open $stashfilename r]
+  while {![eof $f]} {
+    gets $f line
+    # lassign [split $line "\t"]
+    if {[string trim $line] != ""} {
+      backup_file {*}[split $line "\t"] ; # filename target tempext
+    }
+  }
+  # remove stash file when all went well
+  # file delete $stashfilename
+  $log info "Copy stashed files: finished"  
+}  
 
 # @return list of [1, size of file copied in bytes]
 proc backup_file {filename target tempext} {

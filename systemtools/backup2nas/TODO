@@ -1,0 +1,5 @@
+TODO
+=====
+* 10-3-2011 added use of ~/.backup2nas dir. Remove settings files in current dir after a while.
+* 10-3-2011 two phase copy (first stash, then copy) gives the possibility to stash the files without the need for the target to be available. Maybe a callback on the filesystem can be done, which fills the stashed file.
+
