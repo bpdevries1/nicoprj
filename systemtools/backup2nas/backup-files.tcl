@@ -222,7 +222,7 @@ proc handle_stashed_files {stashfilename} {
     }
   }
   # remove stash file when all went well
-  # file delete $stashfilename
+  file delete $stashfilename
   $log info "Copy stashed files: finished"  
 }  
 
