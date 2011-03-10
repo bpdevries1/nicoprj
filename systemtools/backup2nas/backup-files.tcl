@@ -40,14 +40,15 @@ proc main {argc argv} {
   $log info START
   $log debug "argv: $argv"
   set options {
-      {paths.arg  "paths.txt"  "use file with paths"}
-      {ignoreregexps.arg  "ignoreregexps.txt"  "use file with paths to ignore"}
-      {r.arg  "results.txt" "write results to file"}
-      {t.arg  ""  "backup to target dir"}
-      {p "Only backup new files and files changed since previous succesful backup"}
-      {w "Only backup if less than a week old"}
-      {tempext.arg ".__TEMPQQQ__" "Extension used for creating temp files"}
-      {use4nt "Use 4NT dir command to determine if files need to be updated"}
+    {settingsdir.arg "~/.backup2nas" "Dir with settings (paths.txt, ignoreregexps.txt, results.txt"}
+    {paths.arg  "paths.txt"  "use file with paths (relative to settingsdir)"}
+    {ignoreregexps.arg  "ignoreregexps.txt"  "use file with paths to ignore (relative to settingsdir)"}
+    {r.arg  "results.txt" "write results to file (relative to settingsdir)"}
+    {t.arg  ""  "backup to target dir"}
+    {p "Only backup new files and files changed since previous succesful backup (uses backupdatetime.txt (relative to settingsdir))"}
+    {w "Only backup if less than a week old"}
+    {tempext.arg ".__TEMPQQQ__" "Extension used for creating temp files"}
+    {use4nt "Use 4NT dir command to determine if files need to be updated"}
   }
   set usage ": [file tail [info script]] \[options] :"
   array set params [::cmdline::getoptions argv $options $usage]
@@ -63,15 +64,17 @@ proc main {argc argv} {
     $log debug "check_target failed, exiting"
     exit 1
   }
-  set lst_ignore_regexps [::struct::list filterfor el [split [read_file $params(ignoreregexps)] "\n"] {[string trim $el] != ""}] 
-  set lst_paths [::struct::list filterfor el [split [read_file $params(paths)] "\n"] {[string trim $el] != ""}] 
-  set fres [open $params(r) a] ; # append mode.
+  set lst_ignore_regexps [::struct::list filterfor el \
+    [split [read_file [file join $params(settingsdir) $params(ignoreregexps)]] "\n"] {[string trim $el] != ""}] 
+  set lst_paths [::struct::list filterfor el \
+    [split [read_file [file join $params(settingsdir) $params(paths)]] "\n"] {[string trim $el] != ""}] 
+  set fres [open [file join $params(settingsdir) $params(r)] a] ; # append mode.
   if {$params(w)} {
     set time_treshold [expr [clock seconds] - (7 * 24 * 60 * 60)] 
   } elseif {$params(p)} {
     # use backupdatetime.txt in current directory
-    if {[file exists $BACKUPDATETIME]} {
-      set time_treshold [clock scan [read_file $BACKUPDATETIME] -format "%Y-%m-%d %H:%M:%S"] 
+    if {[file exists [file join $params(settingsdir) $BACKUPDATETIME]]} {
+      set time_treshold [clock scan [read_file [file join $params(settingsdir) $BACKUPDATETIME]] -format "%Y-%m-%d %H:%M:%S"] 
     }
   } else {
     set time_treshold 0 
@@ -92,7 +95,7 @@ proc main {argc argv} {
   close $fres
   
   # pas hier de tijd schrijven, pas hier is (volledige) backup gelukt.
-  set f [open $BACKUPDATETIME w]
+  set f [open [file join $params(settingsdir) $BACKUPDATETIME] w]
   puts $f [clock format $start_time -format "%Y-%m-%d %H:%M:%S"]
   close $f
 
