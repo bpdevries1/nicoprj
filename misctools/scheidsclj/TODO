@@ -15,7 +15,8 @@ Opbouw/structuur code
 [2011-03-13 20:17:17] vanuit JoC: destructuring bind toepassen.
 [2011-03-13 20:17:43] vanuit JoC: recursief zou weinig nodig moeten zijn, alleen bij lazy dingen. Zou last resort moeten zijn.
 [2011-03-13 20:30:07] eigenlijk het hele project hernoemen in 'refereesclj'
+[2011-03-13 20:47:09] bij vertalen naar engels: ook DB structuur doen.
 
 Technisch
 =========
-[2011-02-26 10:55:56] Ctrl-C detection and handling.
+[2011-02-26 10:55:56] Ctrl-C detection and handling. Eigenlijk niet zo belangrijk, tijdens draaien wordt beste oplossing wel gesaved, en ctrl-c springt er gewoon helemaal uit.

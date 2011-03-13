@@ -6,69 +6,58 @@
   (println ".") ; bij print wordt de . niet getoond, ook niet met flush.
   (flush))
 
-(defn scheids-afko [scheids-naam]
-   (apply str (map first (re-seq #"[^\s]+" scheids-naam)))) 
+(defn referee-afko [referee-naam]
+   (apply str (map first (re-seq #"[^\s]+" referee-naam)))) 
 
-(defn kan-scheidsen [ar-inp-wedstrijden wedstrijd-id]
-  (map #(scheids-afko (:scheids-naam %1)) 
-    (:lst-kan-fluiten (ar-inp-wedstrijden wedstrijd-id))))
+(defn kan-refereeen [ar-inp-games game-id]
+  (map #(referee-afko (:referee-naam %1)) 
+    (:lst-kan-fluiten (ar-inp-games game-id))))
 
-; @todo 6-3-2011 NdV dit lijkt wel een plek voor destucturing bind van opl-scheids.
-(defn opl-scheids-to-string [opl-scheids ar-inp-wedstrijden]
-  (str (:wedstrijd-naam opl-scheids) " (zd=" (:zelfde-dag opl-scheids) ") "
-       (:scheids-naam opl-scheids) " (" (scheids-afko (:scheids-naam opl-scheids)) 
-       ") (zf=" (:zeurfactor opl-scheids) "/" (:waarde opl-scheids) ") ("
-       (apply str (interpose ", " (kan-scheidsen ar-inp-wedstrijden (:wedstrijd-id opl-scheids)))) ")" ))
-
-; nog een poging tot een macro
-; alleen hier geen macro nodig
-(defmacro printlnf-macro
-  "Combi van println en format"
-  [fmt & args]
-  `(println (format ~fmt ~@args)))
+; @todo 6-3-2011 NdV dit lijkt wel een plek voor destucturing bind van opl-referee.
+(defn opl-referee-to-string [opl-referee ar-inp-games]
+  (str (:game-naam opl-referee) " (zd=" (:zelfde-dag opl-referee) ") "
+       (:referee-naam opl-referee) " (" (referee-afko (:referee-naam opl-referee)) 
+       ") (zf=" (:zeurfactor opl-referee) "/" (:waarde opl-referee) ") ("
+       (apply str (interpose ", " (kan-refereeen ar-inp-games (:game-id opl-referee)))) ")" ))
 
 (defn printlnf
-  "Combi van println en format"
+  "Combination of println and format"
   [fmt & args]
   (println (apply format fmt args)))
 
-;doseq is als foreach
-; (doseq [i [1 2 3]] (println i))
 ; doall zou moeten werken om lazy te forcen, maar met str werkt dit niet zo
 ; sort werkt wel, ook wel logisch: om te sorten, moet je alle waarden hebben.
-;@todo deze invullen.
-; @todo kijken of format of str functie hier beter werkt.
 ; @param sol oplossing
 ; @param kan-naar-beter: functie die oplossing als input heeft, en true/false als output.
-(defn print-solution [sol ar-inp-wedstrijden kan-naar-betere]
-  (printlnf "Oplossing %d (parent: %d)" (:solnr sol) (:solnr-parent sol))
+(defn print-solution [sol ar-inp-games kan-naar-betere]
+  (printlnf "Solution %d (parent: %d)" (:solnr sol) (:solnr-parent sol))
   (printlnf "Fitness: %f" (:fitness sol))
-  (printlnf "Maximum aantal wedstrijden voor een scheidsrechter op een dag: %d" (:prod-wedstrijden-persoon-dag sol))
-  (printlnf "Som van zeurfactoren: %f" (:som-zeurfactoren sol))
-  (println "Lijst van zeurfactoren:" (sort (:lst-zeurfactoren sol)))
-  (println "Aantal wedstrijden per scheidsrechter: " (sort (:lst-aantallen sol)))
-  (printlnf "Maximum aantal wedstrijden voor een scheidsrechter: %d" (:max-scheids sol))
-  (printlnf "Aantal verschillende scheidsrechters: %d" (:n-versch-scheids sol))
-  (printlnf "Aantal wedstrijden: %d" (count (:vec-opl-scheids sol)))
-  (println "Wedstrijden:")
-  (doseq [sol-scheids (:vec-opl-scheids sol)] 
-    (println (opl-scheids-to-string sol-scheids ar-inp-wedstrijden)))
-  (println "--------------\nInfo per scheids:")
-  ; * 1.0 nodig om integer naar float om te zetten, anders problemen bij format.
+  (printlnf "Maximum #games for a referee on one day: %d" (:prod-games-persoon-dag sol))
+  (printlnf "Sum of whine factors: %f" (:som-zeurfactoren sol))
+  (println "List of whine factors:" (sort (:lst-zeurfactoren sol)))
+  (println "#games per referee: " (sort (:lst-aantallen sol)))
+  (printlnf "Maximum #games for a referee: %d" (:max-referee sol))
+  (printlnf "#different referees: %d" (:n-versch-referee sol))
+  (printlnf "#games: %d" (count (:vec-opl-referee sol)))
+  (println "Games:")
+  (doseq [sol-referee (:vec-opl-referee sol)] 
+    (println (opl-referee-to-string sol-referee ar-inp-games)))
+  (println "--------------\nReferees:")
+  ; * 1.0 needed to cast integer to float, otherwise problems with format.
   (doseq [el (:lst-opl-persoon-info sol)]
-    (printlnf "#%d zf=%6.1f : %s" (:nfluit el) (* 1.0 (:zeurfactor el)) (:scheids-naam el))) 
+    (printlnf "#%d zf=%6.1f : %s" (:nfluit el) (* 1.0 (:zeurfactor el)) (:referee-naam el))) 
   (if (kan-naar-betere sol)
-    (println "Vanuit deze oplossing is een BETERE te vinden met 1 change...")
-    (println "Vanuit deze oplossing is GEEN betere te vinden met 1 change..."))
+    (println "from this solution a BETTER one can be found with 1 change...")
+    (println "from this solution a better one CANNOT be found with 1 change..."))
   (println "\n==========\n"))
 
-(defn print-best-solution [proposition ar-inp-wedstrijden kan-naar-betere]
-  (printlnf "Beste oplossing tot nu toe (iteratie %d):" (:iteration @proposition))
-  (print-solution (first (:lst-solutions @proposition)) ar-inp-wedstrijden kan-naar-betere))
+(defn print-best-solution [proposition ar-inp-games kan-naar-betere]
+  (printlnf "Best solution so far (iteration %d):" (:iteration @proposition))
+  (print-solution (first (:lst-solutions @proposition)) ar-inp-games kan-naar-betere))
 
 ; @note wil eigenlijk alleen de beste oplossing zien.
-(defn print-solutions [lst-solutions ar-inp-wedstrijden kan-naar-betere]
+(defn print-solutions [lst-solutions ar-inp-games kan-naar-betere]
 ;  (doseq [sol lst-solutions]
-;    (print-solution sol ar-inp-wedstrijden))
-  (print-best-solution lst-solutions ar-inp-wedstrijden kan-naar-betere))
+;    (print-solution sol ar-inp-games))
+  (print-best-solution lst-solutions ar-inp-games kan-naar-betere))
   

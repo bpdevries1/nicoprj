@@ -1,4 +1,4 @@
-; lib: things that can be used more generally than in scheidsclj.
+; lib: things that can be used more generally than in refereeclj.
 (ns scheidsclj.lib)
 
 ; this one from Stuart Halloway on http://www.nofluffjuststuff.com/blog/stuart_halloway/2009/08/rifle_oriented_programming_with_clojure
