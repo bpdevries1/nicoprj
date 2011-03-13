@@ -1,24 +1,23 @@
-; print - printen naar het scherm (file?) van oplossingen
+; print - print solutions to the screen.
 (ns scheidsclj.print)
 
-; @todo moet deze naar stderr en moet ik een flush doen?
 (defn puts-dot []
-  (println ".") ; bij print wordt de . niet getoond, ook niet met flush.
+  (println ".") ; with print de . (dot) won't be shown, not even with flush
   (flush))
 
-(defn referee-afko [referee-naam]
-   (apply str (map first (re-seq #"[^\s]+" referee-naam)))) 
+(defn referee-initials [referee-name]
+   (apply str (map first (re-seq #"[^\s]+" referee-name)))) 
 
-(defn kan-refereeen [ar-inp-games game-id]
-  (map #(referee-afko (:referee-naam %1)) 
-    (:lst-kan-fluiten (ar-inp-games game-id))))
+(defn can-referee [ar-inp-games game-id]
+  (map #(referee-initials (:referee-name %1)) 
+    (:lst-can-referee (ar-inp-games game-id))))
 
-; @todo 6-3-2011 NdV dit lijkt wel een plek voor destucturing bind van opl-referee.
-(defn opl-referee-to-string [opl-referee ar-inp-games]
-  (str (:game-naam opl-referee) " (zd=" (:zelfde-dag opl-referee) ") "
-       (:referee-naam opl-referee) " (" (referee-afko (:referee-naam opl-referee)) 
-       ") (zf=" (:zeurfactor opl-referee) "/" (:waarde opl-referee) ") ("
-       (apply str (interpose ", " (kan-refereeen ar-inp-games (:game-id opl-referee)))) ")" ))
+; @todo 6-3-2011 NdV dit lijkt wel een plek voor destucturing bind van sol-referee.
+(defn sol-referee-to-string [sol-referee ar-inp-games]
+  (str (:game-name sol-referee) " (sd=" (:same-day sol-referee) ") "
+       (:referee-name sol-referee) " (" (referee-initials (:referee-name sol-referee)) 
+       ") (wf=" (:whinefactor sol-referee) "/" (:value sol-referee) ") ("
+       (apply str (interpose ", " (can-referee ar-inp-games (:game-id sol-referee)))) ")" ))
 
 (defn printlnf
   "Combination of println and format"
@@ -32,20 +31,20 @@
 (defn print-solution [sol ar-inp-games kan-naar-betere]
   (printlnf "Solution %d (parent: %d)" (:solnr sol) (:solnr-parent sol))
   (printlnf "Fitness: %f" (:fitness sol))
-  (printlnf "Maximum #games for a referee on one day: %d" (:prod-games-persoon-dag sol))
-  (printlnf "Sum of whine factors: %f" (:som-zeurfactoren sol))
-  (println "List of whine factors:" (sort (:lst-zeurfactoren sol)))
+  (printlnf "Maximum #games for a referee on one day: %d" (:prod-games-person-dag sol))
+  (printlnf "Sum of whine factors: %f" (:som-whinefactoren sol))
+  (println "List of whine factors:" (sort (:lst-whinefactoren sol)))
   (println "#games per referee: " (sort (:lst-aantallen sol)))
   (printlnf "Maximum #games for a referee: %d" (:max-referee sol))
   (printlnf "#different referees: %d" (:n-versch-referee sol))
-  (printlnf "#games: %d" (count (:vec-opl-referee sol)))
+  (printlnf "#games: %d" (count (:vec-sol-referee sol)))
   (println "Games:")
-  (doseq [sol-referee (:vec-opl-referee sol)] 
-    (println (opl-referee-to-string sol-referee ar-inp-games)))
+  (doseq [sol-referee (:vec-sol-referee sol)] 
+    (println (sol-referee-to-string sol-referee ar-inp-games)))
   (println "--------------\nReferees:")
   ; * 1.0 needed to cast integer to float, otherwise problems with format.
-  (doseq [el (:lst-opl-persoon-info sol)]
-    (printlnf "#%d zf=%6.1f : %s" (:nfluit el) (* 1.0 (:zeurfactor el)) (:referee-naam el))) 
+  (doseq [el (:lst-sol-person-info sol)]
+    (printlnf "#%d zf=%6.1f : %s" (:nfluit el) (* 1.0 (:whinefactor el)) (:referee-name el))) 
   (if (kan-naar-betere sol)
     (println "from this solution a BETTER one can be found with 1 change...")
     (println "from this solution a better one CANNOT be found with 1 change..."))

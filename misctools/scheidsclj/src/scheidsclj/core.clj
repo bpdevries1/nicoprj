@@ -1,9 +1,6 @@
 ;( ; deze als haakjes niet kloppen.
 (ns scheidsclj.core
   (:gen-class)
-  
-  ; (:require clojure.contrib.repl-utils) ; nodig voor ctrl-c handling
-
   (:use scheidsclj.db)
   (:use scheidsclj.geneticlib)
   (:use scheidsclj.lib)
@@ -11,142 +8,143 @@
   (:use scheidsclj.print))
 
 ; global vars, but only set/read-in once.
-(declare *lst-inp-games* *lst-inp-personen* *ar-inp-games*) 
+(declare *lst-inp-games* *lst-inp-persons* *ar-inp-games*) 
   
 (defn select-referee [game referee]
-  (merge (select-keys game [:game-id :game-naam :datum])
-         (select-keys referee [:referee-id :referee-naam :zeurfactor :waarde :zelfde-dag])))
+  (merge (select-keys game [:game-id :game-name :date])
+         (select-keys referee [:referee-id :referee-name :whinefactor :value :same-day])))
   
-; @result game-hashmap, als element in vec-opl-referee
+; @result game-hashmap, als element in vec-sol-referee
 (defn choose-random-referee [game-id]
+  "@result game-hashmap, as element in vec-sol-referee"
   (let [game (*ar-inp-games* game-id)
-        referee (rand-nth (:lst-kan-fluiten game))]
+        referee (rand-nth (:lst-can-referee game))]
     (select-referee game referee))) 
 
 ; @note hogere fitness is beter.
-; prod_games_persoon_dag: 1..veel minder is beter, alles meer dan 1 is gewoon fout.
-; wel bepalen hoe fout het is, zodat het beter kan worden, als bv 2 personen elk 2x op een dag moeten fluiten.
+; prod_games_person_dag: 1..veel minder is beter, alles meer dan 1 is gewoon fout.
+; wel bepalen hoe fout het is, zodat het beter kan worden, als bv 2 persons elk 2x op een dag moeten fluiten.
 ; max_referee: 1..10 minder is beter
 ; n_versch_referee: 1..20 meer is beter
-; som_zeurfactoren: 0..10000 minder is beter
+; som_whinefactoren: 0..10000 minder is beter
 ; door 1-maxwedstrperdag wordt dit deel 0 als het gewoon goed is, en negatief bij fouten.
 ; 19-9-2010 NdV max_referee toch niet zo belangrijk, zelfdedag telt minder dan andere dag, en in zf al rekening mee gehouden.
 ; 19-9-2010 NdV zelfde geldt eigenlijk ook voor aantal verschillende refereeen.
-; 19-9-2010 NdV maar wel de lasten goed verdelen, dus max_zeurfactoren wel belangrijk.
-; expr (1-$prod_games_persoon_dag) * 100000 + (10-$max_referee)*100 + $n_versch_referee - (0.0001 * $som_zeurfactoren)
-(defn calc-fitness [prod-games-persoon-dag max-referee n-versch-referee som-zeurfactoren max-zeurfactoren]
-  (- (* (- 1 prod-games-persoon-dag) 100000)
-     max-zeurfactoren
-     (* 0.0001 som-zeurfactoren)))
+; 19-9-2010 NdV maar wel de lasten goed verdelen, dus max_whinefactoren wel belangrijk.
+; expr (1-$prod_games_person_dag) * 100000 + (10-$max_referee)*100 + $n_versch_referee - (0.0001 * $som_whinefactoren)
+(defn calc-fitness [prod-games-person-dag max-referee n-versch-referee som-whinefactoren max-whinefactoren]
+  (- (* (- 1 prod-games-person-dag) 100000)
+     max-whinefactoren
+     (* 0.0001 som-whinefactoren)))
 
-; bepaal per persoon welke games deze fluit in de gemaakte oplossing
-; input lijst van personen (hashmap)
-; result lijst van personen (hashmap) aangevuld met lijst van games per persoon
-(defn det-persoon-games [lst-inp-personen vec-opl-referee]
-  (map #(assoc %1 :lst-games (for [opl vec-opl-referee :when (= (:referee-id %1) (:referee-id opl))]
-    opl)) lst-inp-personen))
+; bepaal per person welke games deze fluit in de gemaakte oplossing
+; input lijst van persons (hashmap)
+; result lijst van persons (hashmap) aangevuld met lijst van games per person
+(defn det-person-games [lst-inp-persons vec-sol-referee]
+  (map #(assoc %1 :lst-games (for [sol vec-sol-referee :when (= (:referee-id %1) (:referee-id sol))]
+    sol)) lst-inp-persons))
 
 ; deze nog herschrijven met -> of ->>
-; elke persoon heeft lijst van games, elke game is een hashmap. Maak per hashmap een nieuwe, zodat ze met merge-with opgeteld kunnen worden per persoon
-(defn det-prod-games-persoon-dag [lst-persoon-games]
+; elke person heeft lijst van games, elke game is een hashmap. Maak per hashmap een nieuwe, zodat ze met merge-with opgeteld kunnen worden per person
+(defn det-prod-games-person-dag [lst-person-games]
   (apply * 
-    (map (fn [persoon] 
+    (map (fn [person] 
       (apply *
         (vals
           (apply merge-with + 
-            (map #(hash-map (:datum %) 1) (:lst-games persoon)))))) lst-persoon-games)))
+            (map #(hash-map (:date %) 1) (:lst-games person)))))) lst-person-games)))
   
-(defn det-lst-opl-persoon-info [lst-persoon-games]
+(defn det-lst-sol-person-info [lst-person-games]
   (map #(assoc % 
               :nfluit (count (:lst-games %))
-              :zeurfactor (apply * (map :zeurfactor (:lst-games %)))) lst-persoon-games))
+              :whinefactor (apply * (map :whinefactor (:lst-games %)))) lst-person-games))
 
 ; bepaal sleutel waarden van de oplossing
 ; @result hashmap
-(defn det-opl-values [lst-inp-personen vec-opl-referee]
-  (let [lst-persoon-games (det-persoon-games lst-inp-personen vec-opl-referee)]
+(defn det-sol-values [lst-inp-persons vec-sol-referee]
+  (let [lst-person-games (det-person-games lst-inp-persons vec-sol-referee)]
     (hash-map 
-      :lst-zeurfactoren (map #(* (:zeurfactor %1)
-                          (apply * (for [opl (:lst-games %1)] 
-                             (/ (:zeurfactor opl) (:waarde opl))))) lst-persoon-games)
-      :lst-aantallen (map #(count (:lst-games %1)) lst-persoon-games)
-      :prod-games-persoon-dag (det-prod-games-persoon-dag lst-persoon-games)
-      :lst-opl-persoon-info (det-lst-opl-persoon-info lst-persoon-games))))
+      :lst-whinefactoren (map #(* (:whinefactor %1)
+                          (apply * (for [sol (:lst-games %1)] 
+                             (/ (:whinefactor sol) (:value sol))))) lst-person-games)
+      :lst-aantallen (map #(count (:lst-games %1)) lst-person-games)
+      :prod-games-person-dag (det-prod-games-person-dag lst-person-games)
+      :lst-sol-person-info (det-lst-sol-person-info lst-person-games))))
 
-(defn add-statistics [vec-opl-referee note solnr-parent]
-  (let [opl-values (det-opl-values *lst-inp-personen* vec-opl-referee)
-        n-versch-referee (count (for [n (:lst-aantallen opl-values) :when (> n 0)] 1))
-        lst-zeurfactoren (:lst-zeurfactoren opl-values)] 
-    (assoc opl-values
-            :vec-opl-referee vec-opl-referee
+(defn add-statistics [vec-sol-referee note solnr-parent]
+  (let [sol-values (det-sol-values *lst-inp-persons* vec-sol-referee)
+        n-versch-referee (count (for [n (:lst-aantallen sol-values) :when (> n 0)] 1))
+        lst-whinefactoren (:lst-whinefactoren sol-values)] 
+    (assoc sol-values
+            :vec-sol-referee vec-sol-referee
             :note note
             :solnr (new-sol-nr)
             :solnr-parent solnr-parent
-            :fitness (calc-fitness (:prod-games-persoon-dag opl-values) 
-                                   (apply max (:lst-aantallen opl-values)) 
+            :fitness (calc-fitness (:prod-games-person-dag sol-values) 
+                                   (apply max (:lst-aantallen sol-values)) 
                                    n-versch-referee 
-                                   (apply + lst-zeurfactoren) 
-                                   (apply max lst-zeurfactoren))
-            :max-referee (apply max (:lst-aantallen opl-values))
+                                   (apply + lst-whinefactoren) 
+                                   (apply max lst-whinefactoren))
+            :max-referee (apply max (:lst-aantallen sol-values))
             :n-versch-referee n-versch-referee
-            :som-zeurfactoren (apply + lst-zeurfactoren)
-            :max-zeurfactoren (max lst-zeurfactoren))))
+            :som-whinefactoren (apply + lst-whinefactoren)
+            :max-whinefactoren (max lst-whinefactoren))))
 
 ; beetje raar dat choose-random-referee met de game-id wordt aangeroepen, en niet met de game gegevens
 ; zelf. Zo gedaan omdat deze functie vanuit meerdere plekken wordt aangeroepen, en de gegevens niet overal bekend
 ; zijn. 
 ; @todo nog refactoren zodat het meer functioneel wordt, niet afhankelijk van global variables.
 (defn make-solution [lst-input-games]
-  (let [vec-opl-referee (vec (map #(choose-random-referee (:game-id %1)) lst-input-games))]
-    (add-statistics vec-opl-referee "Initial solution" 0)))
+  (let [vec-sol-referee (vec (map #(choose-random-referee (:game-id %1)) lst-input-games))]
+    (add-statistics vec-sol-referee "Initial solution" 0)))
 
-(defn mutate-game [opl-referee]
-  (choose-random-referee (:game-id opl-referee)))
+(defn mutate-game [sol-referee]
+  (choose-random-referee (:game-id sol-referee)))
         
 ; @note tail-recursive, sort-of continuation style passing?
-(defn mutate-solution-rec [n vec-opl-referee solnr-parent]
+(defn mutate-solution-rec [n vec-sol-referee solnr-parent]
   (if (zero? n) 
-    (add-statistics vec-opl-referee "Mutated game(s)" solnr-parent)
+    (add-statistics vec-sol-referee "Mutated game(s)" solnr-parent)
     (recur (dec n) 
-      (let [rnd (rand-int (count vec-opl-referee))]
-        (assoc vec-opl-referee rnd (mutate-game (get vec-opl-referee rnd))))
+      (let [rnd (rand-int (count vec-sol-referee))]
+        (assoc vec-sol-referee rnd (mutate-game (get vec-sol-referee rnd))))
       solnr-parent)))      
       
 ; @todo de rand-int 2 waarde halen uit de command-line params. Hier ook een goede lib voor?
 ; bepaal randomwaarde 1 of 2, en muteer oplossing zo vaak
 (defn mutate-solution [sol]
-  (mutate-solution-rec (inc (rand-int 2)) (:vec-opl-referee sol) (:solnr sol)))
+  (mutate-solution-rec (inc (rand-int 2)) (:vec-sol-referee sol) (:solnr sol)))
 
 ; globals definieren met def, dan maar eenmalig een waarde toegekend (?)
 ; en krijgen pas een waarde bij uitvoeren, dus in andere functies niet bekend op compile time.
 (defn init-globals []
   (def *lst-inp-games* (query-input-games))
-  (def *lst-inp-personen* (det-lst-inp-personen)) 
+  (def *lst-inp-persons* (det-lst-inp-persons)) 
   (def *ar-inp-games* 
     (zipmap (map :game-id *lst-inp-games*) *lst-inp-games*)))
 
 
 ; @result fitness of sol if game with index game-index is refereed by referee
-(defn fitness-sol-game-change-referee [vec-opl-referee game-index referee]
-      ;(let [rnd (rand-int (count vec-opl-referee))]
-  (-> (assoc vec-opl-referee game-index 
-         (select-referee (get vec-opl-referee game-index) referee))
+(defn fitness-sol-game-change-referee [vec-sol-referee game-index referee]
+      ;(let [rnd (rand-int (count vec-sol-referee))]
+  (-> (assoc vec-sol-referee game-index 
+         (select-referee (get vec-sol-referee game-index) referee))
       (add-statistics "" 0)
       (:fitness)))
       
 ; @result max fitness als bij oplossing sol de game met index game-index wordt aangepast.
-; lst-kan-fluiten uit *ar-inp-games* halen, niet uit vec-opl-referee
+; lst-kan-fluiten uit *ar-inp-games* halen, niet uit vec-sol-referee
 ; vraag of je deze info ook niet bij oplossing wilt zetten, is toch read-only/immutable.
-(defn max-fitness-sol-game-change [vec-opl-referee game-index]
-  (apply max (map #(fitness-sol-game-change-referee vec-opl-referee game-index %) 
-    (:lst-kan-fluiten (*ar-inp-games* (:game-id (get vec-opl-referee game-index))))
+(defn max-fitness-sol-game-change [vec-sol-referee game-index]
+  (apply max (map #(fitness-sol-game-change-referee vec-sol-referee game-index %) 
+    (:lst-can-referee (*ar-inp-games* (:game-id (get vec-sol-referee game-index))))
     )))
 
 ; @todo deze implementeren, dan wel maak-oplossing functies nodig)
 ; @note beetje map-reduce achtig: per game die je aanpast een andere functie, is dan parallel uit te voeren.
 (defn kan-naar-betere [sol]
-  (> (apply max (map #(max-fitness-sol-game-change (:vec-opl-referee sol) %)
-                     (range (count (:vec-opl-referee sol)))))
+  (> (apply max (map #(max-fitness-sol-game-change (:vec-sol-referee sol) %)
+                     (range (count (:vec-sol-referee sol)))))
     (:fitness sol)))
 
 ; @todo alleen saven bij een minimale fitness.
@@ -158,7 +156,7 @@
 
 ; @note evol-iteration functioneel opzetten: je krijgt iteratie en lijst oplossingen binnen, en retourneert deze ook.
 ; opties 1) handle-best-solution een sol meegeven. 2) de swap! in deze functie, dan handle aanroepen
-; 3) check niet in deze function, maar in aanroepende maak-voorstel, dan hier ook de puts-dot in.
+; 3) check niet in deze function, maar in aanroepende make-proposition, dan hier ook de puts-dot in.
 ; keuze is nu optie 3
 (defn evol-iteration [{:keys [lst-solutions iteration]}]
   (let [new-iteration (inc iteration)
@@ -187,7 +185,7 @@
 
 (defn -main [& args]
   (open-global-db)
-  (delete-oude-voorstel)
+  (delete-old-proposition)
 
   (let [sol-args {:pop 10
                   :iter 0
