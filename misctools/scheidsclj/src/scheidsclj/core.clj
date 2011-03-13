@@ -10,12 +10,9 @@
   (:use scheidsclj.util)
   (:use scheidsclj.print))
 
-; globale vars, eenmaal gezet.
+; global vars, but only set/read-in once.
 (declare *lst-inp-games* *lst-inp-personen* *ar-inp-wedstrijden*) 
   
-; @todo *lst-solutions* en *iteration* worden wel aangepast, moet dit een atom of zo worden?
-(declare *lst-solutions* *iteration*)
-
 (defn select-scheids [wedstrijd referee]
   (merge (select-keys wedstrijd [:wedstrijd-id :wedstrijd-naam :datum])
          (select-keys referee [:scheids-id :scheids-naam :zeurfactor :waarde :zelfde-dag])))
@@ -23,13 +20,13 @@
 ; @result wedstrijd-hashmap, als element in vec-opl-scheids
 (defn choose-random-scheids [wedstrijd-id]
   (let [wedstrijd (*ar-inp-wedstrijden* wedstrijd-id)
-        referee (random-list (:lst-kan-fluiten wedstrijd))]
+        referee (rand-nth (:lst-kan-fluiten wedstrijd))]
     (select-scheids wedstrijd referee))) 
 
 ; @result wedstrijd-hashmap, als element in vec-opl-scheids
 (defn choose-random-scheids-old [wedstrijd-id]
   (let [inp-wedstrijd (*ar-inp-wedstrijden* wedstrijd-id)
-        inp-kan-fluiten (random-list (:lst-kan-fluiten inp-wedstrijd))]
+        inp-kan-fluiten (rand-nth (:lst-kan-fluiten inp-wedstrijd))]
     (merge (select-keys inp-wedstrijd [:wedstrijd-id :wedstrijd-naam :datum])
            (select-keys inp-kan-fluiten [:scheids-id :scheids-naam :zeurfactor :waarde :zelfde-dag]))))
 

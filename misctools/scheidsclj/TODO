@@ -12,6 +12,9 @@ Opbouw/structuur code
 [2011-02-20 22:52:41] @todo: alle var/functie namen in het engels. Ook tekst/output in het engels. En ook de comments.
 [2011-02-25 22:04:39] @todo minder (geen?) globals gebruiken, de vars met *sterretjes*.
 [2011-02-26 10:53:49] geneticlib is nu nog leeg, hier wat inzetten?
+[2011-03-13 20:17:17] vanuit JoC: destructuring bind toepassen.
+[2011-03-13 20:17:43] vanuit JoC: recursief zou weinig nodig moeten zijn, alleen bij lazy dingen. Zou last resort moeten zijn.
+[2011-03-13 20:30:07] eigenlijk het hele project hernoemen in 'refereesclj'
 
 Technisch
 =========

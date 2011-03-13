@@ -13,6 +13,7 @@
   (map #(scheids-afko (:scheids-naam %1)) 
     (:lst-kan-fluiten (ar-inp-wedstrijden wedstrijd-id))))
 
+; @todo 6-3-2011 NdV dit lijkt wel een plek voor destucturing bind van opl-scheids.
 (defn opl-scheids-to-string [opl-scheids ar-inp-wedstrijden]
   (str (:wedstrijd-naam opl-scheids) " (zd=" (:zelfde-dag opl-scheids) ") "
        (:scheids-naam opl-scheids) " (" (scheids-afko (:scheids-naam opl-scheids)) 
