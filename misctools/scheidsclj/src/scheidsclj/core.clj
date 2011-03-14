@@ -26,16 +26,16 @@
 ; wel bepalen hoe fout het is, zodat het beter kan worden, als bv 2 persons elk 2x op een dag moeten fluiten.
 ; max_referee: 1..10 minder is beter
 ; n_versch_referee: 1..20 meer is beter
-; som_whinefactoren: 0..10000 minder is beter
+; sum-whinefactors: 0..10000 minder is beter
 ; door 1-maxwedstrperdag wordt dit deel 0 als het gewoon goed is, en negatief bij fouten.
 ; 19-9-2010 NdV max_referee toch niet zo belangrijk, zelfdedag telt minder dan andere dag, en in zf al rekening mee gehouden.
 ; 19-9-2010 NdV zelfde geldt eigenlijk ook voor aantal verschillende refereeen.
-; 19-9-2010 NdV maar wel de lasten goed verdelen, dus max_whinefactoren wel belangrijk.
-; expr (1-$prod_games_person_dag) * 100000 + (10-$max_referee)*100 + $n_versch_referee - (0.0001 * $som_whinefactoren)
-(defn calc-fitness [prod-games-person-dag max-referee n-versch-referee som-whinefactoren max-whinefactoren]
-  (- (* (- 1 prod-games-person-dag) 100000)
-     max-whinefactoren
-     (* 0.0001 som-whinefactoren)))
+; 19-9-2010 NdV maar wel de lasten goed verdelen, dus max_whinefactors wel belangrijk.
+; expr (1-$prod_games_person_dag) * 100000 + (10-$max_referee)*100 + $n_versch_referee - (0.0001 * $sum-whinefactors)
+(defn calc-fitness [prod-games-person-day max-referee n-diff-referee sum-whinefactors max-whinefactors]
+  (- (* (- 1 prod-games-person-day) 100000)
+     max-whinefactors
+     (* 0.0001 sum-whinefactors)))
 
 ; bepaal per person welke games deze fluit in de gemaakte oplossing
 ; input lijst van persons (hashmap)
@@ -44,51 +44,49 @@
   (map #(assoc %1 :lst-games (for [sol vec-sol-referee :when (= (:referee-id %1) (:referee-id sol))]
     sol)) lst-inp-persons))
 
-; deze nog herschrijven met -> of ->>
-; elke person heeft lijst van games, elke game is een hashmap. Maak per hashmap een nieuwe, zodat ze met merge-with opgeteld kunnen worden per person
-(defn det-prod-games-person-dag [lst-person-games]
-  (apply * 
-    (map (fn [person] 
-      (apply *
-        (vals
-          (apply merge-with + 
-            (map #(hash-map (:date %) 1) (:lst-games person)))))) lst-person-games)))
-  
+(defn det-prod-games-person-day [lst-person-games]
+  "determine product of product of #games of this person/referee on each day"
+  (letfn [(det-games-person-day [person]
+    (->> (map #(hash-map (:date %) 1) (:lst-games person)) ; make list of hashmaps for each game, date is key.
+         (apply merge-with +)                              ; add per day
+         (vals)                                            ; remove keys, just a list of values, should be all 1's.
+         (apply *)))]                                      ; multiply. Should be 1, not more than 1 game per day per person.
+    (apply * (map det-games-person-day lst-person-games))))
+
 (defn det-lst-sol-person-info [lst-person-games]
   (map #(assoc % 
-              :nfluit (count (:lst-games %))
+              :nreferee (count (:lst-games %))
               :whinefactor (apply * (map :whinefactor (:lst-games %)))) lst-person-games))
 
-; bepaal sleutel waarden van de oplossing
-; @result hashmap
 (defn det-sol-values [lst-inp-persons vec-sol-referee]
+  "determine key values of the solution. @result hashmap"
   (let [lst-person-games (det-person-games lst-inp-persons vec-sol-referee)]
     (hash-map 
-      :lst-whinefactoren (map #(* (:whinefactor %1)
+      :lst-whinefactors (map #(* (:whinefactor %1)
                           (apply * (for [sol (:lst-games %1)] 
                              (/ (:whinefactor sol) (:value sol))))) lst-person-games)
-      :lst-aantallen (map #(count (:lst-games %1)) lst-person-games)
-      :prod-games-person-dag (det-prod-games-person-dag lst-person-games)
+      :lst-counts (map #(count (:lst-games %1)) lst-person-games)
+      :prod-games-person-day (det-prod-games-person-day lst-person-games)
       :lst-sol-person-info (det-lst-sol-person-info lst-person-games))))
 
 (defn add-statistics [vec-sol-referee note solnr-parent]
   (let [sol-values (det-sol-values *lst-inp-persons* vec-sol-referee)
-        n-versch-referee (count (for [n (:lst-aantallen sol-values) :when (> n 0)] 1))
-        lst-whinefactoren (:lst-whinefactoren sol-values)] 
+        n-diff-referee (count (for [n (:lst-counts sol-values) :when (> n 0)] 1))
+        lst-whinefactors (:lst-whinefactors sol-values)] 
     (assoc sol-values
             :vec-sol-referee vec-sol-referee
             :note note
             :solnr (new-sol-nr)
             :solnr-parent solnr-parent
-            :fitness (calc-fitness (:prod-games-person-dag sol-values) 
-                                   (apply max (:lst-aantallen sol-values)) 
-                                   n-versch-referee 
-                                   (apply + lst-whinefactoren) 
-                                   (apply max lst-whinefactoren))
-            :max-referee (apply max (:lst-aantallen sol-values))
-            :n-versch-referee n-versch-referee
-            :som-whinefactoren (apply + lst-whinefactoren)
-            :max-whinefactoren (max lst-whinefactoren))))
+            :fitness (calc-fitness (:prod-games-person-day sol-values) 
+                                   (apply max (:lst-counts sol-values)) 
+                                   n-diff-referee 
+                                   (apply + lst-whinefactors) 
+                                   (apply max lst-whinefactors))
+            :max-referee (apply max (:lst-counts sol-values))
+            :n-diff-referee n-diff-referee
+            :sum-whinefactors (apply + lst-whinefactors)
+            :max-whinefactors (max lst-whinefactors))))
 
 ; beetje raar dat choose-random-referee met de game-id wordt aangeroepen, en niet met de game gegevens
 ; zelf. Zo gedaan omdat deze functie vanuit meerdere plekken wordt aangeroepen, en de gegevens niet overal bekend
@@ -124,14 +122,15 @@
     (zipmap (map :game-id *lst-inp-games*) *lst-inp-games*)))
 
 
-; @result fitness of sol if game with index game-index is refereed by referee
+; helper for can-find-better, use let, letfn?
 (defn fitness-sol-game-change-referee [vec-sol-referee game-index referee]
-      ;(let [rnd (rand-int (count vec-sol-referee))]
+  "@result fitness of sol if game with index game-index is refereed by referee"
   (-> (assoc vec-sol-referee game-index 
          (select-referee (get vec-sol-referee game-index) referee))
       (add-statistics "" 0)
       (:fitness)))
       
+; helper for can-find-better, use let, letfn?
 ; @result max fitness als bij oplossing sol de game met index game-index wordt aangepast.
 ; lst-kan-fluiten uit *ar-inp-games* halen, niet uit vec-sol-referee
 ; vraag of je deze info ook niet bij oplossing wilt zetten, is toch read-only/immutable.
@@ -140,16 +139,15 @@
     (:lst-can-referee (*ar-inp-games* (:game-id (get vec-sol-referee game-index))))
     )))
 
-; @todo deze implementeren, dan wel maak-oplossing functies nodig)
 ; @note beetje map-reduce achtig: per game die je aanpast een andere functie, is dan parallel uit te voeren.
-(defn kan-naar-betere [sol]
+(defn can-find-better [sol]
   (> (apply max (map #(max-fitness-sol-game-change (:vec-sol-referee sol) %)
                      (range (count (:vec-sol-referee sol)))))
     (:fitness sol)))
 
-; @todo alleen saven bij een minimale fitness.
+; @todo parameterise minimal fitness for saving, now at -2000.
 (defn handle-best-solution [proposition]
-  (print-best-solution proposition *ar-inp-games* kan-naar-betere)
+  (print-best-solution proposition *ar-inp-games* can-find-better)
   (let [sol (first (:lst-solutions @proposition))]
     (if (> (:fitness sol) -2000)
       (save-solution sol))))

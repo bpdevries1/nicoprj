@@ -18,7 +18,7 @@
          (select (where (= :scheids.status "gemaild")))
          (select (where (= :scheids.scheids referee-id)))
          (project [:scheids.scheids :zeurfactor.factor]))]
-    (hash-map :nfluit (count result-set)
+    (hash-map :nreferee (count result-set)
               :whinefactor (apply * (map :factor result-set)))))
 
 (defn det-lst-inp-persons []
@@ -29,7 +29,7 @@
              (hash-map :referee-id (:id %1)
                        :referee-name (:naam %1)
                        :whinefactor (:whinefactor planned-referee)
-                       :nfluit (:nfluit planned-referee))))))
+                       :nreferee (:nreferee planned-referee))))))
 
 ; 20-2-2011 NdV tested with full namespace ref, and it works.
 (defn delete-old-proposition []
@@ -62,7 +62,8 @@
            (sort [:wedstrijd.datumtijd]))
       (map #(hash-map :game-id (:id %1) 
                       :game-name (:naam %1)
-                      :date (:datumtijd %1)
+                      ; :date (:datumtijd %1)
+                      :date ((keyword "date(wedstrijd.datumtijd)") %1)
                       :lst-can-referee (query-lst-can-referee (:id %1))))))
 
 (defn save-solution [sol]

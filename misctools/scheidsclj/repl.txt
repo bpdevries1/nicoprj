@@ -90,3 +90,38 @@ dan waarsch in ar fout.
     (while (< @a 10)
       (println @a)
       (swap! a inc))))
+      
+(def vec-sol-referee (:vec-sol-referee sol))      
+
+(def lst-person-games (det-person-games *lst-inp-persons* vec-sol-referee))
+
+(det-prod-games-person-day lst-person-games)
+
+(def lst-games (:lst-games (second lst-person-games)))
+
+(map #(hash-map (:date %) 1) lst-games)
+
+===========
+
+(defn det-games-person-day [person]
+  "determine product of #games of this person/referee on each day"
+  (apply *
+    (vals
+      (apply merge-with + 
+        (map #(hash-map (:date %) 1) (:lst-games person))))))
+
+(defn det-prod-games-person-day [lst-person-games]
+  "determine product of product of #games of this person/referee on each day"
+  (apply * (map det-games-person-day lst-person-games)))
+
+  
+(defn det-prod-games-person-day [lst-person-games]
+  "determine product of product of #games of this person/referee on each day"
+  (letfn [(det-games-person-day [person]
+    "determine product of #games of this person/referee on each day"
+    (apply *
+      (vals
+        (apply merge-with + 
+          (map #(hash-map (:date %) 1) (:lst-games person))))))]
+    (apply * (map det-games-person-day lst-person-games))))
+  
