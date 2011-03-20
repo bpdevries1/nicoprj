@@ -70,7 +70,61 @@
       :prod-games-person-day (det-prod-games-person-day lst-person-games)
       :lst-sol-person-info (det-lst-sol-person-info lst-person-games))))
 
+; make more flexible, so that a series of post-processing functions can be called.
+; maybe also with a name, so chooseable with cmdline.
+(defn user-post-process-old [sol]
+  "User post processing functions, such as changing the fitness based on specific requirements
+   This one so that Baukelien has a max of 6 games."
+  (let [n-games-baukelien (for [person (:lst-sol-person-info sol) 
+                               :when (= (:referee-name person) "Baukelien Mulder")]
+                            (:nreferee person)) ; this gives a list, so need the first item, if available.
+        max-ok 6]
+    (cond (empty? n-games-baukelien) sol
+          (<= (first n-games-baukelien) max-ok) sol
+          true (assoc sol :fitness
+            (- (:fitness sol) (* 1000 (- (first n-games-baukelien) max-ok))))))) 
+
+(defn handle-baukelien [sol]
+  "User post processing function, such as changing the fitness based on specific requirements
+   This one so that Baukelien has a max of 6 games."
+  (let [n-games-baukelien (for [person (:lst-sol-person-info sol) 
+                               :when (= (:referee-name person) "Baukelien Mulder")]
+                            (:nreferee person)) ; this gives a list, so need the first item, if available.
+        max-ok 6]
+    (cond (empty? n-games-baukelien) sol
+          (<= (first n-games-baukelien) max-ok) sol
+          true (assoc sol :fitness
+            (- (:fitness sol) (* 1000 (- (first n-games-baukelien) max-ok))))))) 
+
+; deze nog dynamischer?
+(defn user-post-process [sol]
+  "Call user defined functions to possibly change solution, especially fitness"
+  (-> sol
+      handle-baukelien))
+
 (defn add-statistics [vec-sol-referee note solnr-parent]
+  "Return a solution hashmap, including statistics and fitness"
+  (let [sol-values (det-sol-values *lst-inp-persons* vec-sol-referee)
+        n-diff-referee (count (for [n (:lst-counts sol-values) :when (> n 0)] 1))
+        lst-whinefactors (:lst-whinefactors sol-values)
+        sol (assoc sol-values
+            :vec-sol-referee vec-sol-referee
+            :note note
+            :solnr (new-sol-nr)
+            :solnr-parent solnr-parent
+            :fitness (calc-fitness (:prod-games-person-day sol-values) 
+                                   (apply max (:lst-counts sol-values)) 
+                                   n-diff-referee 
+                                   (apply + lst-whinefactors) 
+                                   (apply max lst-whinefactors))
+            :max-referee (apply max (:lst-counts sol-values))
+            :n-diff-referee n-diff-referee
+            :sum-whinefactors (apply + lst-whinefactors)
+            :max-whinefactors (max lst-whinefactors))]
+        (user-post-process sol)))
+
+(defn add-statistics-old [vec-sol-referee note solnr-parent]
+  "Return a solution hashmap, including statistics and fitness"
   (let [sol-values (det-sol-values *lst-inp-persons* vec-sol-referee)
         n-diff-referee (count (for [n (:lst-counts sol-values) :when (> n 0)] 1))
         lst-whinefactors (:lst-whinefactors sol-values)] 

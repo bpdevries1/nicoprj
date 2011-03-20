@@ -490,4 +490,11 @@ from this solution a better one CANNOT be found with 1 change...
 [2011-03-20 18:32:05] meegegeven params: deze worden niet teruggegeven.
 [2011-03-20 18:32:17] clargon doet het wat dat betreft wel goed, dus deze nu gebruiken.
 [2011-03-20 18:32:39] wat vogelen met doc-string, maar wel gelukt.
-
+[2011-03-20 21:21:11] fitness van eerste oplossing, na toepassen Baukelien factor: -1204234331.669600
+[2011-03-20 21:21:32] nogmaals toepassen hiervan:                                  -1204234331.669600
+[2011-03-20 21:22:57] Baukelien heeft 9 wedstrijden, zou dus nog 600 minder moeten zijn.
+[2011-03-20 21:27:35] fitness bij een goede oplossing is -1024.966800
+[2011-03-20 21:28:17] max-whinefactors telt enkel, waarden tussen 1000 en 2000, de 100 per wedstrijd van
+[2011-03-20 21:29:31] Baukelien spelen dan toch een geringe waarde, hier beter 1000 van maken.
+[2011-03-20 21:32:33] bug: n-games-baukelien is leeg.
+[2011-03-20 21:37:28] fitness now:                                                 -1204234331.669600

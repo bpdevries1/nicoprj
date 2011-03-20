@@ -9,6 +9,19 @@ dingen voor in de REPL
 
 (def sol (make-solution lig))
 
+(print-solution sol *ar-inp-games* (fn [& args] true))
+
+(cond (empty? n-games-baukelien) sol
+          (<= (first n-games-baukelien) max-ok) sol
+          true 123)
+
+(:fitness (cond (empty? n-games-baukelien) sol
+          (<= (first n-games-baukelien) max-ok) sol
+          true (assoc sol :fitness
+            (- (:fitness sol) (* 1000 (- (first n-games-baukelien) max-ok))))))          
+
+(def sol2 (user-post-process sol))
+                            
 (def mapped (map #(hash-map
       :scheids (:scheids-id %)
       :wedstrijd (:wedstrijd-id %)
