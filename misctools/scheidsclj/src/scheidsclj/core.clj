@@ -5,7 +5,8 @@
   (:use scheidsclj.geneticlib)
   (:use scheidsclj.lib)
   (:use scheidsclj.util)
-  (:use scheidsclj.print))
+  (:use scheidsclj.print)
+  (:use clargon.core)) ; was clojopts, but vague with not supplied optional arguments.
 
 ; global vars, but only set/read-in once.
 (declare *lst-inp-games* *lst-inp-persons* *ar-inp-games*) 
@@ -185,12 +186,13 @@
   (open-global-db)
   (delete-old-proposition)
 
-  (let [sol-args {:pop 10
-                  :iter 0
-                  :fitness 100000
-                  :nmutations 2
-                  :loglevel ""
-                  :print "better"}]
+  (let [sol-args (clargon args
+                   (optional ["-p" "--pop" :default 10 :doc "Population size"] #(Integer. %))
+                   (optional ["-i" "--iter" :default 0 :doc "Max #Iterations"] #(Integer. %))
+                   (optional ["-f" "--fitness" :default 100000 :doc "Fitness to reach"] #(Integer. %))
+                   (optional ["-m" "--nmutations" :default 2 :doc "max #mutations in each generation"] #(Integer. %))
+                   (optional ["--loglevel" :default "" :doc "warn, info or debug"])
+                   (optional ["--print" :default "better" :doc "What to print"]))]
     (make-proposition sol-args))                  
   (close-global-db))  
 

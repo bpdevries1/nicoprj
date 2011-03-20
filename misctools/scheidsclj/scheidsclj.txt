@@ -1,0 +1,493 @@
+[2011-02-06 11:56:52] ook hier een log.
+[2011-02-06 11:57:00] keuze voor mysql koppeling: standaard, of met ClojureQL. Doe eerst maar standaard, dan zie ik sneller of ik ergens tegenaan loop.
+[2011-02-06 11:59:54] java.lang.ClassNotFoundException: clojure.contrib.sql
+[2011-02-06 12:04:24] [clojureql "1.1.0-SNAPSHOT"] in clojars, proberen.
+[2011-02-06 12:12:23] wel warnings als: WARNING: distinct already refers to: #'clojure.core/distinct in namespace: scheidsclj.core, being replaced by: #'clojureql.core/distinct
+[2011-02-06 12:12:31] gebruik nu eerst clojureql 1.0.0, nog dezelfde warnings.
+[2011-02-06 12:15:20] kom 'Cake' tegen als alternatief voor Leiningen. Eerst even niet.
+[2011-02-06 15:46:30] java.sql.SQLException: No suitable driver found for jdbc:mysql://localhost:3306/scheids (NO_SOURCE_FILE:0)
+[2011-02-06 15:46:37] bovenstaande bij uitvoeren van @(table db :scheids)  
+[2011-02-06 15:55:19] in clojars gezocht en gevonden: [org.clojars.kjw/mysql-connector "5.1.11"]
+[2011-02-06 15:55:29] deze in project.clj toegevoegd, lein deps gedaan en hierna werkte het wel!
+[2011-02-06 16:16:34] met open-global is een connectie te maken voor hergebruik, alleen geen docs van, via source wel uit te komen?
+
+
+
+
+; test           
+; insert into scheids (wedstrijd, status) values (1455, 'gemaild')           
+; not exists vervangen door group by met count() == 0
+
+select w.id, w.naam w_naam, date(w.datumtijd) datum
+from wedstrijd w
+left join scheids s on s.wedstrijd = w.id
+where w.scheids_nodig = 1
+and s.status = 'gemaild'
+group by 1,2,3
+having count(s.id) = 0
+order by w.datumtijd
+
+select w.id, w.naam w_naam, date(w.datumtijd) datum
+from wedstrijd w
+left join scheids s on s.wedstrijd = w.id
+where w.scheids_nodig = 1
+and s.status = 'gemaild'
+
+select w.id, w.naam w_naam, date(w.datumtijd) datum
+from wedstrijd w
+left join scheids s on s.wedstrijd = w.id and s.status = 'gemaild'
+where w.scheids_nodig = 1
+group by 1,2,3
+having count(s.id) = 0
+order by w.id
+=> deze doet 't!
+=> en met having count(s.id) = 1 wordt het 1 record, ook goed!
+
+query zonder group by
+
+select w.id, w.naam w_naam, date(w.datumtijd) datum, s.id
+from wedstrijd w
+left join scheids s on s.wedstrijd = w.id and s.status = 'gemaild'
+where w.scheids_nodig = 1
+
+
+(outer-join (table :one) (table :two) :left :id) 
+
+
+(outer-join (table :one) (table :two) :left (where (= :one.id :two.id)))
+
+(outer-join (table :wedstrijd) (table :scheids) :left (where (= :wedstrijd.id :scheids.wedstrijd)))
+
+met ->
+
+(-> (table :one) (aggregate [[:count/* :as :cnt]] [:id]))
+
+@(-> (select (table :wedstrijd) (where (= :scheids_nodig 1)))
+    (outer-join (table :scheids) :left (where (= :wedstrijd.id
+                                                 :scheids.wedstrijd)))
+    (aggregate [[:count/* :as :cnt]] [:id :naam :datumtijd])
+    (select (where (= :cnt 0))))
+
+zonder de having:
+@(-> (select (table :wedstrijd) (where (= :scheids_nodig 1)))
+    (outer-join (table :scheids) :left (where (= :wedstrijd.id
+                                                 :scheids.wedstrijd)))
+    (aggregate [[:count/* :as :cnt]] [:id :naam :datumtijd]))
+
+hierbij count overal op 1:
+SELECT wedstrijd.id,wedstrijd.naam,wedstrijd.datumtijd,count(*) AS cnt 
+FROM wedstrijd 
+LEFT OUTER JOIN scheids ON (wedstrijd.id = scheids.wedstrijd) 
+WHERE (scheids_nodig = 1) 
+GROUP BY wedstrijd.id,wedstrijd.naam,wedstrijd.datumtijd
+
+waarschijnlijk doordat join-conditie aangevuld moet worden met status=gemaild.
+
+SELECT wedstrijd.id,wedstrijd.naam,wedstrijd.datumtijd,count(*) AS cnt 
+FROM wedstrijd 
+LEFT OUTER JOIN scheids ON (wedstrijd.id = scheids.wedstrijd and scheids.status='gemaild') 
+WHERE (scheids_nodig = 1) 
+GROUP BY wedstrijd.id,wedstrijd.naam,wedstrijd.datumtijd
+=> deze nog steeds overal 1
+
+select w.id, w.naam w_naam, date(w.datumtijd) datum, s.id
+from wedstrijd w
+left join scheids s on s.wedstrijd = w.id and s.status = 'gemaild'
+where w.scheids_nodig = 1
+=> deze is wel goed.
+
+select w.id, w.naam w_naam, date(w.datumtijd) datum, count(*) as cnt
+from wedstrijd w
+left join scheids s on s.wedstrijd = w.id and s.status = 'gemaild'
+where w.scheids_nodig = 1
+GROUP BY w.id,w.naam,w.datumtijd
+having count(s.id) = 1
+
+niet count(*) maar count(scheids.id), anders telt 'ie altijd 1 record!
+@(-> (select (table :wedstrijd) (where (= :scheids_nodig 1)))
+    (outer-join (table :scheids) :left (where (= :wedstrijd.id
+                                                 :scheids.wedstrijd)))
+    (aggregate [[:count/scheids.id :as :cnt]] [:id :naam :datumtijd]))
+
+(def nscheids (-> (select (table :scheids) (where (= :status "gemaild")))
+                  (aggregate [[:count/* :as :cnt]] [:wedstrijd])))
+@nscheids
+@nscheids                                                                
+({:cnt 1, :wedstrijd 1455})
+=> Ok.
+@(-> (select (table :wedstrijd) (where (= :scheids_nodig 1)))
+    (outer-join nscheids :left (where (= :wedstrijd.id :scheids.wedstrijd))))
+    
+fout op status=gemaild, quotes zijn weg. Deze check eerst weg, niet belangrijk, tabel toch eerst leeg.
+
+(def nscheids (-> (table :scheids)
+                  (aggregate [[:count/* :as :cnt]] [:wedstrijd])))
+@nscheids                                                                
+({:cnt 1, :wedstrijd 1455})
+=> weer ok.
+@(-> (select (table :wedstrijd) (where (= :scheids_nodig 1)))
+    (outer-join nscheids :left (where (= :wedstrijd.id :scheids.wedstrijd))))
+    
+levert op:
+SELECT wedstrijd.*,scheids_subselect.wedstrijd,scheids_subselect.cnt FROM wedstrijd LEFT OUTER JOIN (SELECT scheids.wedstrijd,count(*) AS cnt FROM scheids GROUP BY scheids.wedstrijd) AS scheids_subselect ON (wedstrijd.id = scheids_subselect.wedstrijd) WHERE (scheids_nodig = 1)
+=> deze kan in mysql worden uitgevoerd.
+In clojure: ook goed.
+
+nu nog erbij: cnt is null of count = 0
+
+@(-> (select (table :wedstrijd) (where (= :scheids_nodig 1)))
+    (outer-join nscheids :left (where (= :wedstrijd.id :scheids.wedstrijd)))
+    (select (where (= 0 :scheids.cnt))))
+
+SELECT wedstrijd.*,scheids_subselect.wedstrijd,scheids_subselect.cnt FROM wedstrijd LEFT OUTER JOIN (SELECT scheids.wedstrijd,count(*) AS cnt FROM scheids GROUP BY scheids.wedstrijd) AS scheids_subselect ON (wedstrijd.id = scheids_subselect.wedstrijd) WHERE (scheids_nodig = 1) AND (0 = scheids.cnt)
+
+herschrijven met scheids_subselect?
+SELECT wedstrijd.*,scheids_subselect.wedstrijd,scheids_subselect.cnt FROM wedstrijd LEFT OUTER JOIN (SELECT scheids.wedstrijd,count(*) AS cnt FROM scheids GROUP BY scheids.wedstrijd) AS scheids_subselect ON (wedstrijd.id = scheids_subselect.wedstrijd) WHERE (scheids_nodig = 1) AND (0 = scheids_subselect.cnt)
+=> doet het wel, maar 0 resultaten.
+
+SELECT wedstrijd.*,scheids_subselect.wedstrijd,scheids_subselect.cnt FROM wedstrijd LEFT OUTER JOIN (SELECT scheids.wedstrijd,count(*) AS cnt FROM scheids GROUP BY scheids.wedstrijd) AS scheids_subselect ON (wedstrijd.id = scheids_subselect.wedstrijd) WHERE (scheids_nodig = 1) AND (scheids_subselect.cnt is null)
+=> goed, 60 resultaten (61 - 1 met scheids)
+
+herschrijven zodat cnt is null binnen de outer join zit:
+SELECT wedstrijd.*,scheids_subselect.wedstrijd,scheids_subselect.cnt FROM wedstrijd LEFT OUTER JOIN (SELECT scheids.wedstrijd,count(*) AS cnt FROM scheids GROUP BY scheids.wedstrijd) AS scheids_subselect ON (wedstrijd.id = scheids_subselect.wedstrijd and scheids_subselect.cnt is null) WHERE (scheids_nodig = 1)
+
+
+SELECT wedstrijd.*,scheids_subselect.wedstrijd,scheids_subselect.cnt FROM wedstrijd LEFT OUTER JOIN (SELECT scheids.wedstrijd,count(*) AS cnt FROM scheids GROUP BY scheids.wedstrijd) AS scheids_subselect ON (wedstrijd.id = scheids_subselect.wedstrijd) WHERE (scheids_nodig = 1)
+
+SELECT wedstrijd.*,scheids_subselect.wedstrijd,scheids_subselect.cnt FROM wedstrijd LEFT OUTER JOIN (SELECT scheids.wedstrijd,count(*) AS cnt FROM scheids GROUP BY scheids.wedstrijd) AS scheids_subselect ON (wedstrijd.id = scheids_subselect.wedstrijd and scheids_subselect.cnt = 1) WHERE (scheids_nodig = 1)
+
+vraag is of het zo oplosbaar is zonder having te gebruiken
+=> heb dus wel een goede query zonder 'having', met de test buiten de outer-join, dit kan volgens mij niet anders.
+
+@(-> (select (table :wedstrijd) (where (= :scheids_nodig 1)))
+    (outer-join nscheids :left (where (= :wedstrijd.id :scheids.wedstrijd)))
+    (select (where (nil? :scheids_subselect.cnt))))
+    
+@(-> (select (table :wedstrijd) (where (= :scheids_nodig 1)))
+    (outer-join nscheids :left (where (= :wedstrijd.id :scheids.wedstrijd)))
+    (select (where (= 0 :scheids.cnt))))
+
+
+(select (table :wedstrijd) (where (nil? :team)))
+=> hele nil? is null stuk is er niet.
+(select (table :wedstrijd) (where (= 0 :team)))
+=> goed
+
+wel having in de clojureql code:
+                         (str "GROUP BY " (to-fieldlist tname (first grouped-by))))
+                       (when (and (seq having) (seq combs)) (str "HAVING " having))
+                       
+kan gewoon having gebruiken blijkbaar.
+
+kijk evt ook nog in de test-code, ook voor de is null voorbeelden.
+
+
+@(-> (select (table :wedstrijd) (where (= :scheids_nodig 1)))
+    (outer-join nscheids :left (where (= :wedstrijd.id :scheids.wedstrijd)))
+    (select (where (= 0 :scheids.cnt))))
+    
+in r.36 (hier) de goede query met having in sql vorm.
+
+@(-> (select (table :wedstrijd) (where (= :scheids_nodig 1)))
+    (outer-join nscheids :left (where (= :wedstrijd.id :scheids.wedstrijd)))
+    (having (= 0 :scheids.cnt)))
+[2011-02-06 20:22:15] java.lang.Exception: Unable to resolve symbol: having in this context (NO_SOURCE_FILE:8). Misschien omdat aggregate/group by in nscheids zit?
+
+[2011-02-06 20:18:46] Having zit mogelijk pas in de 1.1.0 snapshot versie, dependencies weer even omhangen.
+
+[2011-02-06 20:18:49] ook in de 1.1.0 versie geen exists clause. Dit kan ook met in-clause.
+
+in test:
+(-> (from :table [:a :b :c])
+         (order-by :ascending :a)
+         (group-by {:c sum} :a :b)
+         (having (> (sum :c) 100)))
+maar hierin wordt having ook niet begrepen
+(-> (from :table [:a :b :c])
+         (order-by :ascending :a)
+         (group-by {:c sum} :a :b))
+from snapt 'ie ook niet.
+
+[2011-02-06 20:24:58] deze syntax stond op een blog van 25-2-2010. mogelijk dus heel anders geworden.
+
+'is null' zeker door (= :id nil)
+
+
+[2011-02-06 21:13:56] opties: 1) vanaf basis group by having script nog een keer. 2) herschrijven met in-clause en dan omzetten 3) met difference-query 4) clojureql vergeten en std sql gebruiken. Dan wel andere lib nodig?
+
+[2011-02-06 21:22:28] hebben aggregate of grouped-by een having sub-clause?
+[2011-02-06 21:29:36] optie 3 probereren A=alle wedstrijd-ids, B=alle wedstrijd-ids met scheids.
+A: @(project (table :wedstrijd) [:id])
+B: @(-> (table :wedstrijd)
+       (join (table :scheids) (where (= :scheids.wedstrijd :wedstrijd.id)))
+       (project [:wedstrijd.id]))
+
+samenvoegen:
+@(-> (project (table :wedstrijd) [:id])
+     (difference (-> (table :wedstrijd)
+       (join (table :scheids) (where (= :scheids.wedstrijd :wedstrijd.id)))
+       (project [:wedstrijd.id])) :all)) 
+[2011-02-06 21:35:12] query lijkt wel ok, maar MySQL snapt het niet. Even googlen:
+wel simpele query voor oplossing voor not exists.
+>SELECT u1.userid
+>FROM user1 u1
+>LEFT JOIN user2 u2 ON u2.userid=u1.userid
+>WHERE u2.userid IS NULL;
+
+voor mijn query:
+select w.id, w.naam w_naam, date(w.datumtijd) datum
+             from wedstrijd w
+             where w.scheids_nodig = 1
+             and not exists (
+                select 1
+                from scheids s
+                where s.wedstrijd = w.id
+                and s.status = 'gemaild'
+             )
+             order by w.datumtijd
+ wordt dan:
+ 
+select w.id, w.naam w_naam, date(w.datumtijd) datum
+from wedstrijd w
+left join scheids s on s.wedstrijd = w.id and s.status = 'gemaild' 
+where w.scheids_nodig = 1
+and s.wedstrijd is null
+order by w.datumtijd 
+=> is wel goed, 60 rows!
+
+
+[2011-02-06 21:40:11] dit in clojureql doen?
+
+(-> (table :wedstrijd)
+    (outer-join (table :scheids) :left (where (= :scheids.wedstrijd :wedstrijd.id)))
+    (select (where (= :wedstrijd.scheids_nodig 1)))
+    (select (where (= :scheids.wedstrijd nil)))
+    (project [:wedstrijd.id :wedstrijd.naam :wedstrijd.datumtijd])
+    (sort [:wedstrijd.datumtijd]))
+
+[2011-02-06 21:48:06] dit is 'em, met count bepaald dat deze 60 results geeft!
+
+
+(map #(vector (* 2 %1) %1) [1 2 3])
+(map #(hash-map :double (* 2 %1) :orig %1) [1 2 3])
+
+[2011-02-06 22:18:41] datatype bepalen: (type (:datum (first (query-input-games))))
+
+[2011-02-06 22:27:18] timestamp omzetten naar date:
+(java.util.Date. (.getTime (:datum (first (query-input-games)))))
+=> werkt wel, maar hierin staat de tijd ook nog steeds. Timestamp is ook een subclass van java.util.Date. Evt kan omzetten via een string ook nog.
+
+
+select kw.scheids, kw.waarde, p.naam p_naam, zf.factor, kw.speelt_zelfde_dag 
+from kan_wedstrijd_fluiten kw, persoon p, zeurfactor zf
+where p.id = kw.scheids
+and kw.wedstrijd = $w_id
+and kw.waarde > 0.2
+and zf.persoon = p.id
+and zf.speelt_zelfde_dag = kw.speelt_zelfde_dag
+
+(-> (table :kan_wedstrijd_fluiten)
+    (join (table :persoon) (where (= :persoon.id :kan_wedstrijd_fluiten.scheids)))
+    (join (table :zeurfactor) (where (= :zeurfactor.persoon :persoon.id)))
+    (select (where (= :kan_wedstrijd_fluiten.wedstrijd wedstrijd-id)))
+    (select (where (> :kan_wedstrijd_fluiten.waarde 0.2)))
+    (select (where (= :zeurfactor.speelt_zelfde_dag :kan_wedstrijd_fluiten.speelt_zelfde_dag)))
+    (project [:kan_wedstrijd_fluiten.scheids :kan_wedstrijd_fluiten.waarde :persoon.naam :zeurfactor.factor :kan_wedstrijd_fluiten.speelt_zelfde_dag]))
+    
+;macro voor select where =
+(defmacro sel-where-eq [it1 it2]
+  `(select (where (= ~it1 ~it2))))
+  
+
+[2011-02-07 20:07:20] foute method verwijderd, anders wordt 'ie niet goed geladen:
+
+(defn query-input-games-fout []
+  ; dubbele -> binnenste voor query opbouw, buitenste voor nabewerking
+  ; note: sel-where-eq macro werkt niet hier, binnen ->
+  (->> @(-> (table :wedstrijd)
+           (outer-join (table :scheids) :left (where (= :scheids.wedstrijd :wedstrijd.id)))
+           (sel-where-eq :wedstrijd.scheids_nodig 1)
+           (sel-where-eq :scheids.wedstrijd nil)
+           (project [:wedstrijd.id :wedstrijd.naam :wedstrijd.datumtijd])
+           (sort [:wedstrijd.datumtijd]))
+      (map #(hash-map :wedstrijd-id (:id %1) 
+                      :wedstrijd-naam (:naam %1)
+                      :datum (datetime-to-date (:datumtijd %1))
+                      :lst-kan-fluiten (query-lst-kan-fluiten (:id %1))))))
+             
+
+[2011-02-07 20:10:20] query-input-games is nu goed, met (pprint (first qig)) is het goed te zien.
+[2011-02-07 20:11:13] pprint voert meteen uit naar stdout, de result is nil.
+
+
+[2011-02-07 20:29:56] nog fout in query-lst-kan-fluiten:
+clojure.core=> (pprint (first lig))
+java.lang.RuntimeException: com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '(scheids-id,waarde,zelfde-dag) JOIN persoon ON (persoon.id = kan_wedstrijd_fluit' at line 1 (NO_SOURCE_FILE:0)
+
+
+[2011-02-07 20:31:01] is onderstaande query:
+SELECT kan_wedstrijd_fluiten.scheids,kan_wedstrijd_fluiten.waarde,persoon.naam,zeurfactor.factor,kan_wedstrijd_fluiten.speelt_zelfde_dag FROM kan_wedstrijd_fluiten AS kan_wedstrijd_fluiten(scheids-id,waarde,zelfde-dag) JOIN persoon ON (persoon.id = kan_wedstrijd_fluiten.scheids) JOIN zeurfactor ON (zeurfactor.persoon = persoon.id) WHERE (kan_wedstrijd_fluiten.wedstrijd = 123) AND (kan_wedstrijd_fluiten.waarde > 0.2) AND (zeurfactor.speelt_zelfde_dag = kan_wedstrijd_fluiten.speelt_zelfde_dag)
+
+
+[2011-02-13 11:27:28] query was al opgelost, geen rename gebruiken.
+[2011-02-13 11:27:47] nu verder met prog.
+
+[2011-02-21 20:34:43] probeer oplossing te saven met clojureql, maar lukt niet:
+scheidsclj.core=> (first mapped)
+{:status "voorstel", :speelt_zelfde_dag 0, :wedstrijd 1475, :scheids 236}
+scheidsclj.core=> (clojureql.core/conj! (clojureql.core/table :scheids) (first mapped))
+SQLException:
+ Message: Generated keys not requested. You need to specify Statement.RETURN_GENERATED_KEYS to Statement.executeUpdate() or Connection.prepareStatement().
+ SQLState: S1009
+ Error Code: 0
+java.lang.Exception: transaction rolled back: Generated keys not requested. You need to specify Statement.RETURN_GENERATED_KEYS to Statement.executeUpdate() or Connection.prepareStatement(). (NO_SOURCE_FILE:0)
+
+[2011-02-21 20:36:56] mogelijke oplossing is andere mysql jar:
+
+I finally found the cause of this. I had a mysql-connector-
+java-5.1.13-bin.jar file in my $JRUBY_HOME/lib directory.
+When I removed this is went to a mysql-connector-java-5.0.4-bin.jar
+file further down in my jruby tree.
+I'm not sure if it was the later version of mysql-connector-java that
+was causing the problem or whether it didn't like the CONNECTOR/J
+jar file in the $JRUBY_HOME/lib directory.
+
+[2011-02-21 20:45:18] dit lijkt zowaar de oplossing, moest wel mysql connector van mysql ophalen, andere clojars file, maar eigenlijk wel goed, bij de bron.
+
+[2011-02-21 20:45:46] hiermee 'lein run' opnieuw:
+
+
+[2011-02-26 10:52:51] kreten van het nederlands in het engels vertalen.
+
+[2011-03-13 20:23:10] iReport op linux geinstalleerd, was toch wel gratis te vinden. Install ging goed.
+[2011-03-13 20:23:32] datasource aanmaken beetje vaag. MySQL wel meteen beschikbaar, maar alle
+[2011-03-13 20:23:49] settings niet meteen goed, bij tweede keer wel.
+[2011-03-13 20:23:58] hiermee scheids rapporten kunnen maken, lijkt dus ok.
+[2011-03-13 20:24:12] verder moeten scripts kunnen werken met meerdere databases. Idee is om
+[2011-03-13 20:24:28] default de testdb te nemen, en alleen de producte db (scheidsprod) als
+[2011-03-13 20:24:45] dit expliciet wordt aangegeven.
+[2011-03-13 20:25:40] nog even gecheckt: in scheidsprod stonden alle scheids records al op status 'gemaild',
+[2011-03-13 20:26:02] zouden dus niet overschreven moeten worden.
+[2011-03-13 23:22:30] dacht even dat voor 3-12-2010 Jan Taconis ook ingedeeld was, terwijl dit niet kon.
+[2011-03-13 23:22:47] maar dit bleek op 10-12 te zijn. Voor 3-12 kon het nu precies, met 3 scheidsen. Ook hier de
+[2011-03-13 23:23:33] vraag of je het kan sturen dat deze dag als eerste wordt ingedeeld.
+[2011-03-13 23:23:48] misschien is probleem met indelen nu ook wel dat ik het hele seizoen wil indelen,
+[2011-03-13 23:24:02] terwijl ik het in de praktijk in 2x gedaan heb. Met back-tracking scheelde dit wel, maar 
+[2011-03-13 23:24:25] met genereren zou het toch niet zoveel uit moeten maken.
+[2011-03-13 23:24:43] maar dan wel voorwaarde dat logische changes eerder worden gekozen.
+
+[2011-03-13 23:27:18] maak me sterk dat vanuit onderstaande 'oplossing' niet een betere te vinden is met 1 change,
+[2011-03-13 23:27:39] tenzij de 3289 (max games) hier invloed op heeft. 57x57=3249
+[2011-03-13 23:30:20] ctrl-c reageert niet meer, maar kill -9 (java!) werkt wel.
+[2011-03-20 17:07:54] Eerder (vorige week) bovenstaand probleem al opgelost: door gebruik date() functie in de SQL
+[2011-03-20 17:08:16] werd de hashmap anders gevuld en de mapping hierop resulteerde in nil's. Hierdoor ging het optellen
+[2011-03-20 17:08:42] en vermenigvuldigen fout: alle wedstrijden van een scheids worden opgeteld, omdat alle dagen 
+[2011-03-20 17:09:06] 'hetzelfde' zijn, nl nil. Dit betekent dat onderstaande 'oplossing' de minimale waarde geeft
+[2011-03-20 17:11:02] voor de producten. Een 'eerlijkere' verdeling van 2,2,2,2 etc levert een groter product op.
+[2011-03-20 17:11:21] iig kunnen oplossen door keyword functie, nodig omdat er haakjes in het keyword staan.
+
+.
+Best solution so far (iteration 26713):
+Solution 292531 (parent: 292529)
+Fitness: -395923963.507600
+Maximum #games for a referee on one day: 3289
+Sum of whine factors: 150995076.000000
+List of whine factors: (1 1 1 1 8.0 8.0 8.0 8.0 8.0 8.0 8.0 8.0 8.0 10.0 10.0 16.0 20.0 3.3554432E7 5.0331648E7 6.7108864E7)
+#games per referee:  (0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 11 13 23)
+Maximum #games for a referee: 23
+#different referees: 16
+#games: 60
+Games:
+24-09-2010 19:45 D3 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, HvdH, BM, CM, KK, MW)
+24-09-2010 19:45 D4 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, HvdH, BM, CM, KK, MW)
+01-10-2010 21:15 H3 (sd=0) Gerard Kraan (GK) (wf=4.0/1.0) (BM, CM, EH, GK)
+01-10-2010 21:15 H2 (sd=0) Chris Meijer (CM) (wf=12.0/1.0) (BM, CM, EH, GK)
+01-10-2010 21:15 H4 (sd=0) Baukelien Mulder (BM) (wf=8.0/1.0) (BM, CM, EH, GK, HvdH, KK, MD)
+08-10-2010 19:45 D2 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (DM, GK, HvdH, JW, NdV, YB, CM, RvZ, RS)
+08-10-2010 19:45 D4 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (DM, GK, HvdH, JW, NdV, YB, CM, RvZ, RS)
+08-10-2010 21:15 H2 (sd=1) Baukelien Mulder (BM) (wf=2.0/0.5) (GK, JW, NdV, YB, BM, EH)
+15-10-2010 21:15 D3 (sd=0) Gerard Kraan (GK) (wf=4.0/1.0) (EH, GK, HvdH, MD, RvZ, RS)
+15-10-2010 21:15 H3 (sd=0) Ester Hilhorst (EH) (wf=20.0/1.0) (EH, GK, RvZ, RS)
+15-10-2010 21:15 H4 (sd=0) Gerard Kraan (GK) (wf=4.0/1.0) (EH, GK, HvdH, MD, RvZ, RS)
+29-10-2010 19:45 D2 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, HvdH, NdV, CM, EH)
+29-10-2010 19:45 H2 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, NdV, CM, EH)
+29-10-2010 21:15 D4 (sd=1) Baukelien Mulder (BM) (wf=2.0/1.0) (GK, HvdH, NdV, BM, KK, RvZ, RS)
+05-11-2010 21:15 H4 (sd=0) Yvonne Bokhorst (YB) (wf=8.0/1.0) (AW, DM, GK, HvdH, JW, RvZ, RS, YB)
+05-11-2010 21:15 H3 (sd=0) Gerard Kraan (GK) (wf=4.0/1.0) (GK, JW, RvZ, RS, YB)
+12-11-2010 19:45 D2 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (DM, GK, HvdH, JW, YB, CM, RvZ, RS)
+12-11-2010 21:15 H2 (sd=1) Baukelien Mulder (BM) (wf=2.0/0.5) (GK, JW, YB, BM)
+19-11-2010 21:15 H3 (sd=0) Ronald Schreuder (RS) (wf=8.0/1.0) (CM, GK, RvZ, RS)
+19-11-2010 21:15 D3 (sd=0) Gerard Kraan (GK) (wf=4.0/1.0) (CM, GK, HvdH, RvZ, RS)
+19-11-2010 21:15 H4 (sd=0) Rob van Zonneveld (RvZ) (wf=8.0/1.0) (CM, GK, HvdH, RvZ, RS)
+03-12-2010 21:15 H3 (sd=0) Gerard Kraan (GK) (wf=4.0/1.0) (CM, GK)
+03-12-2010 21:15 H4 (sd=0) Gerard Kraan (GK) (wf=4.0/1.0) (CM, GK, HvdH)
+03-12-2010 21:15 H2 (sd=0) Gerard Kraan (GK) (wf=4.0/1.0) (CM, GK)
+10-12-2010 19:45 D3 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, HvdH, JT, RvZ, RS, BM, CM, KK)
+10-12-2010 19:45 D4 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, HvdH, JT, RvZ, RS, BM, CM, KK)
+14-01-2011 21:15 H2 (sd=0) Gerard Kraan (GK) (wf=4.0/1.0) (BM, CM, GK, JW, YB)
+14-01-2011 21:15 H3 (sd=0) Gerard Kraan (GK) (wf=4.0/1.0) (BM, CM, GK, JW, YB)
+14-01-2011 21:15 H4 (sd=0) Baukelien Mulder (BM) (wf=8.0/1.0) (AW, BM, CM, DM, GK, HvdH, JW, KK, YB)
+21-01-2011 19:45 D2 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, HvdH, JT, NdV, BM, CM, KK, MW)
+21-01-2011 19:45 D3 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, HvdH, JT, NdV, BM, CM, KK, MW)
+21-01-2011 19:45 D4 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, HvdH, JT, NdV, BM, CM, KK, MW)
+28-01-2011 21:15 D3 (sd=0) Gerard Kraan (GK) (wf=4.0/1.0) (CM, GK, HvdH, MD, NdV)
+28-01-2011 21:15 H4 (sd=0) Henry van der Heide (HvdH) (wf=10.0/1.0) (CM, GK, HvdH, MD, NdV)
+04-02-2011 19:45 D4 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, HvdH, BM, CM, KK, MW)
+04-02-2011 19:45 D2 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, HvdH, BM, CM, KK, MW)
+04-02-2011 19:45 H2 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, BM, CM, MW)
+11-02-2011 21:15 D3 (sd=0) Baukelien Mulder (BM) (wf=8.0/1.0) (BM, CM, GK, HvdH, KK, NdV)
+11-02-2011 21:15 H4 (sd=0) Baukelien Mulder (BM) (wf=8.0/1.0) (BM, CM, GK, HvdH, KK, NdV)
+18-02-2011 19:45 H2 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, JW, YB, BM, CM, MW)
+18-02-2011 19:45 D2 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (DM, GK, HvdH, JW, YB, BM, CM, KK, MW)
+18-02-2011 21:15 D4 (sd=0) Debby Meerveld (DM) (wf=8.0/1.0) (DM, GK, HvdH, JW, YB, RvZ, RS)
+11-03-2011 21:15 D3 (sd=0) Margriet Drent (MD) (wf=10.0/1.0) (BM, CM, GK, HvdH, KK, MD, RvZ, RS)
+11-03-2011 21:15 H3 (sd=0) Gerard Kraan (GK) (wf=4.0/1.0) (BM, CM, GK, RvZ, RS)
+11-03-2011 21:15 H4 (sd=0) Kuneke Kluijfhout (KK) (wf=8.0/1.0) (BM, CM, GK, HvdH, KK, MD, RvZ, RS)
+18-03-2011 19:45 D4 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (DM, GK, HvdH, JW, YB, BM, CM, KK, MW)
+18-03-2011 19:45 H2 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, JW, YB, BM, CM, MW)
+25-03-2011 19:45 D2 (sd=0) Jan Taconis (JT) (wf=8.0/1.0) (GK, HvdH, JT, BM, CM, KK)
+25-03-2011 19:45 D3 (sd=1) Baukelien Mulder (BM) (wf=2.0/1.0) (GK, HvdH, JT, BM, CM, KK)
+25-03-2011 19:45 D4 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, HvdH, JT, BM, CM, KK)
+01-04-2011 19:45 H2 (sd=1) Nico de Vreeze (NdV) (wf=2.0/1.0) (BM, GK, JW, YB, JT, NdV)
+01-04-2011 21:15 H4 (sd=0) Annette Wolda (AW) (wf=8.0/1.0) (AW, BM, DM, GK, HvdH, JW, KK, YB, RvZ, RS)
+01-04-2011 21:15 H3 (sd=0) Jeanet Wattimena (JW) (wf=8.0/1.0) (BM, GK, JW, YB, RvZ, RS)
+01-04-2011 21:15 D2 (sd=0) Baukelien Mulder (BM) (wf=8.0/1.0) (BM, DM, GK, HvdH, JW, KK, YB, RvZ, RS)
+08-04-2011 19:45 D3 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, HvdH, BM, CM, KK)
+08-04-2011 19:45 D2 (sd=1) Baukelien Mulder (BM) (wf=2.0/1.0) (GK, HvdH, BM, CM, KK)
+08-04-2011 19:45 D4 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (GK, HvdH, BM, CM, KK)
+15-04-2011 21:15 H3 (sd=0) Gerard Kraan (GK) (wf=4.0/1.0) (BM, CM, GK, MW)
+15-04-2011 21:15 H2 (sd=0) Maarten Wispelwey (MW) (wf=8.0/1.0) (BM, CM, GK, MW)
+15-04-2011 21:15 H4 (sd=0) Baukelien Mulder (BM) (wf=8.0/1.0) (BM, CM, GK, HvdH, KK, MW, MD)
+--------------
+Referees:
+#1 zf=   8.0 : Annette Wolda
+#11 zf=8388608.0 : Baukelien Mulder
+#23 zf=50331648.0 : Chris Meijer
+#1 zf=   8.0 : Debby Meerveld
+#1 zf=  20.0 : Ester Hilhorst
+#13 zf=67108864.0 : Gerard Kraan
+#0 zf=   1.0 : Gert van de Meent
+#1 zf=  10.0 : Henry van der Heide
+#1 zf=   8.0 : Jan Taconis
+#0 zf=   1.0 : Jan-Albert Kootstra 
+#1 zf=   8.0 : Jeanet Wattimena
+#0 zf=   1.0 : Karen Agricola
+#1 zf=   8.0 : Kuneke Kluijfhout
+#1 zf=   8.0 : Maarten Wispelwey
+#1 zf=  10.0 : Margriet Drent
+#1 zf=   2.0 : Nico de Vreeze
+#0 zf=   1.0 : Reza Gharsi
+#1 zf=   8.0 : Rob van Zonneveld
+#1 zf=   8.0 : Ronald Schreuder
+#1 zf=   8.0 : Yvonne Bokhorst
+from this solution a better one CANNOT be found with 1 change...
+
+[2011-03-20 17:11:41] openstaand punt was nog de command line args handling. Via clojars/github 2 opties
+[2011-03-20 17:11:57] gevonden: clojopt van amalloy en clargon van gar3thjon3s. Lijken bijna gelijk,
+[2011-03-20 17:12:34] op gevoel nu eerst voor clojopts gekozen. Dit is ook een 0.3 versie, terwijl de andere
+[2011-03-20 17:12:52] een 1.0.0 versie is, die heeft het dan toch niet helemaal begrepen.
+[2011-03-20 18:31:44] wat zitten proberen met cmdline met clojopts, maar werkt niet lekker met optionele niet
+[2011-03-20 18:32:05] meegegeven params: deze worden niet teruggegeven.
+[2011-03-20 18:32:17] clargon doet het wat dat betreft wel goed, dus deze nu gebruiken.
+[2011-03-20 18:32:39] wat vogelen met doc-string, maar wel gelukt.
+

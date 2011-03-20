@@ -7,7 +7,8 @@
                  ;[org.clojars.kjw/mysql-connector "5.0.4"]
                  ;[mysql/mysql-connector-java "5.1.6"]
                  [mysql/mysql-connector-java "5.0.4"]
-                 [clj-time "0.3.0-SNAPSHOT"]]
+                 [clj-time "0.3.0-SNAPSHOT"]
+                 [clargon "1.0.0"]]
   :main scheidsclj.core)
 
 ; gebruik mysql connector 5.0.4 ivm problemen met id generatie en teruggeven
