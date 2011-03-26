@@ -103,7 +103,7 @@ proc det_lst_dir_db {dir} {
   global db conn log ar_ids
   set str_db [$db str_to_db [det_path_in_db $dir]]
   # 10-4-2010 NdV slash toegevoegd aan query, want anders ook files die in parent dir zitten en met dezelfde string beginnen (bv motorcycle).
-  set query "select id, path from musicfile where path like '$str_db/%' order by path"
+  set query "select id, path, generic from musicfile where path like '$str_db/%' order by path"
   # 10-4-2010 NdV kan er niet op vertrouwen dat order by altijd dezelfde volgorde kiest als tcl lsort, bv met hoofd en kleine letters. Collating misschien ook anders.
   # volgorde is met deze 'balanced line' essentieel.
   # met filter alle files die in subdirs staan, eruit halen.
@@ -193,7 +193,8 @@ proc upsert_musicfile {filename artist_id album_id lst_dir_db_name} {
       }
     } else {
       # extra element in database, zou weg mogen
-      $log warn "Record in db does not exist in filesystem: [lindex $lst_dir_db 0]"
+      $log warn "Record in db does not exist in filesystem, remove from db: [lindex $lst_dir_db 0]"
+      remove_db_record [lindex $lst_dir_db 0]
       # exit 2
       # db lijst aanpassen en opnieuw proberen.
       ::struct::list shift lst_dir_db
@@ -203,6 +204,16 @@ proc upsert_musicfile {filename artist_id album_id lst_dir_db_name} {
     }
   }
   return $musicfile_id
+}
+
+proc remove_db_record {db_record} {
+  global conn log
+  lassign $db_record id path generic
+  foreach {table field} {member generic musicfile generic generic id} { 
+    set query "delete from $table where $field=$generic"
+    $log warn "query: $query"
+    ::mysql::exec $conn $query 
+  }  
 }
 
 main $argc $argv

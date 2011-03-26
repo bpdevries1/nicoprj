@@ -54,6 +54,7 @@
 
 (defn query-input-games []
   ; double --> and -> innermost for query building, outermost for post processing.
+  ; does not select games where a scheids-record exists, even if it has status "voorstel"
   (->> @(-> (table :wedstrijd)
            (outer-join (table :scheids) :left (where (= :scheids.wedstrijd :wedstrijd.id)))
            (select (where (= :wedstrijd.scheids_nodig 1)))

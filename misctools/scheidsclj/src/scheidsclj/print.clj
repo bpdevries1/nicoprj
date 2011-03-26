@@ -30,6 +30,14 @@
 ; @param kan-naar-beter: functie die oplossing als input heeft, en true/false als output.
 (defn print-solution [sol ar-inp-games can-find-better]
   (printlnf "Solution %d (parent: %d)" (:solnr sol) (:solnr-parent sol))
+  (println "Games:")
+  (doseq [sol-referee (:vec-sol-referee sol)] 
+    (println (sol-referee-to-string sol-referee ar-inp-games)))
+  (println "--------------\nReferees:")
+  ; * 1.0 needed to cast integer to float, otherwise problems with format.
+  (doseq [el (:lst-sol-person-info sol)]
+    (printlnf "#%d zf=%6.1f : %s" (:nreferee el) (* 1.0 (:whinefactor el)) (:referee-name el))) 
+  (println "--------------\nStatistics:")
   (printlnf "Fitness: %f" (:fitness sol))
   (printlnf "Maximum #games for a referee on one day: %d" (:prod-games-person-day sol))
   (printlnf "Sum of whine factors: %f" (:sum-whinefactors sol))
@@ -38,13 +46,6 @@
   (printlnf "Maximum #games for a referee: %d" (:max-referee sol))
   (printlnf "#different referees: %d" (:n-diff-referee sol))
   (printlnf "#games: %d" (count (:vec-sol-referee sol)))
-  (println "Games:")
-  (doseq [sol-referee (:vec-sol-referee sol)] 
-    (println (sol-referee-to-string sol-referee ar-inp-games)))
-  (println "--------------\nReferees:")
-  ; * 1.0 needed to cast integer to float, otherwise problems with format.
-  (doseq [el (:lst-sol-person-info sol)]
-    (printlnf "#%d zf=%6.1f : %s" (:nreferee el) (* 1.0 (:whinefactor el)) (:referee-name el))) 
   (if (can-find-better sol)
     (println "from this solution a BETTER one can be found with 1 change...")
     (println "from this solution a better one CANNOT be found with 1 change..."))

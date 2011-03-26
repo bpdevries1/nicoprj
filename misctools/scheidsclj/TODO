@@ -1,17 +1,14 @@
 
 Mutate-solution
 ================
+[2011-02-20 22:31:21] @todo: meerdere constraints inbouwen, bv dat Baukelien max 6 (?) wedstrijden fluit in een seizoen. Bij meer dan 6 komt er een grote penalty bij, wel afhankelijk van hoeveel meer dan 6.
 [2011-02-20 17:00:09] @todo: bij zoeken naar een betere oplossing kijken naar het product van zeurfactoren van de scheidsen. 
 [2011-02-20 17:00:32] bij de grootste zeurfactor meer kans op aanpassing van een wedstrijd. Hierdoor wel kans
 [2011-02-20 17:00:57] op flippen tussen 2 scheidsrechters.
-[2011-02-20 22:31:21] @todo: meerdere constraints inbouwen, bv dat Baukelien max 6 (?) wedstrijden fluit in een seizoen. Bij meer dan 6 komt er een grote penalty bij, wel afhankelijk van hoeveel meer dan 6.
-[2011-03-13 23:13:37] major todo, zie ook vorige: gaat niet vlot om een werkbare oplossing te vinden met alle 60 wedstrijden (6 teams x 10 thuiswedstrijden).
-[2011-03-13 23:17:12] Maximum #games for a referee on one day: 3289 is wel erg veel! Dit is 11x13x23, de totale wedstrijden per referee, dus niet op 1 dag.
 [2011-03-13 23:25:04] kies nu een wedstrijd om te veranderen, en hierbinnen een scheids om te kiezen, moet misschien andersom?
 
 Opbouw/structuur code
 =====================
-[2011-02-25 22:04:39] @todo minder (geen?) globals gebruiken, de vars met *sterretjes*.
 [2011-02-26 10:53:49] geneticlib is nu nog leeg, hier wat inzetten?
 [2011-03-13 20:17:17] vanuit JoC: destructuring bind toepassen.
 [2011-03-13 20:17:43] vanuit JoC: recursief zou weinig nodig moeten zijn, alleen bij lazy dingen. Zou last resort moeten zijn.
@@ -28,3 +25,9 @@ Technisch
 Debuggen
 ========
 [2011-03-13 23:29:29] Kun je iets met breakpoints doen? wil bv wel eens zien waarom de 3289 zo wordt uitgerekend.
+
+Later / eventueel
+==================
+[2011-02-25 22:04:39] @todo minder (geen?) globals gebruiken, de vars met *sterretjes*.
+
+
