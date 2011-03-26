@@ -13,7 +13,7 @@ if request.env.web2py_runtime_gae:            # if running on Google App Engine
     # session.connect(request, response, db=MEMDB(Client())
 else:                                         # else use a normal relational database
     # db = DAL("mysql://nico:pclip01;@localhost:3306/scheids")
-    db = DAL("mysql://scheids:scheids@localhost:3306/scheids")
+    db = DAL("mysql://scheids:scheids@localhost:3306/scheidsprod")
 ## if no need for session
 # session.forget()
 
@@ -29,7 +29,10 @@ else:                                         # else use a normal relational dat
 from gluon.tools import *
 auth=Auth(globals(),db)                      # authentication/authorization
 auth.settings.hmac_key='fddbe104-a4bb-41f2-9870-8f18fb5bc1fa'
-auth.define_tables()                         # creates all needed tables
+
+# 19-3-2011 NdV line below gives error with db scheidsprod, so comment out.
+# auth.define_tables()                         # creates all needed tables
+
 crud=Crud(globals(),db)                      # for CRUD helpers using auth
 service=Service(globals())                   # for json, xml, jsonrpc, xmlrpc, amfrpc
 
