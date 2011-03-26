@@ -1,0 +1,13 @@
+Backup2nas logboek
+==================
+[2011-03-20 16:43:01] ctrl-c handler toegevoegd, net als bij scheids/maak-voorstel-gen. Maar in handler wordt nu breakpoint aangeroepen, zodat je bij langdurige dingen kan checken waar je bent in de code en hierna weer C van continue kan doen.
+
+[2011-03-21 19:02:03] gisteren groot deel van w:/media naar USB gekopieerd, duurde wel lang. Hierna weer begonnen met check, afgebroken. Log hiervan hernoemd naar ..log.media2usb.
+
+[2011-03-21 19:03:36] wil ook gewone backup weer eens doen.
+
+
+TODO:
+* check ..log.media2usb.
+* media: gisteren wel nieuwe dingen opgehaald, dus datum hiervoor op 20-3-2011 09:00:00 zetten.
+* aparte settings dir per project, vooral voor c/d->w en w->f. Ook verdelen media en de rest.

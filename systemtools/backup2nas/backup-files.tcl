@@ -8,8 +8,13 @@ package require Tclx
 set log [::ndv::CLogger::new_logger [file tail [info script]] info]
 # set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 
-# set BACKUPDATETIME "backupdatetime.txt"
 set 4NT_EXE "c:\\util\\4nt\\4nt.exe"
+
+# @todo (per 20-3-2011)
+# * kan zijn dat een van beide filesystems (bron of target) even niet beschikbaar is. Dan fouten opnemen in apart tekstbestand,
+# en deze volgende keer eerst proberen te doen. Als het dan weer niet lukt, is het echt fout.
+# * merk dat backuppen via laptop van NAS naar 2TB erg traag gaat, nu (20-3-2011) ook niet duidelijk hoe lang het gaat duren
+# * de balanced line van bron en target lijkt best wel een aardig alternatief. Door met 4NT een dir /s te doen.
 
 # @todo
 # backuppen duurt nu best lang, ook al valt er bijna niets te backuppen, het checken duurt lang. Opties:
@@ -32,13 +37,12 @@ set 4NT_EXE "c:\\util\\4nt\\4nt.exe"
 # results-file anders: failed items noteren + oorzaak
 # alleen bestanden nieuwer dan een week.
 # Eerst kopieren naar een temp-file, als dit gelukt is een delete en rename uitvoeren. Vooral bij grote files verkleint dit het risico op corrupte files.
-
-::ndv::CLogger::set_logfile "backup2nas.log"
+# 22-3-2011 (untested yet) bij fouten en afbreken wordt de volgende keer de tobackup.txt ingelezen en afgehandeld. Als dit klaar is, kun je
+# de backupdatetime vullen met de start van de oorspronkelijk check, die je bv in deze tobackup.txt kunt opnemen. Als eerste
+# regel met keyword lijkt het handigst.
 
 proc main {argc argv} {
-  global log fres fstash lst_ignore_regexps BACKUPDATETIME max_path
-  $log info START
-  $log debug "argv: $argv"
+  global log fres params
   set options {
     {settingsdir.arg "~/.backup2nas" "Dir with settings (paths.txt, ignoreregexps.txt, results.txt"}
     {paths.arg  "paths.txt"  "use file with paths (relative to settingsdir)"}
@@ -57,19 +61,78 @@ proc main {argc argv} {
     puts [::cmdline::usage $options $usage]
     exit 1
   }
+
+  ::ndv::CLogger::set_logfile [file join $params(settingsdir) "backup2nas.log"]
+  
+  $log info START
+  $log debug "argv: $argv"
   $log debug "paths: $params(p)"
   $log debug "target: $params(t)"
   
+  backup_main
+  
+  $log info FINISHED
+}
+
+proc backup_main {} {
+  global log params fres fstash lst_ignore_regexps max_path
   set target $params(t)
   if {[check_target $target]} {
     $log debug "check_target failed, exiting"
     exit 1
   }
+  signal trap SIGINT handle_signal
+  lock_backup
+  lassign [set_params] lst_ignore_regexps lst_paths time_treshold
+  
+  set start_time [clock seconds]
+  $log info "time treshold: $time_treshold"
+  set max_path [det_max_path] ; # max path length dependent on OS.
+  set stashfilename [file join $params(settingsdir) filestobackup.txt]
+
+  # 20-3-2011 if something went wrong the previous time, the stashed file still exists.
+  # handle this first.
+  handle_stashed_files $stashfilename -1 1  
+
+  # 20-3-2011 NdV nuttig om met append te doen?, bij fouten delete ik de file steeds.
+  # set fstash [open $stashfilename a]
+  lassign [fill_stash $stashfilename $lst_paths $target $time_treshold $start_time] totalfiles totalbytes 
+  handle_stashed_files $stashfilename $totalfiles 
+
+  # pas hier de tijd schrijven, pas hier is (volledige) backup gelukt.
+  puts_backup_time $start_time
+  
+  unlock_backup
+  
+  $log info "Total files backed up: $totalfiles"
+  $log info "Total Megabytes backed up: [format %7.0f [expr $totalbytes / 1024 / 1024]]"  
+}
+
+# 20-3-2011 NdV Check/make file should be atomic, but this will work ok most of the time
+proc lock_backup {} {
+  global params log
+  set lockname [file join $params(settingsdir) ".backuplock.lck"]
+  if {[file exists $lockname]} {
+    $log error "lock file already exists, exiting: $lockname"
+    exit 1
+  }
+  set f [open $lockname w]
+  puts $f "locked"
+  close $f
+}
+
+proc unlock_backup {} {
+  global params log
+  set lockname [file join $params(settingsdir) ".backuplock.lck"]
+  file delete $lockname
+}
+
+proc set_params {} {
+  global params log
   set lst_ignore_regexps [::struct::list filterfor el \
     [split [read_file [file join $params(settingsdir) $params(ignoreregexps)]] "\n"] {[string trim $el] != ""}] 
   set lst_paths [::struct::list filterfor el \
     [split [read_file [file join $params(settingsdir) $params(paths)]] "\n"] {[string trim $el] != ""}] 
-  # set fres [open [file join $params(settingsdir) $params(r)] a] ; # append mode.
   if {$params(w)} {
     set time_treshold [expr [clock seconds] - (7 * 24 * 60 * 60)] 
   } elseif {$params(p)} {
@@ -84,34 +147,32 @@ proc main {argc argv} {
     $log info "No -w or -p given, backup everything!"
     set time_treshold 0 
   }
-  set start_time [clock seconds]
-  $log info "time treshold: $time_treshold"
-  set max_path [det_max_path] ; # max path length dependent on OS.
+  list $lst_ignore_regexps $lst_paths $time_treshold
+}
+
+proc fill_stash {stashfilename lst_paths target time_treshold start_time} {
+  global params log fstash
+
+  set fstash [open $stashfilename w]
+  chan configure $fstash -encoding "utf-8"
+  puts $fstash "backupdatetime: $start_time"
   set totalfiles 0
   set totalbytes 0.0
-  set stashfilename [file join $params(settingsdir) filestobackup.txt]
-  set fstash [open $stashfilename a]
   foreach path $lst_paths {
-    if {$params(use4nt)} {
-      lappend res [backup_path_4nt $path $target $params(tempext) $time_treshold]
-    } else {
-      lassign [backup_path $path $target $params(tempext) $time_treshold 1] nfiles nbytes
-      incr totalfiles $nfiles
-      set totalbytes [expr $totalbytes + $nbytes] 
-    }
+    lassign [backup_path $path $target $params(tempext) $time_treshold 1] nfiles nbytes
+    incr totalfiles $nfiles
+    set totalbytes [expr $totalbytes + $nbytes] 
   }
-  # close $fres
-  close $fstash
-  handle_stashed_files $stashfilename  
-  
-  # pas hier de tijd schrijven, pas hier is (volledige) backup gelukt.
+  close $fstash  
+  list $totalfiles $totalbytes 
+} 
+
+
+proc puts_backup_time {start_time} {
+  global params log
   set f [open [file join $params(settingsdir) $params(b)] w]
   puts $f [clock format $start_time -format "%Y-%m-%d %H:%M:%S"]
   close $f
-
-  $log info "Total files backed up: $totalfiles"
-  $log info "Total Megabytes backed up: [format %7.0f [expr $totalbytes / 1024 / 1024]]"  
-  $log info FINISHED
 }
 
 # @todo ga eerst uit van windows
@@ -153,49 +214,6 @@ proc backup_path {path target tempext time_treshold reclevel} {
   list $totalfiles $totalbytes
 }
 
-# @note if a copy fails, notify with log.
-# @note files will be puth in [file join $target [drive $path] $path
-proc backup_path_4nt_old {path target tempext time_treshold} {
-  global log fres 4NT_EXE
-  $log debug "Backup up $path => $target"
-  try_eval {
-    file delete 4nt.dir
-    exec $4NT_EXE /c dir [file nativename $path] /s /a /r /h /m >4nt.dir 
-  } {
-    $log error "Failed to exec 4NT dir. errorResult: $errorResult"
-    # toch doorgaan, wel child process exited abnormally, maar alles lijkt goed en file is aangemaakt.
-    # error "Failed to exec 4NT dir; errorResult: $errorResult"
-  }
-  set last_dir_created "<none>"
-  set f [open 4nt.dir r]
-  while {![eof $f]} {
-    gets $f line
-    if {[regexp {^ Directory of (.*)\\\*$} $line z dirname]} {
-      set current_dir [string trim $dirname] 
-      set dirname "<none>"
-    } elseif {[regexp {^([^ ]+ +[^ ]+) +([^ ]+) +(.+)$} $line z datetime filesize filename]} {
-      if {$filesize == "<DIR>"} {
-        continue 
-      }
-      set sec [clock scan $datetime -format "%d-%m-%y  %H:%M"]
-      if {$sec < $time_treshold} {
-        continue 
-      }
-      set filepath [file join $current_dir $filename]
-      if {[ignore_file $filepath]} {
-        continue 
-      }
-      # 17-10-2010 bij ignorefiles nu /~ opgenomen, file join denkt dat een ~ de homedir is, en is op windows niet zo.
-      if {$current_dir != $last_dir_created} {
-        file mkdir [det_target_path $current_dir $target]
-        set last_dir_created $current_dir
-      }
-      backup_file $filepath $target $tempext
-    }
-  }
-  close $f
-}
-
 # @return list of [1, size of file copied in bytes]
 # @rturn list [0,0] if file not copied (to ignore or too old)
 proc handle_file {filename target tempext time_treshold} {
@@ -218,20 +236,51 @@ proc stash_backup_file {filename target tempext} {
   list 1 [file size $filename]
 }
 
-proc handle_stashed_files {stashfilename} {
+proc handle_stashed_files {stashfilename totalfiles {start 0}} {
   global log
-  $log info "Copy stashed files: start"
+  if {![file exists $stashfilename]} {
+    if {!$start} {
+      $log error "Stash file does not exist"
+      return
+    } else {
+      $log debug "Stash file does not exist at start."
+      return ; # without log. 
+    }
+  }
+  $log info "Copy stashed files (#$totalfiles): start"
   set f [open $stashfilename r]
+  chan configure $f -encoding "utf-8"
+  gets $f line
+  if {[regexp {backupdatetime: (.+)$} $line z st]} {
+    set start_time $st
+  } else {
+    set start_time "<unknown>" 
+    close $f ; # reopen file.
+    set f [open $stashfilename r]
+    chan configure $f -encoding "utf-8"
+  }
+  set nfiles 0
   while {![eof $f]} {
     gets $f line
     # lassign [split $line "\t"]
     if {[string trim $line] != ""} {
-      backup_file {*}[split $line "\t"] ; # filename target tempext
+      try_eval {
+        backup_file {*}[split $line "\t"] ; # filename target tempext
+      } {
+        $log warn "Backup failed for $line, $errorResult" 
+      }
+    }
+    incr nfiles
+    if {[expr $nfiles % 100] == 0} {
+      $log info "Handled $nfiles of $totalfiles files ($line)" 
     }
   }
   close $f
   # remove stash file when all went well
   file delete $stashfilename
+  if {$start_time != "<unknown>"} {
+    puts_backup_time $start_time
+  }
   $log info "Copy stashed files: finished"  
 }  
 
@@ -242,19 +291,25 @@ proc backup_file {filename target tempext} {
   set target_path [det_target_path $filename $target]
   set target_dir [file dirname $target_path]
   # acties op target path pas bij echt kopieren, handle_stashed 
-  if {[file isfile $target_dir]} {
-    # vroeger een file, nu een dir: file delete
-    file delete $target_dir
-  }
-  file mkdir $target_dir
-  # file mkdir [file dirname $target_path]
-  set filesize 0
   try_eval {
+    if {[file isfile $target_dir]} {
+      # vroeger een file, nu een dir: file delete
+      file delete $target_dir
+    }
+    file mkdir $target_dir
+    if {[files_equal $filename $target_path]} {
+      $log info "Target file is already the same as source, no need to copy: $target_path"
+      return [list 0 0]
+    }
+    # file mkdir [file dirname $target_path]
+    set filesize 0
     set filesize [file size $filename]
     set temp_target "$target_path$tempext"
     file copy $filename $temp_target ; # force niet nodig hier.
     file delete $target_path
     file rename $temp_target $target_path
+    # set target datetime to same as source
+    file mtime $target_path [file mtime $filename]
     set ext [file extension $filename]
     if {($ext == ".ost") || ($ext == ".pst")} {
       # outlook files altijd loggen.
@@ -267,6 +322,19 @@ proc backup_file {filename target tempext} {
     #puts $fres "[clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]\t$filename\t$res"
   }
   list 1 $filesize
+}
+
+# return 1 if files are equal, that is, both exist and have the same date/time.
+proc files_equal {src target} {
+  if {[file exists $target]} {
+    if {[file mtime $src] == [file mtime $target]} {
+      return 1 
+    } else {
+      return 0
+    }
+  } else {
+    return 0
+  } 
 }
 
 # path: d:/nico/nicoprj/test.txt
@@ -297,6 +365,7 @@ proc det_from_drive {path} {
 }
 
 # 12-3-2011 also ignore if filename is a link (symlink or hardlink on linux, junction on windows)
+# 19-3-2011 if reading the file failes, log this and return 1 (true).
 proc ignore_file {filename {istarget 0}} {
   global lst_ignore_regexps max_path log
   if {[string length $filename] > $max_path} {
@@ -306,15 +375,39 @@ proc ignore_file {filename {istarget 0}} {
   if {$istarget} {
     return 0 ; # with target only check the filename length, it does not exist yet. 
   }
-  if {[file type $filename] == "link"} {
+  set filetype "none"
+  catch {set filetype [file type $filename]}
+  if {$filetype == "none"} {
+    $log warn "Cannot determine filetype of: $filename, returning"
     return 1 
+  }
+  if {$filetype == "link"} {
+    $log debug "Filetype($filename) == link, returning"
+    return 1 
+  }
+  if {[has_invalid_characters $filename]} {
+    $log warn "Invalid characters in: $filename, returning..."
+    return 1
   }
   foreach re $lst_ignore_regexps {
     if {[regexp -nocase -- $re $filename]} {
       return 1 
     }
   }
+  # special case: ? in filename: kan niet op windows, misschien ook nog andere chars.
+  if {[regexp {\?} $filename]} {
+    $log warn "? in filename, ignoring: $filename"
+    return 1 
+  }
   return 0
+}
+
+proc has_invalid_characters {filename} {
+  if {[regexp {\?} $filename]} {
+    return 1 
+  } else {
+    return 0 
+  }
 }
 
 # @note check if path is writable, by creating and deleting a dummy file.
@@ -344,6 +437,13 @@ proc det_max_path {} {
   } else {
     return 32000 ; # not verified on linux! 
   }
+}
+
+proc handle_signal {} {
+  puts "ctrl-c detected, going into debug mode... (exit to exit)"
+  breakpoint
+  # handle_best_solution
+  # exit 1 ; # wel nodig, anders blijft 'ie erin.
 }
 
 main $argc $argv
