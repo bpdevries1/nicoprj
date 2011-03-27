@@ -70,20 +70,6 @@
       :prod-games-person-day (det-prod-games-person-day lst-person-games)
       :lst-sol-person-info (det-lst-sol-person-info lst-person-games))))
 
-; make more flexible, so that a series of post-processing functions can be called.
-; maybe also with a name, so chooseable with cmdline.
-(defn user-post-process-old [sol]
-  "User post processing functions, such as changing the fitness based on specific requirements
-   This one so that Baukelien has a max of 6 games."
-  (let [n-games-baukelien (for [person (:lst-sol-person-info sol) 
-                               :when (= (:referee-name person) "Baukelien Mulder")]
-                            (:nreferee person)) ; this gives a list, so need the first item, if available.
-        max-ok 6]
-    (cond (empty? n-games-baukelien) sol
-          (<= (first n-games-baukelien) max-ok) sol
-          true (assoc sol :fitness
-            (- (:fitness sol) (* 1000 (- (first n-games-baukelien) max-ok))))))) 
-
 (defn handle-baukelien [sol]
   "User post processing function, such as changing the fitness based on specific requirements
    This one so that Baukelien has a max of 6 games."
@@ -97,6 +83,8 @@
             (- (:fitness sol) (* 1000 (- (first n-games-baukelien) max-ok))))))) 
 
 ; deze nog dynamischer?
+; make more flexible, so that a series of post-processing functions can be called.
+; maybe also with a name, so chooseable with cmdline.
 (defn user-post-process [sol]
   "Call user defined functions to possibly change solution, especially fitness"
   (-> sol
@@ -123,27 +111,7 @@
             :max-whinefactors (max lst-whinefactors))]
         (user-post-process sol)))
 
-(defn add-statistics-old [vec-sol-referee note solnr-parent]
-  "Return a solution hashmap, including statistics and fitness"
-  (let [sol-values (det-sol-values *lst-inp-persons* vec-sol-referee)
-        n-diff-referee (count (for [n (:lst-counts sol-values) :when (> n 0)] 1))
-        lst-whinefactors (:lst-whinefactors sol-values)] 
-    (assoc sol-values
-            :vec-sol-referee vec-sol-referee
-            :note note
-            :solnr (new-sol-nr)
-            :solnr-parent solnr-parent
-            :fitness (calc-fitness (:prod-games-person-day sol-values) 
-                                   (apply max (:lst-counts sol-values)) 
-                                   n-diff-referee 
-                                   (apply + lst-whinefactors) 
-                                   (apply max lst-whinefactors))
-            :max-referee (apply max (:lst-counts sol-values))
-            :n-diff-referee n-diff-referee
-            :sum-whinefactors (apply + lst-whinefactors)
-            :max-whinefactors (max lst-whinefactors))))
-
-; beetje raar dat choose-random-referee met de game-id wordt aangeroepen, en niet met de game gegevens
+; @note: beetje raar dat choose-random-referee met de game-id wordt aangeroepen, en niet met de game gegevens
 ; zelf. Zo gedaan omdat deze functie vanuit meerdere plekken wordt aangeroepen, en de gegevens niet overal bekend
 ; zijn. 
 ; @todo nog refactoren zodat het meer functioneel wordt, niet afhankelijk van global variables.
@@ -154,19 +122,18 @@
 (defn mutate-game [sol-referee]
   (choose-random-referee (:game-id sol-referee)))
         
-; @note tail-recursive, sort-of continuation style passing?
-(defn mutate-solution-rec [n vec-sol-referee solnr-parent]
-  (if (zero? n) 
-    (add-statistics vec-sol-referee "Mutated game(s)" solnr-parent)
-    (recur (dec n) 
-      (let [rnd (rand-int (count vec-sol-referee))]
-        (assoc vec-sol-referee rnd (mutate-game (get vec-sol-referee rnd))))
-      solnr-parent)))      
-      
+(defn mutate-solution-step [vec-sol-referee]
+  (let [rnd (rand-int (count vec-sol-referee))]
+        (assoc vec-sol-referee rnd (mutate-game (get vec-sol-referee rnd)))))
+
 ; @todo de rand-int 2 waarde halen uit de command-line params. Hier ook een goede lib voor?
 ; bepaal randomwaarde 1 of 2, en muteer oplossing zo vaak
-(defn mutate-solution [sol]
-  (mutate-solution-rec (inc (rand-int 2)) (:vec-sol-referee sol) (:solnr sol)))
+(defn mutate-solution [{:keys [vec-sol-referee solnr]}]            ; destructure the sol hashmap.   
+  (let [new-vec-sol-referee
+        (->> (iterate mutate-solution-step vec-sol-referee)        ; infinite lazy list of mutations
+             (drop (inc (rand-int 2)))                             ; drop 1 or 2, these are the number of changes
+             (first))]                                             ; and take the first.
+     (add-statistics new-vec-sol-referee "Mutated game(s)" solnr)))  
 
 ; globals definieren met def, dan maar eenmalig een waarde toegekend (?)
 ; en krijgen pas een waarde bij uitvoeren, dus in andere functies niet bekend op compile time.
@@ -175,7 +142,6 @@
   (def *lst-inp-persons* (det-lst-inp-persons)) 
   (def *ar-inp-games* 
     (zipmap (map :game-id *lst-inp-games*) *lst-inp-games*)))
-
 
 ; helper for can-find-better, use let, letfn?
 (defn fitness-sol-game-change-referee [vec-sol-referee game-index referee]

@@ -498,3 +498,10 @@ from this solution a better one CANNOT be found with 1 change...
 [2011-03-20 21:29:31] Baukelien spelen dan toch een geringe waarde, hier beter 1000 van maken.
 [2011-03-20 21:32:33] bug: n-games-baukelien is leeg.
 [2011-03-20 21:37:28] fitness now:                                                 -1204234331.669600
+
+[2011-03-27 16:26:42] had idee om wedstrijd van scheids die de meeste wedstrijden heeft, vaker te kiezen.
+[2011-03-27 16:27:02] maar bedenk nu dat dit eigenlijk al automatisch gebeurt: als 1 persoon de helft van de wedstrijden
+[2011-03-27 16:27:24] fluit, is de kans 0,5 dat een van deze wedstrijden wordt gekozen om te muteren.
+[2011-03-27 16:28:34] merk wel dat ik af en toe in een local optimum terechtkom, wel 1 die op zich acceptabel is.
+[2011-03-27 16:28:49] had bv 1 waarbij Kuneke 8 wedstrijden floot, hierna 1 waarbij het max 7 was.
+
