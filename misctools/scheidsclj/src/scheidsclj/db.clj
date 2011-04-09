@@ -5,7 +5,8 @@
 ;java.lang.ClassCastException: clojureql.core.RTable cannot be cast to java.util.Comparator (NO_SOURCE_FILE:34)
 
 (ns scheidsclj.db
-  (:use clojureql.core)
+  ;(:use scheidsclj.break) ; error if kept within (ns macro)
+  (:use clojureql.core) 
   (:use [clj-time.core :exclude (extend)])
   (:use clj-time.format)
   (:use clj-time.coerce))
@@ -34,6 +35,10 @@
 ; 20-2-2011 NdV tested with full namespace ref, and it works.
 (defn delete-old-proposition []
   (clojureql.core/disj! (table :scheids) (where (= :status "voorstel"))))  
+
+; 27-3-2011 NdV added where 1=1, otherwise an error
+(defn delete-logsolutions []
+  (clojureql.core/disj! (table :logsolution) (where (= 1 1))))
 
 (defn query-lst-can-referee [game-id]
   (->> @(-> (table :kan_wedstrijd_fluiten)
@@ -77,6 +82,17 @@
       :speelt_zelfde_dag (:same-day %)
       :status "voorstel") (:vec-sol-referee sol))))
 
+(defn log-solutions [{:keys [lst-solutions iteration]}]
+  "Log the event of a better solution in the database, for further algorithm analysis"
+  ; (break)
+  (println "*********** Logging iteration info to database ************")
+  (clojureql.core/conj! (table :logsolution)
+    (map #(hash-map
+      :iteration iteration
+      :solnr (:solnr %1)
+      :solnrparent (:solnr-parent %1)
+      :fitness (:fitness %1)) lst-solutions)))
+        
 (def db
  {:classname   "com.mysql.jdbc.Driver"
   :subprotocol "mysql"

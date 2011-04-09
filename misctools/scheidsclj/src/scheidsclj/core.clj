@@ -1,6 +1,7 @@
 ;( ; deze als haakjes niet kloppen.
 (ns scheidsclj.core
   (:gen-class)
+;  (:use scheidsclj.break)
   (:use scheidsclj.db)
   (:use scheidsclj.geneticlib)
   (:use scheidsclj.lib)
@@ -169,14 +170,11 @@
 ; @todo parameterise minimal fitness for saving, now at -2000.
 (defn handle-best-solution [proposition]
   (print-best-solution proposition *ar-inp-games* can-find-better)
+  (log-solutions @proposition)
   (let [sol (first (:lst-solutions @proposition))]
     (if (> (:fitness sol) -2000)
       (save-solution sol))))
 
-; @note evol-iteration functioneel opzetten: je krijgt iteratie en lijst oplossingen binnen, en retourneert deze ook.
-; opties 1) handle-best-solution een sol meegeven. 2) de swap! in deze functie, dan handle aanroepen
-; 3) check niet in deze function, maar in aanroepende make-proposition, dan hier ook de puts-dot in.
-; keuze is nu optie 3
 (defn evol-iteration [{:keys [lst-solutions iteration]}]
   (let [new-iteration (inc iteration)
         old-fitness (:fitness (first lst-solutions))
@@ -205,7 +203,8 @@
 (defn -main [& args]
   (open-global-db)
   (delete-old-proposition)
-
+  (delete-logsolutions)
+  
   (let [sol-args (clargon args
                    (optional ["-p" "--pop" :default 10 :doc "Population size"] #(Integer. %))
                    (optional ["-i" "--iter" :default 0 :doc "Max #Iterations"] #(Integer. %))

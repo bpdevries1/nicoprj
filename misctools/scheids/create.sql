@@ -117,3 +117,12 @@
     CONSTRAINT `zeurfactor_ibfk_1` FOREIGN KEY (`persoon`) REFERENCES `persoon` (`id`) ON DELETE CASCADE
   ) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8;
 
+  CREATE TABLE `scheids`.`logsolution` (
+    `id` int(11) NOT NULL auto_increment,
+    `iteration` int(11) default null,
+    `solnr` int(11) default null,
+    `solnrparent` int(11) default null,
+    `fitness` double default null,
+    PRIMARY KEY (`id`)
+  )
+  
