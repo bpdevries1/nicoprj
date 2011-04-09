@@ -16,6 +16,11 @@ set 4NT_EXE "c:\\util\\4nt\\4nt.exe"
 # * merk dat backuppen via laptop van NAS naar 2TB erg traag gaat, nu (20-3-2011) ook niet duidelijk hoe lang het gaat duren
 # * de balanced line van bron en target lijkt best wel een aardig alternatief. Door met 4NT een dir /s te doen.
 
+# 26-3-2011: gemaakt, testen
+# * op kunnen geven hoe veel levels diep je wilt checken: bij archief bv komt er normaal gesproken alleen wat bij op het hoogste 
+# niveau, als ik er een afgerond project naartoe verplaats. Lijkt het meest logisch dit in paths.txt als extra kolom op te nemen.
+# dus ook checken of een dir nieuw is. If so, dan alles gewoon behandelen, dus in recursie max weer op -1 (bv) zetten.
+
 # @todo
 # backuppen duurt nu best lang, ook al valt er bijna niets te backuppen, het checken duurt lang. Opties:
 ## als het halverwege wordt gestopt, bijhouden waar je bent, soort van sync-points.
@@ -44,7 +49,7 @@ set 4NT_EXE "c:\\util\\4nt\\4nt.exe"
 proc main {argc argv} {
   global log fres params
   set options {
-    {settingsdir.arg "~/.backup2nas" "Dir with settings (paths.txt, ignoreregexps.txt, results.txt"}
+    {settingsdir.arg "~/.backup2nas" "Dir with settings (paths.txt, ignoreregexps.txt, results.txt)"}
     {paths.arg  "paths.txt"  "use file with paths (relative to settingsdir)"}
     {ignoreregexps.arg  "ignoreregexps.txt"  "use file with paths to ignore (relative to settingsdir)"}
     {r.arg  "results.txt" "write results to file (relative to settingsdir)"}
@@ -158,8 +163,9 @@ proc fill_stash {stashfilename lst_paths target time_treshold start_time} {
   puts $fstash "backupdatetime: $start_time"
   set totalfiles 0
   set totalbytes 0.0
-  foreach path $lst_paths {
-    lassign [backup_path $path $target $params(tempext) $time_treshold 1] nfiles nbytes
+  foreach path_spec $lst_paths {
+    lassign [split $path_spec "\t"] path max_level_check ; # if max_level_check not given, it will be an empty string.
+    lassign [backup_path $path $target $params(tempext) $time_treshold 1 $max_level_check] nfiles nbytes
     incr totalfiles $nfiles
     set totalbytes [expr $totalbytes + $nbytes] 
   }
@@ -179,7 +185,63 @@ proc puts_backup_time {start_time} {
 # @note backup all files within path, not just less than 7 days old.
 # @note if a copy fails, notify with log.
 # @note files will be puth in [file join $target [drive $path] $path
-proc backup_path {path target tempext time_treshold reclevel} {
+# @param max_level_check only check until max_level_check if files/dirs have changed. 
+#        return if max level reached without finding a changed file.
+#        if we find a change, check the whole tree again.
+#        if param is empty, there is no max.
+proc backup_path {path target tempext time_treshold reclevel max_level_check} {
+  global log fres 
+  # $log debug "Backup up $path => $target"
+  if {[ignore_file $path]} {
+    return [list 0 0] 
+  }
+  if {($max_level_check != "") && ($reclevel > $max_level_check)} {
+    $log info "max level reached ($reclevel > $max_level_check) without finding a change. Path: $path, returning..."
+    return [list 0 0]
+  } 
+  if {$reclevel <= 3} {
+    # log only if not ignored.
+    $log info "Checking $path"
+  }
+  set target_path [det_target_path $path $target]
+  if {[ignore_file $target_path 1]} {
+    return [list 0 0] 
+  }
+  set totalfiles 0
+  set totalbytes 0.0
+  foreach filepattern {* .*} {
+    foreach filename [glob -nocomplain -directory $path -type f $filepattern] {
+      lassign [handle_file $filename $target $tempext $time_treshold] nfiles nbytes
+      incr totalfiles $nfiles
+      set totalbytes [expr $totalbytes + $nbytes] 
+    }
+    foreach dirname [glob -nocomplain -directory $path -type d $filepattern] {
+      set tail [file tail $dirname]
+      if {($tail == ".") || ($tail == "..")} {
+        continue
+      }
+      lassign [backup_path $dirname $target $tempext $time_treshold [expr $reclevel + 1] \
+          [new_max_level_check $max_level_check $dirname $time_treshold]] nfiles nbytes
+      incr totalfiles $nfiles
+      set totalbytes [expr $totalbytes + $nbytes] 
+    }
+  }
+  list $totalfiles $totalbytes
+}
+
+proc new_max_level_check {max_level_check dirname time_treshold} {
+  if {[file mtime $dirname] < $time_treshold} {
+    return $max_level_check ; # too old, max_level_check stays the same
+  } else {
+    return "" ; # new file, checks are of. 
+  }
+}
+
+# @todo ga eerst uit van windows
+# @note backup all files within path, not just less than 7 days old.
+# @note if a copy fails, notify with log.
+# @note files will be puth in [file join $target [drive $path] $path
+proc backup_path_old {path target tempext time_treshold reclevel} {
   global log fres 
   # $log debug "Backup up $path => $target"
   if {[ignore_file $path]} {
