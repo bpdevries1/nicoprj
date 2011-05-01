@@ -73,6 +73,7 @@ namespace eval ::ndv {
     variable ar_opts
     # global db conn log
     set conn [$db get_connection]
+    # 1-5-2011 NdV not sure if also here only > 0 need to be selected; what if there are less than 5 left with pos value?
     set query "select id, path, freq_history 
                from $ar_opts(viewmain)
                order by freq_history desc, path" 
@@ -82,7 +83,7 @@ namespace eval ::ndv {
     set m 0 ; # aantal gekozen records
     set lst_result {}
     set F_sum [det_freq_history_sum $conn]
-  
+    # puts "F_sum: $F_sum"
     set t 0 ; # aantal behandelde records
     set F_gehad 0.0
     foreach el $lst {
@@ -110,7 +111,8 @@ namespace eval ::ndv {
     variable ar_opts
     # global conn
     # set query "select sum(freq_history) from musicfile where not lower(path) like '%.m4a'"
-    set query "select sum(freq_history) from $ar_opts(viewmain)"
+    # 1-5-2011 NdV only select sum of items with freq > 0, otherwise pos and neg cancel out.
+    set query "select sum(freq_history) from $ar_opts(viewmain) where freq_history > 0"
     set res [::mysql::sel $conn $query -flatlist]
     return [lindex $res 0]
   }
