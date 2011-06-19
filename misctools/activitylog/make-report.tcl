@@ -150,6 +150,8 @@ proc archive_logfile {filename} {
   global log
 	$log debug "archive_logfile: $filename"
   file mkdir [file join [file dirname $filename] archive]
+  # 17-6-2011 NdV delete target file first
+  file delete [file join [file dirname $filename] archive [file tail $filename]]
   file rename $filename [file join [file dirname $filename] archive]
 }
 

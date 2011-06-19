@@ -1,2 +1,2 @@
-tclsh make-report.tcl -l d:\nico\projecten\activitylog\activ- -r d:\nico\projecten\activitylog\report
+tclsh make-report.tcl -l c:\nico\projecten\activitylog\activ- -r c:\nico\projecten\activitylog\report
 
