@@ -16,7 +16,7 @@ proc main {argc argv} {
 	$log info "Starting"
 
   set options {
-    {drv.arg "f:/" "USB Drive to copy music files to on windows machine"}
+    {drv.arg "e:/" "USB Drive to copy music files to on windows machine"}
     {bat.arg "/media/nas/copy-sd.bat" "Batch file to create"}
     {np "Don't mark selected files as played in database"}
   }
