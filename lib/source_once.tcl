@@ -21,7 +21,7 @@ namespace eval ::ndv {
     variable sources
     
     # debugging info
-    puts "source_once: info script: [info script]"
+    # puts "source_once: info script: [info script]"
     set file_norm [file normalize [file join [file dirname [info script]] $file]]
     
     if {![info exists sources($file_norm)]} {
