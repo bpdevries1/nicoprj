@@ -6,6 +6,9 @@ package require Tclx
 
 # log currently active window to a file, every 5 seconds.
 
+# @todo install a file change handler, which monitors c:\projecten
+# twapi::begin_filesystem_monitor and update/vwait should do the trick, see examples.
+
 if {$tcl_platform(platform) == "windows"} {
   package require twapi
 }
@@ -21,15 +24,18 @@ if {$tcl_platform(platform) == "windows"} {
 # {STARTED} activity logging was started.
 
 proc main {argc argv} {
-	global LOGFILE INTERVAL tcl_platform
+	global LOGFILE INTERVAL tcl_platform f
 
   set options {
     {i.arg "5" "Interval in seconds"}
     {l.arg "activitylog" "Logfile name basename/prefix"}
+    {dir.arg "c:/projecten" "Directory to monitor for changes (empty for none"}
   }
   set usage ": [file tail [info script]] \[options] :"
   array set ar_argv [::cmdline::getoptions argv $options $usage]
 
+  init_filechanges $ar_argv(dir)
+  
 	set logfile $ar_argv(l)
   set sec_interval $ar_argv(i)
 	set msec_interval [expr $sec_interval * 1000]
@@ -88,6 +94,7 @@ proc main {argc argv} {
 			set title_prev $title
 		}
 		after $msec_interval
+		update ; # handle file changes in c:\projecten
 	}
 	close $f ; # never reached.
 }
@@ -155,6 +162,27 @@ proc get_active_window_title_unix {} {
     return "{NONE}"
   }
   return "{NONE}"
+}
+
+proc init_filechanges {dir} {
+  global tcl_platform
+  if {$dir == ""} {
+    return 
+  }
+  if {$tcl_platform(platform) != "windows"} {
+    return 
+  }
+  set mon_id [twapi::begin_filesystem_monitor $dir dir_change_cb -access 1 -size 1 -subtree 1 -write 1 -create 1 -dirname 1 -filename 1]
+}
+
+proc dir_change_cb {args} {
+  global f
+  set ts_end [clock seconds]
+  set ts_start [expr $ts_end - 5]
+  foreach arg $args {
+    lassign $arg action path
+    puts_logline $f $ts_start $ts_end "dirchange: $action: $path"
+  }
 }
 
 main $argc $argv
