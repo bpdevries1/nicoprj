@@ -175,13 +175,26 @@ proc init_filechanges {dir} {
   set mon_id [twapi::begin_filesystem_monitor $dir dir_change_cb -access 1 -size 1 -subtree 1 -write 1 -create 1 -dirname 1 -filename 1]
 }
 
+set last_ts_end -1
+set last_main_dir "<none>"
+
 proc dir_change_cb {args} {
-  global f
+  global f last_ts_end last_main_dir
   set ts_end [clock seconds]
   set ts_start [expr $ts_end - 5]
   foreach arg $args {
     lassign $arg action path
-    puts_logline $f $ts_start $ts_end "dirchange: $action: $path"
+    if {[regexp {~.*\.tmp} $path]} {
+      continue; # temp file creation in word etc. 
+    }
+    set main_dir [lindex [file split $path] 0]
+    if {($ts_end == $last_ts_end) && ($main_dir == $last_main_dir)} {
+      # nothing, same timestamp and same dir 
+    } else {
+      puts_logline $f $ts_start $ts_end "dirchange: $action: $path"
+      set last_ts_end $ts_end
+      set last_main_dir $main_dir
+    }
   }
 }
 
