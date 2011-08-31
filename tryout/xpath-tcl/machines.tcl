@@ -1,6 +1,6 @@
 #!/home/nico/bin/tclsh
 
-# NdV 21-9-2010 deze versie nog in d:\aaa gevonden, leek nieuwer dan de versie in deze dir, door is_interesting functie.
+# 11-8-2010 NdV ook een background page, met o.a. Apache Loadbalancer.
 
 package require tdom
 package require ndv
@@ -12,17 +12,23 @@ proc main {} {
   set doc [dom parse $xml]
   set root [$doc documentElement]
 
+  set page_bg [lindex [$root selectNodes {/VisioDocument/Pages/Page[@ID='16']}] 0]
+  lassign [det_shape_lists $page_bg] bg_computers bg_others
   set lst_pages [$root selectNodes {/VisioDocument/Pages/Page}]
   foreach page $lst_pages {
     set page_name [$page @Name] 
     puts "================\npage: $page_name\n-------------------"
-    set lst_shapes [$page selectNodes {Shapes/Shape}] 
-    set lst_shape_info_all [struct::list map $lst_shapes det_shape_info]
-    # set lst_shape_info [struct::list filterfor el $lst_shape_info_all {[dict get $el name] != ""}]
-    set lst_shape_info [struct::list filter $lst_shape_info_all is_interesting]
-    struct::list split $lst_shape_info is_computer lst_computers lst_others
-    foreach computer $lst_computers {
-      set nearest [det_nearest $computer $lst_others]
+    lassign [det_shape_lists $page] lst_computers lst_others
+	if {0} {
+		set lst_shapes [$page selectNodes {Shapes/Shape}] 
+		set lst_shape_info_all [lsort -index 1 [struct::list map $lst_shapes det_shape_info]]
+		# set lst_shape_info [struct::list filterfor el $lst_shape_info_all {[dict get $el name] != ""}]
+		set lst_shape_info [struct::list filter $lst_shape_info_all is_interesting]
+		struct::list split $lst_shape_info is_computer lst_computers lst_others
+	}
+	set lst_others_all [concat $lst_others $bg_others]
+	foreach computer $lst_computers {
+      set nearest [det_nearest $computer $lst_others_all]
       if {$nearest != ""} {
         puts "[dict get $computer name] => [dict get $nearest name] ([dict get $computer point] => [dict get $nearest point])"
       } else {
@@ -47,6 +53,15 @@ proc main {} {
   }
 
   $doc delete  
+}
+
+proc det_shape_lists {page} {
+	set lst_shapes [$page selectNodes {Shapes/Shape}] 
+	set lst_shape_info_all [lsort -index 1 [struct::list map $lst_shapes det_shape_info]]
+	# set lst_shape_info [struct::list filterfor el $lst_shape_info_all {[dict get $el name] != ""}]
+	set lst_shape_info [struct::list filter $lst_shape_info_all is_interesting]
+	struct::list split $lst_shape_info is_computer lst_computers lst_others
+	return [list $lst_computers $lst_others]
 }
 
 proc is_computer {shape_info} {
