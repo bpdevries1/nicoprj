@@ -26,17 +26,17 @@ proc breakpoint {} {
 }
 
 # van http://www.linuxjournal.com/article/1159
+# 16-9-2011 NdV info proc failed if withinn namespace. Now exec info proc with uplevel, so it is in correct namespace.
 proc breakpoint_show {current {show_params 1}} {
   if {$current > 0} {
     set info [info level $current]
     set proc [lindex $info 0]
-    puts stderr "$current: Procedure $proc \
-                {[info args $proc]}"
+    set proc_args [uplevel #$current "info args $proc"]
+    puts stderr "$current: Namespace [uplevel #$current {namespace current}] Procedure $proc $proc_args"
     set index 0
     if {$show_params} {
-      foreach arg [info args $proc] {
-        puts stderr \
-             "\t$arg = [string range [lindex $info [incr index]] 0 50]"
+      foreach arg $proc_args {
+        puts stderr "\t$arg = [string range [lindex $info [incr index]] 0 50]"
       }
     }
   } else {
