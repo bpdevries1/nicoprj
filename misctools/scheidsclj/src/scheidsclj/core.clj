@@ -71,13 +71,14 @@
       :prod-games-person-day (det-prod-games-person-day lst-person-games)
       :lst-sol-person-info (det-lst-sol-person-info lst-person-games))))
 
+; 18-9-2011 Baukelien wil dit jaar max 5 wedstrijden.
 (defn handle-baukelien [sol]
   "User post processing function, such as changing the fitness based on specific requirements
-   This one so that Baukelien has a max of 6 games."
+   This one so that Baukelien has a max of 5 games."
   (let [n-games-baukelien (for [person (:lst-sol-person-info sol) 
                                :when (= (:referee-name person) "Baukelien Mulder")]
                             (:nreferee person)) ; this gives a list, so need the first item, if available.
-        max-ok 6]
+        max-ok 5]
     (cond (empty? n-games-baukelien) sol
           (<= (first n-games-baukelien) max-ok) sol
           true (assoc sol :fitness
@@ -168,11 +169,12 @@
     (:fitness sol)))
 
 ; @todo parameterise minimal fitness for saving, now at -2000.
+; @note 18-9-2011 set from -2000 to -200.000.
 (defn handle-best-solution [proposition]
   (print-best-solution proposition *ar-inp-games* can-find-better)
   (log-solutions @proposition)
   (let [sol (first (:lst-solutions @proposition))]
-    (if (> (:fitness sol) -2000)
+    (if (> (:fitness sol) -200000)
       (save-solution sol))))
 
 (defn evol-iteration [{:keys [lst-solutions iteration]}]
