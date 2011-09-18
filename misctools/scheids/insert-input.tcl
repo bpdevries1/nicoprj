@@ -53,6 +53,8 @@ proc main {argc argv} {
   insert_team_wedstrijden $seizoen $ar_argv(insert2ndhalf)
   # delete_wedstrijden_2011
   insert_kan_wedstrijd_fluiten
+  
+  rapportage
 }
 
 proc empty_db {} {
@@ -73,8 +75,9 @@ proc insert_teams {} {
   global db
   foreach hd {H D} {
     foreach nr {1 2 3 4} {
-      if {$nr == 1} {
-        set scheids_nodig 0 
+      # @todo hier nieuwe ifelse functie voor gebruiken (18-9-2011)
+      if {[lsearch {H1 H2} "$hd$nr"] >= 0} {
+        set scheids_nodig 0
       } else {
         set scheids_nodig 1
       }
@@ -141,33 +144,54 @@ proc handle_scheids {line lst_names ar_values_name} {
 # onderstaande in lib zetten
 # vooralsnog handmatig hardcoded in deze proc.
 proc insert_afwezig {} {
-  insert_afwezig_persoon "Nico de Vreeze" "2010-12-02" "2010-12-23" "Vakantie"
-  insert_afwezig_persoon "Ester Hilhorst" "2010-11-01" "2011-07-01" "Zwanger"
-  insert_afwezig_persoon "Maarten Wispelwey" "2010-10-08" "2010-10-08" "Coach D1"
+  insert_afwezig_persoon "Nico de Vreeze" "Bruiloft" "2011-09-30"  
+  insert_afwezig_persoon "Nico de Vreeze" "Vakantie" "2011-11-26" "2011-12-17" 
+
+  insert_afwezig_persoon "Margriet Drent" "Bruiloft" "2011-09-30" 
+
+  # Chris is eigenlijk de enige die kan op 13-4, maar wil daar een invaller plaatsen
+  insert_afwezig_persoon "Chris Meijer" "Forced afwezig" "2012-04-13"
+  
+  # regio scheidsen - 1e scheids
+  insert_afwezig_persoon "Reza Gharsi" "Regiowedstrijd 1e" "2011-10-14" 
+  insert_afwezig_persoon "Reza Gharsi" "Regiowedstrijd 1e" "2011-10-01"
+  insert_afwezig_persoon "Gert van de Meent" "Regiowedstrijd 1e" "2011-10-27"
+  insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 1e" "2011-10-01"
+  insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 1e" "2011-10-08"
+  
+  # regio scheidsen - 2e scheids
+  insert_afwezig_persoon "Reza Gharsi" "Regiowedstrijd 2e" "2011-10-15"
+  insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 2e" "2011-09-24"
+  insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 2e" "2011-10-15"
+  
+  # insert_afwezig_persoon "Maarten Wispelwey" "2010-10-08" "2010-10-08" "Coach D1"
   # in 2010 heeft Maarten de kinderen in de oneven weken, dan dus afwezig.
   # bepaal eerste afwezig, dan steeds 14d erbij.
   # 17-9-2010 is week 37, dus oneven, dus afwezig
-  insert_afwezig_persoon "Maarten Wispelwey" "2010-09-17"	"2010-09-17" "Kinderen"
-  insert_afwezig_persoon "Maarten Wispelwey" "2010-10-01"	"2010-10-01" "Kinderen"
-  insert_afwezig_persoon "Maarten Wispelwey" "2010-10-15"	"2010-10-15" "Kinderen"
-  insert_afwezig_persoon "Maarten Wispelwey" "2010-10-29"	"2010-10-29" "Kinderen"
-  insert_afwezig_persoon "Maarten Wispelwey" "2010-11-12"	"2010-11-12" "Kinderen"
-  insert_afwezig_persoon "Maarten Wispelwey" "2010-11-26"	"2010-11-26" "Kinderen"
-  insert_afwezig_persoon "Maarten Wispelwey" "2010-12-10"	"2010-12-10" "Kinderen"
-  insert_afwezig_persoon "Maarten Wispelwey" "2010-12-24"	"2010-12-24" "Kinderen"
-  # in 2011 de even weken afwezig.
-  insert_afwezig_persoon "Maarten Wispelwey" "2011-01-14"	"2011-01-14" "Kinderen"
-  insert_afwezig_persoon "Maarten Wispelwey" "2011-01-28"	"2011-01-28" "Kinderen"
-  insert_afwezig_persoon "Maarten Wispelwey" "2011-02-11"	"2011-02-11" "Kinderen"
-  insert_afwezig_persoon "Maarten Wispelwey" "2011-02-25"	"2011-02-25" "Kinderen"
-  insert_afwezig_persoon "Maarten Wispelwey" "2011-03-11"	"2011-03-11" "Kinderen"
-  insert_afwezig_persoon "Maarten Wispelwey" "2011-03-25"	"2011-03-25" "Kinderen"
-  insert_afwezig_persoon "Maarten Wispelwey" "2011-04-08"	"2011-04-08" "Kinderen"
-  insert_afwezig_persoon "Maarten Wispelwey" "2011-04-22"	"2011-04-22" "Kinderen"
   
+  insert_afwezig_maarten
 }
 
-proc insert_afwezig_persoon {persoon eerstedag laatstedag opmerkingen} {
+proc insert_afwezig_maarten {} {
+  set datum "2011-09-23" ; # week 38, maarten even weken de kinderen.
+  while {$datum <= "2012"} {
+    insert_afwezig_persoon "Maarten Wispelwey" "Kinderen" $datum
+    set sec [clock scan $datum -format "%Y-%m-%d"]
+    set sec_2w [expr $sec + (2 * 7 * 24 * 60 * 60)] ; # 2 weken verder zetten.
+    set datum [clock format $sec_2w -format "%Y-%m-%d"]
+  }  
+}
+
+proc insert_afwezig_persoon {persoon opmerkingen eerstedag {laatstedag ""}} {
+  global db log
+  if {$laatstedag == ""} {
+    set laatstedag $eerstedag 
+  }
+  set p_id [lindex [$db find_objects persoon -naam $persoon] 0]
+  $db insert_object afwezig -persoon $p_id -eerstedag $eerstedag -laatstedag $laatstedag -opmerkingen $opmerkingen  
+}
+
+proc insert_afwezig_persoon_old {persoon eerstedag laatstedag opmerkingen} {
   global db log
   set p_id [lindex [$db find_objects persoon -naam $persoon] 0]
   $db insert_object afwezig -persoon $p_id -eerstedag $eerstedag -laatstedag $laatstedag -opmerkingen $opmerkingen  
@@ -201,7 +225,7 @@ proc insert_team_wedstrijden {seizoen insert2ndhalf} {
   if {$ar_argv(fromsite)} {
     # verwijder oude bestanden, wildcard lijkt niet te werken.
     foreach hd {H D} {
-      foreach filename [glob -directory $seizoen "${hd}*"] {
+      foreach filename [glob -nocomplain -directory $seizoen "${hd}*"] {
         file delete $filename 
       }
     }
@@ -210,34 +234,42 @@ proc insert_team_wedstrijden {seizoen insert2ndhalf} {
         # 2009-2010
         # set url "http://competitie.nevobo.nl/holland/team/3258${hd}S+${nr}?programma=true" 
         # 2010-2011
-        set url "http://competitie.nevobo.nl/west/team/3258${hd}S+${nr}?programma=true"
-        set filename "$seizoen/${hd}${nr}-[clock format [clock seconds] -format "%Y-%m-%d-%H-%M-%S"].html"
+        # set url "http://competitie.nevobo.nl/west/team/3258${hd}S+${nr}?programma=true"
+        # 2011-2012, ical formaat
+        set url "http://www.volleybal.nl/application/handlers/export.php?format=ical&type=team&programma=3258${hd}S+${nr}&iRegionId=3000"
+        set filename "$seizoen/${hd}${nr}-[clock format [clock seconds] -format "%Y-%m-%d-%H-%M-%S"].ics"
         http_to_file $url $filename
         # insert_wedstrijden $filename
       }
     }
   }
   
-  if {$insert2ndhalf} {
-    set date_last_assigned [det_date_last_assigned] ; # waarsch string representatie van date. 
-  } else {
-    set date_last_assigned "2009-01-01" 
+  if {0} {
+    # 18-9-2011 date_last_assigned nu even onduidelijk, nog nodig?
+    if {$insert2ndhalf} {
+      set date_last_assigned [det_date_last_assigned] ; # waarsch string representatie van date. 
+    } else {
+      set date_last_assigned "2009-01-01" 
+    }
+    $log debug "date_last_assigned: $date_last_assigned"
+    # breakpoint
+    set sec_date_last_assigned [clock scan $date_last_assigned -format "%Y-%m-%d %H:%M:%S"]
   }
-  $log debug "date_last_assigned: $date_last_assigned"
-  # breakpoint
-  set sec_date_last_assigned [clock scan $date_last_assigned -format "%Y-%m-%d %H:%M:%S"]
   foreach hd {H D} {
+    # 18-9-2011 bij onderstaande glob wel een fout, als er niets gevonden is.
     foreach filename [glob -directory $seizoen "${hd}*"] {
-      insert_wedstrijden $filename $sec_date_last_assigned
+      # insert_wedstrijden $filename $sec_date_last_assigned
+      insert_wedstrijden $filename
     }
   }
   
-  # 28-12-2010 even inhaalwedstrijd van heren 3 tegen Oberon
-  set team_id [lindex [$db find_objects team -naam "H3"] 0]
-
-  $db insert_object wedstrijd -naam "Wilhelmina HS 3 - Oberon" -team $team_id -lokatie "thuis" \
-        -datumtijd "2011-01-10 21:00:00" -scheids_nodig 1 -opmerkingen "Inhaalwedstrijd"
+  if {0} {
+    # 28-12-2010 even inhaalwedstrijd van heren 3 tegen Oberon
+    set team_id [lindex [$db find_objects team -naam "H3"] 0]
   
+    $db insert_object wedstrijd -naam "Wilhelmina HS 3 - Oberon" -team $team_id -lokatie "thuis" \
+          -datumtijd "2011-01-10 21:00:00" -scheids_nodig 1 -opmerkingen "Inhaalwedstrijd"
+  }  
 }
 
 proc det_date_last_assigned {} {
@@ -245,7 +277,51 @@ proc det_date_last_assigned {} {
   lindex [mysql::sel $conn "select max(datumtijd) from wedstrijd" -flatlist] 0
 }
 
-proc insert_wedstrijden {filename sec_from_date} {
+# old param: sec_from_date
+proc insert_wedstrijden {filename} {
+  global log
+  
+  set f [open $filename r]
+  while {![eof $f]} {
+    gets $f line 
+    # DTSTART:20110923T214500
+    # SUMMARY:Oberon DS 1 - Wilhelmina DS 1
+    if {[regexp {^DTSTART:(.+)$} $line z ts]} {
+      set sec_timestamp [clock scan $ts -format "%Y%m%dT%H%M%S"]
+    } elseif {[regexp {^SUMMARY:(.+)$} $line z summary]} {
+      set wedstrijd_naam "[clock format $sec_timestamp -format "%Y-%m-%d %H:%M:%S"] $summary"
+      set team_naam [det_team_naam $summary]
+      set opmerkingen $summary
+    } elseif {[regexp {^LOCATION:(.+)$} $line z loc]} {
+      set lokatie [det_lokatie $loc]
+    } elseif {[regexp {^BEGIN:VEVENT$} $line z summary]} {
+      set sec_timestamp ""
+      set wedstrijd_naam ""
+      set team_naam ""
+      set lokatie ""
+      set opmerkingen ""
+    } elseif {[regexp {^END:VEVENT$} $line z summary]} {
+      upsert_db $wedstrijd_naam $team_naam $lokatie $sec_timestamp $opmerkingen
+    }      
+  }  
+  close $f
+}
+
+proc upsert_db {wedstrijd_naam team_naam lokatie sec_timestamp opmerkingen} {
+  global db
+  set team_id [lindex [$db find_objects team -naam $team_naam] 0]
+  set scheids_nodig [det_scheids_nodig $team_id $lokatie]
+  set lst_ids [$db find_objects wedstrijd -naam $wedstrijd_naam]
+  if {$lst_ids != {}} {
+    $db update_object wedstrijd [lindex $lst_ids 0] -date_checked [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"] 
+  } else {
+    # -opmerkingen [$db str_to_db [format_wedstrijd $ar_val(Wedstrijd)]]
+    $db insert_object wedstrijd -naam $wedstrijd_naam -team $team_id -lokatie $lokatie \
+      -datumtijd [clock format $sec_timestamp -format "%Y-%m-%d %H:%M:%S"] -scheids_nodig $scheids_nodig -opmerkingen $opmerkingen
+  }
+}
+
+proc insert_wedstrijden_old {filename sec_from_date} {
   global log db
   
   # http_to_file $url $filename
@@ -286,7 +362,7 @@ proc insert_wedstrijden {filename sec_from_date} {
 
 # @todo bepalen of zelfde proc ook voor uit-wedstrijden gebruikt kan worden.
 # @pre m kan any matrix zijn, niet per se met nog komende wedstrijden
-proc handle_matrix {m sec_from_date} {
+proc handle_matrix_old {m sec_from_date} {
   # eerste cell weg, bevat nbsp; value-rijden bevatten deze niet.
   set lst_header [lrange [$m get row 0] 1 end]
   if {![regexp {Veld} $lst_header]} {
@@ -298,7 +374,7 @@ proc handle_matrix {m sec_from_date} {
   }
 }
 
-proc handle_wedstrijd {lst_header lst_values sec_from_date} {
+proc handle_wedstrijd_old {lst_header lst_values sec_from_date} {
   global db log
   if {[llength $lst_values] <= 5} {
     return 
@@ -342,6 +418,8 @@ proc handle_wedstrijd {lst_header lst_values sec_from_date} {
   }
 }
 
+# @param wedstrijd: Oberon DS 1 - Wilhelmina DS 1
+# @param wedstrijd: Wilhelmina DS 1 - SVU DS 2
 # @result: H1, D4, etc.
 proc det_team_naam {wedstrijd} {
   global log
@@ -353,9 +431,19 @@ proc det_team_naam {wedstrijd} {
   }
 }
 
+# @return: als Schuilenburg, dan thuis, anders uit
+proc det_lokatie {location} {
+  if {[regexp {Schuilenburg} $location]} {
+    return "thuis" 
+  } else {
+    return "uit" 
+  }
+}
+
+
 # @return: als Wilhelmina eerst genoemd, dan thuis, anders uit
 # @note: wedstrijd begint vaak met "- " dit streepje moet eigenlijk tussen de teams staan. Waarschijnlijk met ophalen diverse PCdata dingen foutgegaan.
-proc det_lokatie {wedstrijd} {
+proc det_lokatie_old {wedstrijd} {
   if {[regexp {^(- )?Wilhelmina} [string trim $wedstrijd]]} {
     return "thuis" 
   } else {
@@ -704,6 +792,23 @@ proc remove_unassigned_games {} {
     and s.status = 'gemaild'
   )"
   
+}
+
+proc rapportage {} {
+  global db
+  
+  puts "#wedstrijden: [::mysql::sel [$db get_connection] "select count(*) from wedstrijd" -flatlist]"
+  puts "#wedstrijden met scheids: [::mysql::sel [$db get_connection] "select count(*) from wedstrijd where scheids_nodig = 1" -flatlist]"
+  puts "#wedstrijden met scheids die op dezelfde dag speelt: [::mysql::sel [$db get_connection] \
+    "select count(*) from wedstrijd w where scheids_nodig = 1 and exists (select 1 from kan_wedstrijd_fluiten k where k.wedstrijd = w.id and k.speelt_zelfde_dag = 1)" -flatlist]"    
+  puts "#wedstrijden zonder scheids die op dezelfde dag speelt: [::mysql::sel [$db get_connection] \
+    "select count(*) from wedstrijd w where scheids_nodig = 1 and not exists (select 1 from kan_wedstrijd_fluiten k where k.wedstrijd = w.id and k.speelt_zelfde_dag = 1)" -flatlist]"
+
+  puts "#wedstrijden waar niemand voor te vinden is: [::mysql::sel [$db get_connection] \
+    "select count(*) from wedstrijd w where scheids_nodig = 1 and not exists (select 1 from kan_wedstrijd_fluiten k where k.wedstrijd = w.id)" -flatlist]"
+
+  # @todo als er wedstrijden zijn waar niemand voor te vinden is, deze wedstrijden printen.
+    
 }
 
 main $argc $argv
