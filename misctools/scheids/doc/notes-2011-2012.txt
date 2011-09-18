@@ -1,0 +1,187 @@
+Notes/log bij maken schema voor seizoen 2011-2012
+=================================================
+[2011-09-18 12:30:28] eerst kijken of wedstrijden goed ingelezen worden, maar in insert worden ook personen ingelezen. Eerst maar kijken wat 'ie doet.
+[2011-09-18 12:31:02] insert-input.tcl -cleandb -fromsite
+[2011-09-18 12:35:10] melding 2011-2012/scheids.tsv niet gevonden. copy from 2011
+[2011-09-18 12:37:53] melding dat H* files niet gevonden zijn, zouden eerst gedownload moeten worden.
+[2011-09-18 12:41:09] fout op wedstrijd textfiles, iets met formaat.
+[2011-09-18 12:41:59] een redirect notice staat in de file.
+
+[2011-09-18 12:43:10] met http://competitie.nevobo.nl/west/team/3258DS+1 kom je op nieuwe site uit, maar nog niet bij wedstrijden.
+[2011-09-18 12:44:35] http://www.volleybal.nl/competitie/team/3258DS+1/programma/volledig wel alles
+[2011-09-18 12:44:39] mogelijkheid te exporteren: kalender, excel of RSS.
+[2011-09-18 12:46:45] excel ziet er wel goed en compleet uit.
+[2011-09-18 12:47:37] met calendar krijg je een .ics bestand.
+[2011-09-18 12:48:33] met rss feed een html, maar wat met wget?
+ http://www.volleybal.nl/application/handlers/export.php?format=rss&type=team&programma=3258DS+1&iRegionId=3000
+[2011-09-18 12:50:24] de rss is XML, maar wel met CDATA, dus zelf nog parsen dan.
+
+http://www.volleybal.nl/application/handlers/export.php?format=excel&type=team&programma=3258DS+1&iRegionId=3000
+[2011-09-18 12:52:32] kan ook format=xls doen, dan wel een binary formaat.
+[2011-09-18 12:52:45] met format is ICS: 0 bytes.
+[2011-09-18 12:54:17] met ical (view source gedaan): lijkt redelijk te doen, qua structuur nog iets minder dan Excel, maar wel tekst.
+
+http://www.volleybal.nl/application/handlers/export.php?format=ical&type=team&programma=3258HS+3&iRegionId=3000
+
+[2011-09-18 12:59:32] getest met H3/ical, gaat goed, dus keuze maken dit formaat in te lezen.
+[2011-09-18 13:05:12] eerst van site halen: ok
+[2011-09-18 14:47:41] inlezen ook goed, let op voor welke teams een scheids nodig is, aanpassen in 'insert_teams'
+[2011-09-18 14:48:03] geteld, voor 59 wedstrijden een scheids nodig, klopt met eigen berekening, D3 gaat met 9 in de poule toch 9 thuiswedstrijden spelen, 1 dubbele.
+[2011-09-18 14:51:42] D4 wil wedstrijd 30-9 verplaatsen, is een uit wedstrijd, dus geen probleem.
+[2011-09-18 15:48:05] scheids.tsv goed krijgen, eerst waarschijnlijk maken/aanpassen in Excel.
+[2011-09-18 15:48:09] Mezelf en Margriet voor 30-9 op afwezig zetten. 
+[2011-09-18 15:48:19] Maarten kan 23-9 niet fluiten, is week 38 dus even, heeft 'ie de kinderen. Op win en linux is dit week 38.
+[2011-09-18 16:18:27] Al ingedeelde wedstrijden van de regio scheidsen erbij, bij afwezig. 
+[2011-09-18 16:23:53] Check bij inlezen: totaal wedstrijden, thuiswedstrijden. Wedstrijden die niemand kan fluiten? aantal door 'thuisspeel' fluiter en moeilijke wedstrijden. 
+[2011-09-18 16:24:06] test nogmaals inlezen: lijkt goed, zie onder. 
+
+#wedstrijden: 162
+#wedstrijden met scheids: 59
+#wedstrijden met scheids die op dezelfde dag speelt: 32
+#wedstrijden zonder scheids die op dezelfde dag speelt: 27
+#wedstrijden waar niemand voor te vinden is: 0
+
+[2011-09-18 16:26:12] maar voor bijna de helft van de wedstrijden dus niemand iemand te vinden die op dezelfde dag speelt!
+
+[2011-09-18 16:26:52] ook nog wedstrijden waarvoor helemaal niemand is te vinden?
+[2011-09-18 16:28:28] gelukkig niet.
+[2011-09-18 16:28:35] dit betekent dat gemiddeld iedereen over het hele jaar 27/14 is bijna 2 wedstrijden fluit op een niet speel avond, en als je de regio scheidsen buiten beschouwing laat 27/11. 
+[2011-09-18 16:30:23] en als Chris, Baukelien, Margriet dit ook niet doen, hou je er 8 over, en fluit men meer dan 3 gemiddeld, sommige dus zelfs 4.
+[2011-09-18 16:32:30] wel zoiets dat ik Baukelien nu meer wil beschermen dan Chris. Margriet is twijfel geval.
+
+[2011-09-18 16:50:11] scheidsclj gebruik ook scheids-db, niet scheidsprod.
+[2011-09-18 16:56:20] lijkt redelijke oplossing uit te komen: veel whinefactors van 256, maar dus niet boven de 1000, dus Baukelien, Chris en Margriet buiten schot? Nu 2x6 en 1x7 wedstrijden.
+[2011-09-18 16:57:31] Sum of whine factors: 6144.000000
+[2011-09-18 16:59:27] wel Gert, Jan-Albert en Reza nu ingedeeld, zou misschien niet moeten na eind oktober.
+[2011-09-18 17:00:03] en fouter: Yvonne staat nu ook ingedeeld, was niet de bedoeling.
+[2011-09-18 17:03:25] en Chris maar 2 wedstrijden, met 400 totaal, dus 2 'uit' wedstrijden. Ook niet handig.
+[2011-09-18 17:05:18] had Chris in tsv al op 200/2 staan, maar blijkbaar in db nog 20/2.
+[2011-09-18 17:17:24] hiermee wordt het lastiger, en toch nog Chris, Baukelien en Margriet elk 1 uitwedstrijd. Factoren nog hoger zetten, of nieuw concept, dat dit gewoon niet kan? Met afwezig is iets te doen, dat ze afwezig zijn op dagen dat ze niet zelf spelen.
+[2011-09-18 17:19:50] Jan Albert en Gert ook nog op niet-speeldag.
+[2011-09-18 17:22:54] hoogste zf staat nu op 4096, helpt het dan om zf's van bepaalde mensen op veel groter dan dit te zetten, bv 100.000.
+[2011-09-18 17:23:39] ff testen, is wel gemakkelijkste oplossing.
+[2011-09-18 17:27:22] beter, maar zowaar nog 1x100.000... Voor Chris, terwijl hij met andere instellingen ook wel voor thuis-wedstrijden stond ingedeeld.
+[2011-09-18 17:29:13] geneigd te zeggen dat voor deze ene wedstrijd toch wel andere scheids te vinden moet zijn, ook al heeft Chris dan geen wedstrijden meer. Toch is dit maar 1 wijziging, en prog zegt dan met 1 wijz geen betere gevonden kan worden.
+[2011-09-18 17:31:20] gaat om 13-4, dus duurt nog even: hier 2 wedstrijden, H4 en D4, en alleen Chris en Reza zouden hier kunnen. Reza dan D4 (want wil Chris niet), dus Chris dan autom op H4.
+[2011-09-18 17:48:48] Baukelien staat nu op 6 wedstrijden, terwijl ze er max 5 wil. Had hier wel code voor, ff checken.
+[2011-09-18 17:56:48] Baukelien stond op max 6, op max 5 gezet. Hierdoor Chris ineens weer de uitwedstrijd op 13-4. Klopt wel, 2 andere invallers, met nog een erbij kom je op 1.000.000, meer dan de 100.000 van Chris. Chris nu gewoon afwezig melden op 13-4.
+[2011-09-18 18:11:50] oplossingen worden wel gevonden, maar mogelijk niet in DB opgeslagen...
+
+TODO:
+* Oplossing in DB opslaan.
+
+TODO Later:
+* bij iedereen de nevobo code invullen, heb deze al ergens? niet in tsv/excel.
+* Lisette Ackerstaff mail sturen met vraag voor reserve. Suzanne de Rooij ook.
+* Los script om afwezigheid toe te voegen en kan-fluiten opnieuw te bepalen.
+* Idee in de groep: iedereen online test laten maken, zodat je de regels kent en dan evt kunt fluiten.
+* Wat te doen met regioscheidsen en of iemand nog andere dingen voor vereniging doet, of vorig jaar relatief veel of weinig heeft gedaan. Laatste met een factor rond de 1 doen, zodat nieuwe mensen met 1 beginnen. Je zou een omvattende zeurfactor kunnen def-en. 
+* Of iemand actief is, staat wel in ods/tsv, maar lees ik niet in, hierdoor ging het met Yvonne eerst ook fout.
+* leiningen/clojure reageert niet op Ctrl-C, terwijl dit toch hier de manier is om af te sluiten. Iets met inputrc te maken?
+* Clojure: ook irritant dat puntjes zetten op scherm meteen ook newline moet worden, kan dit echt niet anders?
+* Report: params meegeven, evt voor titel (eerste helft 2011-2012, nu weg) en tot/vanaf wanneer wedstrijden getoond moeten worden. Of met status werken: gemaild.
+* Status zetten is wel leuk, met set-status.tcl script, maar ivm left join worden wedstrijden toch gewoon opgehaald in report, alleen dan zonder scheidsrechter. Dus nu eerst toch een dag erbij.
+
+Beste oplossing so far:
+Best solution so far (iteration 5407):
+Solution 97352 (parent: 97346)
+Games:
+2011-09-23 21:15:00 Wilhelmina HS 4 - Lovoc HS 3 (sd=0) Nico de Vreeze (NdV) (wf=8.0/1.0) (GvdM, NdV, RG, WvdW, I)
+2011-09-23 21:15:00 Wilhelmina DS 4 - vv Nederhorst DS 3 (sd=0) Wendy van der Woerd (WvdW) (wf=8.0/1.0) (NdV, RG, WvdW, I)
+2011-09-30 21:15:00 Wilhelmina HS 3 - Almere Buiten HS 1 (sd=0) Ronald Schreuder (RS) (wf=8.0/1.0) (JK, RG, RvZ, RS, I)
+2011-09-30 21:15:00 Wilhelmina DS 2 - Afas-LEOS DS 2 (sd=0) Rob van Zonneveld (RvZ) (wf=8.0/1.0) (JK, RG, RvZ, RS, I)
+2011-09-30 21:15:00 Wilhelmina HS 4 - Oberon HS 3 (sd=0) Annette Wolda (AW) (wf=8.0/1.0) (AW, JK, RG, RvZ, RS, I)
+2011-10-07 19:30:00 Wilhelmina DS 3 - Prima Donna Kaas Huizen DS 5 (sd=1) Baukelien Mulder (BM) (wf=2.0/1.0) (JT, RG, I, BM, NdV)
+2011-10-07 19:30:00 Wilhelmina DS 2 - AVV Keistad DS 6 (sd=1) Gert van de Meent (GvdM) (wf=4.0/1.0) (JT, RG, I, BM, CM, GvdM, NdV)
+2011-10-07 21:30:00 Wilhelmina DS 1 - Prima Donna Kaas Huizen DS 4 (sd=1) Jan-Albert Kootstra  (JK) (wf=4.0/1.0) (JT, I, JK, RvZ, WvdW)
+2011-10-07 21:30:00 Wilhelmina HS 3 - Forza Hoogland HS 3 (sd=1) Rob van Zonneveld (RvZ) (wf=2.0/1.0) (JT, RG, I, JK, RvZ, RS, WvdW)
+2011-10-14 21:15:00 Wilhelmina DS 4 - Oberon DS 4 (sd=0) Rob van Zonneveld (RvZ) (wf=8.0/1.0) (BM, NdV, RvZ, RS, WvdW, I)
+2011-10-14 21:15:00 Wilhelmina HS 4 - Afas-LEOS HS 4 (sd=0) Maarten Wispelwey  (MW) (wf=8.0/1.0) (BM, CM, GvdM, JK, MW, NdV, RvZ, RS, WvdW, I)
+2011-10-28 19:30:00 Wilhelmina DS 2 - Unicornus DS 3 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (EH, RG, I, BM, CM, GvdM, MW, NdV)
+2011-10-28 21:30:00 Wilhelmina HS 3 - Forza Hoogland HS 4 (sd=1) Wendy van der Woerd (WvdW) (wf=2.0/1.0) (EH, RG, I, JK, RvZ, RS, WvdW)
+2011-10-28 21:30:00 Wilhelmina DS 1 - SVU DS 2 (sd=1) Rob van Zonneveld (RvZ) (wf=2.0/1.0) (EH, I, JK, RvZ, WvdW)
+2011-11-04 21:15:00 Wilhelmina HS 4 - The Smashers HS 1 (sd=0) Nico de Vreeze (NdV) (wf=8.0/1.0) (AW, CM, GvdM, JK, NdV, RG, RvZ, RS, I)
+2011-11-04 21:15:00 Wilhelmina DS 4 - VC Allvo DS 5 (sd=0) Annette Wolda (AW) (wf=8.0/1.0) (AW, NdV, RG, RvZ, RS, I)
+2011-11-11 19:30:00 Wilhelmina DS 2 - Forza Hoogland DS 5 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (EH, RG, I, BM, CM, GvdM, MW, NdV)
+2011-11-11 19:30:00 Wilhelmina DS 3 - Salvo '67 DS 3 (sd=1) Nico de Vreeze (NdV) (wf=2.0/1.0) (EH, MD, RG, I, BM, NdV)
+2011-11-11 21:30:00 Wilhelmina DS 1 - AVV Keistad DS 4 (sd=1) Jan-Albert Kootstra  (JK) (wf=4.0/1.0) (EH, I, JK, RvZ, WvdW)
+2011-11-11 21:30:00 Wilhelmina HS 3 - Sovoco HS 3 (sd=1) Wendy van der Woerd (WvdW) (wf=2.0/1.0) (EH, RG, I, JK, RvZ, RS, WvdW)
+2011-11-14 19:30:00 Wilhelmina HS 4 - Almere Buiten HS 2 (sd=0) Maarten Wispelwey  (MW) (wf=8.0/1.0) (AW, BM, CM, EH, GvdM, JK, MW, MD, NdV, RG, RvZ, RS, WvdW, I)
+2011-11-28 19:30:00 Wilhelmina DS 2 - Switch DS 1 (sd=0) Jan Taconis (JT) (wf=8.0/1.0) (BM, CM, EH, GvdM, JT, JK, MW, RG, RvZ, RS, I)
+2011-12-02 21:30:00 Wilhelmina DS 1 - VC Allvo DS 2 (sd=0) Ester Hilhorst (EH) (wf=8.0/1.0) (EH, JT, WvdW, I)
+2011-12-02 21:30:00 Wilhelmina HS 3 - VC Allvo HS 3 (sd=0) Jan Taconis (JT) (wf=8.0/1.0) (EH, JT, RG, WvdW, I)
+2011-12-09 21:15:00 Wilhelmina HS 4 - Keizer Otto-Trivolley HS 1 (sd=0) Annette Wolda (AW) (wf=8.0/1.0) (AW, BM, CM, EH, GvdM, MW, MD, RG, I)
+2012-01-13 19:30:00 Wilhelmina DS 2 - Lovoc DS 2 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (EH, JT, RG, I, BM, CM, GvdM, MW, NdV)
+2012-01-13 19:30:00 Wilhelmina DS 3 - The Smashers DS 1 (sd=1) Nico de Vreeze (NdV) (wf=2.0/1.0) (EH, JT, MD, RG, I, BM, NdV)
+2012-01-13 21:30:00 Wilhelmina DS 1 - AVV Keistad DS 5 (sd=0) Ester Hilhorst (EH) (wf=8.0/1.0) (EH, JT, I, WvdW)
+2012-01-13 21:30:00 Wilhelmina HS 3 - Lovoc HS 1 (sd=1) Wendy van der Woerd (WvdW) (wf=2.0/1.0) (EH, JT, RG, I, WvdW)
+2012-01-20 19:30:00 Wilhelmina DS 4 - AVV Keistad DS 8 (sd=0) Reza Gharsi (RG) (wf=8.0/1.0) (RG, I, BM)
+2012-01-20 19:30:00 Wilhelmina DS 3 - Gemini S DS 5 (sd=1) Baukelien Mulder (BM) (wf=2.0/1.0) (RG, I, BM)
+2012-01-20 21:30:00 Wilhelmina DS 1 - Prima Donna Kaas Huizen DS 3 (sd=1) Ester Hilhorst (EH) (wf=2.0/1.0) (I, EH, JK, RvZ)
+2012-01-23 19:30:00 Wilhelmina HS 4 - Voleem HS 4 (sd=0) Ronald Schreuder (RS) (wf=8.0/1.0) (AW, BM, CM, GvdM, JK, MW, NdV, RG, RvZ, RS, WvdW, I)
+2012-01-23 19:30:00 Wilhelmina DS 4 - Switch DS 2 (sd=0) Wendy van der Woerd (WvdW) (wf=8.0/1.0) (AW, BM, NdV, RG, RvZ, RS, WvdW, I)
+2012-02-03 19:30:00 Wilhelmina DS 3 - Gemini S DS 3 (sd=1) Baukelien Mulder (BM) (wf=2.0/1.0) (EH, MD, RG, WvdW, I, BM, NdV)
+2012-02-03 21:30:00 Wilhelmina DS 1 - Keizer Otto-Trivolley DS 1 (sd=1) Jan-Albert Kootstra  (JK) (wf=4.0/1.0) (EH, WvdW, I, JK, RvZ)
+2012-02-03 21:30:00 Wilhelmina HS 3 - Prima Donna Kaas Huizen HS 4 (sd=1) Ronald Schreuder (RS) (wf=2.0/1.0) (EH, RG, WvdW, I, JK, RvZ, RS)
+2012-02-10 21:15:00 Wilhelmina DS 3 - Salvo '67 DS 3 (sd=0) Reza Gharsi (RG) (wf=8.0/1.0) (BM, NdV, RG, I)
+2012-02-10 21:15:00 Wilhelmina HS 4 - AVV Keistad HS 8 (sd=0) Nico de Vreeze (NdV) (wf=8.0/1.0) (BM, GvdM, NdV, RG, I)
+2012-02-10 21:15:00 Wilhelmina DS 4 - Prima Donna Kaas Huizen DS 6 (sd=0) Invaller (I) (wf=100.0/1.0) (BM, NdV, RG, I)
+2012-03-02 19:30:00 Wilhelmina DS 3 - A.G.A.V.S. DS 2 (sd=1) Baukelien Mulder (BM) (wf=2.0/1.0) (RG, I, BM, NdV)
+2012-03-02 19:30:00 Wilhelmina DS 2 - Unicornus DS 2 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (RG, I, BM, CM, GvdM, MW, NdV)
+2012-03-02 21:30:00 Wilhelmina HS 3 - TouchÃ© '86 HS 1 (sd=1) Rob van Zonneveld (RvZ) (wf=2.0/1.0) (RG, I, JK, RvZ, RS, WvdW)
+2012-03-02 21:30:00 Wilhelmina DS 1 - Lovoc DS 1 (sd=1) Jan-Albert Kootstra  (JK) (wf=4.0/1.0) (I, JK, RvZ, WvdW)
+2012-03-09 21:15:00 Wilhelmina HS 4 - Afas-LEOS HS 3 (sd=0) Maarten Wispelwey  (MW) (wf=8.0/1.0) (AW, BM, CM, GvdM, JK, MW, NdV, RG, RvZ, RS, WvdW, I)
+2012-03-09 21:15:00 Wilhelmina DS 4 - Keizer Otto-Trivolley DS 3 (sd=0) Ronald Schreuder (RS) (wf=8.0/1.0) (AW, BM, NdV, RG, RvZ, RS, WvdW, I)
+2012-03-16 19:30:00 Wilhelmina DS 3 - Voleem DS 3 (sd=1) Nico de Vreeze (NdV) (wf=2.0/1.0) (EH, MD, RG, I, BM, NdV)
+2012-03-16 19:30:00 Wilhelmina DS 2 - AVV Keistad DS 7 (sd=1) Gert van de Meent (GvdM) (wf=4.0/1.0) (EH, RG, I, BM, CM, GvdM, MW, NdV)
+2012-03-16 21:30:00 Wilhelmina HS 3 - AVV Keistad HS 5 (sd=1) Jan-Albert Kootstra  (JK) (wf=4.0/1.0) (EH, RG, I, JK, RvZ, RS, WvdW)
+2012-03-16 21:30:00 Wilhelmina DS 1 - US DS 5 (sd=1) Rob van Zonneveld (RvZ) (wf=2.0/1.0) (EH, I, JK, RvZ, WvdW)
+2012-03-23 21:15:00 Wilhelmina DS 4 - ODIS DS 1 (sd=0) Annette Wolda (AW) (wf=8.0/1.0) (AW, RG, I)
+2012-03-23 21:15:00 Wilhelmina HS 4 - Voleem HS 3 (sd=0) Reza Gharsi (RG) (wf=8.0/1.0) (AW, RG, I)
+2012-03-30 21:30:00 Wilhelmina DS 2 - VC Allvo DS 4 (sd=0) Jan Taconis (JT) (wf=8.0/1.0) (EH, GvdM, JT, NdV, RG, I)
+2012-03-30 21:30:00 Wilhelmina DS 1 - Forza Hoogland DS 3 (sd=0) Ester Hilhorst (EH) (wf=8.0/1.0) (EH, GvdM, JT, NdV, I)
+2012-04-13 21:15:00 Wilhelmina HS 4 - TouchÃ© '86 HS 3 (sd=0) Invaller (I) (wf=100.0/1.0) (RG, I)
+2012-04-13 21:15:00 Wilhelmina DS 4 - Forza Hoogland DS 6 (sd=0) Reza Gharsi (RG) (wf=8.0/1.0) (RG, I)
+2012-04-20 19:30:00 Wilhelmina DS 2 - Sovoco DS 3 (sd=1) Chris Meijer (CM) (wf=2.0/1.0) (EH, GvdM, JK, NdV, RG, RvZ, RS, I, BM, CM, MW)
+2012-04-20 19:30:00 Wilhelmina DS 3 - Oberon DS 3 (sd=1) Baukelien Mulder (BM) (wf=2.0/1.0) (EH, MD, NdV, RG, RvZ, RS, I, BM)
+2012-04-20 21:30:00 Wilhelmina DS 1 - Oberon DS 1 (sd=1) Wendy van der Woerd (WvdW) (wf=2.0/1.0) (EH, GvdM, JK, NdV, RvZ, I, WvdW)
+--------------
+Referees:
+#4 zf=4096.0 : Annette Wolda
+#5 zf=  32.0 : Baukelien Mulder
+#5 zf=  32.0 : Chris Meijer
+#0 zf=   1.0 : Debby Meerveld
+#4 zf=1024.0 : Ester Hilhorst
+#0 zf=   1.0 : Gerard Kraan
+#2 zf=  16.0 : Gert van de Meent
+#0 zf=   1.0 : Henry van der Heide
+#2 zf=10000.0 : Invaller
+#3 zf= 512.0 : Jan Taconis
+#5 zf=1024.0 : Jan-Albert Kootstra 
+#0 zf=   1.0 : Jeanet Wattimena
+#0 zf=   1.0 : Kuneke Kluijfhout
+#0 zf=   1.0 : Lisette Ackerstaff
+#3 zf= 512.0 : Maarten Wispelwey 
+#0 zf=   1.0 : Margriet Drent
+#6 zf=4096.0 : Nico de Vreeze
+#4 zf=4096.0 : Reza Gharsi
+#6 zf=1024.0 : Rob van Zonneveld
+#4 zf=1024.0 : Ronald Schreuder
+#0 zf=   1.0 : Suzanne de Rooij
+#0 zf=   1.0 : Vincent Klein Breteler
+#6 zf=1024.0 : Wendy van der Woerd
+#0 zf=   1.0 : Yvonne Bokhorst
+--------------
+Statistics:
+Fitness: -10002.852200
+Maximum #games for a referee on one day: 1
+Sum of whine factors: 28522.000000
+List of whine factors: (1 1 1 1 1 1 1 1 1 1 16.0 32.0 32.0 512.0 512.0 1024.0 1024.0 1024.0 1024.0 1024.0 4096.0 4096.0 4096.0 10000.0)
+#games per referee:  (0 0 0 0 0 0 0 0 0 0 2 2 3 3 4 4 4 4 5 5 5 6 6 6)
+Maximum #games for a referee: 6
+#different referees: 14
+#games: 59
+from this solution a better one CANNOT be found with 1 change...
+==========
+*********** Logging iteration info to database ************
+

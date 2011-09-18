@@ -1,0 +1,37 @@
+Manual - Gebruikers documentatie scheidsrechters indeling
+=========================================================
+
+Nieuw seizoen - inlezen wedstrijden
+-----------------------------------
+* zorg dat <nw seizoen>/scheids.tsv goed is, via scheids.ods. De .ods als source gebruiken, edit gemakkelijker. Evt details
+  wel direct in de db wijzigen, maar dan ook in de ods voor de volgende keer.
+* insert_teams is hardcoded voor aantal teams en of (ver.) scheids nodig is, was alleen H1/D1 niet, maar per 2011-2012 is dit H1-H2 wel, rest niet.
+* insert_afwezig is ook hardcoded.
+* cd ~/nicoprj/misctools/scheids
+* tclsh insert-input.tcl -cleandb -fromsite. Deze werkt op mysql DB 'scheids' (niet scheidsprod)
+  Deze geeft aan het eind ook het aantal wedstrijden en of in principe voor elke wedstrijd een scheids
+  is te vinden.
+* cd ../scheidsclj
+* lein run: let op of oplossingen in DB worden opgeslagen, er staat een vrij arbitraire minimale waarde voor de 
+  fitness, voordat 'ie in de DB wordt opgeslagen, vanwege perf.
+* Nadat lein/clojure heeft gedraaid (ctrl-c werkt nu niet, gebruik kill), kun je met set-status de status van
+  voorstel op gemaild zetten voor een datum-periode. Helaas gaat het vervolgens (vanwege left-join) niet helemaal
+  goed in de rapportage, daarom toch nog hard-coded wat dingen in de rapport-def query.
+* Reporting: zie /opt/iReport-4.0.1/bin/ireport, symlink naar eigen bin gemaakt. Reports staan in scheids/report.
+  De pdf's etc worden hier default ook ingezet.
+* De scheids gegevens vooralsnog zelf in een ods/xls gezet, wil nog ander rapport met onderscheid tussen
+  vaste scheidsen en invallers.
+
+Opties insert-input.tcl
+-----------------------
+* seizoen: helder
+* fromsite: in principe eenmalig
+* cleandb: leegt alle tabellen inclusief persoon en team: kan_wedstrijd_fluiten scheids wedstrijd afwezig kan_team_fluiten zeurfactor persoon_team persoon team
+* wel insert2ndhalf: niet toegekende wedstrijden worden verwijderd en hierna opnieuw opgehaald en ingelezen.
+* niet insert2ndhalf: teams, personen, afwezig, persoon_team worden ingevoerd.
+* loglevel: helder
+
+
+Nieuw seizoen - inlezen scheidsrechters info
+--------------------------------------------
+
