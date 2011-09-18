@@ -11,10 +11,11 @@ left join (
    select s.wedstrijd, p.naam, s.speelt_zelfde_dag
    from scheids s, persoon p
    where s.scheids = p.id
-   and s.status in ( 'voorstel','gemaild')
+   and s.status in ('gemaild')
 ) as sch on sch.wedstrijd = w.id
 where w.lokatie = 'thuis'
 and w.datumtijd >= '2011-01-01'
+and w.datumtijd <= '2012-01-01'
 order by 1, 2, 3]]>
 	</queryString>
 	<field name="datum" class="java.sql.Date">
@@ -62,13 +63,6 @@ order by 1, 2, 3]]>
 						<font size="24" isBold="true"/>
 					</textElement>
 					<text><![CDATA[Scheidsrechters]]></text>
-				</staticText>
-				<staticText>
-					<reportElement x="395" y="43" width="180" height="20" forecolor="#FFFFFF"/>
-					<textElement textAlignment="Right">
-						<font size="14" isBold="false"/>
-					</textElement>
-					<text><![CDATA[2010-2011 tweede helft]]></text>
 				</staticText>
 			</frame>
 		</band>
@@ -147,8 +141,8 @@ order by 1, 2, 3]]>
 				<textElement/>
 				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
-			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement x="0" y="4" width="100" height="13"/>
+			<textField pattern="dd-MM-yyyy">
+				<reportElement x="0" y="4" width="276" height="13"/>
 				<textElement/>
 				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
