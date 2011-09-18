@@ -1,3 +1,5 @@
+#!/home/nico/bin/tclsh
+
 # @todo waarsch bug in mysqltcl, waardoor é etc niet goed in mysql db terechtkomen. Wel goed in html, ook goed in log (utf-8), niet goed in DB, zowel in 
 # sql explorer als in web2py.
 
@@ -17,7 +19,7 @@ proc main {argc argv} {
   
   $log debug "argv: $argv"
   set options {
-      {seizoen.arg "2010-2011" "Welk seizoen (directory)"}
+      {seizoen.arg "2011-2012" "Welk seizoen (directory)"}
       {fromsite  "Haal gegevens opnieuw van NeVoBo site"}
       {cleandb "Leeg database voor inlezen"}
       {insert2ndhalf "Voeg wedstrijden van 2e helft in, laat rest staan."}
