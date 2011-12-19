@@ -1,6 +1,9 @@
 # check of alles op pc is geinstalleerd.
 # Versie: $Id$
 
+# 13-7-2011 hier staan best specifieke dingen in, dus mogelijk dit script aanpassen bij elke nieuwe install.
+# nu niet direct reden om generieke en specifieke te splitsen. Zou wel zo zijn als ik meerdere windows pc's zou hebben.
+
 #met andere interp de perf toolset ook aanroepen.
 
 #iets met handmatige checks.
@@ -19,36 +22,34 @@ itcl::class CCheckPC {
 	# set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 	set log [::ndv::CLogger::new_logger [file tail [info script]] info]
 
-	private common PROJECT_DIR "d:/temp/install"
+	private common PROJECT_DIR "c:/temp/install"
 	private common USERNAME $env(USERNAME)
 	
+	# 13-7-2011 kan in onderstaande lijst geen ${USERNAME} gebruiken, omdat het tussen accolades staat...
 	private common LST_PATHS {
 		c:/bin/freeall.bat
-		"C:/Documents and Settings/nvr00537/.freemind/user.properties"
-		"C:/Documents and Settings/nvr00537/.jedit/jars/BufferTabs.jar"
-		"C:/Documents and Settings/nvr00537/Application Data/.thinkingrock/tr-2.2.1/config/Preferences/org/netbeans/core.properties"
-		"C:/Documents and Settings/nvr00537/Application Data/Microsoft/Outlook/Microsoft Outlook Internet Settings.srs"
-		"C:/Documents and Settings/nvr00537/Application Data/MySQL"
-		"C:/Documents and Settings/nvr00537/Application Data/Subversion/config"
-		"C:/Documents and Settings/nvr00537/Application Data/TomTom/HOME/profiles.ini"
-		"C:/Documents and Settings/nvr00537/Teapot/repository/package/tcl/lib/struct_set-2.2.1"
-		"D:/util/perf/lqn/LQN Solvers/lqns.exe"
+		"C:/Documents and Settings/ndvreeze/.freemind/user.properties"
+		"C:/Documents and Settings/ndvreeze/.jedit/jars/BufferTabs.jar"
+		"C:/Documents and Settings/ndvreeze/Application Data/.thinkingrock/tr-2.2.1/config/Preferences/org/netbeans/core.properties"
+		"C:/Documents and Settings/ndvreeze/Application Data/MySQL"
+		"C:/Documents and Settings/ndvreeze/Teapot/repository/package/tcl/lib/struct_set-2.2.1"
+		"C:/util/perf/lqn/LQN Solvers/lqns.exe"
 		c:/util/4nt/4NT.exe
 		C:/util/editor/pfe/pfe32.exe
 		C:/util/totalcmd/TOTALCMD.EXE
-		D:/bieb/ICT-books/Coders.at.Work.Sep.2009.pdf
-		d:/cruiseresults
-		d:/develop
-		d:/install
-		d:/MySQL
-		d:/nico
-		D:/nico/outlook/Personal.pst
-		d:/perfeng
-		d:/perftoolset
-		d:/progs
-		d:/projecten
-		d:/util
-		i:/Architectuur
+		C:/bieb/ICT-books/Coders.at.Work.Sep.2009.pdf
+		c:/cruiseresults
+		c:/develop
+		c:/install
+		c:/MySQL
+		c:/nico
+		C:/nico/outlook/Personal.pst
+		c:/perfeng
+		c:/perftoolset
+		c:/progs
+		c:/projecten
+		c:/util
+		"C:/Documents and Settings/ndvreeze/Local Settings/Application Data/Microsoft/Outlook/outlook.ost"
 	}
 	
   # 7-10-2009 teacup verify doet 't wel, zegt nul fouten, toch return code 1. Laat eerst maar.
@@ -57,10 +58,9 @@ itcl::class CCheckPC {
   }
 
   # 10-10-2009: paar verwijderd uit PATH, progs doen het wel: jdk1.6, Haskell, LQN,Graphviz
+  # 13-7-2011 Tcl85, python removed.
   private common LST_PATH {
-    Tcl85
     ruby
-    Python25
     "c:\\bin"
     cygwin    
   }
@@ -115,19 +115,34 @@ itcl::class CCheckPC {
 	
 	private method start_programs {} {
 		$log info "Start programs in start menu"
-		# kijk in C:\Documents and Settings\nvr00537\Menu Start
+		# kijk in C:\Documents and Settings\ndvreeze\Menu Start
 	}
 	
 	private method check_perftoolset {} {
 		$log debug "check_perftoolset"
-		set i [interp create]
+		
 		# interp limit $i command -value 1000
-		set res [interp eval $i {
-			set old_pwd [pwd]
-			cd d:\\perftoolset\\testprj\\demo
-			exec {check-install.bat}
-			cd $old_pwd
-		}]
+		set check_install_bat "c:/perftoolset/testprj/demo/check-install.bat"
+		# set check_install_bat "c:/perftoolset/testprj/demo/check-install.bat2"
+		if {[file exists $check_install_bat]} {
+      set i [interp create]
+      interp eval $i set cib $check_install_bat
+		  set res [interp eval $i {
+        set old_pwd [pwd]
+        # cd c:\\perftoolset\\testprj\\demo
+        # cd [file dirname $check_install_bat]
+        cd [file dirname $cib]
+        # exec {check-install.bat}
+        # exec [file tail $check_install_bat]
+        puts "Executing ($cib): [file tail $cib] in dir [pwd]"
+        exec [file tail $cib]
+        cd $old_pwd
+      }]
+    } else {
+      $log warn "check-install.bat not found: $check_install_bat"
+      lappend lst_errors "perf toolset check-install.bat not found: $check_install_bat"
+      set res ""
+    }
 		foreach line [split $res "\n"] {
 			if {[regexp {^ERROR} $line]} {
 				$log debug $line
@@ -155,13 +170,16 @@ itcl::class CCheckPC {
   private method check_commands {} {
     foreach command $LST_COMMANDS {
       if {[catch [list exec {*}$command] res]} {
-        lappend lst_errors "Error executing command $command: $res" 
+        # teacup verify gives "0 problems", is ok.
+        if {![regexp {0 problems} $res]} {
+          lappend lst_errors "Error executing command $command: $res"
+        }
       }
     }
   }
 
   private method check_4nt_aliases {} {
-    set f [open "d:/nico/settings/4dos/alias.dat" r]
+    set f [open "c:/nico/settings/4dos/alias.dat" r]
     set text [read $f]
     close $f
     set lst_aliases [valid_lines $text ":"]
@@ -191,7 +209,7 @@ itcl::class CCheckPC {
       return 
     }
     set lst_checked [read_checked]
-		# kijk in C:\Documents and Settings\nvr00537\Menu Start
+		# kijk in C:\Documents and Settings\ndvreeze\Menu Start
     set sh [::tcom::ref createobject "WScript.Shell"]
     for_recursive_glob filename [list $start_menu_dir] "*" {
       #$log debug "checking file in startmenu: $filename"      
