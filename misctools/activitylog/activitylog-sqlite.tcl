@@ -112,6 +112,7 @@ proc det_logfile_name {logfile timestamp_day} {
 
 proc create_db {db_name} {
   sqlite3 db $db_name
+  db function regexp regexp ; # make regexp available in queries.
   db eval "create table if not exists event (id integer primary key autoincrement, ts_start, ts_end, time, title)"  
 }
 
