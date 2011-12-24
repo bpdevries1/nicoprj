@@ -1,10 +1,12 @@
 #!/home/nico/bin/tclsh
+# log currently active window to a file, every 5 seconds.
 
 package require ndv
 package require Tclx
 package require sqlite3
 
-# log currently active window to a file, every 5 seconds.
+set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+$log set_file "[file tail [info script]].log"
 
 if {$tcl_platform(platform) == "windows"} {
   package require twapi
@@ -124,7 +126,14 @@ proc puts_logline {ts_start ts_end title} {
 	}
 
 	# puts $f [join [list [format_ts $ts_start] [format_ts $ts_end] [expr $ts_end - $ts_start] $title] "\t"]
-	db eval "insert into event (ts_start, ts_end, time, title) values ('[format_ts $ts_start]', '[format_ts $ts_end]', [expr $ts_end - $ts_start], '$title')"   
+	# db eval "insert into event (ts_start, ts_end, time, title) values ('[format_ts $ts_start]', '[format_ts $ts_end]', [expr $ts_end - $ts_start], '$title')"
+	# @note 24-12-2011 NdV cannot call Tcl proc within sqlite query, need braces to convert quotes etc.
+	set fmt_ts_start [format_ts $ts_start]
+	set fmt_ts_end [format_ts $ts_end]
+	set duration [expr $ts_end - $ts_start]
+	
+	# db eval {insert into event (ts_start, ts_end, time, title) values ([format_ts $ts_start], [format_ts $ts_end], [expr $ts_end - $ts_start], $title)}
+	db eval {insert into event (ts_start, ts_end, time, title) values ($fmt_ts_start, $fmt_ts_end, $duration, $title)}
 	
 	# flush $f
 }
@@ -203,5 +212,11 @@ proc dir_change_cb {args} {
   }
 }
 
-main $argc $argv
+try_eval {
+  $log info "Starting main proc..."
+  main $argc $argv
+  $log info "Finished main proc."
+} {
+  $log error "$errorResult" 
+}
 
