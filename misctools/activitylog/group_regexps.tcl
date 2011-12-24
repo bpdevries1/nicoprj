@@ -46,6 +46,7 @@ proc init_group_regexps {} {
 	
 	# on Linux
 	add_re {Git Gui} Programming
+	add_re {ActiveTcl} Programming
 	add_re {VLC Media Player} Media
 	add_re {nico@pclinux} General
 	
@@ -60,6 +61,7 @@ proc init_group_regexps {} {
 	add_re {4NT} General
 	add_re {Adobe Reader} General
 	add_re {PowerPoint} General
+	add_re {4DOS/NT Prompt} General
 	
 	add_re { - Microsoft Outlook$} Outlook
 	add_re { - Bericht} Outlook
@@ -74,8 +76,8 @@ proc init_group_regexps {} {
   add_re {Herinnering} Screensaver
   add_re {\{NONE\}} Screensaver
 	
-  # Empty er ook maar bij
-  add_re {^$} Empty
+  # Empty er ook maar bij, toch als screensaver
+  add_re {^$} Screensaver
 }
 
 proc add_re {re group} {
