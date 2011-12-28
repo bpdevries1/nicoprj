@@ -1,0 +1,9 @@
+TODO
+====
+* Nieuwe vorm sinds 19-9-2011
+* Noteren dat gegevens van scheidsen op diverse plekken staan, en dat 1 source wel wenselijk is, maar lastig.
+  Sources: de excel/ods vorm, de tsv form, de gegevens in de DB. Als procedure voor volgend seizoen niet
+  helemaal duidelijk is, en bv een export van de database ook lastig, is het niet handig gegevens alleen
+  in de db te wijzigen.
+* Gegevens staan ook in e-captain, rapportages van te maken, maar bv of iemand reserve is of niet, staat hier
+  niet in.

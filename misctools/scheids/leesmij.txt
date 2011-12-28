@@ -21,7 +21,7 @@ Acties bij nieuw seizoen.
 * Maken scheids.tsv, export van scheids.xls, hier updates in bijhouden.
 * Downloaden wedstrijden, vraag of thuis/schuilenburg wedstrijden apart opgehaald moeten worden.
 * empty.sql, met schone lei beginnen.
-* insert-input.tcl - met beleid, kijk naar proc-namen:
+* insert-input.tcl - met beleid, kijk naar proc-namen:o
   - insert_teams - nu (12-9-2010) niet gedaan, zelfde als vorig jaar.
   - insert_personen
   - insert_afwezig: met de hand, bv eigen vakantie en ester alleen oktober. @todo Wel periodes kunnen doen.
