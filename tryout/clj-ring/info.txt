@@ -1,0 +1,31 @@
+Clojure web development.
+
+Doelen
+======
+* Niet direct een app voor 'productie', hoewel scheids app wel een stip aan de horizon is. Kan DB al lezen en schrijven via ClojureQL
+* Hier niet net als web2py een volledig framework, maar wat alternatieven en onderdelen, meeste gebaseerd op ring.
+
+Tutorials
+==========
+Om bij te houden welke ik gevolgd heb.
+
+* http://brehaut.net/blog/2011/ring_introduction - 23-10-2011
+
+Later 
+-----
+* http://bestinclass.dk/index.clj/2011/01/building-a-social-media-site.html - combi van clojureql, enlive, moustache, ring, wat brehaut ook wel cool vindt.
+* https://github.com/brentonashworth/sandbar#readme - forms
+* https://github.com/joodie/flutter-decline-demo#readme
+* https://github.com/joodie/pretzel#readme - string predicates.
+
+Code
+====
+(defonce server (run-jetty #'greeting-handler-2 
+                           {:port 8000 :join? false}))
+                           
+(def ^{:doc "A very simple moustache based handler that uses wrap-params to decode a form postback"}
+     simple-form-handler 
+     (app 
+          wrap-params
+          [] {:get  form-view
+              :post handle-form-view}))                           
