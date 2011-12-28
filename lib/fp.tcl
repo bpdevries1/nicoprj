@@ -7,7 +7,17 @@ package provide ndv 0.1.1
 
 namespace eval ::ndv {
 
-	namespace export times times_old lindices iden lambda_negate lambda_and regexp_lambda lst_partition proc_to_lambda lambda_to_proc iden
+	namespace export times times_old lindices iden lambda_negate lambda_and regexp_lambda \
+	         lst_partition proc_to_lambda lambda_to_proc iden id if_else map mapfor \
+	         filter filterfor iota multimap transpose when_set set_if_empty variables
+
+  interp alias {} map {} ::struct::list map
+  interp alias {} mapfor {} ::struct::list mapfor
+  
+  interp alias {} filter {} ::struct::list filter
+  interp alias {} filterfor {} ::struct::list filterfor
+  
+  interp alias {} iota {} ::struct::list iota
 	
   proc times_old {ntimes pr args} {
     set result {}
@@ -34,6 +44,10 @@ namespace eval ::ndv {
 
   proc iden {param} {
     return $param 
+  }
+
+  proc id {val} {
+    return $val
   }
   
   proc lambda_negate {lambda} {
@@ -89,6 +103,67 @@ namespace eval ::ndv {
   # sometimes need in FP functions
   proc iden {arg} {
     return $arg 
+  }
+
+  # functional equivalent of if statement.
+  # not sure if uplevel/expr always works as expected.
+  # idea stolen from R.
+  proc ifelse {expr iftrue {iffalse ""}} {
+    if {[uplevel 1 expr $expr]} {
+      return $iftrue 
+    } else {
+      return $iffalse 
+    }
+  }
+
+  # apply procname to each corresponding member in lst_lsts
+  # return (single) list with results
+  # procname should expect the same number of arguments as there are lists in lst_lsts
+  # @todo deze al in ndv-lib?
+  proc multimap {procname lst_lsts} {
+    set res {}
+    set n [llength [lindex $lst_lsts 0]]
+    for {set i 0} {$i < $n} {incr i} {
+      lappend res [$procname {*}[mapfor lst $lst_lsts {
+        lindex $lst $i
+      }]]
+    }
+    return $res
+  }
+  
+  # ook transpose, hier niet nodig, verder wel handig, zie ook clojure
+  proc transpose {lst_lsts} {
+    multimap list $lst_lsts 
+  }
+  
+  # set var_name to value if value is non-empty. Keep unchanged otherwise.
+  proc when_set {var_name value} {
+    upvar $var_name var
+    if {$value != ""} {
+      set var $value 
+    }
+  }
+   
+  # give a var a value if it does not already have a value (not set, or set to "" or {})
+  # compared to the previous proc, this one checks the actual value of var_name, the previous checks value.
+  proc set_if_empty {var_name value} {
+    upvar $var_name var
+    if {[info exists var]} {
+      if {($var == "") || ($var == {})} {
+        set var $value 
+      } else {
+        # already set to a value, do nothing. 
+      }
+    } else {
+      set var $value 
+    }  
+  }
+
+  # wrapper around variable, to define more than 1 variable without settings its value
+  proc variables {args} {
+    foreach arg $args {
+      uplevel variable $arg 
+    }
   }
   
 }

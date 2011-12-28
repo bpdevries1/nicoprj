@@ -375,8 +375,27 @@ proc gnuplot_file {m_filename png_filename plot_filename} {
 	
 }
 
-# 24-10-2010 added from FB genvugen.tcl
+# subst uitvoeren zonder variabelen te vervangen, ofwel $ negeren
+# subst met -novariables werkt niet (goed)
+# vervang eerst $ door een \004
 proc subst_no_variables {text} {
+  # 4-11-2010 NdV: testje, lijkt wel goed te gaan. 
+  return [subst -novariables $text]
+  
+  global log
+  set special_char [det_special_char $text]
+  regsub -all {\$} $text $special_char text2
+  try_eval {
+    set text3 [subst $text2]
+  } {
+    breakpoint 
+  }
+  regsub -all $special_char $text3 "\$" text4
+  return $text4
+}
+
+# 24-10-2010 added from FB genvugen.tcl
+proc subst_no_variables_old {text} {
   if {[regexp "\004" $text]} {
     error "char(4) already exists in text: $text"
   }
@@ -524,4 +543,12 @@ proc lees_tsv {filename callback_proc} {
   close $f
 }
 
+proc catch_call {catch_result args} {
+  try_eval {
+    set result [eval {*}$args]
+  } {
+    set result $catch_result
+  }
+  return $result
+}
 

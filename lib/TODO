@@ -1,0 +1,21 @@
+Intro
+=====
+* Periodically move library functions from the projects where they are first used to this general place.
+* This is almost by definition a post-hoc activity, as we don't know beforehand if a function will become a lib function.
+
+find ~/nicoprj -name "*.tcl" -mtime -365
+
+# lib in filename
+find ~/nicoprj -name "*lib*.tcl" -mtime -365
+find ~/perftoolset -name "*lib*.tcl" -mtime -365
+
+# could also compare time with time of TODO and/or HISTORY file here.
+
+# lib in contents
+find ~/nicoprj -path '*/lib' -prune -o -name "*.tcl" -mtime -365 -exec ~/aaa/greplib.sh {} \;
+find ~/perftoolset -name "*.tcl" -mtime -365 -exec ~/aaa/greplib.sh {} \;
+
+Concrete todo
+=============
+* Checked files on 26-12-2011 and handled everything, so next time check from this date.
+

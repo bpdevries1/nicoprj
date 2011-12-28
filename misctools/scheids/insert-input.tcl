@@ -141,7 +141,6 @@ proc handle_scheids {line lst_names ar_values_name} {
   }
 }
 
-# onderstaande in lib zetten
 # vooralsnog handmatig hardcoded in deze proc.
 proc insert_afwezig {} {
   insert_afwezig_persoon "Nico de Vreeze" "Bruiloft" "2011-09-30"  

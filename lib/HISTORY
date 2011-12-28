@@ -1,0 +1,108 @@
+6-11-2011
+=========
+* Op 6-11 dus de search uitgevoerd, dus de volgende keer vanaf deze datum zoeken, kijken of -mtime ook absolute dates kan.
+
+find ~/nicoprj -name "*lib*.tcl" -mtime -365
+
+/home/nico/nicoprj/mediatools/lib/libmusic.tcl => only music specific 
+/home/nico/nicoprj/systemtools/check-sync-dirs/check-files-lib.tcl - only specific
+/home/nico/nicoprj/lib/statslib.tcl - already in lib
+/home/nico/nicoprj/lib/generallib.tcl - already in lib
+/home/nico/nicoprj/outlooktools/AgendaImport/lib-agenda.tcl - specific, volley game details import.
+
+find ~/perftoolset -name "*lib*.tcl" -mtime -365
+
+Afgehandeld 26-12-2011
+======================
+/home/nico/perftoolset/tools/viewstate/lib.tcl - yes, subst_no_vars => 26-12-2011 put in generallib.tcl.
+/home/nico/perftoolset/tools/log2analysis/lib_analysis.tcl - yes, array values, file block splitter => 26-12-2011 this one was already in ~/nicoprj/lib/generallib.tcl
+/home/nico/perftoolset/tools/loadmodel/libdot.tcl - yes, dot functions. => 26-12-2011 copied to lib-dir: libdot.tcl and in fp.tcl
+/home/nico/perftoolset/tools/loadrunner-add-subreqs/lib_analysis.tcl - yes, same as /home/nico/perftoolset/tools/log2analysis/lib_analysis.tcl! 
+/home/nico/perftoolset/tools/graphdata/graphdata-lib.tcl - interp alias for functional functions (map, filter), id function. => 26-12-2011 NdV copied functions to ~/nicoprj/lib/generallib and fp.tcl.
+
+find ~/nicoprj -type f -name "*.tcl" -mtime -365 -exec grep -l -i "lib" {} \;
+/home/nico/nicoprj/tryout/random-select/random-select.tcl - already in lib
+/home/nico/nicoprj/mediatools/playlist/shuffleplaylist.tcl - 28-12-11 alleen libs geinclude.
+/home/nico/nicoprj/mediatools/playlist/music-monitor.tcl
+/home/nico/nicoprj/mediatools/playlist/maakm3u.tcl
+/home/nico/nicoprj/mediatools/playlist/maak_album_playlist.tcl
+/home/nico/nicoprj/mediatools/organise/sync-singles-db.tcl
+/home/nico/nicoprj/mediatools/organise/sync-music-db.tcl
+/home/nico/nicoprj/mediatools/organise/show-tijdelijk.tcl
+/home/nico/nicoprj/mediatools/organise/check-existing.tcl
+/home/nico/nicoprj/mediatools/organise/check-albums.tcl
+/home/nico/nicoprj/mediatools/organise/rename-files.tcl
+/home/nico/nicoprj/mediatools/organise/unpack-tijdelijk.tcl
+/home/nico/nicoprj/mediatools/organise/change-brackets.tcl
+/home/nico/nicoprj/mediatools/db/MusicSchemaDef.tcl
+/home/nico/nicoprj/misctools/scheids/maak-tsv.tcl
+/home/nico/nicoprj/misctools/scheids/insert-input.tcl
+/home/nico/nicoprj/systemtools/check-sync-dirs/make-svn-move-historie.tcl
+/home/nico/nicoprj/systemtools/check-sync-dirs/make-svn-rename-versie.tcl
+/home/nico/nicoprj/systemtools/check-sync-dirs/make-svn-move.tcl
+/home/nico/nicoprj/systemtools/check-sync-dirs/make-svn-delete.tcl
+/home/nico/nicoprj/systemtools/check-sync-dirs/check-files.tcl
+/home/nico/nicoprj/systemtools/check-sync-dirs/make-svn-renumber-sub.tcl
+/home/nico/nicoprj/systemtools/check-sync-dirs/make-svn-ontdubbel.tcl
+/home/nico/nicoprj/systemtools/check-sync-dirs/make-svn-renumber.tcl
+/home/nico/nicoprj/systemtools/newpc/checkpc.tcl
+/home/nico/nicoprj/infotools/onto2graph/tools-graphs-reports.tcl
+/home/nico/nicoprj/outlooktools/AgendaImport/nevobo2agenda.tcl
+/home/nico/nicoprj/outlooktools/AgendaImport/pkgIndex.tcl
+
+/home/nico/perftoolset/tools/viewstate/valueexchange.tcl
+/home/nico/perftoolset/tools/viewstate/lib.tcl
+/home/nico/perftoolset/tools/viewstate/add-params.tcl
+/home/nico/perftoolset/tools/viewstate/viewstate.tcl
+/home/nico/perftoolset/tools/viewstate/add-webregfind.tcl
+/home/nico/perftoolset/tools/viewstate/maak-plaat.tcl
+/home/nico/perftoolset/tools/viewstate/add-subtrans.tcl
+/home/nico/perftoolset/tools/viewstate/find-base64.tcl
+/home/nico/perftoolset/tools/viewstate/check-eventvalidation.tcl
+/home/nico/perftoolset/tools/viewstate/eventvalidation.tcl
+/home/nico/perftoolset/tools/xmllog/log2sqlite.tcl
+/home/nico/perftoolset/tools/typeperf/make-graphs-lr.tcl
+/home/nico/perftoolset/tools/typeperf/make-graphs.tcl
+/home/nico/perftoolset/tools/log2analysis/Filelog2analysis.tcl
+/home/nico/perftoolset/tools/log2analysis/get-analyse-logs.tcl
+/home/nico/perftoolset/tools/loadmodel/eqs2dot.tcl
+/home/nico/perftoolset/tools/SubRequests/TransactionURLs.tcl
+/home/nico/perftoolset/tools/SubRequests/OpAn.tcl
+/home/nico/perftoolset/tools/loadrunner-add-subreqs/add-sub.tcl
+/home/nico/perftoolset/tools/graphdata/graphsqlite.tcl
+/home/nico/perftoolset/tools/graphdata/graphdata-lib.tcl
+/home/nico/perftoolset/tools/graphdata/data2sqlite.tcl
+/home/nico/perftoolset/tools/graphdata/graphdata-files.tcl
+/home/nico/perftoolset/tools/graphdata/graphdata.tcl
+/home/nico/perftoolset/tools/graphdata/find-overlaps.tcl
+/home/nico/perftoolset/toolset/cruise/configure.tcl
+/home/nico/perftoolset/toolset/cruise/checkout/client.startlogging.tcl
+/home/nico/perftoolset/toolset/cruise/checkout/script/prjhelpers/CDoHtmlWrapper.tcl
+/home/nico/perftoolset/toolset/cruise/checkout/script/files/CReportJtl.tcl
+/home/nico/perftoolset/toolset/cruise/checkout/script/database/NotesSchemaDef.tcl
+/home/nico/perftoolset/toolset/cruise/checkout/script/database/CDatabase.tcl
+/home/nico/perftoolset/toolset/cruise/checkout/script/servers/CServerTypeperfHelper.tcl
+/home/nico/perftoolset/toolset/cruise/checkout/script/servers/CServerTypeperfSsh2003.tcl
+/home/nico/perftoolset/toolset/cruise/test-installation.tcl
+/home/nico/perftoolset/testprj/demo/scripts/CDoHtmlWrapper.tcl
+
+28-12-2011
+==========
+find en grep combi, maar met hulpscript:
+
+cat ~/aaa/greplib.sh
+echo === $1 ===
+grep -i "lib" $1 | grep -v source
+
+find ~/nicoprj -type f -name "*.tcl" -mtime -365 -exec ~/aaa/greplib.sh {} \;
+
+=> resultaat op 28-12: alle tcl files getoond, paar met lib opmerking, kom hier 
+ook alle tcl files in ~/nicoprj/lib tegen.
+
+Onderstaande werkt beter:
+find ~/nicoprj -path '*/lib' -prune -o -name "*.tcl" -mtime -365 -exec ~/aaa/greplib.sh {} \;
+
+En voor perftoolset:
+find ~/perftoolset -name "*.tcl" -mtime -365 -exec ~/aaa/greplib.sh {} \;
+
+=> Ook paar gevonden en verwerkt.
