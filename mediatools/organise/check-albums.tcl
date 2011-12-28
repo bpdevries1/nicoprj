@@ -27,7 +27,7 @@ itcl::class CAlbumsChecker {
 		set root_dir $a_root_dir
 		$log info "root-dir: $root_dir"
 		set f_rename [open $RENAME_FILE w]
-		foreach dirname [lsort [glob -directory $root_dir -type d *]] {
+		foreach dirname [lsort [glob -nocomplain -directory $root_dir -type d *]] {
 			handle_dir $dirname
 		}
 		close $f_rename
@@ -160,7 +160,7 @@ itcl::class CAlbumsChecker {
 			set filename [file tail $filepath]
 			# normal track numbers, as well as 1-01 etc.
 			if {[is_music_file $filepath]} {
-				if {[regexp {^([0-9]+((-|\.)[0-9]+)?)} $filename z index]} {
+				if {[regexp {^([0-9]+ ?((-|\.) ?[0-9]+)?)} $filename z index]} {
 					regsub -all {\.} $index "-" index
 					lappend lst_index $index
         } elseif {[regexp {[0-9]{2}} $filename z index]} {
@@ -195,9 +195,12 @@ itcl::class CAlbumsChecker {
 	}
 	
 	# @todo dit moet gemakkelijker kunnen, nu echt micro programmeren.
+	# @param prev_index, index: could be a single index, or with a CD number, like 1-01. But also 1 - 01
+	# @todo bug: if trackname starts with a number, it is included in the index here, like 02. 50 Watt.mp3 gives 02- 50 as index.
+	# should determine for whole dir if album/cd numbers are used or not.
 	private method follows {prev_index index} {
-		if {[regexp {^([0-9]+)-([0-9]+)$} $prev_index z prev_album prev_track]} {
-			if {[regexp {^([0-9]+)-([0-9]+)$} $index z album track]} {
+		if {[regexp {^([0-9]+) ?- ?([0-9]+)$} $prev_index z prev_album prev_track]} {
+			if {[regexp {^([0-9]+) ?- ?([0-9]+)$} $index z album track]} {
 				if {$prev_album == $album} {
 					# same album, should be one more
 					regsub -all {^0+} $prev_track "" prev_track
@@ -220,7 +223,7 @@ itcl::class CAlbumsChecker {
 				return 0 ; # one with album, one without
 			}
 		} else {
-			if {[regexp {^([0-9]+)-([0-9]+)$} $index z album track]} {
+			if {[regexp {^([0-9]+) ?- ?([0-9]+)$} $index z album track]} {
 				return 0 ; # one with album, one without
 			} else {
 				# no album, should be one more
