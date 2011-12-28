@@ -33,6 +33,9 @@ proc init_group_regexps {} {
 	add_re {KEN_} Kennemer
 	add_re {kg} Kennemer
 	
+	add_re {Maasstad} Maasstad
+	add_re {MSZ_} Maasstad
+	
 	# PA-Rol
 	add_re {HPM2011} YmorPA 
 	add_re {Ymor PA} YmorPA
@@ -62,6 +65,7 @@ proc init_group_regexps {} {
 	add_re {Adobe Reader} General
 	add_re {PowerPoint} General
 	add_re {4DOS/NT Prompt} General
+	add_re {PopTray} General
 	
 	add_re { - Microsoft Outlook$} Outlook
 	add_re { - Bericht} Outlook
