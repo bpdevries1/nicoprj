@@ -5,6 +5,7 @@
 ;java.lang.ClassCastException: clojureql.core.RTable cannot be cast to java.util.Comparator (NO_SOURCE_FILE:34)
 
 (ns scheidsclj.db
+  (:refer-clojure :exclude [take drop sort distinct compile conj! disj! case]) ; 31-12-2011 deze constructie in SocialSite gezien (Lau Jensen), ook case erbij gezet.
   ;(:use scheidsclj.break) ; error if kept within (ns macro)
   (:use clojureql.core) 
   (:use [clj-time.core :exclude (extend)])
@@ -22,6 +23,7 @@
     (hash-map :nreferee (count result-set)
               :whinefactor (apply * (map :factor result-set)))))
 
+; @todo 31-12-2011 deze map-hashmap constructie mss handiger te doen, zie Lau Jensen over Uncle Bob.
 (defn det-lst-inp-persons []
   (->> @(-> (table :persoon)
             (project [:persoon.id :persoon.naam])
