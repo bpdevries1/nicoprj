@@ -181,3 +181,76 @@ Maximum #games for a referee: 6
 #games: 59
 from this solution a better one CANNOT be found with 1 change...
 
+[2011-12-31 12:21:11] Insert_Date.bsh in ~/.jedit/macro/Text neergezet met goede format, deze doet het meteen, zonder reboot.
+[2011-12-31 12:22:12] insert-input.tcl gecheckt, deze idd scheids als db, en dus niet scheidsprod. Ook in db.clj staat //localhost:3306/scheids en dus niet scheidsprod.
+[2011-12-31 12:23:51] backup-scheids_20111231_1223.sql gemaakt.
+[2011-12-31 12:24:19] wil wedstrijden van 2012 opnieuw inlezen, maar 2011 laten staan. Wil ook afwezig opnieuw inlezen.
+[2011-12-31 12:37:02] afwezig: ikzelf familie, maarten kinderen, wendy kan maar 2 avonden, ester nu weer d2 (in query browser, edit mode, zowel in persoon als in persoon_team), regioscheidsen niet, laatste mail is indeling tot 7-1, en eerste wedstrijd in S'burg is op 13-1.
+[2011-12-31 13:01:24] wedstrijd op 13-4 onduidelijk, zou alleen Chris kunnen, deze eerst forced afwezig, want is voor hem een 'uit' wedstrijd. Maar Reza zou ook moeten kunnen, checken of dit gebeurt. Had Reza nog niet bij D1, met de hand in DB toegevoegd.
+[2011-12-31 13:03:23] met de hand dingen aangepast, dus nogmaals backup: backup-scheids_20111231_1303.sql
+[2011-12-31 13:03:53] cmd: ./insert-input.tcl -fromsite -insert2ndhalf  
+[2011-12-31 13:06:00] cmd goed gegaan, geen wedstrijden waar niemand voor te vinden is.
+[2011-12-31 13:11:05] lein run maar eens doen: 2 mensen met 5 wedstrijden, Baukelien en Reza, Reza grote score. Met Ctrl-C nu wel af te breken.
+[2011-12-31 13:14:30] weet ook weer wat er op 13-4 misging: er zijn 2 wedstrijden, eentje wordt aan Reza toegekend, de ander aan een invaller (hopelijk). Hier een backup van: backup-scheids_20111231_1319.sql. Aspecten bij deze: 2xI, 5xRZ, 1xGert, 3xJ.A., 3xCM.
+[2011-12-31 13:19:24] Nog eens uitvoeren. Resultaat lijkt hetzelfde: 
+Referees:
+#2 zf=  64.0 : Annette Wolda
+#5 zf=  32.0 : Baukelien Mulder
+#3 zf=   8.0 : Chris Meijer
+#0 zf=   1.0 : Debby Meerveld
+#4 zf=  16.0 : Ester Hilhorst
+#0 zf=   1.0 : Gerard Kraan
+#1 zf=   4.0 : Gert van de Meent
+#0 zf=   1.0 : Henry van der Heide
+#2 zf=10000.0 : Invaller
+#1 zf=   8.0 : Jan Taconis
+#3 zf=  64.0 : Jan-Albert Kootstra 
+#0 zf=   1.0 : Jeanet Wattimena
+#0 zf=   1.0 : Kuneke Kluijfhout
+#0 zf=   1.0 : Lisette Ackerstaff
+#1 zf=   8.0 : Maarten Wispelwey 
+#0 zf=   1.0 : Margriet Drent
+#2 zf=  16.0 : Nico de Vreeze
+#5 zf=32768.0 : Reza Gharsi
+#1 zf=   2.0 : Rob van Zonneveld
+#2 zf=  64.0 : Ronald Schreuder
+#0 zf=   1.0 : Suzanne de Rooij
+#0 zf=   1.0 : Vincent Klein Breteler
+#2 zf=   4.0 : Wendy van der Woerd
+#0 zf=   1.0 : Yvonne Bokhorst
+
+Statistics:
+Fitness: -32773.485800
+Maximum #games for a referee on one day: 1
+Sum of whine factors: 54858.000000
+List of whine factors: (1 1 1 1 1 1 1 1 1 1 16.0 32.0 64.0 64.0 128.0 512.0 1024.0 1024.0 1024.0 2048.0 2048.0 4096.0 10000.0 32768.0)
+#games per referee:  (0 0 0 0 0 0 0 0 0 0 1 1 1 1 2 2 2 2 2 3 3 4 5 5)
+Maximum #games for a referee: 5
+#different referees: 14
+#games: 34
+
+[2011-12-31 13:24:08] ClojureQL geeft meldingen, in socialsite tutorial iets gezien dat dit mogelijk kan oplossen, meldingen dat functie al bestaat, overschreven wordt. Lijkt wel te werken, nu nog een warning van een andere package.
+[2011-12-31 13:29:29] en dus nogmaals gerund: weer hetzelfde.
+[2011-12-31 13:30:54] deze oplossing toch niet goed, Baukelien 5 wedstrijden, maar zijn dus 5 vanaf 1-1-2012. Lijk dus geen rekening te houden met al ingedeelde en gespeelde. Deze oplosbaar door even te kijken hoeveel ze in eerste helft was ingedeeld, maar wil eigenlijk ook de zeurfactoren etc van de eerste helft meenemen.
+[2011-12-31 13:33:07] heb wel det-planned-referee functie. Zou kunnen dat zf's wel worden meegenomen, maar de specifieke dingen voor Baukelien niet.
+[2011-12-31 14:14:24] det-planned-referee wordt wel gebruikt, in det-lst-inp-persons en toegekend aan *lst-inp-persons*. Het element :whinefactor bevat het product van de al bestaande zf's.
+[2011-12-31 14:19:27] lein repl, dan functies beschikbaar? Lijkt wel, want wel warning op case already refers to: #'clojure.core/case in namespace: scheidsclj.db, being replaced by: #'clojureql.core/case
+[2011-12-31 14:28:57] de #'clojureql.core/case melding opgelost op dezelfde manier.
+[2011-12-31 15:01:29] aanpassingen in core.clj: neem ook de oude waarden mee, bleek vrij gemakkelijk te integreren, had het al voorbereid, gewoon vergeten hiervoor? want wel deels meegenomen. Berekening start in ieder geval, dus geen syntax fouten.
+[2011-12-31 15:04:41] berekening lijkt wel goed, Baukelien nu weer op 5, maar dus maar 4 nieuwe, ook Annette Wolda staat op 4, 2 nieuwe. Ikzelf sta nu op 6, had er al 3, dus nu nog 3, is ok.
+[2011-12-31 15:14:48] deze backuppen: backup-scheids_20111231_1514.sql
+[2011-12-31 15:15:08] ook nog even zonder invallers, kan bv door een afwezig record te maken. Met de hand gedaan. Werkt niet, invaller wordt nog steeds gekozen. Komt waarschijnlijk doordat kan-wedstrijd-fluiten tabel al is ingevuld.
+[2011-12-31 15:22:57] in kan_wedstrijd_fluiten: van 654 naar -654 gezet.
+[2011-12-31 15:23:39] update kan_wedstrijd_fluiten set scheids=-654 where scheids=654. gaat niet, f.key violation. Dan ook in persoon even een record aanmaken, is ID 655.
+[2011-12-31 15:25:02] update kan_wedstrijd_fluiten set scheids=655 where scheids=654 => gaat wel goed.
+[2011-12-31 15:25:41] zoeken opnieuw: met deze zet ik Gert 1x op een dag dat 'ie niet zelf speelt, eigenlijk ook een no-go. Is wel een 100.000, dus hij op 400.000, blijkbaar toch geen betere. Verder staat Reza heel hoog. Chris staat ook op 100.000 voor uitwedstrijden. Keuze is hier dus tussen Reza (heeft al de ander, <laat maar> Reza nu 2x op 13-4, is sowieso fout, dus bug in mijn systeem, wel iets voor gemaakt, dus zal fout zijn. Wordt wel aangegeven dat ik 2 op een dag heb, blijkbaar niet een betere? Maar Chris kan hier de andere doen... Kan zijn dat de 100.000 de andere overschaduwt. Klopt wel, reken hier ook 100.000 voor. Deze waarde dan aangepast naar 1000.000, kijken of dat helpt, wil niet meteen te veel.
+[2011-12-31 15:53:45] werkt wel, heb nu weer Gert bij een wedstrijd staan, en Chris dus ook. Alternatief voor Gert zou nog Baukelien zijn, er zijn die avond nog 2 wedstrijden die Reza en ik doen. Maar voor Baukelien dan dus ook een uitwedstrijd, wat ze niet wil.
+[2011-12-31 15:55:13] Ik kan dit aan ze voorleggen, kans dat ze zeggen kijk eerst maar of iemand anders, een invaller wil. Kan ze dan geen ongelijk geven. Dus dit maar doen, met 2 inval wedstrijden, voordeel is ook dat Baukelien en Chris dan op andere zijn ingedeeld.
+[2011-12-31 15:56:43] Ofwel de query weer even terugdraaien: update kan_wedstrijd_fluiten set scheids=654 where scheids=655.
+[2011-12-31 15:57:15] exec: gaat weer goed, wel weer iets anders, heb zelf nu maar 5. Rob van Zonneveld heeft er 6, maar heeft er een gemist, dus wel terecht. Hij is de enige met 6. Mss ook nog geblesseerd, dus een kandidaat voor de Inval wedstrijd.
+[2011-12-31 16:00:51] even door laten lopen, dan oplossing bewaren/backuppen.
+[2011-12-31 16:03:07] inmiddels toch weer een betere oplossing, waarbij ik weer 6 wedstrijden heb en Rob 5. Tsja. Ester heeft er ook 6. Maar ja, max wedstrijden zegt niet alles.
+[2011-12-31 19:49:43] check bij Wendy gedaan, idd beide keren om 21.30.
+
+
+

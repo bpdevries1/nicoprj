@@ -3,6 +3,7 @@ Manual - Gebruikers documentatie scheidsrechters indeling
 
 Nieuw seizoen - inlezen wedstrijden
 -----------------------------------
+* Algemeen: werken met MySQL DB scheids, niet scheidsprod.
 * zorg dat <nw seizoen>/scheids.tsv goed is, via scheids.ods. De .ods als source gebruiken, edit gemakkelijker. Evt details
   wel direct in de db wijzigen, maar dan ook in de ods voor de volgende keer.
 * insert_teams is hardcoded voor aantal teams en of (ver.) scheids nodig is, was alleen H1/D1 niet, maar per 2011-2012 is dit H1-H2 wel, rest niet.
@@ -21,6 +22,21 @@ Nieuw seizoen - inlezen wedstrijden
   De pdf's etc worden hier default ook ingezet.
 * De scheids gegevens vooralsnog zelf in een ods/xls gezet, wil nog ander rapport met onderscheid tussen
   vaste scheidsen en invallers.
+
+
+Halverwege seizoen - opnieuw inlezen wedstrijden
+------------------------------------------------
+* Algemeen: werken met MySQL DB scheids, niet scheidsprod.
+* Eerst backup maken van MySQL/scheids
+* insert_afwezig proc bijwerken, let op Maarten, vakanties, mails, ook op regio scheidsen.
+* Ook letten op Invaller, wil ik deze wel of niet: kan-fluiten wordt gevuld bij tcl script, in principe hierna
+  dus niet te wijzigen. Oplossing is nog een dummy Invaller persoon maken, en alle kan-fluiten entries van Invaller
+  hier aanhangen met een SQL update.
+* Let ook op of iemand in een ander team is gaan spelen, was bij Ester het geval.
+* cmd: ./insert-input.tcl -fromsite -insert2ndhalf
+* lein run, resultaat checken, met of zonder invallers. Er wordt rekening gehouden met 1e helft.
+* reporting via iReport, wel query hierin checken, met parameters gaat vooralsnog niet goed, blijkbaar ook
+  doo queries met left-joins.
 
 Opties insert-input.tcl
 -----------------------
