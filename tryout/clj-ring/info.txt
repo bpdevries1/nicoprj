@@ -5,14 +5,29 @@ Doelen
 * Niet direct een app voor 'productie', hoewel scheids app wel een stip aan de horizon is. Kan DB al lezen en schrijven via ClojureQL
 * Hier niet net als web2py een volledig framework, maar wat alternatieven en onderdelen, meeste gebaseerd op ring.
 
+Logboek
+=======
+* 23-10-2011 met tutorial http://brehaut.net/blog/2011/ring_introduction bezig geweest, onduidelijk hoever ik toen gekomen ben. In ieder geval veel met lein repl gespeeld: dependencies in project.clj gezet, reload steeds en voorbeelden geprobeerd.
+* 30-12-2011 nogmaal ring tutorial, nu zorgen dat met lein run een appserver draait die ik kan gebruiken, met 1 van de greeting voorbeelden.
+* 30-12 toch eerst verder met een volledige tutorial, die een app oplevert. Is van een reddit clone, eerst de originele: http://bestinclass.dk/index.clj/2010/02/reddit-clone-in-10-minutes-and-91-lines-of-clojure.html
+* 30-12 hierin staat ook deployment, inclusief source van github afhalen. Eerst ophalen in ~/aaa dir: de cloneit directory wordt gemaakt binnen mijn huidige dir. In ~/nicoprj/tryout/cloneit gezet. Lein deps geeft vervolgens een foutmelding op org.clojure:clojure:jar:1.1.0-new-SNAPSHOT. Dit lijkt idd oud, dus even naar de nieuwe versie kijken.
+* 30-12 nieuwe versie van reddit clone beschreven in http://bestinclass.dk/index.clj/2011/01/building-a-social-media-site.html
+* 30-12-2011 deze ook op github? Ja. Git clone vanuit mijn eigen git tryout dir geeft vage melding, weer even in ~/aaa doen: zelfde melding. De oude ging goed, was met git protocol, de nieuwe met http protocol dus niet. Ofwel de nieuwe met git protocol proberen, gaat wel goed, ook direct in eigen git repo: git clone git://github.com/LauJensen/SocialSite.git 
+* 30-12 vervolgens lein deps: huh gebruikt clojure 1.4-alpha code. En ook swank-clojure. Maar het gaat wel goed, geen foutmelding.
+* 30-12 wordt ook cake gebruikt, is dit een leiningen replacement? Zijn idd vergelijkbaar, cake is wat complexer geimplementeerd, houdt een JVM draaiend, communiceert via Ruby. Heb cake nog niet geinstalleerd, kan ook wel, nu ik toch bezig ben.
+* 30-12 kan app starten zoals beschreven, met (use 'socialsite.core). Volgende is artikel lezen, en eigenlijk ook zeker weten dat alles behandeld is. Eerst lezen, dan code langslopen, kijken wat waar staat.
+
 Tutorials
 ==========
 Om bij te houden welke ik gevolgd heb.
 
-* http://brehaut.net/blog/2011/ring_introduction - 23-10-2011
+* http://brehaut.net/blog/2011/ring_introduction - 23-10-2011 - onduidelijk hoever ik toen gekomen ben.
+* http://bestinclass.dk/index.clj/2011/01/building-a-social-media-site.html - 30-12-2011 mee begonnen, staat in ~/tryout/SocialSite. Starten met:  (use 'socialsite.core)
+* 30-12-2011 deze socialsite tutorial gelezen, best compleet, ook javascript en ajax, ook genoeg over te leren. Enlive ook sowieso, en andere dingen als ik ergens tegenaan loop. Moet vooral een doel hebben. Dit voorbeeld connect met MySQL, is eigenlijk wel prima hier, SQLite minder geschikt voor zoiets, weet bv niet hoeveel connecties er geopend worden naar de DB. Forms: opvallend dat geen <form> tag wordt gebruikt, wel <table> voor posities. Maar met javascript/ajax/jquery vervolgens de submit gedaan, ziet er nog wel wat cryptisch uit.
 
 Later 
 -----
+* https://github.com/swannodette/enlive-tutorial
 * http://bestinclass.dk/index.clj/2011/01/building-a-social-media-site.html - combi van clojureql, enlive, moustache, ring, wat brehaut ook wel cool vindt.
 * https://github.com/brentonashworth/sandbar#readme - forms
 * https://github.com/joodie/flutter-decline-demo#readme
