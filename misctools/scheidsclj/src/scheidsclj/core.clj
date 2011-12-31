@@ -34,14 +34,17 @@
 ; 19-9-2010 NdV zelfde geldt eigenlijk ook voor aantal verschillende refereeen.
 ; 19-9-2010 NdV maar wel de lasten goed verdelen, dus max_whinefactors wel belangrijk.
 ; expr (1-$prod_games_person_dag) * 100000 + (10-$max_referee)*100 + $n_versch_referee - (0.0001 * $sum-whinefactors)
+; 31-12-2011 prod-games-person-day van 100.000 naar 1 miljoen gezet, bepaalde zf's staan ook op 100.000.
 (defn calc-fitness [prod-games-person-day max-referee n-diff-referee sum-whinefactors max-whinefactors]
-  (- (* (- 1 prod-games-person-day) 100000)
+  (- (* (- 1 prod-games-person-day) 1000000)
      max-whinefactors
      (* 0.0001 sum-whinefactors)))
 
 ; bepaal per person welke games deze fluit in de gemaakte oplossing
 ; input lijst van persons (hashmap)
-; result lijst van persons (hashmap) aangevuld met lijst van games per person
+; result lijst van persons (hashmap) aangevuld met lijst van games per person.
+; 31-12-2011 zeurfactor hier dus nog niet berekend voor combi van oud en nieuw:
+;            oud staat er nog in, nieuw te bepalen uit lijst van wedstrijden.
 (defn det-person-games [lst-inp-persons vec-sol-referee]
   (map #(assoc %1 :lst-games (for [sol vec-sol-referee :when (= (:referee-id %1) (:referee-id sol))]
     sol)) lst-inp-persons))
@@ -55,19 +58,38 @@
          (apply *)))]                                      ; multiply. Should be 1, not more than 1 game per day per person.
     (apply * (map det-games-person-day lst-person-games))))
 
+; 31-12-2011 nu wel met meeneming van de oude info: product zf's en ook #games oud.
 (defn det-lst-sol-person-info [lst-person-games]
+  (map #(assoc % 
+              :nreferee (+ (:nreferee %) (count (:lst-games %)))
+              :whinefactor (* (:whinefactor %) (apply * (map :whinefactor (:lst-games %))))) lst-person-games))
+
+; 31-12-2011 had hier nog niet de oude info meegenomen.
+(defn det-lst-sol-person-info-old [lst-person-games]
   (map #(assoc % 
               :nreferee (count (:lst-games %))
               :whinefactor (apply * (map :whinefactor (:lst-games %)))) lst-person-games))
 
+; 31-12-2011 nu ook voor aantal wedstrijden het orig/oude aantal meenemen, net als zeurfactoren.
 (defn det-sol-values [lst-inp-persons vec-sol-referee]
   "determine key values of the solution. @result hashmap"
   (let [lst-person-games (det-person-games lst-inp-persons vec-sol-referee)]
     (hash-map 
-      :lst-whinefactors (map #(* (:whinefactor %1)
-                          (apply * (for [sol (:lst-games %1)] 
+      :lst-whinefactors (map #(* (:whinefactor %1)                                     ; vermenigvuldig whinefactor van oude
+                          (apply * (for [sol (:lst-games %1)]                          ; met product van die van de nieuwe.
                              (/ (:whinefactor sol) (:value sol))))) lst-person-games)
-      :lst-counts (map #(count (:lst-games %1)) lst-person-games)
+      :lst-counts (map #(+ (:nreferee %1) (count (:lst-games %1))) lst-person-games)   ; hier nu wel bestaande meegenomen.
+      :prod-games-person-day (det-prod-games-person-day lst-person-games)
+      :lst-sol-person-info (det-lst-sol-person-info lst-person-games))))
+
+(defn det-sol-values-old [lst-inp-persons vec-sol-referee]
+  "determine key values of the solution. @result hashmap"
+  (let [lst-person-games (det-person-games lst-inp-persons vec-sol-referee)]
+    (hash-map 
+      :lst-whinefactors (map #(* (:whinefactor %1)                                     ; vermenigvuldig whinefactor van oude
+                          (apply * (for [sol (:lst-games %1)]                          ; met product van die van de nieuwe.
+                             (/ (:whinefactor sol) (:value sol))))) lst-person-games)
+      :lst-counts (map #(count (:lst-games %1)) lst-person-games)                      ; hier niet de bestaande meegenomen.
       :prod-games-person-day (det-prod-games-person-day lst-person-games)
       :lst-sol-person-info (det-lst-sol-person-info lst-person-games))))
 
