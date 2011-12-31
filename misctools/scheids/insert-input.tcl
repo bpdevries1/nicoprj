@@ -42,7 +42,8 @@ proc main {argc argv} {
     empty_db
   }
   if {$ar_argv(insert2ndhalf)} {
-    remove_unassigned_games  
+    remove_unassigned_games
+    insert_afwezig ; # ook hierin kan wat veranderd zijn.
   } else {
     # hele seizoen
     insert_teams
@@ -143,25 +144,26 @@ proc handle_scheids {line lst_names ar_values_name} {
 
 # vooralsnog handmatig hardcoded in deze proc.
 proc insert_afwezig {} {
-  insert_afwezig_persoon "Nico de Vreeze" "Bruiloft" "2011-09-30"  
-  insert_afwezig_persoon "Nico de Vreeze" "Vakantie" "2011-11-26" "2011-12-17" 
-
-  insert_afwezig_persoon "Margriet Drent" "Bruiloft" "2011-09-30" 
+  # bestaande info verwijderen, ivm tweede helft seizoen.
+  exec_query "delete from afwezig"
+  
+  insert_afwezig_persoon "Nico de Vreeze" "Familie" "2012-03-30"  
 
   # Chris is eigenlijk de enige die kan op 13-4, maar wil daar een invaller plaatsen
-  insert_afwezig_persoon "Chris Meijer" "Forced afwezig" "2012-04-13"
+  # 31-12-2011 kan Reza deze wedstrijd niet doen?
+  # insert_afwezig_persoon "Chris Meijer" "Forced afwezig" "2012-04-13"
   
   # regio scheidsen - 1e scheids
-  insert_afwezig_persoon "Reza Gharsi" "Regiowedstrijd 1e" "2011-10-14" 
-  insert_afwezig_persoon "Reza Gharsi" "Regiowedstrijd 1e" "2011-10-01"
-  insert_afwezig_persoon "Gert van de Meent" "Regiowedstrijd 1e" "2011-10-27"
-  insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 1e" "2011-10-01"
-  insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 1e" "2011-10-08"
+  # insert_afwezig_persoon "Reza Gharsi" "Regiowedstrijd 1e" "2011-10-14" 
+  # insert_afwezig_persoon "Reza Gharsi" "Regiowedstrijd 1e" "2011-10-01"
+  # insert_afwezig_persoon "Gert van de Meent" "Regiowedstrijd 1e" "2011-10-27"
+  # insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 1e" "2011-10-01"
+  # insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 1e" "2011-10-08"
   
   # regio scheidsen - 2e scheids
-  insert_afwezig_persoon "Reza Gharsi" "Regiowedstrijd 2e" "2011-10-15"
-  insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 2e" "2011-09-24"
-  insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 2e" "2011-10-15"
+  # insert_afwezig_persoon "Reza Gharsi" "Regiowedstrijd 2e" "2011-10-15"
+  # insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 2e" "2011-09-24"
+  # insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 2e" "2011-10-15"
   
   # insert_afwezig_persoon "Maarten Wispelwey" "2010-10-08" "2010-10-08" "Coach D1"
   # in 2010 heeft Maarten de kinderen in de oneven weken, dan dus afwezig.
@@ -169,11 +171,16 @@ proc insert_afwezig {} {
   # 17-9-2010 is week 37, dus oneven, dus afwezig
   
   insert_afwezig_maarten
+  
+  # Mail Wendy 23-12: Je kan me echter wel indelen op 13-1-12 om 21.30 en op 16-3-12 om 21.30 uur. 
+  insert_afwezig_persoon "Wendy van der Woerd" "Werken" "2012-01-01" "2012-01-12"
+  insert_afwezig_persoon "Wendy van der Woerd" "Werken" "2012-01-14" "2012-03-15"
+  insert_afwezig_persoon "Wendy van der Woerd" "Werken" "2012-03-17" "2012-07-01"
 }
 
 proc insert_afwezig_maarten {} {
-  set datum "2011-09-23" ; # week 38, maarten even weken de kinderen.
-  while {$datum <= "2012"} {
+  set datum "2012-01-13" ; # week 2, maarten even weken de kinderen. In SMS staat dat 'ie oneven weken kan, vanaf 20-1-2012.
+  while {$datum <= "2013"} {
     insert_afwezig_persoon "Maarten Wispelwey" "Kinderen" $datum
     set sec [clock scan $datum -format "%Y-%m-%d"]
     set sec_2w [expr $sec + (2 * 7 * 24 * 60 * 60)] ; # 2 weken verder zetten.
