@@ -14,8 +14,8 @@ left join (
    and s.status in ('gemaild')
 ) as sch on sch.wedstrijd = w.id
 where w.lokatie = 'thuis'
-and w.datumtijd >= '2011-01-01'
-and w.datumtijd <= '2012-01-01'
+and w.datumtijd >= '2012-01-01'
+and w.datumtijd <= '2013-01-01'
 order by 1, 2, 3]]>
 	</queryString>
 	<field name="datum" class="java.sql.Date">
