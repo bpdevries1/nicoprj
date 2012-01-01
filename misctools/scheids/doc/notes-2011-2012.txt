@@ -252,5 +252,10 @@ Maximum #games for a referee: 5
 [2011-12-31 16:03:07] inmiddels toch weer een betere oplossing, waarbij ik weer 6 wedstrijden heb en Rob 5. Tsja. Ester heeft er ook 6. Maar ja, max wedstrijden zegt niet alles.
 [2011-12-31 19:49:43] check bij Wendy gedaan, idd beide keren om 21.30.
 
-
+[2012-01-01 12:29:33] nogmaals backup-scheids_20120101_1228.sql.
+[2012-01-01 12:29:43] want wil wat clojure dingen proberen, zoals destructuring bind, eerst voor sol-referee-to-string.
+[2012-01-01 12:37:32] destructuring overal toepasbaar waar ik "(:" gebruik?
+[2012-01-01 12:37:53] de eerste aanpassing werkt goed.
+[2012-01-01 15:02:43] finaliseren nu, ireport geopend, zie in query dat status 'gemaild' moet zijn.
+[2012-01-01 15:02:59] dus query gedaan via tcl script update-status.tcl
 

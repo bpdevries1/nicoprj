@@ -35,8 +35,9 @@ Halverwege seizoen - opnieuw inlezen wedstrijden
 * Let ook op of iemand in een ander team is gaan spelen, was bij Ester het geval.
 * cmd: ./insert-input.tcl -fromsite -insert2ndhalf
 * lein run, resultaat checken, met of zonder invallers. Er wordt rekening gehouden met 1e helft.
+* eerst set-status: scheids/set-status.tcl -seizoen 2011-2012 -fromdate 2012-01-01 -todate 2012-07-01 -status gemaild
 * reporting via iReport, wel query hierin checken, met parameters gaat vooralsnog niet goed, blijkbaar ook
-  doo queries met left-joins.
+  door queries met left-joins.
 
 Opties insert-input.tcl
 -----------------------
