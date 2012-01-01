@@ -1,8 +1,16 @@
 ; print - print solutions to the screen.
 (ns scheidsclj.print)
 
+; Works in uberjar version, not within REPL!
+; Thread/sleep is not needed, flush is needed!
 (defn puts-dot []
-  (println ".") ; with print de . (dot) won't be shown, not even with flush
+  (print ".") ; with print the . (dot) won't be shown, not even with flush
+  (flush))
+  ;(Thread/sleep 1000)) ; even testen met vrij grote waarde. Zelfs deze werkt niet!
+
+; @todo could have something to do with the REPL or leiningen.
+(defn puts-dot-old []
+  (println ".") ; with print the . (dot) won't be shown, not even with flush
   (flush))
 
 (defn referee-initials [referee-name]
@@ -12,12 +20,13 @@
   (map #(referee-initials (:referee-name %1)) 
     (:lst-can-referee (ar-inp-games game-id))))
 
-; @todo 6-3-2011 NdV dit lijkt wel een plek voor destucturing bind van sol-referee.
-(defn sol-referee-to-string [sol-referee ar-inp-games]
-  (str (:game-name sol-referee) " (sd=" (:same-day sol-referee) ") "
-       (:referee-name sol-referee) " (" (referee-initials (:referee-name sol-referee)) 
-       ") (wf=" (:whinefactor sol-referee) "/" (:value sol-referee) ") ("
-       (apply str (interpose ", " (can-referee ar-inp-games (:game-id sol-referee)))) ")" ))
+; :as sol-referee not needed in destructuring
+(defn sol-referee-to-string [{:keys [game-name same-day referee-name whinefactor value game-id]} 
+                             ar-inp-games]
+  (str game-name " (sd=" same-day ") "
+       referee-name " (" (referee-initials referee-name) 
+       ") (wf=" whinefactor "/" value ") ("
+       (apply str (interpose ", " (can-referee ar-inp-games game-id))) ")" ))
 
 (defn printlnf
   "Combination of println and format"
@@ -27,7 +36,8 @@
 ; doall zou moeten werken om lazy te forcen, maar met str werkt dit niet zo
 ; sort werkt wel, ook wel logisch: om te sorten, moet je alle waarden hebben.
 ; @param sol oplossing
-; @param kan-naar-beter: functie die oplossing als input heeft, en true/false als output.
+; @param can-find-better: functie die oplossing als input heeft, en true/false als output.
+; @todo 1-1-2012: bij soseq ook destructuring te doen?
 (defn print-solution [sol ar-inp-games can-find-better]
   (printlnf "Solution %d (parent: %d)" (:solnr sol) (:solnr-parent sol))
   (println "Games:")
