@@ -16,6 +16,34 @@ Logboek
 * 30-12 vervolgens lein deps: huh gebruikt clojure 1.4-alpha code. En ook swank-clojure. Maar het gaat wel goed, geen foutmelding.
 * 30-12 wordt ook cake gebruikt, is dit een leiningen replacement? Zijn idd vergelijkbaar, cake is wat complexer geimplementeerd, houdt een JVM draaiend, communiceert via Ruby. Heb cake nog niet geinstalleerd, kan ook wel, nu ik toch bezig ben.
 * 30-12 kan app starten zoals beschreven, met (use 'socialsite.core). Volgende is artikel lezen, en eigenlijk ook zeker weten dat alles behandeld is. Eerst lezen, dan code langslopen, kijken wat waar staat.
+* 30-12-2011 deze socialsite tutorial gelezen, best compleet, ook javascript en ajax, ook genoeg over te leren. Enlive ook sowieso, en andere dingen als ik ergens tegenaan loop. Moet vooral een doel hebben. Dit voorbeeld connect met MySQL, is eigenlijk wel prima hier, SQLite minder geschikt voor zoiets, weet bv niet hoeveel connecties er geopend worden naar de DB. Forms: opvallend dat geen <form> tag wordt gebruikt, wel <table> voor posities. Maar met javascript/ajax/jquery vervolgens de submit gedaan, ziet er nog wel wat cryptisch uit.
+* 31-12-2011 start gemaakt met enlive-tutorial, in tryout neergezet met git.
+* 31-12-2011 https://github.com/swannodette/enlive-tutorial, t/m eerste template gekomen.
+* 01-01-2012 enlive tutorial helemaal gelezen. Snap niet alles, wel wat inzicht in de mogelijkheden en de concepten erachter. Syntax blijft wel vaag, komt waarsch omdat ik clojure nog niet zo goed ken.
+* Idee: met Enlive en andere tools uit tutorials een eigen CRUD appje maken, iets als TODO's of recepten, of bv de links uit Instapaper. Dan kijken hoe je dingen zou oplossen, en met iets als clojure is het dan vast wel handig te abstraheren.
+
+Quick overview websites op 1-1-2012
+===================================
+* 1-1-2012 weer eens gezocht naar combi van Clojure, web en CRUD:
+* http://anirudhsasikumar.net/blog/2009.10.13.html - Met Flex als UI, compojure en eigen CRUD functies. Geeft wel idee hoe CRUD functies te maken, maar dan op DB niveau, is met ClojureQL beter?! Voor UI dingen liever geen Flex. Eigenlijk heb ik hier dus weinig aan. Uit 2009.
+* http://www.cubrid.org/clj_dbcp - Ook alleen op de DB.
+* http://bitumenframework.blogspot.com/2010/10/crud-in-clojure.html - ook geen UI
+* Note: mss ook UI erbij? heb al wel Web...
+* https://github.com/briancarper/cow-blog#readme - voorbeeld, mss goede dingen uit te halen, laatste update uit juni 2010. Gebruikt oyako.
+* https://github.com/briancarper/oyako - zelfde als ClojureQL, dus tussen clojure en DB, niets met Web te maken.
+* http://www.youtube.com/watch?v=86dC-LDeydY - is DB viewer, die f.keys volgt, vgl eigen hyperbrowse.
+* http://www.moxleystratton.com/article/clojure/for-non-lisp-programmers - Nee, wel CRUD viewer, maar in PHP.
+* https://github.com/tatut/Webjure#readme - soort concurrent van Ring, moustache, lijkt geen aanrader.
+* Compojure krijgt ook nog steeds wel high marks, even in plaatje kijken waar 'ie valt: conc van moustache. De enlive tutorial was met moustache, net als de eerste tutorial hier ook meer mee doet, lijkt dus the way of the future.
+* http://stackoverflow.com/questions/167262/how-do-you-make-a-web-application-in-clojure - leuk, maar erg oud, 2008 zelfs?
+* http://mmcgrana.github.com/2010/07/develop-deploy-clojure-web-applications.html - al eens eerder gezien? 2 getallen optellen, gebruikt compojure en hiccup. Dus net de 'concurrenten'
+* http://myfreeweb.github.com/ringfinger/ - een voorbeeld wel beetje promising, toch wat vaag. Verder geen docs/tutorial. Lijkt eerst minder mature, en de toon op de site is ook niet zo.
+* http://bitumenframework.blogspot.com/ - lijkt ook niet mature.
+
+Dieper naar kijken
+==================
+* http://www.youtube.com/watch?v=86dC-LDeydY - video gekeken, wel leuke ideeen, idd vgl hyperbrowse. Maar waar vind ik het? DBCruiser. Niet gevonden dus.
+
 
 Tutorials
 ==========
@@ -23,15 +51,13 @@ Om bij te houden welke ik gevolgd heb.
 
 * http://brehaut.net/blog/2011/ring_introduction - 23-10-2011 - onduidelijk hoever ik toen gekomen ben.
 * http://bestinclass.dk/index.clj/2011/01/building-a-social-media-site.html - 30-12-2011 mee begonnen, staat in ~/tryout/SocialSite. Starten met:  (use 'socialsite.core)
-* 30-12-2011 deze socialsite tutorial gelezen, best compleet, ook javascript en ajax, ook genoeg over te leren. Enlive ook sowieso, en andere dingen als ik ergens tegenaan loop. Moet vooral een doel hebben. Dit voorbeeld connect met MySQL, is eigenlijk wel prima hier, SQLite minder geschikt voor zoiets, weet bv niet hoeveel connecties er geopend worden naar de DB. Forms: opvallend dat geen <form> tag wordt gebruikt, wel <table> voor posities. Maar met javascript/ajax/jquery vervolgens de submit gedaan, ziet er nog wel wat cryptisch uit.
+* 01-01-2012 moet mss ook een CSS tutorial volgen.
 
 Later 
 -----
-* https://github.com/swannodette/enlive-tutorial
-* http://bestinclass.dk/index.clj/2011/01/building-a-social-media-site.html - combi van clojureql, enlive, moustache, ring, wat brehaut ook wel cool vindt.
 * https://github.com/brentonashworth/sandbar#readme - forms
-* https://github.com/joodie/flutter-decline-demo#readme
-* https://github.com/joodie/pretzel#readme - string predicates.
+* https://github.com/joodie/flutter-decline-demo#readme - CRUD address book demo.
+
 
 Code
 ====
