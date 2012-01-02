@@ -56,7 +56,11 @@
 ; sort werkt wel, ook wel logisch: om te sorten, moet je alle waarden hebben.
 ; @param sol oplossing
 ; @param can-find-better: functie die oplossing als input heeft, en true/false als output.
-; @todo 1-1-2012: bij soseq ook destructuring te doen?
+; @todo zie hier heel veel println en printlnf, hier iets mee te doen, met functie/macro?
+; @todo of ook iets met templating?
+; @todo of literal strings, vgl Tcl, ook over line-endings heen, dan grote format string en alles
+; invullen, maar raak je ook de weg kwijt met 20 parameters. 
+; of CL achtige format functie, die nesting/loops in zich heeft.
 (defn print-solution [{:keys [solnr solnr-parent vec-sol-referee 
                               lst-sol-person-info fitness prod-games-person-day 
                               sum-whinefactors lst-whinefactors lst-counts 

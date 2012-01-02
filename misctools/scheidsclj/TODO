@@ -1,16 +1,19 @@
-
 Mutate-solution
 ================
+[2012-01-02 20:44:27] sessies met oplossingen bewaren, omdat elke calc-sessie een andere oplossing kan opleveren. Met logs dan kijken wat beste is, hoe dit komt etc.
 [2011-02-20 22:31:21] @todo: meerdere constraints inbouwen, bv dat Baukelien max 6 (?) wedstrijden fluit in een seizoen. Bij meer dan 6 komt er een grote penalty bij, wel afhankelijk van hoeveel meer dan 6.
-[2011-02-20 17:00:09] @todo: bij zoeken naar een betere oplossing kijken naar het product van zeurfactoren van de scheidsen. 
+[2011-02-20 17:00:09] @todo: bij zoeken naar een betere oplossing kijken naar het product van zeurfactoren van de scheidsen. [2012-01-02 20:43:24] snap ik niet, is juist combi van product en som die het bepaalt. 
 [2011-02-20 17:00:32] bij de grootste zeurfactor meer kans op aanpassing van een wedstrijd. Hierdoor wel kans
-[2011-02-20 17:00:57] op flippen tussen 2 scheidsrechters.
+[2011-02-20 17:00:57]   op flippen tussen 2 scheidsrechters.
 [2011-03-13 23:25:04] kies nu een wedstrijd om te veranderen, en hierbinnen een scheids om te kiezen, moet misschien andersom?
 
 Opbouw/structuur code
 =====================
-[2012-01-01 00:18:28] iets met zipmap te doen? gebruik nu veel combi's van map en hashmap, hoe zou dit kleiner kunnen?
 [2012-01-01 11:52:18] destructuring toe te passen? Gebruik nu veel functies om info uit hashmap te krijgen, ook al is dat vrij simpel.
+[2012-01-02 20:53:31] bij destructure op 'el' letten, kan vaak ook wel.
+[2012-01-02 20:57:17] RE om te gebruiken, sol nog algemener: \(:([^ ]+) sol\)
+
+[2012-01-01 00:18:28] iets met zipmap te doen? gebruik nu veel combi's van map en hashmap, hoe zou dit kleiner kunnen?
 [2011-02-26 10:53:49] geneticlib is nu nog leeg, hier wat inzetten?
 [2011-03-13 20:17:17] vanuit JoC: destructuring bind toepassen.
 [2011-03-13 20:17:43] vanuit JoC: recursief zou weinig nodig moeten zijn, alleen bij lazy dingen. Zou last resort moeten zijn.
@@ -26,10 +29,27 @@ Technisch
 
 Debuggen
 ========
+[2012-01-02 20:47:12] heb al break.clj, werkte eerder niet. Nu wel, of andere manier?
 [2011-03-13 23:29:29] Kun je iets met breakpoints doen? wil bv wel eens zien waarom de 3289 zo wordt uitgerekend.
+[2012-01-02 22:41:38] zie lijstje op http://www.clojure-toolbox.com/, nu 5 stuks. En ook documentation tools.
+[2012-01-02 22:42:35] ook tools.logging (zie de toolbox hierboven)
 
 Later / eventueel
 ==================
 [2011-02-25 22:04:39] @todo minder (geen?) globals gebruiken, de vars met *sterretjes*.
 
+Editen
+======
+[2012-01-02 20:41:45] los van Scheidsclj: emacs gebruiken. Weer even naar stukje van liebke gekeken over combi van emacs, swank, slime, paredit, incanter, maar voorlopig niet doen.
 
+Organisatie
+===========
+[2012-01-02 20:50:57] Net als in Tcl, gebruik soms -old versies van functies.
+[2012-01-02 21:15:01] en ook hier @todo items in de code.
+
+GUI/Web
+=======
+[2012-01-02 22:45:00] zie ook tryout/ring met docs hierin.
+[2012-01-02 22:45:16] Sandbar: obv compojure: voegt forms toe, met sessions
+[2012-01-02 22:47:18] Clarity: voor Swing.
+[2012-01-02 22:47:53] Seesaw: voor Swing, mss wat meer mature dan Clarity, zit ook tut bij.
