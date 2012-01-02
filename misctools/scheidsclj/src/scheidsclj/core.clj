@@ -231,6 +231,7 @@
               or all games have a final (gemaild) status")))
 
 (defn -main [& args]
+  ; (test-log-err) ; test logging to stderr, doesn't seem to work.
   (open-global-db)
   (delete-old-proposition)
   (delete-logsolutions)

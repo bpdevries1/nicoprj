@@ -1,6 +1,25 @@
 ; print - print solutions to the screen.
 (ns scheidsclj.print)
 
+; test with *err*
+; [2012-01-02 21:57:00] doesn't work in lein run, works in lein-repl.
+(defn log-err [s]
+  (binding [*out* *err*] ; binds *out* to the same as what *err* is bound to, i.e. stderr
+  ;(binding [*err* *out*]
+    (print s)
+    (flush)))
+
+(defn test-log-err []
+  (println "Testing test-log-err")
+  (log-err ".")
+  (Thread/sleep 1000)
+  (log-err ".")
+  (Thread/sleep 1000)
+  (log-err ".")
+  (println)
+  (flush)
+  (println "Finished testing test-log-err"))
+
 ; Works in uberjar version, not within REPL!
 ; Thread/sleep is not needed, flush is needed!
 (defn puts-dot []
