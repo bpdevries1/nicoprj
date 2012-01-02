@@ -85,8 +85,9 @@
   (println "\n==========\n")) 
 
 (defn print-best-solution [proposition ar-inp-games can-find-better]
-  (printlnf "Best solution so far (iteration %d):" (:iteration @proposition))
-  (print-solution (first (:lst-solutions @proposition)) ar-inp-games can-find-better))
+  (let [{:keys [iteration lst-solutions]} @proposition]
+    (printlnf "Best solution so far (iteration %d):" iteration)
+    (print-solution (first lst-solutions) ar-inp-games can-find-better)))
 
 ; @note wil eigenlijk alleen de beste oplossing zien.
 (defn print-solutions [lst-solutions ar-inp-games can-find-better]
