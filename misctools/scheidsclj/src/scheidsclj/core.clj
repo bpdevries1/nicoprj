@@ -160,6 +160,7 @@
      (add-statistics new-vec-sol-referee "Mutated game(s)" solnr)))  
 
 ; globals definieren met def, dan maar eenmalig een waarde toegekend (?)
+; @todo defonce gebruiken?
 ; en krijgen pas een waarde bij uitvoeren, dus in andere functies niet bekend op compile time.
 (defn init-globals []
   (def *lst-inp-games* (query-input-games))
@@ -212,17 +213,22 @@
 (defn make-proposition [sol-args]
   (println "Make proposition" sol-args)
   (init-globals)
-  (let [proposition (atom {:lst-solutions (repeatedly (:pop sol-args) #(make-solution *lst-inp-games*))
-               :iteration 1})
-        fitness (atom (:fitness (first (:lst-solutions @proposition))))]
-    (while (< (:fitness (first (:lst-solutions @proposition))) (:fitness sol-args))
-      (swap! proposition evol-iteration)
-      (if (zero? (mod (:iteration @proposition) 100))
-        (puts-dot))
-      (when (> (:fitness (first (:lst-solutions @proposition))) @fitness)
-        (reset! fitness (:fitness (first (:lst-solutions @proposition))))
-        (handle-best-solution proposition)))
-    (printlnf "Fitness: %f (goal: %f)" @fitness (:fitness sol-args))))
+  (println "#games to find a referee for: " (count *lst-inp-games*))
+  (if (< 0 (count *lst-inp-games*))
+    (let [proposition (atom {:lst-solutions (repeatedly (:pop sol-args) #(make-solution *lst-inp-games*))
+                 :iteration 1})
+          fitness (atom (:fitness (first (:lst-solutions @proposition))))]
+      (while (< (:fitness (first (:lst-solutions @proposition))) (:fitness sol-args))
+        (swap! proposition evol-iteration)
+        (if (zero? (mod (:iteration @proposition) 100))
+          (puts-dot))
+        (when (> (:fitness (first (:lst-solutions @proposition))) @fitness)
+          (reset! fitness (:fitness (first (:lst-solutions @proposition))))
+          (handle-best-solution proposition)))
+      (printlnf "Fitness: %f (goal: %f)" @fitness (:fitness sol-args)))
+    ; else
+    (println "No games found to search a referee for: either the DB is empty, 
+              or all games have a final (gemaild) status")))
 
 (defn -main [& args]
   (open-global-db)
