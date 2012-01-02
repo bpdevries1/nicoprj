@@ -38,7 +38,39 @@
 ; @param sol oplossing
 ; @param can-find-better: functie die oplossing als input heeft, en true/false als output.
 ; @todo 1-1-2012: bij soseq ook destructuring te doen?
-(defn print-solution [sol ar-inp-games can-find-better]
+(defn print-solution [{:keys [solnr solnr-parent vec-sol-referee 
+                              lst-sol-person-info fitness prod-games-person-day 
+                              sum-whinefactors lst-whinefactors lst-counts 
+                              max-referee n-diff-referee] :as sol}               ; :as sol needed for can-find-better                 
+                      ar-inp-games can-find-better]
+  (printlnf "Solution %d (parent: %d)" solnr solnr-parent)
+  (println "Games:")
+  (doseq [sol-referee vec-sol-referee] 
+    (println (sol-referee-to-string sol-referee ar-inp-games)))
+  (println "--------------\nReferees:")
+  ; * 1.0 needed to cast integer to float, otherwise problems with format.
+  (doseq [el lst-sol-person-info] ; @todo deze ook destructure, el is wel een tell-tale
+    (printlnf "#%d zf=%6.1f : %s" (:nreferee el) (* 1.0 (:whinefactor el)) (:referee-name el))) 
+  (println "--------------\nStatistics:")
+  (printlnf "Fitness: %f" fitness)
+  (printlnf "Maximum #games for a referee on one day: %d" prod-games-person-day)
+  (printlnf "Sum of whine factors: %f" sum-whinefactors)
+  (println "List of whine factors:" (sort lst-whinefactors))
+  (println "#games per referee: " (sort lst-counts))
+  (printlnf "Maximum #games for a referee: %d" max-referee)
+  (printlnf "#different referees: %d" n-diff-referee)
+  (printlnf "#games: %d" (count vec-sol-referee))
+  (if (can-find-better sol)
+    (println "from this solution a BETTER one can be found with 1 change...")
+    (println "from this solution a better one CANNOT be found with 1 change..."))
+  (println "\n==========\n")) 
+
+; doall zou moeten werken om lazy te forcen, maar met str werkt dit niet zo
+; sort werkt wel, ook wel logisch: om te sorten, moet je alle waarden hebben.
+; @param sol oplossing
+; @param can-find-better: functie die oplossing als input heeft, en true/false als output.
+; @todo 1-1-2012: bij soseq ook destructuring te doen?
+(defn print-solution-old [sol ar-inp-games can-find-better]
   (printlnf "Solution %d (parent: %d)" (:solnr sol) (:solnr-parent sol))
   (println "Games:")
   (doseq [sol-referee (:vec-sol-referee sol)] 
