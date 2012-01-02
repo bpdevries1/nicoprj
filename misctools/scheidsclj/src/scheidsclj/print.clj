@@ -68,8 +68,8 @@
     (println (sol-referee-to-string sol-referee ar-inp-games)))
   (println "--------------\nReferees:")
   ; * 1.0 needed to cast integer to float, otherwise problems with format.
-  (doseq [el lst-sol-person-info] ; @todo deze ook destructure, el is wel een tell-tale
-    (printlnf "#%d zf=%6.1f : %s" (:nreferee el) (* 1.0 (:whinefactor el)) (:referee-name el))) 
+  (doseq [{:keys [nreferee whinefactor referee-name]} lst-sol-person-info] 
+    (printlnf "#%d zf=%6.1f : %s" nreferee (* 1.0 whinefactor) referee-name)) 
   (println "--------------\nStatistics:")
   (printlnf "Fitness: %f" fitness)
   (printlnf "Maximum #games for a referee on one day: %d" prod-games-person-day)
@@ -83,34 +83,6 @@
     (println "from this solution a BETTER one can be found with 1 change...")
     (println "from this solution a better one CANNOT be found with 1 change..."))
   (println "\n==========\n")) 
-
-; doall zou moeten werken om lazy te forcen, maar met str werkt dit niet zo
-; sort werkt wel, ook wel logisch: om te sorten, moet je alle waarden hebben.
-; @param sol oplossing
-; @param can-find-better: functie die oplossing als input heeft, en true/false als output.
-; @todo 1-1-2012: bij soseq ook destructuring te doen?
-(defn print-solution-old [sol ar-inp-games can-find-better]
-  (printlnf "Solution %d (parent: %d)" (:solnr sol) (:solnr-parent sol))
-  (println "Games:")
-  (doseq [sol-referee (:vec-sol-referee sol)] 
-    (println (sol-referee-to-string sol-referee ar-inp-games)))
-  (println "--------------\nReferees:")
-  ; * 1.0 needed to cast integer to float, otherwise problems with format.
-  (doseq [el (:lst-sol-person-info sol)]
-    (printlnf "#%d zf=%6.1f : %s" (:nreferee el) (* 1.0 (:whinefactor el)) (:referee-name el))) 
-  (println "--------------\nStatistics:")
-  (printlnf "Fitness: %f" (:fitness sol))
-  (printlnf "Maximum #games for a referee on one day: %d" (:prod-games-person-day sol))
-  (printlnf "Sum of whine factors: %f" (:sum-whinefactors sol))
-  (println "List of whine factors:" (sort (:lst-whinefactors sol)))
-  (println "#games per referee: " (sort (:lst-counts sol)))
-  (printlnf "Maximum #games for a referee: %d" (:max-referee sol))
-  (printlnf "#different referees: %d" (:n-diff-referee sol))
-  (printlnf "#games: %d" (count (:vec-sol-referee sol)))
-  (if (can-find-better sol)
-    (println "from this solution a BETTER one can be found with 1 change...")
-    (println "from this solution a better one CANNOT be found with 1 change..."))
-  (println "\n==========\n"))
 
 (defn print-best-solution [proposition ar-inp-games can-find-better]
   (printlnf "Best solution so far (iteration %d):" (:iteration @proposition))
