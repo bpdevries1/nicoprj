@@ -1,9 +1,5 @@
 ;( ; this one if parens don't match 
 
-; 20-2-2011 NdV voorlopig toch gewoon use met alles, want anders vage meldingen:
-;scheidsclj.core=> (def lig (query-input-games))
-;java.lang.ClassCastException: clojureql.core.RTable cannot be cast to java.util.Comparator (NO_SOURCE_FILE:34)
-
 (ns scheidsclj.db
   (:refer-clojure :exclude [take drop sort distinct compile conj! disj! case]) ; 31-12-2011 deze constructie in SocialSite gezien (Lau Jensen), ook case erbij gezet.
   ;(:use scheidsclj.break) ; error if kept within (ns macro)
@@ -60,7 +56,7 @@
 
 
 (defn query-input-games []
-  ; double --> and -> innermost for query building, outermost for post processing.
+  ; double ->> and -> innermost for query building, outermost for post processing.
   ; does not select games where a scheids-record exists, even if it has status "voorstel"
   (->> @(-> (table :wedstrijd)
            (outer-join (table :scheids) :left (where (= :scheids.wedstrijd :wedstrijd.id)))
@@ -70,11 +66,20 @@
            (sort [:wedstrijd.datumtijd]))
       (map #(hash-map :game-id (:id %1) 
                       :game-name (:naam %1)
-                      ; :date (:datumtijd %1)
                       :date ((keyword "date(wedstrijd.datumtijd)") %1)
                       :lst-can-referee (query-lst-can-referee (:id %1))))))
 
-(defn save-solution [sol]
+(defn save-solution [{:keys [vec-sol-referee]}]
+  (delete-old-proposition)
+  (println "Saving solution...")
+  (clojureql.core/conj! (table :scheids) 
+    (map #(hash-map
+      :scheids (:referee-id %)
+      :wedstrijd (:game-id %)
+      :speelt_zelfde_dag (:same-day %)
+      :status "voorstel") vec-sol-referee)))
+
+(defn save-solution-old [sol]
   (delete-old-proposition)
   (println "Saving solution...")
   (clojureql.core/conj! (table :scheids) 
@@ -83,6 +88,7 @@
       :wedstrijd (:game-id %)
       :speelt_zelfde_dag (:same-day %)
       :status "voorstel") (:vec-sol-referee sol))))
+
 
 (defn log-solutions [{:keys [lst-solutions iteration]}]
   "Log the event of a better solution in the database, for further algorithm analysis"

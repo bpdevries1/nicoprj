@@ -1,7 +1,7 @@
 ;( ; deze als haakjes niet kloppen.
 (ns scheidsclj.core
   (:gen-class)
-;  (:use scheidsclj.break)
+;  (:use scheidsclj.break) ; 4-1-2012 @todo werkte laatste keer nog niet, wel wat alternatieve debug packages om te checken.
   (:use scheidsclj.db)
   (:use scheidsclj.geneticlib)
   (:use scheidsclj.lib)
@@ -16,7 +16,6 @@
   (merge (select-keys game [:game-id :game-name :date])
          (select-keys referee [:referee-id :referee-name :whinefactor :value :same-day])))
   
-; @result game-hashmap, als element in vec-sol-referee
 (defn choose-random-referee [game-id]
   "@result game-hashmap, as element in vec-sol-referee"
   (let [game (*ar-inp-games* game-id)
@@ -51,6 +50,15 @@
 
 (defn det-prod-games-person-day [lst-person-games]
   "determine product of product of #games of this person/referee on each day"
+  (letfn [(det-games-person-day [{:keys [lst-games]}]
+    (->> (map #(hash-map (:date %) 1) lst-games)           ; make list of hashmaps for each game, date is key.
+         (apply merge-with +)                              ; add per day
+         (vals)                                            ; remove keys, just a list of values, should be all 1's.
+         (apply *)))]                                      ; multiply. Should be 1, not more than 1 game per day per person.
+    (apply * (map det-games-person-day lst-person-games))))
+
+(defn det-prod-games-person-day-old [lst-person-games]
+  "determine product of product of #games of this person/referee on each day"
   (letfn [(det-games-person-day [person]
     (->> (map #(hash-map (:date %) 1) (:lst-games person)) ; make list of hashmaps for each game, date is key.
          (apply merge-with +)                              ; add per day
@@ -62,13 +70,9 @@
 (defn det-lst-sol-person-info [lst-person-games]
   (map #(assoc % 
               :nreferee (+ (:nreferee %) (count (:lst-games %)))
-              :whinefactor (* (:whinefactor %) (apply * (map :whinefactor (:lst-games %))))) lst-person-games))
-
-; 31-12-2011 had hier nog niet de oude info meegenomen.
-(defn det-lst-sol-person-info-old [lst-person-games]
-  (map #(assoc % 
-              :nreferee (count (:lst-games %))
-              :whinefactor (apply * (map :whinefactor (:lst-games %)))) lst-person-games))
+              :whinefactor (* (:whinefactor %) 
+                (apply * (map :whinefactor (:lst-games %))))) 
+    lst-person-games))
 
 ; 31-12-2011 nu ook voor aantal wedstrijden het orig/oude aantal meenemen, net als zeurfactoren.
 (defn det-sol-values [lst-inp-persons vec-sol-referee]
@@ -82,18 +86,7 @@
       :prod-games-person-day (det-prod-games-person-day lst-person-games)
       :lst-sol-person-info (det-lst-sol-person-info lst-person-games))))
 
-(defn det-sol-values-old [lst-inp-persons vec-sol-referee]
-  "determine key values of the solution. @result hashmap"
-  (let [lst-person-games (det-person-games lst-inp-persons vec-sol-referee)]
-    (hash-map 
-      :lst-whinefactors (map #(* (:whinefactor %1)                                     ; vermenigvuldig whinefactor van oude
-                          (apply * (for [sol (:lst-games %1)]                          ; met product van die van de nieuwe.
-                             (/ (:whinefactor sol) (:value sol))))) lst-person-games)
-      :lst-counts (map #(count (:lst-games %1)) lst-person-games)                      ; hier niet de bestaande meegenomen.
-      :prod-games-person-day (det-prod-games-person-day lst-person-games)
-      :lst-sol-person-info (det-lst-sol-person-info lst-person-games))))
-
-; 18-9-2011 Baukelien wil dit jaar max 5 wedstrijden.
+; 18-9-2011 Baukelien wil dit jaar (2011-2012) max 5 wedstrijden.
 (defn handle-baukelien [sol]
   "User post processing function, such as changing the fitness based on specific requirements
    This one so that Baukelien has a max of 5 games."
@@ -114,7 +107,29 @@
   (-> sol
       handle-baukelien))
 
+; 4-1-2012 in let destructuring can also be used.
 (defn add-statistics [vec-sol-referee note solnr-parent]
+  "Return a solution hashmap, including statistics and fitness"
+  (let [{:keys [lst-counts lst-whinefactors prod-games-person-day] :as sol-values} 
+           (det-sol-values *lst-inp-persons* vec-sol-referee)
+        n-diff-referee (count (for [n lst-counts :when (> n 0)] 1))
+        sol (assoc sol-values
+            :vec-sol-referee vec-sol-referee
+            :note note
+            :solnr (new-sol-nr)
+            :solnr-parent solnr-parent
+            :fitness (calc-fitness prod-games-person-day 
+                                   (apply max lst-counts) 
+                                   n-diff-referee 
+                                   (apply + lst-whinefactors) 
+                                   (apply max lst-whinefactors))
+            :max-referee (apply max lst-counts)
+            :n-diff-referee n-diff-referee
+            :sum-whinefactors (apply + lst-whinefactors)
+            :max-whinefactors (max lst-whinefactors))]
+        (user-post-process sol)))
+
+(defn add-statistics-old [vec-sol-referee note solnr-parent]
   "Return a solution hashmap, including statistics and fitness"
   (let [sol-values (det-sol-values *lst-inp-persons* vec-sol-referee)
         n-diff-referee (count (for [n (:lst-counts sol-values) :when (> n 0)] 1))
@@ -143,9 +158,12 @@
   (let [vec-sol-referee (vec (map #(choose-random-referee (:game-id %1)) lst-input-games))]
     (add-statistics vec-sol-referee "Initial solution" 0)))
 
-(defn mutate-game [sol-referee]
+(defn mutate-game [{:keys [game-id]}]
+  (choose-random-referee game-id))
+
+(defn mutate-game-old [sol-referee]
   (choose-random-referee (:game-id sol-referee)))
-        
+
 (defn mutate-solution-step [vec-sol-referee]
   (let [rnd (rand-int (count vec-sol-referee))]
         (assoc vec-sol-referee rnd (mutate-game (get vec-sol-referee rnd)))))
@@ -163,9 +181,9 @@
 ; @todo defonce gebruiken?
 ; en krijgen pas een waarde bij uitvoeren, dus in andere functies niet bekend op compile time.
 (defn init-globals []
-  (def *lst-inp-games* (query-input-games))
-  (def *lst-inp-persons* (det-lst-inp-persons)) 
-  (def *ar-inp-games* 
+  (defonce *lst-inp-games* (query-input-games))
+  (defonce *lst-inp-persons* (det-lst-inp-persons)) 
+  (defonce *ar-inp-games* 
     (zipmap (map :game-id *lst-inp-games*) *lst-inp-games*)))
 
 ; helper for can-find-better, use let, letfn?
@@ -182,14 +200,13 @@
 ; vraag of je deze info ook niet bij oplossing wilt zetten, is toch read-only/immutable.
 (defn max-fitness-sol-game-change [vec-sol-referee game-index]
   (apply max (map #(fitness-sol-game-change-referee vec-sol-referee game-index %) 
-    (:lst-can-referee (*ar-inp-games* (:game-id (get vec-sol-referee game-index))))
-    )))
+    (:lst-can-referee (*ar-inp-games* (:game-id (get vec-sol-referee game-index)))))))
 
 ; @note beetje map-reduce achtig: per game die je aanpast een andere functie, is dan parallel uit te voeren.
-(defn can-find-better [sol]
-  (> (apply max (map #(max-fitness-sol-game-change (:vec-sol-referee sol) %)
-                     (range (count (:vec-sol-referee sol)))))
-    (:fitness sol)))
+(defn can-find-better [{:keys [vec-sol-referee fitness]}]
+  (> (apply max (map #(max-fitness-sol-game-change vec-sol-referee %)
+                     (range (count vec-sol-referee))))
+     fitness))
 
 ; @todo parameterise minimal fitness for saving, now at -2000.
 ; @note 18-9-2011 set from -2000 to -200.000.
@@ -200,15 +217,33 @@
     (if (> (:fitness sol) -200000)
       (save-solution sol))))
 
+; 4-1-2012 total rewrite with ->>
 (defn evol-iteration [{:keys [lst-solutions iteration]}]
+  {:iteration (inc iteration)
+   :lst-solutions 
+     (->> lst-solutions                                         ; start with the original
+          (map mutate-solution)                                 ; mutate each solution    
+          (concat lst-solutions)                                ; add the originals again
+          (sort-by :fitness >)                                  ; highest fitness at start of list
+          (take (count lst-solutions)))})                       ; reduce to original size, keeping the best
+
+(defn evol-iteration-old2 [{:keys [lst-solutions iteration]}]
+  (let [new-solutions (map mutate-solution lst-solutions)
+        sorted-solutions (sort-by :fitness > (concat new-solutions lst-solutions))
+        best-solutions (take (count lst-solutions) sorted-solutions)]
+     {:lst-solutions best-solutions 
+      :iteration (inc iteration)}))   
+
+(defn evol-iteration-old [{:keys [lst-solutions iteration]}]
   (let [new-iteration (inc iteration)
-        old-fitness (:fitness (first lst-solutions))
+        old-fitness (:fitness (first lst-solutions))                                ; maybe also possible with destructure...
         new-solutions (map mutate-solution lst-solutions)
         sorted-solutions (sort-by :fitness > (concat new-solutions lst-solutions))
         best-solutions (take (count lst-solutions) sorted-solutions)
         new-fitness (:fitness (first best-solutions))]
      {:lst-solutions best-solutions 
       :iteration new-iteration}))   
+
 
 (defn make-proposition [sol-args]
   (println "Make proposition" sol-args)
