@@ -61,6 +61,15 @@
 ; @todo of literal strings, vgl Tcl, ook over line-endings heen, dan grote format string en alles
 ; invullen, maar raak je ook de weg kwijt met 20 parameters. 
 ; of CL achtige format functie, die nesting/loops in zich heeft.
+; of vgl enlive, dat je een soort html met <div>s etc maakt, en vervolgens vertelt hoe dit dit moet aanpassen.
+; uiteraard is dit alles een PoC, voor gebruik hier niet echt nodig. Je zou ook echt een reporting-app/lib kunnen gebruiken.
+; met macro (functie) wel eerst kijken hoe je het wilt aanroepen.
+; 3 mogelijkheden, vgl html-gen:
+; - alles vanuit code, vgl ook mijn CHtmlHelper.
+; - geen mengeling, template is puur, in code wordt het vervangen, zoals enlive.
+; - template file met code hierin, zoals bv in perftoolset/testsuite def. Deze ook in php etc, moet je eigenlijk niet willen.
+;
+; eerst pragmatisch: stukken van hieronder wat leesbaarder en meer concise (korter) maken.
 (defn print-solution [{:keys [solnr solnr-parent vec-sol-referee 
                               lst-sol-person-info fitness prod-games-person-day 
                               sum-whinefactors lst-whinefactors lst-counts 
@@ -95,7 +104,5 @@
 
 ; @note wil eigenlijk alleen de beste oplossing zien.
 (defn print-solutions [lst-solutions ar-inp-games can-find-better]
-;  (doseq [sol lst-solutions]
-;    (print-solution sol ar-inp-games))
   (print-best-solution lst-solutions ar-inp-games can-find-better))
   
