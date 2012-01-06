@@ -27,11 +27,18 @@ class Main
 		@ff = FolderFinder.new
 		@ff.set_namespace(ns)
 		
-		# @folder_chooser = FolderChooser.new
-		lst_todo = @ff.search_folders("TODO") # list of MailFolder
-		lst_todo.each {|fld| puts "#{fld.outlook_folder.items.count} -  #{fld.path}" if fld.outlook_folder.items.count > 0}
+		show_foldername "Inbox"
+		show_foldername "Wacht"
+		show_foldername "Parkeerplaats"
+		show_foldername "Afhandelen"
+		show_foldername "TODO"
   end
 
+  def show_foldername name 
+		lst_todo = @ff.search_folders(name) # list of MailFolder
+		lst_todo.each {|fld| puts "#{fld.outlook_folder.items.count} -  #{fld.path}" if fld.outlook_folder.items.count > 0}
+  end
+  
 end
 
 class OutlookConst
