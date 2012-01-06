@@ -10,7 +10,7 @@ proc is_new_time_group {title} {
 proc det_group {title} {
 	global lst_group_regexps
 	if {[regexp {Tools} $title]} {
-		log "Determining group of: $title"
+		log debug "Determining group of: $title"
 	}
 	set result "Unknown"
 	foreach el $lst_group_regexps {
