@@ -33,19 +33,19 @@ proc init_group_regexps {} {
 	add_re {KEN_} Kennemer
 	add_re {kg} Kennemer
 	
-	add_re {Maasstad} Maasstad
-	add_re {MSZ_} Maasstad
+	
+	#add_re {Maasstad} Maasstad
+	#add_re {MSZ_} Maasstad
+	#add_re {qtp-alt.xlsx} Maasstad 
+	#add_re {msz} Maasstad
+	add_res Maasstad {Maasstad} {MSZ_} {qtp-alt.xlsx} {msz} {Macro Scheduler}
 	
 	# PA-Rol
 	add_re {HPM2011} YmorPA 
 	add_re {Ymor PA} YmorPA
 	
 	# Ymor algemeen
-	add_re {YMR_} Ymor
-	add_re {Ymonitor} Ymor
-	add_re {TOPdesk} Ymor
-	add_re {YViewer} Ymor
-	add_re {uren-saldo} Ymor
+	add_res Ymor {uren-week} {YMR_} {Ymonitor} {TOPdesk} {YViewer} {uren-saldo}
 	
 	# on Linux
 	add_re {Git Gui} Programming
@@ -66,6 +66,7 @@ proc init_group_regexps {} {
 	add_re {PowerPoint} General
 	add_re {4DOS/NT Prompt} General
 	add_re {PopTray} General
+	add_res General {Mozilla Firefox} {Windows Task Manager}
 	
 	add_re { - Microsoft Outlook$} Outlook
 	add_re { - Bericht} Outlook
@@ -82,6 +83,12 @@ proc init_group_regexps {} {
 	
   # Empty er ook maar bij, toch als screensaver
   add_re {^$} Screensaver
+}
+
+proc add_res {group args} {
+  foreach re $args {
+    add_re $re $group 
+  }
 }
 
 proc add_re {re group} {
