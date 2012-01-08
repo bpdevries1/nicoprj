@@ -281,9 +281,9 @@ Maximum #games for a referee: 5
                       met ctrl-c kill je meteen alles. met ctrl-d ook.
 [2012-01-02 23:23:20] (System/exit) doet het wel sort-of, maar dan melding broken pipe.
 [2012-01-02 23:23:38] ofwel dit is ook niet echt wat je wilt.
+[2012-01-04 21:40:25] lib.clj - niets te destructuren.
+[2012-01-04 21:42:11] util.cj - niets te destructuren.
+[2012-01-04 21:50:01] db.clj - paar dingetjes, even testen nog.
 
 core.clj  
-db.clj  
-lib.clj  
-util.clj
-
+print.clj - opnieuw, voor een soort rapport/template functie, zie commentaar in de code.
