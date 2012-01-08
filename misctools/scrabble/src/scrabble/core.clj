@@ -116,16 +116,9 @@ user=> (f "DNOHHQ")
 {\D 1, \H 2, \N 1, \O 1, \Q 1}
 
 ; sort is ook niet direct nodig.
-(defn frequencies
-  "Returns a map from distinct items in coll to the number of times
-  they appear."
-  {:added "1.2"
-   :static true}
-  [coll]
-  (persistent!
-   (reduce (fn [counts x]
-             (assoc! counts x (inc (get counts x 0))))
-           (transient {}) coll)))
+;(defn frequencies
+;  "Returns a map from distinct items in coll to the number of times
+;  they appear."
 
 
 (defn enough-letters [word letters]
@@ -375,4 +368,27 @@ user=> (find-words "^T...$" "ABCDE" sp)
 ;mooi, maar de laatste voor de E moet met een W te combineren zijn, en dat lukt niet.
 
 
-
+;ideeen over verder zoeken, met horizontaal/verticaal.
+;alleen letters neerleggen in dezelfde rij of kolom, die dan ook 1 woord vormen, niet mee.
+;bv bekijk kolom 3. Bekijk eerst per cell wat de restricties zijn, sowieso eerst of dit al aansluit,
+;als de meest linker gevulde kolom 5 is, dan kun je 3 wel overslaan, en beginnen met 4.
+;restrictie: al ingevulde letter, bij blanco: zijn er horizontale restricties? zoek links en rechts
+;naar einde van ingevulde letters. Voor elk van deze horizontale dingen zoeken naar mogelijkheden,
+;rekening houden met eigen letters (later ook sowieso, om met tegenstander rekening te houden)
+;ook later pas rekening houden met 2w waardes etc.
+;hiermee krijg je dan een patroon, bv: .....[AB].T... dan wel: staat de T er al, of is dit de enige die past?
+;met dit pattern heb je 2 'ankers', waarvan je iig 1 moet gebruiken. Per anker dan een nieuwe regexp maken:
+;afhankelijk of je een blanco hebt, kun je de puntjes hieronder vervangen door [<letters>]
+;AB: .{0,7}[AB](.(T.{0,7})?)?
+;T: net andersom, nesting waarschijnlijk ook.
+;mss handig eerst een FSM te maken, deze dan om te zetten naar een RE? in RE lib waarsch weer net andersom.
+;als bovenstaande erg lastig is, dan eerst simpeler: per anker weer: bepaal #ankers boven en onder. Maak RE
+;voor elk van de mogelijke combi's, bv 2 erboven, 1 eronder, dan alle combi's zijn 0-2 erboven, en 0-1 eronder, voor
+;een totaal van 3x2 is 6 RE's. Een anker kan ook uit meer dan 1 letter bestaan, ankers worden altijd gescheiden door
+;spatie? Toch weer onderscheid tussen al geplaatse letters en mogelijk te plaatsen. Voorbeelden, waarbij alles niet
+;in [] betekent dat letter er al staat:
+;...T[AB]..... mogelijkheden: 1) alles eindigend op een T 2) T[AB].*
+; ...T.[AB].... opties: 1) alles op een T; 2) T. 3) T.[AB] 4) T.[AB].* dus RE steeds uitbreiden met anker of een groep?
+; ..T..[AB].. opties: 1) alles op T; 2) ..T.{1,2} 3) ..T..[AB] 4) ..T..[AB].{1,7}
+; ..T[AB][CD]... opties: 1) alles op T 2) ..T[AB] 3) ..T[AB][CD] 4)..T[AB][CD].{1,7}
+;toch moet hiermee wel wat te doen zijn om het in 1 RE te krijgen, juist met een LISP.
