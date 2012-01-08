@@ -27,12 +27,12 @@ proc main {argc argv} {
     ::ndv::CLogger::set_log_level_all $ar_argv(loglevel) 
   }
   
-  set schemadef [MusicSchemaDef::new]
-  set db [::ndv::CDatabase::get_database $schemadef]
-  set conn [$db get_connection]
-
-  ::mysql::exec $conn "set names utf8"
-
+  #set schemadef [MusicSchemaDef::new]
+  #set db [::ndv::CDatabase::get_database $schemadef]
+  #set conn [$db get_connection]
+  #::mysql::exec $conn "set names utf8"
+  lassign [db_connect] db conn
+  
   $log info "Entering main loop"
   
   set prev_path ""
@@ -43,7 +43,16 @@ proc main {argc argv} {
         set prev_path $path
         if {!$ar_argv(np)} {
           $log debug "Mark as played in database: $path" 
-          set lst_ids [::mysql::sel $conn "select generic from musicfile where path = '[$db str_to_db [det_path_in_db $path]]'" -flatlist]
+          try_eval {
+            # set lst_ids [::mysql::sel $conn "select generic from musicfile where path = '[$db str_to_db [det_path_in_db $path]]'" -flatlist]
+            set lst_ids [det_ids $db $conn $path] 
+          } {
+            $log warn "DB error: $errorResult, trying again..."
+            # 8-1-2011 possible db connection has timed out after idle, so reconnect
+            lassign [db_connect] db conn
+            # and try again. If it fails again, something else is wrong.
+            set lst_ids [det_ids $db $conn $path]
+          }
           if {$lst_ids == {}} {
             $log warn "Not found in DB: $path" 
           } else {
@@ -73,6 +82,19 @@ proc det_playing {} {
 
 proc det_playing_path {} {
   return [exec dcop amarok player path] 
+}
+
+# return list: [$db $conn]
+proc db_connect {} {
+  set schemadef [MusicSchemaDef::new]
+  set db [::ndv::CDatabase::get_database $schemadef]
+  set conn [$db get_connection]
+  ::mysql::exec $conn "set names utf8"
+  list $db $conn 
+}
+
+proc det_ids {db conn path} { 
+  ::mysql::sel $conn "select generic from musicfile where path = '[$db str_to_db [det_path_in_db $path]]'" -flatlist
 }
 
 main $argc $argv
