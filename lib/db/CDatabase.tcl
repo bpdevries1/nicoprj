@@ -39,8 +39,9 @@ namespace eval ::ndv {
     private common instance  ""
     private common DB_NAME "indmeetmod"
   
-    public proc get_database {a_schemadef} {
-      if {$instance == ""} {
+    # if param new != 0, return a new instance.
+    public proc get_database {a_schemadef {new 0}} {
+      if {($instance == "") || $new} {
         set instance [uplevel {namespace which [::ndv::CDatabase #auto]}]
         $instance set_schemadef $a_schemadef
         $log debug "Returning new database instance"
