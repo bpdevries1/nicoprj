@@ -1,14 +1,22 @@
-
 Mutate-solution
 ================
+[2012-01-02 20:44:27] sessies met oplossingen bewaren, omdat elke calc-sessie een andere oplossing kan opleveren. Met logs dan kijken wat beste is, hoe dit komt etc.
 [2011-02-20 22:31:21] @todo: meerdere constraints inbouwen, bv dat Baukelien max 6 (?) wedstrijden fluit in een seizoen. Bij meer dan 6 komt er een grote penalty bij, wel afhankelijk van hoeveel meer dan 6.
-[2011-02-20 17:00:09] @todo: bij zoeken naar een betere oplossing kijken naar het product van zeurfactoren van de scheidsen. 
+[2011-02-20 17:00:09] @todo: bij zoeken naar een betere oplossing kijken naar het product van zeurfactoren van de scheidsen. [2012-01-02 20:43:24] snap ik niet, is juist combi van product en som die het bepaalt. 
 [2011-02-20 17:00:32] bij de grootste zeurfactor meer kans op aanpassing van een wedstrijd. Hierdoor wel kans
-[2011-02-20 17:00:57] op flippen tussen 2 scheidsrechters.
+[2011-02-20 17:00:57]   op flippen tussen 2 scheidsrechters.
 [2011-03-13 23:25:04] kies nu een wedstrijd om te veranderen, en hierbinnen een scheids om te kiezen, moet misschien andersom?
 
 Opbouw/structuur code
 =====================
+[2012-01-04 21:59:39] det-person-games: nu for/list comprehension nodig om dingen bij elkaar te zoeken, moet beter kunnen, combineer nu vector met een list, hashmap te gebruiken, met ref-id als key?
+[2012-01-04 22:01:27] vooral lst-inp-persons, kan dit niet hash-inp-persons worden?
+[2012-01-04 22:20:43] heb al *ar-inp-games*, gebruik ik deze uberhaupt?
+[2012-01-04 22:02:27] is dan wel een map functie die je op een map/dict moet kunnen toepassen. Die is er wel, is gewoon een map.
+[2012-01-02 20:53:31] bij destructure op 'el' letten, kan vaak ook wel.
+[2012-01-02 20:57:17] RE om te gebruiken, sol nog algemener: \(:([^ ]+) sol\)
+
+[2012-01-01 00:18:28] iets met zipmap te doen? gebruik nu veel combi's van map en hashmap, hoe zou dit kleiner kunnen?
 [2011-02-26 10:53:49] geneticlib is nu nog leeg, hier wat inzetten?
 [2011-03-13 20:17:17] vanuit JoC: destructuring bind toepassen.
 [2011-03-13 20:17:43] vanuit JoC: recursief zou weinig nodig moeten zijn, alleen bij lazy dingen. Zou last resort moeten zijn.
@@ -18,16 +26,96 @@ Opbouw/structuur code
 [2011-03-13 22:56:47] En ook de comments in het engels.
 [2011-03-14 19:52:40] volgens JoC moet ik lists vervangen door vectors.
 
+Opbouw/structuur van lst-int-persons en vec-sol-referee
+=======================================================
+[2012-01-04 22:54:24] det-person-games: je itereert door lst-person-games en voegt voor elke persoon de actuele
+                      wedstrijden toe, hiervoor steeds vec-sol-referee door, met for.
+[2012-01-04 22:55:37] idee is om 1 of beide van deze om te zetten naar een map, met person als key.
+[2012-01-04 22:56:00] vraag: heb je maps die je op meer dan 1 sleutel kan vinden, dus vec wedstrijden bv
+                      zowel op game-id als op person-id of ook bv person-naam, nodig om Baukelien te vinden.
+                      dan mss ook beter om eenmalig de person-id van Baukelien te vinden, en deze vervolgens
+                      te gebruiken.
+[2012-01-04 23:07:11] vanwege non-mutability moet dit wel kunnen: 1x een item maken, en deze dan aan 2 maps hangen.
+                      de 2 maps vervolgens combineren.
+[2012-01-04 23:09:49] dan bv 1 functie die van een lijst/vector van hashmaps een map maakt van deze hashmaps
+                      opv de key die je opgeeft. evt de key-name in meta-info opslaan voor de volgende functie...
+[2012-01-04 23:10:59] functie die 2 of meer van bovenstaande resultaten combineert tot 1 structuur, bv een hashmap
+                      van maps.
+[2012-01-04 23:13:04] in init-globals een zipmap gebruikt om van een lijst een map te maken met dezelfde items.
+
+bv:
+(defn to-map [s k]
+  (zipmap (map k s) s))
+
+(def m1 (to-map [{:id 1 :name "nico" :age 40} {:id 2 :name "Linda" :age 38} {:id 3 :name "Mem" :age 62}] :name))
+(m1 "Mem") => {:id 3, :name "Mem", :age 62}
+
+wil hiermee dan een:
+(defn to-map [s k & keys]
+
+2 mogelijke implementaties:
+a. ofwel eerst een hashmap op :key en hierbinnen de map met de value doen.
+b. ofwel een map met als key een hashmap van key en value
+c. ofwel een map met als key een vector [key value]
+als je een losse get-functie maakt, maakt het niet zoveel uit.
+als je bestaande functies wilt gebruiken:
+
+met a:
+((:name m1) "Mem")
+
+met b:
+(m1 {:key :name :value "Mem"})
+
+met c:
+(m1 [:name "Mem"])
+
+[2012-01-04 23:28:24] Bij dit alles kan je je afvragen wat bv ClojureQL hier al voor heeft. De data
+                      komt nl meestal wel uit een DB.
+[2012-01-05 00:10:32] mss juxt gebruiken om te combineren, deze krijgt meerdere functies, voert ze allemaal
+                      uit en combineert het resultaat.
+                      
 Technisch
 =========
 [2011-03-13 22:50:33] parse cmd line args, like in tcl.
 
+Profiling
+=========
+[2012-01-04 22:59:50] bv met (ns your-namespace (:require clojure.contrib.profile)) van S. Sierra
+[2012-01-04 23:01:37] (J)VisualVM ook genoemd op http://stackoverflow.com/questions/2974916/profiling-tool-for-clojure
+[2012-01-04 23:03:43] http://www.fatvat.co.uk/2009/05/jvisualvm-and-clojure.html
+
 Debuggen
 ========
+[2012-01-02 20:47:12] heb al break.clj, werkte eerder niet. Nu wel, of andere manier?
 [2011-03-13 23:29:29] Kun je iets met breakpoints doen? wil bv wel eens zien waarom de 3289 zo wordt uitgerekend.
+[2012-01-02 22:41:38] zie lijstje op http://www.clojure-toolbox.com/, nu 5 stuks. En ook documentation tools.
+[2012-01-02 22:42:35] ook tools.logging (zie de toolbox hierboven)
+
+Threadsafe
+==========
+[2012-01-04 23:37:35] eigenlijk is mijn make-proposition niet threadsafe: ik pas 2 atoms aan (proposition en fitness)
+                      maar dus niet gecoordineerd. Dus ofwel een ref, ofwel (beter) de :fitness als onderdeel
+                      van de proposition.
+[2012-01-04 23:40:07] ook opvragen van de waardes meerdere keren, moet dus eigenlijk maar een swap! operatie
+                      zijn. De functie die je meegeeft moet dan ook handle-best-solution aanroepen indien
+                      toepasselijk.
 
 Later / eventueel
 ==================
 [2011-02-25 22:04:39] @todo minder (geen?) globals gebruiken, de vars met *sterretjes*.
 
+Editen
+======
+[2012-01-02 20:41:45] los van Scheidsclj: emacs gebruiken. Weer even naar stukje van liebke gekeken over combi van emacs, swank, slime, paredit, incanter, maar voorlopig niet doen.
 
+Organisatie
+===========
+[2012-01-02 20:50:57] Net als in Tcl, gebruik soms -old versies van functies.
+[2012-01-02 21:15:01] en ook hier @todo items in de code.
+
+GUI/Web
+=======
+[2012-01-02 22:45:00] zie ook tryout/ring met docs hierin.
+[2012-01-02 22:45:16] Sandbar: obv compojure: voegt forms toe, met sessions
+[2012-01-02 22:47:18] Clarity: voor Swing.
+[2012-01-02 22:47:53] Seesaw: voor Swing, mss wat meer mature dan Clarity, zit ook tut bij.
