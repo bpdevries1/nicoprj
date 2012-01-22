@@ -51,15 +51,18 @@ proc catalog_folder {foldername table_name} {
   global log
   $log debug "handling: $foldername"
   foreach filepattern {* .*} {
-    foreach filename [glob -nocomplain -directory $foldername -type f $filepattern] {
+    # set filelist [try {glob -nocomplain -directory $foldername -type f $filepattern} {}]
+    # foreach filename [glob -nocomplain -directory $foldername -type f $filepattern] {}
+    foreach filename [try {glob -nocomplain -directory $foldername -type f $filepattern} {}] {
+    # foreach filename $filelist {}
       handle_file $filename $table_name
     }
-    foreach dirname [glob -nocomplain -directory $foldername -type d $filepattern] {
+    foreach dirname [try {glob -nocomplain -directory $foldername -type d $filepattern} {}] {
       set tail [file tail $dirname]
       if {($tail == ".") || ($tail == "..")} {
         continue
       }
-      if {[file type $dirname] == "link"} {
+      if {[try {file type $dirname} "link"] == "link"} {
         continue 
       }
       catalog_folder $dirname $table_name
@@ -69,17 +72,25 @@ proc catalog_folder {foldername table_name} {
 
 proc handle_file {filename table_name} {
   # @todo? upsert, not insert?
+  global log
+  # $log debug "filename: $filename"
   db eval "insert into $table_name (folder, filename, filedate, filesize, md5sum, lastchecked)
-           values ('[file dirname $filename]', '[file tail $filename]', '[det_datetime $filename]',
-                   '[file size $filename]', '[det_md5sum $filename]', '[det_now]')"
+           values ('[str_to_db [file dirname $filename]]', '[str_to_db [file tail $filename]]', '[det_datetime $filename]',
+                   '[try {file size $filename} -1]', '[det_md5sum $filename]', '[det_now]')"
 }
 
 proc det_datetime {filename} {
-  clock format [file mtime $filename] -format "%Y-%m-%d %H:%M:%S" 
+  try {clock format [file mtime $filename] -format "%Y-%m-%d %H:%M:%S"} "error" 
 }
 
 proc det_md5sum {filename} {
-  ::md5::md5 -hex -file $filename 
+  # try {::md5::md5 -hex -file $filename} "error"
+  # 21-1-2012 interne heel traag, exec md5sum veel sneller.
+  # vb met /home/nico/app.source.221663266939.tar (5.5 MB)
+  # tcl: 33-34 sec
+  # exec: 0.6 sec.
+  set res [try {exec md5sum $filename} "error"]
+  string range $res 0 31
 }
 
 proc det_now {} {
@@ -90,5 +101,24 @@ proc det_now {} {
 # wat lastig met recursieve karakter
 #db eval "begin transaction"
 #db eval "commit"
+
+# @todo potential library function, maybe should rename.
+proc try {cmd exc_res} {
+  global log
+  set res $exc_res
+  try_eval {
+    set res [uplevel $cmd]
+  } {
+    $log warn "Error with: $cmd: $errorResult" 
+  }
+  return $res
+}
+
+proc str_to_db {str} {
+  regsub -all {'} $str "''" str
+  regsub -all {\\} $str {\\\\} str
+  return $str
+}
+ 
 
 main $argv
