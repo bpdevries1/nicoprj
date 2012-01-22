@@ -1,9 +1,11 @@
-# du-filter.tcl: vgl. du.exe, maar dan één die niet struikelt over hidden/system dirs.
+#!/home/nico/bin/tclsh
+
+# du-filter.tcl: vgl. du.exe, maar dan een die niet struikelt over hidden/system dirs.
 # extra: toont alleen dirs met size groter dan treshold (van 100MB)
 #
-# syntax: tclsh du.tcl <dirnaam>
+# syntax: tclsh du.tcl <dirnaam> [<treshold in KB>]
 # size wordt altijd in kb gegeven, zonder 1000-separators.
-
+#
 #set TRESHOLD 10000
 #alleen alles groter dan 100MB
 set TRESHOLD 100000
@@ -33,9 +35,17 @@ proc puts_cmdline_args {root_dir treshold} {
 
 
 # retourneert size van deze dir in kb (incl. subdirs en files) en print uit
-proc handledir dirname {
+proc handledir {dirname} {
 	global TRESHOLD
 
+	# 15-1-2012 NdV Don't follow (sym)links.
+	set ft [file_type $dirname]
+	if {($ft == "link") || ($ft == "error")} {
+	   return 0 ; # (symbolic) link or error, 0 size. 
+	}
+	if {[ignore_folder $dirname]} {
+	   return 0 
+	}
   set size 0
   set maxsub 0
   foreach subdir [glob -directory $dirname -nocomplain -types d *] {
@@ -61,6 +71,12 @@ proc file_size {filename} {
   return $result  
 }
 
+proc file_type {filename} {
+  set result "error"
+  catch {set result [file type $filename]}
+  return $result  
+}
+
 proc printsize {size maxsub dirname} {
   global TRESHOLD PRINTPARENT
   
@@ -76,5 +92,16 @@ proc printsize {size maxsub dirname} {
 		}
 	}
 }
+
+proc ignore_folder {folder} {
+  if {[regexp {^/proc} $folder]} {return 1}
+  if {[regexp {^/dev} $folder]} {return 1}
+  # 15-1-2012 NdV /media: maybe need to find a different solution, if I want to see the size of eg. /media/nas 
+  if {[regexp {^/media} $folder]} {return 1}
+  if {[regexp {^/vmlinuz} $folder]} {return 1}
+  if {[regexp {^/cdrom} $folder]} {return 1}
+  return 0
+}
+
 
 main $argc $argv
