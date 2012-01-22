@@ -38,6 +38,7 @@
 (defn delete-logsolutions []
   (clojureql.core/disj! (table :logsolution) (where (= 1 1))))
 
+; @todo also english in DB, then the conversion (map #(hash-map)) is not necessary.
 (defn query-lst-can-referee [game-id]
   (->> @(-> (table :kan_wedstrijd_fluiten)
             (join (table :persoon) (where (= :persoon.id :kan_wedstrijd_fluiten.scheids)))
