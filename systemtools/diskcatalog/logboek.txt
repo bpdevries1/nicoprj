@@ -1,0 +1,202 @@
+Logboek
+=======
+#Gets MD5 hash
+ proc md5 {string} {
+     #tcllib way:
+     package require md5
+     string tolower [::md5::md5 -hex $string]
+
+     #BSD way:
+     #exec -- md5 -q -s $string
+ 
+     #Linux way:
+     #exec -- echo -n $string | md5sum | sed "s/\ *-/\ \ /"
+
+     #Solaris way:
+     #lindex [exec -- echo -n $string | md5sum] 0
+
+     #OpenSSL way:
+     #exec -- echo -n $string | openssl md5
+ }
+ 
+ 
+package require struct::list
+package require fileutil
+
+[::fileutil::cat $filename]
+
+# wel vraag of deze met grote files om kan gaan.
+::md5::md5 -hex [::fileutil::cat make-svn-ontdubbel.tcl]
+
+# je kan ook channel of file opgeven, dus dit lijkt wel de eerste manier.
+::md5::md5  ? -hex ?  [ -channel channel | -file filename | string ]
+
+[2012-01-19 22:25:52] met backup ook iets gedaan dat je checkt of er wat veranderd is. Hele harddisk duurt erg lang, en
+                      zal nu met md5 nog langer duren. Dit is dus niet iets wat je veel wilt doen.
+[2012-01-19 22:26:55] bijhouden waar je bent klinkt wel noodzakelijk, maar eerst zonder beginnen.
+[2012-01-19 22:27:15] dirs doorlopen wel net als backup? bv niet symlinks doorlopen. Mss ook ignorefiles toepassen.
+[2012-01-20 08:28:37] foutmelding in dir /home/nico/oltest, zie onder.
+[2012-01-21 19:13:22] moet SQL escapen dus, jammer.
+
+[21-01-12 14:56:34] [catalogdisk.tcl] [debug] handling: /home/nico/oltest/out/Personal/Verwijderde items/Adressen/Collega's
+[2012-01-22 01:20:39] bugs opgelost, nu /home/nico goed ingelezen, totaal 22.39-00.55=2:16. 
+   102.872 files, totalsize=76 550 712 988.0 ofwel 76GB.
+[2012-01-22 01:25:09] aan de andere kant met du -H blijkt in / 115G totaal te zijn, met 84GB gebruikt, zou meeste dus in /home/nico
+   zitten.
+[2012-01-22 01:26:44] dubbele dingen op andere lokatie dan mijn home-dir zijn niet zo waarschijnlijk, wel dingen in /opt, /var
+   /etc
+[2012-01-22 01:27:55] nu eerst /media/nas aanzetten.
+[2012-01-22 01:28:55] ook bv /aaa dirs staan ofwel in mij home, ofwel op /media/nas/aaa.
+[2012-01-22 01:29:54] waar ik overal books/ict heb, is ook wel leuk te weten: /media/nas, laptop, dropbox. Als /media/nas
+   de bron is, en de andere 2 puur omdat je er dan beter bijkan, is het goed. Op laptop zou nog meer kunnen staan dan in
+   dropbox, omdat daar meer ruimte is.
+[2012-01-28 22:27:04] heb ook nog diskusage van /media/nas?  
+[2012-01-28 22:36:50] kan keuze zijn om films (bv die ik al gezien heb, niet per se nogeens wil zien) alleen op 2TB te zetten,
+                      dan idd geen backup.
+[2012-01-28 22:48:13] /media/nas/media/PodNova verwijderd, Bommel spul, al in Diversen/Bommel.
+[2012-01-28 23:08:09] Op /media/nas nu 105 GB vrij.
+[2012-01-29 11:23:20] attach database "c-root.db" as croot; dus wel quotes rond dbfilename.
+[2012-01-29 11:27:06] create index ix_filename on files (filename); paar minuten geleden gestart, heeft wel tijd nodig.
+[2012-01-29 11:29:40] index maken klaar.
+[2012-01-29 11:30:31] ook indexen op size en md5sum nodig? Als ik size heb, is sum mss niet meer nodig.
+[2012-01-29 11:30:54] create index ix_size on files (filesize); ok, weet niet hoe lang het duurt.
+[2012-01-29 12:15:18] test: 2 grote files met dezelfde grootte, en daarna dezelfde md5?
+select f1.folder, f1.filename, f1.filesize, f1.md5sum, f2.folder, f2.filename, f2.filesize, f2.md5sum 
+from files f1, files f2
+where f1.filesize > 10000000 
+and f1.filesize = f2.filesize
+and f1.id < f2.id limit 10;
+[2012-01-29 12:19:20] filesize wordt zo als string bepaald, dus niet goed. Heb filesize ook als varchar, mss iets mee te maken.
+select f1.folder, f1.filename, f1.filesize, f1.md5sum, f2.folder, f2.filename, f2.filesize, f2.md5sum 
+from files f1, files f2
+where f1.filesize+1 > 10000000 
+and f1.filesize = f2.filesize
+and f1.id < f2.id limit 10;
+[2012-01-29 12:28:44] met index erbij is /media/nas.db nu 461MB.
+[2012-01-29 12:29:34] copy van media-nas.db naar hd-all.db, en dan de andere 3 erbij. Gaat mss traag omdat index er al opstaat.
+[2012-01-29 12:32:31] bij insert-into niet de id meenemen, zou overlappend kunnen zijn, dus deze opnieuw bepalen.
+
+attach database "c-root.db" as croot;
+select count(*) from files; 
+; 1636337
+select count(*) from croot.files;
+; 436521
+; verwachting straks samen is dan: 1636337+436521= 2072858 (op unix met expr commando, wel spaties)
+; dus ruim 2 miljoen bestanden/records
+
+insert into files (folder, filename, filedate, filesize, md5sum, lastchecked)
+select folder, filename, filedate, filesize, md5sum, lastchecked
+from croot.files;
+
+[2012-01-29 12:39:08] bovenstaande insert paar minuten geleden gestart.
+[2012-01-29 12:44:17] nog steeds bezig...
+[2012-01-29 12:47:38] mss gaat het beter als de indexen er eerst af zijn...
+[2012-01-29 12:53:53] nog bezig, vind het eigenlijk te lang duren
+[2012-01-29 12:55:54] huidige size is al meer dan de som van de ouden, kan aan index liggen.
+[2012-01-29 12:56:22] is nu klaar, zo'n 20 minuten over gedaan.
+[2012-01-29 12:56:48] andere 2 zijn kleiner, zou totaal dan binnen uur moeten lukken, dus maar doen.
+[2012-01-29 12:57:07] 
+
+attach database "old-drives.db" as old;
+select count(*) from old.files;
+; 294742 records in old.files, ruim minder dan in c-root.
+
+insert into files (folder, filename, filedate, filesize, md5sum, lastchecked)
+select folder, filename, filedate, filesize, md5sum, lastchecked
+from old.files;
+
+[2012-01-29 12:58:21] bovenstaande zo starten...
+[2012-01-29 12:58:35] is gestart.
+[2012-01-29 13:22:34] alweer een tijdje klaar
+[2012-01-29 13:23:05] even een count, verwachting: 2072858 + 294742 = 2367600, result=2367600, lijkt goed.
+
+
+attach database "home-nico.db" as home;
+select count(*) from home.files;
+; 102872
+
+insert into files (folder, filename, filedate, filesize, md5sum, lastchecked)
+select folder, filename, filedate, filesize, md5sum, lastchecked
+from home.files;
+[2012-01-29 13:24:18] net gestart.
+[2012-01-29 13:40:54] klaar, count nu (verwacht: 2367600 + 102872 = 2470472): 2470472, dus goed.
+[2012-01-29 13:42:00] totale size van .db: 661.805.056, ofwel 661MB, past nog net op een CD.
+
+[2012-01-29 13:43:04] even select weer proberen:
+select f1.folder, f1.filename, f1.filesize, f1.md5sum, f2.folder, f2.filename, f2.filesize, f2.md5sum 
+from files f1, files f2
+where f1.filesize+1 > 10000000 
+and f1.filesize = f2.filesize
+and f1.id < f2.id limit 10;
+[2012-01-29 13:43:50] staat me wel iets bij dat ik dubbelcheck al eerder heb gedaan, ook met bepalen welke
+                      houden en welke weg.
+[2012-01-29 13:45:47] als ik dit in een script doe, dan niet meteen alle resultaten in een resultset, maar per stukje doen.
+[2012-01-29 14:16:35] voor de zekerheid hd-all.db naar hd-all-orig.db gekopieerd.
+[2012-01-29 14:42:27] binnen Tcl wordt a) niets gevonden en b) duurt het zoeken lang. Dezelfde query in sqlite3 gaat vlot.
+
+% db eval "select * from files where filename='545.mp3' limit 10"
+30163 {/media/nas/media/PodNova-Downloads/PodNova Clippings vreeze42} 545.mp3 {2009-03-02 10:45:30} 20227222 7deec2031765b6706292697d9deac5a7 {2012-01-22 04:06:48} 31827 /media/nas/media/Diversen/Bommel 545.mp3 {2009-03-02 10:45:00} 20227222 7deec2031765b6706292697d9deac5a7 {2012-01-22 07:41:38}
+
+db eval "select * from files f1, files f2 where f1.filename='545.mp3' and f2.filename='545.mp3' limit 10"
+# ok
+db eval "select * from files f1, files f2 where f1.filename='545.mp3' and f2.filename='545.mp3' and f1.id < f2.id limit 10"
+# ook goed
+db eval "select * from files f1, files f2 
+where f1.filename='545.mp3' 
+and f2.filename='545.mp3' 
+and f1.id < f2.id limit 10"
+# ook goed
+db eval "select * from files f1, files f2 
+where f1.filename='545.mp3' 
+and f1.filesize+1 > $minsize
+and f1.filesize = f2.filesize
+and f2.filename='545.mp3' 
+and f1.id < f2.id limit 10"
+# leeg, wel snel
+
+db eval "select * from files f1, files f2 
+where f1.filename='545.mp3' 
+and f1.filesize = f2.filesize
+and f2.filename='545.mp3' 
+and f1.id < f2.id limit 10"
+# goed
+
+db eval "select * from files f1, files f2 
+where f1.filename='545.mp3' 
+and f1.filesize+1 > $minsize
+and f2.filename='545.mp3' 
+and f1.id < f2.id limit 10"
+# ook goed, wel vaag.
+
+# dan bij vorige alleen de gelijkheid van filesizes erbij:
+db eval "select * from files f1, files f2 
+where f1.filename='545.mp3' 
+and f1.filesize+1 > $minsize
+and f2.filename='545.mp3' 
+and f1.filesize = f2.filesize
+and f1.id < f2.id limit 10"
+# is weer leeg
+
+db eval "select * from files f1, files f2 
+where f1.filename='545.mp3' 
+and f1.filesize+1 > $minsize
+and f2.filename='545.mp3' 
+and f1.filesize+1 = f2.filesize+1
+and f1.id < f2.id limit 10"
+# dan weer wel!
+
+[2012-01-29 14:55:08] lijkt dat kolom in numeric mode gaat, en dan dus steeds zo benaderd moet worden.
+[2012-01-29 14:55:27] proberen in de script-query. Sowieso wijken de sqlite3 en tcl versies af.
+[2012-01-29 14:57:14] in script lijkt het weer niet goed.
+[2012-01-29 15:01:48] kan cast(filesize as integer) gebruiken.
+[2012-01-29 15:04:30] query wordt nu wel gedaan in tcl, maar duurt nog lang, lijkt alsof eerst hele resultset bepaald wordt,
+                      en pas dan de eerste 10 teruggegeven.
+[2012-01-29 15:05:02] wel cast in de query gezet, lijkt netter dan +1.
+[2012-01-29 15:07:17] duurt allemaal erg lang in tcl, ook doorlopen van de resultset.
+[2012-01-29 15:10:09] wel benieuwd hoe snel dit op laptop gaat.
+[2012-01-29 15:12:15] gestart met kopieren naar NAS...
+[2012-01-29 15:19:24] kopieren inmiddels klaar. nu naar laptop.
+[2012-01-29 15:20:01] gestart met copy-to-laptop.
+[2012-01-29 15:22:19] ook alweer klaar.
+[2012-01-29 15:23:39] Clj-scrabble ook maar eens gestopt, had hier out-of-memory, dus mss nog wel veel in gebruik.
+[2012-01-29 15:23:57] sluiten hiervan duurde ook wel eventjes.
