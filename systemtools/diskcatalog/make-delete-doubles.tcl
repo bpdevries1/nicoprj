@@ -11,6 +11,7 @@ proc main {argv} {
   set options {
     {db.arg "hd-all.db" "Catalog database"}
     {minsize.arg "10000000" "Minimum size of files to handle"}
+    {limit.arg "10" "Maximum number of records to handle"}
     {out.arg "rm-files.txt" "File to put files to remove in"}
     {loglevel.arg "" "Set global log level"}
   }
@@ -24,32 +25,22 @@ proc main {argv} {
   set db_name $ar_argv(db)
   sqlite3 db $db_name
   
-  handle_doubles $ar_argv(out) $ar_argv(minsize)
+  handle_doubles $ar_argv(out) $ar_argv(minsize) $ar_argv(limit)
 }
 
 # out_filename: everything starting with # is comment, everything with rm\t<id>\t<filename> is a file to be removed.
 
-proc handle_doubles {out_filename minsize} {
+proc handle_doubles {out_filename minsize limit} {
   global log
 
   set f [open $out_filename w]             
 
-  # query: filesize+1 voor integer vgl, limit 10 even als testje.
-  if {0} {
-    set query "select f1.id id1, f1.folder folder1, f1.filename filename1, f1.filesize filesize1, f1.md5sum md5sum1, 
-                      f2.id id2, f2.folder folder2, f2.filename filename2, f2.filesize filesize2, f2.md5sum md5sum2 
-               from files f1, files f2
-               where f1.filesize+1 > $minsize 
-               and f1.filesize+1 = f2.filesize+1
-               and f1.id < f2.id limit 10"
-  }
-  
   set query "select f1.id id1, f1.folder folder1, f1.filename filename1, f1.filesize filesize1, f1.md5sum md5sum1, 
                     f2.id id2, f2.folder folder2, f2.filename filename2, f2.filesize filesize2, f2.md5sum md5sum2 
              from files f1, files f2
              where cast(f1.filesize as integer) > $minsize 
              and cast(f1.filesize as integer) = cast(f2.filesize as integer)
-             and f1.id < f2.id limit 10"
+             and f1.id < f2.id limit $limit"
              
              
   $log debug "query: $query"
