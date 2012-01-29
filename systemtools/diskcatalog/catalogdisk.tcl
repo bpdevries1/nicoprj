@@ -4,10 +4,12 @@ package require ndv
 package require Tclx
 package require struct::list
 package require fileutil
-package require md5
+# package require md5
 package require sqlite3
 
 set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+
+set env(CYGWIN) nodosfilewarning
 
 proc main {argv} {
   set options {
