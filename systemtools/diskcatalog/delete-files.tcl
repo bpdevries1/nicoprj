@@ -63,7 +63,13 @@ proc remove_file {id path} {
 }
 
 proc keep_files {id1 id2} {
-  db eval "insert into keep_doubles (id1, id2) values ($id1, $id2)" 
+  global log
+  $log info "Keeping both files: $id1 $id2"
+  db eval "insert into keep_doubles (id1, id2, date_inserted) values ($id1, $id2, '[sqlite_now]')" 
+}
+
+proc sqlite_now {} {
+  clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S" 
 }
 
 main $argv
