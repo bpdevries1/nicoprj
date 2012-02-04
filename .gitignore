@@ -2,6 +2,7 @@
 *.bak
 *~
 *.log
+*.$$$
 #*#
 
 # 30-1-2011 NdV web2py ignores werken nog niet zo, uitzoeken.
