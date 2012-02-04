@@ -40,6 +40,9 @@ proc init_group_regexps {} {
 	#add_re {msz} Maasstad
 	add_res Maasstad {Maasstad} {MSZ_} {qtp-alt.xlsx} {msz} {Macro Scheduler}
 	
+	# Van Oord vanaf 27-1-2012
+	add_res VanOord {Van.?Oord} {VO_}
+	
 	# PA-Rol
 	add_re {HPM2011} YmorPA 
 	add_re {Ymor PA} YmorPA
