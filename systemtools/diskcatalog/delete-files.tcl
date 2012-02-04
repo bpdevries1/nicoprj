@@ -16,6 +16,8 @@ proc main {argv} {
   set usage ": [file tail [info script]] \[options] path:"
   set argv_orig $argv
   array set ar_argv [::cmdline::getoptions argv $options $usage]
+  parray ar_argv
+  
   file delete "[file rootname [file tail [info script]]].log"
   ::ndv::CLogger::set_logfile "[file rootname [file tail [info script]]].log"
   # @todo (see other code) handle loglevel.arg
