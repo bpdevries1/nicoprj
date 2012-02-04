@@ -63,48 +63,6 @@ proc add_re {re group} {
   lappend lst_group_regexps [list $re $group]
 }
 
-# lst_group_regexps: list of elements, where each element is a list of two elements: regexp and groupname
-# (wanted to do something with regsub, to determine group more dynamically, but cannot find a use for it now (5-9-09)
-# (Idea was to determine everything after last dash (-) and use this as a group, but don't do this now)
-# init code, subject to change, therefore on top of file.
-proc init_group_regexps_old {} {
-	global lst_group_regexps
-	set lst_group_regexps {}
-	lappend lst_group_regexps [list {Mozilla Firefox$} Firefox]
-	lappend lst_group_regexps [list {^jEdit - } jEdit]
-	lappend lst_group_regexps [list {^4NT} 4NT]
-	lappend lst_group_regexps [list {^4DOS/NT Prompt} 4NT]
-
-	# Outlook
-	lappend lst_group_regexps [list { - Microsoft Outlook$} Outlook]
-	lappend lst_group_regexps [list { - Bericht} Outlook]
-	lappend lst_group_regexps [list { - Vergadering} Outlook]
-	lappend lst_group_regexps [list { - Afspraak} Outlook]
-	
-	lappend lst_group_regexps [list { - FreeMind - } FreeMind]
-	lappend lst_group_regexps [list {^ThinkingRock } ThinkingRock]
-
-	# protege
-	lappend lst_group_regexps [list {^Tools +Prot} Protege] ; # two spaces between Tools and Prot
-	lappend lst_group_regexps [list {internal name is} Protege] ; # two spaces between Tools and Prot
-	 
-	lappend lst_group_regexps [list {^Total Commander} TotalCommander]
-	lappend lst_group_regexps [list {^MySQL} MySQL]
-	lappend lst_group_regexps [list {^Microsoft Excel} Excel]
-	lappend lst_group_regexps [list {Microsoft Word$} Word]
-	lappend lst_group_regexps [list {^Microsoft Powerpoint} Powerpoint]
-	lappend lst_group_regexps [list {^Adobe Reader} AdobeReader]
-	lappend lst_group_regexps [list {Adobe Flash Player} AdobeFlashPlayer]
-	lappend lst_group_regexps [list {Player Window} AdobeFlashPlayer]
-	lappend lst_group_regexps [list {Programmer's File Editor} PFE]
-	lappend lst_group_regexps [list {IrfanView} IrfanView]
-	# lappend lst_group_regexps [list {} ]
-	
-	lappend lst_group_regexps [list {Herinnering} Screensaver]
-	lappend lst_group_regexps [list {\{NONE\}} Screensaver]
-	
-}
-
 proc main {argc argv} {
 	global lst_records ar_time_title ar_time_group ar_n_title ar_n_group ar_time_unknown ar_n_unknown ar_time_first ar_time_last ar_argv log
 	
