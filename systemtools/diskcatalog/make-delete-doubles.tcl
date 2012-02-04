@@ -14,10 +14,10 @@ proc main {argv} {
     {minsize.arg "10000000" "Minimum size of files to handle"}
     {limit.arg "50" "Maximum number of records to handle"}
     {out.arg "rm-files.txt" "File to put files to remove in"}
-    {ignore.arg "backups/YmorLaptop;backups/pcubuntu;/Dropbox;C:/bieb;C:/media;/media/e drive/media;C:/install;/media/f backup-c" "Set of re's of paths to ignore, separated by semicolon"}
     {loglevel.arg "" "Set global log level"}
   }
   # ignore: default ignore backup and cache locations.
+  #  {ignore.arg "backups/YmorLaptop;backups/pcubuntu;/Dropbox;C:/bieb;C:/media;/media/e drive/media;C:/install;/media/f backup-c" "Set of re's of paths to ignore, separated by semicolon"}
   
   set usage ": [file tail [info script]] \[options] path:"
   set argv_orig $argv
@@ -30,8 +30,8 @@ proc main {argv} {
   set db_name $ar_argv(db)
   sqlite3 db $db_name
   
-  set ignore_res [split $ar_argv(ignore) ";"]
-  db function ignorepath ignorepath
+  #set ignore_res [split $ar_argv(ignore) ";"]
+  #db function ignorepath ignorepath
   
   make_keep_table
   def_action_functions
@@ -54,17 +54,45 @@ proc def_action_functions {} {
   # langere filenames helpen een klein beetje
   # als 1 van de files in aaa zit, en de andere niet, wint de andere.
   
-  set all_types {oldbackup backup cache source system}
-  def_action_function oldbackup $all_types delete_old_backup
-  
+  # oldbackup: backups for laptop etc, can be deleted if available elsewhere.
+  # backup: current backup, it's the function of this that it's a double
+  # extrabackup: backup on an old drive, keep for now, maybe delete if we're sure there's another backup
+  # cache: for better availability when on the road, i.e. dropbox, stuff on laptop.
+  # cache->other-structure: eg singles, put in a different place for different function, could be replaced by symlinks.
+  # source: source-code but also project data, this is the original place
+  # @todo: have source for both github locations. If locations differ, don't delete, if in the same repo, make a note.
+  # system: OS files, program files, stuff that needs to stay.
+  set all_types {oldbackup backup extrabackup cache source system}
+  def_action_function oldbackup $all_types delete_oldbackup
+  def_action_function extrabackup backup delete_extrabackup
+  # def_action_function extrabackup source keep_both
+  def_action_function {system source} {backup extrabackup} keep_both
 }
 
 proc def_action_function {ltp1 ltp2 fn_name} {
-  global ar_functions
   foreach tp1 $ltp1 {
     foreach tp2 $ltp2 {
-      set ar_functions($tp1,$tp2) $fn_name
-      set ar_functions($tp2,$tp1) $fn_name
+      #set ar_functions($tp1,$tp2) $fn_name
+      #set ar_functions($tp2,$tp1) $fn_name
+      set_ar_functions $tp1 $tp2 $fn_name
+      set_ar_functions $tp2 $tp1 $fn_name
+    }
+  }
+}
+
+# check if value already set, if new value is the same, ok, if different, error.
+proc set_ar_functions {tp1 tp2 fn_name} {
+  global ar_functions
+  
+  set res "none"
+  catch {set res $ar_functions($tp1,$tp2)}
+  if {$res == "none"} {
+    set ar_functions($tp1,$tp2) $fn_name 
+  } else {
+    if {$res == $fn_name} {
+      # ok, set to the same 
+    } else {
+      error "ar_functions($tp1,$tp2) about to be set to $fn_name, but already has value $res" 
     }
   }
 }
@@ -77,7 +105,7 @@ proc det_action_function {tp1 tp2} {
 }
 
 # t: loc_type, d: loc_detail, f: folder, n: filename
-proc delete_old_backup {t1 d1 f1 n1 t2 d2 f2 n2} {
+proc delete_oldbackup {t1 d1 f1 n1 t2 d2 f2 n2} {
   if {$t1 == "oldbackup"} {
     return "delete1" 
   } elseif {$t2 == "oldbackup"} {
@@ -87,6 +115,20 @@ proc delete_old_backup {t1 d1 f1 n1 t2 d2 f2 n2} {
   }
 }
 
+proc delete_extrabackup {t1 d1 f1 n1 t2 d2 f2 n2} {
+  if {$t1 == "extrabackup"} {
+    return "delete1" 
+  } elseif {$t2 == "extrabackup"} {
+    return "delete2"
+  } else {
+    error "None of files is extra backup: $t1 $d1 $f1 $n1 $t2 $d2 $f2 $n2"  
+  }
+}
+
+proc keep_both {t1 d1 f1 n1 t2 d2 f2 n2} {
+  return "keepboth"
+}  
+  
 proc action_undefined {t1 d1 f1 n1 t2 d2 f2 n2} {
   return "undefined"
 }
@@ -134,16 +176,9 @@ proc handle_doubles {out_filename minsize limit} {
   db eval $query {
     $log debug "handling query result: $filename1"
     # resultaten per rij in vars $id1 etc.
-    puts $f "# File1: [file join $folder1 $filename1]: $filesize1: $md5sum1"
-    puts $f "# File2: [file join $folder2 $filename2]: $filesize2: $md5sum2"
+    puts $f "# File1: [file join $folder1 $filename1]: $filesize1: $md5sum1 ($lt1/$ld1)"
+    puts $f "# File2: [file join $folder2 $filename2]: $filesize2: $md5sum2 ($lt2/$ld2)"
 
-
-
-
-    set kv1 [keep_value $folder1 $filename1 $lt1 $ld1]
-    set kv2 [keep_value $folder2 $filename2 $lt2 $ld2]
-    puts $f "# Keep value 1: $kv1"
-    puts $f "# Keep value 2: $kv2"
     if {$filename1 != $filename2} {
       puts $f "# WATCH OUT: Filenames differ, check if they are really the same!" 
     }
@@ -151,30 +186,10 @@ proc handle_doubles {out_filename minsize limit} {
       puts $f "# WATCH OUT: 2 entries pointing to the same file!\n"
       continue; # hier wel continue, al een newline toegevoegd.
     }
-    
-    if {($kv1 == 1000) || ($kv2 == 1000)} {
-      if {$kv1 == 0} {
-        puts $f "# Delete: [file join $folder1 $filename1]"
-        puts $f [join [list rm $id1 [file join $folder1 $filename1]] "\t"] 
-      } elseif {$kv2 == 0} {
-        puts $f "# Delete: [file join $folder2 $filename2]"
-        puts $f [join [list rm $id2 [file join $folder2 $filename2]] "\t"] 
-      } else {
-        puts $f "# one of values equals 1000, don't delete anything, determine what should happen"
-      }
-    } else {
-      if {$kv1 > $kv2} {
-        puts $f "# Delete: [file join $folder2 $filename2]"
-        puts $f [join [list rm $id2 [file join $folder2 $filename2]] "\t"] 
-      } elseif {$kv1 < $kv2} {
-        puts $f "# Delete: [file join $folder1 $filename1]"
-        puts $f [join [list rm $id1 [file join $folder1 $filename1]] "\t"] 
-      } else {
-        # delete arbitrary one, as long as it's the same always: eg 3 files are the same 1<2<3: now 1 surely stays, otherwise 2 or 3 would be removed!
-        puts $f "# Keep values are the same, delete the second one: [file join $folder2 $filename2]"
-        puts $f [join [list rm $id2 [file join $folder2 $filename2]] "\t"]
-      }
-    }
+
+    set fn [det_action_function $lt1 $lt2]
+    set action [$fn $lt1 $ld1 $folder1 $filename1 $lt2 $ld2 $folder2 $filename2]
+    handle_action $f $action $id1 $folder1 $filename1 $id2 $folder2 $filename2
     puts $f "" ; # always a new line between entries.
   }
   close $f
