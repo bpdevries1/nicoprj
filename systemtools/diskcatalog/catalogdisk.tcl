@@ -9,6 +9,11 @@ package require sqlite3
 
 set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 
+# @todo use columns, maybe fill also
+# alter table files add column filesize_int integer;
+# alter table files add column loc_type;
+# alter table files add column loc_detail;
+
 set env(CYGWIN) nodosfilewarning
 
 proc main {argv} {
