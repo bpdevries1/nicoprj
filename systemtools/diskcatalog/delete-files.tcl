@@ -58,7 +58,18 @@ proc remove_file {id path} {
   # this should not give an error
   global log
   $log info "Deleting: $path"
-  catch {file delete $path}
+  # catch {file delete $path}
+  try_eval {
+    if {![file exists $path]} {
+      $log warn "File does not exist before delete: $path" 
+    }
+    file delete $path
+    if {[file exists $path]} {
+      $log warn "File still exists after delete: $path" 
+    }
+  } {
+    $log warn "Delete failed: $errorResult"
+  }
   db eval "delete from files where id=$id"
 }
 
