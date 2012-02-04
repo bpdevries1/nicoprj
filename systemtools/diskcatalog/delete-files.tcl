@@ -39,9 +39,13 @@ proc delete_files {infilename} {
     if {$line == ""} {
       continue 
     }
-    lassign [split $line "\t"] cmd id path
+    # lassign [split $line "\t"] cmd id path
+    set lline [split $line "\t"]
+    set cmd [lindex $lline 0]
     if {$cmd == "rm"} {
-      remove_file $id $path 
+      remove_file [lindex $lline 1] [lindex $lline 2] ; # id and path of file to remove 
+    } elseif {$cmd == "keep"} {
+      keep_files [lindex $lline 1] [lindex $lline 2] ; # id's of both files to keep
     } else {
       $log warn "Don't know how to handle: $line" 
     }
@@ -56,6 +60,10 @@ proc remove_file {id path} {
   $log info "Deleting: $path"
   catch {file delete $path}
   db eval "delete from files where id=$id"
+}
+
+proc keep_files {id1 id2} {
+  db eval "insert into keep_doubles (id1, id2) values ($id1, $id2)" 
 }
 
 main $argv

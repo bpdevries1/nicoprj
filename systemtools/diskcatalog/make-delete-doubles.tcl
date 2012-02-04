@@ -33,12 +33,154 @@ proc main {argv} {
   set ignore_res [split $ar_argv(ignore) ";"]
   db function ignorepath ignorepath
   
+  make_keep_table
+  def_action_functions
+  
   handle_doubles $ar_argv(out) $ar_argv(minsize) $ar_argv(limit)
 }
 
 # out_filename: everything starting with # is comment, everything with rm\t<id>\t<filename> is a file to be removed.
 
+proc make_keep_table {} {
+  db eval "create table if not exists keep_doubles (id1 integer, id2 integer, date_inserted, notes)" 
+}
+
+proc def_action_functions {} {
+  # ar_functions: assoc array t1,t2=>(determine) action function
+  
+  # @todo:
+  # met uitzoeken in de naam -/- 10
+  # blijkbaar .svn files dezelfde als de origs.
+  # langere filenames helpen een klein beetje
+  # als 1 van de files in aaa zit, en de andere niet, wint de andere.
+  
+  set all_types {oldbackup backup cache source system}
+  def_action_function oldbackup $all_types delete_old_backup
+  
+}
+
+proc def_action_function {ltp1 ltp2 fn_name} {
+  global ar_functions
+  foreach tp1 $ltp1 {
+    foreach tp2 $ltp2 {
+      set ar_functions($tp1,$tp2) $fn_name
+      set ar_functions($tp2,$tp1) $fn_name
+    }
+  }
+}
+
+proc det_action_function {tp1 tp2} {
+  global ar_functions
+  set res action_undefined
+  catch {set res $ar_functions($tp1,$tp2)}
+  return $res  
+}
+
+# t: loc_type, d: loc_detail, f: folder, n: filename
+proc delete_old_backup {t1 d1 f1 n1 t2 d2 f2 n2} {
+  if {$t1 == "oldbackup"} {
+    return "delete1" 
+  } elseif {$t2 == "oldbackup"} {
+    return "delete2"
+  } else {
+    error "None of files is old backup: $t1 $d1 $f1 $n1 $t2 $d2 $f2 $n2"  
+  }
+}
+
+proc action_undefined {t1 d1 f1 n1 t2 d2 f2 n2} {
+  return "undefined"
+}
+
+proc handle_action {f action id1 f1 n1 id2 f2 n2} {
+  if {$action == "delete1"} {
+    puts $f "# Delete: [file join $f1 $n1]"
+    puts $f [join [list rm $id1 [file join $f1 $n1]] "\t"] 
+  } elseif {$action == "delete2"} {
+    puts $f "# Delete: [file join $f2 $n2]"
+    puts $f [join [list rm $id2 [file join $f2 $n2]] "\t"] 
+  } elseif {$action == "keepboth"} {
+    puts $f "# Keep both files"
+    puts $f [join [list keep $id1 $id2] "\t"]
+  } else {
+    puts $f "# Unknown action: $action, do nothing" 
+  }
+  # @todo make symlink of a cache file
+}
+
 proc handle_doubles {out_filename minsize limit} {
+  global log
+
+  set f [open $out_filename w]             
+  set query "select f1.id id1, f1.folder folder1, f1.filename filename1, f1.filesize_int filesize1, f1.md5sum md5sum1, f1.loc_type lt1, f1.loc_detail ld1,
+                    f2.id id2, f2.folder folder2, f2.filename filename2, f2.filesize_int filesize2, f2.md5sum md5sum2, f2.loc_type lt2, f2.loc_detail ld2 
+             from files f1, files f2
+             where f1.filesize_int > $minsize 
+             and f1.filesize_int = f2.filesize_int
+             and f1.md5sum = f2.md5sum
+             and f1.id < f2.id
+             and not exists (
+               select 1
+               from keep_doubles k
+               where k.id1 = f1.id
+               and   k.id2 = f2.id
+             )
+             limit $limit"
+             
+  $log debug "query: $query"
+
+  #set res [db eval $query]
+  #$log debug "res: $res"
+  
+  db eval $query {
+    $log debug "handling query result: $filename1"
+    # resultaten per rij in vars $id1 etc.
+    puts $f "# File1: [file join $folder1 $filename1]: $filesize1: $md5sum1"
+    puts $f "# File2: [file join $folder2 $filename2]: $filesize2: $md5sum2"
+
+
+
+
+    set kv1 [keep_value $folder1 $filename1 $lt1 $ld1]
+    set kv2 [keep_value $folder2 $filename2 $lt2 $ld2]
+    puts $f "# Keep value 1: $kv1"
+    puts $f "# Keep value 2: $kv2"
+    if {$filename1 != $filename2} {
+      puts $f "# WATCH OUT: Filenames differ, check if they are really the same!" 
+    }
+    if {[file join $folder1 $filename1] == [file join $folder2 $filename2]} {
+      puts $f "# WATCH OUT: 2 entries pointing to the same file!\n"
+      continue; # hier wel continue, al een newline toegevoegd.
+    }
+    
+    if {($kv1 == 1000) || ($kv2 == 1000)} {
+      if {$kv1 == 0} {
+        puts $f "# Delete: [file join $folder1 $filename1]"
+        puts $f [join [list rm $id1 [file join $folder1 $filename1]] "\t"] 
+      } elseif {$kv2 == 0} {
+        puts $f "# Delete: [file join $folder2 $filename2]"
+        puts $f [join [list rm $id2 [file join $folder2 $filename2]] "\t"] 
+      } else {
+        puts $f "# one of values equals 1000, don't delete anything, determine what should happen"
+      }
+    } else {
+      if {$kv1 > $kv2} {
+        puts $f "# Delete: [file join $folder2 $filename2]"
+        puts $f [join [list rm $id2 [file join $folder2 $filename2]] "\t"] 
+      } elseif {$kv1 < $kv2} {
+        puts $f "# Delete: [file join $folder1 $filename1]"
+        puts $f [join [list rm $id1 [file join $folder1 $filename1]] "\t"] 
+      } else {
+        # delete arbitrary one, as long as it's the same always: eg 3 files are the same 1<2<3: now 1 surely stays, otherwise 2 or 3 would be removed!
+        puts $f "# Keep values are the same, delete the second one: [file join $folder2 $filename2]"
+        puts $f [join [list rm $id2 [file join $folder2 $filename2]] "\t"]
+      }
+    }
+    puts $f "" ; # always a new line between entries.
+  }
+  close $f
+}
+
+proc handle_doubles_old {out_filename minsize limit} {
   global log
 
   set f [open $out_filename w]             
@@ -55,7 +197,7 @@ proc handle_doubles {out_filename minsize limit} {
                limit $limit"
   }
   
-  set query "select f1.id id1, f1.folder folder1, f1.filename filename1, f1.filesize_int filesize1, f1.md5sum md5sum1, f1.loc_type lt1, f1.loc_detail ld1,
+  set query_old "select f1.id id1, f1.folder folder1, f1.filename filename1, f1.filesize_int filesize1, f1.md5sum md5sum1, f1.loc_type lt1, f1.loc_detail ld1,
                     f2.id id2, f2.folder folder2, f2.filename filename2, f2.filesize_int filesize2, f2.md5sum md5sum2, f2.loc_type lt2, f2.loc_detail ld2 
              from files f1, files f2
              where f1.filesize_int > $minsize 
@@ -64,6 +206,21 @@ proc handle_doubles {out_filename minsize limit} {
              and f1.id < f2.id
              and (f1.loc_type is null or f1.loc_type = 'source')
              and (f2.loc_type is null or f2.loc_type = 'source')
+             limit $limit"
+
+  set query "select f1.id id1, f1.folder folder1, f1.filename filename1, f1.filesize_int filesize1, f1.md5sum md5sum1, f1.loc_type lt1, f1.loc_detail ld1,
+                    f2.id id2, f2.folder folder2, f2.filename filename2, f2.filesize_int filesize2, f2.md5sum md5sum2, f2.loc_type lt2, f2.loc_detail ld2 
+             from files f1, files f2
+             where f1.filesize_int > $minsize 
+             and f1.filesize_int = f2.filesize_int
+             and f1.md5sum = f2.md5sum
+             and f1.id < f2.id
+             and not exists (
+               select 1
+               from keep_doubles k
+               where k.id1 = f1.id
+               and   k.id2 = f2.id
+             )
              limit $limit"
              
   $log debug "query: $query"
@@ -147,10 +304,10 @@ proc keep_value {folder filename loc_type loc_detail} {
   }
   
   # if type not determined, keep file, so set value high
-  return 1000 ; # hier geen rel.value bij, check op 1000 hierboven.
+  return 1000 ; # hier geen rel.value bij optellen/aftrekken, check op 1000 hierboven.
 }
 
-proc is_old_backup {folder} {
+proc is_old_backup_old {folder} {
   #DellLaptop  hardware          leesmij.txt      Ordina-SPE-wiki  YmorLaptop
   #DellPC      laptop-important  nicodevreeze.nl  pcubuntu
 
@@ -162,7 +319,7 @@ proc is_old_backup {folder} {
   return 0
 }
 
-proc ignorepath {path} {
+proc ignorepath_old {path} {
   global ignore_res
   set res 0
   foreach re $ignore_res {
