@@ -10,3 +10,5 @@
 **/web2py/databases/
 **/web2py/errors/
 **/web2py/sessions/
+
+output/
