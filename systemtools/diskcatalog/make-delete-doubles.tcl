@@ -263,18 +263,6 @@ proc keep_value {folder filename loc_type loc_detail} {
   return 1000 ; # hier geen rel.value bij optellen/aftrekken, check op 1000 hierboven.
 }
 
-proc is_old_backup_old {folder} {
-  #DellLaptop  hardware          leesmij.txt      Ordina-SPE-wiki  YmorLaptop
-  #DellPC      laptop-important  nicodevreeze.nl  pcubuntu
-
-  if {[regexp {media/nas/backups/([^/]+)} $folder z src]} {
-    if {[lsearch -exact {DellLaptop DellPC laptop-important} $src] >= 0} {
-      return 1 
-    }
-  }
-  return 0
-}
-
 proc ignorepath_old {path} {
   global ignore_res
   set res 0
