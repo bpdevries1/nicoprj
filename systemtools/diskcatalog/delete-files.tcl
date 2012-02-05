@@ -47,6 +47,8 @@ proc delete_files {infilename} {
       remove_file [lindex $lline 1] [lindex $lline 2] ; # id and path of file to remove 
     } elseif {$cmd == "keep"} {
       keep_files [lindex $lline 1] [lindex $lline 2] ; # id's of both files to keep
+    } elseif {$cmd == "move"} {
+      move_file {*}[lrange $lline 1 end]
     } else {
       $log warn "Don't know how to handle: $line" 
     }
@@ -81,8 +83,33 @@ proc keep_files {id1 id2} {
   db eval "insert into keep_doubles (id1, id2, date_inserted) values ($id1, $id2, '[sqlite_now]')" 
 }
 
+proc move_file {id folder_old folder_new filename} {
+  # reset location type and detail, @todo determine again or param.
+  db eval "update files set folder='$folder_new', loc_type=null, loc_detail=null where id=$id"
+  set path_old [file join $folder_old $filename]
+  set path_new [file join $folder_new $filename]
+  try_eval {
+    if {![file exists $path_old]} {
+      log warn "File does not exist before delete: $path_old" 
+    } else {
+      file mkdir $folder_new
+      file rename $path_old $path_new 
+      if {![file exists $path_new]} {
+        log warn "File does not exist at new location: $path_new" 
+      }
+    }
+  } {
+    log warn "Move failed: $errorResult"
+  }
+}
+
 proc sqlite_now {} {
   clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S" 
+}
+
+proc log {args} {
+  global log
+  $log {*}$args
 }
 
 main $argv

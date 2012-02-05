@@ -36,7 +36,16 @@ proc main {argv} {
   make_keep_table
   def_action_functions
   
-  handle_doubles $ar_argv(out) $ar_argv(minsize) $ar_argv(limit)
+  # remove action file here, maybe filled from more than one function.
+  file delete $ar_argv(out)
+  
+  # handle_doubles $ar_argv(out) $ar_argv(minsize) $ar_argv(limit)
+  # handle_old_backups $ar_argv(out) $ar_argv(minsize) $ar_argv(limit)
+  
+  # delete_old $ar_argv(out) $ar_argv(minsize) $ar_argv(limit)
+  # move_dir in principe altijd hele dir, niet alleen limit aantal of vanaf minsize groot.
+  move_dir $ar_argv(out) $ar_argv(minsize) $ar_argv(limit) "/media/nas/backups/laptop-important/d/util/soapui-2.5" "/media/nas/archief/installed/soapui-2.5"
+  
 }
 
 # out_filename: everything starting with # is comment, everything with rm\t<id>\t<filename> is a file to be removed.
@@ -79,8 +88,6 @@ proc def_action_functions {} {
 proc def_action_function {ltp1 ltp2 fn_name} {
   foreach tp1 $ltp1 {
     foreach tp2 $ltp2 {
-      #set ar_functions($tp1,$tp2) $fn_name
-      #set ar_functions($tp2,$tp1) $fn_name
       set_ar_functions $tp1 $tp2 $fn_name
       set_ar_functions $tp2 $tp1 $fn_name
     }
@@ -176,6 +183,9 @@ proc handle_action {f action id1 f1 n1 id2 f2 n2} {
   } elseif {$action == "keepboth"} {
     puts $f "# Keep both files"
     puts $f [join [list keep $id1 $id2] "\t"]
+  } elseif {$action == "move1"} {
+    # handle_action $f "move1" $id1 $folder1 $filename1 0 $folder_new $filename1
+    puts $f [join [list move $id1 $f1 $f2 $n1] "\t"]
   } else {
     puts $f "# Unknown action: $action, do nothing" 
   }
@@ -185,7 +195,7 @@ proc handle_action {f action id1 f1 n1 id2 f2 n2} {
 proc handle_doubles {out_filename minsize limit} {
   global log
 
-  set f [open $out_filename w]             
+  set f [open $out_filename a]             
   set query "select f1.id id1, f1.folder folder1, f1.filename filename1, f1.filesize_int filesize1, f1.md5sum md5sum1, f1.loc_type lt1, f1.loc_detail ld1,
                     f2.id id2, f2.folder folder2, f2.filename filename2, f2.filesize_int filesize2, f2.md5sum md5sum2, f2.loc_type lt2, f2.loc_detail ld2 
              from files f1, files f2
@@ -227,6 +237,98 @@ proc handle_doubles {out_filename minsize limit} {
     puts $f "" ; # always a new line between entries.
   }
   close $f
+}
+
+proc handle_old_backups {out_filename minsize limit} {
+  global log
+
+  set f [open $out_filename a]             
+  set query "select f1.id id1, f1.folder folder1, f1.filename filename1, f1.filesize_int filesize1, f1.md5sum md5sum1, f1.loc_type lt1, f1.loc_detail ld1,
+                    f2.id id2, f2.folder folder2, f2.filename filename2, f2.filesize_int filesize2, f2.md5sum md5sum2, f2.loc_type lt2, f2.loc_detail ld2 
+             from files f1, files f2
+             where f1.filesize_int > $minsize 
+             and f1.filesize_int = f2.filesize_int
+             and f1.md5sum = f2.md5sum
+             and f1.loc_type = 'oldbackup'
+             and (f2.loc_type is null or f2.loc_type <> 'oldbackup') 
+             limit $limit"
+             
+  $log debug "query: $query"
+
+  #set res [db eval $query]
+  #$log debug "res: $res"
+  
+  db eval $query {
+    $log debug "handling query result: $filename1"
+    # resultaten per rij in vars $id1 etc.
+    puts $f "# File1: ($lt1/$ld1) [file join $folder1 $filename1]: $filesize1: $md5sum1"
+    puts $f "# File2: ($lt2/$ld2) [file join $folder2 $filename2]: $filesize2: $md5sum2"
+
+    if {$filename1 != $filename2} {
+      puts $f "# WATCH OUT: Filenames differ, check if they are really the same!" 
+    }
+    if {[file join $folder1 $filename1] == [file join $folder2 $filename2]} {
+      puts $f "# WATCH OUT: 2 entries pointing to the same file!\n"
+      continue; # hier wel continue, al een newline toegevoegd.
+    }
+
+    set fn [det_action_function $lt1 $lt2]
+    set action [$fn $lt1 $ld1 $folder1 $filename1 $lt2 $ld2 $folder2 $filename2]
+    $log debug "function: $fn, action: $action"
+    handle_action $f $action $id1 $folder1 $filename1 $id2 $folder2 $filename2
+    puts $f "" ; # always a new line between entries.
+  }
+  close $f
+}
+
+proc delete_old {out_filename minsize limit} {
+  set old_folders {
+    "/media/nas/backups/DellPC/c-drive/Program Files/Common Files/Java"
+    "/media/nas/backups/DellPC/c-drive/WINDOWS/Temp"    
+  }  
+  foreach old_folder $old_folders {  
+    delete_from_old_backups $old_folder $ar_argv(out) $ar_argv(minsize) $ar_argv(limit)
+  }
+}
+
+proc delete_from_old_backups {folder_start out_filename minsize limit} {
+  # global log
+  set f [open $out_filename a]
+  # set query [make_query_select1 "/media/nas/backups/DellPC/c-drive/Program Files/Common Files/Java" $minsize $limit]
+  set query [make_query_select1 $folder_start $minsize $limit]
+  db eval $query {
+    log debug "handling query result: $filename1"
+    # resultaten per rij in vars $id1 etc.
+    puts $f "# File1: ($lt1/$ld1) [file join $folder1 $filename1]: $filesize1: $md5sum1"
+    handle_action $f "delete1" $id1 $folder1 $filename1 0 "" ""
+    puts $f "" ; # always a new line between entries.
+  }  
+  close $f
+}
+
+# limit of -1 means (to sqlite) no limit.
+proc make_query_select1 {folder_start minsize limit} {
+  return "select f1.id id1, f1.folder folder1, f1.filename filename1, f1.filesize_int filesize1, f1.md5sum md5sum1, f1.loc_type lt1, f1.loc_detail ld1
+           from files f1
+           where f1.filesize_int > $minsize 
+           and f1.folder like '${folder_start}%'
+           limit $limit" 
+}
+
+# ooutfile "/media/nas/backups/laptop-important/d/util/soapui-2.5" "/media/nas/archief/installed/soapui-2.5"
+proc move_dir {out_filename minsize limit old_loc new_loc} {
+  set f [open $out_filename a]
+  set query [make_query_select1 $old_loc $minsize $limit]
+  db eval $query {
+    set folder_new "${new_loc}[string range $folder1 [string length $old_loc] end]"
+    handle_action $f "move1" $id1 $folder1 $filename1 0 $folder_new $filename1
+  }
+  close $f
+}  
+
+proc log {args} {
+  global log
+  $log {*}$args
 }
 
 main $argv
