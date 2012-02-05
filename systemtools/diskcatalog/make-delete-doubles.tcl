@@ -229,50 +229,5 @@ proc handle_doubles {out_filename minsize limit} {
   close $f
 }
 
-proc keep_value {folder filename loc_type loc_detail} {
-  set rel_value 0
-  
-  if {[is_old_backup $folder]} {
-    return 0 ; # old backups have the least value. 
-  }
-  
-  # met uitzoeken in de naam -/- 10
-  if {[regexp {itzoeken} $folder]} {
-    set rel_value [expr $rel_value -10] 
-  }
-
-  # blijkbaar .svn files dezelfde als de origs.
-  if {[regexp {/\.svn/} $folder]} {
-    set rel_value [expr $rel_value -20] 
-  }
-  
-  # langere filenames helpen een klein beetje
-  set rel_value [expr $rel_value + 0.01 * [string length $filename]]
-  
-  # als 1 van de files in aaa zit, en de andere niet, wint de andere.
-  if {[regexp {/aaa/} $folder]} {
-    set rel_value [expr $rel_value - 100] 
-  }
-  
-  if {$loc_type == "source"} {
-    # deeper folder is better
-    return [expr 500 + [llength [file split $folder]] + $rel_value]
-  }
-  
-  # if type not determined, keep file, so set value high
-  return 1000 ; # hier geen rel.value bij optellen/aftrekken, check op 1000 hierboven.
-}
-
-proc ignorepath_old {path} {
-  global ignore_res
-  set res 0
-  foreach re $ignore_res {
-    if {[regexp $re $path]} {
-      set res 1 
-    }
-  }  
-  return $res
-}
-
 main $argv
 
