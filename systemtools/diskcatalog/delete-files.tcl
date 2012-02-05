@@ -31,6 +31,7 @@ proc main {argv} {
 proc delete_files {infilename} {
   global log
   set f [open $infilename r]
+  db eval "begin transaction"
   while {![eof $f]} {
     gets $f line
     if {[regexp {^#} $line]} {
@@ -51,6 +52,7 @@ proc delete_files {infilename} {
     }
   }
   close $f
+  db eval "commit"
 }
 
 proc remove_file {id path} {
