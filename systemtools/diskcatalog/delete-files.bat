@@ -1,0 +1,1 @@
+tclsh delete-files.tcl %$
