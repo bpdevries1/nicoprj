@@ -43,6 +43,7 @@ proc main {argv} {
 
 proc make_keep_table {} {
   db eval "create table if not exists keep_doubles (id1 integer, id2 integer, date_inserted, notes)" 
+  db eval "create index if not exists ix_keep_doubles on keep_doubles(id1,id2)"
 }
 
 proc def_action_functions {} {
@@ -57,16 +58,22 @@ proc def_action_functions {} {
   # oldbackup: backups for laptop etc, can be deleted if available elsewhere.
   # backup: current backup, it's the function of this that it's a double
   # extrabackup: backup on an old drive, keep for now, maybe delete if we're sure there's another backup
-  # cache: for better availability when on the road, i.e. dropbox, stuff on laptop.
+  # cache: for better availability when on the road, i.e. dropbox, stuff on laptop. @todo: all files should exist elsewhere, in a source-location (maybe system location)
+  # @todo cache: not all cache needs to be kept on cache, eg. Talend stuff on c:\install.
   # cache->other-structure: eg singles, put in a different place for different function, could be replaced by symlinks.
   # source: source-code but also project data, this is the original place
   # @todo: have source for both github locations. If locations differ, don't delete, if in the same repo, make a note.
   # system: OS files, program files, stuff that needs to stay.
+  # @todo als het goed is, hoef je van een cache (c:\install) geen backup te maken.
   set all_types {oldbackup backup extrabackup cache source system}
   def_action_function oldbackup $all_types delete_oldbackup
   def_action_function extrabackup backup delete_extrabackup
   # def_action_function extrabackup source keep_both
-  def_action_function {system source} {backup extrabackup} keep_both
+  def_action_function {system source} {backup extrabackup cache} keep_both
+  def_action_function {backup extrabackup} cache keep_both
+  def_action_function backup backup keep_one
+  def_action_function cache cache keep_one
+  def_action_function extrabackup extrabackup keep_one
 }
 
 proc def_action_function {ltp1 ltp2 fn_name} {
@@ -128,7 +135,33 @@ proc delete_extrabackup {t1 d1 f1 n1 t2 d2 f2 n2} {
 proc keep_both {t1 d1 f1 n1 t2 d2 f2 n2} {
   return "keepboth"
 }  
-  
+
+# keep one if the details are the same, keep both (for now) if they are not the same.
+proc keep_one {t1 d1 f1 n1 t2 d2 f2 n2} {
+  if {$t1 == $t2} {
+    if {$d1 == $d2} {
+      # if one or both is .svn (or .git?), keep both
+      if {[regexp {/\.svn/} "$f1 $f2"]} {
+        return "keepboth" 
+      }
+      if {[regexp {/\.git/} "$f1 $f2"]} {
+        return "keepboth" 
+      }
+      # keep the longest of the full path names
+      if {[string length [file join $f1 $n1]] >= [string length [file join $f2 $n2]]} {
+        return "delete2"
+      } else {
+        return "delete1" 
+      }
+    } else {
+      return "keepboth" 
+    }
+  } else {
+    return "undefined"; # location types should be the same. 
+  }
+}  
+
+
 proc action_undefined {t1 d1 f1 n1 t2 d2 f2 n2} {
   return "undefined"
 }
@@ -176,8 +209,8 @@ proc handle_doubles {out_filename minsize limit} {
   db eval $query {
     $log debug "handling query result: $filename1"
     # resultaten per rij in vars $id1 etc.
-    puts $f "# File1: [file join $folder1 $filename1]: $filesize1: $md5sum1 ($lt1/$ld1)"
-    puts $f "# File2: [file join $folder2 $filename2]: $filesize2: $md5sum2 ($lt2/$ld2)"
+    puts $f "# File1: ($lt1/$ld1) [file join $folder1 $filename1]: $filesize1: $md5sum1"
+    puts $f "# File2: ($lt2/$ld2) [file join $folder2 $filename2]: $filesize2: $md5sum2"
 
     if {$filename1 != $filename2} {
       puts $f "# WATCH OUT: Filenames differ, check if they are really the same!" 
@@ -189,6 +222,7 @@ proc handle_doubles {out_filename minsize limit} {
 
     set fn [det_action_function $lt1 $lt2]
     set action [$fn $lt1 $ld1 $folder1 $filename1 $lt2 $ld2 $folder2 $filename2]
+    $log debug "function: $fn, action: $action"
     handle_action $f $action $id1 $folder1 $filename1 $id2 $folder2 $filename2
     puts $f "" ; # always a new line between entries.
   }
