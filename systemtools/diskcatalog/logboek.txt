@@ -159,7 +159,7 @@ where f1.filename='545.mp3'
 and f1.filesize = f2.filesize
 and f2.filename='545.mp3' 
 and f1.id < f2.id limit 10"
-# goed
+# goed, terwijl ik wel filesizes compare, maar niet check op grootte.
 
 db eval "select * from files f1, files f2 
 where f1.filename='545.mp3' 
@@ -200,3 +200,37 @@ and f1.id < f2.id limit 10"
 [2012-01-29 15:22:19] ook alweer klaar.
 [2012-01-29 15:23:39] Clj-scrabble ook maar eens gestopt, had hier out-of-memory, dus mss nog wel veel in gebruik.
 [2012-01-29 15:23:57] sluiten hiervan duurde ook wel eventjes.
+[2012-01-29 15:26:58] uitvoeren op laptop lijkt stuk vlotter, nu nog eens op ubuntu.
+[2012-01-29 15:55:56] ubuntu nog steeds traag
+[2012-01-29 15:56:02] wil niet 'per ongeluk' file deleten uit backup-current of laptop of dropbox omdat bv /media/nas/boeken
+                      als source is aangewezen, en later bepalen dat het toch wel handig is de file op dropbox en/of laptop
+                      te hebben.
+[2012-01-29 15:57:03] als file in dropbox zit, hoeft het niet meer ook op laptop, staat het dan toch al.
+[2012-01-29 15:57:53] files in dropbox kom je sowieso 2x tegen, 1 keer via /home/nico, 1x via laptop. Deze dan beide bewaren.
+[2012-01-29 15:58:33] even vraag dus of een single waardering genoeg is, of dat je alles 1-op-1 moet vergelijken.
+[2012-01-29 15:59:29] eigenlijk def je groepen, die in principe niet mogen overlappen. Dan per groep-combi bepalen wat er
+[2012-01-29 15:59:58] moet gebeuren.
+[2012-01-29 16:00:11] bv binnen /media/boeken is de meest gedetailleerde folder beter, want specifieker?
+[2012-01-29 16:01:45] kan ook zeggen dat ik eerst current-backup en dropbox buiten beschouwing laat. Dan liefst al in de query
+[2012-01-29 16:02:16] doen, evt pas in tcl verwerking. Kan tcl-functie opnemen in query omgeving, mss hierdoor ook wel trager.
+[2012-01-29 16:23:53] dropbox en laptop/bieb als een soort cache te zien, current-backup op een bepaalde manier ook.
+[2012-01-29 16:24:26] dit betekent dat er ergens een bron moet zijn van de file in de cache: if so, ok, if not: vaag: ofwel
+                      file moet naar de source, ofwel file mag uit de cache. 2 files uit cache vergelijken heeft niet zoveel
+                      zin. Nuance: 2 files uit verschillende caches vgl heeft geen zin, maar 2 uit dezelfde wel: kan 1 in principe weg.
+[2012-01-29 16:27:28] deze soorten (bron, backup, cache) en evt de specifieke (cache-dropbox, cache-laptop) al in de database,
+                      lijkt efficienter.
+[2012-01-29 16:30:59] dropbox kan zowel een cache zijn als een bron. boeken als cache, bv current-docs als dropbox, zoals volley.                      
+[2012-01-29 17:18:19] nu al aardig wat in de ingore-list, hierdoor duurt het best lang voordat 'ie met de eerste begint, hierna 
+                      gaat het wel. Kan evt de 'ignore' records verwijderen of markeren. 1 extra kolom lijkt toch handig, flexibel
+                      in te vullen. Kan ook wel (volgens normaliseren) een extra tabel/join doen, maar daar wordt het ook niet sneller
+                      van.
+[2012-01-29 17:25:37] kolom erbij lijkt vrij gemakkelijk. Hoef dus ook niet 1 algemene te doen, kan evt een voor ignore, een voor type, 
+                      een voor subtype.
+
+alter table files add column filesize_int integer;
+alter table files add column loc_type;
+alter table files add column loc_detail;
+
+[2012-01-29 18:52:54] houd laptop versie van de hd-all.db nu als bron, hier kolommen bij en vullen, testen van de int-kolom.
+
+
