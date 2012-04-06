@@ -138,7 +138,7 @@ root is ook zo'n ding met value 0
   
 (defn level 
   ([l] (level l empty-map-zip))
-  ([l z] S
+  ([l z] 
     (cond (empty? l) (:children (zip/root z))
           (> (first l) (:value (zip/node z))) (recur (rest l) (-> z (zip/insert-child (hash-map :value (first l) :children [])) zip/down))
           (= (first l) (:value (zip/node z))) (recur (rest l) (-> z (zip/insert-right (hash-map :value (first l) :children [])) zip/right))
