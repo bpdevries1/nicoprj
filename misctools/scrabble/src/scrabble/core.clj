@@ -1,338 +1,38 @@
-(ns scrabble.core)
+;(
+(ns scrabble.core
+  (:gen-class)
+  (:use [clojure.java.io :only (reader writer)]
+        [clojure.contrib.generic.functor :only (fmap)])
+        ;[clojure.contrib.io :only (write-lines)])
+  (:require [clojure.zip :as zip]))
 
-; first just some helper functions.
-; do we have enough letters to form word?
-; the idea is to see the word and letters as bags/multisets of letters and diff them. 
-; if the result is empty, we're ok.
-(defn enough-letters [word letters]
-  (merge-with - (frequencies word) (frequencies letters)))
-; merge-with not ok, it doesn't apply - if a letter only occurs in letters.
-
-; some functies to query db (sqlite) for wordt/re's.
-; ? does this work with sqlite, in Tcl it does.
-; otherwise try the speed of re's vs the word-list-file compared to doing this with grep.
-
-;tests
-(def word (frequencies "HONDO"))
-(def letters (frequencies "DNOQ"))
-(def letters2 (frequencies "HONDOQ"))
-user=> (use 'clj-diff.core)
-nil
-user=> (diff word letters)
-;{:+ [[-1 [\D 1]] [2 [\O 1] [\Q 1]]], :- [0 1 3]}
-
-(diff word letters2)
-; {:+ [[3 [\Q 1]]], :- []}
-
-(def res (diff word letters2))
- (= [] (:- res))
-;true
-
-(defn enough-letters [word letters]
-  (= [] (:- (diff (frequencies word) (frequencies letters)))))
-
-user=> (enough-letters "HONDO" "QOONDH")
-false
-user=> (enough-letters "HONDO" "HONDOQ")
-true
-;dus nog niet goed.
-
-
-user=> (diff (f "HONDO") (f "QOONDH"))
-{:+ [[0 [\Q 1]] [3 [\H 1]]], :- [0]}
-;idd is de :- niet leeg.
-
-;diff beschouwd params als sequences, dus met ordering.
-(def f (comp frequencies sort))
-
-(diff (f "HONDO") (f "QOONDH"))
-{:+ [[3 [\Q 1]]], :- []}
-
-(defn enough-letters [word letters]
-  (= [] (:- (diff (-> word frequencies sort) (-> letters frequencies sort)))))
-
-user=> (enough-letters "HOND" "DNOHHQ")
-false
-
-(diff (f "HOND") (f "DNOHHQ"))
-;{:+ [[1 [\H 2]] [3 [\Q 1]]], :- [1]}
-;en idd is de :- weer niet leeg.
-(f "HOND")
-
-(f "DNOHHQ")
-user=> (f "HOND")
-{\D 1, \H 1, \N 1, \O 1}
-user=> (f "DNOHHQ")
-{\D 1, \H 2, \N 1, \O 1, \Q 1}
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;andere lib
-(use 'com.georgejahad.difform)
-(difform { 1 2 3 4 5 6} { 5 6 1 2 3 7})
-   {1 2, 3
- - 4
- + 7
-   , 5 6}
-   
-(difform (f "HONDO") (f "QOONDH"))   
-   {\D 1, \H 1, \N 1, \O 2
- + , \Q 1
-   }
-
-(difform (f "HONDO") (f "HONDOQ"))   
-   {\D 1, \H 1, \N 1, \O 2
- + , \Q 1
-   }
-; komt iig hetzelfde uit, hoopgevend.
-(difform (f "HONDO") (f "HNDOQ"))
-   {\D 1, \H 1, \N 1, \O
- - 2
- + 1, \Q 1
-   }
-
-(def res (difform (f "AB") (f "BC")))   
-   {\
- - A
- + B
-   1, \
- - B
- + C
-   1}
-
-;wil dus dat A ergens staat.
-res
-;nil
-; da's ook niet goed.
-
-;;;;;;;;;;;;;;;;;;;;;
-; toch zelf doen met reduce etc
-
-(f "DNOHHQ")
-user=> (f "HOND")
-{\D 1, \H 1, \N 1, \O 1}
-user=> (f "DNOHHQ")
-{\D 1, \H 2, \N 1, \O 1, \Q 1}
-
-; sort is ook niet direct nodig.
-;(defn frequencies
-;  "Returns a map from distinct items in coll to the number of times
-;  they appear."
-
-
-(defn enough-letters [word letters]
-  (let [fword    (frequencies word)
-        fletters (frequencies letters)]
-    (not-any? pos? 
-      (map (fn [[letter cnt]]
-            (- cnt (fletters letter 0))) fword)))) 
-        
-(defn enough-letters [word letters]
-  (let [fword    (frequencies word)
-        fletters (frequencies letters)]
-     (->> fword
-          (map (fn [[letter cnt]]
-            (- cnt (fletters letter 0))))
-          (not-any? pos?))))
-        
-(defn have-letters? [word letters]
-  (let [fletters (frequencies letters)]
-     (->> word
-          frequencies                       ; frequency map of letters in word
-          (map (fn [[letter cnt]]           ; sequencing a map yields vectors [key value]
-            (- cnt (fletters letter 0))))   ; #times letter appears in word -/- #times in letters
-          (not-any? pos?))))                ; a positive value means a letter is in word, but not in letters.
-
-; wel aardig, maar doe nu wel zelf een map en zoeken van de letter in fletters.
-; de merge-with was ook veelbelovend, maar past functie niet toe op items die alleen in de 2e voorkomen.
-; deze er eerst vanaf halen?
-; of een merge-with met +, en eerst zorgen dat de frequencies van letters negatief worden!
-; kan dit met een map? wordt het resultaat dan ook weer map?
-
-
-(have-letters? "HOND" "HOND")
-;true->ok
-
-(have-letters? "HOND" "DNOQHO")
-;true->ok
-
-(have-letters? "HONDD" "DNOQHO")
-;false->ok
-(have-letters? "HONDD" "DNOQDHO")
-;true->ok
-
-(f "DNOQDHO")
-;{\D 2, \H 1, \N 1, \O 2, \Q 1}
-(map (fn [[l c]] {l (- c)}) (f "DNOQDHO")) 
-({\D -2} {\H -1} {\N -1} {\O -2} {\Q -1})
-
-(merge-with + (f "HOND") (map (fn [[l c]] {l (- c)}) (f "DNOQDHO")))
-;fout
-
-(type (map (fn [[l c]] {l (- c)}) (f "DNOQDHO")))
-;clojure.lang.LazySeq moet weer map worden.
-
-(type (hash-map (map (fn [[l c]] {l (- c)}) (f "DNOQDHO"))))
-
-(def s1 (map (fn [[l c]] {l (- c)}) (f "DNOQDHO")))
-;seq van maps, deze samenvoegen
-
-(apply merge s1)
-; ok
-(merge-with + (f "HOND") (apply merge (map (fn [[l c]] {l (- c)}) (f "DNOQDHO"))))
-;{\Q -1, \D -1, \H 0, \N 0, \O -1} -> ok
-
-(not-any? pos? (vals (merge-with + (f "HOND") (apply merge (map (fn [[l c]] {l (- c)}) (f "DNOQDHO"))))))
-;true
-
-(defn have-letters? [word letters]
-  (not-any? pos? 
-    (vals 
-      (merge-with + (frequencies word) 
-                    (apply merge 
-                      (map (fn [[l c]] {l (- c)}) 
-                           (frequencies letters)))))))
-; werkt ook
-; met -> of ->> ?
-(defn have-letters? [word letters]
-  (->> letters                              ; start with available letters
-       frequencies                          ; map met frequentie van elke letter in letters
-       (map (fn [[l c]] {l (- c)}))         ; maak frequenties negatief, result is een sequence van maps
-       (apply merge)                        ; maak hier weer 1 map van.
-       (merge-with + (frequencies word))    ; voeg deze samen met de (positieve) frequencies van het gezochte woord
-       vals                                 ; lijst met alle frequentie-verschillen, een positieve betekent dat een letter in word niet in letters zit.
-       (not-any? pos?)))                    ; alle waarden moeten 0 of negatief zijn.
-
-; de map en hierna apply merge is niet zo mooi.
-
-(use '[clojure.contrib.generic.functor :only (fmap)])
-
-
-(fmap inc {:a 1 :b 3 :c 5})
-;{:a 2, :c 6, :b 4}
-
-(fmap - {:a 1 :b 3 :c 5})
-;{:a -1, :c -5, :b -3}
-;mooi!
-
-; put letters first, so a partial function can be made and applied/filtered on a word list.
-(defn have-letters1? [letters word]
-  (->> letters                              ; start with available letters
-       frequencies                          ; map met frequentie van elke letter in letters
-       (fmap -)                             ; maak frequenties negatief, fmap is een functor, zie haskell.
-       (merge-with + (frequencies word))    ; voeg deze samen met de (positieve) frequencies van het gezochte woord
-       vals                                 ; lijst met alle frequentie-verschillen, een positieve betekent dat een letter in word niet in letters zit.
-       (not-any? pos?)))                    ; alle waarden moeten 0 of negatief zijn.
-
-
-
-(have-letters? "HOND" "HOND")
-;true->ok
-
-(have-letters? "HOND" "DNOQHO")
-;true->ok
-
-(have-letters? "HONDD" "DNOQHO")
-;false->ok
-(have-letters? "HONDD" "DNOQDHO")
-;true->ok
-
-;;;;;;;;;;;;;;;;;;;;;;;;
-; sowpods lezen
-;;;;;;;;;;;;;;;;;;;;;;;;
-(use '[clojure.java.io :only (reader)])
+;(use '[clojure.java.io :only (reader)])
+;(use '[clojure.contrib.generic.functor :only (fmap)])
+;(require '[clojure.zip :as zip])
 
 (defn get-lines [filename]
   (with-open [rdr (reader filename)]
     (doall (line-seq rdr))))
 
-(def sp (get-lines "/media/nas/media/Talen/Dictionaries/sowpods.txt"))
+(defn get-text [filename]
+  (with-open [rdr (reader filename)]
+    (slurp rdr)))
 
-(take 5 sp)
-;IOException Stream closed  java.io.BufferedReader.ensureOpen (BufferedReader.java:97)
+; this one also in clojure.contrib.io, but doesn't work, something with *append* being non-dynamic.
+(defn write-lines
+  "Writes lines (a seq) to f, separated by newlines.  f is opened with
+  writer, and automatically closed at the end of the sequence."
+  [f lines]
+  (with-open [writer (writer f)]
+    (loop [lines lines]
+      (when-let [line (first lines)]
+        (.write writer (str line))
+        (.newLine writer)
+        (recur (rest lines))))))
 
-; om te testen even zonder with-open
-(def rdr (reader "/media/nas/media/Talen/Dictionaries/sowpods.txt"))
-(def sp (line-seq rdr))
 
- (take 10 sp)
-("AA" "AAH" "AAHED" "AAHING" "AAHS" "AAL" "AALII" "AALIIS" "AALS" "AARDVARK")
-
-(count sp)
-; 267751 ; duurt eerste keer paar seconden
-
-(count sp)
-;instantly
-
-(def sp (get-lines "/media/nas/media/Talen/Dictionaries/sowpods.txt"))
-#'user/sp
-user=> (count sp)
-267751
-(take 10 sp)
-;doet het ook
-
-; regexp:
 (defn find-re [re l]
   (filter (partial re-seq re) l))
-
-(find-re #"AARD" sp)
-;("AARDVARK" "AARDVARKS" "AARDWOLF" "AARDWOLVES")
-
-(find-re #"^T[ABCDE]{3,3}.{0,2}$" sp)
-;("TABARD" "TABBED" "TABBIS" "TABBY" "TABEFY" "TABER" "TABERD" "TABERS" "TABES" "TACAN" "TACANS" "TACE" "TACES" "TACET" "TACETS" "TADDIE" "TAED" "TEABOX" "TEACH" "TEACUP" "TEAD" "TEADE" "TEADES" "TEADS" "TEAED" "TEBBAD" "TEDDED" "TEDDER" "TEDDIE" "TEDDY" "TEED")
-
-(filter (partial have-letters? "ABCDET") (find-re #"^T.{3}$" sp))
-;("TACE" "TAED" "TEAD")
-
-
-user=> (have-letters? (concat "ABCDE" "T") "TAED")
-true
-user=> (have-letters? (concat "ABCDE" "T") "TAEDE")
-false
-
-user=> (re-seq #"[A-Z]" "..A..T..")
-("A" "T")
-
-
-(defn find-words 
-  "Find words in word list (wl) that match pattern and only use letters in let
-   pat is a regex like ...T.{1,3}, but given as a string, not as a #\"regexp\""
-  [pat lt wl]
-  (->> wl
-       (find-re (re-pattern pat))
-       (filter (partial have-letters? (concat lt (re-seq #"[A-Z]" pat))))))
-
-(find-words "^T...$" "ABCDE" sp)         
-
-(find-words "^T...$" "ABCDE" sp)
-()
-user=> (find-words "^T...$" "ABCDET" sp)
-("TACE" "TAED" "TEAD")
-
-
-(apply str "ABCDE" (re-seq #"[A-Z]" "^T...$"))
-;"ABCDET"
-
-(defn find-words 
-  "Find words in word list (wl) that match pattern and only use letters in let
-   pat is a regex like ...T.{1,3}, but given as a string, not as a #\"regexp\""
-  [pat lt wl]
-  (->> wl
-       (find-re (re-pattern pat))
-       (filter (partial have-letters? (apply str lt (re-seq #"[A-Z]" pat))))))
-
-user=> (find-words "^T...$" "ABCDE" sp) 
-;("TACE" "TAED" "TEAD")
-
-; ^ en $ eigenlijk wel standaard.
-
-; concreet vb
-(find-words "^AB.{2,4}$" "LGTRAOU" sp)
-
-; ok, werkt wel.
-
-; nu ook een blanco, dus deze ook met have-letters? doen
 
 (defn have-letters? 
   "Find out if there are enough letters to make word. A space in letters denotes a blank"
@@ -346,49 +46,286 @@ user=> (find-words "^T...$" "ABCDE" sp)
        (apply +)                              ; and sum these
        (>= (count (re-seq #" " letters)))))   ; and check if we have enough blanks for the not found letters 
 
-(have-letters? "AAPJE" "AEPJQX ")
-; false, niet terecht.
-(have-letters? "AAPJE" "AEPJQXA")
-(have-letters1? "AAPJE" "AEPJQXA")
-; false, want moet eerst de letters doen.
-(have-letters1? "AEPJQXA" "AAPJE")
-(have-letters? "AEPQX " "AAPJE")
-(have-letters? "AEPQX  " "AAPJE")
-; allemaal goed.
+; @todo letters in pattern tussen [haken] moet je niet tellen als letters die er al liggen.
+(defn find-words 
+  "Find words in word list (wl) that match pattern and only use letters in let
+   pat is a regex like ...T.{1,3}, but given as a string, not as a #\"regexp\""
+  [pat lt wl]
+  (->> wl
+       (find-re (re-pattern pat))
+       (filter (partial have-letters? (apply str lt (re-seq #"[A-Z]" pat))))))
 
-(find-words "." "LRUIOV " sp)
-; kan lang duren, 21:01 gestart, 21:02 klaar, dus valt nog mee.
+(defn find-words2 
+  "Find words in word list (wl) that match pattern and only use letters in lt
+   pat is a regex like ...T.{1,3}, but given as a string, not as a #\"regexp\""
+  [pat lt wl]
+  (->> wl
+       (find-re (re-pattern pat))
+       (filter (partial have-letters? lt))))
 
-; alleen woorden van 6 of 7 letters
-(find-words "^.{6,7}$" "LRUIOV " sp)
-; wel woorden van 6, niet van 7 letters.
+;(def sp (get-lines "/media/nas/media/Talen/Dictionaries/sowpods.txt"))
+;(def nl (get-lines "/media/nas/media/Talen/Dictionaries/wf-nl.txt"))
+;(def nl2 (get-lines "/media/nas/media/Talen/Dictionaries/perletter/alles-sorted.txt"))
+; deze daggad heeft woorden van max 8 letters, is 350.000 regels.
+;(def dnl (make-dawg-z (get-lines "/media/nas/media/Talen/Dictionaries/nl-daggad-sorted-8.txt")))
+; kan kijken hoe ver je dit kunt rekken, maar principe voor andere functies hiermee prima te testen.
 
-(find-words "^.{6,7}E$" "LRUIOV " sp)
-("OUTLIVE" "OVERLIE" "RIVULOSE" "ROUILLE" "SOILURE" "VARIOLE" "VIRGULE" "VOITURE")
-;mooi, maar de laatste voor de E moet met een W te combineren zijn, en dat lukt niet.
+; helper
+(defn empty-to-nil [val]
+  "set result to nil if param is empty: nil, (), []"
+  (if (empty? val) nil val))
+
+; functions to create daggad (gaddag)
+; NdV: I just know the principle, have not looked at implementations in clojure or other language yet.
+; (take 0 word) returns and empty list (), which doesn't work well with if-let. Therefore, make it nil with empty-to-nil
+(defn split-rev-1 [word pos]
+  "Return word split at position as a string, < at the split-point"
+  (if (= pos  0)
+    word
+    (apply str (concat (drop pos word) "<" (reverse (take pos word))))))
+
+(defn split-rev-1-old [word pos]
+  [(drop pos word) (empty-to-nil (reverse (take pos word)))])
+
+(defn split-rev [word]
+  (map (partial split-rev-1 word) (range (count word))))
+
+(defn add-daggad-1 [daggad [forw backw]]
+  (if-let [[first-letter & more] forw]
+    ; still have letters to move forward
+    (let [d2 (get (:next daggad) first-letter)]
+      (assoc daggad :next (assoc (:next daggad) first-letter (add-daggad-1 d2 [more backw]))))
+    ; else: maybe have backward letters
+    (if-let [[first-letter & more] backw]
+      (let [d2 (get (:prev daggad) first-letter)]
+        ;(println daggad d2 first-letter more)
+        (assoc daggad :prev (assoc (:prev daggad) first-letter (add-daggad-1 d2 [forw more]))))
+      ; else: no more letters, mark as final
+      (assoc daggad :final true))))
+  
+  
+; add word to daggad, return new daggad
+(defn add-daggad [daggad word]
+  (reduce add-daggad-1 daggad (split-rev word))) 
+
+(defn make-daggad [word-list]
+  (reduce add-daggad nil word-list))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; functions above work functionally, but use too much memory (and CPU?) to read the complete english or dutch word list
+;;;
+;;; try if using a zipper helps
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; a zipper holds the current node and a path.
+; a path contains steps as a vector
+; a step contains of of key and a node, as [key node]
+(defn map-zip 
+  "Create specific zipper for nested maps. Based on zipper code, but need downto function"
+  [m]
+  ; ((vector (vector) m)))
+  [m (list)])
+
+; create a new key if it doesn't exist
+(defn downto
+  "Move down to a key in a zipper of nested maps"
+  [[node path] k]
+  (if-let [node2 (get node k)]
+    [node2 (conj path [k node])]
+    [{} (conj path [k node])]))
 
 
-;ideeen over verder zoeken, met horizontaal/verticaal.
-;alleen letters neerleggen in dezelfde rij of kolom, die dan ook 1 woord vormen, niet mee.
-;bv bekijk kolom 3. Bekijk eerst per cell wat de restricties zijn, sowieso eerst of dit al aansluit,
-;als de meest linker gevulde kolom 5 is, dan kun je 3 wel overslaan, en beginnen met 4.
-;restrictie: al ingevulde letter, bij blanco: zijn er horizontale restricties? zoek links en rechts
-;naar einde van ingevulde letters. Voor elk van deze horizontale dingen zoeken naar mogelijkheden,
-;rekening houden met eigen letters (later ook sowieso, om met tegenstander rekening te houden)
-;ook later pas rekening houden met 2w waardes etc.
-;hiermee krijg je dan een patroon, bv: .....[AB].T... dan wel: staat de T er al, of is dit de enige die past?
-;met dit pattern heb je 2 'ankers', waarvan je iig 1 moet gebruiken. Per anker dan een nieuwe regexp maken:
-;afhankelijk of je een blanco hebt, kun je de puntjes hieronder vervangen door [<letters>]
-;AB: .{0,7}[AB](.(T.{0,7})?)?
-;T: net andersom, nesting waarschijnlijk ook.
-;mss handig eerst een FSM te maken, deze dan om te zetten naar een RE? in RE lib waarsch weer net andersom.
-;als bovenstaande erg lastig is, dan eerst simpeler: per anker weer: bepaal #ankers boven en onder. Maak RE
-;voor elk van de mogelijke combi's, bv 2 erboven, 1 eronder, dan alle combi's zijn 0-2 erboven, en 0-1 eronder, voor
-;een totaal van 3x2 is 6 RE's. Een anker kan ook uit meer dan 1 letter bestaan, ankers worden altijd gescheiden door
-;spatie? Toch weer onderscheid tussen al geplaatse letters en mogelijk te plaatsen. Voorbeelden, waarbij alles niet
-;in [] betekent dat letter er al staat:
-;...T[AB]..... mogelijkheden: 1) alles eindigend op een T 2) T[AB].*
-; ...T.[AB].... opties: 1) alles op een T; 2) T. 3) T.[AB] 4) T.[AB].* dus RE steeds uitbreiden met anker of een groep?
-; ..T..[AB].. opties: 1) alles op T; 2) ..T.{1,2} 3) ..T..[AB] 4) ..T..[AB].{1,7}
-; ..T[AB][CD]... opties: 1) alles op T 2) ..T[AB] 3) ..T[AB][CD] 4)..T[AB][CD].{1,7}
-;toch moet hiermee wel wat te doen zijn om het in 1 RE te krijgen, juist met een LISP.
+; dan met edits
+; en zonder check of path leeg is, vraag of dit nodig is, heb ook top-functie nu.
+; evt checken of het kan, of pnode wel een map is. Anders vanzelf een foutmelding, maar mogelijk wat cryptisch.
+(defn up
+  "Move up one level in a zipper of nested maps"
+  [[node [[key pnode] & rest]]]
+  [(assoc pnode key node) rest])
+
+(defn up-n
+  "Move up n levels in a zipper of nested maps"
+  [n z]
+  (if (= n 0) z (recur (- n 1) (up z))))
+  
+; replace om : final true te kunnen doen.
+; replace bestaat al wel in clojure.core
+; :final true not used now for brevity. 
+(defn zip-replace
+  "Replace the current node in a zipper of nested maps"
+  [[node path] val]
+  [val path])
+
+(defn top
+  "Move up to the top in a zipper of nested maps"
+  [[node path :as mz]]
+  (if (empty? path) mz (recur (up mz))))
+
+  ;(println "================\ntop: ")
+  ;(println node)
+  ;(println path)
+  ;(println mz)
+
+(defn root
+  "Return root-node of a zipper of nested maps"
+  [mz]
+  (first (top mz)))
+
+; end of 'generic' zipper, now daggad code
+  
+(defn add-daggad-z-1-old 
+  "Add one letter combination to a daggad zipper. Recursive function, zipper moves to top when ready."
+  [dz [forw backw]]
+  (if-let [[first-letter & more] forw]
+    (recur (-> dz (downto :next) (downto first-letter)) [more backw])
+    ; else: maybe have backward letters
+    (if-let [[first-letter & more] backw]
+      (recur (-> dz (downto :prev) (downto first-letter)) [forw more])
+      ; else: no more letters, mark as final
+      (-> dz (downto :final) (zip-replace true) top))))      
+
+(defn add-daggad-z-1
+  "Add one letter combination to a daggad zipper. Recursive function, zipper moves to top when ready."
+  [dz [forw backw]]
+  (if-let [[first-letter & more] forw]
+    (recur (-> dz (downto :n) (downto first-letter)) [more backw])
+    ; else: maybe have backward letters
+    (if-let [[first-letter & more] backw]
+      (recur (-> dz (downto :p) (downto first-letter)) [forw more])
+      ; else: no more letters, mark as final
+      (-> dz (downto :f) top))))      
+
+
+(defn add-daggad-z
+  "Add one word to a daggad zipper. Zipper will be redirected to the top before adding"
+  [dz word]
+  (reduce add-daggad-z-1 (top dz) (split-rev word)))
+
+; in add-daggad-1 ben je al aan het zoeken met hashmap in de daggad om te kijken waar je wat moet toevoegen.
+
+(defn make-daggad-z
+  "Make daggad using a zipper"
+  ([word-list] 
+    ; (make-daggad-z word-list (map-zip {:next {} :prev {} :final false})))
+    (make-daggad-z word-list (map-zip {})))
+  ([word-list dz]
+    (if-let [[first-word & more-words] word-list]
+      (recur more-words (add-daggad-z dz first-word))
+      (root dz))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; also DAWG to check speed and memory usage.
+(defn add-dawg-z-1
+  "Add one word/letter combination to a daggad zipper. Recursive function, zipper moves to top when ready."
+  [dz word]
+  (if-let [[first-letter & more] (word)]
+    (recur (-> dz (downto first-letter)) more)
+    (-> dz (downto :f) top)))      
+
+(defn make-dawg-z-old
+  "Make dawg using a zipper"
+  ([word-list] 
+    ; (make-daggad-z word-list (map-zip {:next {} :prev {} :final false})))
+    (make-dawg-z-old word-list (map-zip {})))
+  ([word-list dz]
+    (if-let [[first-word & more-words] word-list]
+      (recur more-words (add-dawg-z-1 dz first-word))
+      (root dz))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; read a daggad/dawg alphabetically, keep zipper at the inserted pos and move as little as possible.
+
+(defn overlap
+  "Return #letters that are the same (from the beginning) in both words"
+  ([w1 w2]
+    (overlap w1 w2 0))
+  ([w1 w2 acc]
+    (if-let [[l1 & more1] w1]
+      (if-let [[l2 & more2] w2]
+        (if (= l1 l2)
+          (recur more1 more2 (inc acc))
+          acc)
+        acc)
+      acc)))
+
+; use idiomatic (?) seq instead of empty-to-nil
+; http://clojuredocs.org/clojure_core/1.2.0/clojure.core/if-let
+(defn add-dawg-z 
+  "Add one word/letter combination to a daggad zipper. Recursive function, zipper does not move to top when ready."
+  [dz word last-word]
+  (loop [ov (overlap word last-word)
+         dz2 (up-n (- (count last-word) ov) dz)
+         word2 (seq (drop ov word))]
+    (if-let [[first-letter & more] word2]
+      (recur ov (downto dz2 first-letter) more)
+      (-> dz2 (downto :f) up))))      
+
+;(println ov)
+    ;(println dz2)
+    ;(println word2)
+
+(defn make-dawg-z 
+  "Make dawg using a zipper, keep track of last added word."
+  ([word-list] 
+    ; (make-daggad-z word-list (map-zip {:next {} :prev {} :final false})))
+    (make-dawg-z word-list "" (map-zip {})))
+  ([word-list last-word dz]
+    (if-let [[first-word & more-words] word-list]
+      (recur more-words first-word (add-dawg-z dz first-word last-word))
+      (root dz))))
+    
+; this one consumes a lot of memory, too much for my 1GB machine.
+(defn make-daggad-z
+  "Make daggad using split-rev and make-dawg"
+  [word-list]
+  (->> word-list
+       (map split-rev)
+       flatten
+       sort
+       make-dawg-z))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; helper functions to test daggad/dawg
+(defn is-word? [daggad word]
+  "Helper to see if daggad contains word"
+  (if-let [[first-letter & more] word]
+    (recur (get daggad first-letter) more)
+    (not (nil? (:f daggad)))))
+
+(defn get-part-daggad [daggad word]
+  "Helper to get part of a daggad"
+  (if-let [[first-letter & more] word]
+    (recur (get daggad first-letter) more)
+    daggad))  
+
+(defn is-word-old? [daggad word]
+  "Helper to see if daggad contains word"
+  (if-let [[first-letter & more] word]
+    (recur (get (:n daggad) first-letter) more)
+    (not (nil? (:f daggad)))))
+
+(defn test-if-let [word]
+  (if-let [[first-letter & more] word]
+    (do 
+      (println "If-let succeeded with word, first, more: " word first-letter more)
+      (recur more))
+    (println "If-let failed with word: " word)))
+
+; (test-if-let "HOND")
+
+; hier doall nodig, zoals in get-lines?
+(defn get-gawd [filename]
+  (with-open [rdr (reader filename)]
+    (make-dawg-z (line-seq rdr))))
+
+;(def dsp (make-daggad sp))
+;(def dnl (make-daggad nl))
+
+(defn -main
+  [& args]
+  (println "Main started")
+  (def dnl (make-dawg-z (get-lines "/media/nas/media/Talen/Dictionaries/nl-daggad-sorted-1000.txt")))
+  (println "dnl read")
+  (println (is-word? dnl "AANVALLEN"))
+  (println "Main ended"))
+;)

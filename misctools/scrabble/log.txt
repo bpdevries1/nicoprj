@@ -1,0 +1,1113 @@
+(ns scrabble.core)
+
+; first just some helper functions.
+; do we have enough letters to form word?
+; the idea is to see the word and letters as bags/multisets of letters and diff them. 
+; if the result is empty, we're ok.
+(defn enough-letters [word letters]
+  (merge-with - (frequencies word) (frequencies letters)))
+; merge-with not ok, it doesn't apply - if a letter only occurs in letters.
+
+; some functies to query db (sqlite) for wordt/re's.
+; ? does this work with sqlite, in Tcl it does.
+; otherwise try the speed of re's vs the word-list-file compared to doing this with grep.
+
+;tests
+(def word (frequencies "HONDO"))
+(def letters (frequencies "DNOQ"))
+(def letters2 (frequencies "HONDOQ"))
+user=> (use 'clj-diff.core)
+nil
+user=> (diff word letters)
+;{:+ [[-1 [\D 1]] [2 [\O 1] [\Q 1]]], :- [0 1 3]}
+
+(diff word letters2)
+; {:+ [[3 [\Q 1]]], :- []}
+
+(def res (diff word letters2))
+ (= [] (:- res))
+;true
+
+(defn enough-letters [word letters]
+  (= [] (:- (diff (frequencies word) (frequencies letters)))))
+
+user=> (enough-letters "HONDO" "QOONDH")
+false
+user=> (enough-letters "HONDO" "HONDOQ")
+true
+;dus nog niet goed.
+
+
+user=> (diff (f "HONDO") (f "QOONDH"))
+{:+ [[0 [\Q 1]] [3 [\H 1]]], :- [0]}
+;idd is de :- niet leeg.
+
+;diff beschouwd params als sequences, dus met ordering.
+(def f (comp frequencies sort))
+
+(diff (f "HONDO") (f "QOONDH"))
+{:+ [[3 [\Q 1]]], :- []}
+
+(defn enough-letters [word letters]
+  (= [] (:- (diff (-> word frequencies sort) (-> letters frequencies sort)))))
+
+user=> (enough-letters "HOND" "DNOHHQ")
+false
+
+(diff (f "HOND") (f "DNOHHQ"))
+;{:+ [[1 [\H 2]] [3 [\Q 1]]], :- [1]}
+;en idd is de :- weer niet leeg.
+(f "HOND")
+
+(f "DNOHHQ")
+user=> (f "HOND")
+{\D 1, \H 1, \N 1, \O 1}
+user=> (f "DNOHHQ")
+{\D 1, \H 2, \N 1, \O 1, \Q 1}
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;andere lib
+(use 'com.georgejahad.difform)
+(difform { 1 2 3 4 5 6} { 5 6 1 2 3 7})
+   {1 2, 3
+ - 4
+ + 7
+   , 5 6}
+   
+(difform (f "HONDO") (f "QOONDH"))   
+   {\D 1, \H 1, \N 1, \O 2
+ + , \Q 1
+   }
+
+(difform (f "HONDO") (f "HONDOQ"))   
+   {\D 1, \H 1, \N 1, \O 2
+ + , \Q 1
+   }
+; komt iig hetzelfde uit, hoopgevend.
+(difform (f "HONDO") (f "HNDOQ"))
+   {\D 1, \H 1, \N 1, \O
+ - 2
+ + 1, \Q 1
+   }
+
+(def res (difform (f "AB") (f "BC")))   
+   {\
+ - A
+ + B
+   1, \
+ - B
+ + C
+   1}
+
+;wil dus dat A ergens staat.
+res
+;nil
+; da's ook niet goed.
+
+;;;;;;;;;;;;;;;;;;;;;
+; toch zelf doen met reduce etc
+
+(f "DNOHHQ")
+user=> (f "HOND")
+{\D 1, \H 1, \N 1, \O 1}
+user=> (f "DNOHHQ")
+{\D 1, \H 2, \N 1, \O 1, \Q 1}
+
+; sort is ook niet direct nodig.
+;(defn frequencies
+;  "Returns a map from distinct items in coll to the number of times
+;  they appear."
+
+
+(defn enough-letters [word letters]
+  (let [fword    (frequencies word)
+        fletters (frequencies letters)]
+    (not-any? pos? 
+      (map (fn [[letter cnt]]
+            (- cnt (fletters letter 0))) fword)))) 
+        
+(defn enough-letters [word letters]
+  (let [fword    (frequencies word)
+        fletters (frequencies letters)]
+     (->> fword
+          (map (fn [[letter cnt]]
+            (- cnt (fletters letter 0))))
+          (not-any? pos?))))
+        
+(defn have-letters? [word letters]
+  (let [fletters (frequencies letters)]
+     (->> word
+          frequencies                       ; frequency map of letters in word
+          (map (fn [[letter cnt]]           ; sequencing a map yields vectors [key value]
+            (- cnt (fletters letter 0))))   ; #times letter appears in word -/- #times in letters
+          (not-any? pos?))))                ; a positive value means a letter is in word, but not in letters.
+
+; wel aardig, maar doe nu wel zelf een map en zoeken van de letter in fletters.
+; de merge-with was ook veelbelovend, maar past functie niet toe op items die alleen in de 2e voorkomen.
+; deze er eerst vanaf halen?
+; of een merge-with met +, en eerst zorgen dat de frequencies van letters negatief worden!
+; kan dit met een map? wordt het resultaat dan ook weer map?
+
+
+(have-letters? "HOND" "HOND")
+;true->ok
+
+(have-letters? "HOND" "DNOQHO")
+;true->ok
+
+(have-letters? "HONDD" "DNOQHO")
+;false->ok
+(have-letters? "HONDD" "DNOQDHO")
+;true->ok
+
+(f "DNOQDHO")
+;{\D 2, \H 1, \N 1, \O 2, \Q 1}
+(map (fn [[l c]] {l (- c)}) (f "DNOQDHO")) 
+({\D -2} {\H -1} {\N -1} {\O -2} {\Q -1})
+
+(merge-with + (f "HOND") (map (fn [[l c]] {l (- c)}) (f "DNOQDHO")))
+;fout
+
+(type (map (fn [[l c]] {l (- c)}) (f "DNOQDHO")))
+;clojure.lang.LazySeq moet weer map worden.
+
+(type (hash-map (map (fn [[l c]] {l (- c)}) (f "DNOQDHO"))))
+
+(def s1 (map (fn [[l c]] {l (- c)}) (f "DNOQDHO")))
+;seq van maps, deze samenvoegen
+
+(apply merge s1)
+; ok
+(merge-with + (f "HOND") (apply merge (map (fn [[l c]] {l (- c)}) (f "DNOQDHO"))))
+;{\Q -1, \D -1, \H 0, \N 0, \O -1} -> ok
+
+(not-any? pos? (vals (merge-with + (f "HOND") (apply merge (map (fn [[l c]] {l (- c)}) (f "DNOQDHO"))))))
+;true
+
+(defn have-letters? [word letters]
+  (not-any? pos? 
+    (vals 
+      (merge-with + (frequencies word) 
+                    (apply merge 
+                      (map (fn [[l c]] {l (- c)}) 
+                           (frequencies letters)))))))
+; werkt ook
+; met -> of ->> ?
+(defn have-letters? [word letters]
+  (->> letters                              ; start with available letters
+       frequencies                          ; map met frequentie van elke letter in letters
+       (map (fn [[l c]] {l (- c)}))         ; maak frequenties negatief, result is een sequence van maps
+       (apply merge)                        ; maak hier weer 1 map van.
+       (merge-with + (frequencies word))    ; voeg deze samen met de (positieve) frequencies van het gezochte woord
+       vals                                 ; lijst met alle frequentie-verschillen, een positieve betekent dat een letter in word niet in letters zit.
+       (not-any? pos?)))                    ; alle waarden moeten 0 of negatief zijn.
+
+; de map en hierna apply merge is niet zo mooi.
+
+(use '[clojure.contrib.generic.functor :only (fmap)])
+
+
+(fmap inc {:a 1 :b 3 :c 5})
+;{:a 2, :c 6, :b 4}
+
+(fmap - {:a 1 :b 3 :c 5})
+;{:a -1, :c -5, :b -3}
+;mooi!
+
+; put letters first, so a partial function can be made and applied/filtered on a word list.
+(defn have-letters1? [letters word]
+  (->> letters                              ; start with available letters
+       frequencies                          ; map met frequentie van elke letter in letters
+       (fmap -)                             ; maak frequenties negatief, fmap is een functor, zie haskell.
+       (merge-with + (frequencies word))    ; voeg deze samen met de (positieve) frequencies van het gezochte woord
+       vals                                 ; lijst met alle frequentie-verschillen, een positieve betekent dat een letter in word niet in letters zit.
+       (not-any? pos?)))                    ; alle waarden moeten 0 of negatief zijn.
+
+
+
+(have-letters? "HOND" "HOND")
+;true->ok
+
+(have-letters? "HOND" "DNOQHO")
+;true->ok
+
+(have-letters? "HONDD" "DNOQHO")
+;false->ok
+(have-letters? "HONDD" "DNOQDHO")
+;true->ok
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+; sowpods lezen
+;;;;;;;;;;;;;;;;;;;;;;;;
+(use '[clojure.java.io :only (reader)])
+
+(defn get-lines [filename]
+  (with-open [rdr (reader filename)]
+    (doall (line-seq rdr))))
+
+(def sp (get-lines "/media/nas/media/Talen/Dictionaries/sowpods.txt"))
+
+(take 5 sp)
+;IOException Stream closed  java.io.BufferedReader.ensureOpen (BufferedReader.java:97)
+
+; om te testen even zonder with-open
+(def rdr (reader "/media/nas/media/Talen/Dictionaries/sowpods.txt"))
+(def sp (line-seq rdr))
+
+ (take 10 sp)
+("AA" "AAH" "AAHED" "AAHING" "AAHS" "AAL" "AALII" "AALIIS" "AALS" "AARDVARK")
+
+(count sp)
+; 267751 ; duurt eerste keer paar seconden
+
+(count sp)
+;instantly
+
+(def sp (get-lines "/media/nas/media/Talen/Dictionaries/sowpods.txt"))
+#'user/sp
+user=> (count sp)
+267751
+(take 10 sp)
+;doet het ook
+
+; regexp:
+(defn find-re [re l]
+  (filter (partial re-seq re) l))
+
+(find-re #"AARD" sp)
+;("AARDVARK" "AARDVARKS" "AARDWOLF" "AARDWOLVES")
+
+(find-re #"^T[ABCDE]{3,3}.{0,2}$" sp)
+;("TABARD" "TABBED" "TABBIS" "TABBY" "TABEFY" "TABER" "TABERD" "TABERS" "TABES" "TACAN" "TACANS" "TACE" "TACES" "TACET" "TACETS" "TADDIE" "TAED" "TEABOX" "TEACH" "TEACUP" "TEAD" "TEADE" "TEADES" "TEADS" "TEAED" "TEBBAD" "TEDDED" "TEDDER" "TEDDIE" "TEDDY" "TEED")
+
+(filter (partial have-letters? "ABCDET") (find-re #"^T.{3}$" sp))
+;("TACE" "TAED" "TEAD")
+
+
+user=> (have-letters? (concat "ABCDE" "T") "TAED")
+true
+user=> (have-letters? (concat "ABCDE" "T") "TAEDE")
+false
+
+user=> (re-seq #"[A-Z]" "..A..T..")
+("A" "T")
+
+
+(defn find-words 
+  "Find words in word list (wl) that match pattern and only use letters in let
+   pat is a regex like ...T.{1,3}, but given as a string, not as a #\"regexp\""
+  [pat lt wl]
+  (->> wl
+       (find-re (re-pattern pat))
+       (filter (partial have-letters? (concat lt (re-seq #"[A-Z]" pat))))))
+
+(find-words "^T...$" "ABCDE" sp)         
+
+(find-words "^T...$" "ABCDE" sp)
+()
+user=> (find-words "^T...$" "ABCDET" sp)
+("TACE" "TAED" "TEAD")
+
+
+(apply str "ABCDE" (re-seq #"[A-Z]" "^T...$"))
+;"ABCDET"
+
+(defn find-words 
+  "Find words in word list (wl) that match pattern and only use letters in let
+   pat is a regex like ...T.{1,3}, but given as a string, not as a #\"regexp\""
+  [pat lt wl]
+  (->> wl
+       (find-re (re-pattern pat))
+       (filter (partial have-letters? (apply str lt (re-seq #"[A-Z]" pat))))))
+
+user=> (find-words "^T...$" "ABCDE" sp) 
+;("TACE" "TAED" "TEAD")
+
+; ^ en $ eigenlijk wel standaard.
+
+; concreet vb
+(find-words "^AB.{2,4}$" "LGTRAOU" sp)
+
+; ok, werkt wel.
+
+; nu ook een blanco, dus deze ook met have-letters? doen
+
+(defn have-letters? 
+  "Find out if there are enough letters to make word. A space in letters denotes a blank"
+  [letters word]
+  (->> letters                                ; start with available letters
+       frequencies                            ; map met frequentie van elke letter in letters
+       (fmap -)                               ; maak frequenties negatief, fmap is een functor, zie haskell.
+       (merge-with + (frequencies word))      ; voeg deze samen met de (positieve) frequencies van het gezochte woord
+       vals                                   ; lijst met alle frequentie-verschillen, een positieve betekent dat een letter in word niet in letters zit.
+       (filter pos?)                          ; keep positive values
+       (apply +)                              ; and sum these
+       (>= (count (re-seq #" " letters)))))   ; and check if we have enough blanks for the not found letters 
+
+(have-letters? "AAPJE" "AEPJQX ")
+; false, niet terecht.
+(have-letters? "AAPJE" "AEPJQXA")
+(have-letters1? "AAPJE" "AEPJQXA")
+; false, want moet eerst de letters doen.
+(have-letters1? "AEPJQXA" "AAPJE")
+(have-letters? "AEPQX " "AAPJE")
+(have-letters? "AEPQX  " "AAPJE")
+; allemaal goed.
+
+(find-words "." "LRUIOV " sp)
+; kan lang duren, 21:01 gestart, 21:02 klaar, dus valt nog mee.
+
+; alleen woorden van 6 of 7 letters
+(find-words "^.{6,7}$" "LRUIOV " sp)
+; wel woorden van 6, niet van 7 letters.
+
+(find-words "^.{6,7}E$" "LRUIOV " sp)
+("OUTLIVE" "OVERLIE" "RIVULOSE" "ROUILLE" "SOILURE" "VARIOLE" "VIRGULE" "VOITURE")
+;mooi, maar de laatste voor de E moet met een W te combineren zijn, en dat lukt niet.
+
+
+;ideeen over verder zoeken, met horizontaal/verticaal.
+;alleen letters neerleggen in dezelfde rij of kolom, die dan ook 1 woord vormen, niet mee.
+;bv bekijk kolom 3. Bekijk eerst per cell wat de restricties zijn, sowieso eerst of dit al aansluit,
+;als de meest linker gevulde kolom 5 is, dan kun je 3 wel overslaan, en beginnen met 4.
+;restrictie: al ingevulde letter, bij blanco: zijn er horizontale restricties? zoek links en rechts
+;naar einde van ingevulde letters. Voor elk van deze horizontale dingen zoeken naar mogelijkheden,
+;rekening houden met eigen letters (later ook sowieso, om met tegenstander rekening te houden)
+;ook later pas rekening houden met 2w waardes etc.
+;hiermee krijg je dan een patroon, bv: .....[AB].T... dan wel: staat de T er al, of is dit de enige die past?
+;met dit pattern heb je 2 'ankers', waarvan je iig 1 moet gebruiken. Per anker dan een nieuwe regexp maken:
+;afhankelijk of je een blanco hebt, kun je de puntjes hieronder vervangen door [<letters>]
+;AB: .{0,7}[AB](.(T.{0,7})?)?
+;T: net andersom, nesting waarschijnlijk ook.
+;mss handig eerst een FSM te maken, deze dan om te zetten naar een RE? in RE lib waarsch weer net andersom.
+;als bovenstaande erg lastig is, dan eerst simpeler: per anker weer: bepaal #ankers boven en onder. Maak RE
+;voor elk van de mogelijke combi's, bv 2 erboven, 1 eronder, dan alle combi's zijn 0-2 erboven, en 0-1 eronder, voor
+;een totaal van 3x2 is 6 RE's. Een anker kan ook uit meer dan 1 letter bestaan, ankers worden altijd gescheiden door
+;spatie? Toch weer onderscheid tussen al geplaatse letters en mogelijk te plaatsen. Voorbeelden, waarbij alles niet
+;in [] betekent dat letter er al staat:
+;...T[AB]..... mogelijkheden: 1) alles eindigend op een T 2) T[AB].*
+; ...T.[AB].... opties: 1) alles op een T; 2) T. 3) T.[AB] 4) T.[AB].* dus RE steeds uitbreiden met anker of een groep?
+; ..T..[AB].. opties: 1) alles op T; 2) ..T.{1,2} 3) ..T..[AB] 4) ..T..[AB].{1,7}
+; ..T[AB][CD]... opties: 1) alles op T 2) ..T[AB] 3) ..T[AB][CD] 4)..T[AB][CD].{1,7}
+;toch moet hiermee wel wat te doen zijn om het in 1 RE te krijgen, juist met een LISP.
+
+[2012-01-19 22:13:42] wil af van RE's, zoals je hierboven ziet erg lastig. Eerder wat gelezen over datastruct die men hierbij
+                      gebruikt, kijken of ik deze weer zelf kan verzinnen. Iets met woorden opbreken in stukken voor en na een letter.
+[2012-01-19 22:14:48] Dan is dit 1 aspect om te onderzoeken, de andere is los van de woorden bepalen waar je iets mag leggen.
+[2012-01-19 22:15:41] struct ipv RE: kan dit met FP, bv met acyclic graph, wel met meerdere paden die bij hetzelfde uitkomen?
+[2012-01-19 22:16:16] kun je zo'n acyclic graph met FP doen?
+
+[2012-01-28 20:36:49] begonnen met daggad, gaat wel goed. Wil nog met zipper doen, voorlopig kan het zonder, mss
+                      wel sneller met zipper.
+[2012-01-28 20:37:24] (def g (make-daggad ["HOND" "HO" "NAT"]))      
+
+[2012-01-28 21:49:50] bij onderstaande probleem met combi if-let en () te zien.
+scrabble.core=> (test-if-let (second (split-rev-1 "HOND" 0)))
+If-let succeeded with word, first, more:  () nil nil
+If-let failed with word:  nil
+nil
+[2012-01-28 22:02:52] aangepast in de bron, dus split-rev-1, rest dan meteen goed, is-word()
+                      wel aangepast.
+[2012-01-28 22:03:25] volgende is zipper gebruiken, kan nog testen hoe lang inlezen duurt.
+[2012-01-28 22:08:09] mss Scheme amb functie gebruiken, om alle opties te proberen als het
+                      niet meteen deterministisch is.
+[2012-01-28 22:09:20] 1000 inlezen merk je, 10000 duurt wel seconden.                      
+[2012-01-28 22:10:35] net gnl/dnl gestart, iets kleiner dan de sp.
+[2012-01-28 22:10:59] als het maken van de daggad erg lang duurt, is het ofwel zipper, ofwel
+                      eenmalig maken, opslaan en sneller inlezen, als dit kan.
+[2012-01-28 22:11:48] iets met een sqlite? db kan ook, maar wordt het hier sneller van?
+[2012-01-28 22:12:04] dan wel te persisteren.
+[2012-01-28 22:14:54] ook kun je dichter op de 'bare metal' java gaan zitten, hashmaps hierin, 
+                      later weer read-only maken.
+[2012-01-28 22:22:25] helaas, out of memory error. Vraag of dit door het proces of door het resultaat komt.
+scrabble.core=> (def gnl (make-daggad nl))
+OutOfMemoryError Java heap space  java.lang.Object.clone (Object.java:-2)
+
+[2012-03-10 15:10:50] Tijd met zipper bezig, eigen zipper impl voor nested maps, maar ook hier de outofmemory, nog wel mogelijkheden om te optimaliseren.
+
+;(split-rev "HOND")
+;([(\H \O \N \D) ()] [(\O \N \D) (\H)] [(\N \D) (\O \H)] [(\D) (\N \O \H)])
+
+;scrabble.core=> (split-rev "GO")
+;([(\G \O) ()] [(\O) (\G)])
+
+; maybe use zipper for creating and updating the daggad, maybe more efficient.
+; but first the hard-core way.
+
+; add 1 item to daggad
+; item: [(\G \O) ()], i.e. a vec with forward letters as first element, and backward letters as the second
+; first element should be non-empty at the first call, maybe empty on recursive calls
+; (defn add-daggad-1 [daggad [forw backw]]
+;   (if-let [[first-letter & more] forw]
+;     ; still have letters to move forward
+;     (if-let [d2 ((:next daggad) first-letter)]
+;       (assoc daggad :next (assoc (:next daggad) first-letter (add-daggad-1 d2 [more backw])))
+;       (assoc daggad :next (assoc (:next daggad) first-letter (add-daggad-1 nil [more backw])))
+;   ; zelfde dus kan samen
+
+(def mz (map-zip {:next {\A {:final true} \B {:final true}} :prev {} :final false}))
+
+; first case that key already exists
+(defn downto-old
+  "Move down to a key in a zipper of nested maps"
+  [[node path] k]
+  (if-let [node2 (get node k)]
+    [node2 (conj path [k node])]
+    nil))
+  
+(downto mz :next)
+
+(pprint (-> mz (downto :next) (downto \A)))
+
+(pprint (-> mz (downto :next) (downto \C)))
+; nil
+
+(pprint (-> mz (downto :next) (downto \C) up))
+; eerst \C kwijt
+
+(pprint (-> mz (downto :next) (downto \C) (downto :final) (replace true) root))
+; werkt
+
+(pprint (-> mz (downto :next) (downto \A) up up))
+
+(pprint (-> mz (downto :next) (downto \A) root))
+
+; test a bit
+(make-daggad-z ["GO"])
+; fout
+
+(reduce add-daggad-z-1 (map-zip {}) (split-rev "GO"))
+; [true ([:final {}] [\G {}] [:prev {}] [\O {}] [:next true] [:final {}] [\O {}] [:next {}] [\G {}] [:next {}])]
+
+(add-daggad-z (map-zip {}) "GO")
+; [true ([:final {}] [\G {}] [:prev {}] [\O {}] [:next true] [:final {}] [\O {}] [:next {}] [\G {}] [:next {nil {}}])]
+
+(root (add-daggad-z (map-zip {}) "GO"))
+; fout
+
+(top (add-daggad-z (map-zip {}) "GO"))
+; fout
+
+(def z2 (add-daggad-z (map-zip {}) "GO"))
+
+(top z2)
+; fout
+
+; 4x up gaat goed 5e keer gaat fout.
+(def z3 (-> z2 up up up up))
+; ok
+
+(up z3)
+; fout
+
+; lijkt alsof de 2 'woorden' GO en OG in 1 path staan, serieel, niet goed.
+; was 'vergeten' een top te doen tussen 2 combi's, vooralsnog in add-daggad-z-1 erbij gezet.
+
+; opnieuw
+(make-daggad-z ["GO"])
+; {:next {\O {:prev {\G {:final true}}}, \G {:next {\O {:final true}}}}}
+
+(make-daggad-z ["GO" "HOND" "HO"])
+; lijkt goed.
+
+(def g (make-daggad-z ["HOND" "HO" "NAT"]))
+
+(is-word? g "HOND")
+; en nog wat anderen, gaat goed.
+
+; dan de nl lijst, is het kortst, evt opnieuw starten zonder sowpods te laden. Evt de :final true vervangen door :f, :next door :n en :prev door :p, dan wel is-word ook aanpassen.
+(count nl)
+;173383
+
+(def g (make-daggad-z (take 10 nl)))
+; ok
+
+(def g (make-daggad-z (take 100 nl)))
+; ok, duurt al ongeveer een seconde, mss langer
+
+(def g (make-daggad-z (take 1000 nl)))
+; ok, ook ongeveer een seconde
+
+(def g (make-daggad-z (take 10000 nl)))
+; seconde of 10, ok.
+
+(def g (make-daggad-z (take 100000 nl)))
+; duurt stuk langer, ook zeker langer dan 100 seconden, en is nog bezig.
+; verwachting is lineair, maar komt dus niet uit.
+; en toch weer: OutOfMemoryError Java heap space  clojure.lang.LazilyPersistentVector.createOwning (LazilyPersistentVector.java:24)
+
+; verbeterpunten:
+; 1. kleiner tag-namen, true weg bij :final, :f is genoeg.
+; 2. eerst van alle woorden de geshuffelde combi's bewaren, lukt dit in X tijd?
+; 3. deze geshuffelde dingen evt sorteren (in memory of op filesys)
+; 4. en dan vervolgens nogmaals inlezen, maar dan duidelijk niet elke keer naar de top.
+
+; 9-3-2012 zipper lijkt niet direct geschikt voor nested maps, omdat het lastig lijkt (onmogelijk?) om 1 k-v pair direct te vinden en vervolgens te vervangen/
+; Opties
+; 1. geen hashmaps maar vectors gebruiken zolang het een zipper is, hierna mss mogelijk de vectoren naar hashmaps om te zetten. Mss is dit niet nodig, als perf ok is.
+; 2. geen zipper gebruiken, dan iets als mutable structures nodig, want anders terug bij de huidige oplossing.
+; 3. zelf een soort zipper maken die om kan gaan met geneste hashmaps. Dan geen left/right operaties nodig/mogelijk, maar wel down, of down-key
+; 4. zoeken op scrabble/wordfeud in combi met clojure.
+; 5. via top-down, single-pass de structuur opbouwen, met een trie kan dit wel, door sorted input te gebruiken. Mogelijk obv input alle combi's te maken en deze naar nieuwe file te zetten, hierna sorteren. Deze dan single-pass
+;    inlezen in de trie, met speciale delimiter. Lijst bijhouden met voor elke letterpositie een element, dan met recur wel verder te komen. Hier accumulators gebruiken, meer performant en minder geheugen?
+
+; Term 'generic zipper', iig in Haskell.
+; http://biosimilarity.blogspot.com/2010/05/huets-zipper.html - termen nominal (door naam) en position access, itt down/left/right/up.
+; https://github.com/nathell/spleen/blob/master/src/pl/danieljanus/spleen.clj gebruikt een DAWG.
+; https://github.com/bostonaholic/scrabble-solver-clj/blob/master/src/scrabble_solver_clj/utils.clj heeft nog eigenlijk niets.
+; clojure scrabble valt dan wel tegen.
+
+; http://okmij.org/ftp/continuations/zipper.html: Zipping into nested maps (which is a model of a file system) is described in ZipperFS below.
+
+; downTo functie ipv down.
+
+; http://okmij.org/ftp/continuations/ZFS/ZipperM.hs dus in Haskell.
+
+; note: alle pijltjes moeten van de cursor af, normaal in een tree allemaal naar beneden, nu dus ook sommige omhoog.
+
+; beetje bang dat daggad change niet lokaal genoeg zijn, en dat een zipper nog steeds heel veel rond moet en veel bewerkingen moet doen. Maar dan iig nuttige exercitie.
+
+; (def g (make-daggad ["HOND" "HO" "NAT"]))      
+
+; (pprint g)
+; {:next
+;  {\T {:prev {\A {:prev {\N {:final true}}}}},
+;   \A {:next {\T {:prev {\N {:final true}}}}},
+;   \D {:prev {\N {:prev {\O {:prev {\H {:final true}}}}}}},
+;   \N
+;   {:next
+;    {\A {:next {\T {:final true}}},
+;     \D {:prev {\O {:prev {\H {:final true}}}}}}},
+;   \O
+;   {:prev {\H {:final true}},
+;    :next {\N {:next {\D {:prev {\H {:final true}}}}}}},
+;   \H {:next {\O {:final true, :next {\N {:next {\D {:final true}}}}}}}}}
+; nil
+
+
+; (defn is-word [daggad word]
+;   (if-let [[first-letter & more] word]
+;     (recur (get (:next daggad) first-letter) more)
+;     (:final (get (:prev daggad) nil))))
+
+[2012-03-10 15:17:20] sowpods even niet laden, dan nogmaals met 100.000 proberen.
+
+(def g (make-daggad-z (take 100000 nl)))
+; nu een hardcore failure index-out-of-bounds, JVM afgesloten.
+
+; dus nog maar een keer
+[2012-03-10 15:24:40] en weer hetzelfde probleem.
+[2012-03-10 15:36:40] ging nu zelfs een keer fout zonder dat ik een cmd gegeven heb.
+[2012-03-10 15:36:53] lijkt nu wel weer goed.
+[2012-03-10 15:38:42] weer eens met 10.000, kijken of het dan te gebruiken is.
+
+(def g (make-daggad-z (take 10000 nl)))
+
+scrabble.core=> (is-word? g "AAP")
+true
+scrabble.core=> (is-word? g "AAPJE")
+true
+scrabble.core=> (is-word? g "AAPJES")
+true
+scrabble.core=> (is-word? g "AAPJESX")
+false
+
+scrabble.core=> (nth nl 9999)
+"ANARCHISME"
+scrabble.core=> 
+
+scrabble.core=> (nth nl 10000)
+"ANARCHIST"
+
+(is-word? g "ANARCHISME")
+true
+scrabble.core=> (is-word? g "ANARCHIST")
+false
+
+[2012-03-10 15:43:00] kijken of volgende 10.000 erbij kunnen?
+
+(def g2 (make-daggad-z (take 10000 (drop 10000 nl)) (map-zip g)))
+; gaat redelijk vlot.
+
+(is-word? g2 "ANARCHISME")
+
+scrabble.core=> (nth nl 20000)
+"BIJKOMEND"
+scrabble.core=> (is-word? g2 "BIJKOMEND")
+false
+scrabble.core=> (is-word? g2 "BIJKOMEN")
+true
+
+; kijken of dit lukt tot 100.000
+;wel in dezelfde var houden
+
+(def g2 (make-daggad-z (take 10000 (drop 20000 nl)) (map-zip g2)))
+; duurt wel ietsje langer, max 20 sec.
+
+(def g2 (make-daggad-z (take 10000 (drop 30000 nl)) (map-zip g2)))
+; ook nog goed, lijkt weer wat langer, zou moeten timen.
+
+(def g2 (make-daggad-z (take 10000 (drop 40000 nl)) (map-zip g2)))
+; alle operaties in de zipper zouden O(1) moeten zijn, maar lijkt er toch niet op. Mss is de assoc toch zwaarder.
+; stel je hebt 2 daggad's (of 2 zippers): wat kost het ze te combineren? Of in het gebruik het hele lijstje daggads langslopen, ongeveer 20 stuks bij NL.
+; op zich zijn ze te 'sharden'.
+; want deze van 40.000-50.000 duurt al best lang.
+[2012-03-10 15:53:25] nu nog bezig.
+[2012-03-10 15:54:26] nu klaar, en gelukt.
+
+(def g2 (make-daggad-z (take 10000 (drop 50000 nl)) (map-zip g2)))
+[2012-03-10 15:54:41] net gestart.
+[2012-03-10 16:01:58] bezig
+[2012-03-10 16:07:53] OutOfMemoryError Java heap space  scrabble.core/add-daggad-z-1 (core.clj:160)
+
+; in g2 dan 50.000 woorden nog.
+scrabble.core=> (nth nl 49999)
+"GELOOSDEN"
+scrabble.core=> (nth nl 50000)
+"GELOOT"
+scrabble.core=> (is-word? g2 "GELOOSDEN")
+true
+scrabble.core=> (is-word? g2 "GELOOT")
+false
+
+[2012-03-10 16:09:09] Test nieuwe daggad met woorden 50.000-60.000
+(def g6 (make-daggad-z (take 10000 (drop 50000 nl)) (map-zip {})))
+[2012-03-10 16:10:52] gestart even geleden. Als dit ook fout loopt, dan herstart en meteen deze doen. Mogelijk toch iets van memory leak hier?
+[2012-03-10 16:11:52] nog bezig, duurt al lang zat dus.
+[2012-03-10 16:12:39] dus vraag of hier mss moeilijke woorden inzitten.
+[2012-03-10 16:16:26] nog bezig. Vorige toen fout een klein kwartier.
+[2012-03-10 17:35:36] inmiddels dus weer een out-of-memory error.
+
+[2012-03-10 17:35:49] dan nog eens na herstart.
+[2012-03-10 17:36:36] net weer gestart
+[2012-03-10 17:36:46] en klaar.
+[2012-03-10 17:37:16] lijkt dat met operaties toch wat geheugen 'blijft hangen'.
+
+
+ 19988   3.0 772092 280988    48     0 658292 13292    0    0 firefox       │
+│   12688   0.0 416752 144428    40     0 392492 12260    0    0 java          │
+│   10783   0.0 793420 56204   200     0 778656  3336    0    0 fglam          │
+│   10860   1.0 362044 51520    40     0 332700  7860    0    0 java           │
+│   12667   0.0 415076 40928    40     0 390508 10588    0    0 java       
+
+; weet niet welke java van clojure is...
+; opties:
+; 1. kan zijn dat puur het take/drop al veel ruimte kost.
+; 2. wil een soort recursieve merge-with, op voorwaarde dat je de delen wel in een daggad kunt zetten.
+; 3. toch resource verbruik java kunnen meten om enig idee te krijgen wat het allemaal kost, of de zipper uberhaupt zin heeft, wat goede alternatieven zijn.
+
+
+
+(def g2 (make-daggad-z (take 10000 (drop 60000 nl)) (map-zip g2)))
+(def g2 (make-daggad-z (take 10000 (drop 70000 nl)) (map-zip g2)))
+(def g2 (make-daggad-z (take 10000 (drop 80000 nl)) (map-zip g2)))
+(def g2 (make-daggad-z (take 10000 (drop 90000 nl)) (map-zip g2)))
+
+[2012-03-11 01:00:03] Ook banale dingen testen als meer geheugen geven (JVM), draaien op windows, kijken hoe GC gaat, bv tijdens het draaien meer nodig, wordt hierna vrijgegeven?
+[2012-03-11 01:01:02] de 'up' functie lijkt het duurste, moet merge doen, en met top na elke combi gebeurt dit best vaak, kan dit ook minder vaak: alleen als de volgorde anders wordt: eerst combi's samenstellen, dan sorteren,
+  zoals eerder genoemd. Evt via files werken. Je kunt vrij gemakkelijk van elk woord de combi's bepalen en in output file neerzetten, met wat tekens voor de scheiding tussen vooruit en achteruit. Deze dan sorteren en dan
+  zelfs generiek inlezen, met minimum aan 'up' en 'top'. Het sorteren is even de vraag of dit ook in clojure kan (in-place?) of via de linux sort functie.
+  Dan dus nog steeds de zipper te gebruiken. In de zipper heb je maar 1 positie/hole, nu met redelijk random toevoegen past dit niet echt goed.
+[2012-03-11 01:05:20] bovenstaande optie lijkt beter dan technisch te kijken hoeveel geheugen wordt gebruikt, algoritmisch lijkt het al beter.
+[2012-03-11 12:38:22] idee: ipv elke keer :n en :p gebruiken, kun je ook de :n vergeten en 1 keer :p gebruiken, als in het ruitje in de docs.
+[2012-03-11 12:40:18] dawg code gemaakt, eerst simpel testen.
+
+(pprint (make-dawg-z ["AAP" "NOOT" "MIES" "AAPJE"]))
+; ok
+
+[2012-03-11 12:41:49] dan meteen voor NL wordlist, eerst even opnieuw starten, zonder Sowpods? Nee, eerst met, evt daarna zonder.
+
+(def nl-d (make-dawg-z nl))
+[2012-03-11 12:44:20] net gestart
+[2012-03-11 12:45:17] bezig
+[2012-03-11 12:45:36] klaar
+[2012-03-11 12:45:49] ook voor SP:
+
+(def sp-d (make-dawg-z sp))
+[2012-03-11 12:46:31] net gestart
+[2012-03-11 12:46:49] mss dat het splitten van de words wel erg inefficient gebeurt...
+[2012-03-11 12:47:10] bezig
+[2012-03-11 12:47:54] klaar
+
+[2012-03-11 12:48:04] even testen met is-word?
+[2012-03-11 12:49:27] werkt dus niet, dus vraag of het inlezen/verwerken goed is gegaan.
+
+(def td (make-dawg-z ["AAP" "NOOT" "MIES" "AAPJE"]))
+
+scrabble.core=> (is-word? td "AAP")
+nil
+scrabble.core=> (is-word? td "NOOT")
+nil
+
+(def tg (make-daggad-z ["AAP" "NOOT" "MIES" "AAPJE"]))
+
+[2012-03-11 12:57:13] is-word? def mogelijk nog de oude met :next ipv :n, dus nogmaals ingevoerd, nu wel goed.
+[2012-03-11 12:57:33] dan opnieuw met hele lijst:
+
+[2012-03-11 12:59:35] een testen of ik alle geshuffelde woorden kan bepalen van de nl lijst
+
+(def nl-s (map split-rev ["AAP" "NOOT" "MIES" "AAPJE"]))
+; ok
+(def nl-s (map split-rev nl))
+; meteen klaar, waarsch lazy
+; mss ook een manier om door te geven.
+
+; hier count op doen.
+(count nl-s) ; ook meteen klaar.
+
+(drop 173375 nl-s)
+; ook meteen.
+
+[2012-03-11 13:05:17] wel typisch, of door lazy niet alles bepaald. Zou je kunnen testen door naar schijf te schrijven, wil ik mss sowieso wel.
+
+[2012-03-11 13:06:29] TODO
+1. efficientere opslag, door niets steeds :n te gebruiken, en eenmalig :p (en :f).
+2. inlezen met de lazy variant, door nl-s aan dawg routine mee te geven bv, kan niet helemaal door 2 lijsten, kan shuffle-fn wel omschrijven dat 'ie ook weer een string teruggeeft, bv met een < teken. < is dan wel handig, teken
+   dat je links verder moet gaan. Wel ook iets van flatten doen.lee
+
+[2012-03-11 14:39:34] split-rev nu anders, levert lijst strings op, deze via flatten te voeren aan dawg, die nu ook geen :n meer gebruikt.
+[2012-03-11 14:40:29] idee: ipv letters de :atom's (?) in de dawg/daggad zetten.
+[2012-03-11 14:40:57] testje
+(def td (make-daggad-z ["AAP" "NOOT" "MIES" "AAPJE"]))
+
+[2012-03-11 14:50:21] nog eens deze toepassen op nl lijst of eerst deel ervan.
+
+(def dnl (make-daggad-z (take 10000 nl)))
+[2012-03-11 14:51:13] gestart
+[2012-03-11 14:51:19] en klaar.
+
+(def dnl (make-daggad-z nl))
+[2012-03-11 14:52:18] gestart
+[2012-03-11 15:03:52] bezig.
+[2012-03-11 15:14:03] bezig, lijkt nu al langer dan bij timeout/memory full bij vorige keren.
+[2012-03-11 16:42:38] nu toch een out-of-memory.
+
+(def nl-s (flatten (map split-rev nl)))
+[2012-03-11 17:14:43] gaat snel, count opvragen duurt wel even...
+[2012-03-11 17:14:53] bezig nog.
+[2012-03-11 17:15:10] als count mislukt, dan toch ook met write-lines proberen, is lazy, dus kans van slagen.
+[2012-03-11 17:19:19] result: 1 778 857, (count nl) => 173383
+[2012-03-11 17:19:43] is dus factor 10, en niet 5, zoals eerder gezegd.
+[2012-03-11 17:19:57] dan wegschrijven naar file: (write-lines "nl-daggad.txt" nl-s)
+[2012-03-11 17:37:32] gelukt, 23 378 331 bytes, de orig is 1 952 240 bytes, dus 12x zo veel.
+[2012-03-11 17:38:45] zelfde voor sp doen: 
+
+(def sp-s (flatten (map split-rev sp)))
+[2012-03-11 17:39:31] meteen klaar, dan wegschrijven.
+
+(write-lines "sp-daggad.txt" sp-s)
+[2012-03-11 17:40:06] gestart.
+[2012-03-11 17:42:13] met torrent zoeken naar "scrabble woordenlijst"
+[2012-03-11 17:50:52] nog bezig.
+[2012-03-11 17:52:56] java processen van clojure hebben geen -Xmx of -Xms meegekregen.
+[2012-03-11 17:55:27] process heeft wel 407/284m geheugen, moet megabyte zijn.
+[2012-03-11 17:56:18] bezig nog, nu 16 min, nl duurde 18 minuten, dus kan nog langer duren.
+[2012-03-11 18:17:39] out-of-memory gehad. 
+[2012-03-11 18:20:13] hij houdt nu een ref naar de root van de lijst, dan wordt mem usage steeds groter. Ook eens proberen door het ineens te doen, dan hoeft root niet bewaard te worden.
+
+[2012-03-11 18:23:20] alternatief is nog bij inlezen meteeen het outputten ook te doen, dan echt een filter.
+[2012-03-11 18:23:58] test onderstaande, eerst sp inlezen weer.
+(write-lines "sp-daggad2.txt" (flatten (map split-rev sp)))
+[2012-03-11 18:24:46] gestart.
+[2012-03-11 18:27:03] lijkt klaar, had screen van maximised weer teruggezet, toen was 'ie klaar.
+[2012-03-11 18:29:44] de nl versie heeft woorden langer dan 15 letters, niet zo nuttig dus. Met een egrep -v deze er wel uit te halen. Gaat om 10.000 woorden ongeveer.
+[2012-03-11 18:32:02] file renamed dat deze eruit zijn, dan daggad-nl nog eens maken.
+
+(write-lines "nl-daggad2.txt" (flatten (map split-rev nl)))
+[2012-03-11 18:33:42] gestart.
+[2012-03-11 18:37:07] en klaar.
+[2012-03-11 18:43:17] up-n functie gemaakt om n levels in een zipper omhoog te gaan, te gebruiken bij zipper om alfabetische lijst in te lezen, zodat je niets steeds helemaal naar de top hoeft.
+[2012-03-11 18:44:01] wel even testen.
+
+(def z (-> (map-zip {}) (downto \A) (downto \B) (downto \C)))
+
+[2012-03-11 18:49:05] met unix sort de sortering van de daggads geregeld.
+[2012-03-11 19:15:32] versie van make-dawg-z gemaakt die laatste woord bijhoudt en minder naar de top gaat, testen.
+
+(def d (make-dawg-z ["AAP"]))
+; ok
+(def d (make-dawg-z ["AAP" "APEN"]))
+; fout, want moet niet #overlap omhoog, maar #last-word -/- #overlap.
+
+[2012-03-11 19:19:24] aangepast, nu wel goed. Hoef niet per se een ordered lijst te doen, duurt alleen langer, en meer up's. (deze eens tellen?)
+
+(def d (make-dawg-z ["AAP" "APEN" "NOOT" "MIES" "AAPJE"]))
+[2012-03-11 19:22:47] make-daggad-z werkt ook met deze, zou nu ook goed moeten gaan:
+
+(def d (make-daggad-z ["AAP" "APEN" "NOOT" "MIES" "AAPJE"]))
+[2012-03-11 19:25:05] even dawg testen met hele lijst, dan met sorted daggad.
+
+(def dnl (make-daggad-z nl))
+[2012-03-11 19:26:25] gestart
+[2012-03-11 19:26:46] maar deze wilde ik niet, gaat niet goed, wilde de gawd!
+
+(def dnl (make-dawg-z nl))
+[2012-03-11 19:33:53] gestart
+[2012-03-11 19:33:59] en al klaar. Maar niet goed, veel woorden niet gevonden.
+[2012-03-11 19:36:56] 'query' om eerst woord wat wel in nl staat maar niet in dnl:
+
+(take 3 (drop-while #(is-word? dnl %) nl))
+("AISSEN" "AJAKKES" "AJOUR")
+
+(is-word? dnl "AISSEN")
+
+(is-word? dnl "AJAKKES")
+
+scrabble.core=> (count (take-while #(is-word? dnl %) nl))
+8635
+[2012-03-11 19:40:36] gaat dus best lang goed, wat is het woord voor AISSEN.
+scrabble.core=> (nth nl 8635)
+"AISSEN"
+scrabble.core=> (nth nl 8634)
+"AIS"
+[2012-03-11 19:42:08] kan wel het deel van de dawg pakken voor AIS
+
+scrabble.core=> (def aisd (get-part-daggad dnl "AIS"))
+#'scrabble.core/aisd
+scrabble.core=> aisd
+{nil {\S {\E {\N {:f {}}}}, :f {}}, :f {}}
+
+[2012-03-11 19:44:38] er zit dus een nil in.
+[2012-03-11 19:45:31] kijken of het fout is alleen met deze 2 woorden.
+
+(def aisd (make-dawg-z ["AIS" "AISSEN"]))
+; dan wel goed.
+
+[2012-03-11 19:46:57] mss de check in up inbouwen.
+
+AIRTJE
+AIRTJES
+AIS
+AIS
+AISSEN
+AJAKKES
+
+[2012-03-11 19:49:36] AIS staat er dus 2 keer in.
+[2012-03-11 19:49:42] dit eens als testgeval:
+
+(def aisd (make-dawg-z ["AIS" "AIS" "AISSEN"]))
+
+scrabble.core=> (make-dawg-z ["A" "A"])
+{\A {nil {:f {}}, :f {}}}
+
+[2012-03-11 19:50:56] hierboven minimale foutgeval.
+[2012-03-11 20:49:29] oorzaak is weer de if-let, die true geeft bij een lege string. Hier dus weer empty-to-nil voor gebruikt.
+
+[2012-03-11 20:56:58] nogmaals (def dnl (make-dawg-z nl)), zal snel gaan.
+[2012-03-11 20:57:23] en inderdaad, hertest.
+
+scrabble.core=> (is-word? dnl "ZAGEN")
+true
+scrabble.core=> (is-word? dnl "ZAGEND")
+false
+scrabble.core=> (is-word? dnl "ZAGENDE")
+false
+scrabble.core=> (is-word? dnl "ZEGENDE")
+true
+
+[2012-03-11 20:58:16] is goed, wel weer duidelijk dat lang niet alle woorden erin zitten.
+[2012-03-11 20:58:53] nu herstarten, even niets std inlezen.
+[2012-03-11 20:59:38] wil dan de daggad als dawg inlezen.
+
+(def dnl (make-dawg-z (get-lines "/media/nas/media/Talen/Dictionaries/nl-daggad-sorted.txt"))
+[2012-03-11 21:03:14] gestart
+[2012-03-11 21:03:26] bezig
+[2012-03-11 21:09:18] was nog bezig, zie dat er een compile fout in zat, deze eerst oplossen.
+[2012-03-11 21:10:40] weer gestart
+[2012-03-11 21:16:16] bezig, spannend.
+[2012-03-11 21:16:37] toch ergens apart dat het niet lineair schaalt. Grootte scheel factor 11.
+[2012-03-11 21:17:44] en 11 * 10 sec is nog steeds onder de 2 minuten.
+[2012-03-11 21:18:26] mss kan ik get-lines ook lazy maken, en zorgen dat 'ie niet alles bewaard.
+
+[2012-03-11 21:21:23] er gebeurde nog niets, haakje te weinig, kwam erachter door met top te kijken, geen java.
+
+(def dnl (make-dawg-z (get-lines "/media/nas/media/Talen/Dictionaries/nl-daggad-sorted.txt")))
+
+[2012-03-11 21:21:40] haakje toegevoegd.
+[2012-03-11 21:22:29] ArrayIndexOutOfBoundsException 9  java.lang.String.charAt (String.java:688)
+
+[2012-03-11 21:23:13] nu een broken pipe, serious business.
+[2012-03-11 21:23:29] killen met ctrl-c en ctrl-d lukt niet, dan paar kill -9
+[2012-03-11 21:24:01] toch niet nodig, uiteindelijk wel afgesloten.
+[2012-03-11 21:24:31] nogmaals vanaf het begin.
+[2012-03-11 21:24:49] gestart en al heel snel foutmelding.
+[2012-03-11 21:33:28] lein upgrade en lein desp gedaan, upgrade wel wat, deps niet.
+[2012-03-11 21:33:38] nogmaals lein repl en spul laden:
+  
+
+nico@pclinux:601:132:~/nicoprj/misctools/scrabble$ lein repl
+Exception in thread "main" java.lang.NoClassDefFoundError: clojure/lang/Compiler$FnMethod, compiling:(NO_SOURCE_PATH:1)
+
+[2012-03-11 21:34:23] WTF!
+[2012-03-11 21:35:26] ook in scheidsclj proberen, duurt heel lang met lein repl.
+nico@pclinux:604:135:~/nicoprj/misctools/scheidsclj$ lein repl
+
+[INFO] snapshot clojureql:clojureql:1.1.0-SNAPSHOT: checking for updates from clojars
+[INFO] snapshot clj-time:clj-time:0.3.0-SNAPSHOT: checking for updates from clojars
+Copying 7 files to /home/nico/nicoprj/misctools/scheidsclj/lib
+REPL started; server listening on localhost port 54776
+scheidsclj.core=> scheidsclj.core=> 
+
+[2012-03-11 21:37:13] maar doet het dus wel.
+
+[2012-03-11 21:40:09] terug naar scrabble: Caused by: java.io.EOFException: Detect premature EOF
+[2012-03-11 21:41:25] opties: 1) heel nieuw project even maken, hier code inzetten in stappen.
+[2012-03-11 21:41:45] 2) core.clj eerst heel leeg maken.
+[2012-03-11 21:41:57] even optie 2) doen, anders snel optie 1).
+[2012-03-11 21:43:23] optie 2, alleen namespace over, nog steeds fout.
+[2012-03-11 21:44:47] ook even nieuwe maken, kijken waar het misgaat, mss hierna met clean iets doen.
+
+[2012-03-11 21:49:46] in scrabble2 dezelfde project.clj en kleine core.clj, gaat nog goed.
+[2012-03-11 21:50:04] even hertest in scrabble, dan scrabble2.
+[2012-03-11 21:51:42] je kunt ook clean, compile, install, deploy doen.
+[2012-03-11 21:52:16] scrabble nog fout, hierna scrabble2 weer goed.
+[2012-03-11 21:52:24] een clean lijkt op zijn plaats.
+[2012-03-11 21:52:42] clean ging best vlot.
+[2012-03-11 21:52:48] weer een repl, en weer fout.
+[2012-03-11 21:55:07] compile en install gaan wel goed.
+[2012-03-11 21:55:14] eens een lein run doen: geeft fout:
+
+Exception in thread "main" java.lang.RuntimeException: java.lang.ClassNotFoundException: scrabble2.core
+
+[2012-03-11 21:56:29] raar, want zit wel echt in scrabble-dir, niet scrabble2.
+[2012-03-11 21:57:46] raar, heb in project.clj in scrabble-dir toch scrabble2 staan. ff checke
+[2012-03-11 21:58:43] had vanuit scrabble2 weer gekopieerd naar scrabble, daarom deze fout, oh well.
+[2012-03-11 22:01:56] lein run doet het nu.
+[2012-03-11 22:02:01] maar weer eens repl, en nu ok.
+[2012-03-11 22:02:34] dan functies er weer inzetten.
+[2012-03-11 22:03:59] deze ook weer goed, mss was het toch de clean, alleen door scrabble2 in de tekst leek het fout.
+[2012-03-11 22:05:19] even teruggekeken, zou idd kunnen.
+[2012-03-11 22:05:35] weer even het inlezen proberen.
+
+(def dnl (make-dawg-z (get-lines "/media/nas/media/Talen/Dictionaries/nl-daggad-sorted.txt")))
+
+[2012-03-11 22:07:48] weer gestart.
+scrabble.core=> (def dnl (make-dawg-z (get-lines "/media/nas/media/Talen/Dictionaries/nl-daggad-sorted.txt")))
+#
+Sun Mar 11 - 22:08:07
+nico@pclinux:646:181:~/nicoprj/misctools/scrabble$ 
+
+[2012-03-11 22:08:24] wel bijzonder ook, eruit gekicked zonder foutmelding.
+[2012-03-11 22:10:19] ook in main deze call gezet, met lein run proberen.
+
+nico@pclinux:647:182:~/nicoprj/misctools/scrabble$ lein run
+Main started
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=0xb70e554e, pid=15491, tid=3030866832
+#
+# JRE version: 6.0_24-b07
+# Java VM: Java HotSpot(TM) Client VM (19.1-b02 mixed mode, sharing linux-x86 )
+# Problematic frame:
+# V  [libjvm.so+0x3cd54e]
+#
+# An error report file with more information is saved as:
+# /home/nico/nicoprj/misctools/scrabble/hs_err_pid15491.log
+#
+# If you would like to submit a bug report, please visit:
+#   http://java.sun.com/webapps/bugreport/crash.jsp
+#
+
+[2012-03-11 22:11:19] de logfile maar eens bekijken.
+[2012-03-11 22:13:39] weinig aan te zien, geen memory full. Opties: 1) java 7, 2) kleinere inputfile, 3) op windows.
+[2012-03-11 22:30:39] meldingen zijn wel vaag, bottom line is toch waarsch dat er te weinig geheugen is. Met java 7 los je dit niet op, windows mss wel.
+[2012-03-11 22:31:24] anders toch kijken hoe je met ephemeral (?) data structures kunt oplossen.
+[2012-03-11 22:31:48] dan niet al het werk voor niets, zelfde manier van rondlopen in de dawg met downto en up.
+[2012-03-11 22:40:10] iets met sqlite laden te doen? Toch eerst een idee krijgen hoe groot het eigenlijk is.
+[2012-03-15 21:19:02] eens testen met alleen woorden van max 8 letters?
+
+nl-daggad-sorted-1000.txt
+(def dnl (make-dawg-z (get-lines "/media/nas/media/Talen/Dictionaries/nl-daggad-sorted-1000.txt")))
+
+[2012-03-15 22:21:35] testen gedaan op leeg systeem, en met ps-mem.py (ps_mem.py) best goed te zien, met pmap niet, deze
+  mss alleen statische dingen, en niet de heap. Op clean systeem lukken 1 miljoen regels net, maar de totale 1,5 miljoen van
+  nl daggad niet. Hierna woorden van max 8 tekens gedaan (8 zonder <, of 9 incl <), dit totaal 350.000 regels. Dit lukt wel, ook
+  vlot geladen, kost een kleine 100MB. Lijkt dat er max zo'n 316MB gebruikt mag worden, dus de 1mio lukte net aan.
+[2012-03-15 22:23:41] engelse komt later, kan nu eerst kijken hoe ik hier zoekfuncties mee kan maken, weer eens functioneel mee verder
+  dus. Voor lange woorden evt alsnog het gewone woordenboek gebruiken, dan moet je toch al langere woorden aanvullen, hoewel om toch 9
+  te komen maar een woord van 2 aangevuld hoeft te worden. Maar het principe kan ik prima testen zo.
+[2012-03-15 22:24:51] ook opvallend dat met pmap lijkt dat 2 java processen van elk ruim 400MB worden gestart, maar mss wel met een
+  hoop shared memory, dit is wel met de repl, maar heb ik dus wel nodig voor interactief gebruik.
+
+[2012-03-18 17:07:42] via tcl script html met alle woorden opgehaald, moet nog in goede lijst.
+[2012-03-18 17:08:09] met onderstaande in te lezen als tekst.
+
+(def t (get-text "/media/nas/media/Talen/Dictionaries/perletter/letter-x.txt"))
+(def s (re-seq #">[0-9]+ ([A-Z]+)" t))
+(def s2 (map second s))
+
+Dit alles in een:
+(def s2 (->> (get-text "/media/nas/media/Talen/Dictionaries/perletter/letter-x.txt")
+             (re-seq #">[0-9]+ ([A-Z]+)")
+             (map second)))
+
+(map char (range 65 91))
+(map char (range 97 123))
+
+(def l 
+  (concat (map #(->> (get-text (str "/media/nas/media/Talen/Dictionaries/perletter/letter-" % ".txt"))
+             (re-seq #">[0-9]+ ([A-Z]+)")
+             (map second)) (map char (range 97 123)))))
+
+(def l 
+  (flatten (map #(->> (get-text (str "/media/nas/media/Talen/Dictionaries/perletter/letter-" % ".txt"))
+             (re-seq #">[0-9]+ ([A-Z]+)")
+             (map second)) (map char (range 97 123)))))
+             
+(write-lines "/media/nas/media/Talen/Dictionaries/perletter/alles.txt" 
+  (flatten (map #(->> (get-text (str "/media/nas/media/Talen/Dictionaries/perletter/letter-" % ".txt"))
+             (re-seq #">[0-9]+ ([A-Z]+)")
+             (map second)) (map char (range 97 123)))))
+
+[2012-03-18 17:31:53] bovenstaande met write-lines gestart.
+[2012-03-18 17:32:04] en ook al klaar.
+331193 woorden in de lijst, best veel
+[2012-03-18 17:32:44] even met sort en unique
+[2012-03-18 17:33:31] gaat ook vlot, geen dubbelen dus.
+
+[2012-03-18 17:37:31] woorden zoeken die in de orig lijst staan, en niet in de nieuwe grotere.
+
+(defn get-unique 
+  ([l1 l2]
+    (get-unique l1 l2 []))
+  ([l1 l2 acc]
+    ;(println (str l1 " --- " l2))
+    (cond 
+      (empty? l1) acc
+      (empty? l2) (concat acc l1)
+      true (let [res (compare (first l1) (first l2))]
+              (cond 
+                (< res 0) (recur (rest l1) l2 (conj acc (first l1)))
+                (= res 0) (recur (rest l1) (rest l2) acc) 
+                (> res 0) (recur l1 (rest l2) acc))))))  
+           
+(def nl (get-lines "/media/nas/media/Talen/Dictionaries/wf-nl.txt"))
+(def nl2 (get-lines "/media/nas/media/Talen/Dictionaries/perletter/alles-sorted.txt"))
+       
+(def lu (get-unique (take 5 nl) (take 5 nl2)))
+
+(def lu (get-unique nl nl2))
+
+[2012-03-18 18:07:21] Er zijn dus toch ruim 17000 woorden in nl die niet in nl2 voorkomen. Voor de zekerheid de lijsten
+  dus combineren.
+  
+[2012-03-18 18:15:51] Nogmaals daggad maken van deze nieuwe lijst met woorden van max 8, kijken hoe groot deze wordt.
+[2012-03-18 18:18:49] wf-nl-max8.txt heeft maar 69648 woorden, lijkt minder dan vorige, maar hier nog daggad van maken.
+
+(def nl8 (get-lines "/media/nas/media/Talen/Dictionaries/wf-nl-max8.txt"))
+(write-lines "/media/nas/media/Talen/Dictionaries/nl-max8-daggad.txt" (flatten (map split-rev nl8)))
+
+[2012-03-18 18:24:30] deze heeft 479508 regels, ook nog gesort weer in shell. Kijken of deze te lezen is vanaf een clean repl.
+
+(def dnl (make-dawg-z (get-lines "/media/nas/media/Talen/Dictionaries/nl-max8-daggad.txt")))
+
+[2012-03-18 18:29:18] bij starten repl 102MB in gebruik (incl JEdit ook), na laden 222.2 MB. Mogelijk dus nog ruimte voor meer.
+
+TODO:
+Kijken of andere manieren van laden van deze lijst van max8 als daggad ook willen, of een memory full veroorzaken, of het zin heeft gehad het zo op te lossen.
+
+  
+  
