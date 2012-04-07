@@ -118,12 +118,23 @@ proc make_report {report_basename} {
   set hh [ndv::CHtmlHelper::new]
   $hh set_channel $f
   $hh write_header "Activity Log Report [det_date_part [lindex [db eval {select min(tg.ts_start) from timegroup tg}] 0]]" 0
+  
+  add_prev_next_links $hh [det_date_part [lindex [db eval {select min(tg.ts_start) from timegroup tg}] 0]]
+  
   foreach {tg_id ts_start ts_end} [db eval {select id, ts_start, ts_end from timegroup order by ts_start}] {
     report_time_group $hh $tg_id $ts_start $ts_end 
   }  
   # puts_footer $f
   $hh write_footer
   close $f
+}
+
+proc add_prev_next_links {hh date} {
+  set day [expr 24 * 60 * 60]
+  set prev_date [clock format [expr [clock scan $date -format "%Y-%m-%d"] - $day] -format "%Y-%m-%d"]  
+  set next_date [clock format [expr [clock scan $date -format "%Y-%m-%d"] + $day] -format "%Y-%m-%d"]
+  $hh href "\[$prev_date\]" "report-$prev_date.html"
+  $hh href "\[$next_date\]" "report-$next_date.html"
 }
 
 proc report_time_group {hh tg_id tg_start tg_end} {
