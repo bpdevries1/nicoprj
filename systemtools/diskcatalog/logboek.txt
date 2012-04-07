@@ -159,7 +159,7 @@ where f1.filename='545.mp3'
 and f1.filesize = f2.filesize
 and f2.filename='545.mp3' 
 and f1.id < f2.id limit 10"
-# goed, terwijl ik wel filesizes compare, maar niet check op grootte.
+# goed
 
 db eval "select * from files f1, files f2 
 where f1.filename='545.mp3' 
@@ -232,5 +232,93 @@ alter table files add column loc_type;
 alter table files add column loc_detail;
 
 [2012-01-29 18:52:54] houd laptop versie van de hd-all.db nu als bron, hier kolommen bij en vullen, testen van de int-kolom.
+
+
+[2012-02-26 22:40:09] Tijd geleden, weer verder: nu alle groepen gedef'ed, vrij defensief, ook /home/nico als source genoemd. Hierna alles vanaf 10MB afgehandeld.
+[2012-02-26 23:31:55] bezig met dingen vanaf 1MB, nog best veel, ook paar extra dingen def-en in alter.txt
+[2012-02-26 23:32:14] git exe's lijken allen dezelfde inhoud te hebben, alleen filenaam is anders. Hierdoor heel veel checks, duurt lang.
+[2012-03-01 22:37:29] Nog steeds met de git checks bezig, zijn in util\msysgit 100 files, totaal deze dit is 1.2 GB.
+[2012-03-01 22:38:21] wel ook archief-type geintroduceerd.
+[2012-03-01 22:38:37] nog bezig dus met files > 1MB.
+[2012-03-01 22:49:18] git dingen nu wel gehad, nu ook nog veel muziek. Doe het in batches van 10.000, zijn er best veel van.
+[2012-03-01 22:50:11] Seinfeld gekopieerd van /Downloads naar /media/nas, hierdoor op /media/nas nog maar 39GB beschikbaar.
+[2012-03-03 15:50:41] net weer gestart, maar blijken niet meer te zijn.
+[2012-03-03 16:27:19] Eens kijken naar old backups, of hier nog files > 1 of 10 MB instaan.
+
+select * from files
+where loc_type = 'oldbackup'
+and filesize_int > 10000000
+limit 10;
+
+[2012-03-03 17:48:39] Zijn er dus zeker, nogal wat werk om te checken. 
+
+Aantal categorieen: 
+* eigen data: wel houden, komt ook wel voor, bv WM_data van Windows Mobile, bv logs van Naty.
+* util en program files: eigenlijk meteen weg, voor de vorm nog even kijken, wil toch meer de install versies.
+* cruiseresults: lastige
+* perftoolset/dist: zou zeggen dat het weg mag.
+
+[2012-03-04 16:48:03] make-del-doubles aan het draaien met oldbackup minsize = 0 en limit is 100,000. Zal vast lang duren, nu ook
+  nog geen zicht hoeveel bestanden het zijn. Maar delete van d:\develop is ook nog bezig.
+[2012-03-04 18:18:29] minsize = 0 werkt niet, veel bestanden van 1 en 2 bytes, die gelijk zijn aan heel veel andere bestanden, daardoor
+  weer een cross-product, vgl git.exe files. In theorie zijn deze bestandjes (bv in git) nog belangrijk ook).
+[2012-03-04 18:19:26] dus nu met minsize =10 gedaan. Deze is veel sneller klaar, wel 91MB. Hierin nog veel exception.count bestanden,
+  maar deze toch maar deleten. Op linux ging dit deleten wel, op windows heel lang bezig, gestopt. Size=11.
+[2012-03-04 19:08:47] dan nog maar eens met minsize=15... Nog steeds veel dezelfde, en weer kwadratisch. Dit lijkt niet een werkbare
+  manier. Alternatieven:
+  * ook naar filenaam kijken: helpt weinig, de files heten allemaal hetzelfde, alleen dirs zijn anders.
+  * bij media-old is aanwezigheid van 1 andere file genoeg, je hoeft niet meer te zoeken:
+    * in query deze dubbelen al weg: file2 niet meejoinen en een select distinct doen. Of een where exists.
+    * file meteen weg, bij volgende kijken of file nog bestaat: dan werkt huidige opzet niet, met laptop en ubuntu, plus het is later checken, 
+      dus langzamer.
+    * iets met ineens alle dubbelen van een size/MD5 zoeken: mogelijk deze voor latere checks, niet met oldbackups.
+[2012-03-04 19:39:23] door distinct duurt het idd langer. Doorlopen resultset duurt ook langer, mogelijk omdat delen van de result nog opgehaald
+  worden? Distinct is impliciet een sort, en in combi met limit is dit niet ideaal.
+[2012-03-04 19:54:16] Kan ook zijn dat het de backup is, die vanaf 19:32 loopt, deze gekilled nu.
+[2012-03-04 19:55:43] nogmaals uitvoeren met limit 100,000, deze begint nu wel meteen, query result nog in de cache ergens?
+[2012-03-05 09:03:18] delete-files heeft lang geduurt, na 12.00 uur klaar.
+[2012-03-05 09:03:36] net weer nieuwe make-delete gestart.
+[2012-03-05 09:04:41] delete-files: heb begin transaction/commit helemaal aan het begin/eind. Toch af en toe deelcommit? Op windows gedaan, moet nog gecommit etc.
+[2012-03-05 12:02:06] nu paar keer make-delete/delete gedaan, zou eens count op DB kunnen doen hoeveel er in oldbackup staat, zowel #files als #MB.
+[2012-03-05 12:03:08] delete inmiddels weer klaar op linux, maar nog niet op windows. Waarom duurt het hier zo lang, bestanden staan hier niet eens, dus delete hoeft
+  niets te doen.
+[2012-03-05 12:54:52] Delete op windows ook klaar, count op oldbackup: 
+
+select sum(filesize_int) size, count(*) cnt
+from files where loc_type = 'oldbackup';
+
+14125651112|229111
+
+[2012-03-05 12:56:58] 229.000 bestanden is te doen in batches van 100,000. Size is nu nog:14.125.651.112, ofwel 14GB, wel de moeite.
+[2012-03-05 14:04:29] weer een run gedaan, nu nog over: 
+
+13924279697|221185
+
+[2012-03-05 18:46:45] Dit is wel apart, maar kleine 8.000 minder. Klopt wel met grootte van w:\rm-files.txt, nog eens met filesize_int >= 15:
+
+select sum(filesize_int) size, count(*) cnt
+from files where loc_type = 'oldbackup' and filesize_int >= 15;
+13924251076|214527
+
+ofwel bijna net zoveel.
+
+[2012-03-05 18:56:44] mss geldt limit voordat met distinct de boel wordt ingedikt. Nu nog eens starten met limit=10 miljoen, kan wel zijn dat file dan rond 1GB wordt, moet kunnen.
+[2012-03-05 18:58:14] gestart.
+[2012-03-05 19:09:49] lijkt klaar nu, maar heeft niets gedaan, w:\rm-files is leeg. Betekent dit dat de rest allemaal uniek is? Nergens anders te vinden? En wat moet ik er dan mee?
+
+[2012-03-08 21:01:12] Eerst alle lege dirs verwijderen. Kan zijn dat dirs alleen subdirs hebben, deze moeten dan ook weg.
+
+del /sxyz abcxyz*
+
+[2012-03-08 21:04:35] Eerst gedaan op dellLaptop. Duurt wel even.
+
+sqlite> select * from files where folder like '/media/nas/backups/DellLaptop/d/B
+orland%' limit 10;
+sqlite>
+
+[2012-03-08 21:10:44] In Borland folder dus geen files meer, wel veel lege dirs. Deze straks allemaal weg?
+[2012-03-08 21:12:12] Duurt best lang.
+[2012-03-08 21:14:46] Gestopt en nu op de hele backup dir gedaan, zal wel lang duren, later maar eens kijken.
+[2012-03-08 23:40:57] Al een tijdje klaar, kan wel opschonen, wel last van kleine files, deze toch ook maar allemaal weg, kan nooit veel in staan. Hierna weer lege dirs weghalen, duurt wel weer lang, maar ja.
 
 

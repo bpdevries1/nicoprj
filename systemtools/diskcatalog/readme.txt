@@ -13,6 +13,40 @@ Ideas
 * Columns: filename, path, date, size, md5sum, lastchecked (when is the file last checked, md5 etc determined)
 * Columns: something like status, to determine if it is unique or not, has a backup, is in archive? Maybe better in a separate table?
 * Also contents of zip/rar files? Sometimes chose to archive a project in a zip file.
+* Still all this is functionality of 'computing-for-computing', it doesn't really help 'in the real world' or help achieve my goals. On the other hand, I have thought about this for years, it does strike an itch, I do use a lot of HD space, and a lot of it are duplicates.
+* Attachments from outlook: save those to a dir, check if they are already somewhere else. If so, delete them.
+
+Todo - general
+==============
+* Ook al houd ik veel source-files, wel eens kijken hoevaak ik een bepaald bestand heb, bv beachvolley2007 veiligheidsplan. En ook git.exe files.
+* Todo: boeken categoriseren wordt hiermee mss ook gemakkelijker, zeker nu ik verschillende bronnen, ook zowel ebooks als luisterboeken,
+  ook kijken hoe je dit wilt organiseren, denk luisterenboeken in aparte /media/nas/media/audiobooks dir.
+* Use this database also for the backup processes. But still the source has to be checked (5 levels deep?) to see if anything has changed.
+* In some way the database needs to be kept up-to-date for the backup and duplicate search to keep working.
+* grote bestanden waar ik verschillende versies van heb, zoals BD/mthv.zip.
+
+Todo - specific dir's
+=====================
+* old backups: completely empty:
+  * laptop-important - stap 1 drive c: gedaan.
+  * DellLaptop
+  * DellPC
+1. op het oog veel weg, zoals in \bin en \util
+2. doc&settings lukt niet op het oog, dus dan met check-double, met alle files, niet alleen >1MB.
+3. lege dirs weg.
+4. nogmaals op het oog, evt kijken wat ofwel veel bestanden zijn ofwel veel ruimte kost.
+5. Wat overblijft in een zip en in archief.
+
+[2012-03-04 16:45:11] Volgorde iets anders, toch eerst automatische dingen: make_delete uitvoeren die alleen naar old-dirs kijkt, wel met
+                      minsize=0.
+
+* old backups - should be empty now, at least files > 1MB.
+* extrabackups - should be empty now, at least files > 1MB.
+* music singles - replace files in singles dir by symlink to file in albums dir. Some risc involved, if file gets moved. 
+
+Nog te verwijderen:
+
+??? /media/nas/backups/DellLaptop/d/Mijn documenten
 
 Other progs
 ===========
@@ -33,7 +67,7 @@ Algorithm
 * linux cmd cannot handle "*", it is filled out by bash, but not by tcl. With large directories, the cmdline might become large.
   not sure how tcl glob would handle this. Wait and find out if it is needed.
 * See also Todo's at the end of this file.
-    
+
 TODO
 ====
 * Todo: boeken categoriseren wordt hiermee mss ook gemakkelijker, zeker nu ik verschillende bronnen, ook zowel ebooks als luisterboeken,
@@ -114,4 +148,59 @@ Vragen/openstaande punten bij uitgangspunten
   al op staat), lijkt beter dan leegmaken, kapotte drive en 'had ik het er maar op laten staan'.
 * Kan evt ook in .zip/.rar gaan kijken. Voordeel van .zip is dat het kleiner is, sneller te kopieren, ook op USB en integrity
   check heeft. Nadeel is dat je programma hebt en bij corruptie van de zip je er niets meer mee kunt. Met losse files mss nog wel...
+ 
+
+
+#Gets MD5 hash
+ proc md5 {string} {
+     #tcllib way:
+     package require md5
+     string tolower [::md5::md5 -hex $string]
+
+     #BSD way:
+     #exec -- md5 -q -s $string
+ 
+     #Linux way:
+     #exec -- echo -n $string | md5sum | sed "s/\ *-/\ \ /"
+
+     #Solaris way:
+     #lindex [exec -- echo -n $string | md5sum] 0
+
+     #OpenSSL way:
+     #exec -- echo -n $string | openssl md5
+ }
+ 
+ 
+package require struct::list
+package require fileutil
+
+[::fileutil::cat $filename]
+
+# wel vraag of deze met grote files om kan gaan.
+::md5::md5 -hex [::fileutil::cat make-svn-ontdubbel.tcl]
+
+# je kan ook channel of file opgeven, dus dit lijkt wel de eerste manier.
+::md5::md5  ? -hex ?  [ -channel channel | -file filename | string ]
+
+[2012-01-19 22:25:52] met backup ook iets gedaan dat je checkt of er wat veranderd is. Hele harddisk duurt erg lang, en
+                      zal nu met md5 nog langer duren. Dit is dus niet iets wat je veel wilt doen.
+[2012-01-19 22:26:55] bijhouden waar je bent klinkt wel noodzakelijk, maar eerst zonder beginnen.
+[2012-01-19 22:27:15] dirs doorlopen wel net als backup? bv niet symlinks doorlopen. Mss ook ignorefiles toepassen.
+[2012-01-20 08:28:37] foutmelding in dir /home/nico/oltest, zie onder.
+[2012-01-21 19:13:22] moet SQL escapen dus, jammer.
+
+[21-01-12 14:56:34] [catalogdisk.tcl] [debug] handling: /home/nico/oltest/out/Personal/Verwijderde items/Adressen/Collega's
+[2012-01-22 01:20:39] bugs opgelost, nu /home/nico goed ingelezen, totaal 22.39-00.55=2:16. 
+   102.872 files, totalsize=76 550 712 988.0 ofwel 76GB.
+[2012-01-22 01:25:09] aan de andere kant met du -H blijkt in / 115G totaal te zijn, met 84GB gebruikt, zou meeste dus in /home/nico
+   zitten.
+[2012-01-22 01:26:44] dubbele dingen op andere lokatie dan mijn home-dir zijn niet zo waarschijnlijk, wel dingen in /opt, /var
+   /etc
+[2012-01-22 01:27:55] nu eerst /media/nas aanzetten.
+[2012-01-22 01:28:55] ook bv /aaa dirs staan ofwel in mij home, ofwel op /media/nas/aaa.
+[2012-01-22 01:29:54] waar ik overal books/ict heb, is ook wel leuk te weten: /media/nas, laptop, dropbox. Als /media/nas
+   de bron is, en de andere 2 puur omdat je er dan beter bijkan, is het goed. Op laptop zou nog meer kunnen staan dan in
+   dropbox, omdat daar meer ruimte is.
+
+   
   
