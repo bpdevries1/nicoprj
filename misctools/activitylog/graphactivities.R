@@ -17,7 +17,10 @@ plot.timegroups = function(db, timegroup_id, graph_basename, tg_date) {
     opts(legend.position=c(0.95, 0.95), legend.justification=c(1,1)) +
     scale_x_datetime(major="1 hour", minor="15 min", format="%H:%M")
   graph_filename = paste(graph_basename, tg_date, "-", timegroup_id, ".png", sep="")
-  ggsave(graph_filename, width = 7, height = 4, dpi=100)
+  # wil een inch per uur in de breedte, soms 24 uur grafiek, niet te lezen dan.
+  # ggsave(graph_filename, width = 7, height = 4, dpi=100)
+  # 18-2-2012 voor nu even flink breed.
+  ggsave(graph_filename, width = 20, height = 4, dpi=100)
 }
 
 main = function() {
