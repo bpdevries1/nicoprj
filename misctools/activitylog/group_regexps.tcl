@@ -50,6 +50,9 @@ proc init_group_regexps {} {
 	# Ymor algemeen
 	add_res Ymor {uren-week} {YMR_} {Ymonitor} {TOPdesk} {YViewer} {uren-saldo}
 	
+	# AutoHotkey, onderdeel tooling algemeen en maasstad
+	add_res AHK {AutoHotkey \.ahk autohotkey}
+	
 	# on Linux
 	add_re {Git Gui} Programming
 	add_re {ActiveTcl} Programming
