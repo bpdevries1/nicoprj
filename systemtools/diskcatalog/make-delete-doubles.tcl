@@ -10,10 +10,10 @@ set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 proc main {argv} {
   global log ignore_res
   set options {
-    {db.arg "hd-all.db" "Catalog database"}
+    {db.arg "c:/aaa/diskcat/hd-all.db" "Catalog database"}
     {minsize.arg "10000000" "Minimum size of files to handle"}
     {limit.arg "50" "Maximum number of records to handle"}
-    {out.arg "rm-files.txt" "File to put files to remove in"}
+    {out.arg "w:/rm-files.txt" "File to put files to remove in"}
     {loglevel.arg "" "Set global log level"}
   }
   # ignore: default ignore backup and cache locations.
@@ -35,16 +35,24 @@ proc main {argv} {
   
   make_keep_table
   def_action_functions
+  log_action_functions
   
   # remove action file here, maybe filled from more than one function.
   file delete $ar_argv(out)
   
   # handle_doubles $ar_argv(out) $ar_argv(minsize) $ar_argv(limit)
-  # handle_old_backups $ar_argv(out) $ar_argv(minsize) $ar_argv(limit)
+
+
+
+  # Onderstaande 2 gedaan voor files > 10MB (<26-02-2012)
+  handle_old_backups $ar_argv(out) $ar_argv(minsize) $ar_argv(limit)
   
+  # delete_old duurt soms best lang.
   # delete_old $ar_argv(out) $ar_argv(minsize) $ar_argv(limit)
+
+  # Hulp functies?
   # move_dir in principe altijd hele dir, niet alleen limit aantal of vanaf minsize groot.
-  move_dir $ar_argv(out) $ar_argv(minsize) $ar_argv(limit) "/media/nas/backups/laptop-important/d/util/soapui-2.5" "/media/nas/archief/installed/soapui-2.5"
+  # move_dir $ar_argv(out) $ar_argv(minsize) $ar_argv(limit) "/media/nas/backups/laptop-important/d/util/soapui-2.5" "/media/nas/archief/installed/soapui-2.5"
   
 }
 
@@ -74,15 +82,22 @@ proc def_action_functions {} {
   # @todo: have source for both github locations. If locations differ, don't delete, if in the same repo, make a note.
   # system: OS files, program files, stuff that needs to stay.
   # @todo als het goed is, hoef je van een cache (c:\install) geen backup te maken.
-  set all_types {oldbackup backup extrabackup cache source system}
+  set all_types {oldbackup backup extrabackup cache source system archive}
   def_action_function oldbackup $all_types delete_oldbackup
-  def_action_function extrabackup backup delete_extrabackup
+  def_action_function extrabackup {archive backup} delete_extrabackup
   # def_action_function extrabackup source keep_both
   def_action_function {system source} {backup extrabackup cache} keep_both
+  def_action_function {system source} {system source} keep_both
   def_action_function {backup extrabackup} cache keep_both
   def_action_function backup backup keep_one
   def_action_function cache cache keep_one
   def_action_function extrabackup extrabackup keep_one
+  def_action_function archive archive keep_one
+  def_action_function archive {system source} delete_archive
+  def_action_function archive {backup cache} keep_both
+  
+  # @todo archive itt active, zoals source en backup. Raar als iets zowel archive als active is.
+  # note: waar wil je bron hebben: active (source), dan archief, dan extrabackup
 }
 
 proc def_action_function {ltp1 ltp2 fn_name} {
@@ -111,6 +126,32 @@ proc set_ar_functions {tp1 tp2 fn_name} {
   }
 }
 
+proc log_action_functions {} {
+  global ar_functions
+  # find all types, check if each combination of types has a value
+  foreach el [array names ar_functions] {
+    foreach el2 [split $el ","] {
+      set ar_types($el2) $el2 
+    }
+  }
+  set all_types [lsort [array names ar_types]]
+  log debug "all types: $all_types"
+  # puts "\t[join $all_types "\t"]"
+  foreach row $all_types {
+    #puts -nonewline $row
+    foreach col $all_types {
+      # puts -nonewline "\t$ar_functions($row,$col)"
+      try_eval {
+        log debug "$row,$col => $ar_functions($row,$col)"
+      } {
+        log debug "$row,$col => UNKNOWN"
+      }
+    }
+    #puts ""
+  }
+  
+}
+
 proc det_action_function {tp1 tp2} {
   global ar_functions
   set res action_undefined
@@ -120,22 +161,24 @@ proc det_action_function {tp1 tp2} {
 
 # t: loc_type, d: loc_detail, f: folder, n: filename
 proc delete_oldbackup {t1 d1 f1 n1 t2 d2 f2 n2} {
-  if {$t1 == "oldbackup"} {
-    return "delete1" 
-  } elseif {$t2 == "oldbackup"} {
-    return "delete2"
-  } else {
-    error "None of files is old backup: $t1 $d1 $f1 $n1 $t2 $d2 $f2 $n2"  
-  }
+  delete_type oldbackup $t1 $d1 $f1 $n1 $t2 $d2 $f2 $n2
 }
 
 proc delete_extrabackup {t1 d1 f1 n1 t2 d2 f2 n2} {
-  if {$t1 == "extrabackup"} {
+  delete_type extrabackup $t1 $d1 $f1 $n1 $t2 $d2 $f2 $n2
+}
+
+proc delete_archive {t1 d1 f1 n1 t2 d2 f2 n2} {
+  delete_type archive $t1 $d1 $f1 $n1 $t2 $d2 $f2 $n2
+}
+
+proc delete_type {type t1 d1 f1 n1 t2 d2 f2 n2} {
+  if {$t1 == $type} {
     return "delete1" 
-  } elseif {$t2 == "extrabackup"} {
+  } elseif {$t2 == $type} {
     return "delete2"
   } else {
-    error "None of files is extra backup: $t1 $d1 $f1 $n1 $t2 $d2 $f2 $n2"  
+    error "None of files is $type: $t1 $d1 $f1 $n1 $t2 $d2 $f2 $n2"  
   }
 }
 
@@ -226,7 +269,8 @@ proc handle_doubles {out_filename minsize limit} {
       puts $f "# WATCH OUT: Filenames differ, check if they are really the same!" 
     }
     if {[file join $folder1 $filename1] == [file join $folder2 $filename2]} {
-      puts $f "# WATCH OUT: 2 entries pointing to the same file!\n"
+      puts $f "# WATCH OUT: 2 entries pointing to the same file, deleting one from DB!\n"
+      db eval "delete from files where id = $id2" 
       continue; # hier wel continue, al een newline toegevoegd.
     }
 
@@ -243,6 +287,43 @@ proc handle_old_backups {out_filename minsize limit} {
   global log
 
   set f [open $out_filename a]             
+
+  # distinct werkt vertragend, toch lijkt het beter dit in de DB op te lossen...
+  set query "select distinct f1.id id1, f1.folder folder1, f1.filename filename1, f1.filesize_int filesize1, f1.md5sum md5sum1, f1.loc_type lt1, f1.loc_detail ld1
+             from files f1, files f2
+             where f1.filesize_int > $minsize 
+             and f1.filesize_int = f2.filesize_int
+             and f1.md5sum = f2.md5sum
+             and f1.loc_type = 'oldbackup'
+             and (f2.loc_type is null or f2.loc_type <> 'oldbackup') 
+             limit $limit"
+             
+  $log debug "query: $query"
+
+  #set res [db eval $query]
+  #$log debug "res: $res"
+  
+  db eval $query {
+    $log debug "handling query result: $filename1"
+    # resultaten per rij in vars $id1 etc.
+    puts $f "# File1: ($lt1/$ld1) [file join $folder1 $filename1]: $filesize1: $md5sum1"
+    # puts $f "# File2: ($lt2/$ld2) [file join $folder2 $filename2]: $filesize2: $md5sum2"
+
+    #set fn [det_action_function $lt1 $lt2]
+    #set action [$fn $lt1 $ld1 $folder1 $filename1 $lt2 $ld2 $folder2 $filename2]
+    # $log debug "function: $fn, action: $action"
+    # handle_action $f $action $id1 $folder1 $filename1 $id2 $folder2 $filename2
+    handle_action $f delete1 $id1 $folder1 $filename1 0 "" ""
+    puts $f "" ; # always a new line between entries.
+  }
+  close $f
+}
+
+proc handle_old_backups_old {out_filename minsize limit} {
+  global log
+
+  set f [open $out_filename a]             
+
   set query "select f1.id id1, f1.folder folder1, f1.filename filename1, f1.filesize_int filesize1, f1.md5sum md5sum1, f1.loc_type lt1, f1.loc_detail ld1,
                     f2.id id2, f2.folder folder2, f2.filename filename2, f2.filesize_int filesize2, f2.md5sum md5sum2, f2.loc_type lt2, f2.loc_detail ld2 
              from files f1, files f2
@@ -262,14 +343,10 @@ proc handle_old_backups {out_filename minsize limit} {
     $log debug "handling query result: $filename1"
     # resultaten per rij in vars $id1 etc.
     puts $f "# File1: ($lt1/$ld1) [file join $folder1 $filename1]: $filesize1: $md5sum1"
-    puts $f "# File2: ($lt2/$ld2) [file join $folder2 $filename2]: $filesize2: $md5sum2"
+    # puts $f "# File2: ($lt2/$ld2) [file join $folder2 $filename2]: $filesize2: $md5sum2"
 
     if {$filename1 != $filename2} {
       puts $f "# WATCH OUT: Filenames differ, check if they are really the same!" 
-    }
-    if {[file join $folder1 $filename1] == [file join $folder2 $filename2]} {
-      puts $f "# WATCH OUT: 2 entries pointing to the same file!\n"
-      continue; # hier wel continue, al een newline toegevoegd.
     }
 
     set fn [det_action_function $lt1 $lt2]
@@ -281,13 +358,19 @@ proc handle_old_backups {out_filename minsize limit} {
   close $f
 }
 
+# Heel specifiek bepaalde folders deleten.
 proc delete_old {out_filename minsize limit} {
   set old_folders {
     "/media/nas/backups/DellPC/c-drive/Program Files/Common Files/Java"
-    "/media/nas/backups/DellPC/c-drive/WINDOWS/Temp"    
+    "/media/nas/backups/DellPC/c-drive/WINDOWS/Temp"   
+    "/media/nas/backups/laptop-important/d/util"
+    "/media/nas/backups/DellPC/c-drive/Program Files"
+    "/media/nas/backups/laptop-important/d/MySQL"
+    "/media/nas/backups/DellLaptop/d/Mijn documenten"
+    "/media/nas/backups/laptop-important/d/perftoolset"
   }  
   foreach old_folder $old_folders {  
-    delete_from_old_backups $old_folder $ar_argv(out) $ar_argv(minsize) $ar_argv(limit)
+    delete_from_old_backups $old_folder $out_filename $minsize $limit
   }
 }
 
@@ -332,4 +415,7 @@ proc log {args} {
 }
 
 main $argv
+
+# 1:move	673870	/media/nas/backups/laptop-important/d/util/soapui-2.5/source/soapui-2.5/src/test-resources/test3	/media/nas/archief/installed/soapui-2.5/source/soapui-2.5/src/test-resources/test3	readme.txt
+# 1000: move	673638	/media/nas/backups/laptop-important/d/util/soapui-2.5/source/soapui-2.5/src/java/com/eviware/soapui/support/swing	/media/nas/archief/installed/soapui-2.5/source/soapui-2.5/src/java/com/eviware/soapui/support/swing	AbstractModelItemTableMouseListener.java
 

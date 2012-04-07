@@ -9,8 +9,8 @@ set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 
 proc main {argv} {
   set options {
-    {db.arg "hd-all.db" "Catalog database"}
-    {in.arg "rm-files.txt" "File to put files to remove in"}
+    {db.arg "c:/aaa/diskcat/hd-all.db" "Catalog database"}
+    {in.arg "w:/rm-files.txt" "File to put files to remove in"}
     {loglevel.arg "" "Set global log level"}
   }
   set usage ": [file tail [info script]] \[options] path:"
@@ -32,6 +32,7 @@ proc delete_files {infilename} {
   global log
   set f [open $infilename r]
   db eval "begin transaction"
+  set i 0
   while {![eof $f]} {
     gets $f line
     if {[regexp {^#} $line]} {
@@ -51,6 +52,11 @@ proc delete_files {infilename} {
       move_file {*}[lrange $lline 1 end]
     } else {
       $log warn "Don't know how to handle: $line" 
+    }
+    incr i
+    if {$i % 1000 == 0} {
+      db eval "commit"
+      db eval "begin transaction"
     }
   }
   close $f
@@ -85,6 +91,7 @@ proc keep_files {id1 id2} {
 
 proc move_file {id folder_old folder_new filename} {
   # reset location type and detail, @todo determine again or param.
+  log info "Moving file $filename from $folder_old => $folder_new"
   db eval "update files set folder='$folder_new', loc_type=null, loc_detail=null where id=$id"
   set path_old [file join $folder_old $filename]
   set path_new [file join $folder_new $filename]
