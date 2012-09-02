@@ -3,13 +3,14 @@ Manual - Gebruikers documentatie scheidsrechters indeling
 
 Nieuw seizoen - inlezen wedstrijden
 -----------------------------------
+* Backup maken van scheids-DB.
 * Algemeen: werken met MySQL DB scheids, niet scheidsprod.
-* zorg dat <nw seizoen>/scheids.tsv goed is, via scheids.ods. De .ods als source gebruiken, edit gemakkelijker. Evt details
+* zorg dat <nw seizoen>/scheids.tsv goed is, via scheids.ods (copy-paste, dan wordt het tsv). De .ods als source gebruiken, edit gemakkelijker. Evt details
   wel direct in de db wijzigen, maar dan ook in de ods voor de volgende keer.
 * insert_teams is hardcoded voor aantal teams en of (ver.) scheids nodig is, was alleen H1/D1 niet, maar per 2011-2012 is dit H1-H2 wel, rest niet.
 * insert_afwezig is ook hardcoded.
 * cd ~/nicoprj/misctools/scheids
-* tclsh insert-input.tcl -cleandb -fromsite. Deze werkt op mysql DB 'scheids' (niet scheidsprod)
+* ./insert-input.tcl -cleandb -fromsite. Deze werkt op mysql DB 'scheids' (niet scheidsprod)
   Deze geeft aan het eind ook het aantal wedstrijden en of in principe voor elke wedstrijd een scheids
   is te vinden.
 * cd ../scheidsclj

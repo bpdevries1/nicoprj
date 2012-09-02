@@ -19,7 +19,7 @@ proc main {argc argv} {
   
   $log debug "argv: $argv"
   set options {
-      {seizoen.arg "2011-2012" "Welk seizoen (directory)"}
+      {seizoen.arg "2012-2013" "Welk seizoen (directory)"}
       {fromsite  "Haal gegevens opnieuw van NeVoBo site"}
       {cleandb "Leeg database voor inlezen"}
       {insert2ndhalf "Voeg wedstrijden van 2e helft in, laat rest staan."}
@@ -77,7 +77,7 @@ proc insert_teams {} {
   foreach hd {H D} {
     foreach nr {1 2 3 4} {
       # @todo hier nieuwe ifelse functie voor gebruiken (18-9-2011)
-      if {[lsearch {H1 H2} "$hd$nr"] >= 0} {
+      if {[lsearch {H1 D1} "$hd$nr"] >= 0} {
         set scheids_nodig 0
       } else {
         set scheids_nodig 1
@@ -85,6 +85,8 @@ proc insert_teams {} {
       $db insert_object team -naam "$hd$nr" -scheids_nodig $scheids_nodig
     }
   }
+  # 2-9-2012 D5 los:
+  $db insert_object team -naam "D5" -scheids_nodig 1
 }
 
 proc insert_personen {seizoen} {
@@ -128,6 +130,17 @@ proc handle_scheids {line lst_names ar_values_name} {
         }
       }
     }
+    # 2-9-2012 ook hier ook D5 apart
+    set team_naam "D5"
+    set waarde $ar_values($team_naam) 
+    # vervang evt , door .
+    regsub -all {,} $waarde "." waarde
+    if {$waarde > 0} {
+       set team_id [lindex [$db find_objects team -naam $team_naam] 0]
+       $db insert_object kan_team_fluiten -scheids $persoon_id -team $team_id -waarde $waarde
+    }
+    
+    # 2-9-2012 deze kolommen nu 1 verder, omdat D5 kolom ingevoegd is, zou goed moeten gaan.
     # zeurfactoren
     if {$ar_values(zf_andere) != ""} {
       set waarde $ar_values(zf_andere)
@@ -147,7 +160,7 @@ proc insert_afwezig {} {
   # bestaande info verwijderen, ivm tweede helft seizoen.
   exec_query "delete from afwezig"
   
-  insert_afwezig_persoon "Nico de Vreeze" "Familie" "2012-03-30"  
+  # insert_afwezig_persoon "Nico de Vreeze" "Familie" "2012-03-30"  
 
   # Chris is eigenlijk de enige die kan op 13-4, maar wil daar een invaller plaatsen
   # 31-12-2011 kan Reza deze wedstrijd niet doen?
@@ -170,22 +183,35 @@ proc insert_afwezig {} {
   # bepaal eerste afwezig, dan steeds 14d erbij.
   # 17-9-2010 is week 37, dus oneven, dus afwezig
   
+  # 2-9-2012 Ester zwanger, tot begin november
+  insert_afwezig_persoon "Ester Hilhorst" "Zwanger" "2012-11-07" "2013-06-12"
+  
   insert_afwezig_maarten
   
   # Mail Wendy 23-12: Je kan me echter wel indelen op 13-1-12 om 21.30 en op 16-3-12 om 21.30 uur. 
-  insert_afwezig_persoon "Wendy van der Woerd" "Werken" "2012-01-01" "2012-01-12"
-  insert_afwezig_persoon "Wendy van der Woerd" "Werken" "2012-01-14" "2012-03-15"
-  insert_afwezig_persoon "Wendy van der Woerd" "Werken" "2012-03-17" "2012-07-01"
+  #insert_afwezig_persoon "Wendy van der Woerd" "Werken" "2012-01-01" "2012-01-12"
+  #insert_afwezig_persoon "Wendy van der Woerd" "Werken" "2012-01-14" "2012-03-15"
+  #insert_afwezig_persoon "Wendy van der Woerd" "Werken" "2012-03-17" "2012-07-01"
 }
 
 proc insert_afwezig_maarten {} {
-  set datum "2012-01-13" ; # week 2, maarten even weken de kinderen. In SMS staat dat 'ie oneven weken kan, vanaf 20-1-2012.
+  set datum "2012-01-13" ; # week 2, maarten even weken de kinderen. In SMS staat dat 'ie (in 2012) oneven weken kan, vanaf 20-1-2012.
   while {$datum <= "2013"} {
     insert_afwezig_persoon "Maarten Wispelwey" "Kinderen" $datum
     set sec [clock scan $datum -format "%Y-%m-%d"]
     set sec_2w [expr $sec + (2 * 7 * 24 * 60 * 60)] ; # 2 weken verder zetten.
     set datum [clock format $sec_2w -format "%Y-%m-%d"]
-  }  
+  }
+
+  # in 2012 kan 'ie dan waarsch weer even weken wel, dus oneven niet. 4-1-2013 is week 1.
+  set datum "2013-01-04" ; # week 1, maarten oneven weken de kinderen.
+  while {$datum <= "2014"} {
+    insert_afwezig_persoon "Maarten Wispelwey" "Kinderen" $datum
+    set sec [clock scan $datum -format "%Y-%m-%d"]
+    set sec_2w [expr $sec + (2 * 7 * 24 * 60 * 60)] ; # 2 weken verder zetten.
+    set datum [clock format $sec_2w -format "%Y-%m-%d"]
+  }
+  
 }
 
 proc insert_afwezig_persoon {persoon opmerkingen eerstedag {laatstedag ""}} {
@@ -241,13 +267,19 @@ proc insert_team_wedstrijden {seizoen insert2ndhalf} {
         # set url "http://competitie.nevobo.nl/holland/team/3258${hd}S+${nr}?programma=true" 
         # 2010-2011
         # set url "http://competitie.nevobo.nl/west/team/3258${hd}S+${nr}?programma=true"
-        # 2011-2012, ical formaat
+        # 2011-2012, ical formaat, 2012-2013 ook?
         set url "http://www.volleybal.nl/application/handlers/export.php?format=ical&type=team&programma=3258${hd}S+${nr}&iRegionId=3000"
         set filename "$seizoen/${hd}${nr}-[clock format [clock seconds] -format "%Y-%m-%d-%H-%M-%S"].ics"
         http_to_file $url $filename
         # insert_wedstrijden $filename
       }
     }
+    
+    # en ook hier D5.
+    set url "http://www.volleybal.nl/application/handlers/export.php?format=ical&type=team&programma=3258DS+5&iRegionId=3000"
+    set filename "$seizoen/D5-[clock format [clock seconds] -format "%Y-%m-%d-%H-%M-%S"].ics"
+    http_to_file $url $filename
+    
   }
   
   if {0} {

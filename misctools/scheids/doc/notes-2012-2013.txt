@@ -1,0 +1,31 @@
+Notes/log bij maken schema voor seizoen 2011-2012
+=================================================
+[2012-09-02 21:04:25] bij insert-input melding op package not found: htmlparse. Nu mogelijk niet meer nodig, toch even proberen.
+[2012-09-02 21:04:46] ging goed: nico@nico-MS-7760:2009:9:/opt/ActiveTcl-8.5/bin$ sudo ./teacup install htmlparse
+[2012-09-02 21:05:59] inlezen goed, zowaar in 1x:
+#wedstrijden: 181
+#wedstrijden met scheids: 69
+#wedstrijden met scheids die op dezelfde dag speelt: 35
+#wedstrijden zonder scheids die op dezelfde dag speelt: 34
+#wedstrijden waar niemand voor te vinden is: 0
+
+[2012-09-02 21:06:09] Dus echt 50/50 wedstrijden dat er wel/niet scheids ook speelt op die dag.
+[2012-09-02 21:07:12] bij lein run moesten wel weer dingen opgehaald worden, dus ook hier de vraag of ik dit wel eerder heb getest.
+[2012-09-02 21:07:30] kan ook met lein2 te maken hebben.
+[2012-09-02 21:07:45] prog loopt, weet niet of db ook gevuld wordt...
+[2012-09-02 21:08:01] voorlopig veel dingen over het scherm, wordt nog steeds betere oplossing gevonden dus.
+[2012-09-02 21:08:25] En nu ook saving solution te zien. Dit duurt elke keer paar seconden (1-3 sec?)
+[2012-09-02 21:09:54] Zag dat Ester veel wedstrijden moet, en idd nog niet ingevoerd dat zij er niet zo lang is...
+[2012-09-02 21:11:28] dan opnieuw invoeren: ./insert-input.tcl -cleandb
+[2012-09-02 21:11:47] dus niet opnieuw -fromsite.
+[2012-09-02 21:13:24] ingelezen en weer opnieuw lein run is bezig.
+[2012-09-02 21:37:30] indeling is gemaakt, maar nog problemen: Debby staat op 4096 met 4 wedstrijden, maar ook Vincent staat er gewoon
+[2012-09-02 21:38:02] met 7 wedstrijden, en hij is invaller. En Annette staat waarsch weer op 3 uit-wedstrijden, kan dit niet anders.
+[2012-09-02 21:38:46] zijn er wel maar 3, dus dat is dan een voordeel. Chris wel 8 wedstrijden, maar alle thuis, dus toch wel ok.
+[2012-09-02 21:39:35] Gert ook 2x ingedeeld. Invaller 1x. Margriet 0x ingedeeld, komt dat zo uit of is er wat anders? Reza ook 3x.
+[2012-09-02 21:40:31] Wendy ook 4x ingedeeld, maar zeer de vraag of dit lukt.
+[2012-09-02 21:41:02] ofwel, aanpassingen: Vincent eruit, Wendy ook, check Margriet. Hierna kijken wat het oplevert, ook voor Debby, Annette,
+[2012-09-02 21:41:50] Gert, Reza.
+[2012-09-02 21:42:16] Lijkt goed te doen nu, maar die 7 wedstrijden van Vincent kunnen best vertekenen.
+
+
