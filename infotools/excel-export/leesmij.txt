@@ -1,0 +1,4 @@
+met cmd /c aan te roepen of met cscript.
+hele pad opgeven, current dir is niet bekend bij excel.
+
+NdV, 3-11-2012.
