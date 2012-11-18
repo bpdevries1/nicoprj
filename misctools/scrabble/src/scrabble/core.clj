@@ -31,7 +31,9 @@
         (recur (rest lines))))))
 
 
-(defn find-re [re l]
+(defn find-re 
+  "Apply regexp re to all items in list, return items that match re"
+  [re l]
   (filter (partial re-seq re) l))
 
 (defn have-letters? 
@@ -63,8 +65,8 @@
        (find-re (re-pattern pat))
        (filter (partial have-letters? lt))))
 
-;(def sp (get-lines "/media/nas/media/Talen/Dictionaries/sowpods.txt"))
-;(def nl (get-lines "/media/nas/media/Talen/Dictionaries/wf-nl.txt"))
+(def sp (get-lines "/media/nas/media/Talen/Dictionaries/sowpods.txt"))
+(def nl (get-lines "/media/nas/media/Talen/Dictionaries/wf-nl.txt"))
 ;(def nl2 (get-lines "/media/nas/media/Talen/Dictionaries/perletter/alles-sorted.txt"))
 ; deze daggad heeft woorden van max 8 letters, is 350.000 regels.
 ;(def dnl (make-dawg-z (get-lines "/media/nas/media/Talen/Dictionaries/nl-daggad-sorted-8.txt")))

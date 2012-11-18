@@ -1109,5 +1109,14 @@ Dit alles in een:
 TODO:
 Kijken of andere manieren van laden van deze lijst van max8 als daggad ook willen, of een memory full veroorzaken, of het zin heeft gehad het zo op te lossen.
 
-  
-  
+[2012-04-09 20:22:18] op nieuwe PC is onderstaande natuurlijk gelukt:
+(def dnl (make-dawg-z (get-lines "/media/nas/media/Talen/Dictionaries/nl-max8-daggad.txt")))
+
+[2012-04-09 20:22:40] maak wil ook wel de hele lijst.
+(def dnl (make-dawg-z (get-lines "/media/nas/media/Talen/Dictionaries/nl-daggad-sorted.txt")))  
+[2012-04-09 20:33:53] iig niet instantaan.
+[2012-04-09 20:34:05] maar toch vrij vlot.
+[2012-04-09 20:35:22] en lijkt goed te werken, verdere optimalisatie dus eerst niet nodig, later mss wel?
+[2012-04-09 20:35:51] mss ook de hele struct te persisteren, en dan meteen zo in lezen, ook op oude PC.
+
+

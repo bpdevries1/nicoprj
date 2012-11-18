@@ -1,7 +1,8 @@
-(defproject scrabble "1.0.0-SNAPSHOT"
-  :description "Functions for playing scrabble"
+(defproject scrabble/scrabble "1.0.0-SNAPSHOT" 
+  :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/clojure-contrib "1.2.0"]
-                 [difform "1.1.2"]                        ; try for have-letters, not used anymore.
+                 [difform "1.1.2"]
                  [clj-diff "1.0.0-SNAPSHOT"]]
-  :main scrabble.core)            ; try for have-letters, not used anymore.
+  :main scrabble.core
+  :description "Functions for playing scrabble")
