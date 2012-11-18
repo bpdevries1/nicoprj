@@ -1,0 +1,81 @@
+Problemen bekijken indeling seizoen 2012-2013
+
+[2012-09-19 20:34:41] Maarten ingedeeld op hetzelfde moment dat hij moet spelen. Komt dit nog meer voor?
+
+koppelen: scheids,
+
+select p.naam, w1.naam, w2.naam
+from persoon p, wedstrijd w1, wedstrijd w2, scheids s
+where s.wedstrijd = w1.id
+and s.scheids = p.id
+and p.speelt_in = w2.team
+and w1.datumtijd = w2.datumtijd;
+
+select kt.scheids, w.id, kt.waarde, 1
+    from kan_team_fluiten kt, wedstrijd w, persoon p
+    where w.team = kt.team
+    and kt.scheids = p.id
+    and w.lokatie = 'thuis'
+    and p.id = 868
+    and w.id in (5284, 5185)
+    and exists (
+      select 1
+      from wedstrijd w2, persoon_team pt
+      where w2.team = pt.team
+      and pt.persoon = p.id
+      and w2.lokatie = 'thuis'
+      and date(w.datumtijd) = date(w2.datumtijd)
+      and time(w.datumtijd) <> time(w2.datumtijd)
+      and pt.soort = 'speler'
+    )
+    and not exists (
+      select 1
+      from afwezig a
+      where a.persoon = p.id
+      and date(w.datumtijd) between a.eerstedag and a.laatstedag
+    )
+    
+Mogelijke oorzaak: heb in ods/tsv aangegeven dat ze ook eigen team kunnen fluiten.
+Of omdat Maarten coach van D1 is, dus dit wordt als andere wedstrijd op dezelfde dag gezien.
+dus zie je dit ook als 'thuis' wedstrijd?
+
+Niet helemaal de oplossing: als Maarten vroeg speelt en laat coacht, kan hij met bovenstaande
+oplossing wel laat als scheids worden ingedeeld.
+Maar is nu niet probleem, hij heeft hier niet over geklaagd.
+
+
+    select kt.scheids, w.id, kt.waarde, 1
+    from kan_team_fluiten kt, wedstrijd w, persoon p
+    where w.team = kt.team
+    and p.id = 868
+    and kt.scheids = p.id
+    and w.lokatie = 'thuis'
+    and exists (
+      select 1
+      from wedstrijd w2, persoon_team pt
+      where w2.team = pt.team
+      and pt.persoon = p.id
+      and w2.lokatie = 'thuis'
+      and date(w.datumtijd) = date(w2.datumtijd)
+      and time(w.datumtijd) <> time(w2.datumtijd)
+    )
+    and not exists (
+      select 1
+      from wedstrijd w2, persoon_team pt
+      where w2.team = pt.team
+      and pt.persoon = p.id
+      and w.datumtijd = w2.datumtijd
+      and w.id <> w2.id
+    )
+    and not exists (
+      select 1
+      from afwezig a
+      where a.persoon = p.id
+      and date(w.datumtijd) between a.eerstedag and a.laatstedag
+    )
+
+Dit levert nog 202 records op, de oude 218. Vraag of dit alleen van Maarten komt.
+
+[2012-09-23 10:59:02] wie kan wedstrijd van Debby 28-9 fluiten?
+
+

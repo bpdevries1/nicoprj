@@ -11,7 +11,7 @@ left join (
    select s.wedstrijd, p.naam, s.speelt_zelfde_dag
    from scheids s, persoon p
    where s.scheids = p.id
-   and s.status in ('gemaild')
+   and s.status in ('gemaild','voorstel')
 ) as sch on sch.wedstrijd = w.id
 where w.lokatie = 'thuis'
 and w.datumtijd >= '2012-01-01'
@@ -39,7 +39,7 @@ order by 1, 2, 3]]>
 					<textElement>
 						<font size="24" isBold="true"/>
 					</textElement>
-					<textFieldExpression class="java.util.Date"><![CDATA[$F{datum}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{datum}]]></textFieldExpression>
 				</textField>
 				<line>
 					<reportElement x="-20" y="32" width="595" height="1" forecolor="#666666"/>
@@ -108,21 +108,21 @@ order by 1, 2, 3]]>
 				<textElement>
 					<font size="14"/>
 				</textElement>
-				<textFieldExpression class="java.sql.Time"><![CDATA[$F{tijd}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{tijd}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement x="69" y="0" width="301" height="20"/>
 				<textElement>
 					<font size="14"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{opmerkingen}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{opmerkingen}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="370" y="0" width="185" height="20"/>
 				<textElement>
 					<font size="14"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{naam}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{naam}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
@@ -134,17 +134,17 @@ order by 1, 2, 3]]>
 			<textField>
 				<reportElement mode="Opaque" x="0" y="4" width="515" height="13" backcolor="#E6E6E6"/>
 				<textElement textAlignment="Right"/>
-				<textFieldExpression class="java.lang.String"><![CDATA["Pagina "+$V{PAGE_NUMBER}+" van"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Pagina "+$V{PAGE_NUMBER}+" van"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement mode="Opaque" x="515" y="4" width="40" height="13" backcolor="#E6E6E6"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd-MM-yyyy">
 				<reportElement x="0" y="4" width="276" height="13"/>
 				<textElement/>
-				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>

@@ -52,8 +52,7 @@ proc maak_ovz_wedstrijden {conn outdir} {
     $hh table_row $datum $tijd $lokatie $w $p_naam $zd
   }
   $hh table_end
-  $hh write_footer
-  close $f
+  close_html $f $hh
 }
 
 proc maak_wedstrijden {conn outdir} {
@@ -76,6 +75,7 @@ proc maak_wedstrijd {conn outdir w_id w_naam} {
     $hh table_row {*}$row
   }
   $hh table_end
+  close_html $f $hh
 }
 
 proc open_html {filename title} {
@@ -86,7 +86,10 @@ proc open_html {filename title} {
   list $f $hh  
 }
 
-
+proc close_html {f hh} {
+  $hh write_footer
+  close $f
+}
 
 # gebruik -list
 proc sqlsel {query} {

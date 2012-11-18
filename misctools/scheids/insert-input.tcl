@@ -3,6 +3,10 @@
 # @todo waarsch bug in mysqltcl, waardoor é etc niet goed in mysql db terechtkomen. Wel goed in html, ook goed in log (utf-8), niet goed in DB, zowel in 
 # sql explorer als in web2py.
 
+# TODO EIND 2012:
+# wedstrijden opnieuw inlezen, ook beschikbaarheid scheidsen opnieuw inlezen, bv Debby en Maarten.
+# paar wedstrijden vervallen en bijgekomen.
+
 package require ndv
 package require http
 package require htmlparse
@@ -166,36 +170,31 @@ proc insert_afwezig {} {
   # 31-12-2011 kan Reza deze wedstrijd niet doen?
   # insert_afwezig_persoon "Chris Meijer" "Forced afwezig" "2012-04-13"
   
-  # regio scheidsen - 1e scheids
-  # insert_afwezig_persoon "Reza Gharsi" "Regiowedstrijd 1e" "2011-10-14" 
-  # insert_afwezig_persoon "Reza Gharsi" "Regiowedstrijd 1e" "2011-10-01"
-  # insert_afwezig_persoon "Gert van de Meent" "Regiowedstrijd 1e" "2011-10-27"
-  # insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 1e" "2011-10-01"
-  # insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 1e" "2011-10-08"
+  # regio scheidsen
+  # 4-9-2012 alleen 2x Reza in eerste aanwijzing
+  insert_afwezig_persoon "Reza Gharsi" "Regiowedstrijd 1e" "2012-09-22" 
+  insert_afwezig_persoon "Reza Gharsi" "Regiowedstrijd 1e" "2012-09-29"
   
-  # regio scheidsen - 2e scheids
-  # insert_afwezig_persoon "Reza Gharsi" "Regiowedstrijd 2e" "2011-10-15"
-  # insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 2e" "2011-09-24"
-  # insert_afwezig_persoon "Jan-Albert Kootstra" "Regiowedstrijd 2e" "2011-10-15"
-  
-  # insert_afwezig_persoon "Maarten Wispelwey" "2010-10-08" "2010-10-08" "Coach D1"
-  # in 2010 heeft Maarten de kinderen in de oneven weken, dan dus afwezig.
-  # bepaal eerste afwezig, dan steeds 14d erbij.
-  # 17-9-2010 is week 37, dus oneven, dus afwezig
+  # 30-9-2012 schema bekeken van Leon dd 28-9-2012, maar geen nieuwe wedstrijden voor Reza en Gert als 1e of 2e scheids.  
   
   # 2-9-2012 Ester zwanger, tot begin november
-  insert_afwezig_persoon "Ester Hilhorst" "Zwanger" "2012-11-07" "2013-06-12"
+  insert_afwezig_persoon "Ester Hilhorst" "Zwanger" "2012-11-07" "2013-06-30"
+  
+  insert_afwezig_persoon "Nico de Vreeze" "Vakantie" "2012-10-13" "2012-10-21"
+  insert_afwezig_persoon "Nico de Vreeze" "Vakantie?" "2012-12-15" "2013-01-31"
+  insert_afwezig_persoon "Nico de Vreeze" "Niet di" "2012-09-18" "2012-09-18"
+  
+  insert_afwezig_persoon "Annette Wolda" "Niet sep" "2012-09-01" "2012-09-30"
+  # 30-9-2012 mental note: nieuwe scheidsrechters niet meteen begin seizoen indelen, was 2012-2013 wat lastig met Tessa.
   
   insert_afwezig_maarten
   
-  # Mail Wendy 23-12: Je kan me echter wel indelen op 13-1-12 om 21.30 en op 16-3-12 om 21.30 uur. 
-  #insert_afwezig_persoon "Wendy van der Woerd" "Werken" "2012-01-01" "2012-01-12"
-  #insert_afwezig_persoon "Wendy van der Woerd" "Werken" "2012-01-14" "2012-03-15"
-  #insert_afwezig_persoon "Wendy van der Woerd" "Werken" "2012-03-17" "2012-07-01"
 }
 
 proc insert_afwezig_maarten {} {
-  set datum "2012-01-13" ; # week 2, maarten even weken de kinderen. In SMS staat dat 'ie (in 2012) oneven weken kan, vanaf 20-1-2012.
+  # week 2, maarten even weken de kinderen. In SMS staat dat 'ie (in 2012) oneven weken kan, vanaf 20-1-2012.
+  # Mail 4-9-2012: kan nog steeds oneven weken.
+  set datum "2012-01-13"
   while {$datum <= "2013"} {
     insert_afwezig_persoon "Maarten Wispelwey" "Kinderen" $datum
     set sec [clock scan $datum -format "%Y-%m-%d"]
@@ -203,7 +202,8 @@ proc insert_afwezig_maarten {} {
     set datum [clock format $sec_2w -format "%Y-%m-%d"]
   }
 
-  # in 2012 kan 'ie dan waarsch weer even weken wel, dus oneven niet. 4-1-2013 is week 1.
+  # in 2013 kan 'ie dan waarsch weer even weken wel, dus oneven niet. 4-1-2013 is week 1.
+  # Mail 4-9-2012: erg onduidelijk, eerst maar zo doen..
   set datum "2013-01-04" ; # week 1, maarten oneven weken de kinderen.
   while {$datum <= "2014"} {
     insert_afwezig_persoon "Maarten Wispelwey" "Kinderen" $datum
@@ -573,7 +573,7 @@ proc http_to_file {url filename} {
 
 # @return: 0 if not found, or the contents of the line if found
 # @side effect: file pointer is below the found line.
-# @note not used in this file.
+# @note not used in this file/script.
 proc find_in_file {f re} {
   set found 0
   while {![eof $f]} {
@@ -625,6 +625,37 @@ proc insert_kan_wedstrijd_fluiten {} {
   exec_query $query
   
   # deel 2 persoon kan team fluiten en heeft ook thuiswedstrijd die dag (als speler of coach) op ander tijdstip.
+  # 19-9-2012 NdV kan zijn dat persoon vroeg speelt en laat coacht (Maarten), kan dan geen wedstrijd fluiten die avond.
+  # 19-9-2012 NdV nog niet helemaal goede oplossing, beter om er nog een not-exists in te zetten. => gedaan 19-9-2012.
+  set query "
+    insert into kan_wedstrijd_fluiten (scheids, wedstrijd, waarde, speelt_zelfde_dag)
+    select kt.scheids, w.id, kt.waarde, 1
+    from kan_team_fluiten kt, wedstrijd w, persoon p
+    where w.team = kt.team
+    and kt.scheids = p.id
+    and w.lokatie = 'thuis'
+    and exists (
+      select 1
+      from wedstrijd w2, persoon_team pt
+      where w2.team = pt.team
+      and pt.persoon = p.id
+      and w2.lokatie = 'thuis'
+      and date(w.datumtijd) = date(w2.datumtijd)
+      and time(w.datumtijd) <> time(w2.datumtijd)
+      and pt.soort = 'speler'
+    )
+    and not exists (
+      select 1
+      from afwezig a
+      where a.persoon = p.id
+      and date(w.datumtijd) between a.eerstedag and a.laatstedag
+    )
+"
+
+  # 19-9-2012 NdV deze niet meer uitvoeren, maar die hieronder.
+  # exec_query $query
+
+  # 19-9-2012 NdV dus eigenlijk beter, nog niet getest:
   set query "
     insert into kan_wedstrijd_fluiten (scheids, wedstrijd, waarde, speelt_zelfde_dag)
     select kt.scheids, w.id, kt.waarde, 1
@@ -643,14 +674,21 @@ proc insert_kan_wedstrijd_fluiten {} {
     )
     and not exists (
       select 1
+      from wedstrijd w2, persoon_team pt
+      where w2.team = pt.team
+      and pt.persoon = p.id
+      and w.datumtijd = w2.datumtijd
+      and w.id <> w2.id
+    )
+    and not exists (
+      select 1
       from afwezig a
       where a.persoon = p.id
       and date(w.datumtijd) between a.eerstedag and a.laatstedag
     )
 "
-
   exec_query $query
-
+  
 }
 
 
