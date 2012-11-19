@@ -1,2 +1,0 @@
-grep -r -i todo * | grep "\.clj:"
-
