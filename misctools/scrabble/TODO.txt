@@ -1,4 +1,0 @@
-[2012-01-13 13:32:23] alle 2 letter woorden in aparte lijst, deze vaak nodig bij bepalen 'kruis'woorden.
-[2012-01-13 13:33:48] per rij: in welke cellen kun je een letter doen, hoe is dituit te breiden?
-[2012-01-13 13:37:08] alg: structuur printen, soort pretty print, maar niet van alles, maar alleen van 'unieke' dingen, wel vraag wat uniek is.
-[2012-01-22 11:39:23] GADDAG is de data structuur, Quackle is het programma, ook op wikipedia te vinden.
