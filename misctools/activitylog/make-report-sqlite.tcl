@@ -130,11 +130,16 @@ proc make_report {report_basename} {
 }
 
 proc add_prev_next_links {hh date} {
-  set day [expr 24 * 60 * 60]
-  set prev_date [clock format [expr [clock scan $date -format "%Y-%m-%d"] - $day] -format "%Y-%m-%d"]  
-  set next_date [clock format [expr [clock scan $date -format "%Y-%m-%d"] + $day] -format "%Y-%m-%d"]
-  $hh href "\[$prev_date\]" "report-$prev_date.html"
-  $hh href "\[$next_date\]" "report-$next_date.html"
+  log info "Add_prev_next_links for date: $date"
+  if {$date == ""} {
+    $hh href "Empty date!" "Emptydate.html" 
+  } else {
+    set day [expr 24 * 60 * 60]
+    set prev_date [clock format [expr [clock scan $date -format "%Y-%m-%d"] - $day] -format "%Y-%m-%d"]  
+    set next_date [clock format [expr [clock scan $date -format "%Y-%m-%d"] + $day] -format "%Y-%m-%d"]
+    $hh href "\[$prev_date\]" "report-$prev_date.html"
+    $hh href "\[$next_date\]" "report-$next_date.html"
+  }
 }
 
 proc report_time_group {hh tg_id tg_start tg_end} {
