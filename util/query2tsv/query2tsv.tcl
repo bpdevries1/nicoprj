@@ -2,6 +2,8 @@
 
 catch {package require tclodbc}
 catch {package require mysqltcl}
+catch {package require sqlite3}
+
 package require ndv
 package require Tclx
 
@@ -14,7 +16,7 @@ proc main {argc argv} {
   set options {
     {q.arg "" "Query"}
     {f.arg "result.tsv" "Result file"}
-    {conntype.arg "mysql" "Connection type (mysql or odbc)"}
+    {conntype.arg "mysql" "Connection type (mysql, sqlite or odbc)"}
     {db.arg "ForceDB" "Gebruik database"}
     {user.arg "sql_perf" "Gebruik database user"}
     {pw.arg "Welkom01" "Gebruik database password"}
@@ -39,6 +41,8 @@ proc main {argc argv} {
     do_odbc $ar_argv(db) $ar_argv(user) $ar_argv(pw) $f $ar_argv(q)  
   } elseif {$ar_argv(conntype) == "mysql"} {
     do_mysql $ar_argv(db) $ar_argv(user) $ar_argv(pw) $f $ar_argv(q)
+  } elseif {$ar_argv(conntype) == "sqlite"} {
+    do_sqlite $ar_argv(db) $f $ar_argv(q)
   }
   
   close $f
@@ -63,6 +67,18 @@ proc do_mysql {db user pw f query} {
     puts $f [join $row "\t"]
   }
   ::mysql::close $conn
+}
+
+proc do_sqlite {db f query} {
+  sqlite3 db $db
+  db eval $query values {
+    set row {}
+    foreach el $values(*) {
+      lappend row $values($el)
+    }
+    puts $f [join $row "\t"]
+  }
+  db close
 }
 
 main $argc $argv
