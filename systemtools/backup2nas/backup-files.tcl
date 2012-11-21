@@ -70,10 +70,10 @@ proc main {argc argv} {
   ::ndv::CLogger::set_logfile [file join $params(settingsdir) "backup2nas.log"]
   
   $log info START
-  $log debug "argv: $argv"
-  $log debug "paths: $params(p)"
-  $log debug "target: $params(t)"
-  
+  $log info "argv: $argv"
+  $log info "paths: $params(p)"
+  $log info "target: $params(t)"
+  $log info "settingsdir: $params(settingsdir)" 
   backup_main
   
   $log info FINISHED
@@ -152,6 +152,10 @@ proc set_params {} {
     $log info "No -w or -p given, backup everything!"
     set time_treshold 0 
   }
+  $log info "lst_ignore_regexps: $lst_ignore_regexps"
+  $log info "lst_paths: $lst_paths"
+  $log info "time_treshold: $time_treshold"
+  $log info "time_treshold as time: [clock format $time_treshold]"
   list $lst_ignore_regexps $lst_paths $time_treshold
 }
 
