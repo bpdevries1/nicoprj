@@ -42,6 +42,12 @@ proc init_group_regexps {} {
 	
 	# Van Oord vanaf 27-1-2012
 	add_res VanOord {Van.?Oord} {VO_}
+
+	# GMZ vanaf ergens maaert 2012
+	add_res GMZ {GMZ} {Zwolle} {Productie Non-Persistent}
+	
+	# Maxima medisch centrum vanaf maart 2012
+	add_res MMC {MMC} {Maxima}
 	
 	# PA-Rol
 	add_re {HPM2011} YmorPA 
@@ -51,7 +57,7 @@ proc init_group_regexps {} {
 	add_res Ymor {uren-week} {YMR_} {Ymonitor} {TOPdesk} {YViewer} {uren-saldo}
 	
 	# AutoHotkey, onderdeel tooling algemeen en maasstad
-	add_res AHK {AutoHotkey \.ahk autohotkey}
+	add_res AHK {AutoHotkey} {\.ahk} {autohotkey}
 	
 	# on Linux
 	add_re {Git Gui} Programming
