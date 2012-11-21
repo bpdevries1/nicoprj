@@ -8,6 +8,15 @@ package require struct ; # matrices.
 
 package provide ndv 0.1.1
 
+if {0} {
+  # Examples:
+
+  set hh [ndv::CHtmlHelper::new]
+  $hh set_channel $f
+  $hh write_header "Header" 0
+
+}
+
 namespace eval ::ndv {
 	# class maar eenmalig definieren
 	if {[llength [itcl::find classes CHtmlHelper]] > 0} {
@@ -254,6 +263,6 @@ namespace eval ::ndv {
         file copy -force $filename $output_path 
       }
     }
-	}
+  }
 
 }
