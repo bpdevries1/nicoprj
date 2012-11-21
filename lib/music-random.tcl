@@ -56,6 +56,10 @@ namespace eval ::ndv {
     set query "select id, freq, play_count from $ar_opts(viewmain)"
     set result [::mysql::sel $conn $query -list]
     set nrecords [llength $result]
+    # 31-5-2012 NdV try start transaction/commit to improve speed. This does indeed work!
+    # Could also be a different db implementation, like InnoDB, not sure if the one used here is the same as before.
+    $log debug "start transaction"
+    ::mysql::exec $conn "start transaction"
     set i 0
     foreach record $result {
       incr i
@@ -67,6 +71,9 @@ namespace eval ::ndv {
       $log trace "freq_history = $freq_history => $total_sum * ((1.0 * $freq / $F_sum) - ((1.0 * $play_count / $total_sum)))"
       $db update_object $ar_opts(tablemain) $id -freq_history $freq_history
     }
+    # 31-5-2012 NdV ... and also commit.
+    ::mysql::exec $conn "commit"
+    $log debug "Executed commit (after start transaction)"
   }
 
   proc choose_random {db n} {
