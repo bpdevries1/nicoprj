@@ -15,6 +15,7 @@ proc main {argc argv} {
   search_files $env(MEDIA_COMPLETE) $search_strings
   puts "====================="
   search_files $env(MEDIA_NEW) $search_strings
+  search_files $env(MEDIA_TEMP) $search_strings
 }
 
 proc check_params {argc argv} {
@@ -41,7 +42,13 @@ proc search_files {dir search_strings} {
       }
     }
     if {$search_found_all} {
-      puts "\[[format %6.0f [det_size_kb $el]]k\] $el"
+      # puts "\[[format %6.0f [det_size_kb $el]]k\] $el"
+      # puts "\[[format %7s [commify [det_size_kb $el]]]k\] $el"
+      # puts "\[[format %6.0f [det_size_kb $el]]k\] $el"
+      
+      puts "\[[format %7s [commify [format %.0f [det_size_kb $el]]]]k\] $el"
+      
+      
     }
     if {$search_found_one} {
       if {[file isdirectory $el]} {
@@ -65,6 +72,20 @@ proc det_size_kb {path} {
   } else {
     return 0.0 
   }
+}
+
+# commify --
+#   puts commas into a decimal number
+# Arguments:
+#   num		number in acceptable decimal format
+#   sep		separator char (defaults to English format ",")
+# Returns:
+#   number with commas in the appropriate place
+#
+
+proc commify {num {sep ,}} {
+    while {[regsub {^([-+]?\d+)(\d\d\d)} $num "\\1$sep\\2" num]} {}
+    return $num
 }
 
 main $argc $argv
