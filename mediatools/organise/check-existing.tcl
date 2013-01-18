@@ -1,6 +1,10 @@
 #!/home/nico/bin/tclsh
 
+# [2013-01-13 13:55:35] dit script even onduidelijk waar het voor is, met show-tijdelijk iig tijdelij en albums te zien.
+
 package require Itcl
+# [2013-01-13 13:51:04] use package ndv
+package require ndv
 
 source [file join [file dirname [info script]] .. .. lib CLogger.tcl]
 source [file join [file dirname [info script]] .. lib libmusic.tcl]
