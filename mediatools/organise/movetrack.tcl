@@ -30,11 +30,24 @@ proc det_current_filename {} {
 # @todo ook andere tekens vervangen, is vast wel std lib voor.
 proc url_to_filename {url} {
   if {[regexp {^file://(.+)$} $url z filename]} {
-    regsub -all {%20} $filename " " filename 
+    set filename [encoding convertfrom utf-8 [url_decode $filename]]
   } else {
     error "Cannot convert to filename: $url" 
   }
   return $filename
+}
+
+# from http://wiki.tcl.tk/14144
+proc url_decode str {
+    # rewrite "+" back to space
+    # protect \ from quoting another '\'
+    set str [string map [list + { } "\\" "\\\\"] $str]
+
+    # prepare to process all %-escapes
+    regsub -all -- {%([A-Fa-f0-9][A-Fa-f0-9])} $str {\\u00\1} str
+
+    # process \u unicode mapped chars
+    return [subst -novar -nocommand $str]
 }
 
 proc move_next {} {
