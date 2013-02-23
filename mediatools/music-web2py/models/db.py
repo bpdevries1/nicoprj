@@ -14,7 +14,7 @@ if request.env.web2py_runtime_gae:            # if running on Google App Engine
     # session.connect(request, response, db=MEMDB(Client())
 else:                                         # else use a normal relational database
     # db = DAL('sqlite://storage.sqlite')       # if not, use SQLite or other DB
-    db = DAL("mysql://nico:pclip01;@localhost:3306/music")    
+    db = DAL("mysql://qqq:qqq@localhost:3306/music")    
 ## if no need for session
 # session.forget()
 
