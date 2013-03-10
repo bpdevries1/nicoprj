@@ -3,6 +3,7 @@
 # @todo separate general functionality with specific music functionality
 package require Itcl
 package require ndv
+package require json
 
 # class maar eenmalig definieren
 if {[llength [itcl::find classes MusicSchemaDef]] > 0} {
@@ -30,9 +31,12 @@ itcl::class MusicSchemaDef {
   
 	public constructor {} {
 		set conn ""
-		
 		set no_db 0 ; # default is een db beschikbaar.
-		set_db_name_user_password music nico "pclip01;"
+		set f [open ~/.ndv/music-settings.json r]
+		set text [read $f]
+		close $f
+		set d [json::json2dict $text]
+		set_db_name_user_password [dict get $d database] [dict get $d user] [dict get $d password]
 	}
 
 	private method define_classes {} {

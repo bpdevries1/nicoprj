@@ -1,5 +1,8 @@
 #!/home/nico/bin/tclsh
 
+# 23-2-2013 NdV waarsch deze om ratings uit amarok te halen en in music-db te zetten.
+# werkte nog op amarok, heb nu amarok2, dus oud.
+
 package require ndv
 package require Tclx
 # package require struct::list
@@ -57,8 +60,8 @@ proc main {argc argv} {
 }
 
 proc get_amarok_rating {} {
-  set conn [::mysql::connect -host localhost -user nico \
-    -password "pclip01;" -db amarok]
+  set conn [::mysql::connect -host localhost -user QQQ \
+    -password "qqq" -db amarok]
   set query "select url, rating from statistics where rating >0 and url like '%Singles%'"
   set result [::mysql::sel $conn $query -list]
   ::mysql::close $conn

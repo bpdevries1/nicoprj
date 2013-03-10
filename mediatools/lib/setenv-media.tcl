@@ -9,4 +9,7 @@ set env(MEDIA_SCRIPTS) /home/nico/nicoprj/mediatools/playlist
 set env(MEDIA_COMPLETE) $env(MEDIA_MUSIC)/Albums
 set env(MEDIA_SINGLES) $env(MEDIA_MUSIC)/Singles
 
+# [2013-01-13 13:57:39] add new temp-dir
+set env(MEDIA_TEMP) "/home/nico/media/tijdelijk"
+
 

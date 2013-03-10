@@ -29,12 +29,6 @@ proc main {argc argv} {
     ::ndv::CLogger::set_log_level_all $ar_argv(loglevel) 
   }
   
-  #set schemadef [MusicSchemaDef::new]
-  #set db [::ndv::CDatabase::get_database $schemadef]
-  #set conn [$db get_connection]
-  #::mysql::exec $conn "set names utf8"
-  # lassign [db_connect] db conn
-  # lassign [db_connect_with_retry] db conn
   db_connect_with_retry ; # post: db and conn have correct values.
  
   monitor_loop $ar_argv(wait) $ar_argv(np)
@@ -57,6 +51,8 @@ proc monitor_loop {wait np} {
           $log debug "Don't mark as played in database (-np param): $path" 
         }
       }
+    } else {
+      $log debug "det_playing: 0" 
     }
     # after $ar_argv(wait)
     after $wait
@@ -84,7 +80,25 @@ proc mark_played {path} {
   }          
 }
 
+# evt onderstaande gebruiken, 2x na elkaar, kijk of position anders is.
+# org.freedesktop.MediaPlayer.PositionGet
+# GetStatus
+# qdbus --literal org.kde.amarok /Player GetStatus
+# [Argument: (iiii) 1, 0, 0, 0] -> paused, allemaal 0 is playing.
+
 proc det_playing {} {
+  try_eval {  
+    set res [exec qdbus --literal org.kde.amarok /Player GetStatus]
+    if {[regexp {Argument: \(iiii\) 0, 0, 0, 0} $res]} {
+      return 1 
+    }
+  } {
+    # amarok probably not started (yet).
+  }
+  return 0
+}
+
+proc det_playing_old {} {
   try_eval {  
     set res [exec dcop amarok player isPlaying]
     if {$res == "true"} {
@@ -97,15 +111,47 @@ proc det_playing {} {
 }
 
 proc det_playing_path {} {
+  set res [exec qdbus org.kde.amarok /Player org.freedesktop.MediaPlayer.GetMetadata]
+  if {[regexp {location: ([^\n]+)} $res z url]} {
+    puts "url: $url" 
+  }
+  url_to_filename $url
+}
+
+proc url_to_filename {url} {
+  if {[regexp {^file://(.+)$} $url z filename]} {
+    set filename [encoding convertfrom utf-8 [url_decode $filename]]
+  } else {
+    error "Cannot convert to filename: $url" 
+  }
+  return $filename
+}
+
+# from http://wiki.tcl.tk/14144
+proc url_decode str {
+    # rewrite "+" back to space
+    # protect \ from quoting another '\'
+    set str [string map [list + { } "\\" "\\\\"] $str]
+
+    # prepare to process all %-escapes
+    regsub -all -- {%([A-Fa-f0-9][A-Fa-f0-9])} $str {\\u00\1} str
+
+    # process \u unicode mapped chars
+    return [subst -novar -nocommand $str]
+}
+
+proc det_playing_path_old {} {
   return [exec dcop amarok player path] 
 }
 
 # 14-1-2012 long runnning app, so db connection may go away; thus a reconnect may be necessary.
-proc db_connect_with_retry {} {
+proc db_connect_with_retry {{max_try 3}} {
   global log
   set ok 0
   set res "nil"
-  while {!$ok} {
+  set i 0
+  while {!$ok && ($i < $max_try)} {
+    incr i
     try_eval {
       $log info "Trying to connect to db"
       set res [db_connect]
