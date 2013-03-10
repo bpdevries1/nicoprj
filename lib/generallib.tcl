@@ -31,7 +31,7 @@ set intLevel(critical) 0
 
 set loggers(DEFAULT) 0
 
-proc log {str {level critical} {service "DEFAULT"} {pref_stacklevel -1}} {
+proc log_old {str {level critical} {service "DEFAULT"} {pref_stacklevel -1}} {
 	global LOGLEVEL stderr loggers intLevel
 
 	if {[regexp {^-?[0-9]+$} $level]} {
@@ -550,5 +550,30 @@ proc catch_call {catch_result args} {
     set result $catch_result
   }
   return $result
+}
+
+#############################################
+# Directory walking                         #
+#############################################
+proc handle_dir_rec {dir globpattern actionproc {rootdir ""}} {
+  if {$rootdir == ""} {
+    set rootdir $dir 
+  }
+  foreach filename [glob -nocomplain -directory $dir -type f $globpattern] {
+    $actionproc $filename $rootdir
+  }
+  foreach dirname [glob -nocomplain -directory $dir -type d *] {
+    handle_dir_rec $dirname $globpattern $actionproc $rootdir
+  }
+}
+
+proc det_relative_path {sourcefile rootdir} {
+  string range $sourcefile [string length $rootdir]+1 end
+}
+
+proc log {args} {
+  global log
+  # variable log
+  $log {*}$args
 }
 
