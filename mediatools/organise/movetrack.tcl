@@ -27,7 +27,6 @@ proc det_current_filename {} {
   url_to_filename $url
 }
 
-# @todo ook andere tekens vervangen, is vast wel std lib voor.
 proc url_to_filename {url} {
   if {[regexp {^file://(.+)$} $url z filename]} {
     set filename [encoding convertfrom utf-8 [url_decode $filename]]
