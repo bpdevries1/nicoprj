@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Test</title>
+        <script type="text/javascript" src="d3/d3.v2.js"></script>
+        <link rel="stylesheet" href="chapter6.css">
+    </head>
+    <body>
+
+	<script type="text/javascript">
+//Width and height
+var w = 600;
+var h = 250;
+
+var barPadding = 1;
+var fct_y = 4;
+var dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
+                11, 12, 15, 20, 18, 17, 16, 18, 23, 25];
+
+var xScale = d3.scale.ordinal()
+                .domain(d3.range(dataset.length))
+                .rangeRoundBands([0, w], 0.05);                
+                
+var yScale = d3.scale.linear()
+        .domain([0, d3.max(dataset)])
+        .range([0, h]);
+                
+// var barWidth = w / dataset.length - barPadding;
+
+//Create SVG element
+var svg = d3.select("body")
+            .append("svg")
+            .attr("width", w)
+            .attr("height", h);
+            
+svg.selectAll("rect")
+   .data(dataset)
+   .enter()
+   .append("rect")
+   .attr("x", function(d, i) {
+               return xScale(i);         // <-- Set x values
+              })
+   .attr("y", function(d) {
+      return h - yScale(d);
+   })
+   .attr("width", xScale.rangeBand())
+   .attr("height", function(d) {
+      return yScale(d);
+   })
+   .attr("fill", function(d) {
+      return "rgb(0, 0, " + (d * 10) + ")";
+   });
+
+//Create labels   
+svg.selectAll("text")
+   .data(dataset)
+   .enter()
+   .append("text")
+   .text(function(d) {
+        return d;
+   })
+   .attr("x", function(d, i) {
+        return xScale(i) + xScale.rangeBand() / 2;
+   })
+   .attr("y", function(d) {
+        return h - yScale(d) + 14;
+   })
+   .attr("font-family", "sans-serif")
+   .attr("font-size", "11px")
+   .attr("fill", "white")
+   .attr("text-anchor", "middle");
+
+		</script>        
+
+<p>Click on this text to update the chart with new data values as many times as you like!</p>		
+
+	<script type="text/javascript">
+d3.select("p")
+  .on("click", function() {
+        //Do something  on click
+        console.log("clicked");
+        ease = "cubic-in-out";
+        // alert("Hey, don't click that!");
+        //New values for dataset
+        var numValues = dataset.length;                     //Count original length of dataset
+        dataset = [];                                       //Initialize empty array
+        for (var i = 0; i < numValues; i++) {               //Loop numValues times
+            var newNumber = Math.round(Math.random() * 25); //New random integer (0-25)
+            dataset.push(newNumber);                        //Add new number to array
+        };        
+        svg.selectAll("rect")
+           .data(dataset);     //New data successfully bound, sir!      
+        svg.selectAll("rect")
+           .data(dataset)
+           .transition()
+           .delay(function(d, i) {
+                return i * 100;
+            })
+           .duration(500) // logischer om het bij de transition te doen?
+           .ease(ease)
+           .attr("y", function(d) {
+                return h - yScale(d);
+           })
+           .attr("height", function(d) {
+                return yScale(d);
+           })
+           .attr("fill", function(d) {   // <-- Down here!
+                return "rgb(0, 0, " + (d * 10) + ")";
+           });
+        svg.selectAll("text")
+           .data(dataset)
+           .transition()        // <-- This is new,
+           .delay(function(d, i) {
+                return i * 100;
+            })
+           .duration(500)      //     and so is this.
+           .ease(ease)
+           .text(function(d) {
+                return d;
+           })
+           .attr("x", function(d, i) {
+                return xScale(i) + xScale.rangeBand() / 2;
+           })
+           .attr("y", function(d) {
+                return h - yScale(d) + 14;
+           });           
+   });
+
+	</script>        
+
+    </body>
+</html>

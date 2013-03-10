@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Test</title>
+        <script type="text/javascript" src="d3/d3.v2.js"></script>
+        <link rel="stylesheet" href="chapter6.css">
+    </head>
+    <body>
+
+<hr/>
+<div id="div2">
+	<script type="text/javascript">
+
+			var dataset = [];  						 //Initialize empty array
+			for (var i = 0; i < 25; i++) {			 //Loop 25 times
+				// var newNumber = Math.random() * 30;  //New random number (0-30)
+				var newNumber = Math.round(Math.random() * 30);
+				dataset.push(newNumber);			 //Add new number to array
+			}
+			// @todo onderstaand xpath (?) werkt niet, nog eens kijken hoe dit wel moet.
+			// met een append werkt het dus, maar niet altijd wat je wilt.
+			d3.select("body").append("div").selectAll("div")
+				.data(dataset)
+				.enter()
+				.append("div")
+				.attr("class", "bar")
+				.style("height", function(d) {
+					var barHeight = d * 5;
+					return barHeight + "px";
+				});
+			
+		</script>        
+</div>        
+
+	<script type="text/javascript">
+//Width and height
+var w = 500;
+var h = 50;
+
+var svg = d3.select("body")
+            .append("svg")
+            .attr("width", w)
+            .attr("height", h);
+
+var dataset = [ 5, 10, 15, 20, 25 ];
+
+var circles = svg.selectAll("circle")
+                 .data(dataset)
+                 .enter()
+                 .append("circle");
+
+circles.attr("cx", function(d, i) {
+            return (i * 50) + 25;
+        })
+       .attr("cy", h/2)
+       .attr("r", function(d) {
+            return d;
+       })
+       .attr("fill", "yellow")
+       .attr("stroke", "orange")
+       .attr("stroke-width", function(d) {
+           return d/2;
+       });
+                 
+		</script>        
+
+    </body>
+</html>
