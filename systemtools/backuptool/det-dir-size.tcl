@@ -86,7 +86,9 @@ proc det_size_dir {conn path recur_size isroot} {
   $log info "Handle $path"
   set ftmp [file tempfile tempfilename]
   $log debug "Putting output for $path in $tempfilename"  
-  catch {exec -ignorestderr du -m --max-depth=1 --time $path >@$ftmp}
+  # catch {exec -ignorestderr du -m --max-depth=1 --time $path >@$ftmp}
+  exec_du $path $ftmp 
+  
   close $ftmp
   set res [read_file $tempfilename]
   # $log debug "Do not delete tempfile now"
@@ -114,6 +116,17 @@ proc det_size_dir {conn path recur_size isroot} {
       $log warn "Could not parse line: $line"
       breakpoint 
     }
+  }
+}
+
+proc exec_du {path ftmp} { 
+  global tcl_platform
+  if {$tcl_platform(platform) == "windows"} {
+    catch {exec -ignorestderr c:/util/cygwin/bin/du.exe -m --max-depth=1 --time $path >@$ftmp}
+  } elseif {$tcl_platform(platform) == "unix"} {
+    catch {exec -ignorestderr du -m --max-depth=1 --time $path >@$ftmp}
+  } else {
+    error "Unknown platform: $tcl_platform(platform)"  
   }
 }
 
