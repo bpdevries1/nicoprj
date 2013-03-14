@@ -4,8 +4,6 @@ require "EmailFolders.rb"
 require "FolderChooser.rb"
 require "LoggerFactory.rb"
 
-# @todo maak onderscheid tussen learning mode (nu default) en auto-mode.
-
 # alle OLE objecten hebben blijkbaar dezelfde class: WIN32OLE. Hier Enumerable aan
 # toevoegen, zodat bv find beschikbaar komt.
 class WIN32OLE
@@ -20,7 +18,7 @@ class Main
   end
   
   def run
-		puts "Outlook Move Ruby"
+		# puts "Outlook Move Ruby"
 		myApp = WIN32OLE::new("outlook.Application")
 		WIN32OLE.const_load(myApp, OutlookConst)
 
@@ -34,17 +32,19 @@ class Main
 		@email_folders = EmailFolders.new("emailfolders.xml", @ff)
 
 		# handle_folder(ns, "Persoonlijke mappen/Postvak IN")
-		handle_folder(ns, "Mailbox - Nico de Vreeze/Inbox")
-		# handle_folder(ns, "Persoonlijke mappen/Verzonden items")
+		handle_folder(ns, "Mailbox - Nico de Vreeze/Inbox/Alerts")
+		#handle_folder(ns, "Persoonlijke mappen/Verzonden items")
 
-		# handle_todo_folder(ns, "Persoonlijke mappen/Taken", "Personal/Taken/Afgeronde taken")
+		#handle_todo_folder(ns, "Persoonlijke mappen/Taken", "Personal/Taken/Afgeronde taken")
 
 		@email_folders.close
   end
 
 	def handle_folder(ns, folder_name)
-		fl_source = @ff.find_folder_path(ns, folder_name)
-		puts "Found folder, name = #{fl_source.name}"
+		# puts "Handle_folder: start, ns = #{ns}"
+		@log.debug("Handle_folder: start, ns = #{ns}")
+	  fl_source = @ff.find_folder_path(ns, folder_name)
+		# puts "Found folder, name = #{fl_source.name}"
 		handle_items(fl_source)
 	end
 
@@ -57,9 +57,15 @@ class Main
 		index = 1
 		copy.each {
 			|msg| 
-			choice = handle_item(msg, index, total)
-			index += 1
-			break if choice.action == "quit"
+			# nodig: Body, Subject evt, SentOn
+			# puts "#{msg.SentOn}: #{msg.Subject} --- #{msg.Body[0,500]}"
+			if /ELI_E2E/ =~ msg.Subject
+			  str = /(For transaction: [^\n]+)\n/.match(msg.Body)[1]
+			  puts "#{msg.SentOn}: #{msg.Subject} --- #{str}"
+			end
+			#choice = handle_item(msg, index, total)
+			#index += 1
+			#break if choice.action == "quit"
 		}
 	end
 

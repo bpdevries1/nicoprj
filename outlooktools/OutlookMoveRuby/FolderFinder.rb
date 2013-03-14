@@ -9,7 +9,11 @@ class FolderFinder
 	def initialize
  		@log = LoggerFactory.instance.get_logger "FolderFinder"
  		@log.level=INFO
- 		# @log.level=DEBUG
+ 		#puts "---"
+ 		#puts "Init logger done, log = #{@log}"
+ 		#@log.info("Logger started")
+ 		#@log.level=DEBUG
+ 		@log.debug("Logger started")
 	end
 	
 	def set_namespace(ns)
@@ -48,6 +52,7 @@ class FolderFinder
 		return parent_folder if parent_folder == nil
 		
 		folders = parent_folder.Folders
+		# folders.each {|folder| puts "Folder: #{folder.name}"}
 
 		result = folders.find {|folder| folder.name == folder_name}
 		@log.debug("Result of find_folder: #{result.name}") if result != nil
