@@ -27,7 +27,19 @@ proc do_dot {dot_file png_file} {
   #$log info "Making png $png_file from dot $dot_file"
   #exec [file join $ar_argv(dot_dir) dot.exe] -Tpng $dot_file -o $png_file
   if {$tcl_platform(platform) == "unix"} {
-    exec dot -Tpng $dot_file -o $png_file
+    try_eval {
+      exec dot -Tpng $dot_file -o $png_file
+    } {
+      log warn "dot: $errorResult" 
+    }
+  } elseif {$tcl_platform(platform) == "windows"} {
+    set DOT_EXE "c:/util/Graphviz2.28/bin/dot.exe"
+    try_eval {
+      exec $DOT_EXE -Tpng $dot_file -o $png_file
+    } {
+      log warn "dot: $errorResult" 
+    }
+
   } else {
     puts "tbd" 
   }
@@ -106,6 +118,16 @@ proc do_list {lst_items lst_procs} {
   foreach item $lst_items procname $lst_procs {
     # need upvar with up_item and braces, otherwise to much eval is done (quoting hell?)
     uplevel 1 {*}$procname {$up_item} 
+  }
+}
+
+# functional equivalent of if statement.
+# not sure if uplevel/expr always works as expected.
+proc ifelse {expr iftrue {iffalse ""}} {
+  if {[uplevel 1 expr $expr]} {
+    return $iftrue 
+  } else {
+    return $iffalse 
   }
 }
 
