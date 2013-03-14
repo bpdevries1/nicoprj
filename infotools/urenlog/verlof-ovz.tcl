@@ -81,10 +81,12 @@ proc maak_verlof_ovz {hh} {
         # also new year?        
         if {$year > $prev_year} {
           # set delta_verlof [expr $delta_verlof + [det_verlof_year $date]]
-          incrnum delta_verlof [det_verlof_year $date]
+          set verlof_year [det_verlof_year $date]
+          # incrnum delta_verlof [det_verlof_year $date]
+          incrnum delta_verlof $verlof_year
           set prev_year $year
           # $hh table_row "*" $date "Added $delta_verlof hours to verlof ($year)"
-          lappend lst_notes "Uren toegevoegd aan verlof: $delta_verlof ($year)"
+          lappend lst_notes "Uren toegevoegd aan verlof: $verlof_year ($year)"
         }
         
       }
@@ -139,7 +141,7 @@ proc det_year {date} {
 proc det_verlof_year {date} {
   if {[regexp {^\d+-0?(\d+)-} $date z month]} {
     set nmonth [expr 12 - $month + 1] ; # aantal maanden waarover je verlof krijgt
-    # par maand 2 dagen a factor 0.9 (per werkdag bouw ik ook 0.1 deeltijd dag op, vandaag)
+    # par maand 2 dagen a factor 0.9 (per werkdag bouw ik ook 0.1 deeltijd dag op, vandaar)
     expr 0.9 * $nmonth * 2 * 8
   } else {
     error "Unable to parse month from: $date"
