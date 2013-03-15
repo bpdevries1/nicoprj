@@ -5,8 +5,10 @@ package require ndv
 package require Tclx
 package require sqlite3
 
-set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
-$log set_file "[file tail [info script]].log"
+# set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+# $log set_file "[file tail [info script]].log"
+# $log set_file "[info script].log"
 
 if {$tcl_platform(platform) == "windows"} {
   package require twapi
@@ -19,23 +21,29 @@ if {$tcl_platform(platform) == "windows"} {
 # {NO INFO} the system was not active, get_window_title not called during period, system probably suspended.
 # {STARTED} activity logging was started.
 
-proc main {argc argv} {
-	global LOGFILE INTERVAL tcl_platform f
+proc main {argv iter} {
+	global LOGFILE INTERVAL tcl_platform f log
 
   set options {
     {i.arg "5" "Interval in seconds"}
     {l.arg "activitylog" "Logfile name basename/prefix"}
-    {dir.arg "c:/projecten" "Directory to monitor for changes (empty for none"}
+    {dir.arg "c:/projecten" "Directory to monitor for changes (empty for none)"}
   }
   set usage ": [file tail [info script]] \[options] :"
   array set ar_argv [::cmdline::getoptions argv $options $usage]
 
-  init_filechanges $ar_argv(dir)
-  
 	set logfile $ar_argv(l)
   set sec_interval $ar_argv(i)
 	set msec_interval [expr $sec_interval * 1000]
 
+  # logfile in same dir as sqlite files.
+  set logfilename "[file join [file dirname $logfile] [file tail [info script]]].log"
+  $log set_file $logfilename
+  $log info "Set log output file to: $logfilename"
+  $log info "Iteration: $iter"
+	# breakpoint
+  init_filechanges $ar_argv(dir)
+	
   # dynamic procedure name:
   set get_active_window_title get_active_window_title_$tcl_platform(platform) 
 	
@@ -119,10 +127,12 @@ proc create_db {db_name} {
 proc puts_logline {ts_start ts_end title} {
 	if {$ts_start <= 0} {
 		puts "Error: timestamp start not valid: $ts_start"
+		log error "Error: timestamp start not valid: $ts_start"
 		exit 1
 	}
 	if {$ts_end <= 0} {
 		puts "Error: timestamp end not valid: $ts_end"
+		log error "Error: timestamp end not valid: $ts_end"
 		exit 1
 	}
 
@@ -142,26 +152,24 @@ proc puts_logline {ts_start ts_end title} {
 proc format_ts {ts} {
 	if {$ts <= 0} {
 		puts "Error: timestamp not valid: $ts"
+		log error "Error: timestamp not valid: $ts"
 		exit 1
 	}
 	return [clock format $ts -format "%Y-%m-%d %H:%M:%S"]	
 }
 
-proc check_params {argc argv} {
-	global stderr argv0
-	if {$argc != 2} {
-		puts stderr "syntax: [info nameofexecutable] $argv0 <logfile> <interval in sec>"
-		exit 1
-	}
-}
-
 proc get_active_window_title_windows {} {
-	set hwnd [twapi::get_foreground_window]
-	if {$hwnd == ""} {
-		return "{NONE}"
-	} else {
-		return [twapi::get_window_text $hwnd]
-	}
+	try_eval {
+	  set hwnd [twapi::get_foreground_window]
+    if {$hwnd == ""} {
+      return "{NONE}"
+    } else {
+      return [twapi::get_window_text $hwnd]
+    }
+  } {
+    log warn "Could not get active_window_title: $errorResult"
+    return "{NONE}"
+  }
 }
 
 proc get_active_window_title_unix {} {
@@ -213,11 +221,15 @@ proc dir_change_cb {args} {
   }
 }
 
-try_eval {
-  $log info "Starting main proc..."
-  main $argc $argv
-  $log info "Finished main proc."
-} {
-  $log error "$errorResult" 
+set i 0
+while {$i < 10} {
+  incr i
+  try_eval {
+    $log info "Starting main proc, i=$i..."
+    main $argv $i
+    $log info "Finished main proc."
+  } {
+    $log error "$errorResult" 
+  }
+  after 60000
 }
-
