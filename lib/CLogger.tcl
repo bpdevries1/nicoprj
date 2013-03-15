@@ -1,5 +1,11 @@
 # General logging facility.
 
+# History
+# 2013-03-15 NdV removed global/common logfile, now only log instance logfiles.
+
+# @todo
+# * use info stacklevel to also log the calling procedure.
+
 package require Itcl
 
 package provide ndv 0.1.1
@@ -28,7 +34,7 @@ namespace eval ::ndv {
 		set int_level(critical) 0
 
     # global logfile for all CLogger instances.
-    private common logfile ""
+    # private common logfile ""
     
     # 8-1-2010 NdV lijst bijhouden van alle loggers, om in een keer alle loglevels aan te kunnen passen.
     private common lst_loggers {}
@@ -47,7 +53,7 @@ namespace eval ::ndv {
       }
     }
     
-    public proc set_logfile {a_logfilename} {
+    public proc set_logfile_old {a_logfilename} {
       if {$logfile != ""} {
         close_logfile 
       }
@@ -56,8 +62,13 @@ namespace eval ::ndv {
       set logfile [open $a_logfilename a]
     }
     
-    public proc close_logfile {} {
+    public proc get_logfile_old {} {
+      return $logfile 
+    }
+    
+    public proc close_logfile_old {} {
       close $logfile
+      set logfle ""
     }
     
 		private variable name
@@ -87,6 +98,7 @@ namespace eval ::ndv {
     public method set_file {a_filename} {
       set filename $a_filename
       set f_log [open $filename a]
+      log_intern "Opened logfile: $filename" info
     }
 
     public method close_file {} {
@@ -148,14 +160,37 @@ namespace eval ::ndv {
 				if {$stacklevel > 1} {
 					# puts stderr "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$service\] \[$level\] $str *** \[[info level -1]\]"
 					# puts stderr "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$name\] \[$level\] $str *** \[[::info level $pref_stacklevel]\]"
+				} 
+        set str_log "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$name\] \[$level\] $str" 
+        puts stderr $str_log
+				flush stderr ; # could be that stderr is redirected.
+        if {$f_log != -1} {
+          puts $f_log $str_log
+          flush $f_log
+        }
+        #if {$logfile != ""} {
+        #  flush $logfile 
+        #}
+			}
+		}
+
+		public method log_intern_old {str {level critical} {pref_stacklevel -2}} {
+			global stderr
+			# puts stderr "int_level($level) = $int_level($level) ; log_level = $log_level"
+			if {$int_level($level) <= $log_level} {
+				# puts stderr "info level: [info level]"
+				set stacklevel [::info level]
+				if {$stacklevel > 1} {
+					# puts stderr "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$service\] \[$level\] $str *** \[[info level -1]\]"
+					# puts stderr "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$name\] \[$level\] $str *** \[[::info level $pref_stacklevel]\]"
 						set str_log "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$name\] \[$level\] $str" 
 						if {$f_log != -1} {
 								puts $f_log $str_log
 						} else {
 								puts stderr $str_log
-                if {$logfile != ""} {
-                  puts $logfile $str_log 
-                }
+                #if {$logfile != ""} {
+                #  puts $logfile $str_log 
+                #}
 						}
 				} else {
 						set str_log "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$name\] \[$level\] $str" 
@@ -163,17 +198,17 @@ namespace eval ::ndv {
 								puts $f_log $str_log
 						} else {
 								puts stderr $str_log
-                if {$logfile != ""} {
-                  puts $logfile $str_log 
-                }
+                #if {$logfile != ""} {
+                #  puts $logfile $str_log 
+                #}
 						}
 				}
 				flush stderr
-        if {$logfile != ""} {
-          flush $logfile 
-        }
+        #if {$logfile != ""} {
+        #  flush $logfile 
+        #}
 			}
-		}
-	
+		}		
+		
 	}
 }
