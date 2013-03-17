@@ -23,3 +23,6 @@ source [file join [file dirname [info script]] breakpoint.tcl]
 
 # 14-3-2013 added libdot.tcl
 source [file join [file dirname [info script]] libdot.tcl]
+
+# 17-3-2013 added libsqlite.tcl
+source [file join [file dirname [info script]] libsqlite.tcl]
