@@ -26,21 +26,21 @@ proc main {argc argv} {
   
   set R_binary [find_R "/usr/bin/Rscript" "c:/develop/R/R-2.13.0/bin/Rscript.exe" "d:/develop/R/R-2.9.0/bin/Rscript.exe" "d:/apps/R/R-2.11.1/bin/Rscript.exe" {*}[split $env(PATH) ":"]]
   
-	# check_params $argc $argv
 	init_group_regexps
-	# exit
 	
 	set logfilename $ar_argv(l)
 	set report_basename $ar_argv(r)
 	log debug "glob pattern: $logfilename*"
-	# set lst_filenames [lsort [glob -nocomplain "$logfilename*"]]
+	
 	set lst_filenames [lsort [glob -nocomplain -directory [file dirname $logfilename] "[file tail $logfilename]*.db"]]
 	log debug "lst_filenames: $lst_filenames"
-	foreach filename $lst_filenames {
+	
+	# 2013-03-15 NdV also handle all but the last.
+	foreach filename [lrange $lst_filenames 0 end-1] {
 	  handle_logfile $filename $report_basename
 	}
-	#log info "Exit before archiving"
-	#exit
+	
+	# 2013-03-15 NdV @todo? copy last to temp, then make report?
 	
 	# archive all but the last logfile, this one is still active.
 	foreach filename [lrange $lst_filenames 0 end-1] {
@@ -264,6 +264,5 @@ proc find_R {args} {
   # return "Rscript.exe"
   return "Rscript" ; # first make it work on linux, then windows, use os-info, see use of eog/irfanview in a perftoolset script.
 }
-
 
 main $argc $argv
