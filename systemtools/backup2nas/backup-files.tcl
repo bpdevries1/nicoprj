@@ -67,7 +67,8 @@ proc main {argc argv} {
     exit 1
   }
 
-  ::ndv::CLogger::set_logfile [file join $params(settingsdir) "backup2nas.log"]
+  # ::ndv::CLogger::set_logfile [file join $params(settingsdir) "backup2nas.log"]
+  $log set_file [file join $params(settingsdir) "backup2nas.log"]
   
   $log info START
   $log info "argv: $argv"
@@ -134,8 +135,11 @@ proc unlock_backup {} {
 
 proc set_params {} {
   global params log
+  #set lst_ignore_regexps [::struct::list filterfor el \
+  #  [split [read_file [file join $params(settingsdir) $params(ignoreregexps)]] "\n"] {[string trim $el] != ""}] 
+  # 10-2-2013 Also ignore lines starting with '#'.
   set lst_ignore_regexps [::struct::list filterfor el \
-    [split [read_file [file join $params(settingsdir) $params(ignoreregexps)]] "\n"] {[string trim $el] != ""}] 
+    [split [read_file [file join $params(settingsdir) $params(ignoreregexps)]] "\n"] {([string trim $el] != "") && ![regexp {^#} $el]}] 
   set lst_paths [::struct::list filterfor el \
     [split [read_file [file join $params(settingsdir) $params(paths)]] "\n"] {[string trim $el] != ""}] 
   if {$params(w)} {
@@ -200,7 +204,8 @@ proc backup_path {path target tempext time_treshold reclevel max_level_check} {
     return [list 0 0] 
   }
   if {($max_level_check != "") && ($reclevel > $max_level_check)} {
-    $log info "max level reached ($reclevel > $max_level_check) without finding a change. Path: $path, returning..."
+    # 10-2-2013 NdV max level reached log removed.
+    # $log info "max level reached ($reclevel > $max_level_check) without finding a change. Path: $path, returning..."
     return [list 0 0]
   } 
   if {$reclevel <= 3} {
