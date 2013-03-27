@@ -26,3 +26,7 @@ source [file join [file dirname [info script]] libdot.tcl]
 
 # 17-3-2013 added libsqlite.tcl
 source [file join [file dirname [info script]] libsqlite.tcl]
+
+# 27-3-2013 added libdict.tcl
+source [file join [file dirname [info script]] libdict.tcl]
+
