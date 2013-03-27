@@ -212,3 +212,8 @@ namespace eval ::ndv {
 		
 	}
 }
+
+# 27-3-2013 NdV define default logger object.
+# set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+set log [::ndv::CLogger::new_logger [file tail $argv0] debug]
+
