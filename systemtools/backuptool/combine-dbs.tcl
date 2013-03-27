@@ -16,11 +16,13 @@ proc main {argv} {
   # file delete $destdb
   
   if {[file exists $destdb]} {
-    error "Destination file already exists, maybe append it?" 
+    log info "Destination file already exists, append it." 
+  } else {
+    file copy [file join $rootdir "backupinfo.db"] $destdb
   }
-  file copy [file join $rootdir "backupinfo.db"] $destdb
   set conn [open_db $destdb]  
-  connect_second $conn [file join $rootdir "laptop-backupinfo.db"]
+  # connect_second $conn [file join $rootdir "laptop-backupinfo.db"]
+  connect_second $conn [file join $rootdir "laptop-diskfree.db"]
   copy_tables $conn
   $conn close  
 }
@@ -33,6 +35,7 @@ proc connect_second {conn dbname} {
 # @todo: if size_check has more than row, stop and determine what to do.
 # @todo: ook df-output meenemen.
 proc copy_tables {conn} {
+  # @todo alleen records selecteren die nog niet in doel-db staan.
   set res [db_query $conn "select * from db2.size_check"]
   if {[llength $res] != 1} {
     error "Not precisely one row in db2.size_check: $res" 
@@ -42,6 +45,7 @@ proc copy_tables {conn} {
   
   # in size_check_dir 'gelukkig' geen link naar parent-dir, dan hell om id's om te zetten.
   db_eval $conn "insert into size_check_dir (size_check_id, path, size_mb, last_mod) select $size_check_id, ss2.path, ss2.size_mb, ss2.last_mod from db2.size_check_dir ss2" 0
+  db_eval $conn "insert into diskfree (size_check_id, filesystem, total_mb, used_mb, free_mb, mounted) select $size_check_id, df2.filesystem, df2.total_mb, df2.used_mb, df2.free_mb, df2.mounted from db2.diskfree df2" 0
   
   log info "tables copied"
 }
