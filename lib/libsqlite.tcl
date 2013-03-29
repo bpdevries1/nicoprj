@@ -41,6 +41,16 @@ if {$tcl_version == "8.5"} {
     return $res
   }
   
+  # @param args: field names
+  proc prepare_insert {conn tablename args} {
+    # $conn prepare "insert into $tablename ([join $args ", "]) values ([join [map {par {return ":$par"}} $args] ", "])"
+    $conn prepare [create_insert_sql $tablename {*}$args]
+  }
+  
+  proc create_insert_sql {tablename args} {
+    return "insert into $tablename ([join $args ", "]) values ([join [lmap par $args {symbol $par}] ", "])"
+  }
+  
 } else {
   puts stderr "Unknown tcl_version ($tcl_version), don't create sqlite helper procs" 
 }
