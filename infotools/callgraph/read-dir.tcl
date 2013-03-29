@@ -28,7 +28,8 @@ proc main {argv} {
   set stmts [prepare_statements $conn]
   handle_dir_rec $src_dir "*.ahk" handle_ahk
 
-  # @todo remove all (non-)calls where callee is not in function table.
+  # first handle calls to repeat_actions_state, then remove_non_calls, which may remove calls to repeat_actions_state 
+  add_fsm_calls $conn
   remove_non_calls $conn
   
   $conn commit
@@ -41,7 +42,7 @@ proc create_db {db_name} {
   set conn [tdbc::sqlite3::connection create db $db_name]
   db_eval $conn "create table file (path)"
   db_eval $conn "create table function (path, name, linenr, params)"
-  db_eval $conn "create table call (path, linenr, caller, callee, params)"
+  db_eval $conn "create table call (path, linenr, caller, callee, calltype, params)"
   # evt nog indexen.
   
   return $conn
@@ -51,21 +52,20 @@ proc prepare_statements {conn} {
   # dict create ins_file [$conn prepare "insert into file (path) values (:path)"]
   dict create ins_file [prepare_insert $conn file path] \
               ins_function [prepare_insert $conn function path name linenr params] \
-              ins_call [prepare_insert $conn call path linenr caller callee params]
-}
-
-# @param args: field names
-proc prepare_insert {conn tablename args} {
-  # $conn prepare "insert into $tablename ([join $args ", "]) values ([join [map {par {return ":$par"}} $args] ", "])"
-  $conn prepare [create_insert_sql $tablename {*}$args]
-}
-
-proc create_insert_sql {tablename args} {
-  return "insert into $tablename ([join $args ", "]) values ([join [lmap par $args {symbol $par}] ", "])"
+              ins_call [prepare_insert $conn call path linenr caller callee calltype params]
 }
 
 proc handle_ahk {path root_dir} {
   global stmts
+  
+  # 2013-03-29 ignore wrapper script, for now hardcoded.
+  if {[regexp {wrapper} $path]} {
+    return 
+  }
+  if {[regexp {transacties} $path]} {
+    return 
+  }
+  
   log info "handle_ahk: filename: $path"
   [dict get $stmts ins_file] execute [vars_to_dict path]
   set caller "<file>"
@@ -89,9 +89,9 @@ proc handle_ahk {path root_dir} {
       set caller "<file>"
     } else {
       foreach call [det_calls $line] {
-        lassign $call callee params
+        lassign $call callee calltype params 
         # @todo call kan over meerdere lines gaan. In de praktijk nodig? 
-        [dict get $stmts ins_call] execute [vars_to_dict path linenr caller callee params]
+        [dict get $stmts ins_call] execute [vars_to_dict path linenr caller callee calltype params]
       }
     }
   }
@@ -121,29 +121,38 @@ proc is_keyword {fn} {
 #
 # Dus open-haakje met hiervoor een identifier en hierna evt params evt gevolgd door sluithaakje (of multiline)
 # params zijn nog niet zo belangrijk.
-# @todo deze eigenlijk recursief uitvoeren, en lijst van calls opbouwen. Dan ook meteen if/while ondervangen.
 proc det_calls {line} {
   if {[regexp {do_na_2e_di} $line]} {
     # breakpoint 
   }
-  if {[regexp {([a-zA-Z_0-9]+) *\((.*)$} $line z callee rest]} {
-    if {[is_keyword $callee]} {
-      # return {}
-      # recur with rest
-      det_calls $rest
-    } else {
-      # set params ""
-      # return 1
-      return [list [list $callee ""]]
+  set fns [regexp -all -inline {([a-zA-Z_0-9]+) *\(} $line]
+  set res {}
+  foreach {z fn} $fns {
+    if {![is_keyword $fn]} {
+      lappend res [list $fn direct ""]
     }
-  } else {
-    return {}
   }
+  return $res
 }
 
+# remove calls to 'functions' that are not defined in the read source files.
 proc remove_non_calls {conn} {
-  # log warn "todo: remove_non_calls" 
   db_eval $conn "delete from call where callee not in (select name from function)"
+}
+
+# for each call to 
+proc add_fsm_calls {conn} {
+  global stmts
+  set stmt [dict get $stmts ins_call]
+  set calltype "fsm"
+  foreach call [db_query $conn "select path, linenr, caller from call where callee = 'repeat_actions_state'"] {
+    set caller [dict get $call caller]
+    # gebruik conventie dat <prefix> gelijk is aan de callende functie
+    foreach rec [db_query $conn "select name from function where name like '${caller}_%'"] {
+      set callee [dict get $rec name]
+      $stmt execute [dict merge $call [vars_to_dict callee calltype]]
+    }
+  }
 }
 
 #######################################
