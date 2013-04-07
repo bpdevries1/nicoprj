@@ -1,8 +1,8 @@
 # functions for creating dot files (and calling dot)
 
-proc write_dot_header {f} {
+proc write_dot_header {f {rankdir TB}} {
 		puts $f "digraph G \{
-		rankdir = TB
+		rankdir = $rankdir
 /*
 		size=\"40,40\";
 		ratio=fill;

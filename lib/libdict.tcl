@@ -31,4 +31,14 @@ proc vars_to_dict {args} {
   return $res
 }
 
+# @param dct dictionary object
+# @result var-names with values in calling stackframe based on dct.
+proc dict_to_vars {dct} {
+  foreach {nm val} $dct {
+    upvar $nm val2
+    set val2 $val
+  }
+}
+
+
 
