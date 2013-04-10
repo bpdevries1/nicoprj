@@ -51,6 +51,10 @@ if {$tcl_version == "8.5"} {
     return "insert into $tablename ([join $args ", "]) values ([join [lmap par $args {symbol $par}] ", "])"
   }
   
+  proc symbol {name} {
+    return ":$name" 
+  }
+  
 } else {
   puts stderr "Unknown tcl_version ($tcl_version), don't create sqlite helper procs" 
 }
