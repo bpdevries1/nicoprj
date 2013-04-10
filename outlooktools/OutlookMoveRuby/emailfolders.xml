@@ -14,9 +14,6 @@
   <Address name='/O=YMOR/OU=EXCHANGE ADMINISTRATIVE GROUP (FYDIBOHF23SPDLT)/CN=RECIPIENTS/CN=Sgiesbers' auto='true'>
     <MailFolder path='/Personal Folders/Projecten/Bethesda Ziekenhuis/TODO'/>
   </Address>
-  <Address name='Dijk, Marc van' auto='true'>
-    <MailFolder path='/Personal Folders/Projecten/Philips/TODO'/>
-  </Address>
   <Address name='Functioneel beheer PUZA' auto='true'>
     <MailFolder path='/Personal Folders/Projecten/GMZ/TODO'/>
   </Address>
@@ -40,6 +37,9 @@
   </Address>
   <Address name='Steenkamer, J. Joep' auto='true'>
     <MailFolder path='/Personal Folders/Projecten/Bethesda Ziekenhuis/TODO'/>
+  </Address>
+  <Address name='eric.van.der.ende@philips.com' auto='true'>
+    <MailFolder path='/Mailbox - Nico de Vreeze/Inbox/Philips/Todo'/>
   </Address>
   <Address name='p.wesseling@parnassiagroep.nl' auto='true'>
     <MailFolder path='/Personal Folders/Projecten/Parnassia/TODO'/>

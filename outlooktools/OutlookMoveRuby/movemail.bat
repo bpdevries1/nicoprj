@@ -1,5 +1,8 @@
 rem set bakfile=emailfolders-%_date.xml
-set bakfile=c:\nico\projecten\mail\emailfolders-%_date.xml
-del /q %bakfile%
-copy emailfolders.xml %bakfile%
-ruby movemail.rb
+echo %_date werkt niet meer goed met filenames, gebruik nu movemail.sh in bash.
+
+rem cd c:\nico\nicoprj\outlooktools\outlookmoveruby
+rem set bakfile=c:\nico\projecten\mail\emailfolders-%_date.xml
+rem del /q %bakfile%
+rem copy emailfolders.xml %bakfile%
+rem ruby movemail.rb
