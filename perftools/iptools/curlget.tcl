@@ -9,7 +9,9 @@ $log set_file "curlget.log"
 
 proc main {argv} {
   set wait_after 1000
-  set conn [open_db "~/aaa/akamai.db"]
+  # set conn [open_db "~/aaa/akamai.db"]
+  set conn [open_db "~/Dropbox/Philips/Akamai/akamai.db"]
+  
   create_tables $conn
   lookup_entries $conn "Digital_Property" $wait_after
   lookup_entries $conn "Origin_Hostname" $wait_after
