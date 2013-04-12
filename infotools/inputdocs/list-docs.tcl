@@ -3,6 +3,9 @@ package require ndv
 proc main {argv} {
   global f
   lassign $argv root_dir
+  if {![file exists $root_dir]} {
+    error "Not found: $root_dir" 
+  }
   set f [open [file join $root_dir "_files-[clock format [clock seconds] -format "%Y-%m-%d-%H-%m"].tsv"] w]
   puts $f [join [list path date] "\t"]
   handle_dir_rec $root_dir "*" handle_file
