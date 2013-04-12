@@ -106,7 +106,11 @@ itcl::class CCheckPC {
 	
 	private method check_all {} {
 		$log debug "check all"
-		check_perftoolset
+		try_eval {
+		  check_perftoolset
+		} {
+		  $log warn "Error with check_perftoolset: $errorResult"  
+		}
 		check_paths_existing
     check_commands
     check_4nt_aliases
