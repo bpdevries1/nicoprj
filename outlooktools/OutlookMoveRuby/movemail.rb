@@ -31,7 +31,8 @@ class Main
 		
 		@folder_chooser = FolderChooser.new
 		
-		@email_folders = EmailFolders.new("emailfolders.xml", @ff)
+		# @email_folders = EmailFolders.new("emailfolders.xml", @ff)
+		@email_folders = EmailFolders.new("c:/nico/outlook/emailfolders.xml", @ff)
 
 		# handle_folder(ns, "Persoonlijke mappen/Postvak IN")
 		handle_folder(ns, "Mailbox - Nico de Vreeze/Inbox")
