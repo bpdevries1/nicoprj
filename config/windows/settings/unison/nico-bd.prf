@@ -1,9 +1,0 @@
-# Unison preferences file
-include common.prfinc
-
-root = c:\nico\thuis-data
-root = e:\unisonroot\nico
-
-# include common settings for this profile
-include nico.prfinc
-
