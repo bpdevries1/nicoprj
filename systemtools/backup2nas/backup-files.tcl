@@ -89,25 +89,29 @@ proc backup_main {} {
   }
   signal trap SIGINT handle_signal
   lock_backup
-  lassign [set_params] lst_ignore_regexps lst_paths time_treshold
+  try_eval {
+    lassign [set_params] lst_ignore_regexps lst_paths time_treshold
+    
+    set start_time [clock seconds]
+    $log info "time treshold: $time_treshold"
+    set max_path [det_max_path] ; # max path length dependent on OS.
+    set stashfilename [file join $params(settingsdir) filestobackup.txt]
   
-  set start_time [clock seconds]
-  $log info "time treshold: $time_treshold"
-  set max_path [det_max_path] ; # max path length dependent on OS.
-  set stashfilename [file join $params(settingsdir) filestobackup.txt]
-
-  # 20-3-2011 if something went wrong the previous time, the stashed file still exists.
-  # handle this first.
-  handle_stashed_files $stashfilename -1 1  
-
-  # 20-3-2011 NdV nuttig om met append te doen?, bij fouten delete ik de file steeds.
-  # set fstash [open $stashfilename a]
-  lassign [fill_stash $stashfilename $lst_paths $target $time_treshold $start_time] totalfiles totalbytes 
-  handle_stashed_files $stashfilename $totalfiles 
-
-  # pas hier de tijd schrijven, pas hier is (volledige) backup gelukt.
-  puts_backup_time $start_time
+    # 20-3-2011 if something went wrong the previous time, the stashed file still exists.
+    # handle this first.
+    handle_stashed_files $stashfilename -1 1  
   
+    # 20-3-2011 NdV nuttig om met append te doen?, bij fouten delete ik de file steeds.
+    # set fstash [open $stashfilename a]
+    lassign [fill_stash $stashfilename $lst_paths $target $time_treshold $start_time] totalfiles totalbytes 
+    handle_stashed_files $stashfilename $totalfiles 
+  
+    # pas hier de tijd schrijven, pas hier is (volledige) backup gelukt.
+    puts_backup_time $start_time
+  } {
+    $log error "Backup failed: $errorResult" 
+  }
+  $log info "Unlock backup, also if an error occurred"
   unlock_backup
   
   $log info "Total files backed up: $totalfiles"
