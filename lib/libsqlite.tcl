@@ -24,6 +24,15 @@ if {$tcl_version == "8.5"} {
     }
   }
   
+  proc db_eval_try {conn query {return_id 0}} {
+    try_eval {
+      db_eval $query $return_id
+    } {
+      log warn "db_eval failed: $query"
+      # nothing 
+    }
+  }
+  
   proc stmt_exec {conn stmt dct {return_id 0}} {
     $stmt execute $dct
     if {$return_id} {
