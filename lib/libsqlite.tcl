@@ -26,9 +26,10 @@ if {$tcl_version == "8.5"} {
   
   proc db_eval_try {conn query {return_id 0}} {
     try_eval {
-      db_eval $query $return_id
+      db_eval $conn $query $return_id
     } {
       log warn "db_eval failed: $query"
+      log warn "errorResult: $errorResult"
       # nothing 
     }
   }
@@ -60,8 +61,33 @@ if {$tcl_version == "8.5"} {
     return "insert into $tablename ([join $args ", "]) values ([join [lmap par $args {symbol $par}] ", "])"
   }
   
+  proc make_table_def {tablename args} {
+    dict create table $tablename fields $args 
+  }
+  
+  proc create_tables {conn table_def} {
+    # drop table straks weer weg.
+    #db_eval_try $conn "drop table curlgetheader"
+    #db_eval_try $conn "create table curlgetheader (ts, fieldvalue, param, exitcode, resulttext, msec, cacheheaders, akamai_env, cacheable, expires, expiry, cachetype, maxage)"
+    db_eval_try $conn [drop_table_sql $table_def]
+    db_eval_try $conn [create_table_sql $table_def]
+  }
+  
+  proc drop_table_sql {table_def} {
+    return "drop table [dict get $table_def table]" 
+  }
+  
+  proc create_table_sql {table_def} {
+    return "create table [dict get $table_def table] ([join [dict get $table_def fields] ", "])" 
+  }
+  
+  
   proc symbol {name} {
     return ":$name" 
+  }
+
+  proc det_now {} {
+    clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S" 
   }
   
 } else {
