@@ -65,11 +65,13 @@ if {$tcl_version == "8.5"} {
     dict create table $tablename fields $args 
   }
   
-  proc create_tables {conn table_def} {
+  proc create_table {conn table_def {dropfirst 0}} {
     # drop table straks weer weg.
     #db_eval_try $conn "drop table curlgetheader"
     #db_eval_try $conn "create table curlgetheader (ts, fieldvalue, param, exitcode, resulttext, msec, cacheheaders, akamai_env, cacheable, expires, expiry, cachetype, maxage)"
-    db_eval_try $conn [drop_table_sql $table_def]
+    if {$dropfirst} {
+      db_eval_try $conn [drop_table_sql $table_def]
+    }
     db_eval_try $conn [create_table_sql $table_def]
   }
   
