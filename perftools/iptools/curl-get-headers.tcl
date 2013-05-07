@@ -14,33 +14,45 @@ proc main {argv} {
   # set conn [open_db "~/aaa/akamai.db"]
   set root_folder [det_root_folder] ; # based on OS.
   set db_name [file join $root_folder "aaa/akamai.db"]
-  log info "Opening database: $db_name"
-  set conn [open_db $db_name]
 
   # set conn [open_db "~/Dropbox/Philips/Akamai/akamai.db"]
   # @note 6-5-2013 NdV even curlgetheader2, want loopt thuis ook nog, weer mergen morgen.
   set table_def [make_table_def curlgetheader2 ts_start ts fieldvalue param exitcode resulttext msec cacheheaders akamai_env iter cacheable expires expiry cachetype maxage]
-  create_table $conn $table_def 0 ; # 1: first drop the table.
   #set src_table_defs [list [dict create table embedded field url] \
   #                         [dict create table embedded field embed]]
   set src_table_defs [list [dict create table firebug field url] \
                            [dict create table firebug field embedded_url]]
-   
+
+  set ts_start [det_now]
+  set ts_treshold [det_ts_treshold $ts_start 3600]
+  set drop_table 0
+                           
+  lassign $argv settingsfile
+  if {$settingsfile != ""} {
+    log info "Source settings from $settingsfile"
+    source $settingsfile
+  } else {
+    log warn "No settings file: using defaults" 
+  }
+
+  log info "Opening database: $db_name"
+  set conn [open_db $db_name]
+  create_table $conn $table_def $drop_table ; # 1: first drop the table.
+                           
   # lookup_entries $conn $table_def "firebug" $wait_after
-  lookup_entries $conn $table_def $src_table_defs $wait_after
+  lookup_entries $conn $table_def $src_table_defs $wait_after $ts_start $ts_treshold
 }
 
-proc lookup_entries {conn table_def src_table_defs wait_after} {
+proc lookup_entries {conn table_def src_table_defs wait_after ts_start ts_treshold} {
   foreach src_table_def $src_table_defs {
-    lookup_entries_src $conn $table_def $src_table_def $wait_after 
+    lookup_entries_src $conn $table_def $src_table_def $wait_after $ts_start $ts_treshold
   }
 }
 
-proc lookup_entries_src {conn table_def src_table_def wait_after} {
+proc lookup_entries_src {conn table_def src_table_def wait_after ts_start ts_treshold} {
   set res 1
   set totalcount 0
-  set ts_start [det_now]
-  set ts_treshold [det_ts_treshold $ts_start 600]
+  # set ts_start [det_now]
   set total_todo [det_total_todo $conn $src_table_def $table_def $ts_treshold]
   log info "Total to do for $src_table_def: $total_todo"
   while {$res > 0} {
@@ -190,7 +202,13 @@ proc det_expires {resulttext} {
   if {$res == "<none>"} {
     return $res 
   } else {
-    clock format [clock scan $res] -format "%Y-%m-%d %H:%M:%S" -gmt 1 
+    set sec -1
+    catch {set sec [clock scan $res]}
+    if {$sec == -1} {
+      return "<unable to parse: $res>" 
+    } else {
+      return [clock format $sec -format "%Y-%m-%d %H:%M:%S" -gmt 1]
+    }
   }
 }
 
@@ -200,15 +218,23 @@ proc det_expiry {resulttext} {
   if {($exp == "<none>") || ($now == "<none>")} {
     return "<none>" 
   } else {
-    set sec_exp [clock scan $exp]
-    set sec_now [clock scan $now]
-    set sec_diff [expr $sec_exp - $sec_now]
-    if {$sec_diff < 0} {
-      return "past" 
-    } elseif {$sec_diff <= 3600} {
-      return "<1hr" 
+    set sec_exp -1
+    set sec_now -1
+    catch {set sec_exp [clock scan $exp]}
+    catch {set sec_now [clock scan $now]}
+    if {$sec_exp == -1} {
+      return "<unable to parse Expires: $exp>" 
+    } elseif {$sec_now == -1} {
+      return "<unable to parse Date: $now>"
     } else {
-      return ">1hr" 
+      set sec_diff [expr $sec_exp - $sec_now]
+      if {$sec_diff < 0} {
+        return "past" 
+      } elseif {$sec_diff <= 3600} {
+        return "<1hr" 
+      } else {
+        return ">1hr" 
+      }
     }
   }
 }
