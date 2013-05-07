@@ -15,7 +15,8 @@ source [file join [file dirname [info script]] .. lib libmusic.tcl]
 set log [::ndv::CLogger::new_logger [file tail [info script]] info]
 
 # ::ndv::CLogger::set_log_level_all debug
-::ndv::CLogger::set_logfile music.log
+# ::ndv::CLogger::set_logfile music.log
+$log set_file music.log
 
 proc main {argc argv} {
   global log db conn stderr argv0 log SINGLES_ON_SD
