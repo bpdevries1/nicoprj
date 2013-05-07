@@ -13,11 +13,12 @@ package require htmlparse
 set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 
 proc main {argv} {
-  # set conn [open_db "c:/aaa/akamai.db"]
-  set conn [open_db "~/aaa/akamai.db"]
-  set dir "~/Dropbox/Philips/akamai/firebug-report"
+  set conn [open_db "c:/aaa/akamai.db"]
+  # set conn [open_db "~/aaa/akamai.db"]
+  # set dir "~/Dropbox/Philips/akamai/firebug-report"
+  set dir "~/Dropbox/Philips/akamai/firebug"
   # drop nu niet meer doen, evt ook andere dingen inlezen.
-  # db_eval_try $conn "drop table firebug"
+  db_eval_try $conn "drop table firebug"
   # eerst geen andere velden als size en reponse time, mss later.
   db_eval_try $conn "create table firebug (ts, reportfile, url, embedded_url, embedded_domain)"
   db_eval $conn "begin transaction"
@@ -25,7 +26,7 @@ proc main {argv} {
   set ts [det_now]
 # $stmt_insert execute [vars_to_dict ts configfile domain configtype]
 
-  foreach reportfile [glob -directory $dir "*.html"] {
+  foreach reportfile [glob -directory $dir "*.htm*"] {
     log info "reportfile: $reportfile"
     read_report $conn $stmt_insert $ts $reportfile
   }
