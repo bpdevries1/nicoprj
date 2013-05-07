@@ -1,3 +1,5 @@
+#!/usr/bin/env tclsh86
+
 #!/home/nico/bin/tclsh
 
 # install package ndv under tcl lib directory
