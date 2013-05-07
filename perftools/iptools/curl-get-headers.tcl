@@ -11,12 +11,21 @@ $log set_file "curlgetheader.log"
 
 proc main {argv} {
   set wait_after 1000
-  set conn [open_db "~/aaa/akamai.db"]
+  # set conn [open_db "~/aaa/akamai.db"]
+  set root_folder [det_root_folder] ; # based on OS.
+  set db_name [file join $root_folder "aaa/akamai.db"]
+  log info "Opening database: $db_name"
+  set conn [open_db $db_name]
+
   # set conn [open_db "~/Dropbox/Philips/Akamai/akamai.db"]
-  set table_def [make_table_def curlgetheader ts_start ts fieldvalue param exitcode resulttext msec cacheheaders akamai_env iter cacheable expires expiry cachetype maxage]
+  # @note 6-5-2013 NdV even curlgetheader2, want loopt thuis ook nog, weer mergen morgen.
+  set table_def [make_table_def curlgetheader2 ts_start ts fieldvalue param exitcode resulttext msec cacheheaders akamai_env iter cacheable expires expiry cachetype maxage]
   create_table $conn $table_def 0 ; # 1: first drop the table.
-  set src_table_defs [list [dict create table embedded field url] \
-                           [dict create table embedded field embed]]
+  #set src_table_defs [list [dict create table embedded field url] \
+  #                         [dict create table embedded field embed]]
+  set src_table_defs [list [dict create table firebug field url] \
+                           [dict create table firebug field embedded_url]]
+   
   # lookup_entries $conn $table_def "firebug" $wait_after
   lookup_entries $conn $table_def $src_table_defs $wait_after
 }
@@ -31,30 +40,34 @@ proc lookup_entries_src {conn table_def src_table_def wait_after} {
   set res 1
   set totalcount 0
   set ts_start [det_now]
+  set ts_treshold [det_ts_treshold $ts_start 600]
+  set total_todo [det_total_todo $conn $src_table_def $table_def $ts_treshold]
+  log info "Total to do for $src_table_def: $total_todo"
   while {$res > 0} {
     # set res [lookup_entries_iter $conn $table_def $src_table_name $wait_after $ts_start $totalcount]
-    set res [lookup_entries_iter $conn $table_def $src_table_def $wait_after $ts_start $totalcount]
+    set res [lookup_entries_iter $conn $table_def $src_table_def $wait_after $ts_start $totalcount $total_todo $ts_treshold]
     incr totalcount $res
     log info "Items handled for $src_table_def: $totalcount"
     # exit
   }
-  
 }
 
-
-proc lookup_entries_old {conn table_def src_table_name wait_after} {
-  set res 1
-  set totalcount 0
-  set ts_start [det_now]
-  while {$res > 0} {
-    set res [lookup_entries_iter $conn $table_def $src_table_name $wait_after $ts_start $totalcount]
-    incr totalcount $res
-    log info "Items handled for $src_table_name: $totalcount"
-    # exit
-  }
+proc det_total_todo {conn src_table_def table_def ts_treshold} {
+  lassign [dict_get_multi $src_table_def table field] src_table_name src_field
+  dict_to_vars $table_def
+  set query "select count(distinct t.$src_field) aantal
+             from $src_table_name t 
+             where not exists (
+               select 1
+               from $table c
+               where c.fieldvalue = t.$src_field
+               and c.ts_start >= '$ts_treshold'
+             )"
+  set dct [lindex [db_query $conn $query] 0]
+  dict get $dct aantal
 }
 
-proc lookup_entries_iter {conn table_def src_table_def wait_after ts_start totalcount} {
+proc lookup_entries_iter {conn table_def src_table_def wait_after ts_start totalcount total_todo ts_treshold} {
   # decision: don't use explicit transaction, so every insert will be committed at once.
   set max_rows 100
   # set max_rows 2
@@ -64,12 +77,12 @@ proc lookup_entries_iter {conn table_def src_table_def wait_after ts_start total
   dict_to_vars $table_def
   # set stmt_insert [prepare_insert $conn curlgetheader ts fieldvalue param exitcode resulttext msec cacheheaders]
   set stmt_insert [prepare_insert $conn $table {*}$fields]
-  set ts_treshold [det_ts_treshold $ts_start 600]
+  # set ts_treshold [det_ts_treshold $ts_start 600]
   set query "select distinct t.$src_field 
              from $src_table_name t 
              where not exists (
                select 1
-               from curlgetheader c
+               from $table c
                where c.fieldvalue = t.$src_field
                and c.ts_start >= '$ts_treshold'
              )
@@ -98,11 +111,22 @@ proc lookup_entries_iter {conn table_def src_table_def wait_after ts_start total
       }
       set dct_insert [vars_to_dict ts_start ts fieldvalue param exitcode resulttext msec cacheheaders akamai_env iter cacheable expires expiry cachetype maxage]
       stmt_exec $conn $stmt_insert $dct_insert
-      log info "wait msec (iter=$i, total so far=[expr $totalcount + $i]): $wait_after"
+      set ndone [expr $totalcount + $i]
+      log info "iter=$i, total so far=$ndone/$total_todo, [format %.2f [expr 100.0 * $ndone / $total_todo]]% done"
+      log info "ETA: [det_eta $ts_start $ndone $total_todo]"
+      log info "wait msec: $wait_after"
       after $wait_after
     }
   }
   return $i
+}
+
+# @param ts_start sqlite formatted
+proc det_eta {ts_start ndone total_todo} {
+  set sec_start [clock scan $ts_start -format "%Y-%m-%d %H:%M:%S"]
+  set npersec [expr 1.0 * $ndone / ([clock seconds] - $sec_start)]
+  set sec_end [expr round($sec_start + ($total_todo / $npersec))]
+  clock format $sec_end -format "%Y-%m-%d %H:%M:%S"
 }
 
 # determine treshold time based on starttime and offset.
@@ -225,6 +249,18 @@ proc det_header_field {resulttext fieldname} {
     return "<none>" 
   }
 }
+
+# c:/aaa on windows, ~/aaa on linux
+proc det_root_folder {} {
+  global tcl_platform
+  if {$tcl_platform(platform) == "windows"} {
+    return "c:/" 
+  } else {
+    return "~/" 
+  }
+}
+  
+
 
 main $argv
 
