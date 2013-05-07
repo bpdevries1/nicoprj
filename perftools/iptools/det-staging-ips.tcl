@@ -18,8 +18,9 @@ proc main {argv} {
 
   # set conn [open_db "~/Dropbox/Philips/Akamai/akamai.db"]
   # @note 6-5-2013 NdV even curlgetheader2, want loopt thuis ook nog, weer mergen morgen.
-  set table_def [make_table_def staging2 ts domain res1 staging_name res2 staging_ip staging_ip2]
-  create_table $conn $table_def 0 ; # 1: first drop the table.
+  # set table_def [make_table_def staging2 ts domain res1 staging_name res2 staging_ip staging_ip2]
+  set table_def [make_table_def staging ts domain res1 staging_name res2 staging_ip staging_ip2]
+  create_table $conn $table_def 1 ; # 1: first drop the table.
    
   # lookup_entries $conn $table_def "firebug" $wait_after
   lookup_entries $conn $table_def
