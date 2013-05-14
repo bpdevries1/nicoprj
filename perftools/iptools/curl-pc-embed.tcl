@@ -10,3 +10,6 @@ set drop_table 0
 
 # set ts_treshold [det_ts_treshold $ts_start 3600]
 set ts_treshold [det_ts_treshold $ts_start [expr 7 * 24 * 3600]]
+
+set wait_after 100
+

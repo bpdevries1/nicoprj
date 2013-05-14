@@ -1,6 +1,6 @@
 #!/usr/bin/env tclsh86
 
-# curl-get-headers.tcl
+# curl-get-headers-parallel.tcl
 
 # @todo add fields cachekey and akamaiserver and fill them.
 # @todo parallel processing: fileevent, vwait, open "|curl xyz", queues, signals, generator (Tcl 8.6), clj pmap.
@@ -14,6 +14,50 @@ set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 $log set_file "curlgetheader.log"
 
 proc main {argv} {
+  global finished
+  log info "temp main for testing"
+  set url "http://www.philips.nl/c/"
+  set f [open "|curl -IXGET -H \"Pragma: akamai-x-cache-on, akamai-x-cache-remote-on, akamai-x-check-cacheable, akamai-x-get-cache-key, akamai-x-get-extracted-values, akamai-x-get-nonces, akamai-x-get-ssl-client-session-id, akamai-x-get-true-cache-key, akamai-x-serial-no\" -L --connect-timeout 20 --max-time 30 \"$url\"" r]
+  log info "Opened file handle to curl process"
+  
+  set finished 0
+  fconfigure $f -blocking 0
+  fileevent $f readable [list curl_ready $f]
+  log info "Issued file event"
+  
+  if {0} {
+    while {![eof $f]} {
+      gets $f line
+      log debug "exec line: $line"
+    }
+    log debug "eof found"
+    fconfigure $f -blocking 0 
+    close  $f
+  }
+  # vwait finished
+  # log info "Waiting for finished done!"
+  while {!$finished} {
+    log info "Now waiting for file events"
+    update
+    after 1000  
+  }
+  
+  log info "finished"
+}
+
+proc curl_ready {f} {
+  global finished
+  set data [read $f]
+  log debug "\[[string length $data]\]: $data"
+  if {[eof $f]} {
+    fileevent $f readable {}
+    # fconfigure $f -blocking 0 
+    close  $f
+    set finished 1
+  }  
+}
+
+proc main_1 {argv} {
   set wait_after 1000
   # set conn [open_db "~/aaa/akamai.db"]
   set root_folder [det_root_folder] ; # based on OS.
