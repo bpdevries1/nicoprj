@@ -1,6 +1,5 @@
 set db_name [file join $root_folder "aaa/akamai-parallel.db"]
 
-set table_def [make_table_def curlgetheader ts_start ts fieldvalue param exitcode resulttext msec cacheheaders akamai_env iter cacheable expires expiry cachetype maxage]
 set src_table_defs [list [dict create table "xenu" field "url" where "inscope='yes'"]]
   
 set drop_table 0
