@@ -1,6 +1,6 @@
 #!/usr/bin/env tclsh86
 
-# curl-get-headers.tcl
+# curl-fill-fields.tcl
 
 # @todo add fields cachekey and akamaiserver and fill them.
 
@@ -125,41 +125,6 @@ proc det_root_folder {} {
   } else {
     return "~/" 
   }
-}
-
-#  set table_def [make_table_def_keys curlgetheader {ts_start ts fieldvalue param iter} {exitcode resulttext msec cacheheaders akamai_env cacheable expires expiry cachetype maxage cachekey akamaiserver}]
-proc make_table_def_keys {tablename keyfields valuefields} {
-  dict create table $tablename keyfields $keyfields valuefields $valuefields fields [concat $keyfields $valuefields] 
-}
-
-#  set stmt_update [prepare_update $conn $table_def]
-  # @param args: field names
-proc prepare_update {conn table_def} {
-  $conn prepare [create_update_sql $table_def]
-}
-
-proc create_key_index {conn table_def} {
-  db_eval_try $conn [create_index_sql $table_def] 
-}
-
-proc create_index_sql {table_def} {
-  dict_to_vars $table_def
-  set sql "create index ix_key_$table on $table ([join $keyfields ", "])"
-  log info "create index sql: $sql"
-  return $sql
-}
-
-proc create_update_sql {table_def} {
-  dict_to_vars $table_def
-  set sql "update $table
-          set [join [lmap par $valuefields {fld_eq_par $par}] ", "]
-          where [join [lmap par $keyfields {fld_eq_par $par}] " and "]"
-  log debug "update sql: $sql"          
-  return $sql          
-}
-
-proc fld_eq_par {fieldname} {
-  return "$fieldname = [symbol $fieldname]" 
 }
 
 main $argv
