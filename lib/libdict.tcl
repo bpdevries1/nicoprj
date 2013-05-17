@@ -12,9 +12,17 @@ proc dict_get_multi {args} {
   set res {}
   foreach parname [lrange $args 1 end] {
     if {$withname} {
-      lappend res $parname [dict get $dict $parname] 
+      if {[dict exists $dict $parname]} {
+        lappend res $parname [dict get $dict $parname] 
+      } else {
+        lappend res $parname ""
+      }
     } else {
-      lappend res [dict get $dict $parname] 
+      if {[dict exists $dict $parname]} {
+        lappend res [dict get $dict $parname]
+      } else {
+        lappend res ""
+      }
     }
   }
   return $res
