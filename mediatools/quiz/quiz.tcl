@@ -27,46 +27,71 @@ set max_play_time_sec 15
 # * verschil tussen titel goed omdat je 't weet, of omdat je het hoort en goed raadt/weet.
 
 proc main {argv} {
-  global conn stmts
-  lassign $argv db_name
+  global conn stmt
+  lassign $argv db_name testgroup
   set conn [open_db $db_name]
 
-  set stmts(set_seconds_frames) [$conn prepare "update track set seconds = :seconds, frames = :frames where id = :id"]
-  set stmts(update_nright_nwrong) [$conn prepare "update track set nright = :nright, nwrong = :nwrong where id = :id"]
-  set stmts(insert_test) [$conn prepare "insert into track_test (track_id, ts, result, start_sec, stop_sec) values (:track_id, :ts, :result, :start_sec, :stop_sec)"]
+  set td_session [make_table_def_keys session {id} {testgroup_id ts_start ts_end}]
+  set td_track_test [make_table_def_keys track_test {session_id track_id ts} {start_sec stop_sec result}]
+  set stmt(insert_session) [prepare_insert_td $conn $td_session]
+  set stmt(update_session) [prepare_update $conn $td_session]
+  set stmt(insert_track_test) [prepare_insert_td $conn $td_track_test]
+  
+  # @todo aanpassen naar nieuwe functies.
+  set stmt(set_seconds_frames) [$conn prepare "update track set seconds = :seconds, frames = :frames where id = :id"]
+  set stmt(update_nright_nwrong) [$conn prepare "update track set nright = :nright, nwrong = :nwrong where id = :id"]
+  # set stmt(insert_test) [$conn prepare "insert into track_test (track_id, ts, result, start_sec, stop_sec) values (:track_id, :ts, :result, :start_sec, :stop_sec)"]
 
-  quiz $conn
-  $conn close
+  quiz $conn $testgroup
+  
 }
 
-proc open_db {db_name} {
-  set conn [tdbc::sqlite3::connection create db $db_name]
-  return $conn
-}
-
-proc quiz {conn} {
-  global algo
+proc quiz {conn testgroup} {
+  global algo stmt dct_session session_id
+  
+  set tg_id [det_testgroup_id $conn $testgroup]
+  if {$tg_id <= 0} {
+    log error "Testgroup not found, exit: $testgroup" 
+  }
+  set dct_session [dict create testgroup_id $tg_id ts_start [det_now]]
+  set session_id [stmt_exec $conn $stmt(insert_session) $dct_session 1]
+  dict set dct_session id $session_id
+  
   # deze while lus simpel houden, later mogelijk toch een GUI.
   while {1} {
     # iets meer dan 10, anders komen de foute erg snel terug, zit nu dus 100 tussen.
-    set lst_tracks [get_tracks $conn $algo 100]
+    set lst_tracks [get_tracks $conn $tg_id $algo 5]
     foreach track $lst_tracks {
       quiz_track $track 
     }
   }
 }
 
-# @todo randomize possible in SQLite?
-proc get_tracks {conn algo ntracks} {
-  if {$algo == "new_first"} {
-    # quiz tracks that have not been tested before.
-    set res [$conn allrows -as dicts "select * from track order by nright, nwrong, random() limit $ntracks"] 
-  } elseif {$algo == "wrong_first"} {
-    # quiz tracks that have been tested before, and have the most wrongs and least rights.
-    set res [$conn allrows -as dicts "select * from track order by nright, nwrong desc, random() limit $ntracks"] 
+# @return <= 0 if not found
+proc det_testgroup_id {conn testgroup} {
+  set sql "select id from testgroup where name = '$testgroup'"
+  set res [db_query $conn $sql]
+  if {[llength $res] != 1} {
+    return -1 
   } else {
-    error "Unknown algorithm: $algo" 
+    return [dict get [lindex $res 0] id] 
   }
+}
+
+proc get_tracks {conn testgroup_id algo ntracks} {
+  if {$algo == "new_first"} {
+    set order ""
+  } elseif {$algo == "wrong_first"} {
+    set order "desc" 
+  } else {
+    error "Unknown algorithm: $algo"
+  }
+  set sql "select t.* from track t, testgroup_item i
+           where t.id = i.track_id
+           and i.testgroup_id = $testgroup_id
+           order by 1.0*nright/(nright+nwrong+1), nright, nwrong $order, random()
+           limit $ntracks"
+  set res [db_query $conn $sql]
   return $res
 }
 
@@ -102,7 +127,7 @@ proc quiz_track {track} {
   puts "Right answer? (y(es),n(o),t(itle),a(rtist),q(uit))"
   gets stdin answer
   if {$answer == "q"} {
-    exit 
+    handle_quit
   } else {
     update_track $track $answer $start_sec $stop_sec
   }
@@ -121,30 +146,6 @@ proc set_timeout {} {
   set timeout 1
 }
 
-# @param track: dict (path, nright, nwrong, maybe seconds, frames)
-# @todo handle stats: where did the play start, for how many seconds?
-proc quiz_track_old {track} {
-  global max_play_time_sec
-  # set pid_mpg [start_play $track]
-  lassign [start_play $track] pid_mpg start_sec
-  set start_time [clock seconds]
-  puts "Press enter to stop playing and give answer"
-  # after [expr $max_play_time_sec * 1000] stop_play $pid_mpg
-  gets stdin
-  stop_play $pid_mpg
-  set stop_time [clock seconds]
-  set stop_sec [expr $start_sec + ($stop_time - $start_time)]
-  puts_track $track
-  puts "Right answer? (y(es),n(o),t(itle),a(rtist),q(uit))"
-  gets stdin answer
-  if {$answer == "q"} {
-    exit 
-  } else {
-    update_track $track $answer $start_sec $stop_sec
-  }
-  puts "============================================="
-}
-
 # returns pid of mpg321 process.
 proc start_play {track} {
   set track [add_seconds_frames $track]
@@ -157,14 +158,14 @@ proc start_play {track} {
 # if track already has seconds and frames, just return the track.
 # else: use mp3info to find these values, update the db and return the updated track.
 proc add_seconds_frames {track} {
-  global stmts
+  global stmt
   if {![dict exists $track seconds]} {
     set res [exec mp3info -p "%u/%S" [dict get $track path]]
     lassign [split $res "/"] frames seconds
     # append and update do not work, maybe have made a dict_set_multi before.
     dict set track seconds $seconds
     dict set track frames $frames
-    $stmts(set_seconds_frames) execute $track
+    $stmt(set_seconds_frames) execute $track
   } else {
     # just return original 
   }
@@ -196,7 +197,7 @@ proc puts_track {track} {
 
 # beide goed is hier 2 punten, beide fout 2 fouten, alleen titel of artiest is 1 om 1.
 proc update_track {track answer start_sec stop_sec} {
-  global stmts
+  global stmt session_id
   set answer [string tolower [string range $answer 0 0]]
   if {$answer == "y"} {
     dict incr track nright 2
@@ -216,18 +217,21 @@ proc update_track {track answer start_sec stop_sec} {
     puts "Unrecognised answer, continuing..."
     return
   }    
-  $stmts(update_nright_nwrong) execute $track
+  $stmt(update_nright_nwrong) execute $track
   set ts [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
-  #$stmts(insert_test) execute [dict create path [dict get $track path] \
+  #$stmt(insert_test) execute [dict create path [dict get $track path] \
   #  result $result ts $ts start_sec $start_sec stop_sec $stop_sec]
-  $stmts(insert_test) execute [dict create track_id [dict get $track id] \
+  $stmt(insert_track_test) execute [dict create session_id $session_id track_id [dict get $track id] \
     result $result ts $ts start_sec $start_sec stop_sec $stop_sec]
 }
 
-proc db_eval {conn query} {
-  set stmt [$conn prepare $query]
-  $stmt execute
-  $stmt close
+proc handle_quit {} {
+  global conn stmt dct_session
+  dict set dct_session ts_end [det_now]
+  stmt_exec $conn $stmt(update_session) $dct_session
+  log info "Thanks for quizzing and until the next time!"
+  $conn close
+  exit 
 }
 
 main $argv
