@@ -83,9 +83,24 @@ if {$tcl_version == "8.5"} {
     # $conn prepare "insert into $tablename ([join $args ", "]) values ([join [map {par {return ":$par"}} $args] ", "])"
     $conn prepare [create_insert_sql $tablename {*}$args]
   }
+
+  # @param args: field names
+  proc prepare_insert_td {conn table_def} {
+    # $conn prepare "insert into $tablename ([join $args ", "]) values ([join [map {par {return ":$par"}} $args] ", "])"
+    $conn prepare [create_insert_sql_td $table_def]
+  }
   
   proc create_insert_sql {tablename args} {
     return "insert into $tablename ([join $args ", "]) values ([join [lmap par $args {symbol $par}] ", "])"
+  }
+
+  proc create_insert_sql_td {table_def} {
+    # return "insert into $tablename ([join $args ", "]) values ([join [lmap par $args {symbol $par}] ", "])"
+    dict_to_vars $table_def
+    set insert_fields [lmap x $fields {expr {
+        ($x != "id") ? $x : [continue]
+    }}]
+    return "insert into $table ([join $insert_fields ", "]) values ([join [lmap par $insert_fields {symbol $par}] ", "])"
   }
   
   #  set stmt_update [prepare_update $conn $table_def]
