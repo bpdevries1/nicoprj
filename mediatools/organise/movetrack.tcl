@@ -50,7 +50,8 @@ proc url_decode str {
 }
 
 proc move_next {} {
-  exec qdbus org.kde.amarok /Player org.freedesktop.MediaPlayer.Next 
+  exec qdbus org.kde.amarok /Player org.freedesktop.MediaPlayer.Next
+  after 500
   exec qdbus org.kde.amarok /Player org.freedesktop.MediaPlayer.Forward 90000
 }
 
