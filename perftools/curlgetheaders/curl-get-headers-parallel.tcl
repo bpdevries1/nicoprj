@@ -66,12 +66,14 @@ proc lookup_entries_parallel_src {conn table_def src_table_def ts_start ts_tresh
   set akamai_env "prod"
   set global_values [vars_to_dict conn stmt_insert ts_start akamai_env total_todo gen]
   set ndone 0
+  db_eval $conn "begin transaction"
   foreach url [generator takeList $nparallel $gen] {
     start_job [make_job $url] $global_values
   }
   set finished 0
   vwait $finished
   log info "Finished"
+  db_eval $conn "commit"
 }
 
 proc make_job {url} {
@@ -97,7 +99,7 @@ proc start_job_part {job_part rest global_values} {
 }
 
 proc cb_job {f job_part rest global_values job_info} {
-  global job_output
+  global job_output finished
   append job_output($f) [read $f]
   if {[eof $f]} {
     set data $job_output($f)
@@ -113,6 +115,7 @@ proc cb_job {f job_part rest global_values job_info} {
       # generator geeft lege string als 'ie klaar is, geen hasNext functie.
       if {$url == ""} {
         log info "Finished" 
+        set finished 1
       } else {
         start_job [make_job $url] $global_values
       }
@@ -145,6 +148,11 @@ proc handle_job_output {job_part data global_values job_info} {
     incr ndone 
     log info "total so far=$ndone/$total_todo, [format %.2f [expr 100.0 * $ndone / $total_todo]]% done"
     log info "ETA: [det_eta $ts_start $ndone $total_todo]"
+  }
+  if {$ndone % 100 == 0} {
+     db_eval $conn "commit"
+     db_eval $conn "begin transaction"
+     log info "Started new transaction: $ndone"
   }
 }
 
