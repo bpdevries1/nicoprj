@@ -1,0 +1,71 @@
+(def *open-url-script* "firefox")
+
+(def *open-url-script* "firefox")
+
+(in-ns clojure.java.browse) 
+
+(require 'clojure.java.browse :as 'browse)
+
+
+Werkend:
+(require 'clojure.java.browse)
+(in-ns 'clojure.java.browse)
+*open-url-script*
+; -> nil
+(def *open-url-script* "firefox")
+; wel warning, lijkt toch te werken.
+
+*open-url-script*
+;-> firefox
+
+;(binding [*open-url-script* "firefox"])
+
+(go)
+; niet gevonden, in andere ns.
+
+(in-ns 'one.sample.repl)
+
+; helpt niet, nog steeds chrome geopend.
+; ander pad is chrome melding aan te passen.
+
+[2013-05-20 21:32:39] chrome settings blijven lastig.
+
+[2013-05-20 21:32:45] deinstalleer helpt mss, dat clojure/java dan andere browser start.
+[2013-05-20 21:34:41] werkt wel, nu wordt Opera gestart.
+[2013-05-20 21:38:46] lijkt iets langer goed te gaan, maar als snel weer onderstaande melding:
+
+ClojureScript:one.sample.view> java.io.IOException: Write end dead
+
+indefinitely 
+
+M0003 of clojurescriptone 
+ClojureScript browser REPL goes bonkers after it evals - Clojure ...
+
+Update: this seems to only happen if I start the CLJS REPL inside a CLJ REPL. 
+If I start straight from the command line (ie. lein trampoline cljsbuild repl-listen) 
+it's fine.
+
+-> proberen met de dev-server, kijken of deze het wel blijft doen.
+
+[2013-05-20 21:51:31] Opera ook de-installed, en nu wordt 'ie wel met firefox gestart, 
+in nieuwe tab in bestaand window.
+[2013-05-20 21:52:49] maar ook in firefox gaat het mis.
+
+Opties:
+* Deze 'one' laten zitten.
+* Hoofdbranch, evt met leiningen 1
+* Debuggen.
+
+(ie. lein trampoline cljsbuild repl-listen)
+Deze code in de implementatie van go te zetten?
+
+lein trampoline cljsbuild repl-listen
+-> 'cljsbuild' is not a task. See 'lein help'.
+
+Pedestal van Fogus lijkt ook zoiets, alternatief wellicht? Is nu [2013-05-20 22:08:12] wel in alpha modus.
+
+Het geheel is nog behoorlijk in flux. Als ik iets met web/clojure wil, dan kan ik evt eerst ook op
+de server richten en vrij basic html opsturen. Evt met hiccup/<technomancy> de html maken.
+Of wel met pedestal, of nog verder browsen naar de mogelijkheden. Er is ook een clojure bieb, naar clojars,
+met overzicht.
+

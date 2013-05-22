@@ -1,0 +1,12 @@
+/docs/
+/lib/
+/out/
+/public/javascripts/
+/.repl/
+/classes/
+/wiki
+/.lein-deps-sum
+*~
+/.lein-failures
+/.lein-git-deps/
+/target
