@@ -33,7 +33,14 @@ if {$tcl_version == "8.5"} {
       # nothing 
     }
   }
-  
+
+  # @todo what if something fails, rollback, exec except/finally clause?
+  proc db_in_trans {conn block} {
+    db_eval $conn "begin transaction"
+    uplevel $block  
+    db_eval $conn "commit"
+  }
+
   proc stmt_exec {conn stmt dct {return_id 0}} {
     $stmt execute $dct
     if {$return_id} {
