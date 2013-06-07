@@ -7,6 +7,7 @@
 package require tdbc::sqlite3
 package require Tclx
 package require ndv
+package require textutil
 
 set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 $log set_file "curlgetheader.log"
@@ -21,7 +22,7 @@ proc main {argv} {
   # @note 6-5-2013 NdV even curlgetheader2, want loopt thuis ook nog, weer mergen morgen.
   set table_def [make_table_def curlgetheader ts_start ts fieldvalue param exitcode \
       resulttext msec cacheheaders akamai_env iter cacheable expires expiry cachetype \
-      maxage cachekey akamaiserver]
+      maxage cachekey akamaiserver domain httpresultcode]
   #set src_table_defs [list [dict create table embedded field url] \
   #                         [dict create table embedded field embed]]
   set src_table_defs [list [dict create table firebug field url] \
@@ -55,7 +56,7 @@ proc lookup_entries_parallel {conn table_def src_table_defs ts_start ts_treshold
 
 # @todo? dit is volledig coordinated (itt pre-emptive) multitasking: als een curl blijft hangen, blijft het hele proces uiteindelijk hangen.
 proc lookup_entries_parallel_src {conn table_def src_table_def ts_start ts_treshold nparallel} {
-  global ndone
+  global ndone finished jobs_running
   set max_rows 100
   # set max_rows 5
   set total_todo [det_total_todo $conn $src_table_def $table_def $ts_treshold]
@@ -66,13 +67,19 @@ proc lookup_entries_parallel_src {conn table_def src_table_def ts_start ts_tresh
   set akamai_env "prod"
   set global_values [vars_to_dict conn stmt_insert ts_start akamai_env total_todo gen]
   set ndone 0
+  set jobs_running 0
   db_eval $conn "begin transaction"
   foreach url [generator takeList $nparallel $gen] {
+    log info "First start job for: $url"
     start_job [make_job $url] $global_values
   }
-  set finished 0
-  vwait $finished
-  log info "Finished"
+  if {$jobs_running > 0} {
+    set finished 0
+    vwait finished
+  } else {
+    log info "No jobs started, finished immediately" 
+  }
+  log info "Finished (1)"
   db_eval $conn "commit"
 }
 
@@ -89,23 +96,26 @@ proc start_job {job global_values} {
 }
 
 proc start_job_part {job_part rest global_values} {
-  global job_output
+  global job_output jobs_running
   dict_to_vars $job_part
   set f [open "|curl -IXGET -H \"Pragma: akamai-x-cache-on, akamai-x-cache-remote-on, akamai-x-check-cacheable, akamai-x-get-cache-key, akamai-x-get-extracted-values, akamai-x-get-nonces, akamai-x-get-ssl-client-session-id, akamai-x-get-true-cache-key, akamai-x-serial-no\" -L --connect-timeout 20 --max-time 30 \"$url\"" r]
   set job_output($f) ""
   fconfigure $f -blocking 0
   set job_info [dict create msec_start [clock milliseconds]]
   fileevent $f readable [list cb_job $f $job_part $rest $global_values $job_info]
+  incr jobs_running
+  log info "Set #jobs_running to: $jobs_running"
 }
 
 proc cb_job {f job_part rest global_values job_info} {
-  global job_output finished
+  global job_output finished jobs_running
   append job_output($f) [read $f]
   if {[eof $f]} {
     set data $job_output($f)
     unset job_output($f)
     fileevent $f readable {}
     close $f
+    incr jobs_running -1
     handle_job_output $job_part $data $global_values $job_info
     if {[llength $rest] > 0} {
       start_job_part [lindex $rest 0] [lrange $rest 1 end] $global_values
@@ -114,8 +124,12 @@ proc cb_job {f job_part rest global_values job_info} {
       generator next $gen url
       # generator geeft lege string als 'ie klaar is, geen hasNext functie.
       if {$url == ""} {
-        log info "Finished" 
-        set finished 1
+        log info "Finished (2)" 
+        # set finished 1
+        if {$jobs_running <= 0} {
+          log info "All jobs done, set global finished to 1"
+          set finished 1 
+        }
       } else {
         start_job [make_job $url] $global_values
       }
@@ -132,17 +146,72 @@ proc handle_job_output {job_part data global_values job_info} {
   dict_to_vars $global_values
   dict_to_vars $job_part
   dict_to_vars $job_info ; # msec_start
-  set fieldvalue $url
-  set param $url
+  
   set exitcode 0
   set resulttext $data
-  foreach varname {cacheheaders cacheable expires expiry cachetype maxage cachekey akamaiserver} {
+  set fieldvalue $url
+  foreach dct [split_resulttext $url $data] {
+    dict_to_vars $dct ; # url2 and resulttext 
+    set param $url2
+    set domain [det_domain $url2]
+    foreach varname {cacheheaders cacheable expires expiry cachetype maxage cachekey akamaiserver httpresultcode} {
+      set $varname [det_$varname $resulttext] 
+    }
+    set ts [det_now]
+    set msec_end [clock milliseconds]
+    set msec [expr $msec_end - $msec_start]
+    set dct_insert [vars_to_dict ts_start ts fieldvalue param exitcode resulttext msec cacheheaders akamai_env iter cacheable expires expiry cachetype maxage cachekey akamaiserver domain httpresultcode]
+    stmt_exec $conn $stmt_insert $dct_insert
+  }
+  
+  if {$iter == 1} {
+    incr ndone 
+    log info "total so far=$ndone/$total_todo, [format %.2f [expr 100.0 * $ndone / $total_todo]]% done"
+    log info "ETA: [det_eta $ts_start $ndone $total_todo]"
+  }
+  if {$ndone % 100 == 0} {
+     db_eval $conn "commit"
+     db_eval $conn "begin transaction"
+     log info "Started new transaction: $ndone"
+  }
+}
+
+# if redirect happened, make a list of url/resulttext pairs (in dictionary). If not, return param url2 and data in list.
+proc split_resulttext {url data} {
+  set res {}
+  set url2 $url
+  foreach part [textutil::splitx $data {\n\n}] {
+    if {[string trim $part] == ""} {
+      continue 
+    }
+    lappend res [dict create url2 $url2 resulttext $part]
+    if {[regexp {\nLocation: ([^\n]+)} $part z u]} {
+      set url2 $u 
+    } else {
+      set url2 "<none>" 
+    }
+  }
+  return $res
+}
+
+# @note this proc (and all others) is single threaded.
+proc handle_job_output_old {job_part data global_values job_info} {
+  global ndone
+  dict_to_vars $global_values
+  dict_to_vars $job_part
+  dict_to_vars $job_info ; # msec_start
+  set fieldvalue $url
+  set param $url
+  set domain [det_domain $url]
+  set exitcode 0
+  set resulttext $data
+  foreach varname {cacheheaders cacheable expires expiry cachetype maxage cachekey akamaiserver httpresultcode} {
     set $varname [det_$varname $resulttext] 
   }
   set ts [det_now]
   set msec_end [clock milliseconds]
   set msec [expr $msec_end - $msec_start]
-  set dct_insert [vars_to_dict ts_start ts fieldvalue param exitcode resulttext msec cacheheaders akamai_env iter cacheable expires expiry cachetype maxage cachekey akamaiserver]
+  set dct_insert [vars_to_dict ts_start ts fieldvalue param exitcode resulttext msec cacheheaders akamai_env iter cacheable expires expiry cachetype maxage cachekey akamaiserver domain httpresultcode]
   stmt_exec $conn $stmt_insert $dct_insert
   if {$iter == 1} {
     incr ndone 
@@ -185,7 +254,7 @@ proc main_test {argv} {
     after 1000  
   }
   
-  log info "finished"
+  log info "Finished (3)"
 }
 
 proc curl_ready {f} {
@@ -358,10 +427,26 @@ proc det_akamaiserver {resulttext} {
   return $akamaiserver  
 }
 
+proc det_httpresultcode {resulttext} {
+  if {[regexp {HTTP/[^ ]+ ([0-9]+)} $resulttext z httpresultcode]} {
+    return $httpresultcode 
+  } else {
+    return "<none>" 
+  }
+}
+
 proc det_header_field {resulttext fieldname} {
   set re "$fieldname: (\[^\\n\]+)"
   if {[regexp $re $resulttext z value]} {
     return $value 
+  } else {
+    return "<none>" 
+  }
+}
+
+proc det_domain {url} {
+  if {[regexp {https?://([^/]+)} $url z domain]} {
+    return $domain 
   } else {
     return "<none>" 
   }
