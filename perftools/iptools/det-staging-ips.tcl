@@ -12,15 +12,16 @@ $log set_file "curlgetheader.log"
 proc main {argv} {
   set root_folder [det_root_folder] ; # based on OS.
   # 6-5-2013 NdV niet met 2 processen tegelijk op 1 database!
-  set db_name [file join $root_folder "aaa/akamai2.db"]
+  set db_name [file join $root_folder "aaa/akamai.db"]
   log info "Opening database: $db_name"
   set conn [open_db $db_name]
 
   # set conn [open_db "~/Dropbox/Philips/Akamai/akamai.db"]
   # @note 6-5-2013 NdV even curlgetheader2, want loopt thuis ook nog, weer mergen morgen.
   # set table_def [make_table_def staging2 ts domain res1 staging_name res2 staging_ip staging_ip2]
-  set table_def [make_table_def staging ts domain res1 staging_name res2 staging_ip staging_ip2]
-  create_table $conn $table_def 1 ; # 1: first drop the table.
+  set table_def [make_table_def staging ts domain res1 staging_name res2 staging_ip staging_ip2 prod_ip prod_ip2 scope]
+  # create_table $conn $table_def 1 ; # 1: first drop the table.
+  create_table $conn $table_def 0 ; # 1: first drop the table.
    
   # lookup_entries $conn $table_def "firebug" $wait_after
   lookup_entries $conn $table_def
@@ -29,22 +30,30 @@ proc main {argv} {
 proc lookup_entries {conn table_def} {
   dict_to_vars $table_def
   set stmt_insert [prepare_insert $conn $table {*}$fields]
-  set query "select domain from scope where status='in_scope' order by domain"
+  # set query "select domain from scope where status='in_scope' order by domain"
+  set query "select distinct domain from akamaidomains"
+  set scope "lighting"
   foreach row [db_query $conn $query] {
     set ts [det_now]
     set domain [dict get $row domain]
     log info "Finding staging info for: $domain"
     set res1 [nslookup $domain]
+    lassign [det_nslookup_ips $res1] prod_ip prod_ip2
     set staging_name [det_staging_name $res1]
     if {$staging_name != "<none>"} {
       set res2 [nslookup $staging_name]
-      lassign [det_staging_ips $res2] staging_ip staging_ip2
+      lassign [det_nslookup_ips $res2] staging_ip staging_ip2
     } else {
       set res2 "<none>"
       set staging_ip "<none>"
       set staging_ip2 "<none>"
     }
-    set dct_insert [vars_to_dict ts domain res1 staging_name res2 staging_ip staging_ip2]
+    # don't check ip2, mostly (always?) <none>
+    if {$prod_ip == $staging_ip} {
+      log warn "Production IP == Staging IP"
+      breakpoint
+    } 
+    set dct_insert [vars_to_dict scope ts domain res1 prod_ip prod_ip2 staging_name res2 staging_ip staging_ip2]
     stmt_exec $conn $stmt_insert $dct_insert
   }
 }
@@ -65,7 +74,25 @@ proc nslookup {domain} {
 # Aliases:  www.philips.nl
 #           www.countries.philips.com.edgesuite.net
 # 
+# @note 4-6-2013 NdV first check (wrt China) on akamai(edge).net
 proc det_staging_name {res} {
+  if {[regexp {www.usa.philips.com} $res]} {
+    # breakpoint 
+  }
+  if {[regexp {([^ \t:\n]+)\.akamai.net} $res z prefix]} {
+    return "$prefix.akamai-staging.net"
+  } elseif {[regexp {([^ \t:\n]+)\.akamaiedge.net} $res z prefix]} {
+    return "$prefix.akamaiedge-staging.net" 
+  } elseif {[regexp {([^ \t:\n]+)\.edgesuite.net} $res z prefix]} {
+    return "$prefix.edgesuite-staging.net" 
+  } elseif {[regexp {([^ \t:\n]+)\.edgekey.net} $res z prefix]} {
+    return "$prefix.edgekey-staging.net"
+  } else {
+    return "<none>"
+  }
+}
+
+proc det_staging_name_old {res} {
   if {[regexp {([^ ]+)\.edgesuite.net} $res z prefix]} {
     return "$prefix.edgesuite-staging.net" 
   } elseif {[regexp {([^ ]+)\.edgekey.net} $res z prefix]} {
@@ -86,8 +113,18 @@ proc det_staging_name {res} {
 # Addresses:  165.254.92.139
 #           165.254.92.145
 # Aliases:  www.countries.philips.com.edgesuite-staging.net
-proc det_staging_ips {res} {
-  if {[regexp {Addresses: +([0-9.]+)} $res z ip]} {
+#
+# @note antwoord iig na "answer:"
+proc det_nslookup_ips {res} {
+  if {[regexp {answer:.*Address(es)?: +([0-9.]+)} $res z z ip]} {
+    return [list $ip "<none>"] 
+  } else {
+    return [list "<none>" "<none>"] 
+  }
+}
+
+proc det_staging_ips_old {res} {
+  if {[regexp {answer:.*Address(es)?: +([0-9.]+)} $res z z ip]} {
     return [list $ip "<none>"] 
   } else {
     return [list "<none>" "<none>"] 

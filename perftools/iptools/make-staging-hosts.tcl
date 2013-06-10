@@ -11,7 +11,7 @@ set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 proc main {argv} {
   set root_folder [det_root_folder] ; # based on OS.
   # 6-5-2013 NdV niet met 2 processen tegelijk op 1 database!
-  set db_name [file join $root_folder "aaa/akamai2.db"]
+  set db_name [file join $root_folder "aaa/akamai.db"]
   log info "Opening database: $db_name"
   set conn [open_db $db_name]
   make_hosts $conn staging
@@ -24,6 +24,7 @@ proc make_hosts {conn tablename} {
   set query "select staging_ip, domain
              from $tablename
              where staging_ip <> '<none>'
+             and scope='lighting'
              order by staging_ip, domain"
   set prev_staging_ip "<none>"
   set domains {}
