@@ -24,7 +24,8 @@ namespace eval ::ndv {
   # controlled loading of package.
   if {[catch {package require mysqltcl} msg]} {
     #set MYSQLTCL_LIB 0
-    puts stderr "Failed to load mysqltcl library. Msg = $msg"
+    # 18-6-2013 NdV don't put error message anymore, is irritating and mysql not used so much anymore.
+    # puts stderr "Failed to load mysqltcl library. Msg = $msg"
   } else {
     #set MYSQLTCL_LIB 1
   }

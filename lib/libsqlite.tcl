@@ -4,11 +4,12 @@
 
 if {$tcl_version == "8.5"} {
 
-  puts stderr "Creating tcl 8.5 sqlite helper procs (none for now)"
+  # puts stderr "Creating tcl 8.5 sqlite helper procs (none for now)"
   
 } elseif {$tcl_version == "8.6"} {
 
-  puts stderr "Creating tcl 8.6 tdbc::sqlite helper procs" 
+  # 18-6-2013 NdV don't put message anymore, is irritating.
+  # puts stderr "Creating tcl 8.6 tdbc::sqlite helper procs" 
   
   proc open_db {db_name} {
     set conn [tdbc::sqlite3::connection create db $db_name]
@@ -82,8 +83,18 @@ if {$tcl_version == "8.5"} {
   }
   
   proc create_table_sql {table_def} {
+    # return "create table [dict get $table_def table] ([join [dict get $table_def fields] ", "])" 
+    set fields [lmap x [dict get $table_def fields] {expr {
+        ($x != "id") ? $x : "id integer primary key autoincrement"
+    }}]
+    return "create table [dict get $table_def table] ([join $fields ", "])"
+    
+  }
+
+  proc create_table_sql_old {table_def} {
     return "create table [dict get $table_def table] ([join [dict get $table_def fields] ", "])" 
   }
+
   
   # @param args: field names
   proc prepare_insert {conn tablename args} {
