@@ -8,7 +8,7 @@ package provide ndv 0.1.1
 namespace eval ::ndv {
 
 	namespace export times times_old lindices iden lambda_negate lambda_and regexp_lambda \
-	         lst_partition proc_to_lambda lambda_to_proc iden id if_else map mapfor \
+	         lst_partition partition_all proc_to_lambda lambda_to_proc iden id if_else map mapfor \
 	         filter filterfor iota multimap transpose when_set set_if_empty variables
 
   interp alias {} map {} ::struct::list map
@@ -81,6 +81,26 @@ namespace eval ::ndv {
     struct::list mapfor el [array names ar] {set ar($el)} 
   }
 
+  # same name as clojure-fn
+  proc partition_all {n coll} {
+    set res {}
+    set lst {}
+    set i 0
+    foreach el $coll {
+      lappend lst $el
+      incr i
+      if {$i >= $n} {
+        lappend res $lst
+        set lst {}
+        set i 0
+      }
+    }
+    if {$lst != {}} {
+      lappend res $lst
+    }
+    return $res
+  }
+  
   # @todo functies om een lambda naar een proc om te zetten en vice versa
   # deze ook functioneel kunnen inzetten, ofwel return value moet direct bruikbaar zijn.
   proc proc_to_lambda {procname} {
