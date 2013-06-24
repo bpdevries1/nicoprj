@@ -2,7 +2,8 @@
 
 # jtls2db.tcl - convert jtl's (csv) to a sqlite3 db, add fields: id, filename, ts_fmt, sec_delta, TTL (from akamai cachekey)
 
-# @todo nieuwe run bevat akserver_remote en cachetype_remote, oude dus niet, dus flexibel inrichten.
+# @todo Hostname wordt nu in JTL gezet. Ok, maar laptop-lokatie en netwerk kan wijzigen, PUB/PHI of thuis. Gegeven IP adres werkt dan beter, is uit bijbehorende 
+#       JMeter log te achterhalen.
 
 package require tdbc::sqlite3
 package require Tclx
@@ -10,7 +11,7 @@ package require ndv
 
 proc main {argv} {
   lassign $argv jtl_dir
-  if {0} {
+  if {1} {
     set db_dir [copy_jtl_to_db_dir $jtl_dir]
     call_excel2db $db_dir
   } else {
@@ -39,14 +40,17 @@ proc copy_jtl_to_db_dir {jtl_dir} {
 # @pre symlink with excel2db.tcl exists in current (jmetertools) dir.
 proc call_excel2db {db_dir} {
   # @todo? evt deze sources, dan main aanroepen.
-  exec -ignorestderr ./excel2db.tcl $db_dir
+  set excel2db [find_script excel2db.tcl perftoolset tools/excel2db]
+  # exec -ignorestderr ./excel2db.tcl $db_dir
+  exec -ignorestderr tclsh86 $excel2db $db_dir
 }
 
 proc merge_tables {db_dir} {
   set conn [open_db [find_db $db_dir]]
   # breakpoint
   set tables [det_tables $conn]
-  set fields [det_fields $conn [lindex $tables 0]]
+  # set fields [det_fields $conn [lindex $tables 0]]
+  set fields [det_fields_union $conn $tables]
   set target_table reqs
   # set tabledef [make_table_def $target_table {*}[concat {id} $fields {origtable ts_fmt sec_delta ttl}]]
   set tabledef [make_table_def_keys $target_table {id} [concat $fields {origtable ts_utc sec_delta_req sec_delta_reqsrv ttl}]]
@@ -58,7 +62,8 @@ proc merge_tables {db_dir} {
   [$conn getDBhandle] function det_ttl det_ttl
   
   foreach table $tables {
-    insert_table $conn $table $target_table $fields
+    # insert_table $conn $table $target_table $fields
+    insert_table $conn $table $target_table [det_fields $conn $table]
   }
   # @todo: sec_delta: met 1) query/subselect of 2) in tcl oplossen. Voorkeur voor (1).
   # breakpoint
@@ -68,6 +73,9 @@ proc merge_tables {db_dir} {
   # db_eval $conn "update reqs set ttl = det_ttl(cachekey)"
   # X-Cache-Remote: TCP_MEM_HIT from a82-96-58-44.deploy.akamaitechnologies.com (AkamaiGHost/6.11.2.2-10593690) (-)
   fill_deltas $conn $target_table
+  
+  update_labels $conn
+  fill_hostname $conn
 }
 
 proc find_db {db_dir} {  
@@ -78,6 +86,11 @@ proc det_tables {conn} {
   lmap el [dict keys [$conn tables]] {expr {
     [regexp {^cache1d} $el] ? $el : [continue]  
   }}
+}
+
+# @return set-union of all fields of tables
+proc det_fields_union {conn tables} {
+  struct::set union {*}[lmap t $tables {det_fields $conn $t}]
 }
 
 proc det_fields {conn tablename} {
@@ -125,6 +138,52 @@ proc fill_deltas {conn target_table} {
                and t2.timestamp < $target_table.timestamp               
              ))"
   db_eval $conn $query
+}
+
+proc update_labels {conn} {
+  foreach {from to} {clhome cl_home lcdtouch lcdtouch_pdp reaura reaura_pdp} {
+    set query "update reqs set label='$to' where label='$from'"
+    log info "Executing query: $query"
+    db_eval $conn $query
+  }
+}
+
+proc fill_hostname {conn} {
+  db_eval $conn "update reqs set Hostname='PClinux' where Hostname is null" 
+}
+
+# possible lib function
+proc find_script {filename base_dir rel_dir} {
+  set actual_base_dir [det_actual_base_dir $base_dir]
+  set path [file join $actual_base_dir $rel_dir $filename]
+  if {[file exists $path]} {
+    return $path 
+  } else {
+    error "Script not found: $path" 
+  }
+}
+
+# @return system dependent base-dir for scripts
+proc det_actual_base_dir {base_dir} {
+  global tcl_platform
+  if {$tcl_platform(platform) == "windows"} {
+    if {$base_dir == "perftoolset"} {
+      return "c:/perftoolset" 
+    } elseif {$base_dir == "nicoprj"} {
+      return "c:/nico/nicoprj" 
+    } else {
+      error "Cannot determine actual base-dir of $base_dir on windows" 
+    }
+  } else {
+    # linux 
+    if {$base_dir == "perftoolset"} {
+      return "~/perftoolset" 
+    } elseif {$base_dir == "nicoprj"} {
+      return "~/nicoprj" 
+    } else {
+      error "Cannot determine actual base-dir of $base_dir on linux" 
+    }
+  }
 }
 
 main $argv

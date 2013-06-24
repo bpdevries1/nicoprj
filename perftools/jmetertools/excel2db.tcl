@@ -1,1 +1,1 @@
-/home/nico/perftoolset/tools/excel2db/excel2db.tcl
+../../../perftoolset/tools/excel2db/excel2db.tcl
