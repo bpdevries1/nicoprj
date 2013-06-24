@@ -1,8 +1,10 @@
 require 'win32ole'
-require "FolderFinder.rb"
-require "EmailFolders.rb"
-require "FolderChooser.rb"
-require "LoggerFactory.rb"
+# require "FolderFinder.rb"
+# require "c:/nico/nicoprj/outlooktools/OutlookMoveRuby/FolderFinder.rb"
+require "./FolderFinder.rb"
+require "./EmailFolders.rb"
+require "./FolderChooser.rb"
+require "./LoggerFactory.rb"
 
 # @todo maak onderscheid tussen learning mode (nu default) en auto-mode.
 
@@ -21,10 +23,16 @@ class Main
   
   def run
 		puts "Outlook Move Ruby"
-		myApp = WIN32OLE::new("outlook.Application")
+		# myApp = WIN32OLE::new("outlook.Application")
+		
+		myApp = WIN32OLE.connect("Outlook.Application")
+		#myApp = WIN32OLE.new('Outlook.Application')
 		WIN32OLE.const_load(myApp, OutlookConst)
 
 		ns = myApp.GetNameSpace("MAPI")
+		olFolderInbox = 6; # according to http://stackoverflow.com/questions/5022532/retrieving-outlook-inbox-and-sent-folders-in-delphi-using-ole
+		inbox = ns.GetDefaultFolder(olFolderInbox);
+		
 		#ns.Logon # uncomment for online usage
 		@ff = FolderFinder.new
 		@ff.set_namespace(ns)
@@ -35,7 +43,9 @@ class Main
 		@email_folders = EmailFolders.new("c:/nico/outlook/emailfolders.xml", @ff)
 
 		# handle_folder(ns, "Persoonlijke mappen/Postvak IN")
-		handle_folder(ns, "Mailbox - Nico de Vreeze/Inbox")
+		# handle_folder(ns, "Mailbox - Nico de Vreeze/Inbox")
+		#handle_folder_name(ns, "nico.de.vreeze@philips.com/Inbox")
+		handle_folder(ns, inbox)
 		# handle_folder(ns, "Persoonlijke mappen/Verzonden items")
 
 		# handle_todo_folder(ns, "Persoonlijke mappen/Taken", "Personal/Taken/Afgeronde taken")
@@ -43,12 +53,17 @@ class Main
 		@email_folders.close
   end
 
-	def handle_folder(ns, folder_name)
+	def handle_folder_name(ns, folder_name)
 		fl_source = @ff.find_folder_path(ns, folder_name)
 		puts "Found folder, name = #{fl_source.name}"
 		handle_items(fl_source)
 	end
-
+	
+	# @param folder outlook folder object
+	def handle_folder(ns, folder)
+	  handle_items(folder)
+	end  
+	  
 	def handle_items(fl_source)
 		# make a copy first, the original each is too dynamic when items are moved/deleted.
 		copy = fl_source.Items.collect {|el| el}

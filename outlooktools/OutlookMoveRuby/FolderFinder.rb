@@ -1,8 +1,8 @@
 # FolderFinder - library class for finding Outlook folders
 
 require 'win32ole'
-require "EmailFolders.rb"
-require "LoggerFactory.rb"
+require "./EmailFolders.rb"
+require "./LoggerFactory.rb"
 
 class FolderFinder
 	
@@ -43,6 +43,7 @@ class FolderFinder
 
 	# zoek folder 1 niveau diep
 	# @todo handle when a folder doesn't exist (renamed, moved, deleted, etc)
+	# @return Outlook folder object.
 	def find_folder (parent_folder, folder_name) 
 		# possible that path starts with a /, then the first part is empty
 		# @log.debug("Searching Folder: #{folder_name} in parent: #{parent_folder.name}") 

@@ -1,8 +1,8 @@
 # FolderChooser: choose a folder from a list or choose a different action
 
 require 'win32ole'
-require "EmailFolders.rb"
-require "LoggerFactory.rb"
+require "./EmailFolders.rb"
+require "./LoggerFactory.rb"
 
 class FolderChooser
 

@@ -1,8 +1,8 @@
 require 'win32ole'
-require "FolderFinder.rb"
-require "EmailFolders.rb"
-require "FolderChooser.rb"
-require "LoggerFactory.rb"
+require "./FolderFinder.rb"
+require "./EmailFolders.rb"
+require "./FolderChooser.rb"
+require "./LoggerFactory.rb"
 
 # alle OLE objecten hebben blijkbaar dezelfde class: WIN32OLE. Hier Enumerable aan
 # toevoegen, zodat bv find beschikbaar komt.
@@ -18,7 +18,7 @@ class Main
   end
   
   def run
-		puts "Outlook show number of items in TODO folders"
+		# puts "Outlook show number of items in TODO folders"
 		myApp = WIN32OLE::new("outlook.Application")
 		WIN32OLE.const_load(myApp, OutlookConst)
 
@@ -36,7 +36,10 @@ class Main
 
   def show_foldername name 
 		lst_todo = @ff.search_folders(name) # list of MailFolder
-		lst_todo.each {|fld| puts "#{fld.outlook_folder.items.count} -  #{fld.path}" if fld.outlook_folder.items.count > 0}
+		# lst_todo.each {|fld| puts "#{fld.outlook_folder.items.count} -  #{fld.path}" if fld.outlook_folder.items.count > 0}
+		lst_todo.each {|fld| puts "#{'%3d' % fld.outlook_folder.items.count} -  #{fld.path}" if fld.outlook_folder.items.count > 0}
+		
+		'%.2f' % 1.23456789
   end
   
 end
