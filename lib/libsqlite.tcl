@@ -88,7 +88,6 @@ if {$tcl_version == "8.5"} {
         ($x != "id") ? $x : "id integer primary key autoincrement"
     }}]
     return "create table [dict get $table_def table] ([join $fields ", "])"
-    
   }
 
   proc create_table_sql_old {table_def} {
