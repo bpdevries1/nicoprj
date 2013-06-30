@@ -107,6 +107,34 @@ if {$tcl_version == "8.5"} {
     # $conn prepare "insert into $tablename ([join $args ", "]) values ([join [map {par {return ":$par"}} $args] ", "])"
     $conn prepare [create_insert_sql_td $table_def]
   }
+
+  # @param args: field names
+  # @return procname which can be called with dict to insert a record in the specified table.
+  proc prepare_insert_td_proc {conn table_def} {
+    global prepare_insert_td_proc_proc_id
+    # $conn prepare "insert into $tablename ([join $args ", "]) values ([join [map {par {return ":$par"}} $args] ", "])"
+    set stmt [$conn prepare [create_insert_sql_td $table_def]]
+    incr prepare_insert_td_proc_proc_id
+    set proc_name "stmt_insert_$prepare_insert_td_proc_proc_id"
+    # @todo probably need to use some quoting, compare clojure macro and closure.
+    proc $proc_name {dct {return_id 0}} "
+      stmt_exec $conn $stmt \$dct \$return_id
+    "
+    return $proc_name
+  }
+  
+  # some testing with 'closures'
+  proc make_adder {n} {
+    proc adder {i} "
+      expr $n + \$i 
+    "
+    return "adder"
+  }
+  
+  # usage:
+  # set a [make_adder 3]
+  # $a 5
+
   
   proc create_insert_sql {tablename args} {
     return "insert into $tablename ([join $args ", "]) values ([join [lmap par $args {symbol $par}] ", "])"
