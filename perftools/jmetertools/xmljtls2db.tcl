@@ -8,22 +8,24 @@ package require Tclx
 package require struct::stack
 package require ndv
 
-set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+set log [::ndv::CLogger::new_logger [file tail [info script]] warn]
 $log set_file "[info script].log"
 
-# @todo ts_fmt als extra veld opnemen in httpsample.
+# @todo ts_utc als extra veld opnemen in httpsample.
+# @todo remove redundant logging.
 
 proc main {argv} {
   global conn dct_insert_stmts
   if {[llength $argv] != 2} {
     log error "syntax: ./xmljtls2db.tcl <dir-with-jtl> <dir-to-put-db>"
-    exit
+    exit 1
   }
   lassign $argv dirname dbdirname
   # lassign [create_db $dirname] conn table_defs
   lassign [create_db $dbdirname] conn table_defs
   foreach td $table_defs {
-    dict set dct_insert_stmts [dict get $td table] [prepare_insert_td $conn $td]
+    # dict set dct_insert_stmts [dict get $td table] [prepare_insert_td $conn $td]
+    dict set dct_insert_stmts [dict get $td table] [prepare_insert_td_proc $conn $td]
   }
   read_jtls $conn $dirname $dct_insert_stmts
   finish_db $conn
@@ -35,7 +37,7 @@ proc create_db {dirname} {
   # sqlite3 db $dbfile
   set conn [open_db $db_file]
   set td_jtlfile [make_table_def_keys jtlfile {id} {path}]
-  set td_httpsample [make_table_def_keys httpsample {id} {parent_id jtlfile_id t lt ts s lb rc rm tn dt \
+  set td_httpsample [make_table_def_keys httpsample {id} {parent_id jtlfile_id t lt ts ts_utc s lb rc rm tn dt \
     de by ng na hn ec it sc responseHeader requestHeader responseFile cookies \
     method queryString redirectLocation java_net_URL cachetype akserver protocol server path}]
   set td_assertionresult [make_table_def_keys assertionresult {id} {parent_id name failure error}]
@@ -66,20 +68,13 @@ proc read_jtl {conn jtlfile dct_insert_stmts} {
   global elt_stack jtlfile_id
   log info "Reading jtl: $jtlfile" 
   db_eval $conn "begin transaction"
-  set jtlfile_id [stmt_exec $conn [dict get $dct_insert_stmts jtlfile] [dict create path $jtlfile] 1]
+  # set jtlfile_id [stmt_exec $conn [dict get $dct_insert_stmts jtlfile] [dict create path $jtlfile] 1]
+  set jtlfile_id [[dict get $dct_insert_stmts jtlfile] [dict create path $jtlfile] 1]
   log info "jtlfile_id: $jtlfile_id"
-  if {0} {
-    set parser [::xml::parser -elementstartcommand [list elementstart count elt_stack] \
-      -elementendcommand [list elementend elt_stack] \
-      -characterdatacommand [list characterdata elt_stack] \
-      -defaultcommand xml_default]
-  }
-  if {1} {  
-    set parser [::xml::parser -elementstartcommand [list elementstart count elt_stack] \
-      -elementendcommand [list elementend elt_stack] \
-      -characterdatacommand [list characterdata elt_stack] \
-      -defaultcommand xml_default]
-  }
+  set parser [::xml::parser -elementstartcommand [list signal_error elementstart count elt_stack] \
+    -elementendcommand [list signal_error elementend elt_stack] \
+    -characterdatacommand [list signal_error characterdata elt_stack] \
+    -defaultcommand [list signal_error xml_default]]
   set f [open $jtlfile r]
   log debug "Reading file: $jtlfile"
   set elt_stack [struct::stack]
@@ -96,10 +91,26 @@ proc read_jtl {conn jtlfile dct_insert_stmts} {
   db_eval $conn "commit"
 }
 
+# @note wrapper around xml parser callbacks, to make sure that error are signalled and not silently ignored.
+proc signal_error {proc_name args} {
+  try_eval {
+    $proc_name {*}$args
+  } {
+    log error "$errorResult $errorCode $errorInfo, exiting"
+    error $errorResult $errorCode $errorInfo
+    exit
+  }  
+}
+
 proc elementstart {count_name elt_stack_name name attlist args} {
   global conn
   upvar #0 $count_name count
   upvar #0 $elt_stack_name elt_stack
+  log debug "elementstart: $name (att: $attlist, args: $args)"
+  if {[ignore_elt $name]} {
+    log debug "Ignore element: $name"
+    return 
+  }
   incr count
   log debug "Handled $count elements"
   if {[expr $count % 1000] == 0} {
@@ -107,31 +118,42 @@ proc elementstart {count_name elt_stack_name name attlist args} {
     db_eval $conn "commit"
     db_eval $conn "begin transaction"
   }
-  log debug "elementstart: $name (att: $attlist, args: $args)"
+  
   $elt_stack push [dict create tag $name attrs $attlist]
   log info "pushed elt: size now: [$elt_stack size]"
   log debug "current element after change: [first_line [$elt_stack peek]]"
   # log debug "current element after change: [$elt_stack peek]"
+  log debug "elementstart: $name finished"
 }
 
 proc characterdata {elt_stack_name data} {
   upvar #0 $elt_stack_name elt_stack
-  log debug "character data: [first_line $data] ***"
+  log debug "1.character data: [first_line $data] ***"
+  # breakpoint
   if {[string trim $data] != ""} {
     log debug "stack size before change: [$elt_stack size]"
-    set elt [$elt_stack pop]
-    dict set elt text $data
-    $elt_stack push $elt
+    if {[$elt_stack size] > 0} {
+      set elt [$elt_stack pop]
+      dict set elt text $data
+      $elt_stack push $elt
+      log debug "current element after change: [first_line [$elt_stack peek]]"
+    } else {
+      log debug "stack is empty, don't change element with character data" 
+    }
     log debug "stack size after change: [$elt_stack size]"
   }
   # log debug "current element after change: [$elt_stack peek]"
-  log debug "current element after change: [first_line [$elt_stack peek]]"
   log debug "character data end."
 }
 
 proc elementend {elt_stack_name name} {
   upvar #0 $elt_stack_name elt_stack
   log debug "element end: $name"
+  if {[ignore_elt $name]} {
+    log debug "Ignore element: $name"
+    return 
+  }
+
   log info "will pop elt: size now: [$elt_stack size]"
   set child ""
   if {[$elt_stack size] >= 2} {
@@ -139,37 +161,25 @@ proc elementend {elt_stack_name name} {
     set parent [$elt_stack pop]
     dict lappend parent subelts $child
     $elt_stack push $parent
-  } else {
+  } elseif {[$elt_stack size] == 1} {
     # toplevel finished? callback?
-    log info "elt_stack size < 2, do callback?"
-    log info "stack size: [$elt_stack size]"
-    if {[$elt_stack size] == 1} {
-      log info "only element: [$elt_stack peek]" 
-    }
+    log info "elt_stack size == 1, do callback!"
+    handle_main_sample [$elt_stack pop]
+  } else {
+    log error "Stack size < 1 and found end-tag, should not happen" 
   }
-  if {[$elt_stack size] == 1} {
-    # @todo algemene element niet op de stack, want kost veel geheugen, alle sub-tags hier aan toegevoegd.
-    # httpSample niet meer current element, niet meer op stack, toegevoegd aan algemene results (hoeft eigenlijk ook niet)
-    # handle_main_sample [$elt_stack peek]
-    try_eval {
-      #log info "calling handle_main_sample, stack: [stack_to_string $elt_stack]"
-      #handle_main_sample [$elt_stack peek]
-      if {$child == ""} {
-        log warn "want to call handle_main_sample, but child is empty" 
-      } else {
-        log info "calling handle_main_sample, stack: [stack_to_string $elt_stack]"
-        handle_main_sample $child
-      }
-    } {
-      log debug "error in handle_main_sample: $errorResult"
-      log debug "$errorCode $errorInfo"
-      error $errorResult $errorCode $errorInfo
-      exit
-    }
-  }
-  
   log info "stack size after change: [$elt_stack size]"
-  log debug "current element after change: [first_line [$elt_stack peek]]"
+  if {[$elt_stack size] > 0} {
+    log debug "current element after change: [first_line [$elt_stack peek]]"
+  }
+  log debug "elementend $name: finished"
+}
+
+proc ignore_elt {name} {
+  if {$name == "testResults"} {
+    return 1 
+  }
+  return 0
 }
 
 proc stack_to_string {elt_stack} {
@@ -209,7 +219,7 @@ proc handle_main_sample {sample} {
   insert_assertion_results $main_id $sample
   log debug "inserted assertion results"
   insert_sub_samples $main_id $sample
-  log info "handled main sample."
+  log info "handle main sample: finished"
 }
 
 proc insert_sample {sample {parent_id ""}} {
@@ -218,17 +228,20 @@ proc insert_sample {sample {parent_id ""}} {
   set dct [dict_get $sample attrs {}] ; # std attrs like t, ts, ...
   dict set dct jtlfile_id $jtlfile_id
   dict set dct parent_id $parent_id
+  # @todo check if ts_utc is really GMT/UTC.
+  dict set dct ts_utc [clock format [expr round(0.001*[dict_get $dct ts 0])] -format "%Y-%m-%d %H:%M:%S" -gmt 1]
   foreach sub_elt [dict_get $sample subelts {}] {
     set sub_tag [dict get $sub_elt tag]
     if {$sub_tag == "assertionResult"} {
       # ignore here 
     } elseif {$sub_tag == "httpSample"} {
-     # ignore here 
+      # ignore here 
     } else {
       dict set dct $sub_tag [dict_get $sub_elt text ""] 
     }
   }
-  set main_id [stmt_exec $conn [dict get $dct_insert_stmts httpsample] $dct 1]
+  # set main_id [stmt_exec $conn [dict get $dct_insert_stmts httpsample] $dct 1]
+  set main_id [[dict get $dct_insert_stmts httpsample] $dct 1]
   log debug "insert_sample: finished"
   return $main_id  
 }
@@ -242,7 +255,8 @@ proc insert_assertion_results {sample_id sample} {
       foreach sub_sub_elt [dict_get $sub_elt subelts {}] {
          dict set dct_assert [dict get $sub_sub_elt tag] [dict_get $sub_sub_elt text ""] 
       }
-      stmt_exec $conn [dict get $dct_insert_stmts assertionresult] $dct_assert
+      # stmt_exec $conn [dict get $dct_insert_stmts assertionresult] $dct_assert
+      [dict get $dct_insert_stmts assertionresult] $dct_assert
     }
   }
 }
@@ -269,6 +283,34 @@ proc first_line {text} {
     return "all: $text"  
   }
 }
+
+# library function libsqlite
+# @param args: field names
+# @return procname which can be called with dict to insert a record in the specified table.
+proc prepare_insert_td_proc {conn table_def} {
+  global prepare_insert_td_proc_proc_id
+  # $conn prepare "insert into $tablename ([join $args ", "]) values ([join [map {par {return ":$par"}} $args] ", "])"
+  set stmt [$conn prepare [create_insert_sql_td $table_def]]
+  incr prepare_insert_td_proc_proc_id
+  set proc_name "stmt_insert_$prepare_insert_td_proc_proc_id"
+  # @todo probably need to use some quoting, compare clojure macro and closure.
+  proc $proc_name {dct {return_id 0}} "
+    stmt_exec $conn $stmt \$dct \$return_id
+  "
+  return $proc_name
+}
+
+# some testing with 'closures'
+proc make_adder {n} {
+  proc adder {i} "
+    expr $n + \$i 
+  "
+  return "adder"
+}
+
+# usage:
+# set a [make_adder 3]
+# $a 5
 
 main $argv
 
