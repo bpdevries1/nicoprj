@@ -60,6 +60,7 @@ if {$tcl_version == "8.5"} {
   }
   
   proc make_table_def {tablename args} {
+    log warn "deprecated use of make_table_def, use make_table_def_keys"
     dict create table $tablename fields $args 
   }
 
