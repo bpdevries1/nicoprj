@@ -48,5 +48,11 @@ proc dict_to_vars {dct} {
   }
 }
 
-
+proc dict_get {dct key {default {}}} {
+  if {[dict exists $dct $key]} {
+    dict get $dct $key
+  } else {
+    return $default 
+  }
+}
 
