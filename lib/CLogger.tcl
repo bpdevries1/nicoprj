@@ -95,9 +95,14 @@ namespace eval ::ndv {
 			return $log_level
 		}
 		
-    public method set_file {a_filename} {
+    # @param append: should logfile be appended to, default it is overwritten.
+		public method set_file {a_filename {append 0}} {
       set filename $a_filename
-      set f_log [open $filename a]
+      if {$append} {
+        set f_log [open $filename a]
+      } else {
+        set f_log [open $filename w]
+      }
       log_intern "Opened logfile: $filename" info
     }
 
