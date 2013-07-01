@@ -40,7 +40,7 @@ proc create_db {dirname} {
   # sqlite3 db $dbfile
   set conn [open_db $db_file]
   set td_jtlfile [make_table_def_keys jtlfile {id} {path}]
-  set td_httpsample [make_table_def_keys httpsample {id} {parent_id jtlfile_id t lt ts ts_utc s lb rc rm tn dt \
+  set td_httpsample [make_table_def_keys httpsample {id} {level parent_id jtlfile_id t lt ts ts_utc s lb rc rm tn dt \
     de by ng na hn ec it sc responseHeader requestHeader responseFile cookies \
     method queryString redirectLocation java_net_URL cachetype akserver protocol server path}]
   set td_assertionresult [make_table_def_keys assertionresult {id} {parent_id name failure error}]
@@ -130,7 +130,7 @@ proc elementstart {count_name elt_stack_name name attlist args} {
   }
   incr count
   # log debug "Handled $count elements"
-  if {[expr $count % 1000] == 0} {
+  if {[expr $count % 10000] == 0} {
     log info "Handled $count elements, commit and start new transaction."
     db_eval $conn "commit"
     db_eval $conn "begin transaction"
@@ -231,20 +231,21 @@ proc handle_main_sample {sample} {
   # log debug "handle main sample: [first_line $sample]"
   # log debug "latency of main sample: [dict get $sample attrs lt]"
   # breakpoint
-  set main_id [insert_sample $sample]
+  set main_id [insert_sample $sample "" 0]
   # log debug "inserted main sample"
   insert_assertion_results $main_id $sample
   # log debug "inserted assertion results"
-  insert_sub_samples $main_id $sample
+  insert_sub_samples $main_id $sample 1
   # log debug "handle main sample: finished"
 }
 
-proc insert_sample {sample {parent_id ""}} {
+proc insert_sample {sample parent_id level} {
   global conn dct_insert_stmts jtlfile_id
   # log debug "insert_sample: start"
   set dct [dict_get $sample attrs {}] ; # std attrs like t, ts, ...
   dict set dct jtlfile_id $jtlfile_id
   dict set dct parent_id $parent_id
+  dict set dct level $level
   # @todo check if ts_utc is really GMT/UTC.
   dict set dct ts_utc [clock format [expr round(0.001*[dict_get $dct ts 0])] -format "%Y-%m-%d %H:%M:%S" -gmt 1]
   foreach sub_elt [dict_get $sample subelts {}] {
@@ -278,16 +279,16 @@ proc insert_assertion_results {sample_id sample} {
   }
 }
 
-proc insert_sub_samples {sample_id sample} {
+proc insert_sub_samples {sample_id sample level} {
   # log debug "insert_sub_samples in $sample_id: [first_line $sample]"
   global conn dct_insert_stmts jtlfile_id
   foreach sub_elt [dict_get $sample subelts {}] {
     set sub_tag [dict get $sub_elt tag]
     if {$sub_tag == "httpSample"} {
       # log debug "inserting sub_sample: [first_line $sub_elt]"
-      set sub_id [insert_sample $sub_elt $sample_id]
+      set sub_id [insert_sample $sub_elt $sample_id $level]
       insert_assertion_results $sub_id $sub_elt
-      insert_sub_samples $sub_id $sub_elt
+      insert_sub_samples $sub_id $sub_elt [expr $level + 1]
       # log debug "inserted sub_sample"      
     }
   }
