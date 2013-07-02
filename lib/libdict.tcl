@@ -56,3 +56,58 @@ proc dict_get {dct key {default {}}} {
   }
 }
 
+# experimental: creating :accessor procs for dicts on the fly using unknown statement
+# possible alternative is to create these accessors explicity.
+# eg dict_make_accessors :bla :att {:lb lb}
+# last one to create proc :lb, which used attribute lb (not :lb).
+# also split in sub-functions.
+# can this be done with interp alias? probably not, as it is not simply a prefix.
+
+proc make_dict_accessors {args} {
+  foreach arg $args {
+    make_dict_accessor {*}$arg  
+  }
+}
+
+proc make_dict_accessor {args} {
+  if {[llength $args] == 1} {
+    set procname $args
+    set attname $args
+  } elseif {[llength $args] == 2} {
+    lassign $args procname attname
+  } else {
+    error "args does not have length 1 or 2: $args"
+  }
+  proc $procname {dct} "
+    dict get \$dct $attname  
+  "
+}
+
+# Save the original one so we can chain to it
+rename unknown _original_unknown
+
+proc unknown args {
+  log warn "WARNING: unknown command: $args"
+  if {[llength $args] == 2} {
+    lassign $args procname dct
+    if {[string range $procname 0 0] == ":"} {
+      if {[string is list $dct]} {    # Only [string is] where -strict has no effect
+        if {[expr [llength $dct]&1] == 0} {
+          # actual entry in dict may be with or without ":", check current and make implementation dependent on the result.
+          if {[dict exists $dct $procname]} {
+            make_dict_accessor $procname
+          } elseif {[dict exists $dct [string range $procname 1 end]]} {
+            make_dict_accessor $procname [string range $procname 1 end]
+          } else {
+            log warn "attribute not found in dictionary: $procname, with or without :" 
+          }
+          return [$procname $dct]
+        }
+      }
+    }
+  }
+  # if the above does not apply, call the original.
+  log warn "calling original unknown for $args"
+  uplevel 1 [list _original_unknown {*}$args]
+}
+
