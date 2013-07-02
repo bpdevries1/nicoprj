@@ -29,6 +29,9 @@ proc main {argv} {
     # dict set dct_insert_stmts [dict get $td table] [prepare_insert_td $conn $td]
     dict set dct_insert_stmts [dict get $td table] [prepare_insert_td_proc $conn $td]
   }
+  # for testing
+  dict set dct_insert_stmts :assertionresult [dict get $dct_insert_stmts assertionresult]
+  
   read_jtls $conn $dirname $dct_insert_stmts
   finish_db $conn
 }
@@ -274,7 +277,10 @@ proc insert_assertion_results {sample_id sample} {
          dict set dct_assert [dict get $sub_sub_elt tag] [dict_get $sub_sub_elt text ""] 
       }
       # stmt_exec $conn [dict get $dct_insert_stmts assertionresult] $dct_assert
-      [dict get $dct_insert_stmts assertionresult] $dct_assert
+      # [dict get $dct_insert_stmts assertionresult] $dct_assert
+      # puts ":assertionresult \$dct_insert_stmts"
+      # breakpoint
+      [:assertionresult $dct_insert_stmts] $dct_assert
     }
   }
 }
@@ -302,33 +308,49 @@ proc first_line {text} {
   }
 }
 
-# library function libsqlite
-# @param args: field names
-# @return procname which can be called with dict to insert a record in the specified table.
-proc prepare_insert_td_proc {conn table_def} {
-  global prepare_insert_td_proc_proc_id
-  # $conn prepare "insert into $tablename ([join $args ", "]) values ([join [map {par {return ":$par"}} $args] ", "])"
-  set stmt [$conn prepare [create_insert_sql_td $table_def]]
-  incr prepare_insert_td_proc_proc_id
-  set proc_name "stmt_insert_$prepare_insert_td_proc_proc_id"
-  # @todo probably need to use some quoting, compare clojure macro and closure.
-  proc $proc_name {dct {return_id 0}} "
-    stmt_exec $conn $stmt \$dct \$return_id
-  "
-  return $proc_name
+# Save the original one so we can chain to it
+rename unknown _original_unknown
+# Provide our own implementation
+proc unknown args {
+  log warn "WARNING: unknown command: $args"
+  if {[llength $args] == 2} {
+    log debug "#args==2"
+    lassign $args procname dct
+    if {[string range $procname 0 0] == ":"} {
+      log debug "procname starts with :"
+      # procname is 'symbol' (clojure)
+      if {[string is list $dct]} {    # Only [string is] where -strict has no effect
+        # puts "$foo is a list! (length: [llength $foo])"
+        log debug "dct is a list"
+        if {[expr [llength $dct]&1] == 0} {
+          log debug "dct is really a dict, create proc"
+          # All dictionaries conform to lists with even length
+          # puts "$foo is a dictionary! (entries: [dict size $foo])"
+          log debug "Called unknown with symbol-proc to access dict, create proc"
+          
+          # actual entry in dict may be with or without ":", check current and make implementation dependent on the result.
+          if {[dict exists $dct $procname]} {
+            proc $procname {dct} "
+              dict get \$dct $procname  
+            "
+          } elseif {[dict exists $dct [string range $procname 1 end]]} {
+            proc $procname {dct} "
+              dict get \$dct [string range $procname 1 end]  
+            "
+          } else {
+            log warn "attribute not found in dictionary: $procname, with or without :" 
+          }
+          return [$procname $dct]
+        } else {
+          # breakpoint 
+        }
+      }
+    }
+  }
+  # if the above does not apply, call the original.
+  log warn "calling original unknown for $args"
+  uplevel 1 [list _original_unknown {*}$args]
 }
-
-# some testing with 'closures'
-proc make_adder {n} {
-  proc adder {i} "
-    expr $n + \$i 
-  "
-  return "adder"
-}
-
-# usage:
-# set a [make_adder 3]
-# $a 5
 
 main $argv
 
