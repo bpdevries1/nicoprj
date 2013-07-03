@@ -78,8 +78,26 @@ proc make_dict_accessor {args} {
   } else {
     error "args does not have length 1 or 2: $args"
   }
-  proc $procname {dct} "
-    dict get \$dct $attname  
+  proc $procname {dct {default {}}} "
+    dict_get \$dct $attname \$default
+  "
+}
+
+proc make_dict_accessor_old {args} {
+  if {[llength $args] == 1} {
+    set procname $args
+    set attname $args
+  } elseif {[llength $args] == 2} {
+    lassign $args procname attname
+  } else {
+    error "args does not have length 1 or 2: $args"
+  }
+  proc $procname {dct {default ""}} "
+    if {\[dict exists \$dct $attname\]} {
+      dict get \$dct $attname  
+    } else {
+      return \$default
+    }
   "
 }
 
