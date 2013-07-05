@@ -3,7 +3,13 @@
 # jtls2db.tcl - convert jtl's (xml) to a sqlite3 db
 
 # @note log debug (and maybe first_line) statements cause memory exhaustion, uncommenting those helps on Windows. (on Linux no problems, but have more memory there).
-# @todo dict accessor change not completely available here, maybe did not gitpush on linux.
+# @todo ook loopt laptop nu opnieuw uit zijn geheugen, dus verder checken.
+
+# @todo for memory problems:
+# delete vars/items explicitly.
+# call parser::parse with chunks of main httpSamples.
+# info vars ?pattern? to check if there are too many.
+# unset om vars te deleten.
 
 package require tdbc::sqlite3
 package require xml
@@ -23,13 +29,10 @@ proc main {argv} {
     exit 1
   }
   lassign $argv dirname dbdirname
-  # lassign [create_db $dirname] conn table_defs
   lassign [create_db $dbdirname] conn table_defs
   foreach td $table_defs {
-    # dict set dct_insert_stmts [dict get $td table] [prepare_insert_td $conn $td]
-    dict set dct_insert_stmts [dict get $td table] [prepare_insert_td_proc $conn $td]
+    dict set dct_insert_stmts [:table $td] [prepare_insert_td_proc $conn $td]
   }
-  
   read_jtls $conn $dirname $dct_insert_stmts
   finish_db $conn
 }
@@ -38,12 +41,12 @@ proc create_db {dirname} {
   set db_file [file join $dirname "jtldb.db"]
   file mkdir $dirname
   file delete -force $db_file
-  # sqlite3 db $dbfile
   set conn [open_db $db_file]
   set td_jtlfile [make_table_def_keys jtlfile {id} {path}]
   set td_httpsample [make_table_def_keys httpsample {id} {level parent_id jtlfile_id t lt ts ts_utc s lb rc rm tn dt \
     de by ng na hn ec it sc responseHeader requestHeader responseFile cookies \
-    method queryString redirectLocation java_net_URL cachetype akserver cacheable expires expiry maxage cachekey protocol server path}]
+    method queryString redirectLocation java_net_URL cachetype akserver cacheable \
+    expires expiry maxage cachekey protocol server path extension domain}]
   set td_assertionresult [make_table_def_keys assertionresult {id} {parent_id name failure error}]
   set table_defs [list $td_jtlfile $td_httpsample $td_assertionresult]
   foreach td $table_defs {
@@ -53,18 +56,18 @@ proc create_db {dirname} {
 }
 
 proc finish_db {conn} {
-  # log debug "Create index on ts:"
+  log debug "Create index on ts:"
   db_eval $conn "create index ix_ts on httpsample (ts)"
-  # log debug "Create index on lb:"
+  log debug "Create index on lb:"
   db_eval $conn "create index ix_lb on httpsample (lb)"
-  # log debug "Creating indexes finished, closing db"
+  log debug "Creating indexes finished, closing db"
   $conn close
 }
 
 proc read_jtls {conn dirname dct_insert_stmts} {
   foreach jtlfile [glob -directory $dirname "*.jtl"] {
     read_jtl $conn $jtlfile $dct_insert_stmts
-    # exit ; # for now.
+    # exit ; # for testing.
   }
 }
 
@@ -72,27 +75,17 @@ proc read_jtl {conn jtlfile dct_insert_stmts} {
   global elt_stack jtlfile_id
   log info "Reading jtl: $jtlfile" 
   db_eval $conn "begin transaction"
-  # set jtlfile_id [stmt_exec $conn [dict get $dct_insert_stmts jtlfile] [dict create path $jtlfile] 1]
-  set jtlfile_id [[dict get $dct_insert_stmts jtlfile] [dict create path $jtlfile] 1]
+  set jtlfile_id [[:jtlfile $dct_insert_stmts] [dict create path $jtlfile] 1]
   log info "jtlfile_id: $jtlfile_id"
-  if {0} {
-    log info "using dummy callbacks"
-    set parser [::xml::parser -parser expat -elementstartcommand [list signal_error dummy_cb] \
-      -elementendcommand [list signal_error dummy_cb] \
-      -characterdatacommand [list signal_error dummy_cb] \
-      -defaultcommand [list signal_error dummy_cb]]
-  } else {
-    set parser [::xml::parser -parser expat -elementstartcommand [list signal_error elementstart count elt_stack] \
-      -elementendcommand [list signal_error elementend elt_stack] \
-      -characterdatacommand [list signal_error characterdata elt_stack] \
-      -defaultcommand [list signal_error xml_default]]
-  }
+  set parser [::xml::parser -parser expat -elementstartcommand [list signal_error elementstart count elt_stack] \
+    -elementendcommand [list signal_error elementend elt_stack] \
+    -characterdatacommand [list signal_error characterdata elt_stack] \
+    -defaultcommand [list signal_error xml_default]]
   set f [open $jtlfile r]
   log info "Reading file: $jtlfile"
   set elt_stack [struct::stack]
   set text [read $f]
   log info "Reading file finished (length:[string length $text]), now parsing text"
-  # $parser parse $text
   try_eval {
     $parser parse $text
   } {
@@ -100,7 +93,7 @@ proc read_jtl {conn jtlfile dct_insert_stmts} {
     log warn "Maybe no close tag, because JMeter still running"
   }
   $parser free
-  # log debug "Parsing text finished"
+  log debug "Parsing text finished"
   log info "reading jtl finished: $jtlfile"
   db_eval $conn "commit"
 }
@@ -116,6 +109,7 @@ proc signal_error {proc_name args} {
   }  
 }
 
+# @note for testing, and memory errors on windows.
 proc dummy_cb {args} {
   
 }
@@ -130,7 +124,6 @@ proc elementstart {count_name elt_stack_name name attlist args} {
     return 
   }
   incr count
-  # log debug "Handled $count elements"
   if {[expr $count % 10000] == 0} {
     log info "Handled $count elements, commit and start new transaction."
     db_eval $conn "commit"
@@ -193,6 +186,7 @@ proc elementend {elt_stack_name name} {
   # log debug "elementend $name: finished"
 }
 
+# @note ignore main/root element, so stack will be empty between main httpSample elements.
 proc ignore_elt {name} {
   if {$name == "testResults"} {
     return 1 
@@ -202,25 +196,16 @@ proc ignore_elt {name} {
 
 proc stack_to_string_old {elt_stack} {
   set res {}
-  # stack doesn't correctly handle one stack item which is a list.
+  # stack doesn't correctly handle one stack item which is a list, it doesn't return the single item as a list.
   if {[$elt_stack size] == 1} {
     set l [list [$elt_stack peek [$elt_stack size]]] 
   } else {
     set l [$elt_stack peek [$elt_stack size]]
   }
   foreach el $l {
-    lappend res "tag: [dict_get $el tag "<no-tag>"]; lt: [det_latency $el]" 
+    lappend res "tag: [:tag $el "<no-tag>"]; lt: [det_latency $el]" 
   }
   join $res ", "
-}
-
-proc det_latency_old {elt} {
-  set attrs [dict_get $elt attrs {}]
-  if {$attrs != {}} {
-    dict_get $attrs lt "<none>"
-  } else {
-    return "<no-attr>" 
-  }
 }
 
 proc xml_default {data} {
@@ -243,34 +228,54 @@ proc handle_main_sample {sample} {
 proc insert_sample {sample parent_id level} {
   global conn dct_insert_stmts jtlfile_id
   # log debug "insert_sample: start"
-  set dct [dict_get $sample attrs {}] ; # std attrs like t, ts, ...
+  set dct [:attrs $sample {}] ; # std attrs like t, ts, ...
   dict set dct jtlfile_id $jtlfile_id
   dict set dct parent_id $parent_id
   dict set dct level $level
-  # @todo check if ts_utc is really GMT/UTC.
-  dict set dct ts_utc [clock format [expr round(0.001*[dict_get $dct ts 0])] -format "%Y-%m-%d %H:%M:%S" -gmt 1]
-  foreach sub_elt [dict_get $sample subelts {}] {
-    set sub_tag [dict get $sub_elt tag]
+  dict set dct ts_utc [clock format [expr round(0.001*[:ts $dct 0])] -format "%Y-%m-%d %H:%M:%S" -gmt 1]
+  foreach sub_elt [:subelts $sample {}] {
+    set sub_tag [:tag $sub_elt]
     if {$sub_tag == "assertionResult"} {
       # ignore here 
     } elseif {$sub_tag == "httpSample"} {
       # ignore here 
     } else {
-      dict set dct $sub_tag [dict_get $sub_elt text ""] 
+      dict set dct $sub_tag [:text $sub_elt ""] 
     }
   }
-  # set main_id [stmt_exec $conn [dict get $dct_insert_stmts httpsample] $dct 1]
   add_akamai_fields dct
-  set main_id [[dict get $dct_insert_stmts httpsample] $dct 1]
+  dict set dct extension [det_extension [:lb $dct]]
+  dict set dct domain [det_domain [:lb $dct]]
+  set main_id [[:httpsample $dct_insert_stmts] $dct 1]
   # log debug "insert_sample: finished"
   return $main_id  
 }
 
+# @todo maybe should use url lib to handle this
+proc det_extension {lb} {
+  if {[regexp {^([^?;]+)} $lb z prefix]} {
+    # ext max 10 chars
+    if {[regexp {\.([^/.]+)$} [string range $prefix end-10 end] z ext]} {
+      return $ext 
+    } else {
+      return "<none>" 
+    }
+  } else {
+    return "<unknown>" 
+  }
+}
+
+proc det_domain {url} {
+  if {[regexp {https?://([^/]+)} $url z domain]} {
+    return $domain 
+  } else {
+    return "<none>" 
+  }
+}
+
 # @todo somewhat philips/akamai specific, maybe move to seperate file.
 # @note use dct as var to minimise copying, memory is an issue here.
-# @todo nog eens naar nieuwe accessors kijken, gaat nu mogelijk fout omdat ik 'em aanroep zonder dat waarde er is. In lib oplossen, keuze maken.
 # @note nu eerst minder bestaande checken, zijn er toch niet.
-# @todo ook loopt laptop nu opnieuw uit zijn geheugen, dus verder checken. (en vrijdag thuis op PC nogmaals alles inlezen)
 proc add_akamai_fields {dct_name} {
   upvar $dct_name dct
   set resp [:responseHeader $dct]
@@ -280,32 +285,15 @@ proc add_akamai_fields {dct_name} {
   dict set dct akserver [det_akamaiserver $resp] 
 }
 
-proc add_akamai_fields_old {dct_name} {
-  upvar $dct_name dct
-  set resp [:responseHeader $dct]
-  foreach fieldname {cachetype cacheable expires expiry maxage cachekey} {
-    if {[:$fieldname $dct] == ""} {
-      dict set dct $fieldname [det_$fieldname $resp] 
-    }
-  }
-  if {[:akserver $dct] == ""} {
-    dict set dct akserver [det_akamaiserver $resp] 
-  }
-}
-
 proc insert_assertion_results {sample_id sample} {
   global conn dct_insert_stmts jtlfile_id
-  foreach sub_elt [dict_get $sample subelts {}] {
-    set sub_tag [dict get $sub_elt tag]
+  foreach sub_elt [:subelts $sample {}] {
+    set sub_tag [:tag $sub_elt]
     if {$sub_tag == "assertionResult"} {
       set dct_assert [dict create parent_id $sample_id]
-      foreach sub_sub_elt [dict_get $sub_elt subelts {}] {
-         dict set dct_assert [dict get $sub_sub_elt tag] [dict_get $sub_sub_elt text ""] 
+      foreach sub_sub_elt [:subelts $sub_elt {}] {
+         dict set dct_assert [:tag $sub_sub_elt] [:text $sub_sub_elt ""] 
       }
-      # stmt_exec $conn [dict get $dct_insert_stmts assertionresult] $dct_assert
-      # [dict get $dct_insert_stmts assertionresult] $dct_assert
-      # puts ":assertionresult \$dct_insert_stmts"
-      # breakpoint
       [:assertionresult $dct_insert_stmts] $dct_assert
     }
   }
@@ -314,8 +302,8 @@ proc insert_assertion_results {sample_id sample} {
 proc insert_sub_samples {sample_id sample level} {
   # log debug "insert_sub_samples in $sample_id: [first_line $sample]"
   global conn dct_insert_stmts jtlfile_id
-  foreach sub_elt [dict_get $sample subelts {}] {
-    set sub_tag [dict get $sub_elt tag]
+  foreach sub_elt [:subelts $sample {}] {
+    set sub_tag [:tag $sub_elt]
     if {$sub_tag == "httpSample"} {
       # log debug "inserting sub_sample: [first_line $sub_elt]"
       set sub_id [insert_sample $sub_elt $sample_id $level]
