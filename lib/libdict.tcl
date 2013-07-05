@@ -83,31 +83,13 @@ proc make_dict_accessor {args} {
   "
 }
 
-proc make_dict_accessor_old {args} {
-  if {[llength $args] == 1} {
-    set procname $args
-    set attname $args
-  } elseif {[llength $args] == 2} {
-    lassign $args procname attname
-  } else {
-    error "args does not have length 1 or 2: $args"
-  }
-  proc $procname {dct {default ""}} "
-    if {\[dict exists \$dct $attname\]} {
-      dict get \$dct $attname  
-    } else {
-      return \$default
-    }
-  "
-}
-
 # Save the original one so we can chain to it
 rename unknown _original_unknown
 
 proc unknown args {
   log warn "WARNING: unknown command: $args"
-  if {[llength $args] == 2} {
-    lassign $args procname dct
+  if {([llength $args] == 2) || ([llength $args] == 3)} {
+    lassign $args procname dct default
     if {[string range $procname 0 0] == ":"} {
       if {[string is list $dct]} {    # Only [string is] where -strict has no effect
         if {[expr [llength $dct]&1] == 0} {
@@ -118,12 +100,15 @@ proc unknown args {
             make_dict_accessor $procname [string range $procname 1 end]
           } else {
             log warn "attribute not found in dictionary: $procname, with or without :" 
+            log warn "default: make accessor for item without :"
+            make_dict_accessor $procname [string range $procname 1 end]
           }
           return [$procname $dct]
         }
       }
     }
   }
+  # breakpoint
   # if the above does not apply, call the original.
   log warn "calling original unknown for $args"
   uplevel 1 [list _original_unknown {*}$args]
