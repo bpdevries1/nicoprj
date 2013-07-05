@@ -3,6 +3,7 @@
 # jtls2db.tcl - convert jtl's (xml) to a sqlite3 db
 
 # @note log debug (and maybe first_line) statements cause memory exhaustion, uncommenting those helps on Windows. (on Linux no problems, but have more memory there).
+# @todo dict accessor change not completely available here, maybe did not gitpush on linux.
 
 package require tdbc::sqlite3
 package require xml
@@ -10,11 +11,10 @@ package require Tclx
 package require struct::stack
 package require ndv
 
+source lib-akamai-info.tcl
+
 set log [::ndv::CLogger::new_logger [file tail [info script]] info]
 $log set_file "[info script].log"
-
-# @todo ts_utc als extra veld opnemen in httpsample.
-# @todo remove redundant logging.
 
 proc main {argv} {
   global conn dct_insert_stmts
@@ -43,7 +43,7 @@ proc create_db {dirname} {
   set td_jtlfile [make_table_def_keys jtlfile {id} {path}]
   set td_httpsample [make_table_def_keys httpsample {id} {level parent_id jtlfile_id t lt ts ts_utc s lb rc rm tn dt \
     de by ng na hn ec it sc responseHeader requestHeader responseFile cookies \
-    method queryString redirectLocation java_net_URL cachetype akserver protocol server path}]
+    method queryString redirectLocation java_net_URL cachetype akserver cacheable expires expiry maxage cachekey protocol server path}]
   set td_assertionresult [make_table_def_keys assertionresult {id} {parent_id name failure error}]
   set table_defs [list $td_jtlfile $td_httpsample $td_assertionresult]
   foreach td $table_defs {
@@ -260,9 +260,37 @@ proc insert_sample {sample parent_id level} {
     }
   }
   # set main_id [stmt_exec $conn [dict get $dct_insert_stmts httpsample] $dct 1]
+  add_akamai_fields dct
   set main_id [[dict get $dct_insert_stmts httpsample] $dct 1]
   # log debug "insert_sample: finished"
   return $main_id  
+}
+
+# @todo somewhat philips/akamai specific, maybe move to seperate file.
+# @note use dct as var to minimise copying, memory is an issue here.
+# @todo nog eens naar nieuwe accessors kijken, gaat nu mogelijk fout omdat ik 'em aanroep zonder dat waarde er is. In lib oplossen, keuze maken.
+# @note nu eerst minder bestaande checken, zijn er toch niet.
+# @todo ook loopt laptop nu opnieuw uit zijn geheugen, dus verder checken. (en vrijdag thuis op PC nogmaals alles inlezen)
+proc add_akamai_fields {dct_name} {
+  upvar $dct_name dct
+  set resp [:responseHeader $dct]
+  foreach fieldname {cachetype cacheable expires expiry maxage cachekey} {
+    dict set dct $fieldname [det_$fieldname $resp] 
+  }
+  dict set dct akserver [det_akamaiserver $resp] 
+}
+
+proc add_akamai_fields_old {dct_name} {
+  upvar $dct_name dct
+  set resp [:responseHeader $dct]
+  foreach fieldname {cachetype cacheable expires expiry maxage cachekey} {
+    if {[:$fieldname $dct] == ""} {
+      dict set dct $fieldname [det_$fieldname $resp] 
+    }
+  }
+  if {[:akserver $dct] == ""} {
+    dict set dct akserver [det_akamaiserver $resp] 
+  }
 }
 
 proc insert_assertion_results {sample_id sample} {
