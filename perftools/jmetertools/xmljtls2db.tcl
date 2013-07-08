@@ -1,6 +1,6 @@
 #!/usr/bin/env tclsh86
 
-# jtls2db.tcl - convert jtl's (xml) to a sqlite3 db
+# xmljtls2db.tcl - convert jtl's (xml) to a sqlite3 db
 
 # @note log debug (and maybe first_line) statements cause memory exhaustion, uncommenting those helps on Windows. (on Linux no problems, but have more memory there).
 # @todo ook loopt laptop nu opnieuw uit zijn geheugen, dus verder checken.
@@ -10,6 +10,10 @@
 # call parser::parse with chunks of main httpSamples.
 # info vars ?pattern? to check if there are too many.
 # unset om vars te deleten.
+# tried all above things, to no avail.
+
+# @todo level does not seem to be a 'real' integer at all places, so explicitly setting the datatype might be needed.
+# @todo this shows in handle-myphilips.tcl, determining steps and indices for steps and reqs. Mostly ok, 1 exception.
 
 package require tdbc::sqlite3
 package require xml
@@ -18,6 +22,7 @@ package require struct::stack
 package require ndv
 
 source lib-akamai-info.tcl
+# source watch_globals.tcl
 
 set log [::ndv::CLogger::new_logger [file tail [info script]] info]
 $log set_file "[info script].log"
@@ -128,6 +133,9 @@ proc elementstart {count_name elt_stack_name name attlist args} {
     log info "Handled $count elements, commit and start new transaction."
     db_eval $conn "commit"
     db_eval $conn "begin transaction"
+    #log info "call wg_checkpoint"
+    #wg_checkpoint
+    #log info "called wg_checkpoint"
   }
   
   $elt_stack push [dict create tag $name attrs $attlist]
@@ -252,12 +260,21 @@ proc insert_sample {sample parent_id level} {
 }
 
 # @todo maybe should use url lib to handle this
+# @note by adding checks for webservice and logout it becomes Philips specific
 proc det_extension {lb} {
   if {[regexp {^([^?;]+)} $lb z prefix]} {
     # ext max 10 chars
     if {[regexp {\.([^/.]+)$} [string range $prefix end-10 end] z ext]} {
       return $ext 
     } else {
+      if {0} {
+        # handle in post processing.
+        if {[regexp {service} $lb]} {
+          return "webservice" 
+        } elseif {[regexp {logout} $lb]} {
+          return "logout" 
+        }
+      }
       return "<none>" 
     }
   } else {
