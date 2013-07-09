@@ -87,7 +87,7 @@ proc make_dict_accessor {args} {
 rename unknown _original_unknown
 
 proc unknown args {
-  log warn "WARNING: unknown command: $args"
+  log warn "WARNING: unknown command: [string range $args 0 100]"
   if {([llength $args] == 2) || ([llength $args] == 3)} {
     lassign $args procname dct default
     if {[string range $procname 0 0] == ":"} {
