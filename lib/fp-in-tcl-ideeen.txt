@@ -1,0 +1,143 @@
+FP in Tcl:
+* niet als kip zonder kop van alles bekijken.
+* Bepalen welke syntax je wilt, wat moet kunnen, en vervolgens hoe je dit doet.
+
+voorbeelden:
+* map, filter, fold goed doen met niet te veel haakjes en accolades.
+* nieuwe functie creeren die direct als proc te gebruiken is, evt een proc maken.
+* had ook al lambda_to_proc en vice versa, kun je hier iets mee?
+* soort currying, zodat ik niet db_eval $conn $query hoef te doen, maar direct:
+  set db_evalc [curry db_eval $conn]
+  db_evalc $query ; # dan een procdef doen, komt in global namespace, wel zo handig.
+  of $db_evalc $query ; # dan een var, en global maken of meegeven, niet zo handig.
+* log om start/einde van een proc, ook al eens eerder gedaan, soort van AOP:
+  * proclog name {args} {actions}
+  * proc procname .. ; add_logstartend procname
+  * add_logstartend proc procname ..
+  * logging should be managed separately, like AOP, to also easily comment-out.
+* In Clojure wel aantal functies die verschillende soorten input snappen, hier ook wel
+  aardig. Bv een map/filter die een expressie, lambda, proc allemaal snapt.
+* Is de #(%) notatie voor een anonymous proc in tcl ook te doen?
+* db_in_trans: ook met closure of zo aantal trans bijhouden en na 1000 een commit doen? Of
+  een wrapper om het connectie object? Want hoeft niet per se volledig functioneel, OO met XOTcl
+  of zo mag ook.
+
+str functie
+===========
+* in clj niet direct "abc$nr" als return te doen, bv (defn f1 [a] "abc$a"), dan (defn f1 [a] (str "abc" a)) nodig.
+* had al een id/iden functie die dit deed, kan ook str maken:
+
+proc str {args} {
+  join $args ""
+}
+
+Map en filter beter
+===================
+* naast map en filter ook combi als list comprehension?
+* denk in libsqlite wel wat gebruik van map en mss ook filter, kijken of dit mooier kan.
+
+  proc create_table_sql {table_def} {
+    # return "create table [dict get $table_def table] ([join [dict get $table_def fields] ", "])" 
+    set fields [lmap x [dict get $table_def fields] {expr {
+        ($x != "id") ? $x : "id integer primary key autoincrement"
+    }}]
+    return "create table [dict get $table_def table] ([join $fields ", "])"
+  }
+  
+  proc create_insert_sql {tablename args} {
+    return "insert into $tablename ([join $args ", "]) values ([join [lmap par $args {symbol $par}] ", "])"
+  }
+
+  proc create_insert_sql_td {table_def} {
+    # return "insert into $tablename ([join $args ", "]) values ([join [lmap par $args {symbol $par}] ", "])"
+    dict_to_vars $table_def
+    set insert_fields [lmap x $fields {expr {
+        ($x != "id") ? $x : [continue]
+    }}]
+    return "insert into $table ([join $insert_fields ", "]) values ([join [lmap par $insert_fields {symbol $par}] ", "])"
+  }
+  
+  proc create_update_sql {table_def} {
+    dict_to_vars $table_def
+    set sql "update $table
+            set [join [lmap par $valuefields {fld_eq_par $par}] ", "]
+            where [join [lmap par $keyfields {fld_eq_par $par}] " and "]"
+    log debug "update sql: $sql"          
+    return $sql          
+  }
+  
+  proc fld_eq_par {fieldname} {
+    return "$fieldname = [symbol $fieldname]" 
+  }
+      
+  proc symbol {name} {
+    return ":$name" 
+  }
+
+Notes
+-----
+* Als je lmap aanroept met een proc, is het best ok, geen []{} te veel.
+* Met een expr veel onhandiger:
+
+    set fields [lmap x [dict get $table_def fields] {expr {
+        ($x != "id") ? $x : "id integer primary key autoincrement"
+    }}]
+
+set fields [map x [:fields $table] {($x != "id") ? $x : "id integer primary key autoincrement"}]
+set fields [map x [:fields $table] {ifp [eq $x "id"] "id integer primary key autoincrement" $x}]
+
+ifproc ook al ergens staan, denk ik:
+proc ifp {test yes no} {
+  if {$test} {
+    return $yes
+  } else {
+    return $no
+  }
+}
+
+
+en voor filter:
+    set insert_fields [lmap x $fields {expr {
+        ($x != "id") ? $x : [continue]
+    }}]
+
+set insert_fields [filter x $fields {}]
+set insert_fields [filter x $fields {$x != "id"}]
+set insert_fields [filter x $fields {not {eq $x "id"}}]
+  bij deze geneste wel oppassen dat $x wel op goede moment ge-evalueerd wordt, hier kom je wel kern knelpunt van tcl tegen.
+set insert_fields [filter x $fields {not [eq $x "id"]}]
+set insert_fields [filter x $fields {[not [eq $x "id"]]}]
+
+Dus eigenlijk kijken of eerste element van de 'proc' een proc is (zoals bij not) of anders een expressie (string is expr?)
+  
+set insert_fields [filter x $fields {not-eq $x "id"}}]
+
+
+of
+set insert_fields [filter {} $fields]
+set insert_fields [filter {x {$x != "id"}} $fields]
+set insert_fields [filter [fn x {$x != "id"}] $fields]
+
+je kan de filter-proc anders laten werken afh van aantal argumenten, en evt ook van het type, als dit te bepalen is.
+
+Test
+====
+test intro-1 {This is as simple as it gets.} {
+        expr 3 * 5
+    } 15
+    
+test intro-1 {This is as simple as it gets.} {
+        expr 3 * 5
+    } 14
+
+test intro-1 {This is as simple as it gets.} {
+        expr42 3 * 5
+    } 14    
+    
+Done
+====
+* clojure functie om (:attr map) te doen is wel krachtig, of anders (map :attr),
+  kan zoiets ook in tcl? mss met unknown functie, en als deze gebruikt wordt, dan
+  automatisch definieren als accessor functie? Gelukt dus, zie libdict.tcl
+  
+
