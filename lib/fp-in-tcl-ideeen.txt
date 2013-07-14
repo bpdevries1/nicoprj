@@ -22,15 +22,6 @@ voorbeelden:
   een wrapper om het connectie object? Want hoeft niet per se volledig functioneel, OO met XOTcl
   of zo mag ook.
 
-str functie
-===========
-* in clj niet direct "abc$nr" als return te doen, bv (defn f1 [a] "abc$a"), dan (defn f1 [a] (str "abc" a)) nodig.
-* had al een id/iden functie die dit deed, kan ook str maken:
-
-proc str {args} {
-  join $args ""
-}
-
 Map en filter beter
 ===================
 * naast map en filter ook combi als list comprehension?
@@ -86,15 +77,11 @@ Notes
 set fields [map x [:fields $table] {($x != "id") ? $x : "id integer primary key autoincrement"}]
 set fields [map x [:fields $table] {ifp [eq $x "id"] "id integer primary key autoincrement" $x}]
 
-ifproc ook al ergens staan, denk ik:
-proc ifp {test yes no} {
-  if {$test} {
-    return $yes
-  } else {
-    return $no
-  }
-}
-
+Closures
+---------
+* Zijn algemene dingen voor, zie wiki.tcl.tk.
+* Ook idee om alle current vars in dict op te slaan voor de closure, maar perf is dan mogelijk een issue.
+* Dan ook wel zorgen dat vars eigenlijk constant zijn, niet van waarde veranderen nadat closure/functie is gemaakt.
 
 en voor filter:
     set insert_fields [lmap x $fields {expr {
