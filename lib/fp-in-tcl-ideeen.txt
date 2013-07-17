@@ -120,7 +120,29 @@ test intro-1 {This is as simple as it gets.} {
 test intro-1 {This is as simple as it gets.} {
         expr42 3 * 5
     } 14    
+
+Misc
+====
+Not really FP, but idea below is to use generators, so the whole
+file will not be loaded in memory first. Goal is to use with
+Akamai logfiles:
+
+foreach line [get_lines $logfilename -ignoreblank] {
+  
+}
     
+Or:
+read_lines line -ignoreblank $logfilename {
+  
+}
+
+This is shorter, and doesn't need generator (uses callback) but don't like it so much.
+
+db_in_trans with automatic transaction after 1000 items (or so)
+---------------------------------------------------------------
+Already somewhere else?
+
+
 Done
 ====
 * clojure functie om (:attr map) te doen is wel krachtig, of anders (map :attr),

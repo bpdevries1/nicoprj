@@ -35,6 +35,7 @@ proc = {a b} {
 # @note therefore the yes and no values should be enclosed in {}.
 # @note OTOH this makes function less handy to use, and would violate a starting point.
 # @note so should either use the standard if (which is 'lazy') or create own other variant.
+# @note or find a way to distinguish between expression and value: is this possible? how handled in clojure? (probably special form/macro with if)
 proc ifp {test yes no} {
   if {$test == "nil"} {
     return $no
