@@ -18,7 +18,7 @@ proc main {argv} {
   set sec_start [clock scan [clock format [expr [clock seconds] - 4 * 3600] -format "%Y-%m-%d %H" -gmt 1] -format "%Y-%m-%d %H" -gmt 1] 
   if {1} {
     # set sec_end [expr $sec_start - (6 * 7 * 24 * 60 * 60)]
-    set sec_end [expr $sec_start - (7 * 7 * 24 * 60 * 60)]
+    set sec_end [expr $sec_start - (8 * 7 * 24 * 60 * 60)]
   } else {
     # to test, just 4 hours.
     set sec_end [expr $sec_start - (7 * 60 * 60)]
@@ -61,7 +61,7 @@ proc download_keynote {root_dir sec_ts} {
   log debug "res: $res"
   
   if {[file exists $filename]} {
-    if {[file size $filename] < 5000} {
+    if {[file size $filename] < 2000} {
       incr nerrors
     } else {
       # ok. 
