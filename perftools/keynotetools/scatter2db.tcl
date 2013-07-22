@@ -18,7 +18,9 @@ proc main {argv} {
     if {0} {
       set root_dir "c:/aaa/keynote-mobile"
     } else {
-      set root_dir "c:/aaa/keynote-mobile/test"
+      # set root_dir "c:/aaa/keynote-mobile/test"
+      # set root_dir "~/Ymor/Philips/Keynote/test"
+      set root_dir "~/Ymor/Philips/Keynote"
       file delete [file join $root_dir "keynotelogs.db"] 
     }
   } else {
@@ -36,6 +38,7 @@ proc main {argv} {
     element_count page_bytes redir_count redir_delta \
     content_errors error_code page_succeed}
   db_add_tabledef pageitem {id} {scriptrun_id page_id content_type resource_id scontent_type url \
+    extension domain \
     error_code connect_delta dns_delta element_delta first_packet_delta remain_packets_delta request_delta \
     ssl_handshake_delta start_msec system_delta}
     
@@ -52,7 +55,19 @@ proc main {argv} {
 }
 
 proc handle_files {root_dir conn} {
-  handle_dir_rec $root_dir "*.json" [list read_json_file $conn] 
+  db_in_trans $conn {
+    handle_dir_rec $root_dir "*.json" [list warn_error read_json_file $conn]
+  }
+}
+
+proc warn_error {proc_name args} {
+  try_eval {
+    $proc_name {*}$args
+  } {
+    log warn "$errorResult $errorCode $errorInfo, continuing"
+    #error $errorResult $errorCode $errorInfo
+    #exit
+  }  
 }
 
 proc read_json_file {conn filename root_dir} {
@@ -64,7 +79,6 @@ proc read_json_file {conn filename root_dir} {
   set logfile_id [db_insert logfile [dict create path $filename] 1]
   set json [json::json2dict [read_file $filename]]
   # breakpoint
-  db_in_trans $conn {
     # agent_id agent_inst datetime profile_id slot_id target_id wxn_Script wxn_detail_object wxn_page wxn_summary
     foreach l $json {
       foreach run $l {
@@ -81,6 +95,7 @@ proc read_json_file {conn filename root_dir} {
         dict set dct ts_utc [det_ts_utc [:datetime $dct]]
         set scriptrun_id [db_insert scriptrun $dct 1]
         
+        catch {unset ar_detail}
         set details [:wxn_detail_object $run]
         foreach detail $details {
           set ar_detail([:resource_id $detail]) $detail
@@ -107,6 +122,72 @@ proc read_json_file {conn filename root_dir} {
               dict set dct scriptrun_id $scriptrun_id
               dict set dct page_id $page_id
               set dct2 [dict merge $dct $ar_detail([:resource_id $dct])]
+              dict set dct2 extension [det_extension [:url $dct2]]
+              dict set dct2 domain [det_domain [:url $dct2]]
+              db_insert pageitem $dct2
+            }
+          }
+        }
+    }
+  }
+  # exit ; # for test.
+}
+
+proc read_json_file_old {conn filename root_dir} {
+  log info "Reading $filename"
+  if {[is_read $conn $filename]} {
+    log info "Already read, ignoring: $filename"
+    return
+  }
+  set logfile_id [db_insert logfile [dict create path $filename] 1]
+  set json [json::json2dict [read_file $filename]]
+  # breakpoint
+  db_in_trans $conn {
+    # agent_id agent_inst datetime profile_id slot_id target_id wxn_Script wxn_detail_object wxn_page wxn_summary
+    foreach l $json {
+      foreach run $l {
+        # @note only look in part of run that has main items, to be sure that info like delta_msec is not from sub-request.
+        set run_main [dict_get_multi -withname $run target_id slot_id datetime agent_id agent_inst \
+                                 profile_id wxn_summary wxn_Script]
+        # @todo dict_flat anders: gewoon platslaan, alles teruggeven, geen filter. Ook maar 1 level diep, dus alles op level 0 en alles op level1/filter.
+        # @todo is niet triviaal, vooral bepalen of item al atom is.
+        set dct [dict_flat $run_main {target_id slot_id datetime agent_id agent_inst \
+                                 profile_id delta_msec hangup_msec wap_connect_msec signal_strength task_succeed \
+                                 network no_of_resources user_string device error_code content_error}] 
+        dict set dct logfile_id $logfile_id
+        dict set dct scriptname [det_scriptname [:slot_id $dct]]
+        dict set dct ts_utc [det_ts_utc [:datetime $dct]]
+        set scriptrun_id [db_insert scriptrun $dct 1]
+        
+        catch {unset ar_detail}
+        set details [:wxn_detail_object $run]
+        foreach detail $details {
+          set ar_detail([:resource_id $detail]) $detail
+        }
+        # breakpoint
+        
+        set pages [:wxn_page $run]
+        foreach page $pages {
+          set page_main [dict_get_multi -withname $page page_seq wxn_page_object wxn_page_performance wxn_page_status]
+          set dct [dict_flat $page_main {page_seq connect_delta delta_msec dns_lookup_msec first_packet_delta new_connection \
+            remain_packets_delta request_delta ssl_handshake_delta start_msec system_delta \
+            element_count page_bytes redir_count redir_delta \
+            content_errors error_code page_succeed}]
+          # @todo find out what page.start_msec means.
+          dict set dct scriptrun_id $scriptrun_id
+          set page_id [db_insert page $dct 1]
+          
+          foreach detail [:wxn_page_details $page] {
+            foreach elt [:wxn_page_element $detail] {
+              # set dct [dict_flat2 $elt wxn_detail_performance wxn_detail_status]
+              set dct [dict_flat $elt {resource_id error_code connect_delta dns_delta element_delta \
+                first_packet_delta remain_packets_delta request_delta \
+                ssl_handshake_delta start_msec system_delta}]
+              dict set dct scriptrun_id $scriptrun_id
+              dict set dct page_id $page_id
+              set dct2 [dict merge $dct $ar_detail([:resource_id $dct])]
+              dict set dct2 extension [det_extension [:url $dct2]]
+              dict set dct2 domain [det_domain [:url $dct2]]
               db_insert pageitem $dct2
             }
           }
@@ -144,6 +225,29 @@ proc post_process {conn} {
       where 1*resource_id = 1
       and 1*error_code <> 302
       and url like 'http://m.%'"
+}
+
+proc det_domain {url} {
+  if {[regexp {https?://([^/]+)} $url z domain]} {
+    return $domain 
+  } else {
+    return "<none>" 
+  }
+}
+
+# @todo maybe should use url lib to handle this
+# @note by adding checks for webservice and logout it becomes Philips specific
+proc det_extension {lb} {
+  if {[regexp {^([^?;]+)} $lb z prefix]} {
+    # ext max 10 chars
+    if {[regexp {\.([^/.]+)$} [string range $prefix end-10 end] z ext]} {
+      return $ext 
+    } else {
+      return "<none>" 
+    }
+  } else {
+    return "<unknown>" 
+  }
 }
 
 ####################################################################################
