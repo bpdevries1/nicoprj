@@ -15,7 +15,7 @@ source libdb.tcl
 
 proc main {argv} {
   if {[llength $argv] == 0} {
-    if {0} {
+    if {1} {
       set root_dir "c:/aaa/keynote-mobile"
     } else {
       # set root_dir "c:/aaa/keynote-mobile/test"
