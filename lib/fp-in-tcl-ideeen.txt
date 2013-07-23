@@ -142,6 +142,11 @@ db_in_trans with automatic transaction after 1000 items (or so)
 ---------------------------------------------------------------
 Already somewhere else?
 
+ETA Calc
+========
+* Already made a function somewhere, just have it done automatically in some loop, eg
+  with handle_dir_rec.
+
 
 Done
 ====
