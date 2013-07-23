@@ -19,3 +19,99 @@ db.query = function(db, query) {
   dbGetQuery(db, query)
 }
 
+# always forget about paste, so use concat as an alias.
+concat = function(...) {
+  paste0(...)
+}
+
+#######################################################################################
+# Some more specific functions, they look generic enough, see if they are reusable... #
+#######################################################################################
+
+# make a distribution graph from a data.frame df, with an indep(endent) and a dep(endent) column in the df.
+# example call: make.distr(df, indep="scriptname", dep="pageweight", title = "Page weight distribution (bytes) per country", pngname="page-weights.png", width=9, height=3)
+make.distr = function(df, indep="scriptname", dep="pageweight", pngname, title, dpi=100, ...) {
+  df2 = ddply(df, c(indep), function(dfp) {
+    data.frame(
+                min = min(dfp[, dep]),
+                max = max(dfp[, dep]),
+                avg = mean(dfp[,dep]),
+                q05 = quantile(dfp[, dep], 0.05),
+                q25 = quantile(dfp[, dep], 0.25),
+                q45 = quantile(dfp[, dep], 0.45),
+                q55 = quantile(dfp[, dep], 0.55),
+                q75 = quantile(dfp[, dep], 0.75),
+                q95 = quantile(dfp[, dep], 0.95))})
+  n.indep = length(df2[,indep])
+  df2$nameAlt = 1:n.indep
+  
+  max.size = max(df2$q95)
+  ggplot(df2, aes(ymin = nameAlt - 0.2,ymax = nameAlt + 0.2)) + 
+    geom_rect(aes(xmin = q05,xmax = q95),fill = "white",colour = "black") + 
+    geom_rect(aes(xmin = q25,xmax = q75),fill = 'lightblue',colour = "black") +
+    geom_rect(aes(xmin = q45,xmax = q55),fill = 'blue',colour = "black") +
+    geom_rect(aes(xmin = min, xmax = min), colour = "red") +
+    geom_rect(aes(xmin = max, xmax = max), colour = "red") +
+    geom_rect(aes(xmin = avg, xmax = avg), colour = "red") +
+    scale_y_continuous(breaks = 1:n.indep, labels = df2[,indep]) +
+    scale_x_continuous(limits=c(0, 1.1*max.size)) +
+    labs(title = title, x=dep, y=indep)
+  
+  ggsave(pngname, dpi=dpi, ...) 
+}
+
+# make a distribution graph from a data.frame df, with an indep(endent) and a dep(endent) column in the df.
+# also supply a facet field here.
+# similar to make.distr
+# example call: make.distr.period(df, indep="weeknr", dep="pageweight", title = "Page weight distribution (bytes) per country per week", pngname="page-weights-week.png", width=9, height=9)
+make.distr.period = function(df, facet="scriptname", indep="weeknr", dep="pageweight", pngname, title, dpi=100, ...) {
+  df2 = ddply(df, c(facet, indep), function(dfp) {
+    data.frame(
+      min = min(dfp[, dep]),
+      max = max(dfp[, dep]),
+      avg = mean(dfp[,dep]),
+      q05 = quantile(dfp[, dep], 0.05),
+      q25 = quantile(dfp[, dep], 0.25),
+      q45 = quantile(dfp[, dep], 0.45),
+      q55 = quantile(dfp[, dep], 0.55),
+      q75 = quantile(dfp[, dep], 0.75),
+      q95 = quantile(dfp[, dep], 0.95))})
+  n.indep = length(df2[,indep])
+  df2$nameAlt = 1:n.indep
+  
+  max.size = max(df2$q95)
+  ggplot(df2, aes(ymin = nameAlt - 0.2,ymax = nameAlt + 0.2)) + 
+    geom_rect(aes(xmin = q05,xmax = q95),fill = "white",colour = "black") + 
+    geom_rect(aes(xmin = q25,xmax = q75),fill = 'lightblue',colour = "black") +
+    geom_rect(aes(xmin = q45,xmax = q55),fill = 'blue',colour = "black") +
+    geom_rect(aes(xmin = min, xmax = min), colour = "red") +
+    geom_rect(aes(xmin = max, xmax = max), colour = "red") +
+    geom_rect(aes(xmin = avg, xmax = avg), colour = "red") +
+    scale_y_continuous(breaks = 1:n.indep,labels = df2[,indep]) +
+    scale_x_continuous(limits=c(0, max.size)) +
+    labs(title = title, x=dep, y=indep) +
+    # facet_grid(scriptname ~ ., scales="free_y")
+    facet_grid(concat(facet, " ~ ."), scales="free_y")
+  
+  ggsave(pngname, dpi=dpi, ...) 
+}
+
+# example: make.boxplot(df, indep="signal_strength", dep="resptime", title="Response time distribution (msec) per country by signal strength", pngname="resptimes-signal-strength-boxplot.png")
+make.boxplot = function(df, indep, dep, title, pngname, width=12, height=9, ...) {
+  df$fct = factor(df[, indep])
+  ggplot(df, aes_string(x="fct", y=dep)) +
+    geom_boxplot()  +
+    labs(title = title, x=indep, y=dep) +
+    facet_grid(scriptname ~ ., scales="free")
+  ggsave(pngname, dpi=100, width=width, height=height, ...) 
+}
+
+# example: make.scatterplot(df, indep="signal_strength", dep="resptime", title="Response time distribution (msec) per country by signal strength", pngname="resptimes-signal-strength-scatter.png")
+make.scatterplot = function(df, indep, dep, title, pngname, width=12, height=9, ...) {
+  df$fct = factor(df[, indep])
+  ggplot(df, aes(fct, resptime)) +
+    geom_point()  +
+    labs(title = title, x=indep, y=dep) +
+    facet_grid(scriptname ~ .)
+  ggsave(pngname, dpi=100, width=width, height=height, ...) 
+}
