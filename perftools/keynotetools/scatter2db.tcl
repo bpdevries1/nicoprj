@@ -29,7 +29,7 @@ proc main {argv} {
   set db_name [file join $root_dir "keynotelogs.db"]
   set conn [open_db $db_name]
   db_add_tabledef logfile {id} {path}
-  db_add_tabledef scriptrun {id} {logfile_id target_id slot_id scriptname datetime ts_utc agent_id agent_inst \
+  db_add_tabledef scriptrun {id} {logfile_id target_id provider slot_id scriptname datetime ts_utc ts_cet agent_id agent_inst \
     profile_id delta_msec hangup_msec wap_connect_msec signal_strength task_succeed \
     network no_of_resources user_string device error_code content_error}
   db_add_tabledef page {id} {scriptrun_id page_seq connect_delta delta_msec \
@@ -56,7 +56,9 @@ proc main {argv} {
 
 proc handle_files {root_dir conn} {
   db_in_trans $conn {
+    log info "started transaction, now start reading"
     handle_dir_rec $root_dir "*.json" [list warn_error read_json_file $conn]
+    log info "Finished reading, now committing all data"
   }
 }
 
@@ -93,6 +95,8 @@ proc read_json_file {conn filename root_dir} {
       dict set dct logfile_id $logfile_id
       dict set dct scriptname [det_scriptname [:slot_id $dct]]
       dict set dct ts_utc [det_ts_utc [:datetime $dct]]
+      dict set dct ts_cet [det_ts_cet [:datetime $dct]]
+      dict set dct provider [det_provider [:target_id $dct]]
       set scriptrun_id [db_insert scriptrun $dct 1]
       
       catch {unset ar_detail}
@@ -153,6 +157,11 @@ proc det_ts_utc {datetime} {
   clock format [clock scan $datetime -format "%Y-%b-%d %H:%M:%S" -gmt 1] -format "%Y-%m-%d %H:%M:%S" -gmt 1
 }
 
+# @param datetime 2013-JUL-18 00:19:12 
+proc det_ts_cet {datetime} {
+  clock format [clock scan $datetime -format "%Y-%b-%d %H:%M:%S" -gmt 1] -format "%Y-%m-%d %H:%M:%S"
+}
+
 # @note keynote API does not handle redirects correctly, gives them both the same resource_id. This one is to correct the 2nd, which gives a normal 200 code.
 proc post_process {conn} {
   db_eval $conn "update pageitem
@@ -183,6 +192,13 @@ proc det_extension {lb} {
   } else {
     return "<unknown>" 
   }
+}
+
+array set ar_provider [list 1545005 Vodafone 1545000 o2 1544995 3 1545010 "T-mobile" \
+  1544985 Verizon 1544990 Sprint 1544975 "AT&T" 1544980 "T-mobile" 1497245 "china-unicom"]
+proc det_provider {target_id} {
+  global ar_provider
+  return $ar_provider($target_id)
 }
 
 ####################################################################################
