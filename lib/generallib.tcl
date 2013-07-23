@@ -539,11 +539,11 @@ proc handle_dir_rec {dir globpattern actionproc {rootdir ""}} {
   if {$rootdir == ""} {
     set rootdir $dir 
   }
-  foreach filename [glob -nocomplain -directory $dir -type f $globpattern] {
+  foreach filename [lsort [glob -nocomplain -directory $dir -type f $globpattern]] {
     # $actionproc $filename $rootdir
     {*}$actionproc $filename $rootdir
   }
-  foreach dirname [glob -nocomplain -directory $dir -type d *] {
+  foreach dirname [lsort [glob -nocomplain -directory $dir -type d *]] {
     handle_dir_rec $dirname $globpattern $actionproc $rootdir
   }
 }
