@@ -1,3 +1,5 @@
+#!/usr/bin/env tclsh86
+
 # 24-7-2013 onderstaande werkt wel, ook als je package requires omdraait. 
 # maar ergens ging het toch fout...
 

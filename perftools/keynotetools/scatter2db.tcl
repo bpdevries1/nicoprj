@@ -28,36 +28,36 @@ proc main {argv} {
   }
   set db_name [file join $root_dir "keynotelogs.db"]
   set conn [open_db $db_name]
-  db_add_tabledef logfile {id} {path}
-  db_add_tabledef scriptrun {id} {logfile_id target_id provider slot_id scriptname datetime ts_utc ts_cet agent_id agent_inst \
+  # new with TclOO
+  set db [dbwrapper new $conn]
+  
+  $db add_tabledef logfile {id} {path}
+  $db add_tabledef scriptrun {id} {logfile_id target_id provider slot_id scriptname datetime ts_utc ts_cet agent_id agent_inst \
     profile_id delta_msec hangup_msec wap_connect_msec signal_strength task_succeed \
     network no_of_resources user_string device error_code content_error}
-  db_add_tabledef page {id} {scriptrun_id page_seq connect_delta delta_msec \
+  $db add_tabledef page {id} {scriptrun_id page_seq connect_delta delta_msec \
     dns_lookup_msec first_packet_delta new_connection remain_packets_delta request_delta \
     ssl_handshake_delta start_msec system_delta \
     element_count page_bytes redir_count redir_delta \
     content_errors error_code page_succeed}
-  db_add_tabledef pageitem {id} {scriptrun_id page_id content_type resource_id scontent_type url \
+  $db add_tabledef pageitem {id} {scriptrun_id page_id content_type resource_id scontent_type url \
     extension domain \
     error_code connect_delta dns_delta element_delta first_packet_delta remain_packets_delta request_delta \
     ssl_handshake_delta start_msec system_delta}
     
-  db_create_tables $conn 0 ; # 0: don't drop tables first.
-  db_make_insert_statements $conn
-  # db_insert logfile {path "test.json"}
-  
-  handle_files $root_dir $conn
-  
-  post_process $conn
-  
+  $db create_tables 0 ; # 0: don't drop tables first.
+  $db make_insert_statements
+  # for test.
+  # $db insert logfile {path "test.json"}
+  handle_files $root_dir $db
+  post_process $db
   $conn close
-  
 }
 
-proc handle_files {root_dir conn} {
-  db_in_trans $conn {
+proc handle_files {root_dir db} {
+  db_in_trans [$db get_conn] {
     log info "started transaction, now start reading"
-    handle_dir_rec $root_dir "*.json" [list warn_error read_json_file $conn]
+    handle_dir_rec $root_dir "*.json" [list warn_error read_json_file $db]
     log info "Finished reading, now committing all data"
   }
 }
@@ -72,13 +72,13 @@ proc warn_error {proc_name args} {
   }  
 }
 
-proc read_json_file {conn filename root_dir} {
+proc read_json_file {db filename root_dir} {
   log info "Reading $filename"
-  if {[is_read $conn $filename]} {
+  if {[is_read $db $filename]} {
     log info "Already read, ignoring: $filename"
     return
   }
-  set logfile_id [db_insert logfile [dict create path $filename] 1]
+  set logfile_id [$db insert logfile [dict create path $filename] 1]
   set json [json::json2dict [read_file $filename]]
   # breakpoint
     # agent_id agent_inst datetime profile_id slot_id target_id wxn_Script wxn_detail_object wxn_page wxn_summary
@@ -97,7 +97,7 @@ proc read_json_file {conn filename root_dir} {
       dict set dct ts_utc [det_ts_utc [:datetime $dct]]
       dict set dct ts_cet [det_ts_cet [:datetime $dct]]
       dict set dct provider [det_provider [:target_id $dct]]
-      set scriptrun_id [db_insert scriptrun $dct 1]
+      set scriptrun_id [$db insert scriptrun $dct 1]
       
       catch {unset ar_detail}
       set details [:wxn_detail_object $run]
@@ -115,7 +115,7 @@ proc read_json_file {conn filename root_dir} {
           content_errors error_code page_succeed}]
         # @todo find out what page.start_msec means.
         dict set dct scriptrun_id $scriptrun_id
-        set page_id [db_insert page $dct 1]
+        set page_id [$db insert page $dct 1]
         
         foreach detail [:wxn_page_details $page] {
           foreach elt [:wxn_page_element $detail] {
@@ -128,7 +128,7 @@ proc read_json_file {conn filename root_dir} {
             set dct2 [dict merge $dct $ar_detail([:resource_id $dct])]
             dict set dct2 extension [det_extension [:url $dct2]]
             dict set dct2 domain [det_domain [:url $dct2]]
-            db_insert pageitem $dct2
+            $db insert pageitem $dct2
           }
         }
       }
@@ -137,11 +137,11 @@ proc read_json_file {conn filename root_dir} {
   # exit ; # for test.
 }
 
-proc is_read {conn filename} {
-  if {[llength [db_query $conn "select id from logfile where path='$filename'"]] > 0} {
-  return 1 
+proc is_read {db filename} {
+  if {[llength [db_query [$db get_conn] "select id from logfile where path='$filename'"]] > 0} {
+    return 1 
   } else {
-  return 0 
+    return 0 
   }
 }
 
@@ -163,8 +163,8 @@ proc det_ts_cet {datetime} {
 }
 
 # @note keynote API does not handle redirects correctly, gives them both the same resource_id. This one is to correct the 2nd, which gives a normal 200 code.
-proc post_process {conn} {
-  db_eval $conn "update pageitem
+proc post_process {db} {
+  db_eval [$db get_conn] "update pageitem
       set url = url || 'm/'
       where 1*resource_id = 1
       and 1*error_code <> 302
