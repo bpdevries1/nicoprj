@@ -24,6 +24,24 @@ concat = function(...) {
   paste0(...)
 }
 
+# check if R/RStudio are started from cygwin (in windows) so ~ is set to c:/nico
+check.cygwin = function() {
+  shell = Sys.getenv("SHELL") # should be something like /bin/bash.
+  if (shell == "") {
+    print("WARN: not started from (cygwin) bash, ~ is probably not set correctly!")    
+    print("value of SHELL is empty")    
+  } else {
+    if (grep("bash", shell)) {
+      print("Ok, started from (cygwin) bash") 
+    } else {
+      print("WARN: not started from (cygwin) bash, ~ is probably not set correctly!")    
+      print(concat("value of SHELL is: ", shell))
+    }
+  }
+}
+
+check.cygwin()
+
 #######################################################################################
 # Some more specific functions, they look generic enough, see if they are reusable... #
 #######################################################################################
@@ -64,7 +82,7 @@ make.distr = function(df, indep="scriptname", dep="pageweight", pngname, title, 
 # also supply a facet field here.
 # similar to make.distr
 # example call: make.distr.period(df, indep="weeknr", dep="pageweight", title = "Page weight distribution (bytes) per country per week", pngname="page-weights-week.png", width=9, height=9)
-make.distr.period = function(df, facet="scriptname", indep="weeknr", dep="pageweight", pngname, title, dpi=100, ...) {
+make.distr.facet = function(df, facet="scriptname", indep="weeknr", dep="pageweight", pngname, title, dpi=100, ...) {
   df2 = ddply(df, c(facet, indep), function(dfp) {
     data.frame(
       min = min(dfp[, dep]),
@@ -79,7 +97,8 @@ make.distr.period = function(df, facet="scriptname", indep="weeknr", dep="pagewe
   n.indep = length(df2[,indep])
   df2$nameAlt = 1:n.indep
   
-  max.size = max(df2$q95)
+  # max.size = max(df2$q95)
+  max.size = max(df2$max)
   ggplot(df2, aes(ymin = nameAlt - 0.2,ymax = nameAlt + 0.2)) + 
     geom_rect(aes(xmin = q05,xmax = q95),fill = "white",colour = "black") + 
     geom_rect(aes(xmin = q25,xmax = q75),fill = 'lightblue',colour = "black") +
@@ -91,7 +110,33 @@ make.distr.period = function(df, facet="scriptname", indep="weeknr", dep="pagewe
     scale_x_continuous(limits=c(0, max.size)) +
     labs(title = title, x=dep, y=indep) +
     # facet_grid(scriptname ~ ., scales="free_y")
-    facet_grid(concat(facet, " ~ ."), scales="free_y")
+    facet_grid(concat(facet, " ~ ."), scales="free_y", space="free_y")
+  
+  ggsave(pngname, dpi=dpi, ...) 
+}
+
+# @deprecated (already), use make.distr.facet
+make.distr.period = function(...) {
+  make.distr.facet(...)
+}
+
+# make a distribution graph from a data.frame df, with an indep(endent) and a dep(endent) column in the df.
+# also supply a facet field here.
+# similar to make.distr
+# example call: make.distr.period(df, indep="weeknr", dep="pageweight", title = "Page weight distribution (bytes) per country per week", pngname="page-weights-week.png", width=9, height=9)
+make.barchart.facet = function(df, facet="scriptname", indep="weeknr", dep="pageweight", pngname, title, dpi=100, ...) {
+  max.size = max(df[,dep])
+  df$dep = df[,dep]
+  fct.indep = factor(df[,indep])
+  n.indep = length(fct.indep)
+  df$nameAlt = 1:n.indep
+  
+  ggplot(df, aes(ymin = nameAlt - 0.2,ymax = nameAlt + 0.2)) + 
+    geom_rect(aes(xmin = 0,xmax = dep),fill = 'blue',colour = "black") +
+    scale_y_continuous(breaks = 1:n.indep,labels = df[,indep]) +
+    scale_x_continuous(limits=c(0, max.size)) +
+    labs(title = title, x=dep, y=indep) +
+    facet_grid(concat(facet, " ~ ."), scales="free_y", space="free_y")
   
   ggsave(pngname, dpi=dpi, ...) 
 }
@@ -102,7 +147,7 @@ make.boxplot = function(df, indep, dep, title, pngname, width=12, height=9, ...)
   ggplot(df, aes_string(x="fct", y=dep)) +
     geom_boxplot()  +
     labs(title = title, x=indep, y=dep) +
-    facet_grid(scriptname ~ ., scales="free")
+    facet_grid(scriptname ~ ., scales="free", space="free")
   ggsave(pngname, dpi=100, width=width, height=height, ...) 
 }
 
@@ -112,6 +157,6 @@ make.scatterplot = function(df, indep, dep, title, pngname, width=12, height=9, 
   ggplot(df, aes(fct, resptime)) +
     geom_point()  +
     labs(title = title, x=indep, y=dep) +
-    facet_grid(scriptname ~ .)
+    facet_grid(scriptname ~ ., scales="free", space="free")
   ggsave(pngname, dpi=100, width=width, height=height, ...) 
 }
