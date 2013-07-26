@@ -1,6 +1,6 @@
 # libdb.tcl
 
-# @note wil TclOO gebruiken, maar conflict met unknown method ivm dict-accessor.
+# @note/@todo wil TclOO gebruiken, maar conflict met unknown method ivm dict-accessor.
 
 proc db_add_tabledef {table args} {
   global db_tabledefs

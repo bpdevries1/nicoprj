@@ -172,6 +172,10 @@ proc post_process {conn} {
 }
 
 proc det_domain {url} {
+  # remove T-Mobile UMTS specific cache-part like '1.2.3.9/bmi'
+  # http://1.2.3.9/bmi/m.philips.co.uk/consumerfiles/mobile/img/rec-apps/stores/icon_apple.png =>
+  # http://m.philips.co.uk/consumerfiles/mobile/img/rec-apps/stores/icon_apple.png
+  regsub {1.2.3.[0-9]+/bmi/} $url "" url
   if {[regexp {https?://([^/]+)} $url z domain]} {
     return $domain 
   } else {
