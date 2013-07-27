@@ -32,6 +32,7 @@ namespace eval ::ndv {
   }
   
   #@post freq_history fields are updated based on current freq and play_count values
+  #@todo n (#requested) should not be needed here.
   proc calc_freq_history {db n} {
     variable log
     variable ar_opts
@@ -76,8 +77,16 @@ namespace eval ::ndv {
     $log debug "Executed commit (after start transaction)"
   }
 
+  # [2013-07-27 20:01:40] Vandaag error dat niet genoeg items zijn gekozen. Zou moeten dan kans dat item
+  # wordt gekozen groter wordt naarmate en minder beschikbaar zijn. Nu lijkt het alsof items met een Fi < 0
+  # nooit worden gekozen. Ook als je meer items wilt dat er zijn, bepalen wat je wilt: ofwel alles teruggeven,
+  # ofwel sommige items dubbel tot gevraagde aantal.
+  # eerste berekening van Fi zou onafhankelijk van aantal te selecteren items moeten zijn, alleen volgorde en
+  # vooral relatieve kans bepalen.
+  # met test-suite wat meer runs doen, kijken of het kan kloppen (statistisch?)  
   proc choose_random {db n} {
     variable ar_opts
+    log info "choose_random: started"
     # global db conn log
     set conn [$db get_connection]
     # 1-5-2011 NdV not sure if also here only > 0 need to be selected; what if there are less than 5 left with pos value?
@@ -85,26 +94,37 @@ namespace eval ::ndv {
                from $ar_opts(viewmain)
                order by freq_history desc, path" 
     set lst [::mysql::sel $conn $query -list]
-    
     set N [llength $lst]
+    log info "#items to choose from: $N"
     set m 0 ; # aantal gekozen records
     set lst_result {}
     set F_sum [det_freq_history_sum $conn]
     # puts "F_sum: $F_sum"
     set t 0 ; # aantal behandelde records
     set F_gehad 0.0
+    set i 0
+    set skipped 0
     foreach el $lst {
+      incr i
       if {($m >= $n)} {break}
       # while {($m < $n) && ($t < $N)} {}
       set U [random1]
       # puts "U: $U"
       # set el [lindex $lst $t]
-      foreach {id path Fi} $el break;
+      # foreach {id path Fi} $el break;
+      lassign $el id path Fi 
+      log debug "Iteration $i, U=$U, el=$el"
+      set rnd [expr $U * ($F_sum - $F_gehad)]
+      set fixed [expr ($n - $m) * $Fi]
       if {[expr $U * ($F_sum - $F_gehad)] < [expr ($n - $m) * $Fi]} {  
+        log debug "$rnd < $fixed, choose element"
         lappend lst_result [list $id $path $U]
         incr m
       } else {
+        log debug "$rnd >= $fixed, skip element"
+        incr skipped
       }
+      log debug "iter=$i, #chosen=$m, #skipped=$skipped"
       incr t
       set F_gehad [expr $F_gehad + $Fi]
     }
