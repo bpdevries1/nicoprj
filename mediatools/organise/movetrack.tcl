@@ -51,7 +51,10 @@ proc url_decode str {
 
 proc move_next {} {
   exec qdbus org.kde.amarok /Player org.freedesktop.MediaPlayer.Next
-  after 500
+  # 27-7-2013 NdV after a few times, skip 90 seconds does not work anymore. Maybe need to wait longer.
+  # 5 seconds works, but a bit too long
+  # after 5000
+  after 2000
   exec qdbus org.kde.amarok /Player org.freedesktop.MediaPlayer.Forward 90000
 }
 
