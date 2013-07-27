@@ -7,8 +7,17 @@
 # doel is libsqlite.tcl overbodig te maken, en alles via dit db wrapper object uit te voeren, dan geen namespace/name clash problemen.
 
 package require TclOO 
-package require tdbc::sqlite3
-package require tdbc::mysql
+
+# SQlite apparently requires Tcl8.6, so check before.
+# Probably because of tdbc.
+# So also tdbc::mysql
+if {$tcl_version >= 8.6} {
+  package require tdbc::sqlite3
+  package require tdbc::mysql
+} else {
+  puts "Don't load sqlite, tcl version too low: $tcl_version"
+}
+
 
 oo::class create dbwrapper {
 
