@@ -48,8 +48,8 @@ proc main {argc argv} {
   exec chmod +x $bat_filename
   if {!$ar_argv(np)} {
     $log info "Mark files as played in database"
-    $log warn "NOT: still in testing mode!"
-    # ::ndv::music_random_update $db $lst "sd-auto" "-tablemain generic -viewmain singles -tableplayed played"
+    # $log warn "NOT: still in testing mode!"
+    ::ndv::music_random_update $db $lst "sd-auto" "-tablemain generic -viewmain singles -tableplayed played"
   } else {
     $log info "Don't mark files as played in database" 
   }
