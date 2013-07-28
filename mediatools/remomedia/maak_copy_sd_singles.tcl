@@ -10,7 +10,7 @@ package require Tclx
 # set SINGLES_ON_SD 150 ; # 1GB?
 
 # @todo: have option copy-until-full, but then copy directly in this script, don't create batch file
-set SINGLES_ON_SD 600 ; # 4GB?
+set SINGLES_ON_SD 550 ; # 4GB? Bij 600 te veel, 550 lijkt ongeveer te kunnen.
 # set SINGLES_ON_SD 594 ; # test
 
 set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
