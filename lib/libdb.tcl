@@ -13,7 +13,7 @@ package require TclOO
 # So also tdbc::mysql
 if {$tcl_version >= 8.6} {
   package require tdbc::sqlite3
-  package require tdbc::mysql
+  catch {package require tdbc::mysql} ; # mysql not available on (philips) laptop.
 } else {
   puts "Don't load sqlite, tcl version too low: $tcl_version"
 }
@@ -28,7 +28,9 @@ oo::class create dbwrapper {
     if {[llength $args] == 1} {
       # assume sqlite
       set dbtype "sqlite3"
-      set conn [tdbc::sqlite3::connection new [lindex $args 0]] 
+      log debug "connect to: [lindex $args 0]"
+      set conn [tdbc::sqlite3::connection new [lindex $args 0]]
+      log debug "connected"
     } else {
       # assume mysql
       set dbtype "mysql"
@@ -36,10 +38,11 @@ oo::class create dbwrapper {
     }
   }
   
-  destructor {
-    log info "TODO"
+  # @todo destructor gets called in beginning?
+  #destructor {
+  #  log info "destructor: TODO"
     # close prepared statements and db connection. Or just db connection.
-  }
+  #}
   
   # @param conn: a tdbc connection.
 # constructor {a_conn} {
@@ -47,6 +50,11 @@ oo::class create dbwrapper {
 #   set conn $a_conn
 # }
   
+  method close {} {
+    my variable conn
+    $conn close
+  }
+
   method get_conn {} {
     my variable conn
     return $conn
