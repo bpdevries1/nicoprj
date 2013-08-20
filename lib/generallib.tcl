@@ -89,6 +89,12 @@ proc log_start_finished {service script {loglevel -1}} {
 	log "finished" perf $service $loglevel
 }
 
+# to be called from within catch-block of try-eval (I always forget the names of the error-vars)
+proc log_error {logtext} {
+  uplevel 1 {log warn "$errorResult $errorCode $errorInfo, continuing"}
+  log warn $logtext
+}
+
 proc line2list {line} {
 	set l [split $line]
 	set result {}
