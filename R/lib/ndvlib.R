@@ -5,6 +5,8 @@ load.def.libs = function() {
   library(RSQLite, quietly=TRUE) ; # quietly: so we have no warnings, and no error output reported by Tcl.
   library(ggplot2, quietly=TRUE) ; # quietly: so we have no warnings, and no error output reported by Tcl.
   library(plyr)
+  library(stringr)
+  library(reshape2)
 }
 
 db.open = function(db.name) {
@@ -82,7 +84,7 @@ make.distr = function(df, indep="scriptname", dep="pageweight", pngname, title, 
 # also supply a facet field here.
 # similar to make.distr
 # example call: make.distr.period(df, indep="weeknr", dep="pageweight", title = "Page weight distribution (bytes) per country per week", pngname="page-weights-week.png", width=9, height=9)
-make.distr.facet = function(df, facet="scriptname", indep="weeknr", dep="pageweight", pngname, title, dpi=100, ...) {
+make.distr.facet = function(df, facet="scriptname", indep="weeknr", dep="pageweight", pngname, title, dpi=100, req.line = -1, ...) {
   df2 = ddply(df, c(facet, indep), function(dfp) {
     data.frame(
       min = min(dfp[, dep]),
@@ -99,7 +101,7 @@ make.distr.facet = function(df, facet="scriptname", indep="weeknr", dep="pagewei
   
   # max.size = max(df2$q95)
   max.size = max(df2$max)
-  ggplot(df2, aes(ymin = nameAlt - 0.2,ymax = nameAlt + 0.2)) + 
+  p = ggplot(df2, aes(ymin = nameAlt - 0.2,ymax = nameAlt + 0.2)) + 
     geom_rect(aes(xmin = q05,xmax = q95),fill = "white",colour = "black") + 
     geom_rect(aes(xmin = q25,xmax = q75),fill = 'lightblue',colour = "black") +
     geom_rect(aes(xmin = q45,xmax = q55),fill = 'blue',colour = "black") +
@@ -111,6 +113,11 @@ make.distr.facet = function(df, facet="scriptname", indep="weeknr", dep="pagewei
     labs(title = title, x=dep, y=indep) +
     # facet_grid(scriptname ~ ., scales="free_y")
     facet_grid(concat(facet, " ~ ."), scales="free_y", space="free_y")
+  if (req.line != -1) {
+    p = p +
+      geom_vline(xintercept=req.line, linetype="solid", colour = "red")
+  }
+  p
   
   ggsave(pngname, dpi=dpi, ...) 
 }
@@ -137,7 +144,6 @@ make.barchart.facet = function(df, facet="scriptname", indep="weeknr", dep="page
     scale_x_continuous(limits=c(0, max.size)) +
     labs(title = title, x=dep, y=indep) +
     facet_grid(concat(facet, " ~ ."), scales="free_y", space="free_y")
-  
   ggsave(pngname, dpi=dpi, ...) 
 }
 
@@ -159,4 +165,9 @@ make.scatterplot = function(df, indep, dep, title, pngname, width=12, height=9, 
     labs(title = title, x=indep, y=dep) +
     facet_grid(scriptname ~ ., scales="free", space="free")
   ggsave(pngname, dpi=100, width=width, height=height, ...) 
+}
+
+add.psxtime = function(df, from, to, format="%Y-%m-%d") {
+  df[,to] = as.POSIXct(strptime(df[,from], format=format))
+  df
 }
