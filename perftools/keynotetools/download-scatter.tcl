@@ -6,14 +6,18 @@ package require ndv
 set log [::ndv::CLogger::new_logger [file tail [info script]] info]
 $log set_file "[file tail [info script]].log"
 
+# @todo eg Mobile-Android: new script, so no data before certain date, continuously we get zero result. In this case, should stop downloading
+# this data. How to determine?
+
 proc main {argv} {
-  global nerrors
+  # global nerrors
   
   log debug "argv: $argv"
   set options {
     {dir.arg "c:/projecten/Philips/KNDL" "Directory to put downloaded keynote files"}
+    {config.arg "config.csv" "Config file name"}
     {apikey.arg "~/.config/keynote/api-key.txt" "Location of file with Keynote API key"}
-    {format.arg "json" "Format of downloaden file: json or xml"}
+    {format.arg "json" "Format of downloaded file: json or xml"}
     {test "Test the script, just download a few hours of data"}       
   }
   set usage ": [file tail [info script]] \[options] :"
@@ -49,7 +53,8 @@ proc download_keynote_main {dct_argv} {
   set root_dir [:dir $dct_argv]  
   log info "download_keynote_main: Downloading items to: $root_dir"
   
-  set dct_config [csv2dictlist [file join $root_dir config.csv] ";"]
+  # set dct_config [csv2dictlist [file join $root_dir config.csv] ";"]
+  set dct_config [csv2dictlist [file join $root_dir [:config $dct_argv]] ";"]
   make_subdirs $root_dir $dct_config
   
   # start with current time minus 4 hours, so Keynote has time to prepare the data.
@@ -85,6 +90,10 @@ proc make_subdirs {root_dir dct_config} {
 
 proc download_keynote {root_dir el_config sec_ts api_key format } {
   set filename [det_filename $root_dir $el_config $sec_ts $format]
+  # use tempname to download to, then in one 'atomic' action rename to the right name, 
+  # so a possibly running scatter2db.tcl does not interfere.
+  set tempfilename "$filename.temp[expr rand()]"  
+  
   if {[file exists $filename]} {
     # log info "Already have $filename, continuing" ; # or stopping?
     return
@@ -100,14 +109,20 @@ proc download_keynote {root_dir el_config sec_ts api_key format } {
   set start [string toupper [clock format $sec_ts -format $fmt -gmt 1]]
   set end [string toupper [clock format [expr $sec_ts + 3600] -format $fmt -gmt 1]]
   # @note check if it works with just giving transpagelist, not slotidlist -> NO, this does not work!
-  set cmd [list curl --sslv3 -o $filename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
+  # set cmd [list curl --sslv3 -o $filename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
+  set cmd [list curl --sslv3 -o $tempfilename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
   log debug "cmd: $cmd"
   try_eval {
     set res [exec -ignorestderr {*}$cmd]
+    log debug "res: $res"
   } {
     log warn "$errorResult $errorCode $errorInfo, continuing"   
   }
-  log debug "res: $res"
+  try_eval {
+    file rename -force $tempfilename $filename
+  } {
+    log_error "Downloaded temp file could not be renamed, continue." 
+  }
   return [check_errors $filename]
 }
 
@@ -153,9 +168,12 @@ proc check_errors {filename} {
     if {[file size $filename] < 500} {
       set text [read_file $filename]
       if {[regexp {hourly request allowed} $text]} {
-        log warn "Quota have been used: check file and do a good text-check on this"
-        file rename -force $filename $filename.quota
+        log warn "Quota have been used"
+        file rename -force $filename "$filename.quota[expr rand()]"
         set res "quota"
+      } elseif {[regexp {^[\[\],]+$} $text]} {
+        log info "Empty contents, but this can happen, is ok"
+        set res "ok"
       } else {
         log warn "Unknown error with too small file"
         file rename -force $filename "$filename.toosmall[expr rand()]"
@@ -166,7 +184,7 @@ proc check_errors {filename} {
         set res "ok"
       } else {
         log warn "jsonxml downloaded is not complete, rename and try again next hour"
-        file rename -force $filename $filename.incomplete
+        file rename -force $filename "$filename.incomplete[expr rand()]"
         set res "incomplete"
       }
     }
