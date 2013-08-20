@@ -522,7 +522,7 @@ proc lees_tsv {filename callback_proc} {
     foreach name $lst_names value $lst_values {
       set ar_values($name) $value 
     }
-    $callback_proc $line $lst_names ar_values
+    {*}$callback_proc $line $lst_names ar_values
   }  
   close $f
 }
