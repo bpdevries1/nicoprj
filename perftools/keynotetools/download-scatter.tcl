@@ -122,7 +122,22 @@ proc det_api_key {api_key_loc} {
   string trim [read_file $api_key_loc]
 }
 
+# wat proberen met slots/pages, want krijg veel dubbele dingen met MyPhilips (my Mobile niet opgevallen, maar daar maar 1 page)
+# @note 2013-08-03 Keynote API seems to be fixed, no need to repeat slot-id anymore in slotidlist param when you want >1 page, now as expected:
+# slotidlist: 1
+# pages: 1:1, 1:2, 1:3.
+# @todo 2013-08-03 15:30 all MyPhilips downloads before this time are 3 times the size, so remove and download again when all the rest has been done.
 proc det_slots_pages {el_config} {
+  foreach slotid [split [:slotids $el_config] ","] {
+    lappend slotidlist $slotid
+    for {set i 1} {$i <= [:npages $el_config]} {incr i} {
+      lappend transpagelist "$slotid:$i"
+    }
+  }
+  list [join $slotidlist ","] [join $transpagelist ","]
+}
+
+proc det_slots_pages_old1 {el_config} {
   foreach slotid [split [:slotids $el_config] ","] {
     for {set i 1} {$i <= [:npages $el_config]} {incr i} {
       lappend slotidlist $slotid
