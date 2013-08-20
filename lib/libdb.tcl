@@ -71,6 +71,21 @@ oo::class create dbwrapper {
     }
   }
   
+  # @todo what if something fails, rollback, exec except/finally clause?
+  method in_trans {block} {
+    my variable conn
+    my exec "begin transaction"
+    try_eval {
+      uplevel $block
+    } {
+      log_error "Rolling back transaction and raising error"
+      my exec "rollback"
+      error "Rolled back transaction"
+    }
+    my exec "commit"
+  }
+  
+  # @todo getDBhandle does (probably) not work with MySQL.
   method exec {query {return_id 0}} {
     my variable conn
     set stmt [$conn prepare $query]
@@ -80,6 +95,15 @@ oo::class create dbwrapper {
       return [[$conn getDBhandle] last_insert_rowid]   
     }
   } 
+  
+  method exec_try {query {return_id 0}} {
+    try_eval {
+      my exec $query $return_id
+    } {
+      log warn "db exec failed: $query"
+      log warn "errorResult: $errorResult"
+    }
+  }
 
   method prepare_stmt {stmt_name query} {
     my variable db_statements conn
