@@ -83,18 +83,37 @@ if {$tcl_version == "8.5"} {
     return "drop table [dict get $table_def table]" 
   }
   
+  # if fieldname ends with _id, make it an integer field.
+  # if fielddef contains 2 items, the second one is the data type.
   proc create_table_sql {table_def} {
+    # return "create table [dict get $table_def table] ([join [dict get $table_def fields] ", "])" 
+    set fields [lmap x [dict get $table_def fields] {fielddef2sql $x}]
+    return "create table [dict get $table_def table] ([join $fields ", "])"
+  }
+
+  proc fielddef2sql {fielddef} {
+    if {[llength $fielddef] == 2} {
+      lassign $fielddef name datatype
+      return "$name $datatype"
+    } elseif {$fielddef == "id"} {
+      return "id integer primary key autoincrement"
+    } else {
+      if {[regexp {_id$} $fielddef]} {
+        set datatype "integer"        
+      } else {
+        set datatype "varchar" 
+      }
+      return "$fielddef $datatype"
+    }
+  }
+  
+  proc create_table_sql_old {table_def} {
     # return "create table [dict get $table_def table] ([join [dict get $table_def fields] ", "])" 
     set fields [lmap x [dict get $table_def fields] {expr {
         ($x != "id") ? $x : "id integer primary key autoincrement"
     }}]
     return "create table [dict get $table_def table] ([join $fields ", "])"
   }
-
-  proc create_table_sql_old {table_def} {
-    return "create table [dict get $table_def table] ([join [dict get $table_def fields] ", "])" 
-  }
-
   
   # @param args: field names
   proc prepare_insert {conn tablename args} {
@@ -135,9 +154,9 @@ if {$tcl_version == "8.5"} {
   # set a [make_adder 3]
   # $a 5
 
-  
+  # each arg in args is a fielddef: just a name, or name with datatype.
   proc create_insert_sql {tablename args} {
-    return "insert into $tablename ([join $args ", "]) values ([join [lmap par $args {symbol $par}] ", "])"
+    return "insert into $tablename ([join $args ", "]) values ([join [lmap par $args {symbol [lindex $par 0]}] ", "])"
   }
 
   proc create_insert_sql_td {table_def} {
@@ -146,7 +165,10 @@ if {$tcl_version == "8.5"} {
     set insert_fields [lmap x $fields {expr {
         ($x != "id") ? $x : [continue]
     }}]
-    return "insert into $table ([join $insert_fields ", "]) values ([join [lmap par $insert_fields {symbol $par}] ", "])"
+    # set res "insert into $table ([join $insert_fields ", "]) values ([join [lmap par $insert_fields {symbol [lindex $par 0]}] ", "])"
+    set res "insert into $table ([join [lmap par $insert_fields {lindex $par 0}] ", "]) values ([join [lmap par $insert_fields {symbol [lindex $par 0]}] ", "])"
+    log debug "insert sql: $res"
+    return $res
   }
   
   #  set stmt_update [prepare_update $conn $table_def]

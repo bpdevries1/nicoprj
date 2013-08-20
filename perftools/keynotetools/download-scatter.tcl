@@ -6,14 +6,18 @@ package require ndv
 set log [::ndv::CLogger::new_logger [file tail [info script]] info]
 $log set_file "[file tail [info script]].log"
 
+# @todo eg Mobile-Android: new script, so no data before certain date, continuously we get zero result. In this case, should stop downloading
+# this data. How to determine?
+
 proc main {argv} {
-  global nerrors
+  # global nerrors
   
   log debug "argv: $argv"
   set options {
     {dir.arg "c:/projecten/Philips/KNDL" "Directory to put downloaded keynote files"}
+    {config.arg "config.csv" "Config file name"}
     {apikey.arg "~/.config/keynote/api-key.txt" "Location of file with Keynote API key"}
-    {format.arg "json" "Format of downloaden file: json or xml"}
+    {format.arg "json" "Format of downloaded file: json or xml"}
     {test "Test the script, just download a few hours of data"}       
   }
   set usage ": [file tail [info script]] \[options] :"
@@ -49,7 +53,8 @@ proc download_keynote_main {dct_argv} {
   set root_dir [:dir $dct_argv]  
   log info "download_keynote_main: Downloading items to: $root_dir"
   
-  set dct_config [csv2dictlist [file join $root_dir config.csv] ";"]
+  # set dct_config [csv2dictlist [file join $root_dir config.csv] ";"]
+  set dct_config [csv2dictlist [file join $root_dir [:config $dct_argv]] ";"]
   make_subdirs $root_dir $dct_config
   
   # start with current time minus 4 hours, so Keynote has time to prepare the data.
@@ -85,6 +90,10 @@ proc make_subdirs {root_dir dct_config} {
 
 proc download_keynote {root_dir el_config sec_ts api_key format } {
   set filename [det_filename $root_dir $el_config $sec_ts $format]
+  # use tempname to download to, then in one 'atomic' action rename to the right name, 
+  # so a possibly running scatter2db.tcl does not interfere.
+  set tempfilename "$filename.temp[expr rand()]"  
+  
   if {[file exists $filename]} {
     # log info "Already have $filename, continuing" ; # or stopping?
     return
@@ -100,14 +109,20 @@ proc download_keynote {root_dir el_config sec_ts api_key format } {
   set start [string toupper [clock format $sec_ts -format $fmt -gmt 1]]
   set end [string toupper [clock format [expr $sec_ts + 3600] -format $fmt -gmt 1]]
   # @note check if it works with just giving transpagelist, not slotidlist -> NO, this does not work!
-  set cmd [list curl --sslv3 -o $filename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
+  # set cmd [list curl --sslv3 -o $filename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
+  set cmd [list curl --sslv3 -o $tempfilename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
   log debug "cmd: $cmd"
   try_eval {
     set res [exec -ignorestderr {*}$cmd]
+    log debug "res: $res"
   } {
     log warn "$errorResult $errorCode $errorInfo, continuing"   
   }
-  log debug "res: $res"
+  try_eval {
+    file rename -force $tempfilename $filename
+  } {
+    log_error "Downloaded temp file could not be renamed, continue." 
+  }
   return [check_errors $filename]
 }
 
@@ -122,7 +137,22 @@ proc det_api_key {api_key_loc} {
   string trim [read_file $api_key_loc]
 }
 
+# wat proberen met slots/pages, want krijg veel dubbele dingen met MyPhilips (my Mobile niet opgevallen, maar daar maar 1 page)
+# @note 2013-08-03 Keynote API seems to be fixed, no need to repeat slot-id anymore in slotidlist param when you want >1 page, now as expected:
+# slotidlist: 1
+# pages: 1:1, 1:2, 1:3.
+# @todo 2013-08-03 15:30 all MyPhilips downloads before this time are 3 times the size, so remove and download again when all the rest has been done.
 proc det_slots_pages {el_config} {
+  foreach slotid [split [:slotids $el_config] ","] {
+    lappend slotidlist $slotid
+    for {set i 1} {$i <= [:npages $el_config]} {incr i} {
+      lappend transpagelist "$slotid:$i"
+    }
+  }
+  list [join $slotidlist ","] [join $transpagelist ","]
+}
+
+proc det_slots_pages_old1 {el_config} {
   foreach slotid [split [:slotids $el_config] ","] {
     for {set i 1} {$i <= [:npages $el_config]} {incr i} {
       lappend slotidlist $slotid
@@ -138,9 +168,12 @@ proc check_errors {filename} {
     if {[file size $filename] < 500} {
       set text [read_file $filename]
       if {[regexp {hourly request allowed} $text]} {
-        log warn "Quota have been used: check file and do a good text-check on this"
-        file rename -force $filename $filename.quota
+        log warn "Quota have been used"
+        file rename -force $filename "$filename.quota[expr rand()]"
         set res "quota"
+      } elseif {[regexp {^[\[\],]+$} $text]} {
+        log info "Empty contents, but this can happen, is ok"
+        set res "ok"
       } else {
         log warn "Unknown error with too small file"
         file rename -force $filename "$filename.toosmall[expr rand()]"
@@ -151,7 +184,7 @@ proc check_errors {filename} {
         set res "ok"
       } else {
         log warn "jsonxml downloaded is not complete, rename and try again next hour"
-        file rename -force $filename $filename.incomplete
+        file rename -force $filename "$filename.incomplete[expr rand()]"
         set res "incomplete"
       }
     }
