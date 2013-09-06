@@ -1,0 +1,26 @@
+Steps to do before calling R: make.dashboard.graphs
+
+Goals:
+* Import measurement data into c:/projecten/Philips/Dashboards/dashboards.db
+
+Design decisions:
+* First copy the source databases (keynotelogs.db), as some changes will be made in these source databases.
+
+Steps:
+* Close programs that have handles to dirs open: c:/projecten/Philips/KN-Analysis:
+  - RStudio
+  - SQLiteSpy
+* 2 scripts:
+./copy-dbs-analysis.tcl -targetdir c:/projecten/Philips/KN-Analysis -srcpattern "MyPhilips*"
+./apidata2dashboarddb.tcl -dir c:/projecten/Philips/Dashboards -srcdir c:/projecten/Philips/KN-Analysis -srcpattern "MyPhilips*"
+* Call R function.
+graphs-myphilips.R/make.dashboard.graphs()
+
+Dealer locator:
+./copy-dbs-analysis.tcl -targetdir c:/projecten/Philips/KN-AN-DL -config dealerlocator.txt
+./apidata2dashboarddb.tcl -dir c:/projecten/Philips/Dashboards-DL -srcdir c:/projecten/Philips/KN-AN-DL -srcpattern "*"
+
+
+Possible errors:
+* table stat has no column named nmeas: 
+
