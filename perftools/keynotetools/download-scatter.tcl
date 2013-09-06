@@ -18,18 +18,26 @@ proc main {argv} {
     {config.arg "config.csv" "Config file name"}
     {apikey.arg "~/.config/keynote/api-key.txt" "Location of file with Keynote API key"}
     {format.arg "json" "Format of downloaded file: json or xml"}
+    {exitatok "Exit when one loop returns ok (instead of quota reached"}
+    {fromdate.arg "" "Set a date (2013-08-21) from which data should be downloaded (inclusive!)"}
+    {untildate.arg "" "Set a date (2013-08-29) until which data should be downloaded (non-inclusive!)"}
     {test "Test the script, just download a few hours of data"}       
   }
   set usage ": [file tail [info script]] \[options] :"
-  set dct_argv [::cmdline::getoptions argv $options $usage]
+  set dargv [::cmdline::getoptions argv $options $usage]
 
   # put this in a loop, to start again at the whole next hour: either for newer data, 
   # or because the quota has been used for the Keynote API
+  set exitatok [:exitatok $dargv]
   while {1} {
-    set res [download_keynote_main $dct_argv]
+    set res [download_keynote_main $dargv]
     log info "Download keynote main finished with return code: $res"
+    if {($res == "ok") && $exitatok} {
+      break 
+    }
     wait_until_next_hour 
   }
+  log info "Exiting, result = ok, and exitatok"
 }
 
 proc wait_until_next_hour {} {
@@ -49,29 +57,47 @@ proc wait_until_next_hour {} {
   }
 }
 
-proc download_keynote_main {dct_argv} {
-  set root_dir [:dir $dct_argv]  
+proc download_keynote_main {dargv} {
+  set root_dir [:dir $dargv]  
   log info "download_keynote_main: Downloading items to: $root_dir"
   
   # set dct_config [csv2dictlist [file join $root_dir config.csv] ";"]
-  set dct_config [csv2dictlist [file join $root_dir [:config $dct_argv]] ";"]
+  set dct_config [csv2dictlist [file join $root_dir [:config $dargv]] ";"]
   make_subdirs $root_dir $dct_config
   
   # start with current time minus 4 hours, so Keynote has time to prepare the data.
   # also start on a whole hour.
-  set sec_start [clock scan [clock format [expr [clock seconds] - 4 * 3600] -format "%Y-%m-%d %H" -gmt 1] -format "%Y-%m-%d %H" -gmt 1] 
-  if {[:test $dct_argv]} {
-    set sec_end [expr $sec_start - (4 * 60 * 60)]
+  # set sec_start [clock scan [clock format [expr [clock seconds] - 4 * 3600] -format "%Y-%m-%d %H" -gmt 1] -format "%Y-%m-%d %H" -gmt 1]
+  
+  # 26-8-2013 Stel huidige tijd is 10:30 CET, dus 8:30 GMT. Dan laatste sec_start is 7:00 GMT, omdat er een uur bij op wordt geteld, zodat van 7-8 wordt opgehaald.
+  # om 10:00 CET, is 8:00 GMT, zal ook alles van 7-8 worden opgehaald, dit is wellicht iets te snel. Voor de zekerheid dan nog een uur eraf.  
+  # @note sec_start is actually the most recent time, and sec_end the oldest time. This is because the download happens backward: first the most recent, then older until no more data 
+  # available.
+  if {[:untildate $dargv] != ""} {
+    # do not use GMT here (but default CET in NL), as dashboards are presented by CET date.
+    set sec_start [clock scan [:untildate $dargv] -format "%Y-%m-%d" -gmt 0]
   } else {
-    set sec_end [expr $sec_start - (8 * 7 * 24 * 60 * 60)]
+    # auto: until most recent.
+    set sec_start [clock scan [clock format [expr [clock seconds] - 2 * 3600] -format "%Y-%m-%d %H" -gmt 1] -format "%Y-%m-%d %H" -gmt 1]
+  }
+  if {[:fromdate $dargv] != ""} {
+    # do not use GMT here (but default CET in NL), as dashboards are presented by CET date.
+    set sec_end [clock scan [:fromdate $dargv] -format "%Y-%m-%d" -gmt 0]
+  } else {
+    if {[:test $dargv]} {
+      set sec_end [expr $sec_start - (4 * 60 * 60)]
+    } else {
+      # 3-9-2013 6 weeks is long enough, and no detail data more than 6 weeks back.
+      set sec_end [expr $sec_start - (6 * 7 * 24 * 60 * 60)]
+    }
   }
   set nerrors 0
-  set api_key [det_api_key [:apikey $dct_argv]]
+  set api_key [det_api_key [:apikey $dargv]]
   
   set sec_ts $sec_start
   while {$sec_ts >= $sec_end} {
     foreach el_config $dct_config {
-      set res [download_keynote $root_dir $el_config $sec_ts $api_key [:format $dct_argv]]
+      set res [download_keynote $root_dir $el_config $sec_ts $api_key [:format $dargv]]
       if {$res == "quota"} {
         log warn "Quota has been used completely, wait until next hour"
         return $res
@@ -146,16 +172,6 @@ proc det_slots_pages {el_config} {
   foreach slotid [split [:slotids $el_config] ","] {
     lappend slotidlist $slotid
     for {set i 1} {$i <= [:npages $el_config]} {incr i} {
-      lappend transpagelist "$slotid:$i"
-    }
-  }
-  list [join $slotidlist ","] [join $transpagelist ","]
-}
-
-proc det_slots_pages_old1 {el_config} {
-  foreach slotid [split [:slotids $el_config] ","] {
-    for {set i 1} {$i <= [:npages $el_config]} {incr i} {
-      lappend slotidlist $slotid
       lappend transpagelist "$slotid:$i"
     }
   }

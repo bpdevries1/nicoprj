@@ -7,6 +7,7 @@ load.def.libs = function() {
   library(plyr)
   library(stringr)
   library(reshape2)
+  library(grid) # for unit, met legends.
 }
 
 db.open = function(db.name) {

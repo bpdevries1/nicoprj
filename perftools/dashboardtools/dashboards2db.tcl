@@ -76,7 +76,17 @@ proc handle_excel {db filename rootdir} {
     # Daily com dashboard (14-August-2013)_Dashboard_(BMC).csv
     set tab1_name "[file rootname $filename]_Dashboard_(BMC).csv"
     set f [open $tab1_name r]
-    set dheader [get_header $db $logfile_id $f]
+    set dheader [get_header $db $logfile_id $f $filedate]
+    
+    # pas hier de items toevoegen aan logfile_date
+    dict for {date vals} $dheader {
+      # extra check
+      if {$filedate <= $date} {
+        error "File date <= date: $filedate <= $date" 
+      }
+      $db insert logfile_date [dict create logfile_id $logfile_id date $date]
+    }
+    
     # $db insert stat [dict create logfile_id $logfile_id date "2013-08-15" scriptname "MyPhilips" country "DE" totalpageavg "pageavg" respavail "resp" value 3.65]
     set totalpageavg "pageavg"
     set scriptname "MyPhilips"
@@ -157,7 +167,9 @@ proc det_date {path} {
   }
 }
 
-proc get_header {db logfile_id f} {
+# @note was probleem hier dat ik ook al deels de DB vul (tabel logfile_date), zou pas later moeten.
+# nu alleen lezen hier, en pas aan het einde schrijven.
+proc get_header {db logfile_id f filedate} {
   set h1 [csv::split [gets $f]]
   set h2 [csv::split [gets $f]]
   set prev_date "9999-12-31"
@@ -172,14 +184,18 @@ proc get_header {db logfile_id f} {
     set date [clock format [clock scan $datestr -format "%d-%b-%y"] -format "%Y-%m-%d"]
     if {$date > $prev_date} {
       # vorige date nog oude data (wel vaag dat dit dan blijkbaar ook andere data is)
-      # reset result
+      # reset result en deze wel afhandelen.
       set res [dict create]
     }
-    if {[is_read_date $db $date]} {
+    if {$date >= $filedate} {
+      # Nog niet ingevulde kolommen.
+      # reset result en meteen door met volgende.
+      set res [dict create]
+    } elseif {[is_read_date $db $date]} {
       log debug "Already read data from $date before, ignore here" 
     } else {
       # set logfile_id [$db insert logfile [dict create path $filename date $filedate] 1]
-      $db insert logfile_date [dict create logfile_id $logfile_id date $date]
+      # $db insert logfile_date [dict create logfile_id $logfile_id date $date]
       for {set i 0} {$i < 11} {incr i} {
         set countrycol [expr $daycol + $i]
         set country [lindex $h2 $countrycol]
