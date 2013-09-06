@@ -90,13 +90,17 @@ proc scatter2db_main {dct_argv} {
   $dbmain prepare_insert_statements
 
   # @todo create a main db with all info, but possible without page items
-  foreach subdir [lsort [glob -directory $root_dir -type d *]] {
+  foreach subdir [lsort [glob -nocomplain -directory $root_dir -type d *]] {
     if {[ignore_subdir $subdir]} {
       log info "Ignore subdir: $subdir (for test!)"
     } else {
       set res [scatter2db_subdir $dct_argv $subdir $dbmain]
     }
   }
+  
+  # 6-9-2013 also handle current-dir, if script is called with one subdir as param
+  set res [scatter2db_subdir $dct_argv $root_dir $dbmain]
+  
   return $res
 }
 
