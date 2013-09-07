@@ -43,7 +43,7 @@ proc main {argv} {
   } else {
     log info "Running only once"
     set res [scatter2db_main $dct_argv]
-      log info "Scatter2db main finished with return code: $res"
+    log info "Scatter2db main finished with return code: $res"
   }
 }
 
@@ -68,7 +68,7 @@ proc wait_until_next_hour_and_half {} {
 }
 
 proc scatter2db_main {dct_argv} {
-  set root_dir [:dir $dct_argv]  
+  set root_dir [from_cygwin [:dir $dct_argv]]  
   
   set db_name [file join $root_dir "keynotelogsmain.db"]
   if {[:dropdb $dct_argv]} {
