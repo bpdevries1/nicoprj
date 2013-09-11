@@ -16,33 +16,34 @@ set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 $log set_file "[file tail [info script]].log"
 
 proc main {argv} {
-  global dct_argv
+  global dargv
   log debug "argv: $argv"
   set options {
     {dir.arg "c:/projecten/Philips/KNDL" "Directory where downloaded keynote files are (in subdirs) and where DB's (in subdirs) will be created."}
     {dropdb "Drop the (old) database first"}
     {nopost "Do not post process the data (Only for Mobile now)"}
+    {nomain "Do not put data in a main db"}
     {continuous "Keep running this script, to automatically put new items downloaded in DB's"}
     {debug "Run in debug mode, stop when an error occurs"}
   }
   set usage ": [file tail [info script]] \[options] :"
-  set dct_argv [::cmdline::getoptions argv $options $usage]
+  set dargv [::cmdline::getoptions argv $options $usage]
 
-  if {[:dropdb $dct_argv] && [:continuous $dct_argv]} {
+  if {[:dropdb $dargv] && [:continuous $dargv]} {
     log error "Both dropdb and continuous are set, this does not make sense: exiting"
     exit
   }
   
-  if {[:continuous $dct_argv]} {
+  if {[:continuous $dargv]} {
     log info "Running continuously"
     while {1} {
-      set res [scatter2db_main $dct_argv]
+      set res [scatter2db_main $dargv]
       log info "Scatter2db main finished with return code: $res"
       wait_until_next_hour_and_half
     }
   } else {
     log info "Running only once"
-    set res [scatter2db_main $dct_argv]
+    set res [scatter2db_main $dargv]
     log info "Scatter2db main finished with return code: $res"
   }
 }
@@ -67,39 +68,40 @@ proc wait_until_next_hour_and_half {} {
   }
 }
 
-proc scatter2db_main {dct_argv} {
-  set root_dir [from_cygwin [:dir $dct_argv]]  
+proc scatter2db_main {dargv} {
+  set root_dir [from_cygwin [:dir $dargv]]  
   
-  set db_name [file join $root_dir "keynotelogsmain.db"]
-  if {[:dropdb $dct_argv]} {
-    file delete $db_name
-  }
-  # set conn [open_db $db_name]
-  # new with TclOO
-  # set db [dbwrapper new $conn]
-  set existing_db [file exists $db_name]
-  # log debug "existing_db: $existing_db"
-  set dbmain [dbwrapper new $db_name]
-  define_tables $dbmain 0
-  if {!$existing_db} {
-    $dbmain create_tables 0 ; # 0: don't drop tables first.
-    create_indexes $dbmain
+  if {[:nomain $dargv]} {
+    log info "Don't use main DB"
+    set dbmain ""
   } else {
-    # existing db, assuming tables/indexes also already exist. 
-  }
-  $dbmain prepare_insert_statements
-
+    log info "Use main DB"
+    set db_name [file join $root_dir "keynotelogsmain.db"]
+    if {[:dropdb $dargv]} {
+      file delete $db_name
+    }
+    set existing_db [file exists $db_name]
+    set dbmain [dbwrapper new $db_name]
+    define_tables $dbmain 0
+    if {!$existing_db} {
+      $dbmain create_tables 0 ; # 0: don't drop tables first.
+      create_indexes $dbmain
+    } else {
+      # existing db, assuming tables/indexes also already exist. 
+    }
+    $dbmain prepare_insert_statements
+  }  
   # @todo create a main db with all info, but possible without page items
   foreach subdir [lsort [glob -nocomplain -directory $root_dir -type d *]] {
     if {[ignore_subdir $subdir]} {
       log info "Ignore subdir: $subdir (for test!)"
     } else {
-      set res [scatter2db_subdir $dct_argv $subdir $dbmain]
+      set res [scatter2db_subdir $dargv $subdir $dbmain]
     }
   }
   
   # 6-9-2013 also handle current-dir, if script is called with one subdir as param
-  set res [scatter2db_subdir $dct_argv $root_dir $dbmain]
+  set res [scatter2db_subdir $dargv $root_dir $dbmain]
   
   return $res
 }
@@ -115,9 +117,9 @@ proc ignore_subdir {subdir} {
   return 0
 }
 
-proc scatter2db_subdir {dct_argv subdir dbmain} {
+proc scatter2db_subdir {dargv subdir dbmain} {
   set db_name [file join $subdir "keynotelogs.db"]
-  if {[:dropdb $dct_argv]} {
+  if {[:dropdb $dargv]} {
     file delete $db_name
   }
   # set conn [open_db $db_name]
@@ -137,7 +139,7 @@ proc scatter2db_subdir {dct_argv subdir dbmain} {
   # for test.
   # $db insert logfile {path "test.json"}
   handle_files $subdir $db $dbmain
-  if {![:nopost $dct_argv]} {
+  if {![:nopost $dargv]} {
     post_process $db
   }
   # $conn close
@@ -270,13 +272,13 @@ proc handle_files {root_dir db dbmain} {
 }
 
 proc warn_error {proc_name args} {
-  global dct_argv
+  global dargv
   try_eval {
     $proc_name {*}$args
   } {
     # log warn "$errorResult $errorCode $errorInfo, continuing"
     log_error "continuing..."
-    if {[:debug $dct_argv]} {
+    if {[:debug $dargv]} {
       # development mode.
       error $errorResult $errorCode $errorInfo
       exit
@@ -288,7 +290,9 @@ proc warn_error {proc_name args} {
 
 proc read_json_file {db dbmain filename root_dir} {
   read_json_file_db $db $filename $root_dir 1
-  read_json_file_db $dbmain $filename $root_dir 0
+  if {$dbmain != ""} {
+    read_json_file_db $dbmain $filename $root_dir 0
+  }
 }
 
 proc read_json_file_db {db filename root_dir {pageitem 1}} {
