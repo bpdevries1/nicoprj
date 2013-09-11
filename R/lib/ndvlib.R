@@ -172,3 +172,33 @@ add.psxtime = function(df, from, to, format="%Y-%m-%d") {
   df[,to] = as.POSIXct(strptime(df[,from], format=format))
   df
 }
+
+df = add.psxtime(db.query(db, query), "ts_cet", "psx_date", format="%Y-%m-%d %H:%M:%S")
+
+# add ts_psx if ts is present as a field in result of query
+# add date_psx if date is present as a field in result of query
+# first try is add fields blindly, possibly with null values
+# second try is to check which fields are available,
+# or add a try-catch.
+db.query.dt = function(db, query) {
+  df = db.query(db, query)
+  if (match("ts", colnames(df)) > 0) {
+    df$ts_psx = as.POSIXct(strptime(df$ts, format="%Y-%m-%d %H:%M:%S"))
+  }
+  if (match("date", colnames(df)) > 0) {
+    df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d"))
+  }
+  df
+}
+
+db.query.dt = function(db, query) {
+  df = db.query(db, query)
+  if ("ts" %in% colnames(df)) {
+    df$ts_psx = as.POSIXct(strptime(df$ts, format="%Y-%m-%d %H:%M:%S"))
+  }
+  if ("date" %in% colnames(df)) {
+    df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d"))
+  }
+  df
+}
+
