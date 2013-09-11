@@ -7,12 +7,18 @@ main = function () {
   # @note maar wel als je RStudio vanuit cygwin bash start, dan is ~ goed gezet.
   # setwd("c:/projecten/Philips/KNDL")
   setwd("c:/projecten/Philips/KN-Analysis")
-  make.graphs("MyPhilips-CN")
-  make.graphs("MyPhilips-DE")
-  make.graphs("MyPhilips-FR")
-  make.graphs("MyPhilips-RU")
-  make.graphs("MyPhilips-UK")
-  make.graphs("MyPhilips-US")
+  
+  dirnames = Sys.glob("*")
+  for (dirname in dirnames) {
+    make.graphs(dirname)
+  }
+  
+#   make.graphs("MyPhilips-CN")
+#   make.graphs("MyPhilips-DE")
+#   make.graphs("MyPhilips-FR")
+#   make.graphs("MyPhilips-RU")
+#   make.graphs("MyPhilips-UK")
+#   make.graphs("MyPhilips-US")
   
   #setwd("c:/projecten/Philips/Dashboards")
   #make.dashboard.graphs()
@@ -20,18 +26,41 @@ main = function () {
 
 main.de = function () {
   load.def.libs()
-  setwd("c:/projecten/Philips/KN-Analysis")
+  # setwd("c:/projecten/Philips/KN-Analysis")
+  setwd("c:/projecten/Philips/KN-AN-MyPhilips-DE")
   make.graphs("MyPhilips-DE")
 }
 
-main.cn = function () {
+main.cnmp = function () {
   load.def.libs()
   setwd("c:/projecten/Philips/KN-Analysis")
   make.graphs("MyPhilips-CN")
 }
 
+main.cn = function () {
+  load.def.libs()
+  setwd("c:/projecten/Philips/KN-Analysis")
+#   make.graphs("CBF-CN-AC4076")
+  scriptname = "CBF-CN-GC670" 
+  make.graphs(scriptname)
+}
+
+graph.sigin = function() {
+  setwd("c:/projecten/Philips/KNDL/MyPhilips-DE")
+  db = db.open("keynotelogs.db")
+  query = "select ts_cet ts, 0.001 * element_delta loadtime
+            from pageitem i join scriptrun r on r.id = i.scriptrun_id
+            where url like '%signin%'
+            and domain like '%janrain%'
+            and ts_cet > '2013-09-09'"  
+  df = add.psxtime(db.query(db, query), "ts_cet", "psx_date", format="%Y-%m-%d %H:%M:%S")
+  df = db.query.dt(db, query)
+  p = qplot(psx_date, loadtime, data=df)
+  ggsave("sigin.png", dpi=100, width = 9, height=7, plot=p)
+}
 
 # scriptname = "MyPhilips-CN"
+# scriptname = "CBF-CN-AC4076"
 make.graphs = function(scriptname="MyPhilips-CN") {
   setwd(scriptname)
   db = db.open("keynotelogs.db")
@@ -90,9 +119,12 @@ graph.mobile.dashboard2 = function(scriptname, db, max.time = 3.5) {
 }
 
 # just report on succeeded scriptruns.
+# @pre checkrun is available, use keynotetools/postproclogs.tcl to create.
 graph.pageload.pages.domains = function(scriptname, db) {
   # first fill tables
-  fill.helper.tables(db, scriptname)
+  
+  # 10-9-2013 those queries now done from Tcl script, along with other queries.
+  # fill.helper.tables(db, scriptname)
   
   # scriptname = "MyPhilips-DE"
   query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, avg(0.001*p.delta_user_msec) pageload
@@ -108,6 +140,13 @@ graph.pageload.pages.domains = function(scriptname, db) {
     labs(title = concat("Average page load time per page and day for: ", scriptname), x="Date", y="Page load time (sec)")
     # geom_line(aes(psx_date, pageload, data=df2))
   ggsave(concat(scriptname, "-pageload.png"), dpi=100, width = 11, height=7, plot=p)
+  
+  # pageload times ook als facet, want varieert nogal wild.
+  p = qplot(psx_date, pageload, data=df, geom="line") +
+    labs(title = concat("Average page load time per page and day for: ", scriptname), x="Date", y="Page load time (sec)") +
+    facet_grid(pagenr ~ ., scales="free_y")
+  # geom_line(aes(psx_date, pageload, data=df2))
+  ggsave(concat(scriptname, "-pageload-fct.png"), dpi=100, width = 11, height=10, plot=p)
   
   # per domain: sum of element load times (not exactly, as things are loaded in parallel, but should give a good indication)
   # cloudfront may prove difficult because of the subdomain, but maybe specific subdomains give problems. So first check.
@@ -125,7 +164,8 @@ graph.pageload.pages.domains = function(scriptname, db) {
   p = qplot(psx_date, loadtime, data=df, geom="line", colour=domain) +
     geom_point(data=df, aes(x=psx_date, y=loadtime, shape=domain)) +
     # scale_shape(solid=FALSE) +
-    scale_shape_manual(values=1:25) +
+    # scale_shape_manual(values=1:30) +
+    scale_shape_manual(values=rep(1:25,2)) +
     labs(title = concat("Average load times per page, domain and day for: ", scriptname), x="Date", y="Avg load time (sec)") +
     facet_grid(pagenr ~ ., scales="free_y")
   ggsave(concat(scriptname, "-pageload-domain-avg.png"), dpi=100, width = 11, height=7, plot=p)
@@ -144,7 +184,7 @@ graph.pageload.pages.domains = function(scriptname, db) {
   p = qplot(psx_date, loadtime, data=df, geom="line", colour=domain) +
     geom_point(data=df, aes(x=psx_date, y=loadtime, shape=domain)) +
     # scale_shape(solid=FALSE) +
-    scale_shape_manual(values=1:25) +
+    scale_shape_manual(values=rep(1:25,2)) +
     labs(title = concat("Sum of item load times per page, domain and day for: ", scriptname), x="Date", y="Sum load time (sec)") +
     facet_grid(pagenr ~ ., scales="free_y")
   ggsave(concat(scriptname, "-pageload-domain-runtotal.png"), dpi=100, width = 11, height=7, plot=p)
@@ -163,7 +203,7 @@ graph.pageload.pages.domains = function(scriptname, db) {
   p = qplot(psx_date, loadtime, data=df, geom="line", colour=extension) +
     geom_point(data=df, aes(x=psx_date, y=loadtime, shape=extension)) +
     # scale_shape(solid=FALSE) +
-    scale_shape_manual(values=1:25) +
+    scale_shape_manual(values=rep(1:25,2)) +
     labs(title = concat("Average load times per page, extension and day for: ", scriptname), x="Date", y="Avg load time (sec)") +
     facet_grid(pagenr ~ ., scales="free_y")
   ggsave(concat(scriptname, "-pageload-extension-avg.png"), dpi=100, width = 11, height=7, plot=p)
@@ -182,7 +222,7 @@ graph.pageload.pages.domains = function(scriptname, db) {
   p = qplot(psx_date, loadtime, data=df, geom="line", colour=extension) +
     geom_point(data=df, aes(x=psx_date, y=loadtime, shape=extension)) +
     # scale_shape(solid=FALSE) +
-    scale_shape_manual(values=1:25) +
+    scale_shape_manual(values=rep(1:25,2)) +
     labs(title = concat("Sum of item load times per page, extension and day for: ", scriptname), x="Date", y="Sum load time (sec)") +
     facet_grid(pagenr ~ ., scales="free_y")
   ggsave(concat(scriptname, "-pageload-extension-runtotal.png"), dpi=100, width = 11, height=7, plot=p)
@@ -204,7 +244,7 @@ graph.pageload.pages.domains = function(scriptname, db) {
   p = qplot(psx_date, loadtime, data=df, geom="line", colour=url) +
     geom_point(data=df, aes(x=psx_date, y=loadtime, shape=url)) +
     # scale_shape(solid=FALSE) +
-    scale_shape_manual(values=1:25) +
+    scale_shape_manual(values=rep(1:25,2)) +
     labs(title = concat("Sum of item load times per page, url and day for: ", scriptname), x="Date", y="Sum load time (sec)") +
     facet_grid(pagenr ~ ., scales="free_y") +
     theme(legend.position="bottom") +
@@ -228,7 +268,7 @@ graph.pageload.pages.domains = function(scriptname, db) {
   p = qplot(psx_date, loadtime, data=df, geom="line", colour=url) +
     geom_point(data=df, aes(x=psx_date, y=loadtime, shape=url)) +
     # scale_shape(solid=FALSE) +
-    scale_shape_manual(values=1:25) +
+    scale_shape_manual(values=rep(1:25,2)) +
     labs(title = concat("Average item load times per page, url and day for: ", scriptname), x="Date", y="Avg load time (sec)") +
     facet_grid(pagenr ~ ., scales="free_y") +
     theme(legend.position="bottom") +
@@ -238,7 +278,7 @@ graph.pageload.pages.domains = function(scriptname, db) {
 
   # #elements and #bytes per page: does this increase?
   # elements
-  query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, avg(1*p.element_count) element_count, avg(1*page_bytes) page_bytes
+  query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, avg(1*p.element_count) element_count, avg(0.001*page_bytes) page_kbytes
            from scriptrun r, checkrun c, page p
            where c.scriptrun_id = r.id
            and c.real_succeed = 1
@@ -251,8 +291,8 @@ graph.pageload.pages.domains = function(scriptname, db) {
   ggsave(concat(scriptname, "-elt-count.png"), dpi=100, width = 11, height=7, plot=p)
   
   # bytes
-  p = qplot(psx_date, page_bytes, data=df, geom="line", colour=pagenr) +
-    labs(title = concat("Average page bytes per page and day for: ", scriptname), x="Date", y="Page bytes")
+  p = qplot(psx_date, page_kbytes, data=df, geom="line", colour=pagenr) +
+    labs(title = concat("Average page kilobytes per page and day for: ", scriptname), x="Date", y="Page kilobytes")
   ggsave(concat(scriptname, "-page-bytes.png"), dpi=100, width = 11, height=7, plot=p)
   
   # bytes for the 2 problematic URL's:
@@ -273,7 +313,7 @@ graph.pageload.pages.domains = function(scriptname, db) {
   p = qplot(psx_date, content_bytes, data=df, geom="line", colour=url) +
     geom_point(data=df, aes(x=psx_date, y=content_bytes, shape=url)) +
     # scale_shape(solid=FALSE) +
-    scale_shape_manual(values=1:25) +
+    scale_shape_manual(values=rep(1:25,2)) +
     labs(title = concat("Average content bytes per page, url and day for: ", scriptname), x="Date", y="Avg content bytes") +
     facet_grid(pagenr ~ ., scales="free_y") +
     theme(legend.position="bottom") +
@@ -284,7 +324,7 @@ graph.pageload.pages.domains = function(scriptname, db) {
   
 }
 
-fill.helper.tables = function(db, scriptname="MyPhilips-DE") {
+fill.helper.tables.old = function(db, scriptname="MyPhilips-DE") {
   dbSendQuery(db, "drop table if exists runcount")
   dbSendQuery(db, "create table runcount as
     select strftime('%Y-%m-%d', r.ts_cet) date, count(*) number
@@ -306,7 +346,7 @@ fill.helper.tables = function(db, scriptname="MyPhilips-DE") {
   
   # instr is not included in R SQLite lib, so exec (in Tcl from cmdline)
   # after updating from 0.11.2->0.11.4 (6-9-2013) instr is available!
-  print("Shell exec not working yet, run Tcl script before: c:/nico/nicoprj/R/keynote/fill_url.tcl")
+  # print("Shell exec not working yet, run Tcl script before: c:/nico/nicoprj/R/keynote/fill_url.tcl")
   # shell(concat("tclsh c:/nico/nicoprj/R/keynote/fill_url.tcl c:/projecten/Philips/KN-Analysis/", scriptname, "/keynotelogs.db"), translate=TRUE)
   # shell.exec, system, shell commands.
   
@@ -318,10 +358,10 @@ fill.helper.tables = function(db, scriptname="MyPhilips-DE") {
   #> shell(paste(tclscr, 1, 2, 3), tclsh, flag=NULL)
   #Testing calling tcl from R. args=1 2 3
   
-  #dbSendQuery(db, "update pageitem
-  #                  set scontent_type = substr(url, 1, instr(url, '?'))
-  #                 where url like '%?%'
-  #                  and scontent_type is null")
+  dbSendQuery(db, "update pageitem
+                    set scontent_type = substr(url, 1, instr(url, '?'))
+                    where url like '%?%'
+                    and scontent_type is null")
   
   dbSendQuery(db, "insert into maxitem (url, page_seq, loadtime)
                     select i.scontent_type, p.page_seq, avg(0.001*i.element_delta) loadtime
