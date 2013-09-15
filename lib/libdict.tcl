@@ -56,6 +56,24 @@ proc dict_get {dct key {default {}}} {
   }
 }
 
+# dict lappend does not really work as I want, like dict set, with possibility to give >1 key. So this.
+# @pre dict exists.
+proc dict_lappend {args} {
+  set dct_name [lindex $args 0]
+  set keys [lrange $args 1 end-1]
+  set val [lindex $args end]
+  upvar $dct_name dct
+  # breakpoint
+  if {[dict exists $dct {*}$keys]} {
+    set curval [dict get $dct {*}$keys] 
+  } else {
+    set curval {}
+  }
+  lappend curval $val
+  dict set dct {*}$keys $curval
+  return $dct
+}
+
 # experimental: creating :accessor procs for dicts on the fly using unknown statement
 # possible alternative is to create these accessors explicity.
 # eg dict_make_accessors :bla :att {:lb lb}
