@@ -1,5 +1,7 @@
 #!/usr/bin/env tclsh86
 
+# @todo use libpostproclogs.tcl library, create/fill checkrun table.
+
 package require tdbc::sqlite3
 package require Tclx
 package require ndv

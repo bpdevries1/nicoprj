@@ -45,12 +45,13 @@ proc make_indexes {db} {
 
 # @todo make more generic when eg CN needs to be checked.
 proc make_run_check {db srcdir max_urls} {
-  make_run_check_generic $db $srcdir $max_urls
   if {[regexp -nocase {myphilips} $srcdir]} {
     make_run_check_myphilips $db
   } else {
     make_run_check_dealer_locator $db
   }
+  # make_run_check_generic uses checkrun table, which is created by make_run_check_myphilips 
+  make_run_check_generic $db $srcdir $max_urls 
 }
 
 proc make_run_check_generic {db srcdir max_urls} {
