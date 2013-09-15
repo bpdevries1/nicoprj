@@ -24,6 +24,7 @@ test fc-3 {fc} {from_cygwin "c:/"} "c:/"
 test fc-1 {fc} {from_cygwin [from_cygwin "/cygdrive/c/aaa"]} "c:/aaa"
 
 ## test if back and forth return orig.
+## tests don't have to have unique names, see below.
 test bf {bf} {to_cygwin [from_cygwin "/cygdrive/c/aaa"]} "/cygdrive/c/aaa"
 test bf {bf} {from_cygwin [to_cygwin "c:/aaa"]} "c:/aaa"
 
