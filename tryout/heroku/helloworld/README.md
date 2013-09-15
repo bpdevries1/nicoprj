@@ -76,6 +76,7 @@ which can be very useful for debugging or inspecting live data.
 
 ## Notes NdV
 * Procfile contains 'line ...', not 'java ...' as in docs. Leave as-is, see if this also works.
+* lein run -m helloworld.web 5000
 
 ## License
 
