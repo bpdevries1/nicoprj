@@ -128,6 +128,20 @@ proc assert {expr {message ""}} {
   }
 }
 
+# getoptions wrapper: exit when options are not ok, don't print stacktrace.
+proc getoptions {argv_name options usage} {
+  upvar $argv_name argv
+  try_eval {
+    set dargv [::cmdline::getoptions argv $options $usage]
+    # werkt dit, met argv als in-out param?
+    # set dargv [::cmdline::getoptions {*}$args]
+  } {
+    # if getoptions gives error, don't print stacktrace, just exit.
+    puts stderr $errorResult
+    exit 
+  }
+}
+
 #############################################
 # XML related, maybe put in separate file   #
 #############################################
