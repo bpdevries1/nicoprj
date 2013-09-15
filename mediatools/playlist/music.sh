@@ -4,8 +4,11 @@
 cd /home/nico/nicoprj/mediatools/playlist
 source ../lib/setenv-media.sh
 
+# 13-9-2013 kan zijn dat tcl script foutgaat en dat music-r dus niet wordt aangepast. Wil niet dat oude playlist dan wordt gekozen.
+rm "$MEDIA_PLAYLISTS/music-r.m3u"
 # met $* worden params doorgegeven aan tcl script.
-tclsh maak_album_playlist.tcl -pl "$MEDIA_PLAYLISTS/music-r.m3u" $* 
+# tclsh maak_album_playlist.tcl -pl "$MEDIA_PLAYLISTS/music-r.m3u" $*
+./maak_album_playlist.tcl -pl "$MEDIA_PLAYLISTS/music-r.m3u" $*
 amarok "$MEDIA_PLAYLISTS/music-r.m3u" &
 DATETIME=`date +%Y-%m-%d-%H-%M-%S`
 # 31-1-2010 voorlopig ook nog even kopietje maken, kan geen kwaad.
