@@ -47,6 +47,16 @@ namespace eval ::ndv {
         set auto_flush 0
     }
 
+    # idee: algemene get/set methods:
+    # of zijn deze sort-of std al aanwezig in OO-systeem?
+    public method set {var value} {
+      set $var $value
+    }
+    
+    public method get {var} {
+      return $var
+    }
+    
     public method set_channel {a_channel} {
         set channel $a_channel
     }
