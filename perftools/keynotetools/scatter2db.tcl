@@ -23,11 +23,13 @@ proc main {argv} {
     {dropdb "Drop the (old) database first"}
     {nopost "Do not post process the data (Only for Mobile now)"}
     {nomain "Do not put data in a main db"}
+    {moveread "Move read files to subdirectory 'read'"}
     {continuous "Keep running this script, to automatically put new items downloaded in DB's"}
     {debug "Run in debug mode, stop when an error occurs"}
   }
   set usage ": [file tail [info script]] \[options] :"
-  set dargv [::cmdline::getoptions argv $options $usage]
+  # set dargv [::cmdline::getoptions argv $options $usage]
+  set dargv [getoptions argv $options $usage]
 
   if {[:dropdb $dargv] && [:continuous $dargv]} {
     log error "Both dropdb and continuous are set, this does not make sense: exiting"
@@ -292,6 +294,17 @@ proc read_json_file {db dbmain filename root_dir} {
   read_json_file_db $db $filename $root_dir 1
   if {$dbmain != ""} {
     read_json_file_db $dbmain $filename $root_dir 0
+  }
+  move_read $filename
+}
+
+proc move_read {filename} {
+  global dargv 
+  if {[:moveread $dargv]} {
+    set to_dir [file join [file dirname $filename] read]
+    log debug "Move $filename => $to_dir"
+    file mkdir $to_dir
+    file rename $filename $to_dir
   }
 }
 

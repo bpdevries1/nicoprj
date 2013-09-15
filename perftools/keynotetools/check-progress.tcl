@@ -92,7 +92,8 @@ proc check_progress_subdir {dct_argv subdir nexpected} {
   set checkdate [expr [clock seconds] - (6*7*24*3600)]
   set nfound 0
   #log debug "start glob"
-  set lst [glob -nocomplain -tails -directory $subdir *.json]
+  # 15-9-2013 Also check contents of 'read' subdir.
+  set lst [concat [glob -nocomplain -tails -directory $subdir *.json] [glob -nocomplain -tails -directory [file join $subdir read] *.json]]
   #log debug "end glob, now loop list"
   foreach filename $lst {
     #if {[file mtime $filename] >= $checkdate} {

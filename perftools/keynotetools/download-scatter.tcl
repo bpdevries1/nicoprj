@@ -9,6 +9,11 @@ $log set_file "[file tail [info script]].log"
 # @todo eg Mobile-Android: new script, so no data before certain date, continuously we get zero result. In this case, should stop downloading
 # this data. How to determine?
 
+# @todo use stdlib to determine status of each file?
+# 15-9-2013 added 'read' subdir to move files to after scatter2db has read them. Needed to change download and check-progress as well.
+# can imagine using eg one subdir per month, because number of file in each dir grows. One month is about 30*24=720 files, that's ok.
+# noticed that scatter2db was never finished, so possibly checking if a file has been read takes quite some time.
+
 proc main {argv} {
   # global nerrors
   
@@ -116,6 +121,7 @@ proc make_subdirs {root_dir dct_config} {
 
 proc download_keynote {root_dir el_config sec_ts api_key format } {
   set filename [det_filename $root_dir $el_config $sec_ts $format]
+  set filename_read [file join [file dirname $filename] read [file tail $filename]] 
   # use tempname to download to, then in one 'atomic' action rename to the right name, 
   # so a possibly running scatter2db.tcl does not interfere.
   set tempfilename "$filename.temp[expr rand()]"  
@@ -124,6 +130,11 @@ proc download_keynote {root_dir el_config sec_ts api_key format } {
     # log info "Already have $filename, continuing" ; # or stopping?
     return
   }
+  # 15-9-2013 Filename can also exist in the 'read' subdirectory.
+  if {[file exists $filename_read]} {
+    return
+  }
+
   lassign [det_slots_pages $el_config] slotidlist transpagelist
   
   log info "Download Keynote data for [clock format $sec_ts] => $filename"
