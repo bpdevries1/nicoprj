@@ -55,8 +55,8 @@ graph.sigin = function() {
             and ts_cet > '2013-09-09'"  
   df = add.psxtime(db.query(db, query), "ts_cet", "psx_date", format="%Y-%m-%d %H:%M:%S")
   df = db.query.dt(db, query)
-  p = qplot(psx_date, loadtime, data=df)
-  ggsave("sigin.png", dpi=100, width = 9, height=7, plot=p)
+  p = qplot(ts_psx, loadtime, data=df)
+  ggsave("signin.png", dpi=100, width = 9, height=7, plot=p)
 }
 
 # scriptname = "MyPhilips-CN"
