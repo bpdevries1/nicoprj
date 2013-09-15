@@ -1,4 +1,6 @@
-#!/home/nico/bin/tclsh
+#!/usr/bin/env tclsh
+
+# #!/home/nico/bin/tclsh
 
 package require ndv
 package require Tclx
@@ -47,7 +49,15 @@ proc main {argc argv} {
 
 proc create_random_view {} {
   global log db conn 
-  catch {::mysql::exec $conn "drop view if exists albums"}
+  # catch {::mysql::exec $conn "drop view if exists albums"}
+  log debug "Dropping view albums"
+  try_eval {
+    ::mysql::exec $conn "drop view if exists albums"
+  } {
+    log_error "drop view albums failed" 
+  }
+  log debug "Dropped view albums"
+  # breakpoint
   set query "create view albums (id, path, freq, freq_history, play_count) as
              select g.id, a.path, g.freq, g.freq_history, g.play_count
              from generic g, album a, member mem, mgroup mg
@@ -55,7 +65,14 @@ proc create_random_view {} {
              and mem.generic = g.id
              and mem.mgroup = mg.id
              and mg.name = 'Albums'"
-  ::mysql::exec $conn $query
+  try_eval {
+    ::mysql::exec $conn $query
+  } {
+    log_error "create view albums failed"
+    log warn "Possibly the MySQL databases cannot be accessed"
+    log warn "Restarting the system might help (as it did on 13-9-2013)"
+    exit
+  }
 }
 
 # @param lst: list of tuples/lists: [id path random]
