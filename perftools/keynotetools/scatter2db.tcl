@@ -20,6 +20,7 @@ proc main {argv} {
   log debug "argv: $argv"
   set options {
     {dir.arg "c:/projecten/Philips/KNDL" "Directory where downloaded keynote files are (in subdirs) and where DB's (in subdirs) will be created."}
+    {justdir "Just read this directory, not subdirectories. If this is set, dir should not contain subdirs besides 'read'"}
     {dropdb "Drop the (old) database first"}
     {nopost "Do not post process the data (Only for Mobile now)"}
     {nomain "Do not put data in a main db"}
@@ -93,17 +94,26 @@ proc scatter2db_main {dargv} {
     }
     $dbmain prepare_insert_statements
   }  
-  # @todo create a main db with all info, but possible without page items
-  foreach subdir [lsort [glob -nocomplain -directory $root_dir -type d *]] {
-    if {[ignore_subdir $subdir]} {
-      log info "Ignore subdir: $subdir (for test!)"
-    } else {
-      set res [scatter2db_subdir $dargv $subdir $dbmain]
+  
+  if {[:justdir $dargv]} {
+    # 6-9-2013 also handle current-dir, if script is called with one subdir as param
+    # 16-9-2013 not correct, this would create huge keynotelogs.db file in the root when called normally.
+    # so use cmdline param if we want this.
+    # wel checken dat deze dir geen subdirs heeft (of alleen een 'read' subdir)
+    if {[llength [glob -nocomplain -directory $root_dir -type d *]] > 1} {
+      log error "Cannot use -justdir when dir has subdirs, exiting.."
+      exit 1
+    }
+    set res [scatter2db_subdir $dargv $root_dir $dbmain]
+  } else {
+    foreach subdir [lsort [glob -nocomplain -directory $root_dir -type d *]] {
+      if {[ignore_subdir $subdir]} {
+        log info "Ignore subdir: $subdir (for test!)"
+      } else {
+        set res [scatter2db_subdir $dargv $subdir $dbmain]
+      }
     }
   }
-  
-  # 6-9-2013 also handle current-dir, if script is called with one subdir as param
-  set res [scatter2db_subdir $dargv $root_dir $dbmain]
   
   return $res
 }
@@ -291,6 +301,18 @@ proc warn_error {proc_name args} {
 }
 
 proc read_json_file {db dbmain filename root_dir} {
+  if {[file tail [file dirname $filename]] == "read"} {
+    # log info "ALready read with check on dirname/tail"
+    # breakpoint
+    # already in 'read' subdir, don't read again.
+    return 
+  }
+  if {[regexp {/read/} $filename]} {
+    log info "Already read with check on regexp (should not happen)"
+    breakpoint
+    # already in 'read' subdir, don't read again.
+    return 
+  }
   read_json_file_db $db $filename $root_dir 1
   if {$dbmain != ""} {
     read_json_file_db $dbmain $filename $root_dir 0
@@ -301,10 +323,15 @@ proc read_json_file {db dbmain filename root_dir} {
 proc move_read {filename} {
   global dargv 
   if {[:moveread $dargv]} {
-    set to_dir [file join [file dirname $filename] read]
-    log debug "Move $filename => $to_dir"
-    file mkdir $to_dir
-    file rename $filename $to_dir
+    set to_file [file join [file dirname $filename] read [file tail $filename]]
+    log debug "Move $filename => $to_file"
+    file mkdir [file dirname $to_file]
+    if {[file exists $to_file]} {
+      log warn "Target file already exists, should not happen (anymore), deleting duplicate"
+      file delete $filename
+    } else {
+      file rename $filename $to_file
+    }
   }
 }
 
