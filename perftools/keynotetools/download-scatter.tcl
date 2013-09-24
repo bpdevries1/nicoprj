@@ -14,6 +14,8 @@ $log set_file "[file tail [info script]].log"
 # can imagine using eg one subdir per month, because number of file in each dir grows. One month is about 30*24=720 files, that's ok.
 # noticed that scatter2db was never finished, so possibly checking if a file has been read takes quite some time.
 
+# @todo handle: Request blocked. Exceeded 60 requests/minute limit.
+
 proc main {argv} {
   # global nerrors
   
@@ -106,6 +108,9 @@ proc download_keynote_main {dargv} {
       if {$res == "quota"} {
         log warn "Quota has been used completely, wait until next hour"
         return $res
+      } elseif {$res == "limit"} {
+        log warn "Limit of 60 reqs/minute is exceeded, wait one minute now."
+        after 60000
       }
     }
     set sec_ts [expr $sec_ts - 3600] 
@@ -198,6 +203,11 @@ proc check_errors {filename} {
         log warn "Quota have been used"
         file rename -force $filename "$filename.quota[expr rand()]"
         set res "quota"
+      } elseif {[regexp {Request blocked} $text]} {
+        # Request blocked. Exceeded 60 requests/minute limit.    
+        log warn "Request blocked. Exceeded 60 requests/minute limit."
+        file rename -force $filename "$filename.limit[expr rand()]"
+        set res "limit"
       } elseif {[regexp {^[\[\],]+$} $text]} {
         log info "Empty contents, but this can happen, is ok"
         set res "ok"
