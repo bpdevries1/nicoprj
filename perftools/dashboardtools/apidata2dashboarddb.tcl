@@ -1,6 +1,8 @@
 #!/usr/bin/env tclsh86
 
-# @todo use libpostproclogs.tcl library, create/fill checkrun table.
+# @note NOT use libpostproclogs.tcl library, separate scripts now.
+# @note this one just copies/aggregates the already post-processed origin data
+#       to a single DB.
 
 package require tdbc::sqlite3
 package require Tclx
@@ -16,19 +18,21 @@ proc main {argv} {
   set options {
     {dir.arg "c:/projecten/Philips/Dashboards" "Directory where target DB is (dashboards.db)"}
     {srcdir.arg "c:/projecten/Philips/KN-analysis" "Source dir with Keynote API databases (keynotelogs.db)"}
-    {srcpattern.arg "MyPhilips*" "Pattern for subdirs in srcdir to use"}
+    {srcpattern.arg "*" "Pattern for subdirs in srcdir to use"}
     {debug "Run in debug mode, stop when an error occurs"}
   }
   set usage ": [file tail [info script]] \[options] :"
-  set dargv [::cmdline::getoptions argv $options $usage]   
-  set dir [:dir $dargv]
+  # set dargv [::cmdline::getoptions argv $options $usage]
+  set dargv [getoptions argv $options $usage]
+  set dir [from_cygwin [:dir $dargv]]
   file mkdir $dir
   set db_name [file join $dir "dashboards.db"]
   set existing_db [file exists $db_name]
   set db [dbwrapper new $db_name]
   prepare_db $db $existing_db
-  handle_srcdirroot $db [:srcdir $dargv] [:srcpattern $dargv]
+  handle_srcdirroot $db [from_cygwin [:srcdir $dargv]] [:srcpattern $dargv]
   $db close
+  log info "Finished updating: $db_name"
 }
 
 proc prepare_db {db existing_db} {
@@ -64,48 +68,37 @@ proc handle_srcdir {db dir} {
   log info "handle_srcdir: $dir"
   set srcdbname [file join $dir "keynotelogs.db"]
   
-  # first update task_succeed field
   set srcdb [dbwrapper new $srcdbname]
   lassign [det_script_country_npages $dir $srcdb] script country npages
   if {$script == "<none>"} {
     log warn "Could not determine script and country from $dir, ignore this dir and continue"
     return
   }
-  
-  make_indexes $srcdb
-  $srcdb exec "update scriptrun
-                set task_succeed = 0
-                where task_succeed = '<none>'
-                and id in (
-                  select scriptrun_id
-                  from page p
-                  where p.error_code <> ''
-                )"
-  $srcdb exec "update scriptrun
-                set task_succeed = 1
-                where task_succeed = '<none>'"
-                
-  make_run_check $srcdb $dir                
-
-  make_ip_locations $srcdb
-
-  
-  
+  set checkrun_fields [det_checkrun_fields $srcdb]
   $srcdb close
 
-  # then 'copy' data from srcdb to targetdb, ignore the last date, as it is probably not complete yet.
   $db exec "attach database '$srcdbname' as fromDB"
+
+  fill_checkrun_counts $db $script $checkrun_fields
+  log start_stop fill_error_status_counts $db $script
+  log start_stop fill_error404_status_counts $db $script
+  fill_stat_from_src $db $dir $srcdbname $script $country $npages
+  
+  $db exec "detach fromDB"
+  
+  log info "handle_srcdir finished: $dir"
+}
+
+proc fill_stat_from_src {db dir srcdbname script country npages} {
+  
+  # 'copy' data from srcdb to targetdb, ignore the last date, as it is probably not complete yet.
+  
   $db exec "insert into stat (source, date, scriptname, country, totalpageavg, respavail, value, nmeas)
             select 'API', strftime('%Y-%m-%d', r.ts_cet) date, '$script', '$country', 'pageavg', 'avail', 1.0 * sum(task_succeed)/(count(*)) avail, count(*) nmeas
             from fromDB.scriptrun r
             where r.ts_cet < (select strftime('%Y-%m-%d', max(r1.ts_cet)) from scriptrun r1)
             group by 2"
-  # $db exec "insert into stat (source, date, scriptname, country, totalpageavg, respavail, value)
-  #           select 'API', strftime('%Y-%m-%d', r.ts_cet) date, '$script', '$country', 'pageavg', 'resp', 0.001 * avg(r.delta_msec)/$npages resp
-  #           from fromDB.scriptrun r
-  #           where task_succeed = 1
-  #           and r.ts_cet < (select strftime('%Y-%m-%d', max(r1.ts_cet)) from scriptrun r1)
-  #           group by 2"
+
   $db exec "insert into stat (source, date, scriptname, country, totalpageavg, respavail, value, nmeas)
             select 'API', strftime('%Y-%m-%d', r.ts_cet) date, '$script', '$country', 'pageavg', 'resp', 0.001 * avg(r.delta_user_msec)/$npages resp, count(*) nmeas
             from fromDB.scriptrun r
@@ -129,114 +122,93 @@ proc handle_srcdir {db dir} {
             and c.real_succeed = 1
             and r.ts_cet < (select strftime('%Y-%m-%d', max(r1.ts_cet)) from scriptrun r1)
             group by 2"
-
-  $db exec "detach fromDB"
   
-  log info "handle_srcdir finished: $dir"
 }
 
-proc make_indexes {db} {
+proc det_checkrun_fields {srcdb} {
+  [$srcdb get_conn] columns checkrun 
+}
+
+# copied from libfp.tcl, not included in ndv.tcl yet.
+proc str {args} {
+  join $args ""
+}
+
+# @todo should use filter here, but not yet easy to use in libfp, this is another testcase.
+proc det_fields {checkrun_fields} {
+  set res {}
+  foreach field [dict keys $checkrun_fields] {
+    if {[regexp {succeed$} $field]} {
+      lappend res $field 
+    } elseif {[regexp {^has_} $field]} {
+      lappend res $field 
+    }
+  }
+  return $res
+}
+
+proc fill_checkrun_counts {db script checkrun_fields} {
+  # det if checkrun_count already exists. If not, get fieldnames from src, and make a table with more-or-less those fields. 
+  set fields [det_fields $checkrun_fields]
+  set field_defs [lmap el $fields {str $el " integer"}]
+  if {[[$db get_conn] tables checkrun_count] == {}} {
+    $db exec "create table checkrun_count (runcount, scriptname, [join $field_defs ", "])" 
+  }
+  $db exec "delete from checkrun_count where scriptname = '$script'"
+  set query "insert into checkrun_count
+             select count(*), '$script', [join $fields ", "]
+             from fromDB.checkrun
+             group by [join [range 2 [expr [llength $fields] + 3]] ", "]" 
+  # log debug $query
+  $db exec $query
+  # breakpoint
+}
+
+proc fill_error_status_counts {db script} {
+  set fields {topdomain error_code status_code}
+  set i_fields [lmap el $fields {str "i.$el"}]
+  set tablename "error_status_count"
+  create_count_table $db $tablename $fields ; # no integer fields here, so fields=field_defs
+  $db exec "delete from $tablename where scriptname = '$script'"
+  set query "insert into $tablename
+             select count(*), min(r.ts_cet), max(r.ts_cet), '$script', [join $i_fields ", "]
+             from fromDB.pageitem i join scriptrun r on r.id = i.scriptrun_id
+             group by [join [range 4 [expr [llength $fields] + 5]] ", "]" 
+  # log debug $query
+  $db exec $query
+}
+
+# @todo tabel die 404 (en andere?) results opslaat. Ook eerste en laatste datum dat het voorkomt.
+# met urlnoparams hier.
+proc fill_error404_status_counts {db script} {
+  set fields {topdomain urlnoparams error_code status_code}
+  set i_fields [lmap el $fields {str "i.$el"}]
+  set tablename "error404_status_count"
+  create_count_table $db $tablename $fields ; # no integer fields here, so fields=field_defs
+  $db exec "delete from $tablename where scriptname = '$script'"
+  set query "insert into $tablename
+             select count(*), min(r.ts_cet), max(r.ts_cet), '$script', [join $i_fields ", "]
+             from fromDB.pageitem i join scriptrun r on r.id = i.scriptrun_id
+             where i.error_code = '404'
+             group by [join [range 4 [expr [llength $fields] + 5]] ", "]" 
+  # log debug $query
+  $db exec $query
+}
+
+
+proc create_count_table {db tablename field_defs} {
+  if {[[$db get_conn] tables $tablename] == {}} {
+    $db exec "create table $tablename (statcount integer, first_ts, last_ts, scriptname, [join $field_defs ", "])" 
+  }
+}
+
+proc make_indexes_old {db} {
   $db exec_try "create index ix_page_1 on page (scriptrun_id)"
   $db exec_try "create index ix_pageitem_1 on pageitem (scriptrun_id)"
   $db exec_try "create index ix_pageitem_2 on pageitem (page_id)"
 }
 
-# @todo make more generic when eg CN needs to be checked.
-proc make_run_check {db srcdir} {
-  if {[regexp -nocase {myphilips} $srcdir]} {
-    make_run_check_myphilips $db
-  } else {
-    make_run_check_dealer_locator $db
-  }
-}
-
-proc make_run_check_myphilips {db} {
-  $db exec_try "drop table checkrun"
-  $db exec "create table checkrun (scriptrun_id integer, ts_cet, task_succeed integer, real_succeed integer, has_home_jsp integer, has_error_code integer, has_prodreg integer)"
-  $db exec "create index ix_checkrun_1 on checkrun (scriptrun_id)"
-  # first insert all scriptruns
-  $db exec "insert into checkrun (scriptrun_id, ts_cet, task_succeed, real_succeed, has_home_jsp, has_error_code, has_prodreg)
-            select id, ts_cet, task_succeed, 0, 0, 0, 0
-            from scriptrun"
-  # then update each item: update where id in () seems the quickest.
-  $db exec "update checkrun set has_home_jsp = 1 where scriptrun_id in (
-              select distinct p.scriptrun_id
-              from page p, pageitem i
-              where p.id = i.page_id
-              and 1*p.page_seq = 2
-              and i.url like '%home.jsp%'
-              and i.domain != 'philips.112.2o7.net'
-            )"
-  # error 4006 is not serious and happens quite a lot: Cannot set WinInet status callback for synchronous sessions. Support for Java Applets download measurements
-  $db exec "update checkrun set has_error_code = 1 where scriptrun_id in (
-              select distinct i.scriptrun_id
-              from pageitem i
-              where i.domain != 'philips.112.2o7.net' 
-              and i.error_code <> ''
-              and i.error_code <> '4006'
-            )"
-  $db exec "update checkrun set has_prodreg = 1 where scriptrun_id in (
-              select distinct i.scriptrun_id
-              from pageitem i
-              where i.url like '%prodreg%'
-              and i.domain like 'secure.philips%'
-            )"
-  $db exec "update checkrun set real_succeed = 1 where task_succeed = 1 and has_home_jsp = 1 and has_error_code = 0 and has_prodreg = 0"
-}
-
-# @todo find generic stuff between this proc and make_run_check_myphilips => put in generic proc
-proc make_run_check_dealer_locator {db} {
-  $db exec_try "drop table checkrun"
-  $db exec "create table checkrun (scriptrun_id integer, ts_cet, task_succeed integer, real_succeed integer, has_wrb_jsp, has_results_jsp, has_error_jsp, has_a_png integer, has_error_code integer)"
-  $db exec "create index ix_checkrun_1 on checkrun (scriptrun_id)"
-  # first insert all scriptruns
-  $db exec "insert into checkrun (scriptrun_id, ts_cet, task_succeed, real_succeed, has_wrb_jsp, has_results_jsp, has_error_jsp, has_a_png, has_error_code)
-            select id, ts_cet, task_succeed, 0, 0, 0, 0, 0, 0
-            from scriptrun"
-  # then update each item: update where id in () seems the quickest.
-  # check for the existence of the three jsp pages.
-  
-  $db exec "update checkrun set has_wrb_jsp = 1 where scriptrun_id in (
-              select distinct i.scriptrun_id
-              from pageitem i
-              where i.url like '%/wrb_retail_store_locator_results.jsp%'
-            )"
-  $db exec "update checkrun set has_results_jsp = 1 where scriptrun_id in (
-              select distinct i.scriptrun_id
-              from pageitem i
-              where i.url like '%/retail_store_locator_results.jsp%'
-            )"
-  $db exec "update checkrun set has_error_jsp = 1 where scriptrun_id in (
-              select distinct i.scriptrun_id
-              from pageitem i
-              where i.url like '%/retail_store_locator.jsp%'
-            )"
-  
-  $db exec "update checkrun set has_a_png = 1 where scriptrun_id in (
-              select distinct i.scriptrun_id
-              from pageitem i
-              where i.url like '%/A.png%'
-            )"
-  # error 4006 is not serious and happens quite a lot: Cannot set WinInet status callback for synchronous sessions. Support for Java Applets download measurements
-  # more domains are excluded, ip address is set to 0.0.0.0 or NA.
-  # @todo check if runs do have an A.png, but also errors, and marked (real_succeed) as not successful.
-  $db exec "update checkrun set has_error_code = 1 where scriptrun_id in (
-              select distinct i.scriptrun_id
-              from pageitem i
-              where i.domain != 'philips.112.2o7.net' 
-              and i.error_code <> ''
-              and i.error_code <> '4006'
-              and i.ip_address != '0.0.0.0'
-              and i.ip_address != 'NA'
-            )"
-  # $db exec "update checkrun set real_succeed = 1 where task_succeed = 1 and has_a_png = 1 and has_error_code = 0"
-  # 28-8-2013 for now, just check for existence of A.png, don't look at other errors, that may or may not be blocking/real errors.
-  # 28-8-2013 the existence of A.png should correlate 100% with the existence of /retail_store_locator_results.jsp and 0% with retail_store_locator.jsp.
-  # @todo do some manual checks for this.
-  $db exec "update checkrun set real_succeed = 1 where task_succeed = 1 and has_a_png = 1"
-}
-
-proc make_ip_locations {db} {
+proc make_ip_locations_old {db} {
   # ipad: IP Addresses
   $db exec_try "create table ipad as
                 select count(*) number, domain, ip_address
@@ -246,7 +218,7 @@ proc make_ip_locations {db} {
 }
 
 # @todo npages bepalen voor andere typen scripts. Mss kan die voor Dealer locator wel generiek gebruikt worden.
-# @todo check if npages is fixed for a script: are there successful runs with a different number of pages?
+# @todo check if npages is fixed for a script: are there successful runs with a different number of pages? Cause may be a changed script.
 proc det_script_country_npages {dir db} {
   if {[regexp -nocase {myphilips} $dir]} {
     if {[regexp {^([^\-_]+)[\-_]([^\-_]+)$} [file tail $dir] z script country]} {
@@ -266,13 +238,28 @@ proc det_script_country_npages {dir db} {
   }
 }
 
-# old
-proc is_read_old {db filename} {
-  if {[llength [db_query [$db get_conn] "select id from logfile where path='$filename'"]] > 0} {
-    return 1 
-  } else {
-    return 0 
+#######################
+# libfp functions
+#######################
+
+# lib function, could also use struct::list repeat
+proc repeat {n x} {
+  set res {}
+  for {set i 0} {$i < $n} {incr i} {
+    lappend res $x 
   }
+  return $res
+}
+
+# Returns a list of nums from start (inclusive) to end
+# (exclusive), by step, where step defaults to 1
+# also copied from clojure def.
+proc range {start end {step 1}} {
+  set res {}
+  for {set i $start} {$i < $end} {incr i $step} {
+    lappend res $i 
+  }
+  return $res
 }
 
 main $argv
