@@ -13,6 +13,25 @@ proc post_proc_srcdir {dir max_urls} {
   
   # first update task_succeed field
   set srcdb [dbwrapper new $srcdbname]
+  
+  add_fields $srcdb
+  add_topdomain $srcdb
+  
+  # for test:
+  if {0} {
+    $srcdb close
+    log info "Added topdomain for $dir"
+    exit
+  }
+  
+  # for testing function def.
+  if {0} {
+    # set conn [$srcdb get_conn]
+    set handle [$srcdb get_db_handle]
+    $handle function lengte lengte  
+    $srcdb query "select url, lengte(url) from pageitem limit 10"
+  }
+   
   lassign [det_script_country_npages $dir $srcdb] script country npages
   if {$script == "<none>"} {
     log warn "Could not determine script and country from $dir, ignore this dir and continue"
@@ -35,6 +54,10 @@ proc post_proc_srcdir {dir max_urls} {
   make_run_check $srcdb $dir $max_urls                
 
   $srcdb close  
+}
+
+proc lengte {str} {
+  string length $str 
 }
 
 proc make_indexes {db} {
@@ -66,30 +89,30 @@ proc make_run_check_generic {db srcdir max_urls} {
 
   # first set all non-dynamic items, so no need to check/calc afterwards.                  
   $db exec "update pageitem
-            set scontent_type = url
+            set urlnoparams = url
             where not (url like '%?%' or url like '%;%')
-            and scontent_type is null"
+            and urlnoparams is null"
   
   # min works ok, but instr returns 0 when not found, and then min would be 0 as well: not good.
   # so first check only ?, then only ;, then both
   $db exec "update pageitem
-            set scontent_type = substr(url, 1, instr(url, '?'))
+            set urlnoparams = substr(url, 1, instr(url, '?'))
             where url like '%?%'
             and not url like '%;%'
-            and scontent_type is null"
+            and urlnoparams is null"
 
   $db exec "update pageitem
-            set scontent_type = substr(url, 1, instr(url, ';'))
+            set urlnoparams = substr(url, 1, instr(url, ';'))
             where url like '%;%'
             and not url like '%?%'
-            and scontent_type is null"
+            and urlnoparams is null"
 
   # both, use min.
   $db exec "update pageitem
-            set scontent_type = substr(url, 1, min(instr(url, ';'), instr(url, '?')))
+            set urlnoparams = substr(url, 1, min(instr(url, ';'), instr(url, '?')))
             where url like '%;%'
             and url like '%?%'
-            and scontent_type is null"
+            and urlnoparams is null"
 
   # helpers to show top 20 URL's (page items)
   $db exec "drop table if exists maxitem"
@@ -100,7 +123,7 @@ proc make_run_check_generic {db srcdir max_urls} {
   set last_week [det_last_week $db]
   # and r.ts_cet > '2013-08-26'
   $db exec "insert into maxitem (url, page_seq, loadtime)
-            select i.scontent_type, p.page_seq, avg(0.001*i.element_delta) loadtime
+            select i.urlnoparams, p.page_seq, avg(0.001*i.element_delta) loadtime
             from scriptrun r, page p, pageitem i, checkrun c
             where c.scriptrun_id = r.id
             and p.scriptrun_id = r.id
@@ -152,15 +175,93 @@ proc make_run_check_myphilips {db} {
   $db exec "update checkrun set real_succeed = 1 where task_succeed = 1 and has_home_jsp = 1 and has_error_code = 0 and has_prodreg = 0"
 }
 
+proc has_db {el} {
+  return "has_$el" 
+}
+
+proc has_dbdef {el} {
+  return "has_$el integer" 
+}
+
 # @todo find generic stuff between this proc and make_run_check_myphilips => put in generic proc
 proc make_run_check_dealer_locator {db} {
   $db exec_try "drop table checkrun"
-  $db exec "create table checkrun (scriptrun_id integer, ts_cet, task_succeed integer, real_succeed integer, has_store_page, has_wrb_jsp, has_results_jsp, has_error_jsp, has_a_png integer, has_error_code integer)"
+  
+  set has_fields {store_page wrb_jsp results_jsp error_jsp a_png error_code youtube addthis}
+  set db_has_fields [lmap el $has_fields {has_db $el}]
+  set dbdef_has_fields [lmap el $has_fields {has_dbdef $el}]
+  set query "create table checkrun (scriptrun_id integer, ts_cet, task_succeed integer, real_succeed integer, [join $dbdef_has_fields ", "])"
+  # $db exec "create table checkrun (scriptrun_id integer, ts_cet, task_succeed integer, real_succeed integer, has_store_page, has_wrb_jsp, has_results_jsp, has_error_jsp, has_a_png integer, has_error_code integer)"
+  $db exec $query
   $db exec "create index ix_checkrun_1 on checkrun (scriptrun_id)"
   # first insert all scriptruns
-  $db exec "insert into checkrun (scriptrun_id, ts_cet, task_succeed, real_succeed, has_store_page, has_wrb_jsp, has_results_jsp, has_error_jsp, has_a_png, has_error_code)
-            select id, ts_cet, task_succeed, 0, 0, 0, 0, 0, 0, 0
+  #$db exec "insert into checkrun (scriptrun_id, ts_cet, task_succeed, real_succeed, has_store_page, has_wrb_jsp, has_results_jsp, has_error_jsp, has_a_png, has_error_code)
+  #          select id, ts_cet, task_succeed, 0, 0, 0, 0, 0, 0, 0
+  #          from scriptrun"
+
+  set query "insert into checkrun (scriptrun_id, ts_cet, task_succeed, real_succeed, [join $db_has_fields ", "])
+            select id, ts_cet, task_succeed, 0, [join [repeat [llength $has_fields] "0"] ", "]
             from scriptrun"
+  # log info "query: $query"            
+  $db exec $query          
+  # dezen niet per page, komt in tabel checkrun, op zelfde niveau als scriptrun
+
+  # check for the existence of the three jsp pages.
+  # if there is something with retail_store_locator in this script, then do the check for A.png.
+  update_checkrun_url_like $db has_store_page "%retail_store_locator%"            
+            
+  update_checkrun_url_like $db has_wrb_jsp "%/wrb_retail_store_locator_results.jsp%"            
+  update_checkrun_url_like $db has_results_jsp "%/retail_store_locator_results.jsp%"            
+  update_checkrun_url_like $db has_error_jsp "%/retail_store_locator.jsp%"            
+  update_checkrun_url_like $db has_a_png "%/A.png%"            
+
+  # for CN, should not contain youtube and addthis
+  update_checkrun_url_like $db has_youtube "%youtube%"            
+  update_checkrun_url_like $db has_addthis "%addthis%"            
+  
+  # error 4006 is not serious and happens quite a lot: Cannot set WinInet status callback for synchronous sessions. Support for Java Applets download measurements
+  # more domains are excluded, ip address is set to 0.0.0.0 or NA.
+  # @todo check if runs do have an A.png, but also errors, and marked (real_succeed) as not successful.
+  $db exec "update checkrun set has_error_code = 1 where scriptrun_id in (
+              select distinct i.scriptrun_id
+              from pageitem i
+              where i.domain != 'philips.112.2o7.net' 
+              and i.error_code <> ''
+              and i.error_code <> '4006'
+              and i.ip_address != '0.0.0.0'
+              and i.ip_address != 'NA'
+            )"
+  # $db exec "update checkrun set real_succeed = 1 where task_succeed = 1 and has_a_png = 1 and has_error_code = 0"
+  # 28-8-2013 for now, just check for existence of A.png, don't look at other errors, that may or may not be blocking/real errors.
+  # 28-8-2013 the existence of A.png should correlate 100% with the existence of /retail_store_locator_results.jsp and 0% with retail_store_locator.jsp.
+  # @todo do some manual checks for this.
+  $db exec "update checkrun set real_succeed = 1 where task_succeed = 1 and has_a_png = 1"
+  # if this script has no retail store pages, then don't check for A.png.
+  $db exec "update checkrun set real_succeed = 1 where task_succeed = 1 and has_store_page = 0"
+}
+
+proc make_run_check_dealer_locator_old {db} {
+  $db exec_try "drop table checkrun"
+  
+  set has_fields {store_page wrb_jsp results_jsp error_jsp a_png error_code youtube addthis}
+  set db_has_fields [lmap el $has_fields {has_db $el}]
+  set dbdef_has_fields [lmap el $has_fields {has_dbdef $el}]
+  set query "create table checkrun (scriptrun_id integer, ts_cet, task_succeed integer, real_succeed integer, [join $dbdef_has_fields ", "])"
+  # $db exec "create table checkrun (scriptrun_id integer, ts_cet, task_succeed integer, real_succeed integer, has_store_page, has_wrb_jsp, has_results_jsp, has_error_jsp, has_a_png integer, has_error_code integer)"
+  $db exec $query
+  $db exec "create index ix_checkrun_1 on checkrun (scriptrun_id)"
+  # first insert all scriptruns
+  #$db exec "insert into checkrun (scriptrun_id, ts_cet, task_succeed, real_succeed, has_store_page, has_wrb_jsp, has_results_jsp, has_error_jsp, has_a_png, has_error_code)
+  #          select id, ts_cet, task_succeed, 0, 0, 0, 0, 0, 0, 0
+  #          from scriptrun"
+
+  $db exec "insert into checkrun (scriptrun_id, ts_cet, task_succeed, real_succeed, [join $db_has_fields ", "])
+            select id, ts_cet, task_succeed, 0, [join [repeat [llength $has_fields] "0"] ", "]"
+            from scriptrun"
+            
+  # dezen niet per page, komt in tabel checkrun, op zelfde niveau als scriptrun
+  update_checkrun_url_like $db has_store_page "%retail_store_locator%"            
+            
   # then update each item: update where id in () seems the quickest.
   # check for the existence of the three jsp pages.
   # if there is something with retail_store_locator in this script, then do the check for A.png.
@@ -212,6 +313,15 @@ proc make_run_check_dealer_locator {db} {
   $db exec "update checkrun set real_succeed = 1 where task_succeed = 1 and has_store_page = 0"
 }
 
+# @param like_str should include %'s if needed, will not be added by this proc.
+proc update_checkrun_url_like {db dbfield like_str} {            
+  $db exec "update checkrun set $dbfield = 1 where scriptrun_id in (
+              select distinct i.scriptrun_id
+              from pageitem i
+              where i.url like '$like_str'
+            )"
+}
+
 proc make_ip_locations {db} {
   # ipad: IP Addresses
   $db exec_try "create table ipad as
@@ -243,4 +353,58 @@ proc det_script_country_npages {dir db} {
   }
 }
 
+proc add_fields {srcdb} {
+  $srcdb exec_try "alter table pageitem add topdomain"
+  $srcdb exec_try "alter table pageitem add urlnoparams"
+}
+
+# add a field topdomain to pageitem, fill it with topdomain based on domain.
+# secure.philips.com -> philips.com
+# crsc.philips.com.cn -> phlips.com.cn
+# crsc.philips.co.uk -> philips.co.uk
+proc add_topdomain {srcdb} {
+  [$srcdb get_db_handle] function det_topdomain det_topdomain  
+  set query "update pageitem
+             set topdomain = det_topdomain(domain)
+             where topdomain is null"
+  $srcdb exec $query
+}
+
+proc det_topdomain {domain} {
+  # return $domain 
+  # if it's something like www.xxx.co(m).yy, then return xxx.co(m).yy
+  # otherwise if it's like www.xxx.yy, then return xxx.yy
+  # maybe regexp isn't the quickest, try split/join first.
+  set l [split $domain "."]
+  set p [lindex $l end-1]
+  if {($p == "com") || ($p == "co")} {
+    join [lrange $l end-2 end] "." 
+  } else {
+    join [lrange $l end-1 end] "." 
+  }  
+}
+
+#######################
+# libfp functions
+#######################
+
+# lib function, could also use struct::list repeat
+proc repeat {n x} {
+  set res {}
+  for {set i 0} {$i < $n} {incr i} {
+    lappend res $x 
+  }
+  return $res
+}
+
+# Returns a list of nums from start (inclusive) to end
+# (exclusive), by step, where step defaults to 1
+# also copied from clojure def.
+proc range {start end {step 1}} {
+  set res {}
+  for {set i $start} {$i < $end} {incr i $step} {
+    lappend res $i 
+  }
+  return $res
+}
 
