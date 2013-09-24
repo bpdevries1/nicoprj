@@ -65,7 +65,7 @@ oo::class create dbwrapper {
     if {$dbtype == "sqlite3"} {
       $conn getDBhandle
     } elseif {$dbtype == "mysql"} {
-      
+      error "Not implemented (yet)"
     } else {
       error "Unknown dbtype: $dbtype" 
     }
