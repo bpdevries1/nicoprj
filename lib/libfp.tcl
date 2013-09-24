@@ -116,6 +116,7 @@ proc map {args} {
   # note idea is to use cond to test for 2 or 3 arguments: 2 is with lambda, 3 is with var, list, expr
 }
 
+# @todo use det_fields in apidata2dashboarddb.tcl as another testcase.
 proc filter {args} {
 
 }
