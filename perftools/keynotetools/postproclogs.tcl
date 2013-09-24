@@ -22,7 +22,8 @@ proc main {argv} {
     {debug "Run in debug mode, stop when an error occurs"}
   }
   set usage ": [file tail [info script]] \[options] :"
-  set dargv [::cmdline::getoptions argv $options $usage]   
+  # set dargv [::cmdline::getoptions argv $options $usage]
+  set dargv [getoptions argv $options $usage]
   handle_srcdirroot [from_cygwin [:srcdir $dargv]] [:srcpattern $dargv] [:maxurls $dargv]
 }
 
