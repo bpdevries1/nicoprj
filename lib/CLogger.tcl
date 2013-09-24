@@ -155,6 +155,12 @@ namespace eval ::ndv {
 			uplevel $script
 			perf "finished"
 		}
+
+		public method start_stop {args} {
+			perf "start: [lindex $args 0]"
+			uplevel {*}$args
+			perf "finished: [lindex $args 0]"
+		}
 		
 		public method log_intern {str {level critical} {pref_stacklevel -2}} {
 			global stderr
