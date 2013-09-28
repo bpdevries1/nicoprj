@@ -95,6 +95,38 @@ oo::class create dbwrapper {
       return [[$conn getDBhandle] last_insert_rowid]   
     }
   } 
+
+  # @note 27-9-2013 new method signature (rename to exec in due time)
+  # @note replaces exec and exec_try
+  # @param args possible list of args: -log -try -returnid
+  method exec2 {query args} {
+    my variable conn
+    set options {
+      {log "Log the query before exec"}
+      {try "Don't throw error if query fails"}
+      {returnid "Return last_insert_rowid (SQLite only?)"}
+    }
+    set dargv [getoptions args $options ""]
+    if {[:log $dargv]} {
+      log debug $query 
+    }
+    try_eval {
+      set stmt [$conn prepare $query]
+      $stmt execute
+      $stmt close
+      if {[:returnid $dargv]} {
+        return [[$conn getDBhandle] last_insert_rowid]   
+      }
+    } {
+      log warn "db exec failed: $query"
+      log warn "errorResult: $errorResult"
+      if {[:try $dargv]} {
+        # nothing, just log error and continue.
+      } else {
+        error "db exec failed: $query"
+      }
+    }
+  } 
   
   method exec_try {query {return_id 0}} {
     try_eval {
