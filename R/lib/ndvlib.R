@@ -173,7 +173,7 @@ add.psxtime = function(df, from, to, format="%Y-%m-%d") {
   df
 }
 
-df = add.psxtime(db.query(db, query), "ts_cet", "psx_date", format="%Y-%m-%d %H:%M:%S")
+# df = add.psxtime(db.query(db, query), "ts_cet", "psx_date", format="%Y-%m-%d %H:%M:%S")
 
 # add ts_psx if ts is present as a field in result of query
 # add date_psx if date is present as a field in result of query
