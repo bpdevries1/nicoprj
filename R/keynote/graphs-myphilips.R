@@ -6,7 +6,8 @@ main = function () {
   # @note onderstaande werkte niet op Windows in RStudio, ~ verwijst dan naar C:/Users/310118637/Documents.
   # @note maar wel als je RStudio vanuit cygwin bash start, dan is ~ goed gezet.
   # setwd("c:/projecten/Philips/KNDL")
-  setwd("c:/projecten/Philips/KN-Analysis")
+  # setwd("c:/projecten/Philips/KN-Analysis")
+  setwd("c:/projecten/Philips/KN-AN-Mobile")
   
   dirnames = Sys.glob("*")
   for (dirname in dirnames) {
@@ -45,7 +46,7 @@ main.cn = function () {
   make.graphs(scriptname)
 }
 
-graph.sigin = function() {
+graph.signin = function() {
   setwd("c:/projecten/Philips/KNDL/MyPhilips-DE")
   db = db.open("keynotelogs.db")
   query = "select ts_cet ts, 0.001 * element_delta loadtime
