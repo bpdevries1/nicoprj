@@ -3,7 +3,13 @@
 *~
 *.log
 *.$$$
-#*#
+
+# quote hash-marks
+\#*\#
+
+.Rhistory
+*.tcl.1
+perftools/iptools/hosts
 
 # 30-1-2011 NdV web2py ignores werken nog niet zo, uitzoeken.
 **/web2py/cache/
