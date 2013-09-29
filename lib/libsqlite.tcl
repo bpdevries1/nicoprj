@@ -167,7 +167,7 @@ if {$tcl_version == "8.5"} {
     }}]
     # set res "insert into $table ([join $insert_fields ", "]) values ([join [lmap par $insert_fields {symbol [lindex $par 0]}] ", "])"
     set res "insert into $table ([join [lmap par $insert_fields {lindex $par 0}] ", "]) values ([join [lmap par $insert_fields {symbol [lindex $par 0]}] ", "])"
-    log debug "insert sql: $res"
+    # log debug "insert sql: $res"
     return $res
   }
   

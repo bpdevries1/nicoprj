@@ -24,7 +24,7 @@ oo::class create dbwrapper {
   # @doc usage: set conn [dbwrapper new <sqlitefile.db]
   # @doc usage: set conn [dbwrapper new -db <mysqldbname> -user <user> -password <pw>]
   constructor {args} {
-    my variable conn dbtype
+    my variable conn dbtype dbname
     if {[llength $args] == 1} {
       # assume sqlite
       set dbtype "sqlite3"
@@ -36,6 +36,7 @@ oo::class create dbwrapper {
       set dbtype "mysql"
       set conn [tdbc::mysql::connection new {*}$args]
     }
+    set dbname [lindex $args 0]
   }
   
   # @todo destructor gets called in beginning?
@@ -69,6 +70,11 @@ oo::class create dbwrapper {
     } else {
       error "Unknown dbtype: $dbtype" 
     }
+  }
+  
+  method get_dbname {} {
+    my variable dbname
+    return $dbname
   }
   
   # @todo what if something fails, rollback, exec except/finally clause?
@@ -175,8 +181,11 @@ oo::class create dbwrapper {
   
   method create_tables {args} {
     my variable db_tabledefs conn
+    set drop_first [lindex $args 0]
     dict for {table td} $db_tabledefs {
-      create_table $conn $td {*}$args
+      if {(![my table_exists $table]) || $drop_first} {
+        create_table $conn $td {*}$args
+      }
     }
   }
   
@@ -201,7 +210,18 @@ oo::class create dbwrapper {
       # unknown database type, return nothing.
       return
     }
-  }    
+  }  
+
+  # some helpers/info
+  method table_exists {tablename} {
+    my variable conn
+    if {[$conn tables $tablename] == {}} {
+      return 0 
+    } else {
+      return 1
+    }
+  }
+  
 }
 
 # proc breakpoint_dummy {} {
