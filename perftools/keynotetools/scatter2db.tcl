@@ -6,6 +6,7 @@
 # @todo could have two DB connections, and insert parsed data into both!
 # @todo and one main DB with has everything except the details, but includes scriptrun and page, see how big this gets.
 # en in DB kijken of je deze al gedaan hebt.
+# @todo possibly remove main-db: not used until now and have to take into account with db migrations etc.
 
 package require tdbc::sqlite3
 package require Tclx
@@ -15,6 +16,12 @@ package require json
 set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 $log set_file "[file tail [info script]].log"
 
+# libpostproclogs: set_task_succeed (and maybe others)
+source [file join [file dirname [info script]] libpostproclogs.tcl]
+
+source [file join [file dirname [info script]] libmigrations.tcl]
+source [file join [file dirname [info script]] kn-migrations.tcl]
+
 proc main {argv} {
   global dargv
   log debug "argv: $argv"
@@ -23,7 +30,7 @@ proc main {argv} {
     {justdir "Just read this directory, not subdirectories. If this is set, dir should not contain subdirs besides 'read'"}
     {dropdb "Drop the (old) database first"}
     {nopost "Do not post process the data (Only for Mobile now)"}
-    {nomain "Do not put data in a main db"}
+    {nomain2 "Do not put data in a main db"}
     {moveread "Move read files to subdirectory 'read'"}
     {continuous "Keep running this script, to automatically put new items downloaded in DB's"}
     {debug "Run in debug mode, stop when an error occurs"}
@@ -31,7 +38,9 @@ proc main {argv} {
   set usage ": [file tail [info script]] \[options] :"
   # set dargv [::cmdline::getoptions argv $options $usage]
   set dargv [getoptions argv $options $usage]
-
+  
+  # 28-9-2013 don't support maindb anymore for now, don't use it now.
+  dict set dargv nomain 1
   if {[:dropdb $dargv] && [:continuous $dargv]} {
     log error "Both dropdb and continuous are set, this does not make sense: exiting"
     exit
@@ -78,21 +87,22 @@ proc scatter2db_main {dargv} {
     log info "Don't use main DB"
     set dbmain ""
   } else {
-    log info "Use main DB"
-    set db_name [file join $root_dir "keynotelogsmain.db"]
-    if {[:dropdb $dargv]} {
-      file delete $db_name
-    }
-    set existing_db [file exists $db_name]
-    set dbmain [dbwrapper new $db_name]
-    define_tables $dbmain 0
-    if {!$existing_db} {
-      $dbmain create_tables 0 ; # 0: don't drop tables first.
-      create_indexes $dbmain
-    } else {
-      # existing db, assuming tables/indexes also already exist. 
-    }
-    $dbmain prepare_insert_statements
+#    log info "Use main DB"
+#    set db_name [file join $root_dir "keynotelogsmain.db"]
+#    if {[:dropdb $dargv]} {
+#      file delete $db_name
+#    }
+#    set existing_db [file exists $db_name]
+#    set dbmain [dbwrapper new $db_name]
+#    define_tables $dbmain 0
+#    if {!$existing_db} {
+#      $dbmain create_tables 0 ; # 0: don't drop tables first.
+#      create_indexes $dbmain
+#    } else {
+#      # existing db, assuming tables/indexes also already exist. 
+#    }
+#    migrate_db $dbmain $existing_db    
+#    $dbmain prepare_insert_statements
   }  
   
   if {[:justdir $dargv]} {
@@ -142,14 +152,21 @@ proc scatter2db_subdir {dargv subdir dbmain} {
   set db [dbwrapper new $db_name]
   define_tables $db
   if {!$existing_db} {
+    log info "New db: $db_name, create tables"
     $db create_tables 0 ; # 0: don't drop tables first.
     create_indexes $db
+    migrate_kn_create_view_rpi $db
+    copy_script_pages $db
+    # set initial db version
   } else {
-    # existing db, assuming tables/indexes also already exist.
+    log info "Existing db: $db_name, don't create tables"
   }
+  migrate_db $db $existing_db
+  
   $db prepare_insert_statements
   # for test.
   # $db insert logfile {path "test.json"}
+  read_script_pages $db ; # into global dict, should perform better.
   handle_files $subdir $db $dbmain
   if {![:nopost $dargv]} {
     post_process $db
@@ -163,9 +180,12 @@ proc scatter2db_subdir {dargv subdir dbmain} {
 
 proc define_tables {db {pageitem 1}} {
   $db add_tabledef logfile {id} {path filename filesize}
-  $db add_tabledef scriptrun {id} {logfile_id target_id provider slot_id scriptname datetime ts_utc ts_cet agent_id agent_inst agent_instance_id \
+  $db add_tabledef scriptrun {id} {logfile_id target_id provider slot_id scriptname \
+    datetime ts_utc ts_cet date_cet agent_id agent_inst agent_instance_id \
     profile_id delta_msec hangup_msec wap_connect_msec signal_strength task_succeed \
-    network no_of_resources element_count user_string device error_code content_error content_errors resp_bytes estimated_cache_delta_msec trans_level_comp_msec\
+    task_succeed_calc \
+    network no_of_resources element_count user_string device error_code content_error \
+    content_errors resp_bytes estimated_cache_delta_msec trans_level_comp_msec\
     delta_user_msec bandwidth_kbsec cookie_count domain_count connection_count browser_errors \
     setup_msec attempts speed phone_number}
 
@@ -187,7 +207,7 @@ New <txn__summary>:
 Dialer:
 <setup__msec/><attempts/><speed/><phone__number/>    
     }
-  $db add_tabledef page {id} {scriptrun_id page_seq connect_delta delta_msec \
+  $db add_tabledef page {id} {scriptname ts_cet date_cet scriptrun_id page_seq page_type connect_delta delta_msec \
     dns_lookup_msec first_packet_delta new_connection remain_packets_delta request_delta \
     ssl_handshake_delta start_msec system_delta \
     element_count page_bytes redir_count redir_delta \
@@ -223,9 +243,11 @@ new:
     }
     
   if {$pageitem} {
-    $db add_tabledef pageitem {id} {scriptrun_id page_id content_type resource_id scontent_type url \
-      extension domain \
-      error_code connect_delta dns_delta element_delta first_packet_delta remain_packets_delta request_delta \
+    $db add_tabledef pageitem {id} {scriptname ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
+      scontent_type url \
+      extension domain topdomain urlnoparams \
+      error_code connect_delta dns_delta element_delta first_packet_delta \
+      remain_packets_delta request_delta \
       ssl_handshake_delta start_msec system_delta basepage record_seq \
       detail_component_1_msec detail_component_2_msec detail_component_3_msec \
       ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
@@ -273,31 +295,35 @@ new:
 }
 
 proc create_indexes {db} {
-  $db exec_try "create unique index ix_scriptrun_1 on scriptrun(slot_id,datetime)"
+  $db exec2 "create index if not exists ix_page_1 on page (scriptrun_id)"
+  # use -try for pageitem, as pageitem might not exist (in main-db) 
+  $db exec2 "create index if not exists ix_pageitem_1 on pageitem (scriptrun_id)" -try
+  $db exec2 "create index if not exists ix_pageitem_2 on pageitem (page_id)" -try
+  $db exec2 "create unique index if not exists ix_scriptrun_1 on scriptrun(slot_id,datetime)"
 }
+
+proc read_script_pages {db} {
+  global dct_page_type
+  foreach row [$db query "select scriptname, page_seq, page_type from script_pages"] {
+    dict set dct_page_type [:scriptname $row] [:page_seq $row] [:page_type $row]        
+  }
+}
+
+proc det_page_type {scriptname page_seq} {
+  global dct_page_type
+  if {[dict exists $dct_page_type $scriptname $page_seq]} {
+    dict get $dct_page_type $scriptname $page_seq
+  } else {
+    return "<none>" 
+  }
+}
+
 
 # handle each file in a DB trans, not a huge trans for all files.
 proc handle_files {root_dir db dbmain} {
   log info "Start reading"
   handle_dir_rec $root_dir "*.json" [list warn_error read_json_file $db $dbmain]
   log info "Finished reading"
-}
-
-proc warn_error {proc_name args} {
-  global dargv
-  try_eval {
-    $proc_name {*}$args
-  } {
-    # log warn "$errorResult $errorCode $errorInfo, continuing"
-    log_error "continuing..."
-    if {[:debug $dargv]} {
-      # development mode.
-      error $errorResult $errorCode $errorInfo
-      exit
-    } else {
-      # production, vooral-doorgaan mode 
-    }
-  }  
 }
 
 proc read_json_file {db dbmain filename root_dir} {
@@ -346,6 +372,8 @@ proc read_json_file_db {db filename root_dir {pageitem 1}} {
   $db in_trans {    
     set logfile_id [$db insert logfile [dict create path $filename filename [file tail $filename] filesize [file size $filename]] 1]
     set json [json::json2dict [read_file $filename]]
+    # @todo possibly add check if json just contains error message like invalid slotid list.
+    
     # breakpoint
       # agent_id agent_inst datetime profile_id slot_id target_id wxn_Script wxn_detail_object wxn_page wxn_summary
     foreach l $json {
@@ -373,15 +401,44 @@ proc read_json_file_db {db filename root_dir {pageitem 1}} {
         dict set dct scriptname [det_scriptname [:slot_id $dct] $filename]
         dict set dct ts_utc [det_ts_utc [:datetime $dct]]
         dict set dct ts_cet [det_ts_cet [:datetime $dct]]
+        dict set dct date_cet [det_date_cet [:datetime $dct]]
         dict set dct provider [det_provider [:target_id $dct]]
+        set pages [concat [:wxn_page $run] [:txnPages $run]]
+        
+        # @todo param pages as name here, to prevent copying large objects, also do in other places?
+        # @todo det_task_succeed has a bug: does not set to 0 when it should, for CBF-CN-HX6921-2013-09-02--13-00.json
+        dict set dct task_succeed_calc [det_task_succeed_calc [:task_succeed $dct] pages]
         set scriptrun_id [$db insert scriptrun $dct 1]
         
         set dct_details [get_details $run]
-        set pages [concat [:wxn_page $run] [:txnPages $run]]
         foreach page $pages {
-          handle_page $db $scriptrun_id $page $dct_details $pageitem
+          handle_page $db $scriptrun_id $page $dct_details $pageitem [:scriptname $dct] [:datetime $dct]
         }
       }
+    }
+  }
+}
+
+proc det_task_succeed_calc {task_succeed pages_name} {
+  upvar $pages_name pages
+  # breakpoint
+  # @note tested with values of task_succeed like 0, 1, 2, "", "abc" and {}, this works.
+  if {($task_succeed == 0) || ($task_succeed == 1)} {
+    return $task_succeed
+  } else {
+    set found_error 0
+    foreach p $pages {
+      if {[:error_code [:txnPageStatus $p]] != ""} {
+        set found_error 1 
+      }
+      if {[:error_code [:wxn_page_status $p]] != ""} {
+        set found_error 1 
+      }
+    }
+    if {$found_error} {
+      return 0
+    } else {
+      return 1
     }
   }
 }
@@ -406,23 +463,11 @@ proc get_details {run} {
   set dct_details  
 }
 
-proc get_details_old {run} {
-  set details [:wxn_detail_object $run]
-  set dct_details [dict create] 
-  set cur_id [:resource_id [lindex $details 0]]
-  foreach detail $details {
-    # don't use the resource id when it's not one less than the previous, unless it's the first.
-    # dict set dct_details [:resource_id $detail] $detail
-    dict set dct_details $cur_id $detail
-    incr cur_id -1
-  }
-  set dct_details  
-}
-
-proc handle_page {db scriptrun_id page dct_details pageitem} {
+proc handle_page {db scriptrun_id page dct_details pageitem scriptname datetime} {
+  global dargv
   set page_main [dict_get_multi -withname $page page_seq wxn_page_object wxn_page_performance wxn_page_status \
     txnPagePerformance txnPageObject txnPageStatus]
-  set dct [dict_flat $page_main {page_seq connect_delta delta_msec dns_lookup_msec first_packet_delta new_connection \
+  set dctp [dict_flat $page_main {page_seq connect_delta delta_msec dns_lookup_msec first_packet_delta new_connection \
     remain_packets_delta request_delta ssl_handshake_delta start_msec system_delta \
     element_count page_bytes redir_count redir_delta \
     content_errors error_code page_succeed \
@@ -431,8 +476,14 @@ proc handle_page {db scriptrun_id page dct_details pageitem} {
     dom_content_load_time dom_interactive_msec dom_load_time dom_unload_time domain_count 
     estimated_cache_delta_msec first_byte_msec first_paint_msec full_screen_msec time_to_interactive_page}]
   # @todo find out what page.start_msec means.
-  dict set dct scriptrun_id $scriptrun_id
-  set page_id [$db insert page $dct 1]
+  dict set dctp scriptrun_id $scriptrun_id
+  dict set dctp scriptname $scriptname
+  dict set dctp ts_cet [det_ts_cet $datetime]
+  dict set dctp date_cet [det_date_cet $datetime]
+  set page_type [det_page_type $scriptname [:page_seq $dctp]]
+  dict set dctp page_type $page_type
+  
+  set page_id [$db insert page $dctp 1]
   if {!$pageitem} {
     # in maindb we only keep data without pageitems, otherwise db would grow too big probably.
     return 
@@ -443,43 +494,69 @@ proc handle_page {db scriptrun_id page dct_details pageitem} {
     set prev_id 0
     set given_id 0
     foreach elt [:wxn_page_element $detail] {
-      # set dct [dict_flat2 $elt wxn_detail_performance wxn_detail_status]
-      set dct [dict_flat $elt {resource_id error_code connect_delta dns_delta element_delta \
+      # set dcti [dict_flat2 $elt wxn_detail_performance wxn_detail_status]
+      set dcti [dict_flat $elt {resource_id error_code connect_delta dns_delta element_delta \
         first_packet_delta remain_packets_delta request_delta \
         ssl_handshake_delta start_msec system_delta}]
-      dict set dct scriptrun_id $scriptrun_id
-      dict set dct page_id $page_id
-      # set dct2 [dict merge $dct $ar_detail([:resource_id $dct])]
-      # set dct_detail [dict get $dct_details [:resource_id $dct]]
-      if {$prev_id == [:resource_id $dct]} {
+      dict set dcti scriptrun_id $scriptrun_id
+      dict set dcti page_id $page_id
+      # set dcti2 [dict merge $dcti $ar_detail([:resource_id $dcti])]
+      # set dcti_detail [dict get $dcti_details [:resource_id $dcti]]
+      if {$prev_id == [:resource_id $dcti]} {
         incr given_id
       } else {
-        set prev_id [:resource_id $dct]
-        set given_id [:resource_id $dct]
+        set prev_id [:resource_id $dcti]
+        set given_id [:resource_id $dcti]
       }
-      set dct_detail [dict get $dct_details $given_id]
-      set dct2 [dict merge $dct $dct_detail]
-      dict set dct2 extension [det_extension [:url $dct2]]
-      dict set dct2 domain [det_domain [:url $dct2]]
-      $db insert pageitem $dct2
+      set dcti_detail [dict get $dct_details $given_id]
+      set dcti2 [dict merge $dcti $dcti_detail]
+      dict set dcti2 extension [det_extension [:url $dcti2]]
+      set domain [det_domain [:url $dcti2]]
+      dict set dcti2 domain $domain
+      dict set dcti2 topdomain [det_topdomain $domain]
+      dict set dcti2 scriptname $scriptname
+      dict set dcti2 ts_cet [det_ts_cet $datetime]
+      dict set dcti2 date_cet [det_date_cet $datetime]
+      dict set dcti2 page_seq [:page_seq $dctp]
+      dict set dcti2 page_type $page_type
+      dict set dcti2 urlnoparams [det_urlnoparams [:url $dcti2]]
+      
+      # breakpoint ; # page_seq not yet filled.
+      $db insert pageitem $dcti2
     }
   }
   # MyPhilips structure with txnPageDetails looks a bit different, first handle seperately.
-  try_eval {
-    set details [:txnPageDetails $page]
-    if {$details != "null"} {
-      handle_element $db $scriptrun_id $page_id [:txnBasePage $details] 1
-      foreach elt [:txnPageElement $details] {
-        handle_element $db $scriptrun_id $page_id $elt 0
+  if {0} {
+    try_eval {
+      set details [:txnPageDetails $page]
+      if {$details != "null"} {
+        handle_element $db $scriptrun_id $page_id [:txnBasePage $details] 1 $scriptname $datetime [:page_seq $dct]
+        foreach elt [:txnPageElement $details] {
+          handle_element $db $scriptrun_id $page_id $elt 0 $scriptname $datetime [:page_seq $dct]
+        }
+      }
+    } {
+      if {[:debug $dargv]} {
+        log warn "$errorResult $errorCode $errorInfo, debug/breakpoint"
+        breakpoint  
+      } else {
+        log warn "$errorResult $errorCode $errorInfo, continuing"
       }
     }
-  } {
-    log warn "$errorResult $errorCode $errorInfo, continuing"
-    # breakpoint
   }
+  # 28-9-2013 If below fails 'in production', it should also stop.
+  # @todo nanny.tcl process: read exit-code, based on this determine whether to continue/restart.
+  set details [:txnPageDetails $page]
+  if {$details != "null"} {
+    handle_element $db $scriptrun_id $page_id [:txnBasePage $details] 1 $scriptname $datetime [:page_seq $dctp] $page_type
+    foreach elt [:txnPageElement $details] {
+      handle_element $db $scriptrun_id $page_id $elt 0 $scriptname $datetime [:page_seq $dctp] $page_type
+    }
+  }
+  
 }
 
-proc handle_element {db scriptrun_id page_id elt basepage} {
+proc handle_element {db scriptrun_id page_id elt basepage scriptname datetime page_seq page_type} {
   if {($elt == "null") || ($elt == "")} {
     return 
   }
@@ -497,8 +574,25 @@ proc handle_element {db scriptrun_id page_id elt basepage} {
   set url "[:conn_string_text $dct][:object_text $dct]"
   dict set dct url $url
   dict set dct extension [det_extension $url]
-  dict set dct domain [det_domain $url]
+  # dict set dct domain [det_domain $url]
+  set domain [det_domain $url]
+  dict set dct domain $domain
+  dict set dct topdomain [det_topdomain $domain]
+  dict set dct scriptname $scriptname
+  dict set dct ts_cet [det_ts_cet $datetime]
+  dict set dct date_cet [det_date_cet $datetime]
+  dict set dct page_seq $page_seq
+  dict set dct page_type $page_type
+  dict set dct urlnoparams [det_urlnoparams $url]
   $db insert pageitem $dct
+}
+
+proc det_urlnoparams {url} {
+  if {[regexp {^([^\?\;]*)} $url z res]} {
+    return $res 
+  } else {
+    return $url 
+  }
 }
 
 proc is_read {db filename} {
@@ -553,6 +647,11 @@ proc det_ts_cet {datetime} {
   clock format [clock scan $datetime -format "%Y-%b-%d %H:%M:%S" -gmt 1] -format "%Y-%m-%d %H:%M:%S"
 }
 
+# @param datetime 2013-JUL-18 00:19:12 
+proc det_date_cet {datetime} {
+  clock format [clock scan $datetime -format "%Y-%b-%d %H:%M:%S" -gmt 1] -format "%Y-%m-%d"
+}
+
 # @note keynote API does not handle redirects correctly, gives them both the same resource_id. This one is to correct the 2nd, which gives a normal 200 code.
 proc post_process {db} {
   log info "Post process: start"
@@ -602,6 +701,24 @@ proc det_provider {target_id} {
 ####################################################################################
 
 # library functions
+proc warn_error {proc_name args} {
+  global dargv
+  try_eval {
+    $proc_name {*}$args
+  } {
+    # log warn "$errorResult $errorCode $errorInfo, continuing"
+    log_error "continuing..."
+    if {[:debug $dargv]} {
+      # development mode.
+      error $errorResult $errorCode $errorInfo
+      breakpoint
+      exit
+    } else {
+      # production, vooral-doorgaan mode 
+    }
+  }  
+}
+
 # return a new dictionary with keys/values as in keys. In dct they may be nested, but not in a list.
 # @todo don't use these functions, use the merge solution in 'new/myphilips' way of reading.
 proc dict_flat {dct keys} {

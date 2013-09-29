@@ -257,28 +257,6 @@ proc det_script_country_npages_default {dir db} {
   return [list [file tail $dir] "unknown" $npages]
 }
 
-# @todo npages bepalen voor andere typen scripts. Mss kan die voor Dealer locator wel generiek gebruikt worden.
-# @todo check if npages is fixed for a script: are there successful runs with a different number of pages? Cause may be a changed script.
-# @note this _old version specifically for MyPhilips and DL. New version should work with all.
-proc det_script_country_npages_old {dir db} {
-  if {[regexp -nocase {myphilips} $dir]} {
-    if {[regexp {^([^\-_]+)[\-_]([^\-_]+)$} [file tail $dir] z script country]} {
-      return [list $script $country 3]
-    } else {
-      # error "Could not determine script and country from: $dir"
-      return "<none>"
-    }
-  } else {
-    # just dealer locator for now.
-    if {[regexp {^CBF-([^-]+)-(.+)$} [file tail $dir] z country script]} {
-      set res [$db query "select max(1*page_seq) npages from page"]
-      set npages [:npages [lindex $res 0]]
-      log info "#pages for [file tail $dir]: $npages"
-      return [list $script $country $npages]
-    }
-  }
-}
-
 # @note idee hier is alles direct over te nemen, zelfs script-field zit al in bron-tabel
 proc fill_run_avail {db srcdbname script} {
   # @todo eigenlijk field defs uit brontabel overnemen.

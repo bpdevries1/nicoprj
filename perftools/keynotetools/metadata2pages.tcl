@@ -28,19 +28,19 @@ proc main {argv} {
   set json [json::json2dict [read_file $slotfilename]]
   set f [open $configname w]
   set re [:pattern $dargv]
-  # puts $f "slot_id;script_name;page_seq;page_name;page_type"
-  puts $f [join {slot_id script_name page_seq page_name page_type} [:sep $dargv]]
+  # puts $f "slot_id;scriptname;page_seq;page_name;page_type"
+  puts $f [join {slot_id scriptname page_seq page_name page_type} [:sep $dargv]]
   foreach prd_el [:product $json] {
     log debug "Handle [:name $prd_el]"
     foreach slot [:slot $prd_el] {
-      set script_name [cleanup [:slot_alias $slot]]
-      if {[regexp $re $script_name]} {
+      set scriptname [cleanup [:slot_alias $slot]]
+      if {[regexp $re $scriptname]} {
         set slot_id [:slot_id $slot]
         set page_seq 0
         foreach page_name [split [:pages $slot] ","] {
           incr page_seq
-          set page_type [det_page_type $script_name $page_seq $page_name]
-          puts $f [join [list $slot_id $script_name $page_seq $page_name $page_type] [:sep $dargv]]
+          set page_type [det_page_type $scriptname $page_seq $page_name]
+          puts $f [join [list $slot_id $scriptname $page_seq $page_name $page_type] [:sep $dargv]]
         }
       }
     }
@@ -67,7 +67,7 @@ proc cleanup {alias} {
 }
 
 set dpts {{land 1-landing} {Dec 3-decision} {detail 4-detail} {suppor 5-support} {Search 6-dealerloc} {Categ 2-category}}
-proc det_page_type {script_name page_seq page_name} {
+proc det_page_type {scriptname page_seq page_name} {
   global dpts
   foreach el $dpts {
     lassign $el re tp

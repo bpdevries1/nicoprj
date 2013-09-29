@@ -2,32 +2,9 @@
 
 # @todo put in separate namespace (compare clojure?)
 
-# @param db result of 'dbwrapper new'
+# @param db a dbwrapper object
 # @param procprefix prefix of proc to do actual migrations.
-proc migrate_db_old {db procprefix existing_db} {
-  migrate_create_tables $db
-  if {$existing_db} {
-    set version [migrate_det_current_version $db]
-  } else {
-    set version "new"
-  }    
-  while {1} {
-    # set new_version [$procprefix $db $version]
-    set sec_start [clock seconds]
-    lassign [$procprefix $db $version] new_version description
-    if {$version == $new_version} {
-      break
-    } else {
-      migrate_add_version $db $version $new_version $description $sec_start [clock seconds]
-    }
-    set version $new_version
-  }
-}
-
-# @param db result of 'dbwrapper new'
-# @param procprefix prefix of proc to do actual migrations.
-proc migrate_db_new {db procprefix existing_db} {
-  log debug "procprefix: $procprefix not used in new version"
+proc migrate_db {db existing_db} {
   migrate_create_tables $db
   if {$existing_db} {
     set version [migrate_det_current_version $db]
@@ -47,13 +24,18 @@ proc migrate_db_new {db procprefix existing_db} {
   }
 }
 
-interp alias {} migrate_db {} migrate_db_new
+# interp alias {} migrate_db {} migrate_db_new
 # interp alias {} migrate_db {} migrate_db_old
 
 proc migrate_db_step {db version} {
   global migrate_db_procs
-  set procname [dict get $migrate_db_procs $version]
-  $procname $db  
+  try_eval {
+    set procname [dict get $migrate_db_procs $version]
+    return [$procname $db]
+  } {
+    log warn "no proc for $version found, returning version so it stops"
+    return $version
+  }
 }
 
 # @todo mocht het zo niet werken, dan evt in 2 stappen: proc def-en gewoon, en hierna registreren.
@@ -84,7 +66,20 @@ proc migrate_create_tables {db} {
   $db add_tabledef db_version {version_current} {}
   $db add_tabledef db_migration {id} {start_utc stop_utc \
     version_from version_to description}
-  $db create_tables 0 ; # don't drop tables first.  
+  # @note db object will check if table already exists.
+  $db create_tables 0 ; # don't drop tables first.    
+  $db prepare_insert_statements
+}
+
+proc migrate_create_tables_old {db} {
+  $db add_tabledef db_version {version_current} {}
+  $db add_tabledef db_migration {id} {start_utc stop_utc \
+    version_from version_to description}
+  if {[$db table_exists db_version]} {
+    # tables already exist 
+  } else {
+    $db create_tables 0 ; # don't drop tables first.
+  }
   $db prepare_insert_statements
 }
 

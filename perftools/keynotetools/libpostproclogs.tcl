@@ -66,7 +66,9 @@ proc lengte {str} {
 }
 
 # @note this proc does not take a lot of time.
+# @note this functionality has been added to scatter2db.tcl
 proc make_indexes {db} {
+  log debug "Creating indexes for: [$db get_dbname]"
   $db exec_try "create index ix_page_1 on page (scriptrun_id)"
   $db exec_try "create index ix_pageitem_1 on pageitem (scriptrun_id)"
   $db exec_try "create index ix_pageitem_2 on pageitem (page_id)"
@@ -74,17 +76,38 @@ proc make_indexes {db} {
 
 proc set_task_succeed {db} {
   # log info "Setting task_succeed in scriptrun: start"
-  $db exec "update scriptrun
+  $db exec2 "update scriptrun
                 set task_succeed = 0
                 where task_succeed = '<none>'
                 and id in (
                   select scriptrun_id
                   from page p
                   where p.error_code <> ''
-                )"
-  $db exec "update scriptrun
+                )" -log
+  $db exec2 "update scriptrun
                 set task_succeed = 1
-                where task_succeed = '<none>'"
+                where task_succeed = '<none>'" -log
+  # log info "Setting task_succeed in scriptrun: finished"                
+}
+
+# @note this one also (only) used in scatter2db/kn-migrations.tcl
+proc set_task_succeed_calc {db} {
+  # log info "Setting task_succeed in scriptrun: start"
+  $db exec2 "update scriptrun
+             set task_succeed_calc = task_succeed
+             where task_succeed_calc is null
+             and task_succeed in ('0','1', 0, 1)" -log 
+  $db exec2 "update scriptrun
+                set task_succeed_calc = 0
+                where task_succeed_calc is null
+                and id in (
+                  select scriptrun_id
+                  from page p
+                  where p.error_code <> ''
+                )" -log
+  $db exec2 "update scriptrun
+                set task_succeed_calc = 1
+                where task_succeed_calc is null" -log
   # log info "Setting task_succeed in scriptrun: finished"                
 }
 
@@ -113,35 +136,10 @@ proc make_run_check_generic {db srcdir max_urls} {
             group by 1"
 
   log info "Dropped and created runcount"            
-            
-  # first set all non-dynamic items, so no need to check/calc afterwards.                  
-  $db exec "update pageitem
-            set urlnoparams = url
-            where not (url like '%?%' or url like '%;%')
-            and urlnoparams is null"
+     
+  fill_urlnoparams $db
   
-  # min works ok, but instr returns 0 when not found, and then min would be 0 as well: not good.
-  # so first check only ?, then only ;, then both
-  $db exec "update pageitem
-            set urlnoparams = substr(url, 1, instr(url, '?'))
-            where url like '%?%'
-            and not url like '%;%'
-            and urlnoparams is null"
-
-  $db exec "update pageitem
-            set urlnoparams = substr(url, 1, instr(url, ';'))
-            where url like '%;%'
-            and not url like '%?%'
-            and urlnoparams is null"
-
-  # both, use min.
-  $db exec "update pageitem
-            set urlnoparams = substr(url, 1, min(instr(url, ';'), instr(url, '?')))
-            where url like '%;%'
-            and url like '%?%'
-            and urlnoparams is null"
-
-  log info "Updated pageitem.urlnoparams (several queries)"            
+        
             
   # helpers to show top 20 URL's (page items)
   $db exec "drop table if exists maxitem"
@@ -164,6 +162,37 @@ proc make_run_check_generic {db srcdir max_urls} {
             limit $max_urls"
             
   log info "Dropped, created and filled maxitem"            
+}
+
+proc fill_urlnoparams {db} {
+  # first set all non-dynamic items, so no need to check/calc afterwards.                  
+  $db exec2 "update pageitem
+            set urlnoparams = url
+            where not (url like '%?%' or url like '%;%')
+            and urlnoparams is null" -log
+  
+  # min works ok, but instr returns 0 when not found, and then min would be 0 as well: not good.
+  # so first check only ?, then only ;, then both
+  $db exec2 "update pageitem
+            set urlnoparams = substr(url, 1, instr(url, '?'))
+            where url like '%?%'
+            and not url like '%;%'
+            and urlnoparams is null" -log
+
+  $db exec2 "update pageitem
+            set urlnoparams = substr(url, 1, instr(url, ';'))
+            where url like '%;%'
+            and not url like '%?%'
+            and urlnoparams is null" -log
+
+  # both, use min.
+  $db exec2 "update pageitem
+            set urlnoparams = substr(url, 1, min(instr(url, ';'), instr(url, '?')))
+            where url like '%;%'
+            and url like '%?%'
+            and urlnoparams is null" -log
+
+  log info "Updated pageitem.urlnoparams (several queries)"      
 }
 
 # want to calc top 20 items from last week data. But use last moment of measurements in the DB, not current time.
@@ -354,7 +383,8 @@ proc add_fields {db} {
 # crsc.philips.co.uk -> philips.co.uk
 # @note this one should only take (a lot of) time if topdomain is null.
 # @note only if -clean is in cmdline, field will be cleared first.
-proc add_topdomain {db clean} {
+# @note also used in migrations and scatter2db.
+proc add_topdomain {db clean {checkfirst 1}} {
   [$db get_db_handle] function det_topdomain det_topdomain
   if {$clean} {
     log info "Clean field topdomain first before filling again"
@@ -366,7 +396,12 @@ proc add_topdomain {db clean} {
   # @note for now: check if we can find one item with topdomain filled,
   #       if so, assume all are filled (as it is atomic action).
   # @note could also add an index on topdomain.
-  set res [$db query "select id from pageitem where topdomain is not null limit 1"]
+  if {$checkfirst} {
+    set res [$db query "select id from pageitem where topdomain is not null limit 1"]
+  } else {
+    # don't check, do update directly
+    set res {}    
+  }
   if {[llength $res] > 0} {
     log info "Already one topdomain field filled, assume all are filled" 
   } else {
@@ -374,11 +409,12 @@ proc add_topdomain {db clean} {
     set query "update pageitem
                set topdomain = det_topdomain(domain)
                where topdomain is null"
-    $db exec $query
+    $db exec2 $query -log
     log info "Filled all topdomains"
   }
 }
 
+# @note also used in migrations and scatter2db.
 proc det_topdomain {domain} {
   # return $domain 
   # if it's something like www.xxx.co(m).yy, then return xxx.co(m).yy
@@ -547,7 +583,7 @@ proc fill_known_error {db dir dargv} {
 proc det_support_page_seq {db dir} {
   set query "select page_seq
              from script_pages
-             where script_name = '[file tail $dir]'
+             where scriptname = '[file tail $dir]'
              and page_type like '%support%'
              order by page_seq
              limit 1"

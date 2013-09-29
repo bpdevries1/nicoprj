@@ -211,6 +211,9 @@ proc check_errors {filename} {
       } elseif {[regexp {^[\[\],]+$} $text]} {
         log info "Empty contents, but this can happen, is ok"
         set res "ok"
+      } elseif {[regexp {invalid slotid list} $text]} {
+        log info "Invalid slotid list, probably script is not active, is ok"
+        set res "ok"
       } else {
         log warn "Unknown error with too small file"
         file rename -force $filename "$filename.toosmall[expr rand()]"

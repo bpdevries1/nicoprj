@@ -128,7 +128,7 @@ make.graphs.allflows = function () {
   
   # met script-pages erbij voor soorten pages
   query = "select strftime('%Y-%m-%d', ts_cet) date, task_succeed, page_type, scriptname, count(*) number           
-           from run_avail ra join script_pages sp on ra.scriptname = sp.script_name and ra.err_page_seq = sp.page_seq
+           from run_avail ra join script_pages sp on ra.scriptname = sp.scriptname and ra.err_page_seq = sp.page_seq
            where task_succeed = 0
            group by 1,2,3,4
            order by 1,2,3"
@@ -158,8 +158,8 @@ make.graphs.allflows.perc = function () {
   # @todo check met known errors of totaal nog steeds 100% is.
   query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, page_type page_error_type, ra.scriptname scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
               from run_avail ra 
-              join script_pages sp on ra.scriptname = sp.script_name and ra.err_page_seq = sp.page_seq
-              join stat s on s.script_name = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
+              join script_pages sp on ra.scriptname = sp.scriptname and ra.err_page_seq = sp.page_seq
+              join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
               where task_succeed = 0
               and s.respavail = 'avail'
               and s.source = 'API'
@@ -168,14 +168,14 @@ make.graphs.allflows.perc = function () {
               union all
               select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, ra.known_error_type page_error_type, ra.scriptname scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
               from run_avail ra 
-              join stat s on s.script_name = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
+              join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
               where task_succeed = 0
               and s.respavail = 'avail'
               and s.source = 'API'
               and ra.known_error = 1
               group by 1,2,3,4
               union all
-              select s.date, 1, '0-available' page_error_type, s.script_name, s.nmeas number, 100.0 * s.value perc
+              select s.date, 1, '0-available' page_error_type, s.scriptname, s.nmeas number, 100.0 * s.value perc
               from stat s
               where s.respavail = 'avail'
               and s.source = 'API'
@@ -195,8 +195,8 @@ make.graphs.allflows.perc = function () {
   # 1. naar percentages
   query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, page_type page_error_type, ra.scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
             from run_avail ra 
-            join script_pages sp on ra.scriptname = sp.script_name and ra.err_page_seq = sp.page_seq
-            join stat s on s.script_name = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
+            join script_pages sp on ra.scriptname = sp.scriptname and ra.err_page_seq = sp.page_seq
+            join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
             where task_succeed = 0
             and s.respavail = 'avail'
             and s.source = 'API'
@@ -205,7 +205,7 @@ make.graphs.allflows.perc = function () {
             union all
             select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, ra.known_error_type page_error_type, ra.scriptname scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
             from run_avail ra 
-            join stat s on s.script_name = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
+            join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
             where task_succeed = 0
             and s.respavail = 'avail'
             and s.source = 'API'
@@ -227,7 +227,7 @@ make.graphs.allflows.perc = function () {
   # Errors-per-topdomain-perc.png
   query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, elt_topdomain topdomain, ra.scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
             from run_avail ra 
-            join stat s on s.script_name = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
+            join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
             where task_succeed = 0
             and s.respavail = 'avail'
             and s.source = 'API'
@@ -236,7 +236,7 @@ make.graphs.allflows.perc = function () {
             union all
             select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, ra.known_error_type page_error_type, ra.scriptname scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
             from run_avail ra 
-            join stat s on s.script_name = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
+            join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
             where task_succeed = 0
             and s.respavail = 'avail'
             and s.source = 'API'
@@ -291,8 +291,8 @@ make.graphs.allflows.perc = function () {
   # 1. naar percentages
   query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, page_type page_error_type, ra.scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
             from run_avail ra 
-            join script_pages sp on ra.scriptname = sp.script_name and ra.err_page_seq = sp.page_seq
-            join stat s on s.script_name = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
+            join script_pages sp on ra.scriptname = sp.scriptname and ra.err_page_seq = sp.page_seq
+            join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
             where task_succeed = 0
             and s.respavail = 'avail'
             and s.source = 'API'
@@ -314,7 +314,7 @@ make.graphs.allflows.perc = function () {
   # Errors-per-topdomain-perc.png
   query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, elt_topdomain topdomain, ra.scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
             from run_avail ra 
-            join stat s on s.script_name = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
+            join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
             where task_succeed = 0
             and s.respavail = 'avail'
             and s.source = 'API'
@@ -367,8 +367,8 @@ make.graphs.allflows.perc.old = function () {
   
   query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, page_type, ra.scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
   from run_avail ra 
-  join script_pages sp on ra.scriptname = sp.script_name and ra.err_page_seq = sp.page_seq
-  join stat s on s.script_name = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
+  join script_pages sp on ra.scriptname = sp.scriptname and ra.err_page_seq = sp.page_seq
+  join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
   where task_succeed = 0
   and s.respavail = 'avail'
   and s.source = 'API'
@@ -391,14 +391,14 @@ make.graphs.allflows.perc.old = function () {
   # ook avail als eerste, is nu opvulling tot 100%.
   query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, page_type, ra.scriptname scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
   from run_avail ra 
-  join script_pages sp on ra.scriptname = sp.script_name and ra.err_page_seq = sp.page_seq
-  join stat s on s.script_name = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
+  join script_pages sp on ra.scriptname = sp.scriptname and ra.err_page_seq = sp.page_seq
+  join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
   where task_succeed = 0
   and s.respavail = 'avail'
   and s.source = 'API'
   group by 1,2,3,4
   union
-  select s.date, 1, '0-available', s.script_name, s.nmeas number, 100.0 * s.value perc
+  select s.date, 1, '0-available', s.scriptname, s.nmeas number, 100.0 * s.value perc
   from stat s
   where s.respavail = 'avail'
   and s.source = 'API'
@@ -418,7 +418,7 @@ make.graphs.allflows.perc.old = function () {
   # Errors-per-topdomain-perc.png
   query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, elt_topdomain topdomain, ra.scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
   from run_avail ra 
-  join stat s on s.script_name = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
+  join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
   where task_succeed = 0
   and s.respavail = 'avail'
   and s.source = 'API'
