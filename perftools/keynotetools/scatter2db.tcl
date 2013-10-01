@@ -587,14 +587,6 @@ proc handle_element {db scriptrun_id page_id elt basepage scriptname datetime pa
   $db insert pageitem $dct
 }
 
-proc det_urlnoparams {url} {
-  if {[regexp {^([^\?\;]*)} $url z res]} {
-    return $res 
-  } else {
-    return $url 
-  }
-}
-
 proc is_read {db filename} {
   if {[llength [db_query [$db get_conn] "select id from logfile where filename='[file tail $filename]'"]] > 0} {
     return 1 
