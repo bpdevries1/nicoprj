@@ -1,4 +1,3 @@
-# #!/usr/bin/env tclsh86
 # this is a lib, no bash (env) start needed.
 
 package require tdbc::sqlite3
@@ -195,6 +194,17 @@ proc fill_urlnoparams {db} {
   log info "Updated pageitem.urlnoparams (several queries)"      
 }
 
+# @note fill_urlnoparams is really slow on DB's (could take 30 minutes+ per DB), so try this one.
+# @note add_topdomain is similar, takes 5 minutes (also a bit long).
+proc fill_urlnoparams2 {db} {
+  [$db get_db_handle] function det_urlnoparams det_urlnoparams
+
+  set query "update pageitem
+             set urlnoparams = det_urlnoparams(url)
+             where urlnoparams is null"
+  $db exec2 $query -log
+}
+
 # want to calc top 20 items from last week data. But use last moment of measurements in the DB, not current time.
 proc det_last_week {db} {
   set res [$db query "select date(max(r.ts_cet), '-7 days') lastweek from scriptrun r"]
@@ -235,10 +245,12 @@ proc make_run_check_myphilips {db} {
   $db exec "update checkrun set real_succeed = 1 where task_succeed = 1 and has_home_jsp = 1 and has_error_code = 0 and has_prodreg = 0"
 }
 
+# @note also used in kn-migrations
 proc has_db {el} {
   return "has_$el" 
 }
 
+# @note also used in kn-migrations
 proc has_dbdef {el} {
   return "has_$el integer" 
 }
@@ -432,6 +444,16 @@ proc det_topdomain {domain} {
     }
   }  
 }
+
+proc det_urlnoparams {url} {
+  # add ; or ? to the returned string.
+  if {[regexp {^([^\? \;]*.)} $url z res]} {
+    return $res 
+  } else {
+    return $url 
+  }
+}
+
 
 # create run_avail table, fill with task_succeed and underlying reasons for failure.
 proc make_run_avail {db dir dargv} {
