@@ -1,7 +1,7 @@
 MyPhilips-BR
 MyPhilips-CN
 MyPhilips-DE
-MyPhilips-DE
+MyPhilips-FR
 MyPhilips-RU
 MyPhilips-UK
 MyPhilips-US
