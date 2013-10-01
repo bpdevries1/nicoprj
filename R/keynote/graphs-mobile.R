@@ -57,9 +57,6 @@ make.mobile.graphs = function(dir="c:/projecten/Philips/KN-AN-Mobile/Mobile-land
   df = add.psxtime(db.query(db, query), "ts_cet", "psx_date",format="%Y-%m-%d %H:%M:%S")
   # dfm = melt(df, measure.vars=c("loadtime","dnstime","connecttime","reqtime","firstpackettime","remainpacketstime"))
   dfm = melt(df, id.vars=c("ts_cet","psx_date","scriptname","domain"))
-  p=qplot(psx_date, value, data=dfm, geom="line", colour=variable) +
-    labs(title = concat("Sum of network times"), x="Date", y="Sum network times (sec)") +
-    facet_wrap(~ domain, scales="free", ncol=1)
   p=qplot(psx_date, value, data=dfm, geom="line") +
     labs(title = concat("Sum of network times"), x="Date", y="Sum network times (sec)") +
     facet_grid(variable ~ domain, scales="free")

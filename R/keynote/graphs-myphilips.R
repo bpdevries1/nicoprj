@@ -7,13 +7,16 @@ main = function () {
   # @note maar wel als je RStudio vanuit cygwin bash start, dan is ~ goed gezet.
   # setwd("c:/projecten/Philips/KNDL")
   # setwd("c:/projecten/Philips/KN-Analysis")
-  setwd("c:/projecten/Philips/KN-AN-Mobile")
+  # setwd("c:/projecten/Philips/KN-AN-Mobile")
+  setwd("c:/projecten/Philips/KN-AN-MyPhilips")
   
   dirnames = Sys.glob("*")
   for (dirname in dirnames) {
     make.graphs(dirname)
   }
-  
+
+# Lines below for testing.
+#   make.graphs("MyPhilips-BR")
 #   make.graphs("MyPhilips-CN")
 #   make.graphs("MyPhilips-DE")
 #   make.graphs("MyPhilips-FR")
@@ -63,12 +66,14 @@ graph.signin = function() {
 # scriptname = "MyPhilips-CN"
 # scriptname = "CBF-CN-AC4076"
 make.graphs = function(scriptname="MyPhilips-CN") {
+  print(concat("Making graphs for: ", scriptname))
   setwd(scriptname)
   db = db.open("keynotelogs.db")
   #graph.mobile.dashboard(scriptname, db)
   #graph.mobile.dashboard2(scriptname, db)
   # graph.checks(scriptname, db)
   graph.pageload.pages.domains(scriptname, db)
+  graph.cloudfront(scriptname, db)
   db.close(db)
   setwd("..")  
 }
@@ -128,6 +133,7 @@ graph.pageload.pages.domains = function(scriptname, db) {
   # fill.helper.tables(db, scriptname)
   
   # scriptname = "MyPhilips-DE"
+  # scriptname = "MyPhilips-CN"
   query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, avg(0.001*p.delta_user_msec) pageload
            from scriptrun r, checkrun c, page p
            where c.scriptrun_id = r.id
@@ -151,26 +157,6 @@ graph.pageload.pages.domains = function(scriptname, db) {
   
   # per domain: sum of element load times (not exactly, as things are loaded in parallel, but should give a good indication)
   # cloudfront may prove difficult because of the subdomain, but maybe specific subdomains give problems. So first check.
-  # query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, i.domain, sum(0.001*i.element_delta) loadtime
-  query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, i.domain, avg(0.001*i.element_delta) loadtime
-           from scriptrun r, checkrun c, page p, pageitem i
-           where c.scriptrun_id = r.id
-           and c.real_succeed = 1
-           and p.scriptrun_id = r.id
-           and i.page_id = p.id
-           and not i.domain = 'philips.112.2o7.net'
-           group by 1,2,3
-           order by 1,2,3"
-  df = add.psxtime(db.query(db, query), "date", "psx_date")
-  p = qplot(psx_date, loadtime, data=df, geom="line", colour=domain) +
-    geom_point(data=df, aes(x=psx_date, y=loadtime, shape=domain)) +
-    # scale_shape(solid=FALSE) +
-    # scale_shape_manual(values=1:30) +
-    scale_shape_manual(values=rep(1:25,2)) +
-    labs(title = concat("Average load times per page, domain and day for: ", scriptname), x="Date", y="Avg load time (sec)") +
-    facet_grid(pagenr ~ ., scales="free_y")
-  ggsave(concat(scriptname, "-pageload-domain-avg.png"), dpi=100, width = 11, height=7, plot=p)
-  
   query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, i.domain, sum(0.001*i.element_delta)/rc.number loadtime
          from scriptrun r, checkrun c, page p, pageitem i, runcount rc
          where c.scriptrun_id = r.id
@@ -189,36 +175,40 @@ graph.pageload.pages.domains = function(scriptname, db) {
     labs(title = concat("Sum of item load times per page, domain and day for: ", scriptname), x="Date", y="Sum load time (sec)") +
     facet_grid(pagenr ~ ., scales="free_y")
   ggsave(concat(scriptname, "-pageload-domain-runtotal.png"), dpi=100, width = 11, height=7, plot=p)
-  
-  # per extension
-  query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, i.extension, avg(0.001*i.element_delta) loadtime
-           from scriptrun r, checkrun c, page p, pageitem i
-           where c.scriptrun_id = r.id
-           and c.real_succeed = 1
-           and p.scriptrun_id = r.id
-           and i.page_id = p.id
-           and not i.domain = 'philips.112.2o7.net'
-           group by 1,2,3
-           order by 1,2,3"
+
+  # per topdomain: sum of element load times (not exactly, as things are loaded in parallel, but should give a good indication)
+  # cloudfront may prove difficult because of the subdomain, but maybe specific subdomains give problems. So first check.
+  query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, i.topdomain, sum(0.001*i.element_delta)/rc.number loadtime
+         from scriptrun r, checkrun c, page p, pageitem i, runcount rc
+         where c.scriptrun_id = r.id
+         and c.real_succeed = 1
+         and p.scriptrun_id = r.id
+         and i.page_id = p.id
+         and rc.date = strftime('%Y-%m-%d', r.ts_cet)
+         and not i.domain = 'philips.112.2o7.net'
+         group by 1,2,3
+         order by 1,2,3"     
   df = add.psxtime(db.query(db, query), "date", "psx_date")
-  p = qplot(psx_date, loadtime, data=df, geom="line", colour=extension) +
-    geom_point(data=df, aes(x=psx_date, y=loadtime, shape=extension)) +
+  p = qplot(psx_date, loadtime, data=df, geom="line", colour=topdomain) +
+    geom_point(data=df, aes(x=psx_date, y=loadtime, shape=topdomain)) +
     # scale_shape(solid=FALSE) +
     scale_shape_manual(values=rep(1:25,2)) +
-    labs(title = concat("Average load times per page, extension and day for: ", scriptname), x="Date", y="Avg load time (sec)") +
+    labs(title = concat("Sum of item load times per page, topdomain and day for: ", scriptname), x="Date", y="Sum load time (sec)") +
     facet_grid(pagenr ~ ., scales="free_y")
-  ggsave(concat(scriptname, "-pageload-extension-avg.png"), dpi=100, width = 11, height=7, plot=p)
+  ggsave(concat(scriptname, "-pageload-topdomain-runtotal.png"), dpi=100, width = 11, height=7, plot=p)
   
+  
+  # per extension
   query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, i.extension, sum(0.001*i.element_delta)/rc.number loadtime
-  from scriptrun r, checkrun c, page p, pageitem i, runcount rc
-  where c.scriptrun_id = r.id
-  and c.real_succeed = 1
-  and p.scriptrun_id = r.id
-  and i.page_id = p.id
-  and rc.date = strftime('%Y-%m-%d', r.ts_cet)
-  and not i.domain = 'philips.112.2o7.net'
-  group by 1,2,3
-  order by 1,2,3"     
+            from scriptrun r, checkrun c, page p, pageitem i, runcount rc
+            where c.scriptrun_id = r.id
+            and c.real_succeed = 1
+            and p.scriptrun_id = r.id
+            and i.page_id = p.id
+            and rc.date = strftime('%Y-%m-%d', r.ts_cet)
+            and not i.domain = 'philips.112.2o7.net'
+            group by 1,2,3
+            order by 1,2,3"     
   df = add.psxtime(db.query(db, query), "date", "psx_date")
   p = qplot(psx_date, loadtime, data=df, geom="line", colour=extension) +
     geom_point(data=df, aes(x=psx_date, y=loadtime, shape=extension)) +
@@ -229,13 +219,13 @@ graph.pageload.pages.domains = function(scriptname, db) {
   ggsave(concat(scriptname, "-pageload-extension-runtotal.png"), dpi=100, width = 11, height=7, plot=p)
     
   # only top 20 page items, use helper tables (already filled here)
-  query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, i.scontent_type url, sum(0.001*i.element_delta)/rc.number loadtime
+  query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, i.urlnoparams url, sum(0.001*i.element_delta)/rc.number loadtime
     from scriptrun r, checkrun c, page p, pageitem i, runcount rc, maxitem m
     where c.scriptrun_id = r.id
     and c.real_succeed = 1
     and p.scriptrun_id = r.id
     and i.page_id = p.id
-    and i.scontent_type = m.url
+    and i.urlnoparams = m.url
     and p.page_seq = m.page_seq
     and rc.date = strftime('%Y-%m-%d', r.ts_cet)
     and not i.domain = 'philips.112.2o7.net'
@@ -252,30 +242,6 @@ graph.pageload.pages.domains = function(scriptname, db) {
     theme(legend.direction="vertical") +
     theme(legend.key.height=unit(10, "points"))
   ggsave(concat(scriptname, "-pageload-url-runtotal.png"), dpi=100, width = 11, height=11, plot=p)
-  
-  # ook als average, kijken of er dan hetzelfde uitkomt.
-  query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, i.scontent_type url, avg(0.001*i.element_delta) loadtime
-    from scriptrun r, checkrun c, page p, pageitem i, maxitem m
-    where c.scriptrun_id = r.id
-    and c.real_succeed = 1
-    and p.scriptrun_id = r.id
-    and i.page_id = p.id
-    and i.scontent_type = m.url
-    and p.page_seq = m.page_seq
-    and not i.domain = 'philips.112.2o7.net'
-    group by 1,2,3
-    order by 1,2,3"     
-  df = add.psxtime(db.query(db, query), "date", "psx_date")
-  p = qplot(psx_date, loadtime, data=df, geom="line", colour=url) +
-    geom_point(data=df, aes(x=psx_date, y=loadtime, shape=url)) +
-    # scale_shape(solid=FALSE) +
-    scale_shape_manual(values=rep(1:25,2)) +
-    labs(title = concat("Average item load times per page, url and day for: ", scriptname), x="Date", y="Avg load time (sec)") +
-    facet_grid(pagenr ~ ., scales="free_y") +
-    theme(legend.position="bottom") +
-    theme(legend.direction="vertical") +
-    theme(legend.key.height=unit(10, "points"))
-  ggsave(concat(scriptname, "-pageload-url-avg.png"), dpi=100, width = 11, height=11, plot=p)
 
   # #elements and #bytes per page: does this increase?
   # elements
@@ -299,13 +265,13 @@ graph.pageload.pages.domains = function(scriptname, db) {
   # bytes for the 2 problematic URL's:
   # https://secure.philips.de/services/services/JanrainAuthenticationWebService/login?
   # https://philips.janraincapture.com/widget/traditional_signin.jsonp
-  query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, i.scontent_type url, avg(1*i.content_bytes) content_bytes
+  query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, i.urlnoparams url, avg(1*i.content_bytes) content_bytes
     from scriptrun r, checkrun c, page p, pageitem i, maxitem m
     where c.scriptrun_id = r.id
     and c.real_succeed = 1
     and p.scriptrun_id = r.id
     and i.page_id = p.id
-    and i.scontent_type = m.url
+    and i.urlnoparams = m.url
     and p.page_seq = m.page_seq
     and not i.domain = 'philips.112.2o7.net'
     group by 1,2,3
@@ -321,60 +287,35 @@ graph.pageload.pages.domains = function(scriptname, db) {
     theme(legend.direction="vertical") +
     theme(legend.key.height=unit(10, "points"))
   ggsave(concat(scriptname, "-content-bytes-url-avg.png"), dpi=100, width = 11, height=11, plot=p)
-  
-  
 }
 
-fill.helper.tables.old = function(db, scriptname="MyPhilips-DE") {
-  dbSendQuery(db, "drop table if exists runcount")
-  dbSendQuery(db, "create table runcount as
-    select strftime('%Y-%m-%d', r.ts_cet) date, count(*) number
-    from scriptrun r, checkrun c
-    where r.id = c.scriptrun_id
-    and c.real_succeed = 1
-    group by 1")
+graph.cloudfront = function(scriptname, db) {
+  query = "select i.date_cet date, i.page_seq pagenr, i.topdomain topdomain, 
+          sum(0.001*i.element_delta)/rc.number loadtime,
+          sum(0.001*i.dns_delta)/rc.number dnstime,
+          sum(0.001*i.connect_delta)/rc.number connecttime,
+          sum(0.001*i.request_delta)/rc.number reqtime,
+          sum(0.001*i.first_packet_delta)/rc.number firstpackettime,
+          sum(0.001*i.remain_packets_delta)/rc.number remainpacketstime,
+          sum(0.001*system_delta)/rc.number clienttime
+          from checkrun c, pageitem i, runcount rc
+          where c.scriptrun_id = i.scriptrun_id
+          and c.real_succeed = 1
+          and rc.date = i.date_cet
+          and i.topdomain = 'cloudfront.net'
+          and i.ts_cet > '2013-08-22'
+          group by 1,2,3
+          order by 1,2,3"    
+  df = db.query.dt(db, query)
 
-  # helpers to show top 20 URL's (page items)
-  dbSendQuery(db, "drop table if exists maxitem")
-  
-  dbSendQuery(db, "CREATE TABLE maxitem (id integer primary key autoincrement, 
-                  url, page_seq, loadtime)")
-  
-  dbSendQuery(db, "update pageitem
-                    set scontent_type = url
-                    where not url like '%?%'
-                    and scontent_type is null")
-  
-  # instr is not included in R SQLite lib, so exec (in Tcl from cmdline)
-  # after updating from 0.11.2->0.11.4 (6-9-2013) instr is available!
-  # print("Shell exec not working yet, run Tcl script before: c:/nico/nicoprj/R/keynote/fill_url.tcl")
-  # shell(concat("tclsh c:/nico/nicoprj/R/keynote/fill_url.tcl c:/projecten/Philips/KN-Analysis/", scriptname, "/keynotelogs.db"), translate=TRUE)
-  # shell.exec, system, shell commands.
-  
-  # 6-9-2013 shell also works:
-  #> tclsh = "c:/develop/tcl86/bin/tclsh86.exe"
-  #> tclscr = "c:/aaa/test.tcl"
-  #> shell(concat(tclscr, " a b c"), tclsh, flag=NULL)
-  #Testing calling tcl from R. args=a b c
-  #> shell(paste(tclscr, 1, 2, 3), tclsh, flag=NULL)
-  #Testing calling tcl from R. args=1 2 3
-  
-  dbSendQuery(db, "update pageitem
-                    set scontent_type = substr(url, 1, instr(url, '?'))
-                    where url like '%?%'
-                    and scontent_type is null")
-  
-  dbSendQuery(db, "insert into maxitem (url, page_seq, loadtime)
-                    select i.scontent_type, p.page_seq, avg(0.001*i.element_delta) loadtime
-                    from scriptrun r, page p, pageitem i, checkrun c
-                    where c.scriptrun_id = r.id
-                    and p.scriptrun_id = r.id
-                    and i.page_id = p.id
-                    and c.real_succeed = 1
-                    and r.ts_cet > '2013-08-26'
-                    group by 1,2
-                    order by 3 desc
-                    limit 20")
+  # dfm = melt(df, measure.vars=c("loadtime","dnstime","connecttime","reqtime","firstpackettime","remainpacketstime"))
+  dfm = melt(df, id.vars=c("date", "date_psx","pagenr", "topdomain"))
+  p=qplot(date_psx, value, data=dfm, geom="line", colour=variable, shape=variable) +
+    geom_point(data=dfm, aes(x=date_psx, y=value, shape=variable)) +
+    labs(title = "Sum of network times for Cloudfront", x="Date", y="Sum network times (sec)") +
+    scale_shape_manual(values=rep(1:25,2)) +
+    facet_grid(pagenr ~ ., scales="free")
+  ggsave("Network-times-cloudfront.png", dpi=100, width = 10, height=9, plot=p)
 }
 
 test.legend = function() {
