@@ -98,6 +98,8 @@ migrate_proc add_fill_task_succeed "Fill task_succeed field" {
   set_task_succeed_calc $db
 }
 
+# @note als je dezen even niet wilt (want ze duren lang), dan gewoon uitcommenten en scatter2db opnieuw starten
+#       of "if 0" omheen zetten.
 migrate_proc add_fill_topdomain "Add and fill topdomain field" {
   $db exec2 "alter table pageitem add topdomain" -log -try
   add_topdomain $db 0 0 ; # don't clean first, new field. Also don't check first.
@@ -105,5 +107,86 @@ migrate_proc add_fill_topdomain "Add and fill topdomain field" {
 
 migrate_proc add_fill_urlnoparams "Add and fill urlnoparams field" {
   $db exec2 "alter table pageitem add urlnoparams" -log -try
-  fill_urlnoparams $db
+  fill_urlnoparams2 $db
 }
+
+if {0} {
+# add checkrun, first define helper procs
+proc add_checkrun {db} {
+  set has_fields {store_page wrb_jsp results_jsp error_jsp a_png error_code youtube addthis support_nav_error}
+  set db_has_fields [lmap el $has_fields {has_db $el}]
+  set dbdef_has_fields [lmap el $has_fields {has_dbdef $el}]
+  set query "create table checkrun (scriptrun_id integer, ts_cet, task_succeed integer, real_succeed integer, [join $dbdef_has_fields ", "])"
+  $db exec2 $query -log
+  $db exec2 "create index ix_checkrun_1 on checkrun (scriptrun_id)" -log
+  return $has_fields
+}
+
+# @todo create and filled based on Dealer Locator code, still have to do:
+# based on Myphilips and generic
+# filling new records as they are being read.
+migrate_proc add_fill_checkrun "Add and fill checkrun table" {
+  set has_fields [add_checkrun $db]
+  set query "insert into checkrun (scriptrun_id, ts_cet, task_succeed, real_succeed, [join $db_has_fields ", "])
+            select id, ts_cet, task_succeed, 0, [join [repeat [llength $has_fields] "0"] ", "]
+            from scriptrun"
+  $db exec2 $query -log          
+  # @todo maybe check type of script and which fields need to be filled.
+  # check for the existence of the three jsp pages of store locator.
+  # if there is something with retail_store_locator in this script, then do the check for A.png.
+  update_checkrun_url_like $db has_store_page "%retail_store_locator%"            
+            
+  update_checkrun_url_like $db has_wrb_jsp "%/wrb_retail_store_locator_results.jsp%"            
+  update_checkrun_url_like $db has_results_jsp "%/retail_store_locator_results.jsp%"            
+  update_checkrun_url_like $db has_error_jsp "%/retail_store_locator.jsp%"            
+  update_checkrun_url_like $db has_a_png "%/A.png%"            
+
+  # for CN, should not contain youtube and addthis
+  update_checkrun_url_like $db has_youtube "%youtube%"            
+  update_checkrun_url_like $db has_addthis "%addthis%"            
+  
+  # error 4006 is not serious and happens quite a lot: Cannot set WinInet status callback for synchronous sessions. Support for Java Applets download measurements
+  # more domains are excluded, ip address is set to 0.0.0.0 or NA.
+  # @todo check if runs do have an A.png, but also errors, and marked (real_succeed) as not successful.
+  $db exec2 "update checkrun set has_error_code = 1 where scriptrun_id in (
+              select distinct i.scriptrun_id
+              from pageitem i
+              where i.domain != 'philips.112.2o7.net' 
+              and i.error_code <> ''
+              and i.error_code <> '4006'
+              and i.ip_address != '0.0.0.0'
+              and i.ip_address != 'NA'
+            )" -log
+  # nav to support page goes to something else
+  if {0} {
+    # @todo support_page error goed vullen, 26-9-2013 voor availability/Andre nog niet zo belangrijk
+    # lijkt op fout op:                   and not i.url like '%t=support%'
+    set support_page_seq [det_support_page_seq $db $dir]
+    if {$support_page_seq == 0} {
+      log warn "Support page seq not found, don't look for errors on this page" 
+    } else {
+      log info "Support page seq: $support_page_seq"
+      # @todo look for nav error not t=support found in (complete!) URL.
+      set query "update checkrun set has_support_nav_error = 1' 
+                where scriptrun_id in (
+                  select distinct i.scriptrun_id
+                  from pageitem i join page p on p.id = i.page_id
+                  where i.basepage = 1
+                  and p.page_seq = $support_page_seq
+                  and not i.url like '%t=support%'
+                )"
+      log debug "query: $query"              
+      $db exec2 $query -log              
+      log info "Look for support-page errors finished"
+    }
+  }
+  $db exec2 "update checkrun set real_succeed = 1 
+             where task_succeed = 1 and has_a_png = 1" -log
+  # if this script has no retail store pages, then don't check for A.png.
+  $db exec2 "update checkrun set real_succeed = 1 
+             where task_succeed = 1 and has_store_page = 0" -log
+  
+  
+}
+
+} ; # end of if 0
