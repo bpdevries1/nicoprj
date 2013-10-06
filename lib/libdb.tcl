@@ -173,7 +173,8 @@ oo::class create dbwrapper {
     $stmt close
     return $res
   }
-   
+  
+  # @todo idea determine tabledef's from actual table definitions in the (sqlite) db.
   method add_tabledef {table args} {
     my variable db_tabledefs
     dict set db_tabledefs $table [make_table_def_keys $table {*}$args]  
