@@ -1,0 +1,201 @@
+R starten en besturen vanuit Tcl
+
+exec lijkt niet direct te gebruiken, maar open kan mss ook nog
+of mss iets met pipes doen.
+
+Doel is ook niet direct interactief gebruik, dan Rstudio waarsch beter,
+maar meer automatische, eerder wel gemaakt dat ik R aanroep, maar dan moet
+je steeds libs inladen etc, is best wel traag.
+
+set c [open "|c:/develop/R/R-2.15.3/bin/R.exe" {RDWR}]
+set procid [pid $c]
+
+proc read_c {c} {
+  while {![eof $c]} {
+    puts [gets $c]
+  }
+}
+
+Dit hierboven werkt niet zo, R geeft geen output, weinig vertrouwen dat 'ie
+de input goed doet, zou evt expliciet kunnen testen met een side effect.
+
+Maar wel Expect kunnen installeren, dus biedt ook hoop.
+
+Zoek: control R session from Tcl/python/ruby.
+
+control R session from Tcl Expect
+
+R cmdline params.
+Rscript is een andere, maar wil ik eigenlijk expliciet niet, juist soort van 
+interactief houden.
+
+Tcltk package in R is andere kant op: tcl functies (vooral Tk) gebruiken vanuit
+R. mss nog wel eens leuk voor interactieve grafieken, maar niet wat ik nu wil.
+
+Er is ook autoexpect, maar niet direct te vinden. Cygwin install werkt nu niet via
+telefoon wifi hotspot.
+
+spawn c:/develop/R/R-2.15.3/bin/R.exe
+
+7780
+
+send "library(plyr)"
+
+er was iets met output redirect vanuit R, evt hier te gebruiken.
+
+send "sink(\"c:/aaa/sink2.txt\")"
+send "\r"
+send "print(1234)"
+send "\r"
+send "sink()"
+send "\r"
+
+Nu 772k
+
+send "library(RSQLite) \r"
+
+send "sink(\"c:/aaa/sink2.txt\")"
+send "print(1234)"
+send "sink()"
+-> dit werkt niet, ook direct achter elkaar.
+
+2 opties:
+* \r erbij -> ja, dan wel.
+* beetje tijd ertussen.->not
+
+Dan \r op eind vd regel erbij.
+
+send "sink(\"c:/aaa/sink3.txt\")\r"
+send "print(12345)\r"
+send "sink()\r"
+
+werkt ook!
+
+% info vars
+tcl_rcFileName tcl_version argv0 argv tcl_interactive exp_library user_spawn_id
+any_spawn_id auto_path errorCode errorInfo auto_execs spawn_out auto_index env tcl_patchLevel spawn_id exp_exec_library expect_library argc error_spawn_id timeout tcl_library tcl_platform
+% set spawn_id
+exp4
+% set user_spawn_id
+exp1
+%
+
+Vraag of expect nodig is, of dat |open toch ook werkt, want niet gechecked:
+* of er stiekem toch output kwam
+* door \r ook mee te sturen.
+
+Nog wel nodig:
+* output lezen: kan evt ook met outputfile, maar is 'ie dan ook meteen te lezen?
+  * want als je in een script draait, wil je de input-buffer niet overflowen. Dus weten
+    wanneer 'ie weer klaar is.
+* proces stoppen: wel netjes, niet direct nodig. Pid wordt geretourneerd, dus kill $pid kan ook.
+  * of anders een q() commando naar R.
+* in een proc uitvoeren, zijn de global vars wel beschikbaar?
+* send -i xx doen.
+
+Laatst ook al tcl/script vanuit R aanroepen, dit lukt wel. Was voor instr sql function.
+
+Hoe te testen of wachten op de prompt werkt. Door R commando te draaien die
+wat tijd kost en te loggen wanneer je commando's stuurt.
+
+package require Expect
+spawn c:/develop/R/R-2.15.3/bin/R.exe
+
+proc puts_time {msg} {
+  puts "[clock format [clock seconds]]: $msg"
+}
+
+proc test {} {
+  send "sink(\"c:/aaa/sink-test3.txt\")\r"
+  send "print(12345)\r"
+  puts_time start
+  send "print(1:1000)\r"
+  expect {
+    ">*" { puts action_when_gt_followed_by_anything }
+    "*" { puts action_when_anything }
+    -re ".*" {puts re_action_when_anything }
+    eof { puts action_on_end_of_file }
+    timeout { puts action_on_command_timeout }
+    default { puts action_on_command_timeout_or_eof }
+  }
+  puts_time start1
+  send "print(1:10000)\r"
+  expect {
+    ">*" { pust action_when_gt_followed_by_anything }
+    "*" { puts action_when_anything }
+    eof { puts action_on_end_of_file }
+    timeout { puts action_on_command_timeout }
+    default { puts action_on_command_timeout_or_eof }
+  }
+  puts_time start2
+  send "print(1:100000)\r"
+  expect {
+    ">*" { pust action_when_gt_followed_by_anything }
+    "*" { puts action_when_anything }
+    eof { puts action_on_end_of_file }
+    timeout { puts action_on_command_timeout }
+    default { puts action_on_command_timeout_or_eof }
+  }
+  puts_time start3
+  send "sink()\r"
+}
+
+expect {
+  -re "a*" { action_when_a_followed_by_any_a }
+  "b*" { action_when_b_followed_by_anything }
+  -gl "-re" { action_when_real_dash_r_e }
+  eof { action_on_end_of_file }
+  timeout { action_on_command_timeout }
+  default { action_on_command_timeout_or_eof }
+  -re "(abc)*" { action_on_any_number_of_a_b_c }
+  -re "-?(0|\[1-9]\[0-9]*)?\\.?\[0-9]*" { action_on_float_or_integer }
+}
+
+expect {
+  ">*" { pust action_when_gt_followed_by_anything }
+  eof { puts action_on_end_of_file }
+  timeout { puts action_on_command_timeout }
+  default { puts action_on_command_timeout_or_eof }
+}
+
+expect when anything krijg je dus wel, wil ook wel graag zien wat de anything is.
+lijkt me ook wel normale use case.
+
+Mss zie je nu wel niets omdat:
+* Je outdir redirected hebt.
+* In deze output is > ook niet zichtbaar.
+
+Dan nog een zonder output redirect:
+
+proc test {} {
+  puts_time start
+  send "print(1:1000)\r"
+  expect {
+    ">*" { puts action_when_gt_followed_by_anything }
+    "*" { puts action_when_anything }
+    -re ".*" {puts re_action_when_anything }
+    eof { puts action_on_end_of_file }
+    timeout { puts action_on_command_timeout }
+    default { puts action_on_command_timeout_or_eof }
+  }
+  puts_time start1
+  send "print(1:10000)\r"
+  expect {
+    ">*" { pust action_when_gt_followed_by_anything }
+    "*" { puts action_when_anything }
+    eof { puts action_on_end_of_file }
+    timeout { puts action_on_command_timeout }
+    default { puts action_on_command_timeout_or_eof }
+  }
+  puts_time start2
+  send "print(1:100000)\r"
+  expect {
+    ">*" { pust action_when_gt_followed_by_anything }
+    "*" { puts action_when_anything }
+    eof { puts action_on_end_of_file }
+    timeout { puts action_on_command_timeout }
+    default { puts action_on_command_timeout_or_eof }
+  }
+  puts_time start3
+}
+
