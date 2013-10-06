@@ -6,6 +6,9 @@ package require ndv
 set log [::ndv::CLogger::new_logger [file tail [info script]] info]
 $log set_file "[file tail [info script]].log"
 
+set script_dir [file dirname [info script]]
+source [file join $script_dir download-check.tcl]
+
 # @todo eg Mobile-Android: new script, so no data before certain date, continuously we get zero result. In this case, should stop downloading
 # this data. How to determine?
 
@@ -65,6 +68,8 @@ proc wait_until_next_hour {} {
 }
 
 proc download_keynote_main {dargv} {
+  global dl_check
+  
   set root_dir [:dir $dargv]  
   log info "download_keynote_main: Downloading items to: $root_dir"
   
@@ -101,6 +106,7 @@ proc download_keynote_main {dargv} {
   set nerrors 0
   set api_key [det_api_key [:apikey $dargv]]
   
+  set dl_check [DownloadCheck new $root_dir]
   set sec_ts $sec_start
   while {$sec_ts >= $sec_end} {
     foreach el_config $dct_config {
@@ -115,6 +121,8 @@ proc download_keynote_main {dargv} {
     }
     set sec_ts [expr $sec_ts - 3600] 
   }
+  $dl_check close
+  $dl_check destroy 
   return "ok"
 }
 
@@ -125,20 +133,16 @@ proc make_subdirs {root_dir dct_config} {
 }
 
 proc download_keynote {root_dir el_config sec_ts api_key format } {
+  global dl_check
   set filename [det_filename $root_dir $el_config $sec_ts $format]
-  set filename_read [file join [file dirname $filename] read [file tail $filename]] 
+  if {[$dl_check read? $filename]} {
+    # log info "Already have $filename, continuing" ; # or stopping?
+    return 
+  }
+  
   # use tempname to download to, then in one 'atomic' action rename to the right name, 
   # so a possibly running scatter2db.tcl does not interfere.
   set tempfilename "$filename.temp[expr rand()]"  
-  
-  if {[file exists $filename]} {
-    # log info "Already have $filename, continuing" ; # or stopping?
-    return
-  }
-  # 15-9-2013 Filename can also exist in the 'read' subdirectory.
-  if {[file exists $filename_read]} {
-    return
-  }
 
   lassign [det_slots_pages $el_config] slotidlist transpagelist
   
@@ -165,7 +169,9 @@ proc download_keynote {root_dir el_config sec_ts api_key format } {
   } {
     log_error "Downloaded temp file could not be renamed, continue." 
   }
-  return [check_errors $filename]
+  set status [check_errors $filename]
+  $dl_check set_read $filename $status
+  return $status
 }
 
 proc det_filename {root_dir el_config sec_ts format} {
