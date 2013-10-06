@@ -345,11 +345,11 @@ proc make_run_check_dealer_locator {db dir} {
 # @param like_str should include %'s if needed, will not be added by this proc.
 proc update_checkrun_url_like {db dbfield like_str} {            
   # distinct nu even weg, niet echt nodig, alleen trager.
-  $db exec "update checkrun set $dbfield = 1 where scriptrun_id in (
+  $db exec2 "update checkrun set $dbfield = 1 where scriptrun_id in (
               select i.scriptrun_id
               from pageitem i
               where i.url like '$like_str'
-            )"
+            )" -log
 }
 
 proc make_ip_locations {db} {

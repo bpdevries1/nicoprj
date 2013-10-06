@@ -110,27 +110,34 @@ migrate_proc add_fill_urlnoparams "Add and fill urlnoparams field" {
   fill_urlnoparams2 $db
 }
 
-if {0} {
+# @todo nog even if 0, want niet in 'productie'
+if {1} {
 # add checkrun, first define helper procs
 proc add_checkrun {db} {
-  set has_fields {store_page wrb_jsp results_jsp error_jsp a_png error_code youtube addthis support_nav_error}
+  set has_fields {store_page wrb_jsp results_jsp error_jsp a_png error_code youtube addthis \
+                  support_nav_error home_jsp prodreg}
   set db_has_fields [lmap el $has_fields {has_db $el}]
   set dbdef_has_fields [lmap el $has_fields {has_dbdef $el}]
-  set query "create table checkrun (scriptrun_id integer, ts_cet, task_succeed integer, real_succeed integer, [join $dbdef_has_fields ", "])"
+  set query "create table if not exists checkrun (scriptrun_id integer, ts_cet, task_succeed integer, real_succeed integer, [join $dbdef_has_fields ", "])"
   $db exec2 $query -log
-  $db exec2 "create index ix_checkrun_1 on checkrun (scriptrun_id)" -log
-  return $has_fields
+  $db exec2 "create index if not exists ix_checkrun_1 on checkrun (scriptrun_id)" -log
+  return $db_has_fields
 }
 
 # @todo create and filled based on Dealer Locator code, still have to do:
 # based on Myphilips and generic
 # filling new records as they are being read.
 migrate_proc add_fill_checkrun "Add and fill checkrun table" {
-  set has_fields [add_checkrun $db]
+  log debug "add_fill_checkrun: start"
+  set db_has_fields [add_checkrun $db]
+  log debug "add_fill_checkrun: has_fields: $db_has_fields"
+  # breakpoint
   set query "insert into checkrun (scriptrun_id, ts_cet, task_succeed, real_succeed, [join $db_has_fields ", "])
-            select id, ts_cet, task_succeed, 0, [join [repeat [llength $has_fields] "0"] ", "]
+            select id, ts_cet, task_succeed_calc, 0, [join [repeat [llength $db_has_fields] "0"] ", "]
             from scriptrun"
+  log debug "add_fill_checkrun: insert-query: $query"
   $db exec2 $query -log          
+  log debug "add_fill_checkrun: inserted checkrun records"
   # @todo maybe check type of script and which fields need to be filled.
   # check for the existence of the three jsp pages of store locator.
   # if there is something with retail_store_locator in this script, then do the check for A.png.
@@ -145,17 +152,30 @@ migrate_proc add_fill_checkrun "Add and fill checkrun table" {
   update_checkrun_url_like $db has_youtube "%youtube%"            
   update_checkrun_url_like $db has_addthis "%addthis%"            
   
+  $db exec2 "update checkrun set has_home_jsp = 1 where scriptrun_id in (
+              select distinct i.scriptrun_id
+              from pageitem i
+              where 1*i.page_seq = 2
+              and i.url like '%home.jsp%'
+              and i.domain != 'philips.112.2o7.net'
+            )" -log
+
+  $db exec2 "update checkrun set has_prodreg = 1 where scriptrun_id in (
+              select distinct i.scriptrun_id
+              from pageitem i
+              where i.url like '%prodreg%'
+              and i.domain like 'secure.philips%'
+            )" -log
+            
   # error 4006 is not serious and happens quite a lot: Cannot set WinInet status callback for synchronous sessions. Support for Java Applets download measurements
   # more domains are excluded, ip address is set to 0.0.0.0 or NA.
   # @todo check if runs do have an A.png, but also errors, and marked (real_succeed) as not successful.
   $db exec2 "update checkrun set has_error_code = 1 where scriptrun_id in (
               select distinct i.scriptrun_id
               from pageitem i
-              where i.domain != 'philips.112.2o7.net' 
-              and i.error_code <> ''
-              and i.error_code <> '4006'
-              and i.ip_address != '0.0.0.0'
-              and i.ip_address != 'NA'
+              where i.topdomain not in ('2o7.net', 'adoftheyear.com', 'livecom.net') 
+              and i.error_code not in ('', '200', '4006')
+              and i.ip_address not in ('0.0.0.0', 'NA')
             )" -log
   # nav to support page goes to something else
   if {0} {
@@ -183,10 +203,17 @@ migrate_proc add_fill_checkrun "Add and fill checkrun table" {
   $db exec2 "update checkrun set real_succeed = 1 
              where task_succeed = 1 and has_a_png = 1" -log
   # if this script has no retail store pages, then don't check for A.png.
+  
+  # @note onderstaande waarsch te kort door de bocht, dus nu niet.
   $db exec2 "update checkrun set real_succeed = 1 
              where task_succeed = 1 and has_store_page = 0" -log
   
+  # @note vanuit MyPhilips:             
+  $db exec2 "update checkrun set real_succeed = 1 
+             where task_succeed = 1 and has_home_jsp = 1 and 
+             has_error_code = 0 and has_prodreg = 0"
+  log debug "add_fill_checkrun: finished"
   
-}
+} ; # end of migrate_proc add_fill_checkrun
 
 } ; # end of if 0

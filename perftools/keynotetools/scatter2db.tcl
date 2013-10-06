@@ -17,10 +17,11 @@ set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 $log set_file "[file tail [info script]].log"
 
 # libpostproclogs: set_task_succeed (and maybe others)
-source [file join [file dirname [info script]] libpostproclogs.tcl]
-
-source [file join [file dirname [info script]] libmigrations.tcl]
-source [file join [file dirname [info script]] kn-migrations.tcl]
+set script_dir [file dirname [info script]]
+source [file join $script_dir libpostproclogs.tcl]
+source [file join $script_dir libmigrations.tcl]
+source [file join $script_dir kn-migrations.tcl]
+source [file join $script_dir checkrun-handler.tcl]
 
 proc main {argv} {
   global dargv
@@ -81,6 +82,7 @@ proc wait_until_next_hour_and_half {} {
 }
 
 proc scatter2db_main {dargv} {
+  global cr_handler
   set root_dir [from_cygwin [:dir $dargv]]  
   
   if {[:nomain $dargv]} {
@@ -104,7 +106,7 @@ proc scatter2db_main {dargv} {
 #    migrate_db $dbmain $existing_db    
 #    $dbmain prepare_insert_statements
   }  
-  
+  set cr_handler [checkrun_handler new]
   if {[:justdir $dargv]} {
     # 6-9-2013 also handle current-dir, if script is called with one subdir as param
     # 16-9-2013 not correct, this would create huge keynotelogs.db file in the root when called normally.
@@ -124,7 +126,7 @@ proc scatter2db_main {dargv} {
       }
     }
   }
-  
+  $cr_handler destroy
   return $res
 }
 
@@ -140,6 +142,7 @@ proc ignore_subdir {subdir} {
 }
 
 proc scatter2db_subdir {dargv subdir dbmain} {
+  global cr_handler
   set db_name [file join $subdir "keynotelogs.db"]
   if {[:dropdb $dargv]} {
     file delete $db_name
@@ -162,7 +165,15 @@ proc scatter2db_subdir {dargv subdir dbmain} {
     log info "Existing db: $db_name, don't create tables"
   }
   migrate_db $db $existing_db
-  
+  # @todo nog even if 0, want niet in 'productie'
+  if {1} {
+    set has_fields [add_checkrun $db]
+    $cr_handler set_has_fields $has_fields
+    # [2013-10-06 12:36:27] added {}, so fields are not key fields.
+    $db add_tabledef checkrun {}  \
+      [concat {scriptrun_id ts_cet task_succeed real_succeed} $has_fields]
+  }
+
   $db prepare_insert_statements
   # for test.
   # $db insert logfile {path "test.json"}
@@ -176,7 +187,6 @@ proc scatter2db_subdir {dargv subdir dbmain} {
   log info "Created/updated db $db_name, size is now [file size $db_name]"
   return "ok"
 }
-
 
 proc define_tables {db {pageitem 1}} {
   $db add_tabledef logfile {id} {path filename filesize}
@@ -362,6 +372,7 @@ proc move_read {filename} {
 }
 
 proc read_json_file_db {db filename root_dir {pageitem 1}} {
+  global cr_handler
   if {[is_read $db $filename]} {
     # log info "Already read, ignoring: $filename"
     return
@@ -409,10 +420,16 @@ proc read_json_file_db {db filename root_dir {pageitem 1}} {
         # @todo det_task_succeed has a bug: does not set to 0 when it should, for CBF-CN-HX6921-2013-09-02--13-00.json
         dict set dct task_succeed_calc [det_task_succeed_calc [:task_succeed $dct] pages]
         set scriptrun_id [$db insert scriptrun $dct 1]
-        
+        $cr_handler init
+        $cr_handler set_scriptrun dct $scriptrun_id
         set dct_details [get_details $run]
         foreach page $pages {
           handle_page $db $scriptrun_id $page $dct_details $pageitem [:scriptname $dct] [:datetime $dct]
+        }
+        set dct_checkrun [$cr_handler get_record]
+        # @todo nog even niet in productie.
+        if {1} {
+          $db insert checkrun $dct_checkrun
         }
       }
     }
@@ -464,7 +481,7 @@ proc get_details {run} {
 }
 
 proc handle_page {db scriptrun_id page dct_details pageitem scriptname datetime} {
-  global dargv
+  global dargv cr_handler
   set page_main [dict_get_multi -withname $page page_seq wxn_page_object wxn_page_performance wxn_page_status \
     txnPagePerformance txnPageObject txnPageStatus]
   set dctp [dict_flat $page_main {page_seq connect_delta delta_msec dns_lookup_msec first_packet_delta new_connection \
@@ -523,6 +540,7 @@ proc handle_page {db scriptrun_id page dct_details pageitem scriptname datetime}
       
       # breakpoint ; # page_seq not yet filled.
       $db insert pageitem $dcti2
+      $cr_handler add_pageitem dcti2
     }
   }
   # MyPhilips structure with txnPageDetails looks a bit different, first handle seperately.
@@ -557,6 +575,7 @@ proc handle_page {db scriptrun_id page dct_details pageitem scriptname datetime}
 }
 
 proc handle_element {db scriptrun_id page_id elt basepage scriptname datetime page_seq page_type} {
+  global cr_handler
   if {($elt == "null") || ($elt == "")} {
     return 
   }
@@ -585,6 +604,7 @@ proc handle_element {db scriptrun_id page_id elt basepage scriptname datetime pa
   dict set dct page_type $page_type
   dict set dct urlnoparams [det_urlnoparams $url]
   $db insert pageitem $dct
+  $cr_handler add_pageitem dct
 }
 
 proc is_read {db filename} {

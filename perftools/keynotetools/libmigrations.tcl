@@ -31,6 +31,21 @@ proc migrate_db_step {db version} {
   global migrate_db_procs
   try_eval {
     set procname [dict get $migrate_db_procs $version]
+    log info "Determined procname for $version: $procname"
+    # breakpoint
+  } {
+    log warn "no proc for $version found, returning version so it stops"
+    return $version
+  }
+  return [$procname $db]
+}
+
+proc migrate_db_step_old {db version} {
+  global migrate_db_procs
+  try_eval {
+    set procname [dict get $migrate_db_procs $version]
+    log info "Determined procname for $version: $procname"
+    breakpoint
     return [$procname $db]
   } {
     log warn "no proc for $version found, returning version so it stops"
