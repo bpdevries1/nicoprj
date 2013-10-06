@@ -294,6 +294,7 @@ graph.cloudfront = function(scriptname, db) {
           sum(0.001*i.element_delta)/rc.number loadtime,
           sum(0.001*i.dns_delta)/rc.number dnstime,
           sum(0.001*i.connect_delta)/rc.number connecttime,
+          sum(0.001*i.ssl_handshake_delta)/rc.number ssltime,
           sum(0.001*i.request_delta)/rc.number reqtime,
           sum(0.001*i.first_packet_delta)/rc.number firstpackettime,
           sum(0.001*i.remain_packets_delta)/rc.number remainpacketstime,
@@ -316,6 +317,84 @@ graph.cloudfront = function(scriptname, db) {
     scale_shape_manual(values=rep(1:25,2)) +
     facet_grid(pagenr ~ ., scales="free")
   ggsave("Network-times-cloudfront.png", dpi=100, width = 10, height=9, plot=p)
+  
+  # @todo surround with try-except: only location tables for CN and BR.
+  # c.real_succeed = 1 and   
+  query = "select i.date_cet date, l.location location, count(*) number, avg(0.001*i.element_delta) loadtime, avg(0.001*(i.element_delta-i.system_delta)) loadtime_nc
+            from pageitem i 
+              join checkrun c on c.scriptrun_id = i.scriptrun_id
+              left join location l on l.ip_address = i.ip_address
+            where i.topdomain = 'cloudfront.net'
+            and i.ts_cet > '2013-08-22'
+            and i.ts_cet < (select max(date_cet) from scriptrun)
+            and 1*i.page_seq = 1
+            group by 1, 2"
+  df = db.query.dt(db, query)
+  
+  # both with and without in one graph, facet is type.
+  dfm = melt(df, id.vars = c("date", "location", "number", "date_psx"))
+  p=qplot(date_psx, value, data=dfm, geom="line", colour=location) +
+    geom_point(data=dfm, aes(x=date_psx, y=value, shape=location)) +
+    labs(title = "Average loadtime for Cloudfront elements per location", x="Date", y="Average load time (sec)") +
+    scale_shape_manual(values=rep(1:25,2)) +
+    facet_grid(. ~ variable)
+  ggsave("Loadtimes-type-cloudfront-location.png", dpi=100, width = 8, height=6, plot=p)
+  
+  
+  # @todo both plots in one, use melt and facet.
+  p=qplot(date_psx, loadtime, data=df, geom="line", colour=location) +
+    geom_point(data=df, aes(x=date_psx, y=loadtime, shape=location)) +
+    labs(title = "Average loadtime for Cloudfront elements per location", x="Date", y="Average load time (sec)") +
+    scale_shape_manual(values=rep(1:25,2))
+  ggsave("Loadtimes-cloudfront-location.png", dpi=100, width = 8, height=6, plot=p)
+  p=qplot(date_psx, loadtime_nc, data=df, geom="line", colour=location) +
+    geom_point(data=df, aes(x=date_psx, y=loadtime_nc, shape=location)) +
+    labs(title = "Average loadtime (excl client time) for Cloudfront elements per location", x="Date", y="Average load time (sec)") +
+    scale_shape_manual(values=rep(1:25,2))
+  ggsave("Loadtimes-nc-cloudfront-location.png", dpi=100, width = 8, height=6, plot=p)
+  p=qplot(date_psx, number, data=df, geom="line", colour=location) +
+    geom_point(data=df, aes(x=date_psx, y=number, shape=location)) +
+    labs(title = "Daily #items for Cloudfront elements per location", x="Date", y="Daily #items") +
+    scale_shape_manual(values=rep(1:25,2))
+  ggsave("Loadtimes-cloudfront-location-nitems.png", dpi=100, width = 8, height=6, plot=p)
+  
+  # just total counts
+  query = "select i.date_cet date, count(*) number, 'real' result
+          from pageitem i 
+          join checkrun c on c.scriptrun_id = i.scriptrun_id
+          where c.real_succeed = 1
+          and i.topdomain = 'cloudfront.net'
+          and i.ts_cet > '2013-08-22'
+          and i.ts_cet < (select max(date_cet) from scriptrun)
+          and 1*i.page_seq = 1
+          group by 1,3
+union all
+          select i.date_cet date, count(*) number, 'task' result
+          from pageitem i 
+          join checkrun c on c.scriptrun_id = i.scriptrun_id
+          where i.topdomain = 'cloudfront.net'
+          and c.task_succeed = 1
+          and i.ts_cet > '2013-08-22'
+          and i.ts_cet < (select max(date_cet) from scriptrun)
+          and 1*i.page_seq = 1
+          group by 1,3
+union all
+          select i.date_cet date, count(*) number, 'total' result
+          from pageitem i 
+          where i.topdomain = 'cloudfront.net'
+          and i.ts_cet > '2013-08-22'
+          and i.ts_cet < (select max(date_cet) from scriptrun)
+          and 1*i.page_seq = 1
+          group by 1,3"
+
+  df = db.query.dt(db, query)
+  # @todo both plots in one, use melt and facet.
+  p=qplot(date_psx, number, data=df, geom="line", colour=result) +
+    geom_point(data=df, aes(x=date_psx, y=number, shape=result)) +
+    scale_shape_manual(values=rep(1:25,2)) +
+    labs(title = "Daily #items for Cloudfront elements", x="Date", y="Daily #items")
+  ggsave("cloudfront-numbers.png", dpi=100, width = 8, height=6, plot=p)
+  
 }
 
 test.legend = function() {

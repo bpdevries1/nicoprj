@@ -45,6 +45,7 @@ make.mobile.graphs = function(dir="c:/projecten/Philips/KN-AN-Mobile/Mobile-land
               sum(0.001*i.element_delta) loadtime,
               sum(0.001*i.dns_delta) dnstime,
               sum(0.001*i.connect_delta) connecttime,
+              sum(0.001*i.ssl_handshake_delta) ssltime,
               sum(0.001*i.request_delta) reqtime,
               sum(0.001*i.first_packet_delta) firstpackettime,
               sum(0.001*i.remain_packets_delta) remainpacketstime
