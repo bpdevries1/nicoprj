@@ -193,7 +193,7 @@ make.graphs.allflows.perc = function () {
   ggsave("avail-errors-per-pagetype-perc2.png", dpi=100, width = 17, height=9, plot=p)
 
   # 1. naar percentages
-  query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, page_type page_error_type, ra.scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
+  query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, page_type page_error_type, ra.scriptname scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
             from run_avail ra 
             join script_pages sp on ra.scriptname = sp.scriptname and ra.err_page_seq = sp.page_seq
             join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
@@ -215,7 +215,7 @@ make.graphs.allflows.perc = function () {
   df = db.query.dt(db, query)
   
   # in ggplot2 geen textures/fill patterns mogelijk (Hadley, 25-5-2010)
-  p = ggplot(df, aes(x=date_psx, y=perc, fill=page_type)) + 
+  p = ggplot(df, aes(x=date_psx, y=perc, fill=page_error_type)) + 
     geom_bar(stat = "identity") +
     labs(title = concat("Availability and error-percentage per pagetype and day for CN scripts (perc)"), x="Date", y="Percentage") +
     # facet_wrap(~ scriptname, scales="free", ncol=2) +
@@ -225,7 +225,7 @@ make.graphs.allflows.perc = function () {
   ggsave("avail-errors-per-pagetype-perc.png", dpi=100, width = 17, height=9, plot=p)
   
   # Errors-per-topdomain-perc.png
-  query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, elt_topdomain topdomain, ra.scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
+  query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, elt_topdomain topdomain, ra.scriptname scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
             from run_avail ra 
             join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
             where task_succeed = 0
@@ -234,7 +234,7 @@ make.graphs.allflows.perc = function () {
             and ra.known_error = 0
             group by 1,2,3,4
             union all
-            select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, ra.known_error_type page_error_type, ra.scriptname scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
+            select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, 'KE:'||ra.known_error_type page_error_type, ra.scriptname scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
             from run_avail ra 
             join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
             where task_succeed = 0
@@ -289,7 +289,7 @@ make.graphs.allflows.perc = function () {
   
   # then also graphs with just the unknown errors, one per pagetype and one per domain.
   # 1. naar percentages
-  query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, page_type page_error_type, ra.scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
+  query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, page_type page_error_type, ra.scriptname scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
             from run_avail ra 
             join script_pages sp on ra.scriptname = sp.scriptname and ra.err_page_seq = sp.page_seq
             join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
@@ -302,7 +302,7 @@ make.graphs.allflows.perc = function () {
   df = db.query.dt(db, query)
   
   # in ggplot2 geen textures/fill patterns mogelijk (Hadley, 25-5-2010)
-  p = ggplot(df, aes(x=date_psx, y=perc, fill=page_type)) + 
+  p = ggplot(df, aes(x=date_psx, y=perc, fill=page_error_type)) + 
     geom_bar(stat = "identity") +
     labs(title = concat("Availability and error-percentage per pagetype and day for CN scripts (perc)"), x="Date", y="Percentage") +
     # facet_wrap(~ scriptname, scales="free", ncol=2) +
@@ -312,7 +312,7 @@ make.graphs.allflows.perc = function () {
   ggsave("avail-errors-per-pagetype-perc-unknown.png", dpi=100, width = 17, height=9, plot=p)
   
   # Errors-per-topdomain-perc.png
-  query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, elt_topdomain topdomain, ra.scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
+  query = "select strftime('%Y-%m-%d', ra.ts_cet) date, task_succeed, elt_topdomain topdomain, ra.scriptname scriptname, count(*) number, 100.0 * count(*)/s.nmeas perc
             from run_avail ra 
             join stat s on s.scriptname = ra.scriptname and s.date = strftime('%Y-%m-%d', ra.ts_cet)
             where task_succeed = 0
@@ -343,6 +343,7 @@ make.graphs.allflows.perc = function () {
               group by 1) s on s.date = strftime('%Y-%m-%d', ra.ts_cet)
             where task_succeed = 0
             and ra.known_error = 0
+            group by 1,2,3
             order by 1,2,3"
   df = db.query.dt(db, query)
   

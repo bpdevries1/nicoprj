@@ -74,54 +74,14 @@ make.graphs = function(scriptname="MyPhilips-CN") {
   # graph.checks(scriptname, db)
   graph.pageload.pages.domains(scriptname, db)
   graph.cloudfront(scriptname, db)
+  if ((scriptname == "MyPhilips-CN") || (scriptname == "MyPhilips-BR")) {
+    graph.cloudfront.locations(scriptname, db)
+  }
+  if (scriptname == "MyPhilips-CN") {
+    graph.cloudfront.locations.hongkong(scriptname, db)
+  }
   db.close(db)
   setwd("..")  
-}
-
-graph.mobile.dashboard = function(scriptname, db, max.time = 3.5) {
-  # don't include current day, as it is not finished yet, and avg may still change
-  query = "select r.scriptname, strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq, 0.001*avg(p.delta_msec) pageloadtime
-             from scriptrun r, page p
-             where p.scriptrun_id = r.id
-             and r.ts_cet > '2013-06-20'
-             and r.ts_cet < (select strftime('%Y-%m-%d', max(r1.ts_cet)) from scriptrun r1)
-             group by 1,2,3
-             order by 1,2,3"
-  df = db.query(db, query)
-  df.all = add.psxtime(df, "date", "psx_date")
-  # and ts_cet < strftime('%Y-%m-%d', 'now')
-  max.size = max(df.all$pageloadtime)
-  qplot(psx_date, pageloadtime, data=df.all, geom="line") +
-    labs(title = concat("Average page load time per day for: ", scriptname), x="Date", y="Page load time (sec)") +
-    # scale_y_continuous(limits=c(0, max.size)) +
-    geom_text(aes(psx_date, pageloadtime, label=sprintf("%.1f", pageloadtime)), hjust = 0, vjust = 0, size = 3,
-              colour="blue", data=df.all) +
-    geom_hline(yintercept=max.time, linetype="solid", colour = "red") +
-    facet_grid(page_seq ~ ., scales="free_y")
-  
-  ggsave(concat(scriptname, "-dashboard.png"), dpi=100, width = 11, height=9)
-}
-
-graph.mobile.dashboard2 = function(scriptname, db, max.time = 3.5) {
-  # don't include current day, as it is not finished yet, and avg may still change
-  query = "select r.scriptname, strftime('%Y-%m-%d', r.ts_cet) date, 0.001*avg(p.delta_msec) pageloadtime
-             from scriptrun r, page p
-             where p.scriptrun_id = r.id
-             and r.ts_cet > '2013-06-20'
-             and r.ts_cet < (select strftime('%Y-%m-%d', max(r1.ts_cet)) from scriptrun r1)
-             group by 1,2
-             order by 1,2"
-  df = db.query(db, query)
-  df.all = add.psxtime(df, "date", "psx_date")
-  # and ts_cet < strftime('%Y-%m-%d', 'now')
-  max.size = max(df.all$pageloadtime)
-  qplot(psx_date, pageloadtime, data=df.all, geom="line") +
-    labs(title = concat("Average page load time per day for: ", scriptname), x="Date", y="Page load time (sec)") +
-    # scale_y_continuous(limits=c(0, max.size)) +
-    geom_text(aes(psx_date, pageloadtime, label=sprintf("%.1f", pageloadtime)), hjust = 0, vjust = 0, size = 3,
-              colour="blue", data=df.all) +
-    geom_hline(yintercept=max.time, linetype="solid", colour = "red")
-  ggsave(concat(scriptname, "-dashboard2.png"), dpi=100, width = 11, height=9)
 }
 
 # just report on succeeded scriptruns.
@@ -304,7 +264,6 @@ graph.cloudfront = function(scriptname, db) {
           and c.real_succeed = 1
           and rc.date = i.date_cet
           and i.topdomain = 'cloudfront.net'
-          and i.ts_cet > '2013-08-22'
           group by 1,2,3
           order by 1,2,3"    
   df = db.query.dt(db, query)
@@ -316,8 +275,12 @@ graph.cloudfront = function(scriptname, db) {
     labs(title = "Sum of network times for Cloudfront", x="Date", y="Sum network times (sec)") +
     scale_shape_manual(values=rep(1:25,2)) +
     facet_grid(pagenr ~ ., scales="free")
-  ggsave("Network-times-cloudfront.png", dpi=100, width = 10, height=9, plot=p)
+  ggsave("Network-times-cloudfront.png", dpi=100, width = 11, height=9, plot=p)
   
+
+}
+
+graph.cloudfront.locations = function(scriptname, db) {
   # @todo surround with try-except: only location tables for CN and BR.
   # c.real_succeed = 1 and   
   query = "select i.date_cet date, l.location location, count(*) number, avg(0.001*i.element_delta) loadtime, avg(0.001*(i.element_delta-i.system_delta)) loadtime_nc
@@ -325,7 +288,6 @@ graph.cloudfront = function(scriptname, db) {
               join checkrun c on c.scriptrun_id = i.scriptrun_id
               left join location l on l.ip_address = i.ip_address
             where i.topdomain = 'cloudfront.net'
-            and i.ts_cet > '2013-08-22'
             and i.ts_cet < (select max(date_cet) from scriptrun)
             and 1*i.page_seq = 1
             group by 1, 2"
@@ -337,26 +299,29 @@ graph.cloudfront = function(scriptname, db) {
     geom_point(data=dfm, aes(x=date_psx, y=value, shape=location)) +
     labs(title = "Average loadtime for Cloudfront elements per location", x="Date", y="Average load time (sec)") +
     scale_shape_manual(values=rep(1:25,2)) +
-    facet_grid(. ~ variable)
-  ggsave("Loadtimes-type-cloudfront-location.png", dpi=100, width = 8, height=6, plot=p)
+    facet_grid(. ~ variable) +
+    theme(legend.position="bottom")
+    #theme(legend.direction="vertical") +
+    #theme(legend.key.height=unit(10, "points"))
   
+  ggsave("Loadtimes-type-cloudfront-location.png", dpi=100, width = 11, height=4, plot=p)
   
   # @todo both plots in one, use melt and facet.
   p=qplot(date_psx, loadtime, data=df, geom="line", colour=location) +
     geom_point(data=df, aes(x=date_psx, y=loadtime, shape=location)) +
     labs(title = "Average loadtime for Cloudfront elements per location", x="Date", y="Average load time (sec)") +
     scale_shape_manual(values=rep(1:25,2))
-  ggsave("Loadtimes-cloudfront-location.png", dpi=100, width = 8, height=6, plot=p)
+  ggsave("Loadtimes-cloudfront-location.png", dpi=100, width = 11, height=6, plot=p)
   p=qplot(date_psx, loadtime_nc, data=df, geom="line", colour=location) +
     geom_point(data=df, aes(x=date_psx, y=loadtime_nc, shape=location)) +
     labs(title = "Average loadtime (excl client time) for Cloudfront elements per location", x="Date", y="Average load time (sec)") +
     scale_shape_manual(values=rep(1:25,2))
-  ggsave("Loadtimes-nc-cloudfront-location.png", dpi=100, width = 8, height=6, plot=p)
+  ggsave("Loadtimes-nc-cloudfront-location.png", dpi=100, width = 11, height=6, plot=p)
   p=qplot(date_psx, number, data=df, geom="line", colour=location) +
     geom_point(data=df, aes(x=date_psx, y=number, shape=location)) +
     labs(title = "Daily #items for Cloudfront elements per location", x="Date", y="Daily #items") +
     scale_shape_manual(values=rep(1:25,2))
-  ggsave("Loadtimes-cloudfront-location-nitems.png", dpi=100, width = 8, height=6, plot=p)
+  ggsave("Loadtimes-cloudfront-location-nitems.png", dpi=100, width = 11, height=6, plot=p)
   
   # just total counts
   query = "select i.date_cet date, count(*) number, 'real' result
@@ -364,7 +329,6 @@ graph.cloudfront = function(scriptname, db) {
           join checkrun c on c.scriptrun_id = i.scriptrun_id
           where c.real_succeed = 1
           and i.topdomain = 'cloudfront.net'
-          and i.ts_cet > '2013-08-22'
           and i.ts_cet < (select max(date_cet) from scriptrun)
           and 1*i.page_seq = 1
           group by 1,3
@@ -374,7 +338,6 @@ union all
           join checkrun c on c.scriptrun_id = i.scriptrun_id
           where i.topdomain = 'cloudfront.net'
           and c.task_succeed = 1
-          and i.ts_cet > '2013-08-22'
           and i.ts_cet < (select max(date_cet) from scriptrun)
           and 1*i.page_seq = 1
           group by 1,3
@@ -382,7 +345,6 @@ union all
           select i.date_cet date, count(*) number, 'total' result
           from pageitem i 
           where i.topdomain = 'cloudfront.net'
-          and i.ts_cet > '2013-08-22'
           and i.ts_cet < (select max(date_cet) from scriptrun)
           and 1*i.page_seq = 1
           group by 1,3"
@@ -393,8 +355,115 @@ union all
     geom_point(data=df, aes(x=date_psx, y=number, shape=result)) +
     scale_shape_manual(values=rep(1:25,2)) +
     labs(title = "Daily #items for Cloudfront elements", x="Date", y="Daily #items")
-  ggsave("cloudfront-numbers.png", dpi=100, width = 8, height=6, plot=p)
+  ggsave("cloudfront-numbers.png", dpi=100, width = 11, height=6, plot=p)
+    
+  # SSL time per location wrt ticket #11823. Uses all runs, also failed ones.
+  # scriptname = "MyPhilips-BR" ; db = get.db(scriptname)
+  # scriptname = "MyPhilips-CN" ; db = get.db(scriptname)
+  query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, l.location location, sum(0.001*i.ssl_handshake_delta)/rc.number ssltime
+         from scriptrun r, page p, pageitem i, runcount rc, location l
+         where p.scriptrun_id = r.id
+         and i.page_id = p.id
+         and i.topdomain = 'cloudfront.net'
+         and rc.date = strftime('%Y-%m-%d', r.ts_cet)
+         and i.ip_address = l.ip_address
+         group by 1,2,3
+         order by 1,2,3"     
+  # df = add.psxtime(db.query(db, query), "date", "psx_date")
+  df = db.query.dt(db, query)
+  p = qplot(date_psx, ssltime, data=df, geom="line", colour=location) +
+    geom_point(data=df, aes(x=date_psx, y=ssltime, shape=location)) +
+    scale_shape_manual(values=rep(1:25,2)) +
+    labs(title = concat("Sum of SSL times per page, location and day for: ", scriptname), x="Date", y="Sum SSL time (sec)") +
+    facet_grid(pagenr ~ ., scales="free_y")
+  ggsave(concat(scriptname, "-ssl-location-runtotal.png"), dpi=100, width = 11, height=7, plot=p)
+
+  # After September 15th (very high times for Hong Kong before)
+  query = "select strftime('%Y-%m-%d', r.ts_cet) date, p.page_seq pagenr, l.location location, sum(0.001*i.ssl_handshake_delta)/rc.number ssltime
+         from scriptrun r, page p, pageitem i, runcount rc, location l
+         where p.scriptrun_id = r.id
+         and i.page_id = p.id
+         and i.topdomain = 'cloudfront.net'
+         and rc.date = strftime('%Y-%m-%d', r.ts_cet)
+         and rc.date > '2013-09-15'
+         and i.ip_address = l.ip_address
+         group by 1,2,3
+         order by 1,2,3"     
+  df = db.query.dt(db, query)
+  p = qplot(date_psx, ssltime, data=df, geom="line", colour=location) +
+    geom_point(data=df, aes(x=date_psx, y=ssltime, shape=location)) +
+    scale_shape_manual(values=rep(1:25,2)) +
+    labs(title = concat("Sum of SSL times per page, location and day for: ", scriptname), x="Date", y="Sum SSL time (sec)") +
+    facet_grid(pagenr ~ ., scales="free_y")
+  ggsave(concat(scriptname, "-ssl-location-runtotal-after-20130915.png"), dpi=100, width = 11, height=7, plot=p)
   
+  
+}
+
+get.db = function(scriptname) {
+  setwd("c:/projecten/Philips/KN-AN-MyPhilips")
+  setwd(scriptname)
+  db = db.open("keynotelogs.db")
+  db
+}
+
+graph.cloudfront.locations.hongkong = function(scriptname, db) {
+  # No Hong Kong, loadtimes very high in comparison.
+  query = "select i.date_cet date, l.location location, count(*) number, avg(0.001*i.element_delta) loadtime, avg(0.001*(i.element_delta-i.system_delta)) loadtime_nc
+            from pageitem i 
+              join checkrun c on c.scriptrun_id = i.scriptrun_id
+              left join location l on l.ip_address = i.ip_address
+            where i.topdomain = 'cloudfront.net'
+            and i.ts_cet < (select max(date_cet) from scriptrun)
+            and l.location != 'Hong Kong'
+            and 1*i.page_seq = 1
+            group by 1, 2"
+  df = db.query.dt(db, query)
+  
+  p=qplot(date_psx, loadtime, data=df, geom="line", colour=location) +
+    geom_point(data=df, aes(x=date_psx, y=loadtime, shape=location)) +
+    labs(title = "Average loadtime for Cloudfront elements per location", x="Date", y="Average load time (sec)") +
+    scale_shape_manual(values=rep(1:25,2))
+  ggsave("Loadtimes-cloudfront-location-no-hongkong.png", dpi=100, width = 11, height=6, plot=p)
+
+  # Page 1 loading times vs number/% of Hong Kong items
+  # first # and time, later %.
+  # Loadtimes-cloudfront-location-nitems.png
+  # MyPhilips-CN-pageload.png
+  query = "select 'pageload' valtype, strftime('%Y-%m-%d', r.ts_cet) date, avg(0.001*p.delta_user_msec) value
+           from scriptrun r, checkrun c, page p
+           where c.scriptrun_id = r.id
+           and c.real_succeed = 1
+           and p.scriptrun_id = r.id
+           and 1*p.page_seq = 1
+           group by 1,2
+           union all
+            select 'perc' valtype, i.date_cet date, 100.0 * count(*) / n.number value
+            from pageitem i 
+            join ncloudfront n on n.date = i.date_cet
+            left join location l on l.ip_address = i.ip_address
+            where i.topdomain = 'cloudfront.net'
+            and l.location = 'Hong Kong'
+            and i.ts_cet < (select max(date_cet) from scriptrun)
+            and 1*i.page_seq = 1
+            group by 1, 2  "
+  df = db.query.dt(db, query)
+  p=qplot(date_psx, value, data=df, geom="line") +
+    labs(title = "Average page loadtime (sec) and % of Cloudfront Hong Kong items per day", x="Date", y="Value") +
+    facet_grid(valtype ~ ., scales = "free")
+  ggsave("Loadtimes-cloudfront-hongkong.png", dpi=100, width = 11, height=6, plot=p)
+
+  # en tegen elkaar uitzetten:
+  query = "select v1.date, v1.value pageload, v2.value perc
+            from vcf v1 join vcf v2 on v1.date = v2.date
+            where v1.valtype = 'pageload'
+            and v2.valtype = 'perc'"
+  df = db.query.dt(db, query)
+  
+  # ook scatter van perc vs loadtime
+  p=qplot(perc, pageload, data=df, geom="point") +
+    labs(title = "Average page loadtime versus % of Cloudfront Hong Kong items per day", x="Perc", y="Load time (sec)")
+  ggsave("Loadtimes-cloudfront-hongkong-scatter.png", dpi=100, width = 8, height=6, plot=p)
 }
 
 test.legend = function() {
