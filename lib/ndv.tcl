@@ -39,3 +39,6 @@ source [file join [file dirname [info script]] libcsv.tcl]
 # 6-9-2013 added libcyg.tcl
 source [file join [file dirname [info script]] libcyg.tcl]
 
+# 12-10-2013 added libfp.tcl (test needed that functions do not overlap/name clash)
+source [file join [file dirname [info script]] libfp.tcl]
+

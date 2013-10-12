@@ -5,7 +5,7 @@
 # @todo later
 # put in separate namespace
 
-# @note heavily based on thing found on wiki.tcl.tk
+# @note heavily based on things found on wiki.tcl.tk
 # @note also based on previous attempts to usable FP methods/procs/functions.
 # @note use Tcltest to validate functionality, also usable as documentation.
 # @note try to use CLojure function names (and arguments) as basis. 
