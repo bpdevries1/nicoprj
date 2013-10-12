@@ -19,23 +19,9 @@ proc post_proc_srcdir {dir dargv} {
   
   copy_script_pages $db
   
-  log start_stop add_fields $db
-  log start_stop add_topdomain $db [:cleantopdomain $dargv]
-  
-  # for test:
-  if {0} {
-    $db close
-    log info "Added topdomain for $dir"
-    exit
-  }
-  
-  # for testing function def.
-  if {0} {
-    # set conn [$db get_conn]
-    set handle [$db get_db_handle]
-    $handle function lengte lengte  
-    $db query "select url, lengte(url) from pageitem limit 10"
-  }
+  # 12-10-2013 removed some calls, data already put there in standard scatter2db.tcl.
+  # log start_stop add_fields $db
+  # log start_stop add_topdomain $db [:cleantopdomain $dargv]
    
   lassign [det_script_country_npages $dir $db] script country npages
   if {$script == "<none>"} {
@@ -43,16 +29,21 @@ proc post_proc_srcdir {dir dargv} {
     return
   }
   
-  log start_stop make_indexes $db
-  log start_stop set_task_succeed $db
+  # log start_stop make_indexes $db
+  
+  # 12-10-2013 don't set/update task_succeed anymore. At some point, postproc will be done on the
+  # main DB's, we only want to add data there, not replace it (compare Datomic).
+  # log start_stop set_task_succeed $db
   
   # @note checkrun table and run_avail have same keys, so could be combined.
   # @note for now first fill/update checkrun, then possibly use results in run_avail.
   # @todo nu even niet voor test, later weer aanzetten.
-  if {1} {
-    log start_stop make_run_check $db $dir $max_urls
-  }
-
+  # 12-10-2013 checkrun tabel filled in scatter2db.tcl.
+  #if {1} {
+  #  log start_stop make_run_check $db $dir $max_urls
+  #}
+  log start_stop make_daily_tables $db $srcdir $max_urls
+  
   # log start_stop make_run_avail $db $dir $dargv
   # @todo log start_stop lijkt dargv plat te slaan, niet de bedoeling.
   make_run_avail $db $dir $dargv
@@ -60,20 +51,16 @@ proc post_proc_srcdir {dir dargv} {
   $db close  
 }
 
-proc lengte {str} {
-  string length $str 
-}
-
 # @note this proc does not take a lot of time.
 # @note this functionality has been added to scatter2db.tcl
-proc make_indexes {db} {
+proc make_indexes_old {db} {
   log debug "Creating indexes for: [$db get_dbname]"
   $db exec_try "create index ix_page_1 on page (scriptrun_id)"
   $db exec_try "create index ix_pageitem_1 on pageitem (scriptrun_id)"
   $db exec_try "create index ix_pageitem_2 on pageitem (page_id)"
 }
 
-proc set_task_succeed {db} {
+proc set_task_succeed_old {db} {
   # log info "Setting task_succeed in scriptrun: start"
   $db exec2 "update scriptrun
                 set task_succeed = 0
@@ -89,42 +76,23 @@ proc set_task_succeed {db} {
   # log info "Setting task_succeed in scriptrun: finished"                
 }
 
-# @note this one also (only) used in scatter2db/kn-migrations.tcl
-proc set_task_succeed_calc {db} {
-  # log info "Setting task_succeed in scriptrun: start"
-  $db exec2 "update scriptrun
-             set task_succeed_calc = task_succeed
-             where task_succeed_calc is null
-             and task_succeed in ('0','1', 0, 1)" -log 
-  $db exec2 "update scriptrun
-                set task_succeed_calc = 0
-                where task_succeed_calc is null
-                and id in (
-                  select scriptrun_id
-                  from page p
-                  where p.error_code <> ''
-                )" -log
-  $db exec2 "update scriptrun
-                set task_succeed_calc = 1
-                where task_succeed_calc is null" -log
-  # log info "Setting task_succeed in scriptrun: finished"                
-}
+
 
 # @todo make more generic when eg CN needs to be checked.
 # @todo not sure yet if this function is (too) slow.
-proc make_run_check {db srcdir max_urls} {
+proc make_run_check_old {db srcdir max_urls} {
   if {[regexp -nocase {myphilips} $srcdir]} {
     log start_stop make_run_check_myphilips $db
   } else {
     log start_stop make_run_check_dealer_locator $db $srcdir
   }
   # make_run_check_generic uses checkrun table, which is created by make_run_check_myphilips 
-  log start_stop make_run_check_generic $db $srcdir $max_urls 
+  # log start_stop make_daily_tables $db $srcdir $max_urls 
 }
 
 # @todo not sure yet if this function is (too) slow.
 # @todo drop table first seems slow.
-proc make_run_check_generic {db srcdir max_urls} {
+proc make_daily_tables {db srcdir max_urls} {
   # those queries used to be in R script graphs-myphilips.R
   $db exec "drop table if exists runcount"
   $db exec "create table runcount as
@@ -137,8 +105,6 @@ proc make_run_check_generic {db srcdir max_urls} {
   log info "Dropped and created runcount"            
      
   fill_urlnoparams $db
-  
-        
             
   # helpers to show top 20 URL's (page items)
   $db exec "drop table if exists maxitem"
@@ -163,7 +129,7 @@ proc make_run_check_generic {db srcdir max_urls} {
   log info "Dropped, created and filled maxitem"            
 }
 
-proc fill_urlnoparams {db} {
+proc fill_urlnoparams_old {db} {
   # first set all non-dynamic items, so no need to check/calc afterwards.                  
   $db exec2 "update pageitem
             set urlnoparams = url
@@ -194,16 +160,6 @@ proc fill_urlnoparams {db} {
   log info "Updated pageitem.urlnoparams (several queries)"      
 }
 
-# @note fill_urlnoparams is really slow on DB's (could take 30 minutes+ per DB), so try this one.
-# @note add_topdomain is similar, takes 5 minutes (also a bit long).
-proc fill_urlnoparams2 {db} {
-  [$db get_db_handle] function det_urlnoparams det_urlnoparams
-
-  set query "update pageitem
-             set urlnoparams = det_urlnoparams(url)
-             where urlnoparams is null"
-  $db exec2 $query -log
-}
 
 # want to calc top 20 items from last week data. But use last moment of measurements in the DB, not current time.
 proc det_last_week {db} {
@@ -211,7 +167,7 @@ proc det_last_week {db} {
   :lastweek [lindex $res 0]
 }
 
-proc make_run_check_myphilips {db} {
+proc make_run_check_myphilips_old {db} {
   $db exec_try "drop table checkrun"
   $db exec "create table checkrun (scriptrun_id integer, ts_cet, task_succeed integer, real_succeed integer, has_home_jsp integer, has_error_code integer, has_prodreg integer)"
   $db exec "create index ix_checkrun_1 on checkrun (scriptrun_id)"
@@ -256,7 +212,7 @@ proc has_dbdef {el} {
 }
 
 # @todo find generic stuff between this proc and make_run_check_myphilips => put in generic proc
-proc make_run_check_dealer_locator {db dir} {
+proc make_run_check_dealer_locator_old {db dir} {
   $db exec_try "drop table checkrun"
   
   set has_fields {store_page wrb_jsp results_jsp error_jsp a_png error_code youtube addthis support_nav_error}
@@ -352,7 +308,7 @@ proc update_checkrun_url_like {db dbfield like_str} {
             )" -log
 }
 
-proc make_ip_locations {db} {
+proc make_ip_locations_old {db} {
   # ipad: IP Addresses
   $db exec_try "create table ipad as
                 select count(*) number, domain, ip_address
@@ -384,76 +340,10 @@ proc det_script_country_npages {dir db} {
 }
 
 # @note this one does not take a lot of time.
-proc add_fields {db} {
+proc add_fields_old {db} {
   $db exec_try "alter table pageitem add topdomain"
   $db exec_try "alter table pageitem add urlnoparams"
 }
-
-# add a field topdomain to pageitem, fill it with topdomain based on domain.
-# secure.philips.com -> philips.com
-# crsc.philips.com.cn -> phlips.com.cn
-# crsc.philips.co.uk -> philips.co.uk
-# @note this one should only take (a lot of) time if topdomain is null.
-# @note only if -clean is in cmdline, field will be cleared first.
-# @note also used in migrations and scatter2db.
-proc add_topdomain {db clean {checkfirst 1}} {
-  [$db get_db_handle] function det_topdomain det_topdomain
-  if {$clean} {
-    log info "Clean field topdomain first before filling again"
-    $db exec "update pageitem set topdomain = null" 
-  }
-  # @note update where is null still takes quite some time.
-  # @note maybe keep list of actions (and time) in the DB, and only update
-  #       records after this timestamp
-  # @note for now: check if we can find one item with topdomain filled,
-  #       if so, assume all are filled (as it is atomic action).
-  # @note could also add an index on topdomain.
-  if {$checkfirst} {
-    set res [$db query "select id from pageitem where topdomain is not null limit 1"]
-  } else {
-    # don't check, do update directly
-    set res {}    
-  }
-  if {[llength $res] > 0} {
-    log info "Already one topdomain field filled, assume all are filled" 
-  } else {
-    log info "Not one topdomain filled, fill all now"
-    set query "update pageitem
-               set topdomain = det_topdomain(domain)
-               where topdomain is null"
-    $db exec2 $query -log
-    log info "Filled all topdomains"
-  }
-}
-
-# @note also used in migrations and scatter2db.
-proc det_topdomain {domain} {
-  # return $domain 
-  # if it's something like www.xxx.co(m).yy, then return xxx.co(m).yy
-  # otherwise if it's like www.xxx.yy, then return xxx.yy
-  # maybe regexp isn't the quickest, try split/join first.
-  set l [split $domain "."]
-  set p [lindex $l end-1]
-  if {($p == "com") || ($p == "co")} {
-    join [lrange $l end-2 end] "." 
-  } else {
-    if {$domain == "images.philips.com"} {
-      return "scene7" 
-    } else {
-      join [lrange $l end-1 end] "."
-    }
-  }  
-}
-
-proc det_urlnoparams {url} {
-  # add ; or ? to the returned string.
-  if {[regexp {^([^\? \;]*.)} $url z res]} {
-    return $res 
-  } else {
-    return $url 
-  }
-}
-
 
 # create run_avail table, fill with task_succeed and underlying reasons for failure.
 proc make_run_avail {db dir dargv} {
@@ -636,7 +526,7 @@ proc copy_script_pages {db} {
 #######################
 
 # lib function, could also use struct::list repeat
-proc repeat {n x} {
+proc repeat_old {n x} {
   set res {}
   for {set i 0} {$i < $n} {incr i} {
     lappend res $x 
@@ -647,7 +537,7 @@ proc repeat {n x} {
 # Returns a list of nums from start (inclusive) to end
 # (exclusive), by step, where step defaults to 1
 # also copied from clojure def.
-proc range {start end {step 1}} {
+proc range_old {start end {step 1}} {
   set res {}
   for {set i $start} {$i < $end} {incr i $step} {
     lappend res $i 

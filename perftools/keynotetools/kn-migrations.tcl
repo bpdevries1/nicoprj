@@ -91,11 +91,85 @@ migrate_proc add_fill_page_type "Add and fill page type for page and item" {
   }
 }
 
+proc set_task_succeed_calc {db} {
+  $db exec2 "update scriptrun
+             set task_succeed_calc = task_succeed
+             where task_succeed_calc is null
+             and task_succeed in ('0','1', 0, 1)" -log 
+  $db exec2 "update scriptrun
+                set task_succeed_calc = 0
+                where task_succeed_calc is null
+                and id in (
+                  select scriptrun_id
+                  from page p
+                  where p.error_code <> ''
+                )" -log
+  $db exec2 "update scriptrun
+                set task_succeed_calc = 1
+                where task_succeed_calc is null" -log
+}
+
 # @note task_succeed is an existing field.
 # @todo still big in determining succeed for new items, so not this one for now.
 migrate_proc add_fill_task_succeed "Fill task_succeed field" {
   $db exec2 "alter table scriptrun add task_succeed_calc integer" -log -try
   set_task_succeed_calc $db
+}
+
+# @note also used in migrations and scatter2db.
+proc det_topdomain {domain} {
+  # return $domain 
+  # if it's something like www.xxx.co(m).yy, then return xxx.co(m).yy
+  # otherwise if it's like www.xxx.yy, then return xxx.yy
+  # maybe regexp isn't the quickest, try split/join first.
+  set l [split $domain "."]
+  set p [lindex $l end-1]
+  if {($p == "com") || ($p == "co")} {
+    join [lrange $l end-2 end] "." 
+  } else {
+    if {$domain == "images.philips.com"} {
+      return "scene7" 
+    } else {
+      join [lrange $l end-1 end] "."
+    }
+  }  
+}
+
+# add a field topdomain to pageitem, fill it with topdomain based on domain.
+# secure.philips.com -> philips.com
+# crsc.philips.com.cn -> phlips.com.cn
+# crsc.philips.co.uk -> philips.co.uk
+# @note this one should only take (a lot of) time if topdomain is null.
+# @note only if -clean is in cmdline, field will be cleared first.
+# @note also used in migrations and scatter2db.
+proc add_topdomain {db clean {checkfirst 1}} {
+  [$db get_db_handle] function det_topdomain det_topdomain
+  if {$clean} {
+    log info "Clean field topdomain first before filling again"
+    $db exec "update pageitem set topdomain = null" 
+  }
+  # @note update where is null still takes quite some time.
+  # @note maybe keep list of actions (and time) in the DB, and only update
+  #       records after this timestamp
+  # @note for now: check if we can find one item with topdomain filled,
+  #       if so, assume all are filled (as it is atomic action).
+  # @note could also add an index on topdomain.
+  if {$checkfirst} {
+    set res [$db query "select id from pageitem where topdomain is not null limit 1"]
+  } else {
+    # don't check, do update directly
+    set res {}    
+  }
+  if {[llength $res] > 0} {
+    log info "Already one topdomain field filled, assume all are filled" 
+  } else {
+    log info "Not one topdomain filled, fill all now"
+    set query "update pageitem
+               set topdomain = det_topdomain(domain)
+               where topdomain is null"
+    $db exec2 $query -log
+    log info "Filled all topdomains"
+  }
 }
 
 # @note als je dezen even niet wilt (want ze duren lang), dan gewoon uitcommenten en scatter2db opnieuw starten
@@ -105,13 +179,31 @@ migrate_proc add_fill_topdomain "Add and fill topdomain field" {
   add_topdomain $db 0 0 ; # don't clean first, new field. Also don't check first.
 }
 
+proc det_urlnoparams {url} {
+  # add ; or ? to the returned string.
+  if {[regexp {^([^\? \;]*.)} $url z res]} {
+    return $res 
+  } else {
+    return $url 
+  }
+}
+
+# @note fill_urlnoparams is really slow on DB's (could take 30 minutes+ per DB), so try this one.
+# @note add_topdomain is similar, takes 5 minutes (also a bit long).
+proc fill_urlnoparams2 {db} {
+  [$db get_db_handle] function det_urlnoparams det_urlnoparams
+
+  set query "update pageitem
+             set urlnoparams = det_urlnoparams(url)
+             where urlnoparams is null"
+  $db exec2 $query -log
+}
+
 migrate_proc add_fill_urlnoparams "Add and fill urlnoparams field" {
   $db exec2 "alter table pageitem add urlnoparams" -log -try
   fill_urlnoparams2 $db
 }
 
-# @todo nog even if 0, want niet in 'productie'
-if {1} {
 # add checkrun, first define helper procs
 proc add_checkrun {db} {
   set has_fields {store_page wrb_jsp results_jsp error_jsp a_png error_code youtube addthis \
@@ -216,4 +308,4 @@ migrate_proc add_fill_checkrun "Add and fill checkrun table" {
   
 } ; # end of migrate_proc add_fill_checkrun
 
-} ; # end of if 0
+
