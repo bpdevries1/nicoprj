@@ -125,3 +125,24 @@ proc fold {args} {
 
 
 }
+
+# lib function, could also use struct::list repeat
+proc repeat {n x} {
+  set res {}
+  for {set i 0} {$i < $n} {incr i} {
+    lappend res $x 
+  }
+  return $res
+}
+
+# Returns a list of nums from start (inclusive) to end
+# (exclusive), by step, where step defaults to 1
+# also copied from clojure def.
+proc range {start end {step 1}} {
+  set res {}
+  for {set i $start} {$i < $end} {incr i $step} {
+    lappend res $i 
+  }
+  return $res
+}
+
