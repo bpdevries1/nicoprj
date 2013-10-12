@@ -4,12 +4,13 @@ package require struct::set
 
 oo::class create Rwrapper {
 
-  constructor {} {
-    # nothing.
+  constructor {a_dargv} {
+    my variable dargv
+    set dargv $a_dargv
   }
 
   method init {a_dir db} {
-    my variable f cmdfilename dir
+    my variable f cmdfilename dir stacked_cmds
     set dir $a_dir
     set cmdfilename "R-[my now].R"
     set f [open [file join $dir $cmdfilename] w]
@@ -20,6 +21,7 @@ oo::class create Rwrapper {
       source('~/nicoprj/R/lib/ndvlib.R')
       load.def.libs()
       db = db.open('$db')"
+    set stacked_cmds {}
   }
   
   method now {} {
@@ -29,21 +31,51 @@ oo::class create Rwrapper {
   # replace ' with " before writing.
   method write {cmd} {
     my variable f
+    # regsub -all {\'} $cmd "\42" cmd2
+    # puts $f $cmd2
+    puts $f [my replace_quotes $cmd]
+  }
+  
+  method replace_quotes {cmd} {
     regsub -all {\'} $cmd "\42" cmd2
-    puts $f $cmd2
+    return $cmd2
   }
   
   method query {query} {
-    my variable f
-    puts $f "query = \"$query\""
-    my write "df = db.query.dt(db, query)
-              print(head(df))"
+    my variable f stacked_cmds
+    # puts $f "query = \"$query\""
+    lappend stacked_cmds "query = \"$query\""
+    lappend stacked_cmds "df = db.query.dt(db, query)
+              print(head(df))" 
+    # my write 
+  }
+
+  method melt {value_vars} {
+    my variable stacked_cmds
+    # my write "df = melt(df, measure.vars=c("resp_bytes", "element_count", "domain_count", "content_errors", "connection_count"))
+    lappend stacked_cmds [my replace_quotes "df = melt(df, measure.vars=c([join [lmap el $value_vars {str "'" $el "'"}] ", "]))"]
+    lappend stacked_cmds "print(head(df))"
+    lappend stacked_cmds "print(tail(df))"
   }
   
-# @todo + minimum (Y) value.  
-  
   method qplot {dct} {
+    my variable dargv dir stacked_cmds f
     set d [my det_plot_dct $dct]
+    if {([:incr $dargv]) && [file exists [file join $dir [:pngname $d]]]} {
+      log debug "File already exists, incr: return: [file join $dir [:pngname $d]]"
+      return 
+    }
+    if {[:query $d] != ""} {
+      my query [:query $d] 
+    }
+    if {[:melt $d] != ""} {
+      my melt [:melt $d] 
+    }
+    foreach cmd $stacked_cmds {
+      # my write $cmd
+      puts $f $cmd ; # replace quotes already done where needed (not with query!)
+    }
+    set stacked_cmds {}
     my write "p = qplot([:xvar $d], [:yvar $d], data=df, geom='[:geom $d]', colour=[:colour $d]) +"
     if {[:geom2 $d] != ""} {
       my write "geom_point(data=df, aes(x=[:xvar $d], y=[:yvar $d], shape=[:colour $d])) +" 
@@ -52,8 +84,11 @@ oo::class create Rwrapper {
       my write "scale_shape_manual(values=rep(1:25,5)) +" 
     }
     my write "scale_y_continuous(limits=c([:ymin $d], [:ymax $d])) +"
+    if {[:facet $d] != ""} {
+      my write "facet_grid([:facet $d] ~ ., scales='free_y') +" 
+    }
     my write "labs(title = '[:title $d]', x='[:xlab $d]', y='[:ylab $d]')
-      ggsave('[:title $d].png', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+      ggsave('[:pngname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
   }
   
   # @todo set default values for un-specified values by the user: geom, colour, facet.
@@ -64,6 +99,11 @@ oo::class create Rwrapper {
     } else {
       my dset dct xvar [:x $dct]
     }
+    if {[:melt $dct] != ""} {
+      my dset dct y value
+      my dset dct colour variable
+    }
+    
     my dset dct yvar [:y $dct]
     my dset dct xlab [:x $dct]
     my dset dct ylab [:y $dct]
@@ -75,6 +115,8 @@ oo::class create Rwrapper {
     }
     my dset dct ymin "min(df\$[:yvar $dct])"
     my dset dct ymax "max(df\$[:yvar $dct])"
+    my dset dct title "No title"
+    my dset dct pngname "[:title $dct].png"
     return $dct
   }
   
