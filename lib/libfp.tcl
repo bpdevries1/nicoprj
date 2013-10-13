@@ -117,8 +117,16 @@ proc map {args} {
 }
 
 # @todo use det_fields in apidata2dashboarddb.tcl as another testcase.
+# @param args: same as lmap: el list statement
 proc filter {args} {
-
+  lassign $args var l cmd
+  set res {}
+  foreach $var $l bool [lmap {*}$args] {
+    if {$bool} {
+      lappend res [set $var] 
+    }
+  }
+  return $res
 }
 
 proc fold {args} {
