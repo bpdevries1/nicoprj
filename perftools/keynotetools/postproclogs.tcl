@@ -21,7 +21,6 @@ proc main {argv} {
     {srcpattern.arg "*" "Pattern for subdirs in srcdir to use"}
     {maxurls.arg "20" "max nr of urls to put in maxitem (for graphs)"}
     {clean "Clean DB (drop tables) before filling again"}
-    {cleantopdomain "Clean topdomain field before filling again"}
     {onedir "Exit script after handling one dir"}
     {debug "Run in debug mode, stop when an error occurs"}
   }

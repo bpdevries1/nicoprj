@@ -42,7 +42,7 @@ proc post_proc_srcdir {dir dargv} {
   #if {1} {
   #  log start_stop make_run_check $db $dir $max_urls
   #}
-  log start_stop make_daily_tables $db $srcdir $max_urls
+  log start_stop make_daily_tables $db $dir $max_urls
   
   # log start_stop make_run_avail $db $dir $dargv
   # @todo log start_stop lijkt dargv plat te slaan, niet de bedoeling.
@@ -94,27 +94,27 @@ proc make_run_check_old {db srcdir max_urls} {
 # @todo drop table first seems slow.
 proc make_daily_tables {db srcdir max_urls} {
   # those queries used to be in R script graphs-myphilips.R
-  $db exec "drop table if exists runcount"
-  $db exec "create table runcount as
+  $db exec2 "drop table if exists runcount" -log
+  $db exec2 "create table runcount as
             select strftime('%Y-%m-%d', r.ts_cet) date, count(*) number
             from scriptrun r, checkrun c
             where r.id = c.scriptrun_id
             and c.real_succeed = 1
-            group by 1"
+            group by 1" -log
 
   log info "Dropped and created runcount"            
      
-  fill_urlnoparams $db
+  # fill_urlnoparams $db
             
   # helpers to show top 20 URL's (page items)
-  $db exec "drop table if exists maxitem"
+  $db exec2 "drop table if exists maxitem" -log
   
-  $db exec "CREATE TABLE maxitem (id integer primary key autoincrement, 
-                  url, page_seq, loadtime)"
+  $db exec2 "CREATE TABLE maxitem (id integer primary key autoincrement, 
+                  url, page_seq, loadtime)" -log
 
   set last_week [det_last_week $db]
-  # and r.ts_cet > '2013-08-26'
-  $db exec "insert into maxitem (url, page_seq, loadtime)
+  log info "Determined last week as: $last_week (possibly old database)"
+  $db exec2 "insert into maxitem (url, page_seq, loadtime)
             select i.urlnoparams, p.page_seq, avg(0.001*i.element_delta) loadtime
             from scriptrun r, page p, pageitem i, checkrun c
             where c.scriptrun_id = r.id
@@ -124,7 +124,7 @@ proc make_daily_tables {db srcdir max_urls} {
             and r.ts_cet > '$last_week'
             group by 1,2
             order by 3 desc
-            limit $max_urls"
+            limit $max_urls" -log
             
   log info "Dropped, created and filled maxitem"            
 }
@@ -350,40 +350,43 @@ proc make_run_avail {db dir dargv} {
   log info "make_run_avail: start"
   if {[:clean $dargv]} {
     log info "Dropping table run_avail" 
-    $db exec "drop table if exists run_avail"
+    $db exec2 "drop table if exists run_avail" -log
   }
   set script [file tail $dir]
   # @note choice now to have just one table with max 2 error elements.
   # @todo drop table niet zo zinnig nog, als je toch items gaat toevoegen altijd.
   # @todo beter met query params te werken, of escapen van quotes in url. Nu even url niet meenemen, wel urlnp.
   # @todo komen nu dubbele items in: ofwel hier op checken, ofwel tabel eerst legen, evt met cmdline parameter.
-  $db exec "create table if not exists run_avail (scriptname, scriptrun_id integer, 
+  $db exec2 "create table if not exists run_avail (scriptname, scriptrun_id integer, 
                ts_cet, task_succeed, err_page_seq integer, err_page_id integer,
                known_error integer, known_error_type,
                pg_err_code, pg_bytes, pg_elts, 
                elt_id, elt_error_code, elt_status_code, elt_url, elt_urlnp, elt_domain, elt_topdomain,
-               elt_id2, elt_error_code2, elt_status_code2, elt_url2, elt_urlnp2, elt_domain2, elt_topdomain2)"
+               elt_id2, elt_error_code2, elt_status_code2, elt_url2, elt_urlnp2, elt_domain2, elt_topdomain2)" -log
   # @note below two fields added later.
   $db exec_try "alter table run_avail add known_error integer"
   $db exec_try "alter table run_avail add known_error_type"
-               
-  $db exec "insert into run_avail (scriptname, scriptrun_id, ts_cet, task_succeed, err_page_seq,
+
+  # @todo first idea (but wrong) if run_avail already existed and was 
+  #       filled, keep ts_cet until it is already filled.
+  # @todo better idea: run_avail should be filled during scatter2db, just as checkrun.
+  $db exec2 "insert into run_avail (scriptname, scriptrun_id, ts_cet, task_succeed, err_page_seq,
                  err_page_id, pg_err_code, pg_bytes, pg_elts)
                select '$script', r.id, r.ts_cet, r.task_succeed, 0,
                  0, '0', 0, 0
                from scriptrun r
-               where r.task_succeed = 1"
+               where r.task_succeed = 1" -log
   
-  $db exec "insert into run_avail (scriptname, scriptrun_id, ts_cet, task_succeed, err_page_seq,
+  $db exec2 "insert into run_avail (scriptname, scriptrun_id, ts_cet, task_succeed, err_page_seq,
                  err_page_id, pg_err_code, pg_bytes, pg_elts)
                select '$script', r.id, r.ts_cet, r.task_succeed, p.page_seq, p.id, p.error_code, 
                  p.page_bytes, p.element_count
                from scriptrun r join page p on p.scriptrun_id = r.id
                where task_succeed = 0
-               and p.error_code <> ''"
+               and p.error_code <> ''" -log
                
-  $db exec "create index if not exists ix_run_avail1 on run_avail (scriptrun_id)"
-  $db exec "create index if not exists ix_run_avail2 on run_avail (err_page_id)"
+  $db exec2 "create index if not exists ix_run_avail1 on run_avail (scriptrun_id)" -log
+  $db exec2 "create index if not exists ix_run_avail2 on run_avail (err_page_id)" -log
 
 if {0} {  
   Opties:
@@ -418,13 +421,13 @@ if {0} {
        set res2 [$db query $query2]
        if {[llength $res2] == 0} {
          # elt_id, elt_error_code, elt_status_code, elt_url, elt_urlnp, elt_domain,
-         $db exec "update run_avail
+         $db exec2 "update run_avail
                    set elt_id = 0, elt_error_code = '<none>',
                        elt_status_code = '<none>',
                        elt_urlnp = '<none>',
                        elt_domain = '<none>',
                        elt_topdomain = '<none>'
-                   where err_page_id = $page_id"
+                   where err_page_id = $page_id" -log
        } else {
          # use first item
          # breakpoint
@@ -440,7 +443,7 @@ if {0} {
                    where err_page_id = $page_id"
          # log debug "query3: $query3"
          # breakpoint
-         $db exec $query3                   
+         $db exec2 $query3 -log                  
        }
      }    
   }
@@ -457,37 +460,37 @@ proc fill_known_error {db dir dargv} {
   # mobile redirect
   log info "Check for mobile redirect"
   # removed distinct option.
-  $db exec "update run_avail set known_error_type = 'mobile-redir' 
+  $db exec2 "update run_avail set known_error_type = 'mobile-redir' 
             where known_error_type is null 
             and scriptrun_id in (
               select i.scriptrun_id
               from pageitem i
               where i.domain like 'm.philips%'
-            )"
+            )" -log
             
   # navigation error with shavers
   if {[regexp -- {-RQ} $dir]} {
     log info "Shavers, check for shaver nav error"
-    $db exec "update run_avail set known_error_type = 'shaver-nav' 
+    $db exec2 "update run_avail set known_error_type = 'shaver-nav' 
               where known_error_type is null 
               and scriptrun_id in (
                 select distinct p.scriptrun_id
                 from page p
                 where p.error_code = '-1010'
-              )"
+              )" -log
   } else {
     log info "No shavers, no shaver nav error" 
   }
   
   # after known_error_type is filled, fill known_error with 0 or 1
   log info "known_error_type filled, now fill known_error field"
-  $db exec "update run_avail
+  $db exec2 "update run_avail
             set known_error = 1
             where known_error_type <> ''
-            and known_error is null"
-  $db exec "update run_avail
+            and known_error is null" -log
+  $db exec2 "update run_avail
             set known_error = 0
-            where known_error is null"
+            where known_error is null" -log
   
   log info "fill_known_error: finished"
 }
@@ -513,12 +516,12 @@ proc copy_script_pages {db} {
   if {![file exists $src_name]} {
     error "Src db for script_pages does not exist" 
   }
-  $db exec "attach database '$src_name' as fromDB"
+  $db exec2 "attach database '$src_name' as fromDB" -log
   set table "script_pages"
   # @note possibly the drop table works on fromDB.table, if this is the only one.
   # $db exec "drop table if exists $table"
-  $db exec_try "create table $table as select * from fromDB.$table"
-  $db exec "detach fromDB"
+  $db exec2 "create table $table as select * from fromDB.$table" -try -log
+  $db exec2 "detach fromDB" -log
 }
 
 #######################
