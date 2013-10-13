@@ -62,7 +62,7 @@ proc handle_srcdir {db dir ndx dargv} {
   $db exec "attach database '$srcdbname' as fromDB"
 
   set scriptname [det_scriptname $dir]
-  foreach table [:tables $dargv] {
+  foreach table [split [:tables $dargv] ","] {
     if {$ndx == 1} {
       if {[:droptarget $dargv]} {
         $db exec2 "drop table if exists $table" -log 
