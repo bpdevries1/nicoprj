@@ -27,6 +27,8 @@ proc main {argv} {
 
 proc prepare_db {dargv} {
   set db [dbwrapper new [file join [:dir $dargv] [:db $dargv]]]
+  $db exec2 "drop table if exists nruns" -log
+  
   $db exec2 "create table if not exists nruns as
              select strftime('%Y-%m-%d', ts_cet) date, scriptname, count(*) nruns
              from page_td2
