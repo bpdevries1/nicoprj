@@ -1,0 +1,39 @@
+user=> (use 'dev)
+
+FileNotFoundException Could not locate tutorial_client/simulated/services__init.class or tutorial_client/simulated/services.clj on classpath:   clojure.lang.RT.load (RT.java:443)
+
+Opties:
+* cljs->clj hernoemen.
+* Iets in de file zetten dat 'ie common is, zowel clj/cljs. ^:shared meta optie. Filenaam is dan wel .clj.
+
+File hernoemen, wordt de melding anders?
+========================================
+user=> (use 'dev)
+
+FileNotFoundException Could not locate tutorial_client/simulated/services__init.class or tutorial_client/simulated/services.clj on classpath:   clojure.lang.RT.load (RT.java:443)
+
+=> ofwel dezelfde melding, kan 'em eerst ook kopieren (dan heb ik beide) naar .clj.
+
+Idee: config.clj moet je afblijven, en je moet het in de start.cljs regelen, dan waarsch ook niet het clj vs cljs probleem.
+=> dat is het dus inderdaad.
+
+Concepten
+=========
+* Derive functies: lijkt wat op Excel: als een van de inputs wijzigt, wordt opnieuw berekend.
+* Idee dat het behoorlijk complex is, op veel plekken wat aan te passen, je zou er zo een vergeten. En wat 
+  je aan moet passen, is zeker niet triviaal. Aan de andere kant is wel alles in te stellen, niet als 
+  framework en invul oefening.
+
+Speed
+=====
+* Chrome lijkt een stuk sneller dan Firefox, debug tijden meer vergelijkbaar met tutorial, avg is nu 16 msec, in Firefox 228 msec. Kan zijn dat dit komt omdat er in Firefox nog andere tabs/windows open staan. Maar als het te traag wordt, wel iets om te proberen.
+  Later Firefox wel beter, 64 msec, nog steeds 16 msec in Chrome.
+
+Conclusies
+==========
+* Take-away: bij problemen eerst alles afsluiten en opnieuw starten, kijken of er meldingen zijn.
+* Bij services: 2 verschillende browsers openen, anders worden 2 tabs in een browser als dezelfde sessie gezien.
+  Hiermee doet eigen versie het nu ook. Starten wel wat tricky, voordat ze elkaar 'zien'.
+  
+
+
