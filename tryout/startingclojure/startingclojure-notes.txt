@@ -1,0 +1,8 @@
+startingclojure notes
+=====================
+* Met rechter-muis/run/clojure wordt een REPL gestart.
+* zie strict/paredit mode bij Chas, maar heb zelf niet hier. Schijnt mooi te werken, wel wennen.
+  kwestie van dubbelklikken op statusbar, maar dan moet ik shortcuts blijkbaar wel goed kennen, dus later.
+* Hij kan previous commands doen, maar hoe? Ctrl-up.
+
+
