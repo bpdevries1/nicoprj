@@ -44,6 +44,7 @@ oo::class create Rwrapper {
   method query {query} {
     my variable f stacked_cmds
     # puts $f "query = \"$query\""
+    set stacked_cmds {} ; # when a new query starts, other cmds on the stack can be removed, not used anymore, overwritten.
     lappend stacked_cmds "query = \"$query\""
     lappend stacked_cmds "df = db.query.dt(db, query)
               print(head(df))" 
@@ -58,6 +59,10 @@ oo::class create Rwrapper {
     lappend stacked_cmds "print(tail(df))"
   }
   
+  # @todo idee: ook als args mee kunnen geven, dan 2 opties:
+  # - als dct zoals nu, met accolades, dan geen backslash nodig bij einde regel.
+  # - direct als params, dan wel backslash nodig, maar geen [list], en parameter substitutie.
+  # - of: parameter substitutie binnen qplot doen, maar mss gevaarlijk.
   method qplot {dct} {
     my variable dargv dir stacked_cmds f
     set d [my det_plot_dct $dct]
@@ -65,6 +70,7 @@ oo::class create Rwrapper {
       log debug "File already exists, incr: return: [file join $dir [:pngname $d]]"
       return 
     }
+    my write "print(concat('Making graph: ', '[:pngname $d]'))"
     if {[:query $d] != ""} {
       my query [:query $d] 
     }
@@ -72,7 +78,6 @@ oo::class create Rwrapper {
       my melt [:melt $d] 
     }
     foreach cmd $stacked_cmds {
-      # my write $cmd
       puts $f $cmd ; # replace quotes already done where needed (not with query!)
     }
     set stacked_cmds {}
@@ -89,6 +94,7 @@ oo::class create Rwrapper {
     }
     my write "labs(title = '[:title $d]', x='[:xlab $d]', y='[:ylab $d]')
       ggsave('[:pngname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+    my write "print(concat('Made graph: ', '[:pngname $d]'))"
   }
   
   # @todo set default values for un-specified values by the user: geom, colour, facet.
