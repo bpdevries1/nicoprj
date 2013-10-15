@@ -67,8 +67,10 @@ oo::class create Rwrapper {
   # - direct als params, dan wel backslash nodig, maar geen [list], en parameter substitutie.
   # - of: parameter substitutie binnen qplot doen, maar mss gevaarlijk.
   method qplot {dct} {
-    my variable dargv dir stacked_cmds f
+    my variable dargv dir stacked_cmds f d
     set d [my det_plot_dct $dct]
+    log debug "dct: $dct"
+    log debug "d: $d"
     if {([:incr $dargv]) && [file exists [file join $dir [:pngname $d]]]} {
       log debug "File already exists, incr: return: [file join $dir [:pngname $d]]"
       return 
@@ -87,7 +89,7 @@ oo::class create Rwrapper {
     # @todo if-thens vervangen door method, bv write-if <expr> <statement>
     # of write-if-filled :colour <statement> (deze moet dan wel $d beschikbaar hebben, via param of uplevel)
     if {[:colour $d] != ""} {
-      set colour ", colour=as.factor([:colour $d])" 
+      set colour ", colour=as.factor([:colour $d]), shape=as.factor([:colour $d])" 
     } else {
       set colour "" 
     }
@@ -106,19 +108,43 @@ oo::class create Rwrapper {
     if {[:facet $d] != ""} {
       my write "facet_grid([:facet $d] ~ ., scales='free_y') +" 
     }
-    my write "labs(title = '[:title $d]', x='[:xlab $d]', y='[:ylab $d]')
-      ggsave('[:pngname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+    # @todo als pos=bottom en dir=vertical, dan checken hoeveel 'kleuren' er zijn. Als veel, dan grafiek groter maken.
+    #       berekening in Tcl (dan ook query in tcl) of in R (beter, als dit kan).
+    my write-if-filled :legend.position "theme(legend.position='[:legend.position $d]') +"
+    my write-if-filled :legend.direction "theme(legend.direction='[:legend.direction $d]') +"
+    # @todo guide_legend verhaal nog niet zien werken, ondanks officiele documentatie.
+    # p + guides(col = guide_legend(ncol = 8))
+    # p + guides(col = guide_legend(ncol = 8))
+    my write-if-filled :legend.ncol "guides(col = guide_legend(ncol = [:legend.ncol $d])) +"
+    my write-if-filled :legend.nrow "guides(col = guide_legend(nrow = [:legend.nrow $d])) +"
+    my write "labs(title = '[:title $d]', x='[:xlab $d]', y='[:ylab $d]')"
+    my write "ggsave('[:pngname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+    # ook voor SVG wel dimensies opgeven, anders vierkant en blijft vierkant.
+    my write "ggsave('[:svgname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+    # my write "ggsave('[:pngname $d].svg', plot=p)"
     my write "print(concat('Made graph: ', '[:pngname $d]'))"
   }
-  
+
+  # :legend.position "theme(legend.position='[:legend.position $d]') +"
+  method write-if-filled {key expr} {
+    my variable d
+    if {[$key $d] != ""} {
+      my write $expr 
+    }
+  }
+
   # @todo set default values for un-specified values by the user: geom, colour, facet.
   method det_plot_dct {dct} {
-    my dset dct xvar [ifp [= [:x $dct] "date"] "date_psx" [:x $dct]]
+    # @todo if using ifp like below, also include check for 'ts'.
+    # my dset dct xvar [ifp [= [:x $dct] "date"] "date_psx" [:x $dct]]
     if {[:x $dct] == "date"} {
       my dset dct xvar "date_psx"
+    } elseif {[:x $dct] == "ts"} {
+      my dset dct xvar "ts_psx"
     } else {
       my dset dct xvar [:x $dct]
     }
+    # log info "2:d: $dct "
     if {[:melt $dct] != ""} {
       my dset dct y value
       my dset dct colour variable
@@ -136,8 +162,14 @@ oo::class create Rwrapper {
     my dset dct ymin "min(df\$[:yvar $dct])"
     my dset dct ymax "max(df\$[:yvar $dct])"
     my dset dct title "No title"
-    my dset dct pngname "[:title $dct].png"
+    my dset dct pngname "[my sanitise [:title $dct]].png"
+    my dset dct svgname "[my sanitise [:title $dct]].svg"
     return $dct
+  }
+  
+  method sanitise {filename} {
+    regsub -all {[/:\\\?~;]} $filename "_" filename
+    return $filename
   }
   
   method dset {dct_name key value} {
@@ -148,12 +180,16 @@ oo::class create Rwrapper {
   }
   
   method doall {} {
-    my variable f cmdfilename dir
+    my variable f cmdfilename dir dargv
     my write "db.close(db)
               print('R finished')
               sink()"
     close $f
-    file copy -force [file join $dir $cmdfilename] [file join $dir "R-latest.R"]
+    if {[:keepcmd $dargv]} {
+      file copy -force [file join $dir $cmdfilename] [file join $dir "R-latest.R"]
+    } else {
+      file rename -force [file join $dir $cmdfilename] [file join $dir "R-latest.R"]
+    }
     set rbinary [my det_rbinary]
     set script [file normalize [file join $dir "R-latest.R"]] 
     try_eval {
