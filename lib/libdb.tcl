@@ -18,7 +18,6 @@ if {$tcl_version >= 8.6} {
   puts "Don't load sqlite, tcl version too low: $tcl_version"
 }
 
-
 oo::class create dbwrapper {
 
   # @doc usage: set conn [dbwrapper new <sqlitefile.db]
@@ -183,6 +182,9 @@ oo::class create dbwrapper {
   method create_tables {args} {
     my variable db_tabledefs conn
     set drop_first [lindex $args 0]
+    if {$drop_first == ""} {
+      set drop_first 0 
+    }
     dict for {table td} $db_tabledefs {
       if {(![my table_exists $table]) || $drop_first} {
         create_table $conn $td {*}$args
@@ -228,4 +230,3 @@ oo::class create dbwrapper {
 # proc breakpoint_dummy {} {
 #   breakpoint 
 # }
-
