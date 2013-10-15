@@ -2,6 +2,9 @@ package require TclOO
 
 package require struct::set
 
+# @todo filefacet: filename ook als soort facet doen: voor bepaalde kolom een graph/file per kolom-waarde, soort facet dus.
+# @todo in theorie ook meerdere kolommen: dan voor elke combi van waarden een file.
+
 oo::class create Rwrapper {
 
   constructor {a_dargv} {
@@ -81,12 +84,23 @@ oo::class create Rwrapper {
       puts $f $cmd ; # replace quotes already done where needed (not with query!)
     }
     set stacked_cmds {}
-    my write "p = qplot([:xvar $d], [:yvar $d], data=df, geom='[:geom $d]', colour=[:colour $d]) +"
+    # @todo if-thens vervangen door method, bv write-if <expr> <statement>
+    # of write-if-filled :colour <statement> (deze moet dan wel $d beschikbaar hebben, via param of uplevel)
+    if {[:colour $d] != ""} {
+      set colour ", colour=as.factor([:colour $d])" 
+    } else {
+      set colour "" 
+    }
+    my write "p = qplot([:xvar $d], [:yvar $d], data=df, geom='[:geom $d]' $colour) +"
     if {[:geom2 $d] != ""} {
-      my write "geom_point(data=df, aes(x=[:xvar $d], y=[:yvar $d], shape=[:colour $d])) +" 
+      my write "geom_point(data=df, aes(x=[:xvar $d], y=[:yvar $d], shape=as.factor([:colour $d]))) +" 
     }
     if {([:geom $d] == "point") || ([:geom2 $d] == "point")} {
-      my write "scale_shape_manual(values=rep(1:25,5)) +" 
+      # my write "scale_shape_manual(values=rep(1:25,5)) +" 
+      my write "scale_shape_manual(name='[:colour $d]', values=rep(1:25,5)) +"
+    }
+    if {$colour != ""} {
+      my write "scale_colour_discrete(name='[:colour $d]') +"
     }
     my write "scale_y_continuous(limits=c([:ymin $d], [:ymax $d])) +"
     if {[:facet $d] != ""} {
