@@ -13,7 +13,7 @@ package require Tclx
 package require ndv
 package require json
 
-set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+set log [::ndv::CLogger::new_logger [file tail [info script]] info]
 $log set_file "[file tail [info script]].log"
 
 # libpostproclogs: set_task_succeed (and maybe others)
@@ -382,54 +382,61 @@ proc read_json_file_db {db filename root_dir {pageitem 1}} {
   # db_in_trans [$db get_conn] {}
   $db in_trans {    
     set logfile_id [$db insert logfile [dict create path $filename filename [file tail $filename] filesize [file size $filename]] 1]
-    set json [json::json2dict [read_file $filename]]
-    # @todo possibly add check if json just contains error message like invalid slotid list.
+    set text [read_file $filename]
+    if {[regexp {Bad Request} $text]} {
+      log warn "Bad Request in result json, continue"
+    } elseif {[string length $text] < 500} {
+      log warn "Json file too small, continue"
+    } else {
+      set json [json::json2dict $text]
+      # @todo possibly add check if json just contains error message like invalid slotid list.
+      
+      # breakpoint
+        # agent_id agent_inst datetime profile_id slot_id target_id wxn_Script wxn_detail_object wxn_page wxn_summary
+      foreach l $json {
+        # this l is either a list of TxnMeasurement(s) or a list of WxnMeasurement(s)
+        foreach run $l {
+          # @note only look in part of run that has main items, to be sure that info like delta_msec is not from sub-request.
+          set run_main [dict_get_multi -withname $run target_id slot_id datetime agent_id agent_inst agent_instance_id \
+                                   profile_id wxn_summary wxn_Script txn_summary txn_dialer]
+          if {[is_read_scriptrun $db $run_main]} {
+            log warn "Scriptrun has already been read, possibly double in Keynote json file: $filename, [:slot_id $run_main], [:datetime $run_main]"
+            continue
+          }
+          # @todo dict_flat anders: gewoon platslaan, alles teruggeven, geen filter. Ook maar 1 level diep, dus alles op level 0 en alles op level1/filter.
+          # @todo is niet triviaal, vooral bepalen of item al atom is.
+          # @todo of op dit niveau een functie die alle directe waarden geeft (geen sub-dict of list), deze kun je dan mergen met alle waarden van specifieke sub-items
+    # <element__count>111</element__count><content__errors>4</content__errors><resp__bytes>1059517</resp__bytes><estimated__cache__delta__msec>13026</estimated__cache__delta__msec><trans__level__comp__msec/><delta__user__msec>15309</delta__user__msec><bandwidth__kbsec>70.64</bandwidth__kbsec><cookie__count/><domain__count>10</domain__count><connection__count>23</connection__count><browser__errors/></txn__summary>
     
-    # breakpoint
-      # agent_id agent_inst datetime profile_id slot_id target_id wxn_Script wxn_detail_object wxn_page wxn_summary
-    foreach l $json {
-      # this l is either a list of TxnMeasurement(s) or a list of WxnMeasurement(s)
-      foreach run $l {
-        # @note only look in part of run that has main items, to be sure that info like delta_msec is not from sub-request.
-        set run_main [dict_get_multi -withname $run target_id slot_id datetime agent_id agent_inst agent_instance_id \
-                                 profile_id wxn_summary wxn_Script txn_summary txn_dialer]
-        if {[is_read_scriptrun $db $run_main]} {
-          log warn "Scriptrun has already been read, possibly double in Keynote json file: $filename, [:slot_id $run_main], [:datetime $run_main]"
-          continue
-        }
-        # @todo dict_flat anders: gewoon platslaan, alles teruggeven, geen filter. Ook maar 1 level diep, dus alles op level 0 en alles op level1/filter.
-        # @todo is niet triviaal, vooral bepalen of item al atom is.
-        # @todo of op dit niveau een functie die alle directe waarden geeft (geen sub-dict of list), deze kun je dan mergen met alle waarden van specifieke sub-items
-  # <element__count>111</element__count><content__errors>4</content__errors><resp__bytes>1059517</resp__bytes><estimated__cache__delta__msec>13026</estimated__cache__delta__msec><trans__level__comp__msec/><delta__user__msec>15309</delta__user__msec><bandwidth__kbsec>70.64</bandwidth__kbsec><cookie__count/><domain__count>10</domain__count><connection__count>23</connection__count><browser__errors/></txn__summary>
-  
-        set dct [dict_flat $run_main {target_id slot_id datetime agent_id agent_inst agent_instance_id \
-             profile_id delta_msec hangup_msec wap_connect_msec signal_strength task_succeed \
-             network no_of_resources user_string device error_code content_error \
-             element_count content_errors resp_bytes estimated_cache_delta_msec \
-             trans_level_comp_msec delta_user_msec bandwidth_kbsec cookie_count domain_count connection_count browser_errors \
-             setup_msec attempts speed phone_number}] 
-        dict set dct logfile_id $logfile_id
-        dict set dct scriptname [det_scriptname [:slot_id $dct] $filename]
-        dict set dct ts_utc [det_ts_utc [:datetime $dct]]
-        dict set dct ts_cet [det_ts_cet [:datetime $dct]]
-        dict set dct date_cet [det_date_cet [:datetime $dct]]
-        dict set dct provider [det_provider [:target_id $dct]]
-        set pages [concat [:wxn_page $run] [:txnPages $run]]
-        
-        # @todo param pages as name here, to prevent copying large objects, also do in other places?
-        # @todo det_task_succeed has a bug: does not set to 0 when it should, for CBF-CN-HX6921-2013-09-02--13-00.json
-        dict set dct task_succeed_calc [det_task_succeed_calc [:task_succeed $dct] pages]
-        set scriptrun_id [$db insert scriptrun $dct 1]
-        $cr_handler init
-        $cr_handler set_scriptrun dct $scriptrun_id
-        set dct_details [get_details $run]
-        foreach page $pages {
-          handle_page $db $scriptrun_id $page $dct_details $pageitem [:scriptname $dct] [:datetime $dct]
-        }
-        set dct_checkrun [$cr_handler get_record]
-        # @todo nog even niet in productie.
-        if {1} {
-          $db insert checkrun $dct_checkrun
+          set dct [dict_flat $run_main {target_id slot_id datetime agent_id agent_inst agent_instance_id \
+               profile_id delta_msec hangup_msec wap_connect_msec signal_strength task_succeed \
+               network no_of_resources user_string device error_code content_error \
+               element_count content_errors resp_bytes estimated_cache_delta_msec \
+               trans_level_comp_msec delta_user_msec bandwidth_kbsec cookie_count domain_count connection_count browser_errors \
+               setup_msec attempts speed phone_number}] 
+          dict set dct logfile_id $logfile_id
+          dict set dct scriptname [det_scriptname [:slot_id $dct] $filename]
+          dict set dct ts_utc [det_ts_utc [:datetime $dct]]
+          dict set dct ts_cet [det_ts_cet [:datetime $dct]]
+          dict set dct date_cet [det_date_cet [:datetime $dct]]
+          dict set dct provider [det_provider [:target_id $dct]]
+          set pages [concat [:wxn_page $run] [:txnPages $run]]
+          
+          # @todo param pages as name here, to prevent copying large objects, also do in other places?
+          # @todo det_task_succeed has a bug: does not set to 0 when it should, for CBF-CN-HX6921-2013-09-02--13-00.json
+          dict set dct task_succeed_calc [det_task_succeed_calc [:task_succeed $dct] pages]
+          set scriptrun_id [$db insert scriptrun $dct 1]
+          $cr_handler init
+          $cr_handler set_scriptrun dct $scriptrun_id
+          set dct_details [get_details $run]
+          foreach page $pages {
+            handle_page $db $scriptrun_id $page $dct_details $pageitem [:scriptname $dct] [:datetime $dct]
+          }
+          set dct_checkrun [$cr_handler get_record]
+          # @todo nog even niet in productie.
+          if {1} {
+            $db insert checkrun $dct_checkrun
+          }
         }
       }
     }
