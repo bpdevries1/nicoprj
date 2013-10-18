@@ -58,7 +58,15 @@ proc graph_all {r} {
             xlab "Date/time" ylab "Load time (seconds)"
             ymin 0 geom point colour serv_store facet url
             legend.nrow 6
-            width 11 height 10}    
+            width 11 height 10}
+            
+  $r query "select ts_cet ts, url, akserver, server, serverstore, server||'-'||serverstore serv_store, time_total from curltest where ts_cet between '2013-10-16 00:00' and '2013-10-16 07:00'"
+  $r qplot {title "Load times Shop in timeframe"
+            x ts y time_total xlab "Date/time" ylab "Load time (seconds)"
+            ymin 0 geom point colour url
+            legend.position bottom
+            width 11 height 7}
+            
 #            legend.direction horizontal
 #            legend.position bottom
 # @todo? legend ook als legend {position bottom direction horizontal ncol8}
