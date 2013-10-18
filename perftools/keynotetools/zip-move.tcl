@@ -28,6 +28,10 @@ proc handle_dir {dir root_target} {
   set target_dir [file join $root_target [file tail $dir]]
   file mkdir $target_dir
   # breakpoint
+  # 16-10-2013 if file copy fails (w: not available or disk full), the script should stop here.
+  #            next time a new zip will be made and copied to w:, then dir will be completely deleted.
+  #            so the old zip will be deleted as well (good) and the old zip will not be included
+  #            in the new zip (good as well).
   file copy $zip_name $target_dir
   # breakpoint
   file delete $zip_name
