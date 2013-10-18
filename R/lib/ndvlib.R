@@ -8,6 +8,7 @@ load.def.libs = function() {
   library(stringr)
   library(reshape2)
   library(grid) # for unit, met legends.
+  library(scales) # for ticks per hour.
 }
 
 db.open = function(db.name) {
