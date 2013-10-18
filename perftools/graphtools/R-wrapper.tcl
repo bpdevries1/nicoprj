@@ -17,13 +17,12 @@ oo::class create Rwrapper {
     set dir $a_dir
     set cmdfilename "R-[my now].R"
     set f [open [file join $dir $cmdfilename] w]
-    my write "
-      setwd('$dir')
+    my write [my pprint "setwd('$dir')
       sink('R-output.txt')
       print('R started')
       source('~/nicoprj/R/lib/ndvlib.R')
       load.def.libs()
-      db = db.open('$db')"
+      db = db.open('$db')"]
     set stacked_cmds {}
   }
   
@@ -36,7 +35,12 @@ oo::class create Rwrapper {
     my variable f
     # regsub -all {\'} $cmd "\42" cmd2
     # puts $f $cmd2
+    # puts $f [my indent [my replace_quotes $cmd]]
     puts $f [my replace_quotes $cmd]
+  }
+  
+  method write2 {cmd} {
+    my write "  $cmd" 
   }
   
   method replace_quotes {cmd} {
@@ -44,13 +48,28 @@ oo::class create Rwrapper {
     return $cmd2
   }
   
+  method indent {str} {
+    # @todo first start all at line 1, maybe indent for queries and plot commands.
+    # @todo maybe not use this function.
+  }
+  
+  # start first line at col 0, next at col 2.
+  method pprint {str} {
+    set str [string trim $str]
+    # remove all spaces from start of lines
+    while {[regsub -all {\n } $str "\n" str]} {}
+    # put 2 spaces in front of every line but the first
+    regsub -all {\n} $str "\n  " str
+    return $str
+  }
+  
   method query {query} {
     my variable f stacked_cmds
     # puts $f "query = \"$query\""
     set stacked_cmds {} ; # when a new query starts, other cmds on the stack can be removed, not used anymore, overwritten.
-    lappend stacked_cmds "query = \"$query\""
-    lappend stacked_cmds "df = db.query.dt(db, query)
-              print(head(df))" 
+    lappend stacked_cmds [my pprint "query = \"$query\""]
+    lappend stacked_cmds "df = db.query.dt(db, query)"
+    lappend stacked_cmds "print(head(df))" 
     # my write 
   }
 
@@ -66,8 +85,29 @@ oo::class create Rwrapper {
   # - als dct zoals nu, met accolades, dan geen backslash nodig bij einde regel.
   # - direct als params, dan wel backslash nodig, maar geen [list], en parameter substitutie.
   # - of: parameter substitutie binnen qplot doen, maar mss gevaarlijk.
-  method qplot {dct} {
+  method qplot {args} {
     my variable dargv dir stacked_cmds f d
+    set d [my plot_prepare {*}$args]
+    set colour [ifp [= "" [:colour $d]] "" ", colour=as.factor([:colour $d]), shape=as.factor([:colour $d])"] 
+    my write "p = qplot([:xvar $d], [:yvar $d], data=df, geom='[:geom $d]' $colour) +"
+    my write-if-filled :geom2 "geom_point(data=df, aes(x=[:xvar $d], y=[:yvar $d], shape=as.factor([:colour $d]))) +"
+
+    my write_scales $colour
+    my write_facet
+    my write_legend
+    my write_labs
+
+    my write "ggsave('[:pngname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+    # ook voor SVG wel dimensies opgeven, anders vierkant en blijft vierkant.
+    my write "ggsave('[:svgname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+    # my write "ggsave('[:pngname $d].svg', plot=p)"
+    my write "print(concat('Made graph: ', '[:pngname $d]'))"
+  }
+
+  method plot_prepare {args} {
+    # my variable dargv dir stacked_cmds f d
+    my variable dargv stacked_cmds f d
+    set dct [ifp [= 1 [llength $args]] [lindex $args 0] $args]
     set d [my det_plot_dct $dct]
     log debug "dct: $dct"
     log debug "d: $d"
@@ -75,7 +115,7 @@ oo::class create Rwrapper {
       log debug "File already exists, incr: return: [file join $dir [:pngname $d]]"
       return 
     }
-    my write "print(concat('Making graph: ', '[:pngname $d]'))"
+    my write "\nprint(concat('Making graph: ', '[:pngname $d]'))"
     if {[:query $d] != ""} {
       my query [:query $d] 
     }
@@ -86,57 +126,56 @@ oo::class create Rwrapper {
       puts $f $cmd ; # replace quotes already done where needed (not with query!)
     }
     set stacked_cmds {}
-    # @todo if-thens vervangen door method, bv write-if <expr> <statement>
-    # of write-if-filled :colour <statement> (deze moet dan wel $d beschikbaar hebben, via param of uplevel)
-    if {[:colour $d] != ""} {
-      set colour ", colour=as.factor([:colour $d]), shape=as.factor([:colour $d])" 
-    } else {
-      set colour "" 
-    }
-    my write "p = qplot([:xvar $d], [:yvar $d], data=df, geom='[:geom $d]' $colour) +"
-    if {[:geom2 $d] != ""} {
-      my write "geom_point(data=df, aes(x=[:xvar $d], y=[:yvar $d], shape=as.factor([:colour $d]))) +" 
+    return $d
+  }
+
+  method write_scales {colour} {
+    my variable d
+    # @note scale_colour should be put before scale_shape, in order for guides(ncol) to work.
+    #       doesn't matter if guides is put first.    
+    if {$colour != ""} {
+      my write2 "scale_colour_discrete(name='[:colour $d]') +"
     }
     if {([:geom $d] == "point") || ([:geom2 $d] == "point")} {
-      # my write "scale_shape_manual(values=rep(1:25,5)) +" 
-      my write "scale_shape_manual(name='[:colour $d]', values=rep(1:25,5)) +"
+      my write2 "scale_shape_manual(name='[:colour $d]', values=rep(1:25,5)) +"
     }
-    if {$colour != ""} {
-      my write "scale_colour_discrete(name='[:colour $d]') +"
-    }
-    my write "scale_y_continuous(limits=c([:ymin $d], [:ymax $d])) +"
+    my write2 "scale_y_continuous(limits=c([:ymin $d], [:ymax $d])) +"
+    # @todo check type of x-var and x.breaks value: dates, times, or something else?
+    my write-if-filled :x.breaks "scale_x_datetime(minor_breaks = date_breaks('[:x.breaks $d]')) +"    
+    # also possible: breaks instead of minor_breaks, and labels:
+    # last_plot() + scale_x_datetime(breaks = date_breaks("10 days"), labels = date_format("%d/%m"))
+  }
+  
+  method write_facet {} {
+    my variable d
     if {[:facet $d] != ""} {
-      my write "facet_grid([:facet $d] ~ ., scales='free_y') +" 
+      my write2 "facet_grid([:facet $d] ~ ., scales='free_y') +" 
     }
+  }
+
+  method write_legend {} {
+    my variable d
     # @todo als pos=bottom en dir=vertical, dan checken hoeveel 'kleuren' er zijn. Als veel, dan grafiek groter maken.
     #       berekening in Tcl (dan ook query in tcl) of in R (beter, als dit kan).
     my write-if-filled :legend.position "theme(legend.position='[:legend.position $d]') +"
     my write-if-filled :legend.direction "theme(legend.direction='[:legend.direction $d]') +"
-    # @todo guide_legend verhaal nog niet zien werken, ondanks officiele documentatie.
-    # p + guides(col = guide_legend(ncol = 8))
-    # p + guides(col = guide_legend(ncol = 8))
     my write-if-filled :legend.ncol "guides(col = guide_legend(ncol = [:legend.ncol $d])) +"
     my write-if-filled :legend.nrow "guides(col = guide_legend(nrow = [:legend.nrow $d])) +"
-    my write "labs(title = '[:title $d]', x='[:xlab $d]', y='[:ylab $d]')"
-    my write "ggsave('[:pngname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-    # ook voor SVG wel dimensies opgeven, anders vierkant en blijft vierkant.
-    my write "ggsave('[:svgname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-    # my write "ggsave('[:pngname $d].svg', plot=p)"
-    my write "print(concat('Made graph: ', '[:pngname $d]'))"
   }
 
-  # :legend.position "theme(legend.position='[:legend.position $d]') +"
+  method write_labs {} {  
+    my variable d
+    my write2 "labs(title = '[:title $d]', x='[:xlab $d]', y='[:ylab $d]')"
+  }
+
   method write-if-filled {key expr} {
     my variable d
     if {[$key $d] != ""} {
-      my write $expr 
+      my write2 $expr 
     }
   }
 
-  # @todo set default values for un-specified values by the user: geom, colour, facet.
   method det_plot_dct {dct} {
-    # @todo if using ifp like below, also include check for 'ts'.
-    # my dset dct xvar [ifp [= [:x $dct] "date"] "date_psx" [:x $dct]]
     if {[:x $dct] == "date"} {
       my dset dct xvar "date_psx"
     } elseif {[:x $dct] == "ts"} {
@@ -144,12 +183,10 @@ oo::class create Rwrapper {
     } else {
       my dset dct xvar [:x $dct]
     }
-    # log info "2:d: $dct "
     if {[:melt $dct] != ""} {
       my dset dct y value
       my dset dct colour variable
     }
-    
     my dset dct yvar [:y $dct]
     my dset dct xlab [:x $dct]
     my dset dct ylab [:y $dct]
@@ -168,7 +205,7 @@ oo::class create Rwrapper {
   }
   
   method sanitise {filename} {
-    regsub -all {[/:\\\?~;]} $filename "_" filename
+    regsub -all {[/:\\\?~;<>]} $filename "_" filename
     return $filename
   }
   
@@ -181,9 +218,9 @@ oo::class create Rwrapper {
   
   method doall {} {
     my variable f cmdfilename dir dargv
-    my write "db.close(db)
+    my write [my pprint "\n# Finished\ndb.close(db)
               print('R finished')
-              sink()"
+              sink()"]
     close $f
     if {[:keepcmd $dargv]} {
       file copy -force [file join $dir $cmdfilename] [file join $dir "R-latest.R"]
