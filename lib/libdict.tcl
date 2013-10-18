@@ -116,8 +116,8 @@ proc unknown args {
           } elseif {[dict exists $dct [string range $procname 1 end]]} {
             make_dict_accessor $procname [string range $procname 1 end]
           } else {
-            log warn "attribute not found in dictionary: $procname, with or without :" 
-            log warn "default: make accessor for item without :"
+            #log warn "attribute not found in dictionary: $procname, with or without :" 
+            #log warn "default: make accessor for item without :"
             make_dict_accessor $procname [string range $procname 1 end]
           }
           return [$procname $dct]
