@@ -29,6 +29,7 @@ proc make_graphs {dargv} {
   set r [Rwrapper new $dargv]
   $r init [:dir $dargv] [:db $dargv]
   graph_all $r
+  graph_timeframes $r
   $r doall
   $r cleanup
   $r destroy
@@ -84,6 +85,36 @@ proc graph_all {r} {
   
 }
 
+proc graph_timeframes {r} {
+  $r query "select ts_cet ts, url, time_total from curltest
+            where ts_cet < '2013-10-16 08:00'"
+  $r qplot {title "Load times Shop until 2013-10-16 08:00"
+            x ts y time_total xlab "Date/time" ylab "Load time (seconds)"
+            ymin 0 geom point colour url
+            legend.position bottom
+            x.breaks hour
+            width 11 height 7}
+            
+  $r query "select ts_cet ts, url, time_total from curltest
+            where ts_cet < '2013-10-18'
+            and ts_cet > '2013-10-16 08:00'"
+  $r qplot {title "Load times Shop from 2013-10-16 until 2013-10-18"
+            x ts y time_total xlab "Date/time" ylab "Load time (seconds)"
+            ymin 0 geom point colour url
+            legend.position bottom
+            x.breaks hour
+            width 11 height 7}
+            
+  $r query "select ts_cet ts, url, time_total from curltest
+            where ts_cet > '2013-10-18'"
+  $r qplot {title "Load times Shop from 2013-10-18"
+            x ts y time_total xlab "Date/time" ylab "Load time (seconds)"
+            ymin 0 geom point colour url
+            legend.position bottom
+            x.breaks hour
+            width 11 height 7}            
+}
+            
 # @todo
 # runs on windows?
 # other graphs: other fields.
