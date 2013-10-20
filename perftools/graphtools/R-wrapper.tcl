@@ -88,6 +88,10 @@ oo::class create Rwrapper {
   method qplot {args} {
     my variable dargv dir stacked_cmds f d
     set d [my plot_prepare {*}$args]
+    if {$d == {}} {
+      # graph already exists and in incr(emental) mode: return.
+      return 
+    }
     set colour [ifp [= "" [:colour $d]] "" ", colour=as.factor([:colour $d]), shape=as.factor([:colour $d])"] 
     my write "p = qplot([:xvar $d], [:yvar $d], data=df, geom='[:geom $d]' $colour) +"
     my write-if-filled :geom2 "geom_point(data=df, aes(x=[:xvar $d], y=[:yvar $d], shape=as.factor([:colour $d]))) +"
@@ -106,14 +110,14 @@ oo::class create Rwrapper {
 
   method plot_prepare {args} {
     # my variable dargv dir stacked_cmds f d
-    my variable dargv stacked_cmds f d
+    my variable dargv dir stacked_cmds f d
     set dct [ifp [= 1 [llength $args]] [lindex $args 0] $args]
     set d [my det_plot_dct $dct]
     log debug "dct: $dct"
     log debug "d: $d"
     if {([:incr $dargv]) && [file exists [file join $dir [:pngname $d]]]} {
       log debug "File already exists, incr: return: [file join $dir [:pngname $d]]"
-      return 
+      return {}
     }
     my write "\nprint(concat('Making graph: ', '[:pngname $d]'))"
     if {[:query $d] != ""} {
