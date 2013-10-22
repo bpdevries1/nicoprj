@@ -23,6 +23,8 @@ proc main {argv} {
 }
 
 proc curltest {dargv} {
+  global curl_bin
+  set curl_bin [det_curl_bin]
   set dir [:dir $dargv]
   file mkdir $dir
   set dbname [file join $dir "curltest.db"]
@@ -31,8 +33,17 @@ proc curltest {dargv} {
   set interval [expr 1000 * [:interval $dargv]]
   set clientname [det_clientname]
   while {1} {
-    test1 $db $clientname "https://www.philips-shop.de/store/myaccount/login.jsp"
-    test1 $db $clientname "http://www.philipsstore.nl/store/"
+    # new ones 21-10-2013
+    test1 $db $clientname qa "http://qal.www.philips-shop.de/store/"
+    #test1 $db $clientname qa "https://qal.www.philips-shop.de/store/myaccount/login.jsp"
+    test1 $db $clientname qa "http://www.dev2.philips-shop.co.uk/store/"
+    #test1 $db $clientname qa "https://www.dev2.philips-shop.co.uk/store/myaccount/login.jsp"
+    
+    test1 $db $clientname qa "http://qal.www.philips-tienda.es/store/index.jsp?country=ES&language=es"
+    test1 $db $clientname qa "http://qal.www.philips-tienda.es/store/"
+    test1 $db $clientname prod "https://www.philips-shop.de/store/myaccount/login.jsp"
+    test1 $db $clientname prod "http://www.philipsstore.nl/store/"
+    log info "Wait $interval msec"
     after $interval
   }
 }
@@ -48,9 +59,44 @@ proc prepare_db {db} {
   $db prepare_insert_statements  
 }
 
-proc test1 {db clientname url} {
+if {0} {
+  curl -w "@curlset.txt" -IXGET -H "Pragma: akamai-x-cache-on, akamai-x-cache-remote-on, akamai-x-check-cacheable, akamai-x-get-cache-key, akamai-x-get-extracted-values, akamai-x-get-nonces, akamai-x-get-ssl-client-session-id, akamai-x-get-true-cache-key, akamai-x-serial-no" -L --connect-timeout 20 --max-time 30 "http://www.philipsstore.nl/store/"
+  
+  curl -w "@curlset.txt" -IXGET -H "Pragma: akamai-x-cache-on, akamai-x-cache-remote-on, akamai-x-check-cacheable, akamai-x-get-cache-key, akamai-x-get-extracted-values, akamai-x-get-nonces, akamai-x-get-ssl-client-session-id, akamai-x-get-true-cache-key, akamai-x-serial-no" -L --connect-timeout 20 --max-time 30 "https://www.philips-shop.de/store/myaccount/login.jsp"
+
+c:/util/cygwin/bin/curl -w "@curlset.txt" -IXGET -H "Pragma: akamai-x-cache-on, akamai-x-cache-remote-on, akamai-x-check-cacheable, akamai-x-get-cache-key, akamai-x-get-extracted-values, akamai-x-get-nonces, akamai-x-get-ssl-client-session-id, akamai-x-get-true-cache-key, akamai-x-serial-no" -L --connect-timeout 20 --max-time 30 "http://www.philipsstore.nl/store/"
+  
+c:/util/cygwin/bin/curl -w "@curlset.txt"
+curlset.txt niet gevonden.
+ook in c:/util/cygwin/bin neerzetten. 
+
+
+}
+
+proc det_curl_bin {} {
+  global tcl_platform
+  if {$tcl_platform(platform) == "windows"} {
+    return "c:/util/cygwin/bin/curl.exe"  
+  } else {
+    return "curl" 
+  }
+}
+
+proc test1 {db clientname prodqa url} {
+  global curl_bin
   log info "Get: $url"
-  set resulttext [exec -ignorestderr curl -w "@curlset.txt" -IXGET -H "Pragma: akamai-x-cache-on, akamai-x-cache-remote-on, akamai-x-check-cacheable, akamai-x-get-cache-key, akamai-x-get-extracted-values, akamai-x-get-nonces, akamai-x-get-ssl-client-session-id, akamai-x-get-true-cache-key, akamai-x-serial-no" -L --connect-timeout 20 --max-time 30 "$url"]
+  # set resulttext [exec -ignorestderr curl -w "@curlset.txt" -IXGET -H "Pragma: akamai-x-cache-on, akamai-x-cache-remote-on, akamai-x-check-cacheable, akamai-x-get-cache-key, akamai-x-get-extracted-values, akamai-x-get-nonces, akamai-x-get-ssl-client-session-id, akamai-x-get-true-cache-key, akamai-x-serial-no" -L --connect-timeout 20 --max-time 30 "$url"]
+  #set cmd [list $curl_bin -w curlset.txt -IXGET -H "Pragma: akamai-x-cache-on, akamai-x-cache-remote-on, akamai-x-check-cacheable, akamai-x-get-cache-key, akamai-x-get-extracted-values, akamai-x-get-nonces, akamai-x-get-ssl-client-session-id, akamai-x-get-true-cache-key, akamai-x-serial-no" -L --connect-timeout 20 --max-time 30 $url] 
+  # set resulttext [exec -ignorestderr $curl_bin -w "@curlset.txt" -IXGET -H "Pragma: akamai-x-cache-on, akamai-x-cache-remote-on, akamai-x-check-cacheable, akamai-x-get-cache-key, akamai-x-get-extracted-values, akamai-x-get-nonces, akamai-x-get-ssl-client-session-id, akamai-x-get-true-cache-key, akamai-x-serial-no" -L --connect-timeout 20 --max-time 30 "$url"]
+  #log info "Executing: $cmd"
+  try_eval {
+    set resulttext ""
+    set resulttext [exec -ignorestderr c:/util/cygwin/bin/bash ./curl$prodqa.sh $url]
+  } {
+    log warn "Error during curl: $errorResult"
+    set resulttext "$resulttext$errorResult"
+  }
+  log info "result: $resulttext"
   set ts_cet [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
   set dct [dict create url $url resulttext $resulttext ts_cet $ts_cet]
   dict set dct clientname $clientname
