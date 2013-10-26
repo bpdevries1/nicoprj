@@ -101,7 +101,9 @@ if {$tcl_version == "8.5"} {
       if {[regexp {_id$} $fielddef]} {
         set datatype "integer"        
       } else {
-        set datatype "varchar" 
+        # set datatype "varchar"
+        # [2013-10-26 14:05:40] no Affinity by default.
+        set datatype ""
       }
       return "$fielddef $datatype"
     }
