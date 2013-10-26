@@ -144,10 +144,25 @@ oo::class create Rwrapper {
       my write2 "scale_shape_manual(name='[:colour $d]', values=rep(1:25,5)) +"
     }
     my write2 "scale_y_continuous(limits=c([:ymin $d], [:ymax $d])) +"
-    # @todo check type of x-var and x.breaks value: dates, times, or something else?
-    my write-if-filled :x.breaks "scale_x_datetime(minor_breaks = date_breaks('[:x.breaks $d]')) +"    
+    if {[regexp {^dt/} [:xdatatype $d]]} {
+      set options {}
+      if {[:x.breaks $d] != ""} {
+        lappend options "minor_breaks = date_breaks('[:x.breaks $d]')" 
+      }
+      lappend options "labels = date_format('[my det_date_format [:xdatatype $d]]')"
+      my write2 "scale_x_datetime([join $options ", "]) +"
+    }
     # also possible: breaks instead of minor_breaks, and labels:
     # last_plot() + scale_x_datetime(breaks = date_breaks("10 days"), labels = date_format("%d/%m"))
+  }
+  
+  method det_date_format {datatype} {
+    # @todo maybe add a \n for ts format.
+    switch $datatype {
+      dt/date {str "%Y-%m-%d"}
+      dt/time {str "%H:%M:%S"}
+      dt/ts {str "%Y-%m-%d %H:%M:%S"}
+    }
   }
   
   method write_facet {} {
@@ -182,10 +197,16 @@ oo::class create Rwrapper {
   method det_plot_dct {dct} {
     if {[:x $dct] == "date"} {
       my dset dct xvar "date_psx"
+      my dset dct xdatatype "dt/date"
     } elseif {[:x $dct] == "ts"} {
       my dset dct xvar "ts_psx"
+      my dset dct xdatatype "dt/ts"
+    } elseif {[:x $dct] == "time"} {
+      my dset dct xvar "time_psx"
+      my dset dct xdatatype "dt/time"
     } else {
       my dset dct xvar [:x $dct]
+      my dset dct xdatatype "other/other"
     }
     if {[:melt $dct] != ""} {
       my dset dct y value
@@ -200,8 +221,8 @@ oo::class create Rwrapper {
     } else {
       my dset dct geom "point"
     }
-    my dset dct ymin "min(df\$[:yvar $dct])"
-    my dset dct ymax "max(df\$[:yvar $dct])"
+    my dset dct ymin "min(df\$[:yvar $dct], na.rm=TRUE)"
+    my dset dct ymax "max(df\$[:yvar $dct], na.rm=TRUE)"
     my dset dct title "No title"
     my dset dct pngname "[my sanitise [:title $dct]].png"
     my dset dct svgname "[my sanitise [:title $dct]].svg"
