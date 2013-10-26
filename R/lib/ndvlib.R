@@ -181,16 +181,18 @@ add.psxtime = function(df, from, to, format="%Y-%m-%d") {
 # first try is add fields blindly, possibly with null values
 # second try is to check which fields are available,
 # or add a try-catch.
-db.query.dt = function(db, query) {
-  df = db.query(db, query)
-  if (match("ts", colnames(df)) > 0) {
-    df$ts_psx = as.POSIXct(strptime(df$ts, format="%Y-%m-%d %H:%M:%S"))
-  }
-  if (match("date", colnames(df)) > 0) {
-    df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d"))
-  }
-  df
-}
+
+# [2013-10-25 14:09:15] stond er dubbel in, geen idee waarom...
+# db.query.dt = function(db, query) {
+#   df = db.query(db, query)
+#   if (match("ts", colnames(df)) > 0) {
+#     df$ts_psx = as.POSIXct(strptime(df$ts, format="%Y-%m-%d %H:%M:%S"))
+#   }
+#   if (match("date", colnames(df)) > 0) {
+#     df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d"))
+#   }
+#   df
+# }
 
 db.query.dt = function(db, query) {
   df = db.query(db, query)
@@ -199,6 +201,9 @@ db.query.dt = function(db, query) {
   }
   if ("date" %in% colnames(df)) {
     df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d"))
+  }
+  if ("time" %in% colnames(df)) {
+    df$time_psx = as.POSIXct(strptime(df$time, format="%H:%M:%S"))
   }
   df
 }
