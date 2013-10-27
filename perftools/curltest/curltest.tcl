@@ -11,8 +11,9 @@ $log set_file "[file tail [info script]].log"
 proc main {argv} {
   log debug "argv: $argv"
   set options {
-    {dir.arg "~/Ymor/Philips/Shop/curltest" "Dir to put output"}
+    {dir.arg "~/Dropbox/Philips/Shop/curltest" "Dir to put output"}
     {loglevel.arg "info" "Log level (debug, info, warn)"}
+    {qadev "Also do QA and DEV environments"}
     {interval.arg "300" "Interval in seconds"}
   }
   set usage ": [file tail [info script]] \[options] :"
@@ -33,16 +34,19 @@ proc curltest {dargv} {
   set interval [expr 1000 * [:interval $dargv]]
   set clientname [det_clientname]
   while {1} {
-    # new ones 21-10-2013
-    test1 $db $clientname qa "http://qal.www.philips-shop.de/store/"
-    #test1 $db $clientname qa "https://qal.www.philips-shop.de/store/myaccount/login.jsp"
-    test1 $db $clientname qa "http://www.dev2.philips-shop.co.uk/store/"
-    #test1 $db $clientname qa "https://www.dev2.philips-shop.co.uk/store/myaccount/login.jsp"
-    
-    test1 $db $clientname qa "http://qal.www.philips-tienda.es/store/index.jsp?country=ES&language=es"
-    test1 $db $clientname qa "http://qal.www.philips-tienda.es/store/"
     test1 $db $clientname prod "https://www.philips-shop.de/store/myaccount/login.jsp"
     test1 $db $clientname prod "http://www.philipsstore.nl/store/"
+
+    if {[:qadev $dargv]} {
+      # new ones 21-10-2013
+      test1 $db $clientname qa "http://qal.www.philips-shop.de/store/"
+      #test1 $db $clientname qa "https://qal.www.philips-shop.de/store/myaccount/login.jsp"
+      test1 $db $clientname qa "http://www.dev2.philips-shop.co.uk/store/"
+      #test1 $db $clientname qa "https://www.dev2.philips-shop.co.uk/store/myaccount/login.jsp"
+      
+      test1 $db $clientname qa "http://qal.www.philips-tienda.es/store/index.jsp?country=ES&language=es"
+      test1 $db $clientname qa "http://qal.www.philips-tienda.es/store/"
+    }
     log info "Wait $interval msec"
     after $interval
   }
@@ -91,7 +95,12 @@ proc test1 {db clientname prodqa url} {
   #log info "Executing: $cmd"
   try_eval {
     set resulttext ""
-    set resulttext [exec -ignorestderr c:/util/cygwin/bin/bash ./curl$prodqa.sh $url]
+    # for windows, also qa-dev:
+    # set resulttext [exec -ignorestderr c:/util/cygwin/bin/bash ./curl$prodqa.sh $url]
+    
+    # for linux:
+    set resulttext [exec -ignorestderr curl -w "@curlset.txt" -IXGET -H "Pragma: akamai-x-cache-on, akamai-x-cache-remote-on, akamai-x-check-cacheable, akamai-x-get-cache-key, akamai-x-get-extracted-values, akamai-x-get-nonces, akamai-x-get-ssl-client-session-id, akamai-x-get-true-cache-key, akamai-x-serial-no" -L --connect-timeout 20 --max-time 30 "$url"]
+    # set resulttext [exec -ignorestderr $curl_bin ./curl$prodqa.sh $url]
   } {
     log warn "Error during curl: $errorResult"
     set resulttext "$resulttext$errorResult"
