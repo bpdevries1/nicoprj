@@ -22,6 +22,7 @@ source [file join $script_dir libpostproclogs.tcl]
 source [file join $script_dir libmigrations.tcl]
 source [file join $script_dir kn-migrations.tcl]
 source [file join $script_dir checkrun-handler.tcl]
+source [file join $script_dir dailystats.tcl]
 
 proc main {argv} {
   global dargv
@@ -34,6 +35,8 @@ proc main {argv} {
     {nomain2 "Do not put data in a main db"}
     {moveread "Move read files to subdirectory 'read'"}
     {continuous "Keep running this script, to automatically put new items downloaded in DB's"}
+    {updatedaily "Update daily aggregate tables"}
+    {pattern.arg "*" "Just handle subdirs that have pattern"}
     {debug "Run in debug mode, stop when an error occurs"}
   }
   set usage ": [file tail [info script]] \[options] :"
@@ -84,7 +87,7 @@ proc wait_until_next_hour_and_half {} {
 proc scatter2db_main {dargv} {
   global cr_handler
   set root_dir [from_cygwin [:dir $dargv]]  
-  
+  set res "Ok"
   if {[:nomain $dargv]} {
     log info "Don't use main DB"
     set dbmain ""
@@ -118,7 +121,7 @@ proc scatter2db_main {dargv} {
     }
     set res [scatter2db_subdir $dargv $root_dir $dbmain]
   } else {
-    foreach subdir [lsort [glob -nocomplain -directory $root_dir -type d *]] {
+    foreach subdir [lsort [glob -nocomplain -directory $root_dir -type d [:pattern $dargv]]] {
       if {[ignore_subdir $subdir]} {
         log info "Ignore subdir: $subdir (for test!)"
       } else {
@@ -160,9 +163,11 @@ proc scatter2db_subdir {dargv subdir dbmain} {
     create_indexes $db
     migrate_kn_create_view_rpi $db
     copy_script_pages $db
+    add_daily_stats $db 1
     # set initial db version
   } else {
     log info "Existing db: $db_name, don't create tables"
+    add_daily_stats $db 0 ; # to define tables for insert-statements.
   }
   migrate_db $db $existing_db
   # @todo nog even if 0, want niet in 'productie'
@@ -181,6 +186,9 @@ proc scatter2db_subdir {dargv subdir dbmain} {
   handle_files $subdir $db $dbmain
   if {![:nopost $dargv]} {
     post_process $db
+  }
+  if {[:updatedaily $dargv]} {
+    update_daily_stats $db $subdir
   }
   # $conn close
   $db close

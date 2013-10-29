@@ -308,4 +308,27 @@ migrate_proc add_fill_checkrun "Add and fill checkrun table" {
   
 } ; # end of migrate_proc add_fill_checkrun
 
+# add checkrun, first define helper procs
+proc add_daily_stats {db {create_tables 1}} {
+  $db add_tabledef dailystatus {} {dateuntil_cet}
+  $db add_tabledef dailystatuslog {} {ts_start_cet ts_end_cet datefrom_cet dateuntil_cet notes}
+  $db add_tabledef aggr_run {id} {scriptname date_cet {total_time_sec real} {page_time_sec real} \
+    {npages int} {avail real} {datacount int} {total_ttip_sec real} {page_ttip_sec real}}
+  $db add_tabledef aggr_page {id} {scriptname date_cet {page_seq int} {avail real} \
+    {page_time_sec real} {page_ttip_sec real} {datacount int}}
+  if {$create_tables} {
+    $db create_tables 0
+  }
+}
+
+# @todo create and filled based on Dealer Locator code, still have to do:
+# based on Myphilips and generic
+# filling new records as they are being read.
+migrate_proc add_daily_stats "Add daily stats tables" {
+  log debug "add_daily_stats: start"
+  # set db_has_fields [add_checkrun $db]
+  add_daily_stats $db 1
+  log debug "add_daily_stats: finished"
+  # breakpoint
+}
 

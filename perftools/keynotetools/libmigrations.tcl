@@ -86,18 +86,6 @@ proc migrate_create_tables {db} {
   $db prepare_insert_statements
 }
 
-proc migrate_create_tables_old {db} {
-  $db add_tabledef db_version {version_current} {}
-  $db add_tabledef db_migration {id} {start_utc stop_utc \
-    version_from version_to description}
-  if {[$db table_exists db_version]} {
-    # tables already exist 
-  } else {
-    $db create_tables 0 ; # don't drop tables first.
-  }
-  $db prepare_insert_statements
-}
-
 proc migrate_det_current_version {db} {
   set res [$db query "select version_current from db_version"]
   if {[llength $res] == 1} {
