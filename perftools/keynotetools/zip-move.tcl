@@ -48,7 +48,8 @@ proc zip_files {dir} {
   cd $dir
   log debug "zipping json files in $dir => $name"
   # breakpoint
-  exec zip $name *.json
+  set zip_exe "c:/util/cygwin/bin/zip.exe"
+  exec $zip_exe $name *.json
   return [file join $dir $name]
 }
 
