@@ -318,6 +318,10 @@ proc create_indexes {db} {
   $db exec2 "create index if not exists ix_pageitem_1 on pageitem (scriptrun_id)" -try
   $db exec2 "create index if not exists ix_pageitem_2 on pageitem (page_id)" -try
   $db exec2 "create unique index if not exists ix_scriptrun_1 on scriptrun(slot_id,datetime)"
+
+  # [2013-10-29 17:03:08] added for daily stats:
+  $db exec2 "create index if not exists ix_run_datecet on scriptrun(date_cet)" -log -try
+  $db exec2 "create index if not exists ix_page_datecet on page(date_cet)" -log -try
 }
 
 proc read_script_pages {db} {

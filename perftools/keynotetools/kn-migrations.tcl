@@ -332,3 +332,10 @@ migrate_proc add_daily_stats "Add daily stats tables" {
   # breakpoint
 }
 
+migrate_proc add_indexes_date_cet "Add indexes for date_cet fields" {
+  log info "Add indexes for date_cet fields"
+  # set db_has_fields [add_checkrun $db]
+  $db exec2 "create index if not exists ix_run_datecet on scriptrun(date_cet)" -log -try
+  $db exec2 "create index if not exists ix_page_datecet on page(date_cet)" -log -try
+}
+

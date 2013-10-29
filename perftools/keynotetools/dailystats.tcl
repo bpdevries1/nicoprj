@@ -63,6 +63,7 @@ proc update_stats_date {db subdir sec_date} {
   
   set total_time_sec 0.0
   set total_ttip_sec 0.0
+  set npages 0
   foreach row [$db query "select 1*p.page_seq page_seq, count(*) datacount, avg(0.001*p.delta_user_msec) page_time_sec, 
                                  avg(0.001*p.time_to_interactive_page) page_ttip_sec
                           from page p
@@ -78,9 +79,16 @@ proc update_stats_date {db subdir sec_date} {
      set total_time_sec [expr $total_time_sec + [:page_time_sec $row]]
      set total_ttip_sec [expr $total_ttip_sec + [:page_ttip_sec $row]]
   }
-  $db insert aggr_run [dict create scriptname $scriptname date_cet $date_cet \
-    total_time_sec [format %.3f $total_time_sec] page_time_sec [format %.3f [expr $total_time_sec / $npages]] \
-    npages $npages avail [format %.3f $avail] datacount $datacount total_ttip_sec [format %.3f $total_ttip_sec] \
-    page_ttip_sec [format %.3f [expr $total_ttip_sec / $npages]]]
+  if {$npages == 0} {
+    # @note no pages, no page stats (divide by 0)
+    $db insert aggr_run [dict create scriptname $scriptname date_cet $date_cet \
+      total_time_sec [format %.3f $total_time_sec] \
+      npages $npages avail [format %.3f $avail] datacount $datacount total_ttip_sec [format %.3f $total_ttip_sec]]
+  } else {
+    $db insert aggr_run [dict create scriptname $scriptname date_cet $date_cet \
+      total_time_sec [format %.3f $total_time_sec] page_time_sec [format %.3f [expr $total_time_sec / $npages]] \
+      npages $npages avail [format %.3f $avail] datacount $datacount total_ttip_sec [format %.3f $total_ttip_sec] \
+      page_ttip_sec [format %.3f [expr $total_ttip_sec / $npages]]]
+  }
 }
 
