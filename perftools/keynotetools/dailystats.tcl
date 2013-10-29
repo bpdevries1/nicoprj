@@ -32,6 +32,7 @@ proc det_prev_dateuntil {db} {
     clock scan [:dateuntil_cet [lindex $res 0]] -format "%Y-%m-%d" 
   } else {
     set res [$db query "select min(date_cet) date from scriptrun"]
+    log debug "res: $res"
     if {[llength $res] == 1} {
       clock scan [:date [lindex $res 0]] -format "%Y-%m-%d"
     } else {
