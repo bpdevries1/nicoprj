@@ -36,13 +36,16 @@ proc main {argv} {
     {moveread "Move read files to subdirectory 'read'"}
     {continuous "Keep running this script, to automatically put new items downloaded in DB's"}
     {updatedaily "Update daily aggregate tables"}
+    {updatemaxitem "Update maxitem table (daily)"}
+    {maxitem "20" "Number of maxitems to determine"}
     {pattern.arg "*" "Just handle subdirs that have pattern"}
+    {loglevel.arg "info" "Log level (debug, info, warn)"}
     {debug "Run in debug mode, stop when an error occurs"}
   }
   set usage ": [file tail [info script]] \[options] :"
   # set dargv [::cmdline::getoptions argv $options $usage]
   set dargv [getoptions argv $options $usage]
-  
+  log set_log_level [:loglevel $dargv]
   # 28-9-2013 don't support maindb anymore for now, don't use it now.
   dict set dargv nomain 1
   if {[:dropdb $dargv] && [:continuous $dargv]} {
@@ -145,7 +148,7 @@ proc ignore_subdir {subdir} {
 }
 
 proc scatter2db_subdir {dargv subdir dbmain} {
-  global cr_handler
+  global cr_handler min_date
   set db_name [file join $subdir "keynotelogs.db"]
   if {[:dropdb $dargv]} {
     file delete $db_name
@@ -183,12 +186,16 @@ proc scatter2db_subdir {dargv subdir dbmain} {
   # for test.
   # $db insert logfile {path "test.json"}
   read_script_pages $db ; # into global dict, should perform better.
+  
+  # @note [global] min_date contains minimum date of currently read json files. Give this one to update_daily_stats.
+  set min_date [clock format [clock seconds] -format "%Y-%m-%d"]
   handle_files $subdir $db $dbmain
   if {![:nopost $dargv]} {
     post_process $db
   }
   if {[:updatedaily $dargv]} {
-    update_daily_stats $db $subdir
+    update_daily_stats $db $subdir $dargv $min_date
+    # update_daily_stats $db $subdir $dargv "2013-10-27"
   }
   # $conn close
   $db close
@@ -384,7 +391,7 @@ proc move_read {filename} {
 }
 
 proc read_json_file_db {db filename root_dir {pageitem 1}} {
-  global cr_handler
+  global cr_handler min_date
   if {[is_read $db $filename]} {
     # log info "Already read, ignoring: $filename"
     return
@@ -430,7 +437,11 @@ proc read_json_file_db {db filename root_dir {pageitem 1}} {
           dict set dct scriptname [det_scriptname [:slot_id $dct] $filename]
           dict set dct ts_utc [det_ts_utc [:datetime $dct]]
           dict set dct ts_cet [det_ts_cet [:datetime $dct]]
-          dict set dct date_cet [det_date_cet [:datetime $dct]]
+          set date_cet [det_date_cet [:datetime $dct]]
+          dict set dct date_cet $date_cet
+          if {$date_cet < min_date} {
+            set min_date $date_cet 
+          }
           dict set dct provider [det_provider [:target_id $dct]]
           set pages [concat [:wxn_page $run] [:txnPages $run]]
           
