@@ -28,7 +28,8 @@ proc main {argv} {
 proc make_graphs {dargv} {
   set r [Rwrapper new $dargv]
   $r init [:dir $dargv] [:db $dargv]
-  graph_all $r
+  # graph_all $r
+  graph_connection $r
   $r doall
   $r cleanup
   $r destroy
@@ -69,6 +70,20 @@ proc graph_all {r} {
             legend.direction horizontal \
             legend.ncol 4 \
             width 11 height 7            
+}
+
+proc graph_connection {r} {
+  $r query "select strftime('%Y-%m-%d %H:%M', substr(ts, 1, 19))||':00' ts, class, count(*) number
+            from atglogs
+            where class like '%connection%'
+            group by 1,2"
+  $r qplot {title "Number of connection errors per minute"
+            x ts y number xlab "Date/time" ylab "#messages"
+            ymin 0 geom point colour class
+            x.breaks hour
+            legend.position bottom
+            legend.direction vertical
+            width 11 height 7}  
 }
 
 # @todo
