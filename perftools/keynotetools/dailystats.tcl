@@ -59,7 +59,11 @@ proc update_stats_date {db subdir sec_date} {
     set nitems([:task_succeed_calc $row]) [:datacount $row]                          
   }
   set datacount [expr $nitems(0) + $nitems(1)]
-  set avail [expr 1.0 * $nitems(1) / $datacount]
+  if {$datacount == 0} {
+    set avail 0.0 
+  } else {
+    set avail [expr 1.0 * $nitems(1) / $datacount]
+  }
   
   set total_time_sec 0.0
   set total_ttip_sec 0.0
