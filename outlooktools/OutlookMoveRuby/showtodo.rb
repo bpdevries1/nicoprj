@@ -26,7 +26,14 @@ class Main
 		#ns.Logon # uncomment for online usage
 		@ff = FolderFinder.new
 		@ff.set_namespace(ns)
+		puts "Todo folders with items:"
+		show_foldername_items "Inbox"
+		show_foldername_items "Wacht"
+		show_foldername_items "Parkeerplaats"
+		show_foldername_items "Afhandelen"
+		show_foldername_items "TODO"
 		
+		puts "Todo folders with #items:"
 		show_foldername "Inbox"
 		show_foldername "Wacht"
 		show_foldername "Parkeerplaats"
@@ -38,8 +45,20 @@ class Main
 		lst_todo = @ff.search_folders(name) # list of MailFolder
 		# lst_todo.each {|fld| puts "#{fld.outlook_folder.items.count} -  #{fld.path}" if fld.outlook_folder.items.count > 0}
 		lst_todo.each {|fld| puts "#{'%3d' % fld.outlook_folder.items.count} -  #{fld.path}" if fld.outlook_folder.items.count > 0}
-		
-		'%.2f' % 1.23456789
+  end
+  
+  def show_foldername_items name 
+		lst_todo = @ff.search_folders(name) # list of MailFolder
+		lst_todo.each {|fld| 
+		  if fld.outlook_folder.items.count > 0
+        puts "#{'%3d' % fld.outlook_folder.items.count} -  #{fld.path}" 
+        puts "-"*20
+        fld.outlook_folder.items.each {|msg|
+          puts "#{msg.SentOn}/#{msg.SenderName}/#{msg.Subject}"
+        }
+        puts "="*40
+      end
+		}
   end
   
 end
