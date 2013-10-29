@@ -30,6 +30,7 @@ proc update_daily_stats {db subdir dargv min_date} {
     set ts_end_cet [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
     if {$days_done} {
       if {[:updatemaxitem $dargv]} {
+        # breakpoint
         update_maxitem $db [:maxitem $dargv]
       }
       $db exec2 "delete from dailystatus"
@@ -50,12 +51,12 @@ proc det_prev_dateuntil {db} {
     log info "res: $res"
     if {[llength $res] == 1} {
       try_eval {
-        set res -1
-        set res [clock scan [:date [lindex $res 0]] -format "%Y-%m-%d"]
+        set res2 -1
+        set res2 [clock scan [:date [lindex $res 0]] -format "%Y-%m-%d"]
       } {
-        log warn "Error while parsing date: $res" 
+        log warn "det_prev_dateuntil: Error while parsing date: $res" 
       }
-      return $res
+      return $res2
     } else {
       return -1
       # error "Empty scriptrun table" 
@@ -129,10 +130,11 @@ proc update_maxitem {db max_urls} {
   $db exec2 "drop table if exists maxitem" -log
   
   $db exec2 "CREATE TABLE maxitem (id integer primary key autoincrement, 
-                  url, page_seq, loadtime)" -log
+                  url, page_seq int, loadtime real)" -log
 
   set last_week [det_last_week $db]
   log info "Determined last week as: $last_week (possibly old database)"
+  log info "Max_urls to determine: $max_urls"
   $db exec2 "insert into maxitem (url, page_seq, loadtime)
             select i.urlnoparams, p.page_seq, avg(0.001*i.element_delta) loadtime
             from scriptrun r, page p, pageitem i

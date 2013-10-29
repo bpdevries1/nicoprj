@@ -37,7 +37,7 @@ proc main {argv} {
     {continuous "Keep running this script, to automatically put new items downloaded in DB's"}
     {updatedaily "Update daily aggregate tables"}
     {updatemaxitem "Update maxitem table (daily)"}
-    {maxitem "20" "Number of maxitems to determine"}
+    {maxitem.arg "20" "Number of maxitems to determine"}
     {pattern.arg "*" "Just handle subdirs that have pattern"}
     {loglevel.arg "info" "Log level (debug, info, warn)"}
     {debug "Run in debug mode, stop when an error occurs"}
@@ -194,6 +194,7 @@ proc scatter2db_subdir {dargv subdir dbmain} {
     post_process $db
   }
   if {[:updatedaily $dargv]} {
+    # breakpoint
     update_daily_stats $db $subdir $dargv $min_date
     # update_daily_stats $db $subdir $dargv "2013-10-27"
   }
@@ -555,7 +556,11 @@ proc handle_page {db scriptrun_id page dct_details pageitem scriptname datetime}
         set prev_id [:resource_id $dcti]
         set given_id [:resource_id $dcti]
       }
-      set dcti_detail [dict get $dct_details $given_id]
+      try_eval {
+        set dcti_detail [dict get $dct_details $given_id]
+      } {
+        set dcti_detail [dict create] 
+      }
       set dcti2 [dict merge $dcti $dcti_detail]
       dict set dcti2 extension [det_extension [:url $dcti2]]
       set domain [det_domain [:url $dcti2]]
