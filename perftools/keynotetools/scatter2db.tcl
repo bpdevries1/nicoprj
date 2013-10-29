@@ -439,7 +439,7 @@ proc read_json_file_db {db filename root_dir {pageitem 1}} {
           dict set dct ts_cet [det_ts_cet [:datetime $dct]]
           set date_cet [det_date_cet [:datetime $dct]]
           dict set dct date_cet $date_cet
-          if {$date_cet < min_date} {
+          if {$date_cet < $min_date} {
             set min_date $date_cet 
           }
           dict set dct provider [det_provider [:target_id $dct]]
