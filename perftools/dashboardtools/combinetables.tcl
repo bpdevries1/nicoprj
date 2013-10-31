@@ -19,8 +19,10 @@ proc main {argv} {
   # lassign $argv dirname
   set options {
     {dir.arg "c:/projecten/Philips/Dashboards-Shop" "Directory where target DB is (dashboards.db)"}
+    {db.arg "dashboards.db" "Target DB name"}
     {srcdir.arg "c:/projecten/Philips/KN-AN-Shop" "Source dir with Keynote API databases (keynotelogs.db)"}
     {srcpattern.arg "*" "Pattern for subdirs in srcdir to use"}
+    {srcdb.arg "keynotelogs.db" "Source db name to use"}
     {tables.arg "page_td2" "Tables to combine (, seperated)"}
     {newdb "Always create a new database (default is to add to current db)"}
     {droptarget "Drop target tables before (re)creating"}
@@ -31,7 +33,8 @@ proc main {argv} {
   set dargv [getoptions argv $options $usage]
   set dir [from_cygwin [:dir $dargv]]
   file mkdir $dir
-  set db_name [file join $dir "dashboards.db"]
+  # set db_name [file join $dir "dashboards.db"]
+  set db_name [file join $dir [:db $dargv]]
   if {[:newdb $dargv]} {
     set existing_db [file exists $db_name]
     if {$existing_db} {
@@ -57,7 +60,37 @@ proc handle_srcdirroot {db srcdir srcpattern dargv} {
 
 proc handle_srcdir {db dir ndx dargv} {
   log info "handle_srcdir: $dir"
-  set srcdbname [file join $dir "keynotelogs.db"]
+  # set srcdbname [file join $dir "keynotelogs.db"]
+  set srcdbname [file join $dir [:srcdb $dargv]]
+  
+  $db exec "attach database '$srcdbname' as fromDB"
+
+  set scriptname [det_scriptname $dir]
+  foreach table [split [:tables $dargv] ","] {
+    if {$ndx == 1} {
+      if {[:droptarget $dargv]} {
+        $db exec2 "drop table if exists $table" -log 
+      }
+    }
+    # @note set field as _scriptname because src-table might already have the scriptname field.
+    # @note try options because source table might not exist in all source databases.
+    if {[$db table_exists $table]} {
+      $db exec2 "insert into $table 
+         select '$scriptname' _scriptname, * from fromDB.$table" -log -try
+    } else {
+      $db exec2 "create table $table as 
+         select '$scriptname' _scriptname, * from fromDB.$table" -log -try  
+    }
+  }
+  $db exec "detach fromDB"
+  
+  log info "handle_srcdir finished: $dir"
+}
+
+proc handle_srcdir_old {db dir ndx dargv} {
+  log info "handle_srcdir: $dir"
+  # set srcdbname [file join $dir "keynotelogs.db"]
+  set srcdbname [file join $dir [:srcdb $dargv]]
   
   $db exec "attach database '$srcdbname' as fromDB"
 
@@ -68,11 +101,12 @@ proc handle_srcdir {db dir ndx dargv} {
         $db exec2 "drop table if exists $table" -log 
       }
       # @note try options because source table might not exist in all source databases.
+      # @note set field as _scriptname because src-table might already have the scriptname field.
       $db exec2 "create table $table as 
-         select '$scriptname' scriptname, * from fromDB.$table" -log -try  
+         select '$scriptname' _scriptname, * from fromDB.$table" -log -try  
     } else {
       $db exec2 "insert into $table 
-         select '$scriptname' scriptname, * from fromDB.$table" -log -try
+         select '$scriptname' _scriptname, * from fromDB.$table" -log -try
     }
   }
   $db exec "detach fromDB"

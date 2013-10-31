@@ -309,8 +309,9 @@ migrate_proc add_fill_checkrun "Add and fill checkrun table" {
 } ; # end of migrate_proc add_fill_checkrun
 
 # add checkrun, first define helper procs
+# @todo dailystatus table also defined in extraprocessing.tcl
 proc add_daily_stats {db {create_tables 1}} {
-  $db add_tabledef dailystatus {} {dateuntil_cet}
+  $db add_tabledef dailystatus {} {actiontype dateuntil_cet}
   $db add_tabledef dailystatuslog {} {ts_start_cet ts_end_cet datefrom_cet dateuntil_cet notes}
   $db add_tabledef aggr_run {id} {scriptname date_cet {total_time_sec real} {page_time_sec real} \
     {npages int} {avail real} {datacount int} {total_ttip_sec real} {page_ttip_sec real}}
@@ -339,3 +340,31 @@ migrate_proc add_indexes_date_cet "Add indexes for date_cet fields" {
   $db exec2 "create index if not exists ix_page_datecet on page(date_cet)" -log -try
 }
 
+migrate_proc dailystatus_add_column "Add column to dailystatus" {
+  $db exec2 "alter table dailystatus add column actiontype" -try
+  $db exec2 "update dailystatus set actiontype = 'general' where actiontype is null"
+}
+
+migrate_proc add_indexes_ts_cet "Add indexes for ts_cet fields" {
+  log info "Add indexes for ts_cet fields"
+  # set db_has_fields [add_checkrun $db]
+  $db exec2 "create index if not exists ix_item_datecet on pageitem(date_cet)" -log -try
+  
+  $db exec2 "create index if not exists ix_run_tscet on scriptrun(ts_cet)" -log -try
+  $db exec2 "create index if not exists ix_page_tscet on page(ts_cet)" -log -try
+  $db exec2 "create index if not exists ix_item_tscet on pageitem(ts_cet)" -log -try
+}
+
+migrate_proc add_pageitem_gt3 "Add pageitem_gt3 table" {
+  log info "Add pageitem_gt3 table"
+  $db add_tabledef pageitem_gt3 {id} {scriptname ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
+      scontent_type url \
+      extension domain topdomain urlnoparams \
+      error_code connect_delta dns_delta element_delta first_packet_delta \
+      remain_packets_delta request_delta \
+      ssl_handshake_delta start_msec system_delta basepage record_seq \
+      detail_component_1_msec detail_component_2_msec detail_component_3_msec \
+      ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
+      header_bytes object_text header_code custom_object_trend status_code}
+  $db create_tables 0
+}

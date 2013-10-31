@@ -1,5 +1,8 @@
 # dailystats.tcl - sourced from scatter2db.tcl
 
+# @todo obv mindate ook dailystatus records van andere items aanpassen, zodat deze bij
+#       extraprocessing ook opnieuw worden gedaan.
+# @todo (zie boven ook) functies duidelijk scheiden, zodat ze herbruikbaar zijn.
 proc update_daily_stats {db subdir dargv min_date} {
   log info "update_daily_stats: start"
   set sec_min_date [clock scan $min_date -format "%Y-%m-%d"]
@@ -33,8 +36,8 @@ proc update_daily_stats {db subdir dargv min_date} {
         # breakpoint
         update_maxitem $db [:maxitem $dargv]
       }
-      $db exec2 "delete from dailystatus"
-      $db insert dailystatus [dict create dateuntil_cet $dateuntil_cet]
+      $db exec2 "delete from dailystatus where actiontype='general'"
+      $db insert dailystatus [dict create dateuntil_cet $dateuntil_cet actiontype "general"]
       $db insert dailystatuslog [dict create ts_start_cet $ts_start_cet ts_end_cet $ts_end_cet \
         datefrom_cet $datefrom_cet dateuntil_cet $dateuntil_cet notes "Basic stats"]
     }
@@ -43,7 +46,7 @@ proc update_daily_stats {db subdir dargv min_date} {
 }
 
 proc det_prev_dateuntil {db} {
-  set res [$db query "select dateuntil_cet from dailystatus"]
+  set res [$db query "select dateuntil_cet from dailystatus where actiontype='general'"]
   if {[llength $res] == 1} {
     clock scan [:dateuntil_cet [lindex $res 0]] -format "%Y-%m-%d" 
   } else {
@@ -123,36 +126,4 @@ proc update_stats_date {db subdir sec_date} {
   }
 }
 
-# @pre we have a new day, and added some daily stats.
-# @pre updatemaxitem cmdline param is given.
-proc update_maxitem {db max_urls} {
-  log info "Recreate maxitem table"
-  $db exec2 "drop table if exists maxitem" -log
-  
-  $db exec2 "CREATE TABLE maxitem (id integer primary key autoincrement, 
-                  url, page_seq int, loadtime real)" -log
-
-  set last_week [det_last_week $db]
-  log info "Determined last week as: $last_week (possibly old database)"
-  log info "Max_urls to determine: $max_urls"
-  $db exec2 "insert into maxitem (url, page_seq, loadtime)
-            select i.urlnoparams, p.page_seq, avg(0.001*i.element_delta) loadtime
-            from scriptrun r, page p, pageitem i
-            where p.scriptrun_id = r.id
-            and i.page_id = p.id
-            and 1*r.task_succeed_calc = 1
-            and r.ts_cet > '$last_week'
-            group by 1,2
-            order by 3 desc
-            limit $max_urls" -log
-            
-  log info "Dropped, created and filled maxitem"        
-  
-}
-
-# want to calc top 20 items from last week data. But use last moment of measurements in the DB, not current time.
-proc det_last_week {db} {
-  set res [$db query "select date(max(r.ts_cet), '-7 days') lastweek from scriptrun r"]
-  :lastweek [lindex $res 0]
-}
 

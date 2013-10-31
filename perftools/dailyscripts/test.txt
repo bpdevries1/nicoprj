@@ -1,0 +1,2 @@
+test ivm current en script dir.
+

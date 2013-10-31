@@ -14,16 +14,38 @@ oo::class create Rwrapper {
 
   method init {a_dir db} {
     my variable f cmdfilename dir stacked_cmds
-    set dir $a_dir
+    # set dir $a_dir
+    set dir [file normalize [from_cygwin $a_dir]] ; # for R need Unix style (/) dir. 
     set cmdfilename "R-[my now].R"
     set f [open [file join $dir $cmdfilename] w]
     my write [my pprint "setwd('$dir')
-      sink('R-output.txt')
+      zz = file('R-output.txt', open = 'wt')
+      # sink('R-output.txt')
+      # sink('R-output.txt', type = 'message')
+      sink(zz)
+      # cannot split the message stderr stream (, split=TRUE)
+      sink(zz, type = 'message')
       print('R started')
       source('~/nicoprj/R/lib/ndvlib.R')
       load.def.libs()
       db = db.open('$db')"]
     set stacked_cmds {}
+    my set_outputroot $dir ; # default output-dir is same as DB
+  }
+  
+  method set_outputroot {a_dir} {
+    my variable outputroot
+    set outputroot $a_dir
+    file mkdir $outputroot
+  }
+  
+  method set_outformat {a_format} {
+    my variable outformats
+    if {$a_format == "all"} {
+      set outformats [list png svg] 
+    } else {
+      set outformats [list $a_format]
+    }
   }
   
   method now {} {
@@ -86,7 +108,7 @@ oo::class create Rwrapper {
   # - direct als params, dan wel backslash nodig, maar geen [list], en parameter substitutie.
   # - of: parameter substitutie binnen qplot doen, maar mss gevaarlijk.
   method qplot {args} {
-    my variable dargv dir stacked_cmds f d
+    my variable dargv dir stacked_cmds f d outputroot outformats
     set d [my plot_prepare {*}$args]
     if {$d == {}} {
       # graph already exists and in incr(emental) mode: return.
@@ -101,11 +123,26 @@ oo::class create Rwrapper {
     my write_legend
     my write_labs
 
-    my write "ggsave('[:pngname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-    # ook voor SVG wel dimensies opgeven, anders vierkant en blijft vierkant.
-    my write "ggsave('[:svgname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-    # my write "ggsave('[:pngname $d].svg', plot=p)"
-    my write "print(concat('Made graph: ', '[:pngname $d]'))"
+    foreach outformat $outformats {
+      # outprocname: :0name
+      set outprocname ":${outformat}name"
+      my write "# outprocname: $outprocname"
+      set outname [$outprocname $d]
+      my write "# outname: $outname"
+      my write "ggsave('[file join $outputroot $outname]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+      my write "print(concat('Made graph: ', '$outname'))"
+    }
+    
+    if {0} {
+      # my write "ggsave('[:pngname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+      my write "ggsave('[file join $outputroot [:pngname $d]]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+      # ook voor SVG wel dimensies opgeven, anders vierkant en blijft vierkant.
+      # my write "ggsave('[:svgname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+      my write "ggsave('[file join $outputroot [:svgname $d]]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+      # my write "ggsave('[:pngname $d].svg', plot=p)"
+      my write "print(concat('Made graph: ', '[:pngname $d]'))"
+    }
+    
   }
 
   method plot_prepare {args} {
@@ -245,7 +282,8 @@ oo::class create Rwrapper {
     my variable f cmdfilename dir dargv
     my write [my pprint "\n# Finished\ndb.close(db)
               print('R finished')
-              sink()"]
+              sink()
+              sink(type = 'message')"]
     close $f
     if {[:keepcmd $dargv]} {
       file copy -force [file join $dir $cmdfilename] [file join $dir "R-latest.R"]

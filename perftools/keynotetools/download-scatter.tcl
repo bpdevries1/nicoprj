@@ -200,6 +200,7 @@ proc det_slots_pages {el_config} {
   list [join $slotidlist ","] [join $transpagelist ","]
 }
 
+# @note 30-10-2013 when an known 'error' occurs, just remove the file.
 proc check_errors {filename} {
   set res "unknown"
   if {[file exists $filename]} {
@@ -207,12 +208,14 @@ proc check_errors {filename} {
       set text [read_file $filename]
       if {[regexp {hourly request allowed} $text]} {
         log warn "Quota have been used"
-        file rename -force $filename "$filename.quota[expr rand()]"
+        # file rename -force $filename "$filename.quota[expr rand()]"
+        file delete -force $filename
         set res "quota"
       } elseif {[regexp {Request blocked} $text]} {
         # Request blocked. Exceeded 60 requests/minute limit.    
         log warn "Request blocked. Exceeded 60 requests/minute limit."
-        file rename -force $filename "$filename.limit[expr rand()]"
+        # file rename -force $filename "$filename.limit[expr rand()]"
+        file delete -force $filename
         set res "limit"
       } elseif {[regexp {^[\[\],]+$} $text]} {
         log info "Empty contents, but this can happen, is ok"
