@@ -80,7 +80,6 @@ proc create_indexes {db} {
 # handle each file in a DB trans, not a huge trans for all files.
 proc handle_files {subdir db} {
   # log info "Start reading: $subdir"
-  # handle_dir_rec $root_dir "*.json" [list warn_error read_json_file $db $dbmain]
   # @note don't want recursive, just all directly below subdir
   foreach filename [glob -nocomplain -directory $subdir "*.json"] {
     warn_error read_json_file $db $filename 

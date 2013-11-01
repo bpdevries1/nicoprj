@@ -1,5 +1,7 @@
-##########################
-# to libdaily.tcl
+# libextra.tcl - called by extra_*.tcl lib-scripts.
+
+
+# wrapper function to execute body for updating items.
 proc check_do_daily {db actiontype body} {
   $db in_trans {
     set sec_prev_dateuntil [det_prev_dateuntil $db $actiontype]
@@ -23,6 +25,7 @@ proc check_do_daily {db actiontype body} {
   }
 }
 
+# @result date (in sec) for which last updates were applied. 
 proc det_prev_dateuntil {db actiontype} {
   set res [$db query "select dateuntil_cet from dailystatus where actiontype='$actiontype'"]
   if {[llength $res] == 1} {
@@ -45,6 +48,7 @@ proc det_prev_dateuntil {db actiontype} {
   }  
 }
 
+# @result date (in sec) of last date to apply updates for (inclusive)
 proc det_last_dateuntil {} {
   # 6*3600: don't start updating the day before too soon: all .json files need to be read.
   # @todo either don't determine daily stats before all 24 json files are read.
@@ -54,6 +58,7 @@ proc det_last_dateuntil {} {
   return $sec_yesterday
 }
 
+# update dailystatus table with results of latest update
 proc update_daily_status_db {db actiontype datefrom_cet dateuntil_cet ts_start_cet ts_end_cet} {
   $db exec2 "delete from dailystatus where actiontype='$actiontype'"
   $db insert dailystatus [dict create dateuntil_cet $dateuntil_cet actiontype $actiontype]

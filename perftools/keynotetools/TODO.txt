@@ -1,0 +1,23 @@
+Uitgangspunten
+==============
+* Wil waarsch vanuit een algemene functie steeds een specifieke functie per dag aanroepen.
+* Toch liever werken vanuit een werkende situatie. Zeker scatter2db zou gewoon moeten werken, evt eerst
+  zonder de dailystats.
+
+TODO
+====
+* migrations aanroepen vanuit extraprocessing.tcl
+* bij determine t/m datum (=yesterday): bepaal max(r.date_cet) minus 1 dag. Als data nog niet is ingelezen,
+  dan ook geen stats bepalen. Normaal bij scatter2db gebeurt inlezen eerst, maar ook download kan nog laten
+  wachten en bij extraprocessing script weet je niet of scatter2db al heeft gedraaid.
+* extra_update_maxitem implementeren.
+  - eerst niet druk maken om evt algemene functionaliteit (kan later nog ge-extraheerd).
+* extra_gt3 implementeren
+  - wel alles.
+* extra_dailystats langslopen en op (ongeveer) dezelfde manier als maxitem en gt3 doen.
+
+* vacuum en analyze als actions opnemen.
+
+Done
+====
+

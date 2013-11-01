@@ -17,12 +17,14 @@ set log [::ndv::CLogger::new_logger [file tail [info script]] info]
 $log set_file "[file tail [info script]].log"
 
 # libpostproclogs: set_task_succeed (and maybe others)
-set script_dir [file dirname [info script]]
-source [file join $script_dir libpostproclogs.tcl]
-source [file join $script_dir libmigrations.tcl]
-source [file join $script_dir kn-migrations.tcl]
-source [file join $script_dir checkrun-handler.tcl]
-source [file join $script_dir dailystats.tcl]
+# set script_dir [file dirname [info script]]
+# source [file join $script_dir libpostproclogs.tcl]
+# source [file join $script_dir libmigrations.tcl]
+# source [file join $script_dir kn-migrations.tcl]
+# source [file join $script_dir checkrun-handler.tcl]
+## source [file join $script_dir dailystats.tcl]
+
+ndv::source_once libpostproclogs.tcl libmigrations.tcl kn-migrations.tcl checkrun-handler.tcl libextraprocessing.tcl libextra.tcl
 
 proc main {argv} {
   global dargv
@@ -91,27 +93,6 @@ proc scatter2db_main {dargv} {
   global cr_handler
   set root_dir [from_cygwin [:dir $dargv]]  
   set res "Ok"
-  if {[:nomain $dargv]} {
-    log info "Don't use main DB"
-    set dbmain ""
-  } else {
-#    log info "Use main DB"
-#    set db_name [file join $root_dir "keynotelogsmain.db"]
-#    if {[:dropdb $dargv]} {
-#      file delete $db_name
-#    }
-#    set existing_db [file exists $db_name]
-#    set dbmain [dbwrapper new $db_name]
-#    define_tables $dbmain 0
-#    if {!$existing_db} {
-#      $dbmain create_tables 0 ; # 0: don't drop tables first.
-#      create_indexes $dbmain
-#    } else {
-#      # existing db, assuming tables/indexes also already exist. 
-#    }
-#    migrate_db $dbmain $existing_db    
-#    $dbmain prepare_insert_statements
-  }  
   set cr_handler [checkrun_handler new]
   if {[:justdir $dargv]} {
     # 6-9-2013 also handle current-dir, if script is called with one subdir as param
@@ -122,13 +103,13 @@ proc scatter2db_main {dargv} {
       log error "Cannot use -justdir when dir has subdirs, exiting.."
       exit 1
     }
-    set res [scatter2db_subdir $dargv $root_dir $dbmain]
+    set res [scatter2db_subdir $dargv $root_dir]
   } else {
     foreach subdir [lsort [glob -nocomplain -directory $root_dir -type d [:pattern $dargv]]] {
       if {[ignore_subdir $subdir]} {
         log info "Ignore subdir: $subdir (for test!)"
       } else {
-        set res [scatter2db_subdir $dargv $subdir $dbmain]
+        set res [scatter2db_subdir $dargv $subdir]
       }
     }
   }
@@ -147,7 +128,7 @@ proc ignore_subdir {subdir} {
   return 0
 }
 
-proc scatter2db_subdir {dargv subdir dbmain} {
+proc scatter2db_subdir {dargv subdir} {
   global cr_handler min_date
   set db_name [file join $subdir "keynotelogs.db"]
   if {[:dropdb $dargv]} {
@@ -189,10 +170,11 @@ proc scatter2db_subdir {dargv subdir dbmain} {
   
   # @note [global] min_date contains minimum date of currently read json files. Give this one to update_daily_stats.
   set min_date [clock format [clock seconds] -format "%Y-%m-%d"]
-  handle_files $subdir $db $dbmain
+  handle_files $subdir $db
   if {![:nopost $dargv]} {
     post_process $db
   }
+  # @todo [2013-11-01 09:57:40] weer activeren, maar dan via extraproc_subdir en actions.
   if {[:updatedaily $dargv]} {
     # breakpoint
     update_daily_stats $db $subdir $dargv $min_date
@@ -350,13 +332,13 @@ proc det_page_type {scriptname page_seq} {
 
 
 # handle each file in a DB trans, not a huge trans for all files.
-proc handle_files {root_dir db dbmain} {
+proc handle_files {root_dir db} {
   log info "Start reading"
-  handle_dir_rec $root_dir "*.json" [list warn_error read_json_file $db $dbmain]
+  handle_dir_rec $root_dir "*.json" [list warn_error read_json_file $db]
   log info "Finished reading"
 }
 
-proc read_json_file {db dbmain filename root_dir} {
+proc read_json_file {db filename root_dir} {
   if {[file tail [file dirname $filename]] == "read"} {
     # log info "ALready read with check on dirname/tail"
     # breakpoint
@@ -370,9 +352,6 @@ proc read_json_file {db dbmain filename root_dir} {
     return 
   }
   read_json_file_db $db $filename $root_dir 1
-  if {$dbmain != ""} {
-    read_json_file_db $dbmain $filename $root_dir 0
-  }
   move_read $filename
 }
 
