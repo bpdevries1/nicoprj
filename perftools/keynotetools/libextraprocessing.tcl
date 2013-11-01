@@ -1,7 +1,7 @@
 # libextraprocessing.tcl - called by scatter2db.tcl and extraprocessing.tcl
 
 # ndv::source_once dailystats.tcl updatemaxitem.tcl extra_gt3.tcl
-ndv::source_once extra_dailystats.tcl extra_maxitem.tcl extra_gt3.tcl
+ndv::source_once extra_dailystats.tcl extra_maxitem.tcl extra_gt3.tcl extra_janitor.tcl
 
 proc extraproc_subdir {dargv subdir} {
   global cr_handler min_date
@@ -19,31 +19,22 @@ proc extraproc_subdir {dargv subdir} {
   set db [dbwrapper new $db_name]
   define_tables $db
   migrate_db $db $existing_db
-  
+  add_daily_stats2 $db 0
   $db prepare_insert_statements
   
   if {[:actions $dargv] == "all"} {
-    set actions [list maxitem gt3] 
+    set actions [list maxitem gt3 dailystats vacuum analyze] 
   } else {
     set actions [split [:actions $dargv] ","] 
   }
   foreach action $actions {
-    # graph_$action $r $dir
-    check_do_daily $db $action {
-      # update_maxitem $db [:maxitem $dargv]
-      extra_update_$action $db $dargv $subdir
-    }
-    
+    # @note - per action bepalen of je iets als check_do_daily wilt gebruiken.
+    extra_update_$action $db $dargv $subdir
+    #check_do_daily $db $action {
+    #  extra_update_$action $db $dargv $subdir
+    #}
   }  
   
-  if {0} {
-    # update_maxitem $db [:maxitem $dargv]
-    if {[:updatemaxitem $dargv]} {
-      check_do_daily $db "maxitem" {
-        update_maxitem $db [:maxitem $dargv]
-      }
-    }
-  }
   $db close
   log info "Created/updated db $db_name, size is now [file size $db_name]"
   return "ok"

@@ -3,21 +3,36 @@ Uitgangspunten
 * Wil waarsch vanuit een algemene functie steeds een specifieke functie per dag aanroepen.
 * Toch liever werken vanuit een werkende situatie. Zeker scatter2db zou gewoon moeten werken, evt eerst
   zonder de dailystats.
-
+* Eerst vanuit extraprocessing werkend maken, dan vanuit scatter2db.
+  
 TODO
 ====
+* Vanuit scatter2db aanroepen, 
+* Draaien op laptop voor Shop: eerst alles behalve vacuum, dan incl deze.
+* Dan draaien voor alles maar nog geen vacuum.
+
+Later
+=====
+
+Done
+====
 * migrations aanroepen vanuit extraprocessing.tcl
-* bij determine t/m datum (=yesterday): bepaal max(r.date_cet) minus 1 dag. Als data nog niet is ingelezen,
-  dan ook geen stats bepalen. Normaal bij scatter2db gebeurt inlezen eerst, maar ook download kan nog laten
-  wachten en bij extraprocessing script weet je niet of scatter2db al heeft gedraaid.
 * extra_update_maxitem implementeren.
   - eerst niet druk maken om evt algemene functionaliteit (kan later nog ge-extraheerd).
 * extra_gt3 implementeren
   - wel alles.
 * extra_dailystats langslopen en op (ongeveer) dezelfde manier als maxitem en gt3 doen.
-
+* bij determine t/m datum (=yesterday): bepaal max(r.date_cet) minus 1 dag. Als data nog niet is ingelezen,
+  dan ook geen stats bepalen. Normaal bij scatter2db gebeurt inlezen eerst, maar ook download kan nog laten
+  wachten en bij extraprocessing script weet je niet of scatter2db al heeft gedraaid.
+  -> niet zo belangrijk: als er geen data is, duurt het ook niet lang. En bij alsnog inlezen volgt toch een reset.
 * vacuum en analyze als actions opnemen.
-
-Done
-====
+  - vacuum duurt sowieso wel lang om uit te voeren.
+  - disk lijkt 3M/sec te doen. Bij 3G wordt het dan 1000 sec is ong een kwartier. Als je ook alles moet
+    lezen is het dubbel.
+  - was ong kwartier bezig idd, dus klopt wel. Hierna bug, dus nog eens. Zal wel weer zo lang duren.
+  - 2e keer lijkt net zo lang te duren, vorige was wel helemaal voltooid. Dus bv alleen per week of
+    maand doen, kijken hoe lang het duurt, en ook of andere acties daarna weer sneller worden en in de 
+    loop van de week/maand steeds langzamer.
+  - analyze gaat een stuk sneller: 3 sec.  
 

@@ -129,7 +129,7 @@ proc ignore_subdir {subdir} {
 }
 
 proc scatter2db_subdir {dargv subdir} {
-  global cr_handler min_date
+  global cr_handler last_read_date
   set db_name [file join $subdir "keynotelogs.db"]
   if {[:dropdb $dargv]} {
     file delete $db_name
@@ -168,16 +168,17 @@ proc scatter2db_subdir {dargv subdir} {
   # $db insert logfile {path "test.json"}
   read_script_pages $db ; # into global dict, should perform better.
   
-  # @note [global] min_date contains minimum date of currently read json files. Give this one to update_daily_stats.
-  set min_date [clock format [clock seconds] -format "%Y-%m-%d"]
+  # @note [global] last_read_date contains minimum date of currently read json files. Give this one to update_daily_stats.
+  set last_read_date [clock format [clock seconds] -format "%Y-%m-%d"]
   handle_files $subdir $db
-  if {![:nopost $dargv]} {
-    post_process $db
-  }
+  reset_daily_status_db $db $last_read_date
+  #if {![:nopost $dargv]} {
+  #  post_process $db
+  #}
   # @todo [2013-11-01 09:57:40] weer activeren, maar dan via extraproc_subdir en actions.
   if {[:updatedaily $dargv]} {
     # breakpoint
-    update_daily_stats $db $subdir $dargv $min_date
+    # update_daily_stats $db $subdir $dargv $last_read_date
     # update_daily_stats $db $subdir $dargv "2013-10-27"
   }
   # $conn close
@@ -371,7 +372,7 @@ proc move_read {filename} {
 }
 
 proc read_json_file_db {db filename root_dir {pageitem 1}} {
-  global cr_handler min_date
+  global cr_handler last_read_date
   if {[is_read $db $filename]} {
     # log info "Already read, ignoring: $filename"
     return
@@ -419,8 +420,8 @@ proc read_json_file_db {db filename root_dir {pageitem 1}} {
           dict set dct ts_cet [det_ts_cet [:datetime $dct]]
           set date_cet [det_date_cet [:datetime $dct]]
           dict set dct date_cet $date_cet
-          if {$date_cet < $min_date} {
-            set min_date $date_cet 
+          if {$date_cet < $last_read_date} {
+            set last_read_date $date_cet 
           }
           dict set dct provider [det_provider [:target_id $dct]]
           set pages [concat [:wxn_page $run] [:txnPages $run]]
@@ -679,7 +680,8 @@ proc det_date_cet {datetime} {
 }
 
 # @note keynote API does not handle redirects correctly, gives them both the same resource_id. This one is to correct the 2nd, which gives a normal 200 code.
-proc post_process {db} {
+# @todo deze denk ik al tijd niet meer laten lopen, hoeft nu ook niet meer vanwege Akamai redirect change.
+proc post_process_old {db} {
   log info "Post process: start"
   db_eval [$db get_conn] "update pageitem
       set url = url || 'm/'

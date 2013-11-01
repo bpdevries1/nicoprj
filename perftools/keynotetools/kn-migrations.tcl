@@ -1,5 +1,8 @@
 # kn-migrations.tcl - diff-scripts to put keynote db's in right version
 
+package require ndv
+ndv::source_once libmigrations.tcl
+
 migrate_proc add_fk_indexes "Add foreign key indexes" {
   $db exec2 "create index if not exists ix_page_1 on page (scriptrun_id)"
   $db exec2 "create index if not exists ix_pageitem_1 on pageitem (scriptrun_id)" -try
@@ -310,7 +313,8 @@ migrate_proc add_fill_checkrun "Add and fill checkrun table" {
 
 # add checkrun, first define helper procs
 # @todo dailystatus table also defined in extraprocessing.tcl
-proc add_daily_stats {db {create_tables 1}} {
+# @note old version, now use add_daily_stats2
+proc add_daily_stats1 {db {create_tables 1}} {
   $db add_tabledef dailystatus {} {actiontype dateuntil_cet}
   $db add_tabledef dailystatuslog {} {ts_start_cet ts_end_cet datefrom_cet dateuntil_cet notes}
   $db add_tabledef aggr_run {id} {scriptname date_cet {total_time_sec real} {page_time_sec real} \
@@ -322,13 +326,17 @@ proc add_daily_stats {db {create_tables 1}} {
   }
 }
 
+migrate_proc add_daily_status "No-op" {
+  log info "No-op to continue with next, as some DB's have this status"  
+}
+
 # @todo create and filled based on Dealer Locator code, still have to do:
 # based on Myphilips and generic
 # filling new records as they are being read.
 migrate_proc add_daily_stats "Add daily stats tables" {
   log debug "add_daily_stats: start"
   # set db_has_fields [add_checkrun $db]
-  add_daily_stats $db 1
+  add_daily_stats1 $db 1
   log debug "add_daily_stats: finished"
   # breakpoint
 }
@@ -368,3 +376,41 @@ migrate_proc add_pageitem_gt3 "Add pageitem_gt3 table" {
       header_bytes object_text header_code custom_object_trend status_code}
   $db create_tables 0
 }
+
+migrate_proc add_aggr_maxitem "Add table aggr_maxitem" {
+  # log info "Add table aggr_maxitem"
+  $db add_tabledef aggr_maxitem {id} {date_cet scriptname keytype keyvalue {seqnr int} \
+    {avg_time_sec real} {page_seq int}} 
+  $db create_tables 0
+}
+
+proc add_daily_stats2 {db {create_tables 1}} {
+  # @todo update field defs.
+  $db add_tabledef aggr_run {id} {date_cet scriptname {avg_time_sec real} {avg_nkbytes real}
+    {avg_nitems real} {datacount int} {avg_ttip_sec real} {avail real} {npages int}
+    {page_time_sec real} {page_ttip_sec real}}
+    
+  $db add_tabledef aggr_page {id} {date_cet scriptname {page_seq int}   
+    {avg_time_sec real} {avg_nkbytes real} {avg_nitems real} {datacount int}
+    {avg_ttip_sec real} {avail real}}
+  
+  if {$create_tables} {
+    $db create_tables 0
+  }
+}
+
+# @todo create and filled based on Dealer Locator code, still have to do:
+# based on Myphilips and generic
+# filling new records as they are being read.
+migrate_proc add_daily_stats2 "Add daily stats tables (take 2)" {
+  log debug "add_daily_stats2: start"
+  $db exec2 "drop table if exists aggr_run"
+  $db exec2 "drop table if exists aggr_page"
+  add_daily_stats2 $db 1
+  log debug "add_daily_stats2: finished"
+  # breakpoint
+}
+
+
+# LET OP: als pageitem tabel verandert, moet pageitem_gt3 mee veranderen!
+

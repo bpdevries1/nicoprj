@@ -2,7 +2,93 @@
 
 
 # wrapper function to execute body for updating items.
-proc check_do_daily {db actiontype body} {
+# @param body is executed for each day, with var 'date_cet' set.
+# @param tables delete data from these tables before updating data (wrt refreshing of data for new scatter-data loaded in DB)
+# @pre dateuntil in dailystatus table is updated to the past when new run-data for a date is loaded.
+proc check_do_daily {db actiontype tables body} {
+  log info "check_do_daily - $actiontype: start"
+  $db in_trans {
+    set ts_start_cet [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
+    set sec_prev_dateuntil [det_prev_dateuntil $db $actiontype]
+    if {$sec_prev_dateuntil == -1} {
+      log info "Emtpy database, return"
+      return
+    }
+    set sec_datefrom [clock add $sec_prev_dateuntil 1 day]
+    set datefrom_cet [clock format $sec_datefrom -format "%Y-%m-%d"]
+    foreach table $tables {
+      $db exec2 "delete from $table where date_cet >= '$datefrom_cet'" 
+    }
+    set sec_last_dateuntil [det_last_dateuntil]
+    set dateuntil_cet [clock format $sec_last_dateuntil -format "%Y-%m-%d"]
+    log info "doing actions for dates: $datefrom_cet => $dateuntil_cet"
+    set days_done 0
+    set sec_date $sec_datefrom
+    upvar date_cet date_cet ; # make date_cet available in $body
+    # breakpoint
+    while {$sec_date <= $sec_last_dateuntil} {
+      set date_cet [clock format $sec_date -format "%Y-%m-%d"]
+      # update_stats_date $db $subdir $sec_date
+      # @todo check of dit zo werkt met $body.
+      # @todo op level hoger de var date_cet een waarde geven. (wel eerder gedaan, check bv dict_to_vars)
+      # mogelijk een keer de link definieren, en vervolgens in de loop steeds waarde updaten.
+      uplevel $body
+      set sec_date [clock add $sec_date 1 day]
+      set days_done 1
+    }
+    set ts_end_cet [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
+    if {$days_done} {
+      $db exec2 "delete from dailystatus where actiontype='$actiontype'"
+      $db insert dailystatus [dict create dateuntil_cet $dateuntil_cet actiontype $actiontype]
+      $db insert dailystatuslog [dict create ts_start_cet $ts_start_cet ts_end_cet $ts_end_cet \
+        datefrom_cet $datefrom_cet dateuntil_cet $dateuntil_cet notes $actiontype]
+    }
+  }
+  log info "check_do_daily - $actiontype: finished"
+}
+
+# wrapper function to execute body for updating items.
+# @param body is executed for each day, with var 'date_cet' set.
+# @param tables delete data from these tables before updating data (wrt refreshing of data for new scatter-data loaded in DB)
+# @pre dateuntil in dailystatus table is updated to the past when new run-data for a date is loaded.
+# this version doesn't handle actions per day, but all-in-one (eg with vacuum and analyze)
+# @todo overlap (not DRY) with proc above, so reorg.
+proc check_do_daily_allinone {db actiontype tables body} {
+  # upvars for calling body and making vars available.
+  upvar datefrom_cet datefrom_cet
+  upvar dateuntil_cet dateuntil_cet
+  log info "check_do_daily - $actiontype: start"
+  # cannot VACUUM from within a transaction. So for now allinone version without transaction.
+  set ts_start_cet [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
+  set sec_prev_dateuntil [det_prev_dateuntil $db $actiontype]
+  if {$sec_prev_dateuntil == -1} {
+    log info "Emtpy database, return"
+    return
+  }
+  set sec_datefrom [clock add $sec_prev_dateuntil 1 day]
+  set datefrom_cet [clock format $sec_datefrom -format "%Y-%m-%d"]
+  $db in_trans {
+    foreach table $tables {
+      $db exec2 "delete from $table where date_cet >= '$datefrom_cet'" 
+    }
+  }
+  set sec_last_dateuntil [det_last_dateuntil]
+  set dateuntil_cet [clock format $sec_last_dateuntil -format "%Y-%m-%d"]
+  log info "doing actions for dates: $datefrom_cet => $dateuntil_cet"
+  if {$datefrom_cet <= $dateuntil_cet} {
+    uplevel $body
+    set ts_end_cet [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
+    $db in_trans {
+      $db exec2 "delete from dailystatus where actiontype='$actiontype'"
+      $db insert dailystatus [dict create dateuntil_cet $dateuntil_cet actiontype $actiontype]
+      $db insert dailystatuslog [dict create ts_start_cet $ts_start_cet ts_end_cet $ts_end_cet \
+        datefrom_cet $datefrom_cet dateuntil_cet $dateuntil_cet notes $actiontype]
+    }
+  }
+  log info "check_do_daily - $actiontype: finished"
+}
+
+proc check_do_daily_old {db actiontype body} {
   $db in_trans {
     set sec_prev_dateuntil [det_prev_dateuntil $db $actiontype]
     if {$sec_prev_dateuntil == -1} {
@@ -66,3 +152,9 @@ proc update_daily_status_db {db actiontype datefrom_cet dateuntil_cet ts_start_c
     datefrom_cet $datefrom_cet dateuntil_cet $dateuntil_cet notes $actiontype]
 }
 
+# possible that nothing is read, so last_read_date is today. Only update records which have date > last_read_date
+proc reset_daily_status_db {db last_read_date} {
+  log debug "reset daily status db to day before $last_read_date"
+  set date_before [clock format [clock add [clock scan $last_read_date -format "%Y-%m-%d"] -1 day] -format "%Y-%m-%d"]
+  $db exec2 "update dailystatus set dateuntil_cet = '$date_before' where dateuntil_cet > '$date_before'" -log  
+}

@@ -2,34 +2,36 @@
 
 # @todo volgens nieuwe spec: daily update, maxitems per dag.
 proc extra_update_maxitem {db dargv subdir} {
+  # specifiek hier: vorige datum op uiterlijk een week geleden zetteen (tov max(r.date_cet))
   set sec_prev_dateuntil [det_prev_dateuntil $db "maxitem"]
-  set sec_last_dateuntil [det_last_dateuntil]
-  # wil voor maxitem voor max 7 dagen in het verleden de data bepalen.
-  # kan evt door hier een check en update te doen, en dan een algemene functie aan te roepen, die
-  # dan ook bovenstaande 2 waarden bepaalt. Dit is dan een trucje dat hier kan werken.
-  
-  
-  log info "Recreate maxitem table"
-  set max_urls [:maxitem $dargv]
-  $db exec2 "drop table if exists maxitem" -log
-  
-  $db exec2 "CREATE TABLE maxitem (id integer primary key autoincrement, 
-                  url, page_seq int, loadtime real)" -log
-
+  set prev_dateuntil [clock format $sec_prev_dateuntil -format "%Y-%m-%d"]
   set last_week [det_last_week $db]
-  log info "Determined last week as: $last_week (possibly old database)"
-  log info "Max_urls to determine: $max_urls"
-  
-  # @todo per dag waarden bepalen: dan evt ook te zien of deze top20 nogal verandert (en of dit boeiend is, dwz hoge tijden).
-  $db exec2 "insert into maxitem (url, page_seq, loadtime)
-            select i.urlnoparams, i.page_seq, avg(0.001*i.element_delta) loadtime
-            from pageitem i
-            where i.status_code between '200' and '399'
-            and i.ts_cet > '$last_week'
-            group by 1,2
-            order by 3 desc
-            limit $max_urls" -log
-  log info "Dropped, created and filled maxitem"        
+  if {$prev_dateuntil < $last_week} {
+    update_daily_status_db $db "maxitem" $prev_dateuntil $last_week "" "" 
+  }
+  set max_urls [:maxitem $dargv]
+  set scriptname [file tail $subdir]
+  check_do_daily $db "maxitem" aggr_maxitem {
+    # date_cet is set for each day to handle.
+    log info "Determining maxitem values for: $date_cet"
+    $db exec2 "drop table if exists temp_maxitem"
+    $db exec2 "create table temp_maxitem as
+               select i.urlnoparams urlnoparams, i.page_seq page_seq, avg(0.001*i.element_delta) loadtime
+               from pageitem i
+               where i.status_code between '200' and '399'
+               and i.date_cet = '$date_cet'
+               group by 1,2
+               order by 3 desc
+               limit $max_urls" -log
+    # pas in tweede stuk de rowid van de temptable gebruiken.
+    # hierdoor ook steeds temp table deleten, zodat rowid steeds met 1 begint.
+    $db exec2 "insert into aggr_maxitem (date_cet, scriptname, keytype, keyvalue, seqnr, avg_time_sec, page_seq)
+               select '$date_cet' date_cet, '$scriptname' scriptname, 'urlnoparams' keytype, urlnoparams keyvalue,
+                      rowid seqnr, loadtime avg_time_sec, page_seq
+               from temp_maxitem" -log
+    
+    $db exec2 "drop table if exists temp_maxitem"              
+  }
 }
 
 # @pre we have a new day, and added some daily stats.
