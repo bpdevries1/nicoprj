@@ -37,8 +37,7 @@ proc main {argv} {
     {nomain2 "Do not put data in a main db"}
     {moveread "Move read files to subdirectory 'read'"}
     {continuous "Keep running this script, to automatically put new items downloaded in DB's"}
-    {updatedaily "Update daily aggregate tables"}
-    {updatemaxitem "Update maxitem table (daily)"}
+    {actions.arg "" "List of actions to do in post processing (comma separated: dailystats,gt3,maxitem,analyze,vacuum)"}
     {maxitem.arg "20" "Number of maxitems to determine"}
     {pattern.arg "*" "Just handle subdirs that have pattern"}
     {loglevel.arg "info" "Log level (debug, info, warn)"}
@@ -172,18 +171,9 @@ proc scatter2db_subdir {dargv subdir} {
   set last_read_date [clock format [clock seconds] -format "%Y-%m-%d"]
   handle_files $subdir $db
   reset_daily_status_db $db $last_read_date
-  #if {![:nopost $dargv]} {
-  #  post_process $db
-  #}
-  # @todo [2013-11-01 09:57:40] weer activeren, maar dan via extraproc_subdir en actions.
-  if {[:updatedaily $dargv]} {
-    # breakpoint
-    # update_daily_stats $db $subdir $dargv $last_read_date
-    # update_daily_stats $db $subdir $dargv "2013-10-27"
-  }
-  # $conn close
   $db close
   log info "Created/updated db $db_name, size is now [file size $db_name]"
+  extraproc_subdir $dargv $subdir
   return "ok"
 }
 
