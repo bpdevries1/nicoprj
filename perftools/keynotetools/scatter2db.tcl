@@ -147,11 +147,11 @@ proc scatter2db_subdir {dargv subdir} {
     create_indexes $db
     migrate_kn_create_view_rpi $db
     copy_script_pages $db
-    add_daily_stats $db 1
+    add_daily_stats2 $db 1
     # set initial db version
   } else {
     log info "Existing db: $db_name, don't create tables"
-    add_daily_stats $db 0 ; # to define tables for insert-statements.
+    add_daily_stats2 $db 0 ; # to define tables for insert-statements.
   }
   migrate_db $db $existing_db
   # @todo nog even if 0, want niet in 'productie'

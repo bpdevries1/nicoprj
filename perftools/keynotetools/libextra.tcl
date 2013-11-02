@@ -7,13 +7,13 @@
 # @pre dateuntil in dailystatus table is updated to the past when new run-data for a date is loaded.
 proc check_do_daily {db actiontype tables body} {
   log info "check_do_daily - $actiontype: start"
+  set ts_start_cet [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
+  set sec_prev_dateuntil [det_prev_dateuntil $db $actiontype]
+  if {$sec_prev_dateuntil == -1} {
+    log info "Emtpy database, return"
+    return
+  }
   $db in_trans {
-    set ts_start_cet [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
-    set sec_prev_dateuntil [det_prev_dateuntil $db $actiontype]
-    if {$sec_prev_dateuntil == -1} {
-      log info "Emtpy database, return"
-      return
-    }
     set sec_datefrom [clock add $sec_prev_dateuntil 1 day]
     set datefrom_cet [clock format $sec_datefrom -format "%Y-%m-%d"]
     foreach table $tables {
