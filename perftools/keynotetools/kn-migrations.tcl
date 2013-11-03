@@ -384,6 +384,14 @@ migrate_proc add_aggr_maxitem "Add table aggr_maxitem" {
   $db create_tables 0
 }
 
+proc add_daily_status {db {create_tables 0}} {
+  $db add_tabledef dailystatus {} {actiontype dateuntil_cet}
+  $db add_tabledef dailystatuslog {} {ts_start_cet ts_end_cet datefrom_cet dateuntil_cet notes}
+  if {$create_tables} {
+    $db create_tables 0
+  }
+}
+
 proc add_daily_stats2 {db {create_tables 1}} {
   # @todo update field defs.
   $db add_tabledef aggr_run {id} {date_cet scriptname {avg_time_sec real} {avg_nkbytes real}

@@ -19,6 +19,7 @@ proc extraproc_subdir {dargv subdir} {
   set db [dbwrapper new $db_name]
   define_tables $db
   migrate_db $db $existing_db
+  add_daily_status $db 0
   add_daily_stats2 $db 0
   $db prepare_insert_statements
   
