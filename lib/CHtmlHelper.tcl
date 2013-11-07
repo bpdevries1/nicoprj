@@ -37,7 +37,7 @@ namespace eval ::ndv {
       # $log debug "line 2" 
       # $log debug "lib_path: $::ndv::lib_path" 
       set result [uplevel {namespace which [::ndv::CHtmlHelper \#auto]}]
-        return $result	
+      return $result	
     }
 
     private variable channel
@@ -49,7 +49,8 @@ namespace eval ::ndv {
 
     # idee: algemene get/set methods:
     # of zijn deze sort-of std al aanwezig in OO-systeem?
-    public method set {var value} {
+    # [2013-11-07 20:42:05] overloading set is dangerous: don't go there.
+    public method set2 {var value} {
       set $var $value
     }
     
