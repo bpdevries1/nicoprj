@@ -48,14 +48,23 @@ proc handledir {dirname} {
 	}
   set size 0
   set maxsub 0
-  foreach subdir [glob -directory $dirname -nocomplain -types d *] {
+  
+  catch {
+    set subdirs {}
+    set subdirs [glob -directory $dirname -nocomplain -types d *]
+  }
+  foreach subdir $subdirs {
 		set subsize [handledir $subdir]
 		incr size $subsize
 		if {$subsize > $maxsub} {
 			set maxsub $subsize
 		}
   }
-  foreach file [glob -directory $dirname -nocomplain -types f *] {
+  catch {
+    set files {}
+    set files [glob -directory $dirname -nocomplain -types f *]
+  }
+  foreach file $files {
 		incr size [expr int(ceil(1.0 * [file_size $file] / 1024))]
   }
 
