@@ -21,7 +21,7 @@ proc main {argv} {
   set usage ": [file tail [info script]] \[options] :"
   set dargv [::cmdline::getoptions argv $options $usage]
 
-  copy_tables [:fromdb $dargv] [:todb $dargv] [:tables $dargv]
+  copy_tables [from_cygwin [:fromdb $dargv]] [from_cygwin [:todb $dargv]] [:tables $dargv]
 }
 
 proc copy_tables {fromdbname todbname tables} {
