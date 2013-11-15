@@ -9,12 +9,18 @@ package require ndv
 set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 
 proc main {argv} {
+  puts "verlof-ovz: started"
   lassign $argv urendir
   sqlite3 db [file join $urendir uren-saldo_uren.tsv.db]
+  puts "opened sqlite connection"
   set f [open [file join $urendir verlof-ovz.html] w]
+  puts "opened html file for writing, f=$f"
   set hh [ndv::CHtmlHelper::new]
+  puts "created htmlhelper object"
   $hh set_channel $f
+  puts "set channel done"
   $hh write_header "Header" 0
+  puts "wrote header"
   maak_verlof_ovz $hh
   $hh write_footer  
   close $f
