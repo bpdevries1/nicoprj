@@ -51,6 +51,14 @@ proc main {argv} {
 
 proc handle_srcdirroot {db srcdir srcpattern dargv} {
   set ndx 0
+  
+  # drop table doen op doel-tabel als src-db nog niet attached is, dan geen kans dat deze gedropped wordt.
+  foreach table [split [:tables $dargv] ","] {
+    if {[:droptarget $dargv]} {
+      $db exec2 "drop table if exists $table" -log 
+    }
+  }
+
   foreach subdir [glob -directory $srcdir -type d $srcpattern] {
     incr ndx
     handle_srcdir $db $subdir $ndx $dargv
@@ -67,11 +75,6 @@ proc handle_srcdir {db dir ndx dargv} {
 
   set scriptname [det_scriptname $dir]
   foreach table [split [:tables $dargv] ","] {
-    if {$ndx == 1} {
-      if {[:droptarget $dargv]} {
-        $db exec2 "drop table if exists $table" -log 
-      }
-    }
     # @note set field as _scriptname because src-table might already have the scriptname field.
     # @note try options because source table might not exist in all source databases.
     if {[$db table_exists $table]} {
