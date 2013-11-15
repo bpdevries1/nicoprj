@@ -1,0 +1,42 @@
+[15-11-13 05:38:33] [scatter2db.tcl] [info] Reading c:/projecten/Philips/KNDL/Shop-Browsing-Flow-DE-RQ1250/Shop-Browsing-Flow-DE-RQ1250-2013-11-12--18-00.json
+c:/projecten/Philips/KNDL/Shop-Browsing-Flow-US-RQ1250X/Shop-Browsing-Flow-US-RQ1250X-2013-11-11--11-00.json
+c:\projecten\Philips\KNDL\Shop-Browsing-Flow-US-RQ1250X\Shop-Browsing-Flow-US-RQ1250X-2013-11-11--23-00.json
+
+update filestatus
+set status='error'
+where filename in ('Shop-Browsing-Flow-DE-RQ1250-2013-11-12--18-00.json', 'Shop-Browsing-Flow-US-RQ1250X-2013-11-11--11-00.json', 'Shop-Browsing-Flow-US-RQ1250X-2013-11-11--23-00.json')
+
+Conclusie
+=========
+* Waren hier maar 3 files, deze 'rechtgezet', probleem alleen dat slotid's zijn aangepast, mss ook wel oorzaak van deze fouten.
+* Ofwel dit is nu een incident, geen probleem, geen verdere maatregelen nu.
+
+Algemeen:
+
+Vragen:
+- hoeveel files? 
+- soorten fouten: alleen 0-bytes (of toch iets anders?). Is dit in Tcl te checken?
+- datum van foutfiles: alleen gisteren/vandaag of ook al eerder? Zowel filenaam als datum/tijd van download.
+
+Acties:
+1. download even stopzetten, scatter2db draaien, zip-move doen, dan alleen nog 'foute' json files aanwezig.
+2. dan tellen.
+3. nogmaals scatter2db en zip-move
+4. nogmaals tellen: zelfde aantal nog? Ofwel is de file fout of mss het inleesproces even probleem?
+
+Notes
+======
+* 3 stuks over, waarvan een aan het begin 0-en heeft, daarna lijkt het wel goed. De andere 2 lijken goed zo op het oog.
+* allemaal shop, grote bestanden. #1 DE, #2 US.
+
+Hoe in code mee om te gaan?
+- op 0-bytes zou te checken moeten zijn, bv laatste bytes (of eerste). Maar heb ook al een check op compleetheid (sluit haakjes e.d.)
+- maar in het algemeen niet alle mogelijke inleesfouten te voorkomen.
+- met queueing mechanisme mss beter oplosbaar ipv centrale DB die mss niet multi-user is.
+- of sqlite goed testen dat het wel multi-user/process te gebruiken is. Of eens over lezen.
+- queue en db hoeven elkaar niet uit te sluiten. Queue voor actuele proces, de TODO's. En de DB met de inhoud en evt ook rapporten: gaan
+  dezelfde files steeds fout of zijn het incidenten?
+
+Eenmalige oplossing/retry:
+- files verwijderen is niet genoeg, ook markeren in controle-db als fout. Evt script voor maken.
+- dit script ook in check modus, dan periodiek draaien?

@@ -1,0 +1,73 @@
+Status 15-11-2013
+=================
+* Korte termijn oplossing gedaan: slotid's aangepast, databases bijgewerkt, oude files weg en opnieuw. Lijkt goed.
+* Later: structurele oplossing. Nu niet, want 2w tot vakantie.
+
+Conclusie
+=========
+* Niet gestopt, wel ander slot-id en kleine overlap in tijd.
+* Oude uitgangspunten kloppen niet meer:
+  - scripnaam = slotid = dirnaam = db
+
+Keuzes
+======  
+* In Dir/DB iig zo houden, zelf functionele script-naam houden, ook al verandert het slot-id.
+
+
+Opties
+======
+* zo snel, kort door de bocht mogelijk:
+  - slot-id's aanpassen in config, opnieuw download starten. Ene dag overlap maakt weinig uit.
+  - wel lege files verwijderen, zowel in check-dl DB als in de keynotelogs.db's.
+  
+lege files:
+- files zelf - done
+- in check-dl.db - done
+- in keynotelogs.db - 5 stuks
+
+check-dl.db
+-----------
+delete from filestatus
+where filename like 'Shop%'
+and ts_cet > '2013-11-13'
+and (
+  filename like '%2013-11-13%' or
+  filename like '%2013-11-14%' or
+  filename like '%2013-11-15%'
+  )
+
+keynotelogs.db
+--------------  
+delete from logfile
+where (
+  filename like '%2013-11-13%' or
+  filename like '%2013-11-14%' or
+  filename like '%2013-11-15%'
+  )
+and 1*filesize < 10000;
+  
+  
+Volledig
+--------
+* check-dl db: inhoud van metadata, deze wel/ook periodiek bijwerken.
+* in config.csv alleen naam van de dirs/db's.
+* mapping van slot-id(s) naar dir moet dan nog wel.
+
+Config-files
+============
+* Simpel met start- en eind-dates werken, ook al kloppen ze niet helemaal, dan niet steeds lege file download en quoto snel bereikt.
+
+Checks
+======
+* zijn er nu actuele scripts die ik niet download? De nieuwe shop-scripts zouden hier uit moeten komen.
+* En andersom scripts die ik nog wel download, terwijl ze niet meer actief zijn. 
+  - is het voldoende deze uit de config files te halen? Dan geen nieuwe downloads meer. Mss nog wel stats bepalen, wat wel snel gaat,
+    maar toch tijd kost.
+  - eerder bleek helemaal verwijderen de enige echte remedie.
+
+Meta
+====
+* Merk dat ik nu niet heel veel zin heb om al te veel op de schop te gooien, oorzaken:
+  - genoeg te doen verder in de 2 weken tot vakantie.
+  - niet zeker of ik na de vakantie nog bij Philips ben, dus mss vergeefse moeite.
+* Conclusie nu voor de snelle oplossing kiezen.
