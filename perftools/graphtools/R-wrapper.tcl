@@ -5,16 +5,22 @@ package require struct::set
 # @todo filefacet: filename ook als soort facet doen: voor bepaalde kolom een graph/file per kolom-waarde, soort facet dus.
 # @todo in theorie ook meerdere kolommen: dan voor elke combi van waarden een file.
 
+# @todo bij facet: bepalen hoeveel facets er zijn en obv hiervan de hoogte van de graph: hight = constant1 + constant2 * #facets.
+# @todo BUG: als geen colour meegegeven, en line-point als geom, gaat het fout: shape=as.factor()
+# @todo BUG: point-line werkt niet zoals line-point: alleen point zichtbaar, geen line.
+
 oo::class create Rwrapper {
 
   constructor {a_dargv} {
     my variable dargv
     set dargv $a_dargv
+    log debug "Rwrapper constructed with: $dargv"
   }
 
   method init {a_dir db} {
     my variable f cmdfilename dir stacked_cmds
     # set dir $a_dir
+    log debug "RWrapper initialised with: $a_dir"
     set dir [file normalize [from_cygwin $a_dir]] ; # for R need Unix style (/) dir. 
     set cmdfilename "R-[my now].R"
     set f [open [file join $dir $cmdfilename] w]
@@ -112,8 +118,10 @@ oo::class create Rwrapper {
     set d [my plot_prepare {*}$args]
     if {$d == {}} {
       # graph already exists and in incr(emental) mode: return.
+      log debug "Graph already exists, not creating again: [:title $d]"
       return 
     }
+    log debug "Graph does not exist, so creating: [:title $d]"
     set colour [ifp [= "" [:colour $d]] "" ", colour=as.factor([:colour $d]), shape=as.factor([:colour $d])"] 
     my write "p = qplot([:xvar $d], [:yvar $d], data=df, geom='[:geom $d]' $colour) +"
     my write-if-filled :geom2 "geom_point(data=df, aes(x=[:xvar $d], y=[:yvar $d], shape=as.factor([:colour $d]))) +"
@@ -121,6 +129,9 @@ oo::class create Rwrapper {
     my write_scales $colour
     my write_facet
     my write_legend
+    my write_extra
+    
+    # for now labs as the latest, is not followed by '+'
     my write_labs
 
     foreach outformat $outformats {
@@ -147,13 +158,14 @@ oo::class create Rwrapper {
 
   method plot_prepare {args} {
     # my variable dargv dir stacked_cmds f d
-    my variable dargv dir stacked_cmds f d
+    my variable dargv dir stacked_cmds f d outputroot
     set dct [ifp [= 1 [llength $args]] [lindex $args 0] $args]
     set d [my det_plot_dct $dct]
     log debug "dct: $dct"
     log debug "d: $d"
-    if {([:incr $dargv]) && [file exists [file join $dir [:pngname $d]]]} {
-      log debug "File already exists, incr: return: [file join $dir [:pngname $d]]"
+    if {([:incr $dargv]) && [file exists [file join $outputroot [:pngname $d]]]} {
+      # 14-11-2013 bugfix: use outputroot, not dir.
+      log debug "File already exists, incr: return: [file join $outputroot [:pngname $d]]"
       return {}
     }
     my write "\nprint(concat('Making graph: ', '[:pngname $d]'))"
@@ -224,6 +236,11 @@ oo::class create Rwrapper {
     my write2 "labs(title = '[:title $d]', x='[:xlab $d]', y='[:ylab $d]')"
   }
 
+  method write_extra {} {
+    my variable d
+    my write-if-filled :extra "[:extra $d] +"
+  }
+  
   method write-if-filled {key expr} {
     my variable d
     if {[$key $d] != ""} {
