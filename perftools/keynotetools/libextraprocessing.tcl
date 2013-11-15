@@ -1,7 +1,7 @@
 # libextraprocessing.tcl - called by scatter2db.tcl and extraprocessing.tcl
 
 # ndv::source_once dailystats.tcl updatemaxitem.tcl extra_gt3.tcl
-ndv::source_once extra_dailystats.tcl extra_maxitem.tcl extra_gt3.tcl extra_janitor.tcl
+ndv::source_once extra_dailystats.tcl extra_maxitem.tcl extra_gt3.tcl extra_janitor.tcl extra_aggrsub.tcl
 
 proc extraproc_subdir {dargv subdir} {
   global cr_handler min_date
@@ -21,10 +21,12 @@ proc extraproc_subdir {dargv subdir} {
   migrate_db $db $existing_db
   add_daily_status $db 0
   add_daily_stats2 $db 0
+  $db add_tabledef aggr_sub {id} {date_cet scriptname {page_seq int} {npages int} keytype keyvalue \
+    {avg_time_sec real} {avg_nkbytes real} {avg_nitems real}}
   $db prepare_insert_statements
   
   if {[:actions $dargv] == "all"} {
-    set actions [list maxitem gt3 dailystats vacuum analyze] 
+    set actions [list dailystats maxitem gt3 aggrsub vacuum analyze] 
   } else {
     set actions [split [:actions $dargv] ","] 
   }

@@ -291,6 +291,25 @@ new:
   url: calc field: concat(conn_string_text, object_text)
   }
   }
+  
+  # [2013-11-04 12:31:24] add new tables also for new databases
+  add_daily_status $db
+  $db add_tabledef aggr_maxitem {id} {date_cet scriptname keytype keyvalue {seqnr int} \
+    {avg_time_sec real} {page_seq int}} 
+  $db add_tabledef pageitem_gt3 {id} {scriptname ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
+      scontent_type url \
+      extension domain topdomain urlnoparams \
+      error_code connect_delta dns_delta element_delta first_packet_delta \
+      remain_packets_delta request_delta \
+      ssl_handshake_delta start_msec system_delta basepage record_seq \
+      detail_component_1_msec detail_component_2_msec detail_component_3_msec \
+      ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
+      header_bytes object_text header_code custom_object_trend status_code}  
+      
+  $db add_tabledef aggr_sub {id} {date_cet scriptname {page_seq int} {npages int} keytype keyvalue \
+    {avg_time_sec real} {avg_nkbytes real} {avg_nitems real}}
+
+  # note 12-11-2013 if tables are added here, they should possibly also be added in libextraprocessing.    
 }
 
 proc create_indexes {db} {

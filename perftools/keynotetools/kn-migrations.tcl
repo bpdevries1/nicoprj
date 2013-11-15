@@ -419,6 +419,28 @@ migrate_proc add_daily_stats2 "Add daily stats tables (take 2)" {
   # breakpoint
 }
 
+migrate_proc add_aggr_sub "Add daily stats aggr_sub table" {
+  $db add_tabledef aggr_sub {id} {date_cet scriptname {page_seq int} {npages int} keytype keyvalue \
+    {avg_time_sec real} {avg_nkbytes real} {avg_nitems real}}
+  $db create_tables 0
+  log debug "add_daily_stats2: finished"
+}
+
+migrate_proc add_aggr_sub2 "Add daily stats aggr_sub table (take 2)" {
+  $db exec2 "drop table if exists aggr_sub" -log -try
+  $db exec2 "delete from dailystatus where actiontype = 'aggrsub'"
+  $db add_tabledef aggr_sub {id} {date_cet scriptname {page_seq int} {npages int} keytype keyvalue \
+    {avg_time_sec real} {avg_nkbytes real} {avg_nitems real}}
+  $db create_tables 0
+  log debug "add_daily_stats2: finished"
+}
+
+# want graphs of aggr_maxitem table, so prepare data for all dates
+migrate_proc redo_maxitem "Redo all maxitem records" {
+  $db exec2 "delete from dailystatus where actiontype = 'maxitem'"
+  $db exec2 "delete from aggr_maxitem"
+}
+
 
 # LET OP: als pageitem tabel verandert, moet pageitem_gt3 mee veranderen!
 

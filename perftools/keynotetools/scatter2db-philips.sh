@@ -3,6 +3,7 @@
 # ./nanny.tcl tclsh ./scatter2db.tcl -nopost -moveread -continuous -updatedaily
 
 # 1-11-2013 nu even zonder -updatedaily, staat in de steigers.
-./nanny.tcl tclsh ./scatter2db.tcl -nopost -moveread -continuous -actions dailystats,gt3,maxitem,analyze
+# ./nanny.tcl tclsh ./scatter2db.tcl -nopost -moveread -continuous -actions dailystats,gt3,maxitem,analyze
+./nanny.tcl tclsh ./scatter2db.tcl -nopost -moveread -continuous -actions dailystats,gt3,maxitem,aggrsub,analyze
 # ./nanny.tcl tclsh ./scatter2db.tcl -nopost -moveread -continuous
 

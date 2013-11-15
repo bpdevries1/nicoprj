@@ -2,14 +2,18 @@
 
 # @todo volgens nieuwe spec: daily update, maxitems per dag.
 proc extra_update_maxitem {db dargv subdir} {
-  # specifiek hier: vorige datum op uiterlijk een week geleden zetteen (tov max(r.date_cet))
-  set sec_prev_dateuntil [det_prev_dateuntil $db "maxitem"]
-  set prev_dateuntil [clock format $sec_prev_dateuntil -format "%Y-%m-%d"]
-  set last_week [det_last_week $db]
-  if {$prev_dateuntil < $last_week} {
-    update_daily_status_db $db "maxitem" $prev_dateuntil $last_week "" "" 
+  if {0} {
+    # OLD: specifiek hier: vorige datum op uiterlijk een week geleden zetteen (tov max(r.date_cet))
+    set sec_prev_dateuntil [det_prev_dateuntil $db "maxitem"]
+    set prev_dateuntil [clock format $sec_prev_dateuntil -format "%Y-%m-%d"]
+    set last_week [det_last_week $db]
+    if {$prev_dateuntil < $last_week} {
+      update_daily_status_db $db "maxitem" $prev_dateuntil $last_week "" "" 
+    }
   }
+  
   set max_urls [:maxitem $dargv]
+  log info "max_urls: $max_urls"
   set scriptname [file tail $subdir]
   check_do_daily $db "maxitem" aggr_maxitem {
     # date_cet is set for each day to handle.
