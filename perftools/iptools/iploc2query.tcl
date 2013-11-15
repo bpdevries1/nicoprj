@@ -8,7 +8,7 @@ proc main {argv} {
   while {![eof $f]} {
     set row [split [gets $f] "\t"]
     lassign $row ip z z loc
-    if {$ip == ""} {
+    if {($ip == "") || ($loc == "")} {
       continue 
     }
     set iprange [det_iprange $ip]
