@@ -133,27 +133,7 @@ oo::class create Rwrapper {
     
     # for now labs as the latest, is not followed by '+'
     my write_labs
-
-    foreach outformat $outformats {
-      # outprocname: :0name
-      set outprocname ":${outformat}name"
-      my write "# outprocname: $outprocname"
-      set outname [$outprocname $d]
-      my write "# outname: $outname"
-      my write "ggsave('[file join $outputroot $outname]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-      my write "print(concat('Made graph: ', '$outname'))"
-    }
-    
-    if {0} {
-      # my write "ggsave('[:pngname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-      my write "ggsave('[file join $outputroot [:pngname $d]]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-      # ook voor SVG wel dimensies opgeven, anders vierkant en blijft vierkant.
-      # my write "ggsave('[:svgname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-      my write "ggsave('[file join $outputroot [:svgname $d]]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-      # my write "ggsave('[:pngname $d].svg', plot=p)"
-      my write "print(concat('Made graph: ', '[:pngname $d]'))"
-    }
-    
+    my write_ggsave
   }
 
   method plot_prepare {args} {
@@ -241,6 +221,39 @@ oo::class create Rwrapper {
     my write-if-filled :extra "[:extra $d] +"
   }
   
+  method write_ggsave {} {
+    my variable d outputroot outformats
+    if {[:height $d] != ""} {
+      set height [:height $d]
+      my write "height = $height"
+    } else {
+      my write "height = det.height(height.min=[:height.min $d], height.max=[:height.max $d], height.base=[:height.base $d], height.perfacet=[:height.perfacet $d], facets=df\$[:facet $d])"
+    }
+ 
+    my write "print(concat('height: ', height))"
+    foreach outformat $outformats {
+      # outprocname: :0name
+      set outprocname ":${outformat}name"
+      my write "# outprocname: $outprocname"
+      set outname [$outprocname $d]
+      my write "# outname: $outname"
+      # my write "ggsave('[file join $outputroot $outname]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+      my write "ggsave('[file join $outputroot $outname]', dpi=100, width=[:width $d], height=height, plot=p)"
+      my write "print(concat('Made graph: ', '$outname'))"
+    }
+    
+    if {0} {
+      # my write "ggsave('[:pngname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+      my write "ggsave('[file join $outputroot [:pngname $d]]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+      # ook voor SVG wel dimensies opgeven, anders vierkant en blijft vierkant.
+      # my write "ggsave('[:svgname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+      my write "ggsave('[file join $outputroot [:svgname $d]]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
+      # my write "ggsave('[:pngname $d].svg', plot=p)"
+      my write "print(concat('Made graph: ', '[:pngname $d]'))"
+    }
+  
+  }
+  
   method write-if-filled {key expr} {
     my variable d
     if {[$key $d] != ""} {
@@ -280,6 +293,13 @@ oo::class create Rwrapper {
     my dset dct title "No title"
     my dset dct pngname "[my sanitise [:title $dct]].png"
     my dset dct svgname "[my sanitise [:title $dct]].svg"
+    
+    # height of graph, 2 options: 1) fixed height 2) based on #facets.
+    my dset dct height.min 5
+    my dset dct height.max 20
+    my dset dct height.min 3
+    my dset dct height.perfacet 1.5
+
     return $dct
   }
   

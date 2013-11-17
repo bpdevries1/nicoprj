@@ -19,13 +19,14 @@ proc graph_combined_default {r dargv period} {
               width 11 height 7
   
     # @todo met line-point en geen colour gaat het fout: shape=as.factor() e.d.            
+   
     $r query "select scriptname, date_cet date, avail
               from aggr_run where avail >= 0 and date_cet > '[period2startdate $period]'"
     $r qplot title "Availability - F - $period" \
               x date y avail \
               xlab "Date" ylab "Availability" \
               ymin 0 geom line facet scriptname \
-              width 11 height 14
+              width 11 height.min 5 height.max 20 height.base 1 height.perfacet 1.0
     $r qplot title "Availability - C - $period" \
               x date y avail \
               xlab "Date" ylab "Availability" \

@@ -208,3 +208,16 @@ db.query.dt = function(db, query) {
   df
 }
 
+det.height = function(height.min, height.max, height.base, height.perfacet, facets) {
+  nfacets = length(levels(as.factor(facets)))
+  height = height.base + nfacets * height.perfacet
+  if (height > height.max) {
+    height.max
+  } else {
+    if (height < height.min) {
+      height.min
+    } else {
+      height
+    }
+  }
+}
