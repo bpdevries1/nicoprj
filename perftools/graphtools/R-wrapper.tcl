@@ -172,7 +172,9 @@ oo::class create Rwrapper {
     if {([:geom $d] == "point") || ([:geom2 $d] == "point")} {
       my write2 "scale_shape_manual(name='[:colour $d]', values=rep(1:25,5)) +"
     }
-    my write2 "scale_y_continuous(limits=c([:ymin $d], [:ymax $d])) +"
+    if {([:ymin $d] != "") && ([:ymax $d] != "")} {
+      my write2 "scale_y_continuous(limits=c([:ymin $d], [:ymax $d])) +"
+    }
     if {[regexp {^dt/} [:xdatatype $d]]} {
       set options {}
       if {[:x.breaks $d] != ""} {
@@ -227,7 +229,14 @@ oo::class create Rwrapper {
       set height [:height $d]
       my write "height = $height"
     } else {
-      my write "height = det.height(height.min=[:height.min $d], height.max=[:height.max $d], height.base=[:height.base $d], height.perfacet=[:height.perfacet $d], facets=df\$[:facet $d])"
+      set facets [ifp [= [:facet $d] ""] "NA" "df\$[:facet $d]"]
+      set colours [ifp [= [:colour $d] ""] "NA" "df\$[:colour $d]"]
+      #if {[:facet $d] == ""} {
+      #  set facets "NA"
+      #} else {
+      #  set facets "df\$[:facet $d])" 
+      #}
+      my write "height = det.height(height.min=[:height.min $d], height.max=[:height.max $d], height.base=[:height.base $d], height.perfacet=[:height.perfacet $d], height.percolour=[:height.percolour $d], facets=$facets, colours=$colours)"
     }
  
     my write "print(concat('height: ', height))"
@@ -288,8 +297,12 @@ oo::class create Rwrapper {
     } else {
       my dset dct geom "point"
     }
-    my dset dct ymin "min(df\$[:yvar $dct], na.rm=TRUE)"
-    my dset dct ymax "max(df\$[:yvar $dct], na.rm=TRUE)"
+    
+    # 19-11-2013 vooral met facets is min/max niet zo handig, dan geen free-y meer.
+    if {[:facet $dct] == ""} {
+      my dset dct ymin "min(df\$[:yvar $dct], na.rm=TRUE)"
+      my dset dct ymax "max(df\$[:yvar $dct], na.rm=TRUE)"
+    }
     my dset dct title "No title"
     my dset dct pngname "[my sanitise [:title $dct]].png"
     my dset dct svgname "[my sanitise [:title $dct]].svg"
@@ -298,8 +311,9 @@ oo::class create Rwrapper {
     my dset dct height.min 5
     my dset dct height.max 20
     my dset dct height.min 3
-    my dset dct height.perfacet 1.5
-
+    # @note default for height.perfacet/colour are 0, graphs might have just one of those items. If 0 don't check the df column.
+    my dset dct height.perfacet 0
+    my dset dct height.percolour 0
     return $dct
   }
   
