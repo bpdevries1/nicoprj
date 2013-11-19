@@ -40,9 +40,10 @@ proc graph_combined_default {r dargv period} {
               from aggr_run
               where date_cet > '[period2startdate $period]'"
     # one generic graph per datatype, all in one graph with lines.
+    # ymin 0
     $r qplot title "Average daily page loading times - C - $period" \
               x date y page_time_sec xlab "Date/time" ylab "Page load time (seconds)" \
-              ymin 0 geom line-point colour scriptname \
+              geom line-point colour scriptname \
               width 11 height 9 \
               legend.position bottom \
               legend.direction horizontal \
@@ -130,12 +131,21 @@ proc graph_combined_topdomain {r dargv period} {
                 and s.date_cet > '2013-10-01'
                 group by 1,2,3)
               group by 1,2"
+    # ymin 0
     $r qplot title "Sum of load times per topdomain averaged per page and script - $period" \
               x date y loadtime xlab "Date/time" ylab "Load time (seconds)" \
-              ymin 0 geom line-point colour topdomain \
+              geom line-point colour topdomain \
               width 11 height 7 \
               legend.position right \
               legend.direction vertical
+              
+    $r qplot title "Sum of load times per topdomain averaged per page and script - $period (logscale)" \
+              x date y loadtime xlab "Date/time" ylab "Load time (seconds)" \
+              geom line-point colour topdomain \
+              width 11 height 7 \
+              legend.position right \
+              legend.direction vertical \
+              extra "scale_y_log10()"
   }
 }
 

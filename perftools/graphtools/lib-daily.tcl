@@ -43,7 +43,7 @@ proc make_graphs_dir {dargv dir} {
   if {[:actions $dargv] == "all"} {
     # set actions [list kn3 hour ttip]
     # @todo actions weer kn3 laten includen. Doet het [2013-10-31 12:57:46] niet, omdat tabel niet bestaat.
-    set actions [list dashboard maxitem topdomain extension]
+    set actions [list dashboard maxitem topdomain extension ttip]
   } else {
     set actions [split [:actions $dargv] ","] 
   }
