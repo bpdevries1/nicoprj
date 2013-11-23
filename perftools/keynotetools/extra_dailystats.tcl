@@ -2,9 +2,13 @@
 
 proc extra_update_dailystats {db dargv subdir} {
   set scriptname [file tail $subdir]
-  check_do_daily $db "dailystats" aggr_maxitem {
+  # 23-11-2013 Bugfix: clear aggr_run and aggr_page before handling, not aggr_maxitem.
+  check_do_daily $db "dailystats" {aggr_run aggr_page} {
     # date_cet is set for each day to handle.
     log info "Determining dailystats (aggr_run/page) for: $date_cet"
+    # 23-11-2013 two statements below should not be necessary.
+    #$db exec2 "delete from aggr_run where date_cet = '$date_cet'"
+    #$db exec2 "delete from aggr_page where date_cet = '$date_cet'"
     set nitems(0) 0
     set nitems(1) 0
     foreach row [$db query "select count(*) datacount, task_succeed_calc
@@ -25,6 +29,7 @@ proc extra_update_dailystats {db dargv subdir} {
     set run_avg_nkbytes 0.0
     set run_avg_nitems 0.0
     set npages 0
+    # @note 23-11-2013 zou eigenlijk geen avg moeten gebruiken, maar sum()/#runs, maar maakt hier weinig uit.
     foreach row [$db query "select 1*p.page_seq page_seq, count(*) datacount, avg(0.001*p.delta_user_msec) page_time_sec, 
                                    avg(0.001*p.time_to_interactive_page) page_ttip_sec, avg(0.001*p.page_bytes) avg_nkbytes,
                                    avg(1*p.element_count) avg_nitems

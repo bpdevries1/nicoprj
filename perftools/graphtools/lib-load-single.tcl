@@ -7,27 +7,24 @@ proc graph_dashboard {r dir period} {
     # one generic graph per datatype, all in one graph with lines.
     $r qplot title "$scriptname - Average daily page loading times - $period" \
               x date y page_time_sec xlab "Date/time" ylab "Page load time (seconds)" \
-              ymin 0 geom line \
-              width 11 height 9 \
+              geom line \
+              width 11 height 7 \
               legend.position bottom \
               legend.direction horizontal \
               legend.ncol 4
                           
     $r qplot title "$scriptname - Average daily #kilobytes - $period" \
               x date y avg_nkbytes xlab "Date/time" ylab "#kilobytes" \
-              ymin 0 geom line \
-              width 11 height 9 \
+              geom line \
+              width 11 height 7 \
               legend.position bottom \
               legend.direction horizontal \
               legend.ncol 4
 
     $r qplot title "$scriptname - Average daily #items - $period" \
               x date y avg_nitems xlab "Date/time" ylab "#items" \
-              ymin 0 geom line \
-              width 11 height 9 \
-              legend.position bottom \
-              legend.direction horizontal \
-              legend.ncol 4
+              geom line \
+              width 11 height 7 
               
     # per page
     $r query "select date_cet date, 1*page_seq page_seq, avg_time_sec, avg_nkbytes, avg_nitems 
@@ -38,26 +35,26 @@ proc graph_dashboard {r dir period} {
     $r qplot title "$scriptname - Average daily page loading times by page - $period" \
               x date y avg_time_sec xlab "Date/time" ylab "Page load time (seconds)" \
               geom line-point colour page_seq \
-              width 11 height 7 \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.24 \
+              legend.avg 3 \
               legend.position bottom \
-              legend.direction horizontal \
-              legend.ncol 4
+              legend.direction vertical
                           
     $r qplot title "$scriptname - Average daily #kilobytes by page - $period" \
               x date y avg_nkbytes xlab "Date/time" ylab "#kilobytes" \
-              ymin 0 geom line-point colour page_seq \
-              width 11 height 9 \
+              geom line-point colour page_seq \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.24 \
+              legend.avg 3 \
               legend.position bottom \
-              legend.direction horizontal \
-              legend.ncol 4
+              legend.direction vertical
 
     $r qplot title "$scriptname - Average daily #items by page - $period" \
               x date y avg_nitems xlab "Date/time" ylab "#items" \
-              ymin 0 geom line-point colour page_seq \
-              width 11 height 9 \
+              geom line-point colour page_seq \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.24 \
+              legend.avg 3 \
               legend.position bottom \
-              legend.direction horizontal \
-              legend.ncol 4  
+              legend.direction vertical
   } else {
     log debug "Period smaller than 1 week, no dashboard graphs"
     # @todo? show scatterplot instead, like Keynote does.
@@ -75,19 +72,8 @@ proc graph_maxitem {r dir period} {
     if {[period2days $period] <= 42} {
       # std maxitem graph vanuit aggr_maxitem tabel. Alleen items die in top20 van laatste dag vallen.
       # @todo? maybe better to create view, now have non-DRY code.
-      $r query "select date_cet date, a.avgtimeurl url, avg_time_sec loadtime, 1*page_seq page_seq
-                from aggr_maxitem m join (
-                  select keyvalue url, '\[' || round(avg(avg_time_sec), 3) || 's\] ' || keyvalue avgtimeurl
-                  from aggr_maxitem m3
-                  where m3.keytype = 'urlnoparams'
-                  and m3.keyvalue in (
-                    select a2.keyvalue
-                    from aggr_maxitem a2
-                    where a2.date_cet = (select max(date_cet) from aggr_run)
-                    and a2.keytype = 'urlnoparams'
-                  )
-                  and m3.date_cet > '[period2startdate $period]'
-                  group by 1) a on a.url = m.keyvalue
+      $r query "select date_cet date, keyvalue url, avg_time_sec loadtime, 1*page_seq page_seq
+                from aggr_maxitem m 
                 where m.keytype = 'urlnoparams'
                 and m.keyvalue in (
                   select a2.keyvalue
@@ -97,31 +83,19 @@ proc graph_maxitem {r dir period} {
                 )
                 and m.date_cet > '[period2startdate $period]'
                 order by m.date_cet"
-              
       #  ymin 0
-      $r qplot title "$scriptname - Max items by page - $period" \
+      $r qplot title "$scriptname - Slow URLs by page - $period" \
                 x date y loadtime xlab "Date" ylab "Load time (seconds)" \
                 geom line-point colour url facet page_seq \
-                width 11 height.min 5 height.max 20 height.base 1.7 height.perfacet 1.7 height.percolour 0.24 \
+                width 11 height.min 5 height.max 20 height.base 3.4 height.perfacet 1.7 height.percolour 0.24 \
+                legend.avg 3 \
                 legend.position bottom \
                 legend.direction vertical    
     
       # en deze ook averaged per page: zelf sum/npages doen, anders fout, als item op maar bv 2 pages staat.
-if {1} {
-      $r query "select m.date_cet date, a.avgtimeurl url, 1.0*sum(m.avg_time_sec)/r.npages loadtime
+      $r query "select m.date_cet date, m.keyvalue url, 1.0*sum(m.avg_time_sec)/r.npages loadtime
                 from aggr_maxitem m 
                   join aggr_run r on m.date_cet = r.date_cet
-                  join (select keyvalue url, '\[' || round(avg(avg_time_sec), 3) || 's\] ' || keyvalue avgtimeurl
-                        from aggr_maxitem m3
-                        where m3.keytype = 'urlnoparams'
-                        and m3.keyvalue in (
-                          select a2.keyvalue
-                          from aggr_maxitem a2
-                          where a2.date_cet = (select max(date_cet) from aggr_run)
-                          and a2.keytype = 'urlnoparams'
-                        )
-                        and m3.date_cet > '[period2startdate $period]'
-                        group by 1) a on a.url = m.keyvalue
                 where m.keytype = 'urlnoparams'
                 and m.keyvalue in (
                   select a2.keyvalue
@@ -133,26 +107,11 @@ if {1} {
                 and m.date_cet > '[period2startdate $period]'
                 group by 1,2
                 order by url desc, m.date_cet"
-}
-if {0} {
-      $r query "select m.date_cet date, m.keyvalue url, 1.0*sum(m.avg_time_sec)/r.npages loadtime
-                from aggr_maxitem m join aggr_run r on m.date_cet = r.date_cet
-                where m.keytype = 'urlnoparams'
-                and m.keyvalue in (
-                  select a2.keyvalue
-                  from aggr_maxitem a2
-                  where a2.date_cet = (select max(date_cet) from aggr_run)
-                  and a2.keytype = 'urlnoparams'
-                )
-                and m.date_cet > '[period2startdate $period]'
-                group by 1,2
-                order by m.date_cet"
-}
-                
-      $r qplot title "$scriptname - Max items averaged per page - $period" \
+      $r qplot title "$scriptname - Slow URLs averaged per page - $period" \
                 x date y loadtime xlab "Date" ylab "Load time (seconds)" \
-                ymin 0 geom line-point colour url \
+                geom line-point colour url \
                 width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.24 \
+                legend.avg 3 \
                 legend.position bottom \
                 legend.direction vertical    
     
@@ -180,10 +139,11 @@ if {0} {
       # data van meerdere dagen, dus dag op x, tijd op y. Kleur en facet gebruiken.
       # facet = component, is minder lang.
       # kleur = url
-      $r qplot title "$scriptname - Network times slow urls - 1 - $period" \
+      $r qplot title "$scriptname - Network times Slow URLs by network part - $period" \
                 x date y value xlab "Date" ylab "Network time (seconds)" \
-                ymin 0 geom point colour url facet variable \
-                width 11 height 20 \
+                geom point colour url facet variable \
+                width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.24 height.perfacet 1.7 \
+                legend.avg 3 \
                 legend.position bottom \
                 legend.direction vertical
     } else {
@@ -191,22 +151,24 @@ if {0} {
     }
   } else {
     # max period 1 week: all points
-    $r query "select '\[' || round(avg_time_sec, 3) || 's\] ' || i.urlnoparams url, i.ts_cet ts, 0.001*i.element_delta loadtime
+    # @todo2 geeft deze nu de goede hoogte? vermoeden dat met geen facets deze mss op 0 staat en dan mss 1.7 eraf.
+    $r query "select i.urlnoparams url, i.ts_cet ts, 0.001*i.element_delta loadtime
               from pageitem i 
                 join aggr_maxitem m on i.urlnoparams = m.keyvalue
                      and m.page_seq = i.page_seq
               where m.date_cet = (select max(date_cet) from aggr_run)
               and i.date_cet > '[period2startdate $period]'"
-    $r qplot title "$scriptname - Load times slow urls - 1 - $period" \
+              
+    $r qplot title "$scriptname - Slow URLs - $period" \
               x ts y loadtime xlab "Date/time" ylab "Load time (seconds)" \
-              ymin 0 geom point colour url \
-              width 11 height 9 \
+              geom point colour url \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.24 height.perfacet 0.0 \
+              legend.avg 3 \
               legend.position bottom \
-              legend.direction horizontal \
-              legend.ncol 1
-    $r qplot title "$scriptname - Load times slow urls - 2 - $period" \
+              legend.direction vertical
+    $r qplot title "$scriptname - Slow URLs by URL - $period" \
               x ts y loadtime xlab "Date/time" ylab "Load time (seconds)" \
-              ymin 0 geom point facet url \
+              geom point facet url \
               width 11 height 20
     # zelfde als vorige, maar dan alle punten.
     $r query "select i.ts_cet ts, i.urlnoparams url, 
@@ -230,10 +192,11 @@ if {0} {
     # data van meerdere dagen, dus dag op x, tijd op y. Kleur en facet gebruiken.
     # facet = component, is minder lang.
     # kleur = url
-    $r qplot title "$scriptname - Network times slow urls - 2 - $period" \
+    $r qplot title "$scriptname - Network times Slow URLs by URL - $period" \
               x ts y value xlab "Date/time" ylab "Network time (seconds)" \
-              ymin 0 geom point colour url facet variable \
-              width 11 height 20 \
+              geom point colour url facet variable \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.24 height.perfacet 1.7 \
+              legend.avg 3 \
               legend.position bottom \
               legend.direction vertical
               
@@ -247,6 +210,8 @@ if {0} {
 # @todo:
 # - period => date > x opnemen.
 # - als period < 1w (of in days uitgedrukt), dan niet summary per dag, maar scatterplot van alles.
+# @note 23-11-2013 checked calc of times in graph wrt data in aggr_sub table, should be good: by page graph shows time for each page, 
+#                  per page == by run shows divided by #pages.
 proc graph_topdomain {r dir period} {
   set scriptname [file tail $dir]
   if {[period2days $period] >= 7} {
@@ -256,8 +221,9 @@ proc graph_topdomain {r dir period} {
               and date_cet > '[period2startdate $period]'"
     $r qplot title "$scriptname - Sum of load times per topdomain by page - $period" \
               x date y loadtime xlab "Date/time" ylab "Load time (seconds)" \
-              ymin 0 geom line-point colour topdomain facet page_seq \
-              width 11 height 20 \
+              geom line-point colour topdomain facet page_seq \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.0 height.perfacet 1.7 \
+              legend.avg 3 \
               legend.position right \
               legend.direction vertical
     # ook summary over alles in 1 graph:
@@ -268,8 +234,9 @@ proc graph_topdomain {r dir period} {
               group by 1,2"
     $r qplot title "$scriptname - Sum of load times per topdomain averaged per page - $period" \
               x date y loadtime xlab "Date/time" ylab "Load time (seconds)" \
-              ymin 0 geom line-point colour topdomain \
+              geom line-point colour topdomain \
               width 11 height 8 \
+              legend.avg 3 \
               legend.position right \
               legend.direction vertical
     
@@ -287,8 +254,9 @@ proc graph_extension {r dir period} {
               and date_cet > '[period2startdate $period]'"
     $r qplot title "$scriptname - Sum of load times per extension by page - $period" \
               x date y loadtime xlab "Date/time" ylab "Load time (seconds)" \
-              ymin 0 geom line-point colour extension facet page_seq \
-              width 11 height 20 \
+              geom line-point colour extension facet page_seq \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.0 height.perfacet 1.7 \
+              legend.avg 3 \
               legend.position right \
               legend.direction vertical
     
@@ -299,8 +267,9 @@ proc graph_extension {r dir period} {
               group by 1,2"
     $r qplot title "$scriptname - Sum of load times per extension averaged per page - $period" \
               x date y loadtime xlab "Date/time" ylab "Load time (seconds)" \
-              ymin 0 geom line-point colour extension \
-              width 11 height 8 \
+              geom line-point colour extension \
+              width 11 height 7 \
+              legend.avg 3 \
               legend.position right \
               legend.direction vertical
   } else {
@@ -316,14 +285,15 @@ proc graph_ttip {r dir period} {
     $r query "select date_cet date, page_seq, avg_time_sec, avg_ttip_sec, avg_time_sec - avg_ttip_sec async_sec
               from aggr_page where avg_time_sec >= 0 and date_cet > '[period2startdate $period]'"
     $r melt {avg_time_sec avg_ttip_sec async_sec}
-    $r qplot title "$scriptname - Total and TTIP times - $period" \
+    $r qplot title "$scriptname - Total and TTIP times by page - $period" \
               x date y value \
               xlab "Date" ylab "Time (seconds)" \
-              ymin 0 geom line-point colour variable \
+              geom line-point colour variable \
               facet page_seq \
-              legend.position bottom \
-              legend.direction horizontal \
-              width 11 height.min 5 height.max 20 height.base 0.5 height.perfacet 2.0
+              legend.position right \
+              legend.direction vertical \
+              legend.avg 3 \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.perfacet 1.7 height.percolour 0.0
   } else {
     # a scatterplot of all datapoints
     $r query "select ts_cet ts, 1.0*page_seq page_seq, 0.001 * delta_user_msec time_sec, 0.001 * time_to_interactive_page ttip_sec,
@@ -335,19 +305,21 @@ proc graph_ttip {r dir period} {
     $r qplot title "$scriptname - Total and TTIP times - $period" \
               x ts y value \
               xlab "Date/time" ylab "Time (seconds)" \
-              ymin 0 geom point colour variable \
+              geom point colour variable \
               facet page_seq \
-              legend.position bottom \
-              legend.direction horizontal \
-              width 11 height.min 5 height.max 20 height.base 0.5 height.perfacet 2.0
+              legend.position right \
+              legend.direction vertical \
+              legend.avg 3 \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.perfacet 1.7 height.percolour 0.0
     $r qplot title "$scriptname - Total and TTIP times - $period (logscale)" \
               x ts y value \
               xlab "Date/time" ylab "Time (seconds)" \
               geom point colour variable \
               facet page_seq \
-              legend.position bottom \
-              legend.direction horizontal \
-              width 11 height.min 5 height.max 20 height.base 0.5 height.perfacet 2.0 \
+              legend.position right \
+              legend.direction vertical \
+              legend.avg 3 \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.perfacet 1.7 height.percolour 0.0 \
               extra "scale_y_log10()"
   }
 }

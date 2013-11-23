@@ -4,3 +4,4 @@ cd ${0%/*}
 # ./shop-daily.sh
 ./myphilips-daily.sh
 ./cbf-cn-daily.sh
+./cbf-de-daily.sh
