@@ -28,8 +28,9 @@ proc main {argv} {
   set options {
     {dir.arg "c:/projecten/Philips/KNDL" "Directory where downloaded keynote files are (in subdirs) and where DB's (in subdirs) will be created."}
     {justdir "Just read this directory, not subdirectories. If this is set, dir should not contain subdirs besides 'read'"}
-    {actions.arg "all" "List of actions to do (comma separated: dailystats,gt3,maxitem,analyze,vacuum)"}
+    {actions.arg "all" "List of actions to do (comma separated: dailystats,gt3,maxitem,slowitem,analyze,vacuum)"}
     {maxitem.arg "20" "Number of maxitems to determine"}
+    {minsec.arg "0.2" "Only put items > minsec in slowitem table"}
     {pattern.arg "*" "Just handle subdirs that have pattern"}
     {loglevel.arg "info" "Log level (debug, info, warn)"}
     {debug "Run in debug mode, stop when an error occurs"}

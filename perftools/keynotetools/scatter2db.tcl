@@ -37,8 +37,9 @@ proc main {argv} {
     {nomain2 "Do not put data in a main db"}
     {moveread "Move read files to subdirectory 'read'"}
     {continuous "Keep running this script, to automatically put new items downloaded in DB's"}
-    {actions.arg "" "List of actions to do in post processing (comma separated: dailystats,gt3,maxitem,analyze,vacuum)"}
+    {actions.arg "" "List of actions to do in post processing (comma separated: dailystats,gt3,maxitem,slowitem,analyze,vacuum)"}
     {maxitem.arg "20" "Number of maxitems to determine"}
+    {minsec.arg "0.2" "Only put items > minsec in slowitem table"}
     {pattern.arg "*" "Just handle subdirs that have pattern"}
     {loglevel.arg "info" "Log level (debug, info, warn)"}
     {debug "Run in debug mode, stop when an error occurs"}

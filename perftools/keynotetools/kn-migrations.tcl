@@ -444,3 +444,11 @@ migrate_proc redo_maxitem "Redo all maxitem records" {
 
 # LET OP: als pageitem tabel verandert, moet pageitem_gt3 mee veranderen!
 
+migrate_proc add_aggr_slowitem "Add table aggr_slowitem" {
+  log info "Add table aggr_slowitem"
+  # avg_page_sec: tijd van dit item op deze page. Bij alle pages optellen dus nog door aantal pages delen.
+  # uitgangspunt: page_seq zit in het record, is dan ook onderdeel van de p.key.
+  $db add_tabledef aggr_slowitem {id} {date_cet scriptname {page_seq int} keytype keyvalue {seqnr int} \
+    {avg_page_sec real} {avg_loadtime_sec real} {nitems int}} 
+  $db create_tables 0
+}
