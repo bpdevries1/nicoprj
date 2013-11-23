@@ -8,7 +8,15 @@ package require struct::set
 # @todo bij facet: bepalen hoeveel facets er zijn en obv hiervan de hoogte van de graph: hight = constant1 + constant2 * #facets.
 # @todo BUG: als geen colour meegegeven, en line-point als geom, gaat het fout: shape=as.factor()
 # @todo BUG: point-line werkt niet zoals line-point: alleen point zichtbaar, geen line.
-
+# @todo als je maar 1 lijn tekent (evt wel >1 facet) dan evt ook de average ergens in de graph zetten. Mss toch als legend/colour, of
+#       als label in de graph zelf (of eronder)
+# @todo BUG: als je combi van meerdere plots per query en legend.avg gebruikt, doe wel elke keer dft,df 'query', maar df wordt hierdoro
+#       steeds breder, en je krijgt dubbele velden, en waarsch wordt dan de verkeerde geselecteerd. Dus je moet de df weer resetten op
+#       wat 'ie was, of je moet de naam van het df dat je plot anders regelen. Dat je de ene df 'df.query' blijft noemen, en steeds df.plot
+#       opnieuw bepaalt.
+# @todo in R-wrapper bepalen hoe hoog graph moet worden. height.percolour/perfacet op default zetten, afh plaatsing legend en ook #columns
+#       bepalen of deze meegenomen moeten worden. Bv ook als er veel colours zijn, en de hoogte groter moet worden dan voor een facet.
+# @todo order van legend moet (soms, altijd?) net andersom, bv met guides(colour = guide_legend(reverse = TRUE), shape = guide_legend(reverse = TRUE)), maar werkt nog niet zo.
 oo::class create Rwrapper {
 
   constructor {a_dargv} {
@@ -121,10 +129,11 @@ oo::class create Rwrapper {
       log debug "Graph already exists, not creating again: [:title $d]"
       return 
     }
+    my preprocess
     log debug "Graph does not exist, so creating: [:title $d]"
     set colour [ifp [= "" [:colour $d]] "" ", colour=as.factor([:colour $d]), shape=as.factor([:colour $d])"] 
-    my write "p = qplot([:xvar $d], [:yvar $d], data=df, geom='[:geom $d]' $colour) +"
-    my write-if-filled :geom2 "geom_point(data=df, aes(x=[:xvar $d], y=[:yvar $d], shape=as.factor([:colour $d]))) +"
+    my write "p = qplot([:xvar $d], [:yvar $d], data=df.plot, geom='[:geom $d]' $colour) +"
+    my write-if-filled :geom2 "geom_point(data=df.plot, aes(x=[:xvar $d], y=[:yvar $d], shape=as.factor([:colour $d]))) +"
 
     my write_scales $colour
     my write_facet
@@ -162,15 +171,46 @@ oo::class create Rwrapper {
     return $d
   }
 
+  # stuff to to before qplot (or ggplot?) is called
+  method preprocess {} {
+    my variable f d
+    if {[:legend.avg $d] != ""} {
+      # add average of values to legend, add to df here using library(sqldf)
+      # my write "dft = sqldf('select [:colour $d], avg([:yvar $d]) avrg from df group by 1')"
+      if {[:facet $d] != ""} {
+        my write "dfnvalues = data.frame(nxvalues = length(levels(as.factor(df\$[:xvar $d]))), nfacets=length(levels(as.factor(df\$[:facet $d]))))"
+      } else {
+        my write "dfnvalues = data.frame(nxvalues = length(levels(as.factor(df\$[:xvar $d]))), nfacets=1)"
+      }
+      
+      # my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/nxvalues avrg, avg([:yvar $d]) avg2, count([:yvar $d]) nr from df, dfnvalues group by 1')"
+      my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/(nxvalues*nfacets) avrg, avg([:yvar $d]) avg2, count([:yvar $d]) nr from df, dfnvalues group by 1')"
+      my write_df dft
+      # my write not possible below, single quotes should stay single quotes.
+      puts $f "df.plot = sqldf(\"select df.*, '\['||round(dft.avrg,[:legend.avg $d])||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\")"
+      my write_df df.plot
+      dict set d colour "label_avg"
+    } else {
+      my write "df.plot = df"
+    }
+  }
+
+  method write_df {df_name} {
+    my write "print('Summary of data frame: $df_name')"
+    my write "print(head($df_name))"
+    my write "print(tail($df_name))"
+    my write "print(summary($df_name))"
+  }
+  
   method write_scales {colour} {
     my variable d
     # @note scale_colour should be put before scale_shape, in order for guides(ncol) to work.
     #       doesn't matter if guides is put first.    
     if {$colour != ""} {
-      my write2 "scale_colour_discrete(name='[:colour $d]') +"
+      my write2 "scale_colour_discrete(name='[:colourlabel $d]') +"
     }
     if {([:geom $d] == "point") || ([:geom2 $d] == "point")} {
-      my write2 "scale_shape_manual(name='[:colour $d]', values=rep(1:25,5)) +"
+      my write2 "scale_shape_manual(name='[:colourlabel $d]', values=rep(1:25,5)) +"
     }
     if {([:ymin $d] != "") && ([:ymax $d] != "")} {
       my write2 "scale_y_continuous(limits=c([:ymin $d], [:ymax $d])) +"
@@ -181,7 +221,11 @@ oo::class create Rwrapper {
         lappend options "minor_breaks = date_breaks('[:x.breaks $d]')" 
       }
       lappend options "labels = date_format('[my det_date_format [:xdatatype $d]]')"
-      my write2 "scale_x_datetime([join $options ", "]) +"
+      if {[:xdatatype $d] == "dt/date"} {
+        my write2 "scale_x_date([join $options ", "]) +"
+      } else {
+        my write2 "scale_x_datetime([join $options ", "]) +"
+      }
     }
     # also possible: breaks instead of minor_breaks, and labels:
     # last_plot() + scale_x_datetime(breaks = date_breaks("10 days"), labels = date_format("%d/%m"))
@@ -190,7 +234,7 @@ oo::class create Rwrapper {
   method det_date_format {datatype} {
     # @todo maybe add a \n for ts format.
     switch $datatype {
-      dt/date {str "%Y-%m-%d"}
+      dt/date {str "%Y-%m-%d\n%H:%M"}
       dt/time {str "%H:%M:%S"}
       dt/ts {str "%Y-%m-%d %H:%M:%S"}
     }
@@ -229,8 +273,8 @@ oo::class create Rwrapper {
       set height [:height $d]
       my write "height = $height"
     } else {
-      set facets [ifp [= [:facet $d] ""] "NA" "df\$[:facet $d]"]
-      set colours [ifp [= [:colour $d] ""] "NA" "df\$[:colour $d]"]
+      set facets [ifp [= [:facet $d] ""] "NA" "df.plot\$[:facet $d]"]
+      set colours [ifp [= [:colour $d] ""] "NA" "df.plot\$[:colour $d]"]
       #if {[:facet $d] == ""} {
       #  set facets "NA"
       #} else {
@@ -272,7 +316,8 @@ oo::class create Rwrapper {
 
   method det_plot_dct {dct} {
     if {[:x $dct] == "date"} {
-      my dset dct xvar "date_psx"
+      # my dset dct xvar "date_psx"
+      my dset dct xvar "date_Date"
       my dset dct xdatatype "dt/date"
     } elseif {[:x $dct] == "ts"} {
       my dset dct xvar "ts_psx"
@@ -306,6 +351,9 @@ oo::class create Rwrapper {
     my dset dct title "No title"
     my dset dct pngname "[my sanitise [:title $dct]].png"
     my dset dct svgname "[my sanitise [:title $dct]].svg"
+    
+    # label to display above (as title) of the legend.
+    my dset dct colourlabel [:colour $dct]
     
     # height of graph, 2 options: 1) fixed height 2) based on #facets.
     my dset dct height.min 5

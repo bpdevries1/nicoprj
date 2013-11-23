@@ -9,6 +9,7 @@ load.def.libs = function() {
   library(reshape2)
   library(grid) # for unit, met legends.
   library(scales) # for ticks per hour.
+  library(sqldf) # for query-ing dataframes.
 }
 
 db.open = function(db.name) {
@@ -200,7 +201,12 @@ db.query.dt = function(db, query) {
     df$ts_psx = as.POSIXct(strptime(df$ts, format="%Y-%m-%d %H:%M:%S"))
   }
   if ("date" %in% colnames(df)) {
-    df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d"))
+    # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d"))
+    # df$date_date = as.Date(df$date, "%Y-%m-%d")
+    # @todo rename field to date_parsed, and ts_parsed, cause format is not Posix always.
+    df$date_Date = as.Date(df$date, "%Y-%m-%d")
+    # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d", tz="UTC"))
+    # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d", tz="GMT"))
   }
   if ("time" %in% colnames(df)) {
     df$time_psx = as.POSIXct(strptime(df$time, format="%H:%M:%S"))
@@ -209,10 +215,11 @@ db.query.dt = function(db, query) {
 }
 
 det.height = function(height.min, height.max, height.base, height.perfacet, facets, height.percolour, colours) {
+  # base height should include height for 1 facet.
   height = height.base
   if (height.perfacet > 0) {
     nfacets = length(levels(as.factor(facets)))
-    height = height + nfacets * height.perfacet
+    height = height + (nfacets-1) * height.perfacet
   }
   if (height.percolour > 0) {
     ncolours = length(levels(as.factor(colours)))
