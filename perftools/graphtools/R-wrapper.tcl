@@ -233,8 +233,9 @@ oo::class create Rwrapper {
   
   method det_date_format {datatype} {
     # @todo maybe add a \n for ts format.
+    # old, for test: dt/date {str "%Y-%m-%d\n%H:%M"}
     switch $datatype {
-      dt/date {str "%Y-%m-%d\n%H:%M"}
+      dt/date {str "%Y-%m-%d"}
       dt/time {str "%H:%M:%S"}
       dt/ts {str "%Y-%m-%d %H:%M:%S"}
     }
@@ -347,6 +348,23 @@ oo::class create Rwrapper {
     if {[:facet $dct] == ""} {
       my dset dct ymin "min(df\$[:yvar $dct], na.rm=TRUE)"
       my dset dct ymax "max(df\$[:yvar $dct], na.rm=TRUE)"
+    } else {
+      if {[:ymin $dct] == ""} {
+        if {[:ymax $dct] == ""} {
+          # no min/max set, leave as is
+        } else {
+          # only max is set, set min to min of values
+          my dset dct ymin "min(df\$[:yvar $dct], na.rm=TRUE)"
+        }
+      } else {
+        # ymin is set.
+        if {[:ymax $dct] == ""} {
+          # only min is set, set max to max of values
+          my dset dct ymax "max(df\$[:yvar $dct], na.rm=TRUE)"
+        } else {
+          # both ymin and ymax are set, leave as is.
+        }
+      }
     }
     my dset dct title "No title"
     my dset dct pngname "[my sanitise [:title $dct]].png"

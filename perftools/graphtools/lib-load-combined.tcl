@@ -129,8 +129,10 @@ proc graph_combined_topdomain {r dargv period} {
                 where s.keytype = 'topdomain'
                 and s.date_cet > '[period2startdate $period]'
                 group by 1,2,3)
-              group by 1,2
-              having loadtime2 > 0.1"
+              group by 1,2"
+# 26-11-2013 having hieronder verwijderd, zorgt voor fout avg berekening, achtergekomen door vgl met slow-items. Evt anders doen, op vgl
+# manier als met slow items.
+              # having loadtime2 > 0.1"              
     # ymin 0
     $r qplot title "Sum of load times per topdomain averaged per page and script - $period" \
               x date y loadtime2 xlab "Date/time" ylab "Load time (seconds)" \
@@ -171,8 +173,9 @@ proc graph_combined_extension {r dargv period} {
                 where s.keytype = 'extension'
                 and s.date_cet > '[period2startdate $period]'
                 group by 1,2,3)
-              group by 1,2
-              having loadtime2 > 0.1"
+              group by 1,2"
+# 26-11-2013 having hieronder verwijderd, zorgt voor fout avg berekening, achtergekomen door vgl met slow-items. Evt anders doen, op vgl
+# manier als met slow items.
     $r qplot title "Sum of load times per extension averaged per page and script - $period" \
               x date y loadtime2 xlab "Date/time" ylab "Load time (seconds)" \
               geom line-point colour extension \
@@ -183,82 +186,72 @@ proc graph_combined_extension {r dargv period} {
   }
 }
 
-proc graph_combined_maxitem_new_old {r dargv period} {
-  if {[period2days $period] >= 7} {  
+proc graph_combined_slowitem {r dargv period} {
+  #$db add_tabledef aggr_slowitem {id} {date_cet scriptname {page_seq int} keytype keyvalue {seqnr int} \
+  # {avg_page_sec real} {avg_loadtime_sec real} {nitems int}} 
 
-if {0} {
-    $r query "select m.scriptname, m.date_cet date, m.keyvalue url, 1.0*sum(m.avg_time_sec)/r.npages loadtime
-              from aggr_maxitem m join aggr_run r on m.date_cet = r.date_cet and m.scriptname = r.scriptname
+  if {[period2days $period] >= 7} {  
+    # @todo 24-11-2013 toch iets met temp tables: huidige oplossing is te monolitisch, niet DRY en te complex.
+    # temp table maken met iets als onderstaands:
+    # keuze tables in R of in Tcl maken.
+    # * tcl: voordeel: weet hoe het moet, nadeel: andere DB connectie.
+    # * R: nog even uitzoeken, maar dan wel in dezelfde connectie dus.
+    # rs <- dbSendQuery(con, "delete * from PURGE as p where p.wavelength<0.03")
+    # @note 24-11-2013 noodzaak nu iets minder, want beide onderstaande tabellen geven wel hetzelfde resultaat in de legend-values.
+    #$r execquery "drop table if exists temp1"
+    #$r execquery "create table temp1 as                   subselect"
+    
+    $r query "select m.scriptname, m.date_cet date, m.keyvalue url, 1.0*sum(m.avg_page_sec)/r.npages loadtime
+              from aggr_slowitem m join aggr_run r on m.date_cet = r.date_cet and m.scriptname = r.scriptname
               where m.keytype = 'urlnoparams'
-              and m.seqnr <= 2
-              and m.keyvalue in (
-                select a2.keyvalue
-                from aggr_maxitem a2
-                where a2.date_cet = (select max(date_cet) from aggr_run)
-                and a2.keytype = 'urlnoparams'
-                and a2.seqnr <= 2
-              )
               and m.date_cet > '[period2startdate $period]'
+              and m.keyvalue in (
+                select keyvalue
+                from aggr_slowitem m2 
+                  join aggr_run r on m2.date_cet = r.date_cet and m2.scriptname = r.scriptname
+                where m2.date_cet > '[period2startdate $period]'
+                and m2.keytype = 'urlnoparams'
+                group by 1
+                having 1.0*sum(m2.avg_page_sec)/
+                    (r.npages*(select count(distinct scriptname) from aggr_run)*(select count(distinct date_cet) from aggr_run where date_cet > '[period2startdate $period]')) > 0.05
+              )
               group by 1,2,3
               order by m.date_cet"
-}              
-      $r query "select m.scriptname, m.date_cet date, a.avgtimeurl url, 1.0*sum(m.avg_time_sec)/r.npages loadtime
-                from aggr_maxitem m 
-                  join aggr_run r on m.date_cet = r.date_cet and m.scriptname = r.scriptname
-                  join (select keyvalue url, '\[' || round(avg(avg_time_sec), 3) || 's\] ' || keyvalue avgtimeurl
-                        from aggr_maxitem m3
-                        where m3.keytype = 'urlnoparams'
-                        and m3.keyvalue in (
-                          select a2.keyvalue
-                          from aggr_maxitem a2
-                          where a2.date_cet = (select max(date_cet) from aggr_run)
-                          and a2.keytype = 'urlnoparams'
-                          and a2.seqnr <= 5
-                        )
-                        and m3.date_cet > '[period2startdate $period]'
-                        and m3.seqnr <= 5
-                        group by 1) a on a.url = m.keyvalue
-                where m.keytype = 'urlnoparams'
-                and m.keyvalue in (
-                  select a3.keyvalue
-                  from aggr_maxitem a3
-                  where a3.date_cet = (select max(date_cet) from aggr_run)
-                  and a3.keytype = 'urlnoparams'
-                  and a3.seqnr <= 5
-                )
-                and m.date_cet > '[period2startdate $period]'
-                and m.seqnr <= 5
-                group by 1,2
-                order by url desc, m.date_cet"
-              
     $r qplot title "Slow URLs averaged per page by script - $period" \
               x date y loadtime xlab "Date" ylab "Load time (seconds)" \
               geom line-point colour url facet scriptname \
               width 11 height.min 5 height.max 20 height.base 3.4 height.perfacet 1.7 height.percolour 0.24 \
+              legend.avg 3 \
               legend.position bottom \
               legend.direction vertical    
     # use the main query above as a subquery here to aggregate over all scripts.
-    $r query "select date, url, avg(loadtime) loadtime from (
-                select m.scriptname, m.date_cet date, m.keyvalue url, 1.0*sum(m.avg_time_sec)/r.npages loadtime
-                from aggr_maxitem m join aggr_run r on m.date_cet = r.date_cet and m.scriptname = r.scriptname
+    $r query "select date, url, sum(loadtime)/(select count(distinct scriptname) from aggr_run) loadtime2 from (
+                select m.scriptname, m.date_cet date, m.keyvalue url, 1.0*sum(m.avg_page_sec)/r.npages loadtime
+                from aggr_slowitem m join aggr_run r on m.date_cet = r.date_cet and m.scriptname = r.scriptname
                 where m.keytype = 'urlnoparams'
-                and m.seqnr <= 2
-                and m.keyvalue in (
-                  select a2.keyvalue
-                  from aggr_maxitem a2
-                  where a2.date_cet = (select max(date_cet) from aggr_run)
-                  and a2.keytype = 'urlnoparams'
-                  and a2.seqnr <= 2
-                )
                 and m.date_cet > '[period2startdate $period]'
+                and m.keyvalue in (
+                  select keyvalue
+                  from aggr_slowitem m2 
+                    join aggr_run r on m2.date_cet = r.date_cet and m2.scriptname = r.scriptname
+                  where m2.date_cet > '[period2startdate $period]'
+                  and m2.keytype = 'urlnoparams'
+                  group by 1
+                  having 1.0*sum(m2.avg_page_sec)/
+                      (r.npages*(select count(distinct scriptname) from aggr_run)*(select count(distinct date_cet) from aggr_run where date_cet > '[period2startdate $period]')) > 0.05
+                  )
                 group by 1,2,3) 
-              group by 1,2"                
+              group by 1,2
+              order by date"
+
+    # legend.avg 3 => add averages of values to legend-colours rounded to 3 decimals.
     $r qplot title "Slow URLs averaged per page and script - $period" \
-              x date y loadtime xlab "Date" ylab "Load time (seconds)" \
+              x date y loadtime2 xlab "Date" ylab "Load time (seconds)" \
               geom line-point colour url \
-              width 11 height 9 \
+              width 11 height.min 5 height.max 20 height.base 5 height.percolour 0.24 \
+              legend.avg 3 \
               legend.position bottom \
-              legend.direction vertical    
+              legend.direction vertical
   }
 }
 
@@ -277,7 +270,7 @@ proc graph_combined_maxitem {r dargv period} {
               and m.date_cet > '[period2startdate $period]'
               group by 1,2,3
               order by m.date_cet"
-    $r qplot title "Slow URLs averaged per page by script - $period" \
+    $r qplot title "__Max URLs averaged per page by script - $period" \
               x date y loadtime xlab "Date" ylab "Load time (seconds)" \
               geom line-point colour url facet scriptname \
               width 11 height.min 5 height.max 20 height.base 3.4 height.perfacet 1.7 height.percolour 0.24 \
@@ -300,7 +293,7 @@ proc graph_combined_maxitem {r dargv period} {
                 group by 1,2,3) 
               group by 1,2"                
     # legend.avg 3 => add averages of values to legend-colours rounded to 3 decimals.
-    $r qplot title "Slow URLs averaged per page and script - $period" \
+    $r qplot title "__Max URLs averaged per page and script - $period" \
               x date y loadtime xlab "Date" ylab "Load time (seconds)" \
               geom line-point colour url \
               width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.24 \
@@ -348,7 +341,7 @@ proc graph_combined_gt3 {r dargv period} {
               legend.position right \
               legend.direction vertical
 
-      $r query "select a.date, a.functiontype, sum(a.avg_page_sec) / 9 avg_page_sec2
+      $r query "select a.date, a.functiontype, sum(a.avg_page_sec) / (select count(distinct scriptname) from aggr_run) avg_page_sec2
                 from (select i.date_cet date, 
                 CASE 
                 WHEN (i.urlnoparams like '%flash%' or extension = 'swf') THEN 'Flash'

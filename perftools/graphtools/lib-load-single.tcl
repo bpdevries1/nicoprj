@@ -61,10 +61,10 @@ proc graph_dashboard {r dir period} {
   }
 }
 
-# @todo mss de netwerk grafieken alleen voor de laatste 2 weken doen, anders duurt het te lang en niet overzichtelijk.
-# @todo '2013-11-01' and '2013-11-11' hardcoded now, change to 6w/2w/2d settings.
-# moet soort tabel zijn met mapping welke grafieken voor welke periode wordt gemaakt.
-# dan bv calls: make_graph_maxitem {all 6w 1w} 
+proc graph_slowitem {r dir period} {
+  log warn "slowitem: TODO"
+}
+
 proc graph_maxitem {r dir period} {
   # @todo use period
   set scriptname [file tail $dir]
@@ -84,7 +84,7 @@ proc graph_maxitem {r dir period} {
                 and m.date_cet > '[period2startdate $period]'
                 order by m.date_cet"
       #  ymin 0
-      $r qplot title "$scriptname - Slow URLs by page - $period" \
+      $r qplot title "$scriptname - Max URLs by page - $period" \
                 x date y loadtime xlab "Date" ylab "Load time (seconds)" \
                 geom line-point colour url facet page_seq \
                 width 11 height.min 5 height.max 20 height.base 3.4 height.perfacet 1.7 height.percolour 0.24 \
@@ -107,7 +107,7 @@ proc graph_maxitem {r dir period} {
                 and m.date_cet > '[period2startdate $period]'
                 group by 1,2
                 order by url desc, m.date_cet"
-      $r qplot title "$scriptname - Slow URLs averaged per page - $period" \
+      $r qplot title "$scriptname - Max URLs averaged per page - $period" \
                 x date y loadtime xlab "Date" ylab "Load time (seconds)" \
                 geom line-point colour url \
                 width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.24 \
@@ -139,7 +139,7 @@ proc graph_maxitem {r dir period} {
       # data van meerdere dagen, dus dag op x, tijd op y. Kleur en facet gebruiken.
       # facet = component, is minder lang.
       # kleur = url
-      $r qplot title "$scriptname - Network times Slow URLs by network part - $period" \
+      $r qplot title "$scriptname - Network times Max URLs by network part - $period" \
                 x date y value xlab "Date" ylab "Network time (seconds)" \
                 geom point colour url facet variable \
                 width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.24 height.perfacet 1.7 \
@@ -159,14 +159,14 @@ proc graph_maxitem {r dir period} {
               where m.date_cet = (select max(date_cet) from aggr_run)
               and i.date_cet > '[period2startdate $period]'"
               
-    $r qplot title "$scriptname - Slow URLs - $period" \
+    $r qplot title "$scriptname - Max URLs - $period" \
               x ts y loadtime xlab "Date/time" ylab "Load time (seconds)" \
               geom point colour url \
               width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.24 height.perfacet 0.0 \
               legend.avg 3 \
               legend.position bottom \
               legend.direction vertical
-    $r qplot title "$scriptname - Slow URLs by URL - $period" \
+    $r qplot title "$scriptname - Max URLs by URL - $period" \
               x ts y loadtime xlab "Date/time" ylab "Load time (seconds)" \
               geom point facet url \
               width 11 height 20
@@ -192,7 +192,7 @@ proc graph_maxitem {r dir period} {
     # data van meerdere dagen, dus dag op x, tijd op y. Kleur en facet gebruiken.
     # facet = component, is minder lang.
     # kleur = url
-    $r qplot title "$scriptname - Network times Slow URLs by URL - $period" \
+    $r qplot title "$scriptname - Network times Max URLs by URL - $period" \
               x ts y value xlab "Date/time" ylab "Network time (seconds)" \
               geom point colour url facet variable \
               width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.24 height.perfacet 1.7 \

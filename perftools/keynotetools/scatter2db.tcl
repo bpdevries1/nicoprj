@@ -37,7 +37,7 @@ proc main {argv} {
     {nomain2 "Do not put data in a main db"}
     {moveread "Move read files to subdirectory 'read'"}
     {continuous "Keep running this script, to automatically put new items downloaded in DB's"}
-    {actions.arg "" "List of actions to do in post processing (comma separated: dailystats,gt3,maxitem,slowitem,analyze,vacuum)"}
+    {actions.arg "" "List of actions to do in post processing (comma separated: dailystats,gt3,maxitem,slowitem,topic,aggr_specific,domain_ip,analyze,vacuum)"}
     {maxitem.arg "20" "Number of maxitems to determine"}
     {minsec.arg "0.2" "Only put items > minsec in slowitem table"}
     {pattern.arg "*" "Just handle subdirs that have pattern"}
@@ -297,6 +297,7 @@ new:
   add_daily_status $db
   $db add_tabledef aggr_maxitem {id} {date_cet scriptname keytype keyvalue {seqnr int} \
     {avg_time_sec real} {page_seq int}} 
+  # 26-11-2013 most likely this tabledef (pageitem_gt3) is not used here.
   $db add_tabledef pageitem_gt3 {id} {scriptname ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
       scontent_type url \
       extension domain topdomain urlnoparams \

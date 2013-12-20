@@ -1,7 +1,7 @@
 # libextraprocessing.tcl - called by scatter2db.tcl and extraprocessing.tcl
 
 # ndv::source_once dailystats.tcl updatemaxitem.tcl extra_gt3.tcl
-ndv::source_once extra_dailystats.tcl extra_maxitem.tcl extra_slowitem.tcl extra_gt3.tcl extra_janitor.tcl extra_aggrsub.tcl
+ndv::source_once extra_dailystats.tcl extra_maxitem.tcl extra_slowitem.tcl extra_gt3.tcl extra_topic.tcl extra_aggr_specific.tcl extra_domain_ip.tcl extra_janitor.tcl extra_aggrsub.tcl
 
 proc extraproc_subdir {dargv subdir} {
   global cr_handler min_date
@@ -27,7 +27,7 @@ proc extraproc_subdir {dargv subdir} {
   
   if {[:actions $dargv] == "all"} {
     # @todo 23-11-2013 maxitem verwijderen, als slowitem goed werkt en volledig gevuld is.
-    set actions [list dailystats gt3 aggrsub maxitem slowitem vacuum analyze] 
+    set actions [list dailystats gt3 aggrsub maxitem slowitem topic domain_ip aggr_specific vacuum analyze] 
     # set actions [list dailystats gt3 aggrsub maxitem vacuum analyze] 
   } else {
     set actions [split [:actions $dargv] ","] 

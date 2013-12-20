@@ -442,7 +442,6 @@ migrate_proc redo_maxitem "Redo all maxitem records" {
 }
 
 
-# LET OP: als pageitem tabel verandert, moet pageitem_gt3 mee veranderen!
 
 migrate_proc add_aggr_slowitem "Add table aggr_slowitem" {
   log info "Add table aggr_slowitem"
@@ -452,3 +451,40 @@ migrate_proc add_aggr_slowitem "Add table aggr_slowitem" {
     {avg_page_sec real} {avg_loadtime_sec real} {nitems int}} 
   $db create_tables 0
 }
+
+migrate_proc redo_aggrrunpage_20131125 "Redo all aggr-run-page-slowitem records" {
+  # slowitem is afhankelijk van #runs op een dag, dus deze ook doen. Rest niet, check gedaan op voorkomen aggr_run en aggr_page.
+  # @note zou trouwens verwachten dat aggr_sub ook het #runs nodig heeft, dus nog checken. => deze gebruikt direct het aantal scriptruns, dus goed!
+  $db exec2 "delete from dailystatus where actiontype in ('dailystats', 'slowitem')"
+  $db exec2 "delete from aggr_slowitem"
+  $db exec2 "delete from aggr_page"
+  $db exec2 "delete from aggr_run"
+}
+
+migrate_proc add_pageitem_topic "Add pageitem_topic table" {
+  log info "Add pageitem_topic table"
+  $db add_tabledef pageitem_topic {id} {scriptname topic ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
+      scontent_type url \
+      extension domain topdomain urlnoparams \
+      error_code connect_delta dns_delta element_delta first_packet_delta \
+      remain_packets_delta request_delta \
+      ssl_handshake_delta start_msec system_delta basepage record_seq \
+      detail_component_1_msec detail_component_2_msec detail_component_3_msec \
+      ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
+      header_bytes object_text header_code custom_object_trend status_code}
+  $db create_tables 0
+}
+
+migrate_proc add_domain_ip_time "Add domain_ip_time table" {
+  log info "Add domain_ip_time table"
+  $db add_tabledef domain_ip_time {id} {scriptname date_cet topdomain domain ip_address {number int} {min_conn_msec real}}
+  $db create_tables 0
+}
+
+migrate_proc add_aggr_specific "Add aggr_specific table" {
+  log info "Add aggr_specific table"
+  $db add_tabledef aggr_specific {id} {scriptname date_cet topic {per_page_sec real}}
+  $db create_tables 0
+}
+
+# LET OP: als pageitem tabel verandert, moet pageitem_gt3 en pageitem_topic mee veranderen!
