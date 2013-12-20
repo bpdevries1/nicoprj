@@ -31,7 +31,8 @@ proc maak_verlof_ovz {hh} {
   try_eval {
     $hh heading 1 "Verlof overzicht"
     $hh table_start 
-    $hh table_header "Vrijdag" "Verlof delta" "Verlof som" "Deeltijd delta" "Deeltijd som" "Totaal som" "Totaal dagen" "Opmerkingen"
+    write_table_header $hh
+    # $hh table_header "Vrijdag" "Verlof delta" "Verlof som" "Deeltijd delta" "Deeltijd som" "Totaal som" "Totaal dagen" "Opmerkingen"
     # CREATE TABLE urendag (date, project, hours, comments);
     set query "select date, project, sum(hours) hours
                from urendag
@@ -124,12 +125,16 @@ proc maak_verlof_ovz {hh} {
       make_table_row $hh $prev_date $delta_verlof $verlof $delta_deeltijd $deeltijd $lst_notes
       # $hh table_row $date {*}[format_values [list $delta_verlof $verlof $delta_deeltijd $deeltijd [expr $verlof+$deeltijd] [expr ($verlof+$deeltijd)/7.2]]] [notes_to_html $lst_notes]
     }
-    
+    write_table_header $hh
     $hh table_end
   } {
     log error $errorResult
     breakpoint 
   }
+}
+
+proc write_table_header {hh} {
+  $hh table_header "Vrijdag" "Verlof delta" "Verlof som" "Deeltijd delta" "Deeltijd som" "Totaal som" "Totaal dagen" "Opmerkingen"
 }
 
 proc make_table_row {hh prev_date delta_verlof verlof delta_deeltijd deeltijd lst_notes} {
