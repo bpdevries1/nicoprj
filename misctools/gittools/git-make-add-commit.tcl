@@ -15,7 +15,7 @@ proc main {argv} {
   if {$has_changes} {
     set dt [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
     puts $f "git commit -m \"Changes for $dt\""
-    puts $f "gitpush"
+    puts $f "# gitpush"
   } else {
     puts $f "# No changes"
   }
