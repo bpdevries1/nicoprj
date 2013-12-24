@@ -2,7 +2,7 @@
 
 proc extra_update_dailystats {db dargv subdir} {
   set scriptname [file tail $subdir]
-  # 23-11-2013 Bugfix: clear aggr_run and aggr_page before handling, not aggr_maxitem.
+  # 23-11-2013 Bugfix: clear aggr_run and aggr_page before handling.
   check_do_daily $db "dailystats" {aggr_run aggr_page} {
     # date_cet is set for each day to handle.
     log info "Determining dailystats (aggr_run/page) for: $date_cet"
@@ -61,5 +61,6 @@ proc extra_update_dailystats {db dargv subdir} {
         page_ttip_sec [format %.3f [expr $total_ttip_sec / $npages]] \
         avg_nkbytes [format %.3f $run_avg_nkbytes] avg_nitems [format %.3f $run_avg_nitems]]
     }
+    identity "dailystats - $date_cet"                 
   }
 }

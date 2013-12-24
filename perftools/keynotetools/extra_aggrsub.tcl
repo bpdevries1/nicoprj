@@ -33,6 +33,7 @@ proc extra_update_aggrsub {db dargv subdir} {
     } else {
       log warn "Could not determine datacount for $subdir/$date_cet"
     }
+    identity "aggrsub - $date_cet"                     
   }
 }
 

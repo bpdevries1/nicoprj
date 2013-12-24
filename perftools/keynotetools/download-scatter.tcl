@@ -45,12 +45,29 @@ proc main {argv} {
     if {($res == "ok") && $exitatok} {
       break 
     }
-    wait_until_next_hour 
+    wait_until_next_time 
   }
   log info "Exiting, result = ok, and exitatok"
 }
 
-proc wait_until_next_hour {} {
+# Start each run each half an hour.
+proc wait_until_next_time {} {
+  set finished 0
+  while {!$finished} {
+    set minute [clock format [clock seconds] -format "%M"]
+    log info "Time: [clock format [clock seconds]]"
+    if {[expr $minute % 30] == 0} {
+      log info "Finished waiting, starting the next batch of downloads"
+      set finished 1 
+    } else {
+      log info "Wait another (small) minute, until minute is 0 or 30" 
+    }
+    after 55000
+    # after 5000
+  }
+}
+
+proc wait_until_next_time_old {} {
   set finished 0
   set start_hour [clock format [clock seconds] -format "%H"]
   while {!$finished} {
@@ -87,10 +104,76 @@ proc download_keynote_main {dargv} {
   # available.
   if {[:untildate $dargv] != ""} {
     # do not use GMT here (but default CET in NL), as dashboards are presented by CET date.
+    set sec_end [clock scan [:untildate $dargv] -format "%Y-%m-%d" -gmt 0]
+  } else {
+    # auto: until most recent.
+    # set sec_end [clock scan [clock format [expr [clock seconds] - 2 * 3600] -format "%Y-%m-%d %H" -gmt 1] -format "%Y-%m-%d %H" -gmt 1]
+    # @note now set to current minus 1.5 hours, so at eg 8.30 the data from 7.00-8.00 can be downloaded.
+    set sec_end [clock scan [clock format [expr round([clock seconds] - 1.5 * 3600)] -format "%Y-%m-%d %H" -gmt 1] -format "%Y-%m-%d %H" -gmt 1]    
+  }
+  if {[:fromdate $dargv] != ""} {
+    # do not use GMT here (but default CET in NL), as dashboards are presented by CET date.
+    set sec_start [clock scan [:fromdate $dargv] -format "%Y-%m-%d" -gmt 0]
+  } else {
+    if {[:test $dargv]} {
+      set sec_start [expr $sec_end - (4 * 60 * 60)]
+    } else {
+      # 3-9-2013 6 weeks is long enough, and no detail data more than 6 weeks back.
+      set sec_start [expr $sec_end - (6 * 7 * 24 * 60 * 60)]
+    }
+  }
+  set nerrors 0
+  set api_key [det_api_key [:apikey $dargv]]
+  
+  set dl_check [DownloadCheck new $root_dir]
+  
+  # @todo determine sec_start for each script - later, some possible issues where holes can occur, if one download fails but the next succeeds. Normally a failed one would be retried the next time. Also, downloading normally takes a lot more time than checking the DB.
+  # @todo determine sec_end each time again, to download data ASAP.
+  # @note this order also means that important scripts (placed at the start of the config) will be handled first.
+  foreach el_config $dct_config {
+    set sec_ts $sec_start
+    while {$sec_ts <= $sec_end} {
+      set res [download_keynote $root_dir $el_config $sec_ts $api_key [:format $dargv]]
+      if {$res == "quota"} {
+        log warn "Quota has been used completely, wait until next hour"
+        return $res
+      } elseif {$res == "limit"} {
+        log warn "Limit of 60 reqs/minute is exceeded, wait one minute now."
+        after 60000
+      }
+      set sec_ts [expr $sec_ts + 3600]  
+      
+    }
+  }  
+  $dl_check close
+  $dl_check destroy 
+  return "ok"
+}
+
+proc download_keynote_main_old {dargv} {
+  global dl_check
+  
+  set root_dir [:dir $dargv]  
+  log info "download_keynote_main: Downloading items to: $root_dir"
+  
+  # set dct_config [csv2dictlist [file join $root_dir config.csv] ";"]
+  set dct_config [csv2dictlist [file join $root_dir [:config $dargv]] ";"]
+  make_subdirs $root_dir $dct_config
+  
+  # start with current time minus 4 hours, so Keynote has time to prepare the data.
+  # also start on a whole hour.
+  # set sec_start [clock scan [clock format [expr [clock seconds] - 4 * 3600] -format "%Y-%m-%d %H" -gmt 1] -format "%Y-%m-%d %H" -gmt 1]
+  
+  # 26-8-2013 Stel huidige tijd is 10:30 CET, dus 8:30 GMT. Dan laatste sec_start is 7:00 GMT, omdat er een uur bij op wordt geteld, zodat van 7-8 wordt opgehaald.
+  # om 10:00 CET, is 8:00 GMT, zal ook alles van 7-8 worden opgehaald, dit is wellicht iets te snel. Voor de zekerheid dan nog een uur eraf.  
+  # @note sec_end is actually the most recent time, and sec_start the oldest time. This is because the download happens forward. 
+  if {[:untildate $dargv] != ""} {
+    # do not use GMT here (but default CET in NL), as dashboards are presented by CET date.
     set sec_start [clock scan [:untildate $dargv] -format "%Y-%m-%d" -gmt 0]
   } else {
     # auto: until most recent.
-    set sec_start [clock scan [clock format [expr [clock seconds] - 2 * 3600] -format "%Y-%m-%d %H" -gmt 1] -format "%Y-%m-%d %H" -gmt 1]
+    # @note now set to current minus 1.5 hours, so at eg 8.30 the data from 7.00-8.00 can be downloaded.
+    set sec_start [clock scan [clock format [expr round([clock seconds] - 1.5 * 3600)] -format "%Y-%m-%d %H" -gmt 1] -format "%Y-%m-%d %H" -gmt 1]
   }
   if {[:fromdate $dargv] != ""} {
     # do not use GMT here (but default CET in NL), as dashboards are presented by CET date.
@@ -132,6 +215,8 @@ proc make_subdirs {root_dir dct_config} {
   }
 }
 
+# @param sec_ts - based on GMT/UTC and rounded to whole hour (using format/scan).
+# @param sec_ts - denoted start of period the data should be downloaded. An hour will be added for the end.
 proc download_keynote {root_dir el_config sec_ts api_key format } {
   global dl_check
   set filename [det_filename $root_dir $el_config $sec_ts $format]
@@ -175,13 +260,10 @@ proc download_keynote {root_dir el_config sec_ts api_key format } {
 }
 
 proc det_filename {root_dir el_config sec_ts format} {
-  # file join $root_dir "keynote-mobile-[clock format $sec_ts -format "%Y-%m-%d--%H-%M" -gmt 1].$format"
   file join $root_dir [:dirname $el_config] "[:dirname $el_config]-[clock format $sec_ts -format "%Y-%m-%d--%H-%M" -gmt 1].$format"
 }
 
 proc det_api_key {api_key_loc} {
-  # string trim [read_file [file join ~ .config keynote api-key.txt]]
-  # string trim [read_file "~/.config/keynote/api-key.txt"]
   string trim [read_file $api_key_loc]
 }
 

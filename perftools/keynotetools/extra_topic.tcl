@@ -16,6 +16,7 @@ proc extra_update_topic {db dargv subdir} {
                  from pageitem
                  where date_cet = '$date_cet'
                  and url like '%promotionchina/imagelist%'" -log
+      identity "topic - $date_cet"                 
     }  
     # catalog selector as separate loop/action for now.
     # 28-11-2013 not now, included in extra_aggr_specific, part of ph-non-cacheable, check for 'requestid'
@@ -30,6 +31,7 @@ proc extra_update_topic {db dargv subdir} {
                    from pageitem
                    where date_cet = '$date_cet'
                    and url like '%promotionchina/imagelist%'" -log
+        identity "topic-cs - $date_cet"                                    
       }                   
     }  
   } else {

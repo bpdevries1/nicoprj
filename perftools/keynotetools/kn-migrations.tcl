@@ -377,13 +377,6 @@ migrate_proc add_pageitem_gt3 "Add pageitem_gt3 table" {
   $db create_tables 0
 }
 
-migrate_proc add_aggr_maxitem "Add table aggr_maxitem" {
-  # log info "Add table aggr_maxitem"
-  $db add_tabledef aggr_maxitem {id} {date_cet scriptname keytype keyvalue {seqnr int} \
-    {avg_time_sec real} {page_seq int}} 
-  $db create_tables 0
-}
-
 proc add_daily_status {db {create_tables 0}} {
   $db add_tabledef dailystatus {} {actiontype dateuntil_cet}
   $db add_tabledef dailystatuslog {} {ts_start_cet ts_end_cet datefrom_cet dateuntil_cet notes}
@@ -401,6 +394,21 @@ proc add_daily_stats2 {db {create_tables 1}} {
   $db add_tabledef aggr_page {id} {date_cet scriptname {page_seq int}   
     {avg_time_sec real} {avg_nkbytes real} {avg_nitems real} {datacount int}
     {avg_ttip_sec real} {avail real}}
+  
+  # 24-12-2013 add 4 other tables for new databases: aggr_slowitem, pageitem_topic, domain_ip_time, aggr_specific
+  $db add_tabledef aggr_slowitem {id} {date_cet scriptname {page_seq int} keytype keyvalue {seqnr int} \
+    {avg_page_sec real} {avg_loadtime_sec real} {nitems int}} 
+  $db add_tabledef pageitem_topic {id} {scriptname topic ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
+      scontent_type url \
+      extension domain topdomain urlnoparams \
+      error_code connect_delta dns_delta element_delta first_packet_delta \
+      remain_packets_delta request_delta \
+      ssl_handshake_delta start_msec system_delta basepage record_seq \
+      detail_component_1_msec detail_component_2_msec detail_component_3_msec \
+      ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
+      header_bytes object_text header_code custom_object_trend status_code}
+  $db add_tabledef domain_ip_time {id} {scriptname date_cet topdomain domain ip_address {number int} {min_conn_msec real}}
+  $db add_tabledef aggr_specific {id} {scriptname date_cet topic {per_page_sec real}}
   
   if {$create_tables} {
     $db create_tables 0
@@ -434,14 +442,6 @@ migrate_proc add_aggr_sub2 "Add daily stats aggr_sub table (take 2)" {
   $db create_tables 0
   log debug "add_daily_stats2: finished"
 }
-
-# want graphs of aggr_maxitem table, so prepare data for all dates
-migrate_proc redo_maxitem "Redo all maxitem records" {
-  $db exec2 "delete from dailystatus where actiontype = 'maxitem'"
-  $db exec2 "delete from aggr_maxitem"
-}
-
-
 
 migrate_proc add_aggr_slowitem "Add table aggr_slowitem" {
   log info "Add table aggr_slowitem"
@@ -487,4 +487,16 @@ migrate_proc add_aggr_specific "Add aggr_specific table" {
   $db create_tables 0
 }
 
+# @todo dropping the table does not seem to work.
+migrate_proc remove_maxitem "Remove maxitem table" {
+  log info "Remove maxitem table"
+  $db exec2 "drop table aggr_maxitem" -log
+  log info "Removed maxitem table"
+}
+
+migrate_proc add_logfile_indexes "Add logfile indexes" {
+  $db exec2 "create index if not exists ix_logfile_1 on logfile (filename)" -log -try
+}
+
 # LET OP: als pageitem tabel verandert, moet pageitem_gt3 en pageitem_topic mee veranderen!
+# LET OP: als je een table toevoegt, dan ook toevoegen bij add_daily_stats2, deze wordt aangeroepen voor nieuwe DB's.

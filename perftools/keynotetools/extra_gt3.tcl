@@ -13,6 +13,7 @@ proc extra_update_gt3 {db dargv subdir} {
                from pageitem
                where date_cet = '$date_cet'
                and 1*element_delta > 3000" -log
+    identity "gt3 - $date_cet"                                
   }  
 }
 

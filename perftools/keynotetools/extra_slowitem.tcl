@@ -34,6 +34,7 @@ proc extra_update_slowitem {db dargv subdir} {
                       rowid seqnr, avg_page_sec, avg_loadtime_sec, nitems
                from temp_slowitem" -log
     
-    $db exec2 "drop table if exists temp_slowitem"              
+    $db exec2 "drop table if exists temp_slowitem"            
+    identity "slowitem - $date_cet"                     
   }
 }
