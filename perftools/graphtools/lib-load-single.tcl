@@ -65,7 +65,7 @@ proc graph_slowitem {r dir period} {
   log warn "slowitem: TODO"
 }
 
-proc graph_maxitem {r dir period} {
+proc graph_maxitem_old {r dir period} {
   # @todo use period
   set scriptname [file tail $dir]
   if {[period2days $period] >= 7} {
