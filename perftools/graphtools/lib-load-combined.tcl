@@ -255,7 +255,7 @@ proc graph_combined_slowitem {r dargv period} {
   }
 }
 
-proc graph_combined_maxitem {r dargv period} {
+proc graph_combined_maxitem_old {r dargv period} {
   if {[period2days $period] >= 7} {  
     $r query "select m.scriptname, m.date_cet date, m.keyvalue url, 1.0*sum(m.avg_time_sec)/r.npages loadtime
               from aggr_maxitem m join aggr_run r on m.date_cet = r.date_cet and m.scriptname = r.scriptname

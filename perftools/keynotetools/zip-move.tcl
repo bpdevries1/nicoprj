@@ -1,5 +1,7 @@
 #!/usr/bin/env tclsh86
 
+# @todo also make this script working on PC/linux: config-file and/or cmdline params.
+
 package require Tclx
 package require ndv
 
@@ -8,7 +10,7 @@ $log set_file "[file tail [info script]].log"
 
 proc main {argv} {
   set root_src "c:/projecten/Philips/KNDL"
-  set root_target "w:/archief/Ymor/Philips/KNDL"
+  set root_target "w:/archief/Ymor/Philips/KNDL-loadPC"
   file mkdir $root_target
   foreach dir [glob -directory $root_src -type d *] {
     handle_dir [file join $dir] $root_target 

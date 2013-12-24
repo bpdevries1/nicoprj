@@ -23,6 +23,7 @@ proc extra_update_aggr_specific {db dargv subdir} {
                   and il.url like '%imagelist%'
                   group by 1,2,3,4) i join aggr_run r on i.scriptname = r.scriptname and i.date_cet = r.date_cet
                   group by 1,2,3" -log
+      identity "aggr_specific - $date_cet"                                   
     }
     
     # extra calculations specific for CN as well, just last 6 weeks.
@@ -95,6 +96,7 @@ proc extra_update_aggr_specific {db dargv subdir} {
         # kleine steekproef gedaan voor HX6921 test (data tot Sep-28), niets gevonden.      
       
       } ; # if date_cet
+      identity "aggr_specific_cn - $date_cet"                 
     } ; # check_do_daily
   } else {
     # nothing to do for non-CBF-CN scripts.

@@ -10,7 +10,7 @@ proc make_graphs {dargv} {
   if {[:combinedactions $dargv] == "all"} {
     # set actions [list kn3 hour ttip]
     # @todo actions weer kn3 laten includen. Doet het [2013-10-31 12:57:46] niet, omdat tabel niet bestaat.
-    set actions [list default ttip topdomain extension maxitem slowitem gt3]
+    set actions [list default ttip topdomain extension slowitem gt3]
   } else {
     set actions [split [:combinedactions $dargv] ","] 
   }
@@ -43,7 +43,7 @@ proc make_graphs_dir {dargv dir} {
   if {[:actions $dargv] == "all"} {
     # set actions [list kn3 hour ttip]
     # @todo actions weer kn3 laten includen. Doet het [2013-10-31 12:57:46] niet, omdat tabel niet bestaat.
-    set actions [list dashboard maxitem slowitem topdomain extension ttip]
+    set actions [list dashboard slowitem topdomain extension ttip]
   } else {
     set actions [split [:actions $dargv] ","] 
   }

@@ -14,6 +14,7 @@ proc extra_update_domain_ip {db dargv subdir} {
                where date_cet = '$date_cet'
                and 1*connect_delta > 0
                group by 1,2,3,4,5" -log
+    identity "domainip - $date_cet"                                
   }  
 }
 

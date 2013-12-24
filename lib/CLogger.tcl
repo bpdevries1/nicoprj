@@ -172,7 +172,9 @@ namespace eval ::ndv {
 					# puts stderr "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$service\] \[$level\] $str *** \[[info level -1]\]"
 					# puts stderr "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$name\] \[$level\] $str *** \[[::info level $pref_stacklevel]\]"
 				} 
-        set str_log "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$name\] \[$level\] $str" 
+        # set str_log "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$name\] \[$level\] $str" 
+        # 24-12-2013 changed date format to standard, also used within SQLite.
+        set str_log "\[[clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]\] \[$name\] \[$level\] $str" 
         puts stderr $str_log
 				flush stderr ; # could be that stderr is redirected.
         if {$f_log != -1} {

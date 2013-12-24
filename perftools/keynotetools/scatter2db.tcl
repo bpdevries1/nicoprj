@@ -37,7 +37,7 @@ proc main {argv} {
     {nomain2 "Do not put data in a main db"}
     {moveread "Move read files to subdirectory 'read'"}
     {continuous "Keep running this script, to automatically put new items downloaded in DB's"}
-    {actions.arg "" "List of actions to do in post processing (comma separated: dailystats,gt3,maxitem,slowitem,topic,aggr_specific,domain_ip,analyze,vacuum)"}
+    {actions.arg "" "List of actions to do in post processing (comma separated: dailystats,gt3,maxitem,slowitem,topic,aggr_specific,domain_ip,removeold,combinereport,analyze,vacuum)"}
     {maxitem.arg "20" "Number of maxitems to determine"}
     {minsec.arg "0.2" "Only put items > minsec in slowitem table"}
     {pattern.arg "*" "Just handle subdirs that have pattern"}
@@ -295,8 +295,6 @@ new:
   
   # [2013-11-04 12:31:24] add new tables also for new databases
   add_daily_status $db
-  $db add_tabledef aggr_maxitem {id} {date_cet scriptname keytype keyvalue {seqnr int} \
-    {avg_time_sec real} {page_seq int}} 
   # 26-11-2013 most likely this tabledef (pageitem_gt3) is not used here.
   $db add_tabledef pageitem_gt3 {id} {scriptname ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
       scontent_type url \
@@ -324,6 +322,9 @@ proc create_indexes {db} {
   # [2013-10-29 17:03:08] added for daily stats:
   $db exec2 "create index if not exists ix_run_datecet on scriptrun(date_cet)" -log -try
   $db exec2 "create index if not exists ix_page_datecet on page(date_cet)" -log -try
+  
+  # 24-12-2013 used for determining latest date read and earliest possible daily aggregate/combine processing.
+  $db exec2 "create index if not exists ix_logfile_1 on logfile (filename)" -log -try
 }
 
 proc read_script_pages {db} {
@@ -425,6 +426,10 @@ proc read_json_file_db {db filename root_dir {pageitem 1}} {
                element_count content_errors resp_bytes estimated_cache_delta_msec \
                trans_level_comp_msec delta_user_msec bandwidth_kbsec cookie_count domain_count connection_count browser_errors \
                setup_msec attempts speed phone_number}] 
+          # 24-12-2013 set delta_user_msec if empty, used in a lot of places.
+          if {[:delta_user_msec $dct] == "<none>"} {
+            dict set dct delta_user_msec [:delta_msec $dct]
+          }
           dict set dct logfile_id $logfile_id
           dict set dct scriptname [det_scriptname [:slot_id $dct] $filename]
           dict set dct ts_utc [det_ts_utc [:datetime $dct]]
@@ -440,6 +445,7 @@ proc read_json_file_db {db filename root_dir {pageitem 1}} {
           # @todo param pages as name here, to prevent copying large objects, also do in other places?
           # @todo det_task_succeed has a bug: does not set to 0 when it should, for CBF-CN-HX6921-2013-09-02--13-00.json
           dict set dct task_succeed_calc [det_task_succeed_calc [:task_succeed $dct] pages]
+          # breakpoint
           set scriptrun_id [$db insert scriptrun $dct 1]
           $cr_handler init
           $cr_handler set_scriptrun dct $scriptrun_id
@@ -515,6 +521,11 @@ proc handle_page {db scriptrun_id page dct_details pageitem scriptname datetime}
     dom_content_load_time dom_interactive_msec dom_load_time dom_unload_time domain_count 
     estimated_cache_delta_msec first_byte_msec first_paint_msec full_screen_msec time_to_interactive_page}]
   # @todo find out what page.start_msec means.
+  # 24-12-2013 set delta_user_msec if empty, used in a lot of places.
+  if {[:delta_user_msec $dctp] == "<none>"} {
+    dict set dctp delta_user_msec [:delta_msec $dctp]
+  }
+
   dict set dctp scriptrun_id $scriptrun_id
   dict set dctp scriptname $scriptname
   dict set dctp ts_cet [det_ts_cet $datetime]
