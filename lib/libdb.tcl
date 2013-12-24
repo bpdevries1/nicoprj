@@ -216,6 +216,7 @@ oo::class create dbwrapper {
   }  
 
   # some helpers/info
+  # @note this one works only for the main DB, not for attached DB's.
   method table_exists {tablename} {
     my variable conn
     if {[$conn tables $tablename] == {}} {
