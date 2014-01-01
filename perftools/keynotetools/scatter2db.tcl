@@ -347,6 +347,7 @@ proc det_page_type {scriptname page_seq} {
 # handle each file in a DB trans, not a huge trans for all files.
 proc handle_files {root_dir db} {
   log info "Start reading"
+  # @note 27-12-2013 handle_dir_rec sorts files before handling, so this should be ok, that oldest files will be read first.
   handle_dir_rec $root_dir "*.json" [list warn_error read_json_file $db]
   log info "Finished reading"
 }

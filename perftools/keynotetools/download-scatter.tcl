@@ -54,7 +54,7 @@ proc main {argv} {
 proc wait_until_next_time {} {
   set finished 0
   while {!$finished} {
-    set minute [clock format [clock seconds] -format "%M"]
+    set minute [scan [clock format [clock seconds] -format "%M"] %d]
     log info "Time: [clock format [clock seconds]]"
     if {[expr $minute % 30] == 0} {
       log info "Finished waiting, starting the next batch of downloads"
@@ -63,23 +63,6 @@ proc wait_until_next_time {} {
       log info "Wait another (small) minute, until minute is 0 or 30" 
     }
     after 55000
-    # after 5000
-  }
-}
-
-proc wait_until_next_time_old {} {
-  set finished 0
-  set start_hour [clock format [clock seconds] -format "%H"]
-  while {!$finished} {
-    set hour [clock format [clock seconds] -format "%H"]
-    log info "Time: [clock format [clock seconds]]"
-    if {$hour != $start_hour} {
-      log info "Finished waiting, starting the next batch of downloads"
-      set finished 1 
-    } else {
-      log info "Wait another 5 minutes, until hour != $start_hour" 
-    }
-    after 300000
     # after 5000
   }
 }
@@ -241,7 +224,11 @@ proc download_keynote {root_dir el_config sec_ts api_key format } {
   set end [string toupper [clock format [expr $sec_ts + 3600] -format $fmt -gmt 1]]
   # @note check if it works with just giving transpagelist, not slotidlist -> NO, this does not work!
   # set cmd [list curl --sslv3 -o $filename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
-  set cmd [list curl --sslv3 -o $tempfilename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
+  # set cmd [list curl --sslv3 -o $tempfilename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
+
+  # 24-12-2013 ook hier timeout waarden instellen, lijkt af en toe voor te komen dat 'ie blijft hangen. Wel relatief grote waarden, kijken wat 'ie doet.
+  set cmd [list curl --sslv3 --connect-timeout 60 --max-time 120 -o $tempfilename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
+
   log debug "cmd: $cmd"
   try_eval {
     set res [exec -ignorestderr {*}$cmd]

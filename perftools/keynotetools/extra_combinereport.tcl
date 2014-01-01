@@ -62,9 +62,10 @@ proc det_ncurrent {db cdate_id} {
 proc do_combined_report {db cdef_row dateuntil_cet cdate_id} {
   set ts_start_cet [det_now]
   set cmds [:cmds $cdef_row]
-  foreach cmd [split $cmds "\n"] {
-    exec_cmd $cmd
-  }
+  #foreach cmd [split $cmds "\n"] {
+  #  exec_cmd $cmd
+  #}
+  exec_cmd $cmds
   set ts_end_cet [det_now]
   $db exec2 "update combinedate set status = 'done', ts_start_cet = '$ts_start_cet', ts_end_cet = '$ts_end_cet'
              where id = $cdate_id"
@@ -72,7 +73,9 @@ proc do_combined_report {db cdef_row dateuntil_cet cdate_id} {
              where combinedate_id = $cdate_id"
 }
 
+# @param cmd possibly multiline command, assume Tcl for now, or single line bash script call.
 proc exec_cmd {cmd} {
+  log info "Executing cmd: $cmd"
   if {[bash? $cmd]} {
     log info "Executing: c:/util/cygwin/bin/bash.exe {*}$cmd"
     try_eval {
@@ -82,8 +85,18 @@ proc exec_cmd {cmd} {
     }
     log info "Exec finished"
   } else {
-    log warn "Don't know how to exec: $cmd"
+    # log warn "Don't know how to exec: $cmd"
+    log info "No bash, assume Tcl commands"
+    try_eval {
+      # breakpoint
+      uplevel $cmd
+    } {
+      log_error "Something failed during Tcl eval"
+    }
+    # breakpoint
+    log info "Tcl eval finished"
   }
+  log info "Executed cmd."
 }
 
 proc bash? {cmd} {
