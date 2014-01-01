@@ -65,9 +65,10 @@ proc make_graphs_dir {dargv dir} {
 
 # @note naast global functions als hierboven (make_graphs_dir etc) ook low level functies zoals hieronder. Mss nog file splitsen.
 # @return '2013-11-14 12:00:00' or similar, complete timestamp useable for date comparison as well.
-set time_units [list h hour d day w week m month y year]
+# set time_units [list h hour d day w week m month y year]
 proc period2startdate {period} {
-  global time_units
+  # global time_units
+  set time_units [list h hour d day w week m month y year]
   if {[regexp {^(\d+)(.)$} $period z n unit]} {
     clock format [clock add [clock seconds] -$n [dict get $time_units $unit]] -format "%Y-%m-%d %H:%M:%S"
   } else {
@@ -76,7 +77,8 @@ proc period2startdate {period} {
 }
 
 proc period2days {period} {
-  global time_units
+  # global time_units
+  set time_units [list h hour d day w week m month y year]
   if {[regexp {^(\d+)(.)$} $period z n unit]} {
     set s [clock seconds]
     expr round(($s - [clock add $s -$n [dict get $time_units $unit]]) / (24*60*60))
