@@ -59,17 +59,19 @@ proc det_ncurrent {db cdate_id} {
   :ncurrent [lindex [$db query "select count(*) ncurrent from combinedatedir where combinedate_id = $cdate_id"] 0]
 }
 
-proc do_combined_report {db cdef_row dateuntil_cet cdate_id} {
+proc do_combined_report {dbcr cdef_row dateuntil_cet cdate_id} {
   set ts_start_cet [det_now]
   set cmds [:cmds $cdef_row]
+  create_target_views [det_targetdbname [:targetdir $cdef_row]]
+
   #foreach cmd [split $cmds "\n"] {
   #  exec_cmd $cmd
   #}
   exec_cmd $cmds
   set ts_end_cet [det_now]
-  $db exec2 "update combinedate set status = 'done', ts_start_cet = '$ts_start_cet', ts_end_cet = '$ts_end_cet'
+  $dbcr exec2 "update combinedate set status = 'done', ts_start_cet = '$ts_start_cet', ts_end_cet = '$ts_end_cet'
              where id = $cdate_id"
-  $db exec2 "update combinedatedir set status = 'done'
+  $dbcr exec2 "update combinedatedir set status = 'done'
              where combinedate_id = $cdate_id"
 }
 
@@ -108,10 +110,12 @@ proc bash? {cmd} {
   }
 }
 
-# @todo create target tables if not exists.
+# @param db source db, targetdir contains info for target-db.
+# @note Target tables will be created if they do not exist yet.
 proc copy_to_target_db {db scriptname targetdir datefrom_cet dateuntil_cet} {
   file mkdir [file join $targetdir daily]
-  set targetdbname [file join $targetdir daily daily.db]
+  # set targetdbname [file join $targetdir daily daily.db]
+  set targetdbname [det_targetdbname $targetdir]
   log info "Copying aggregate data to targetDB: $targetdbname"
   $db exec2 "attach database '$targetdbname' as toDB"
   foreach table {aggr_run aggr_page aggr_slowitem aggr_sub pageitem_gt3 pageitem_topic domain_ip_time aggr_specific} {
@@ -134,5 +138,21 @@ proc copy_to_target_db {db scriptname targetdir datefrom_cet dateuntil_cet} {
     }
   }
   $db exec2 "detach toDB"
+}
+
+proc det_targetdbname {targetdir} {
+  file join $targetdir daily daily.db
+}
+
+# @pre when the views are made, the base-tables already exist (or not needed as long as view is not queried)
+proc create_target_views {targetdbname} {
+  set db [dbwrapper new $targetdbname]
+  $db exec2 "create view if not exists nscripts as
+             select date_cet, 
+             count(distinct scriptname) number 
+             from aggr_run
+             where datacount > 0
+             group by date_cet" -log -try
+  $db close
 }
 

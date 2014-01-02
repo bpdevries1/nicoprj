@@ -3,7 +3,8 @@ proc graph_dashboard {r dir period} {
   if {[period2days $period] >= 7} {  
     $r query "select date_cet date, page_time_sec, avg_nkbytes, avg_nitems 
               from aggr_run
-              where date_cet > '[period2startdate $period]'"
+              where date_cet > '[period2startdate $period]'
+              and datacount > 0"
     # one generic graph per datatype, all in one graph with lines.
     $r qplot title "$scriptname - Average daily page loading times - $period" \
               x date y page_time_sec xlab "Date/time" ylab "Page load time (seconds)" \

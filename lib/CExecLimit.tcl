@@ -1,26 +1,29 @@
 # Execute a system command, limit the time it may take.
 
+# @todo add this one to ndv package.
+
 # @note for now only command line commands may be used, because stdout is read to 
 # determine when the command has finished.
 
 package require Itcl
 package require Tclx
 package require fileutil
-package require math
+
+# math was used for random function, but can use expr rand() as well, don't have math package available now.
+# package require math
 
 # class maar eenmalig definieren
 if {[llength [itcl::find classes CExecLimit]] > 0} {
 	return
 }
 
-source [file join $env(CRUISE_DIR) checkout lib perflib.tcl]
-
-
-source [file join $env(CRUISE_DIR) checkout script lib CLogger.tcl]
+# 2-1-2014 are those still needed?
+# source [file join $env(CRUISE_DIR) checkout lib perflib.tcl]
+# source [file join $env(CRUISE_DIR) checkout script lib CLogger.tcl]
 
 itcl::class CExecLimit {
-	private common log
-	set log [CLogger::new_logger [file tail [info script]] info]
+	# private common log
+	# set log [CLogger::new_logger [file tail [info script]] info]
 
 
 	# private common TEMPDIR "c:/temp"
@@ -75,7 +78,8 @@ itcl::class CExecLimit {
 		set f [open $saveproc_filename a]
 		puts $f "$pid\t$cmd"
 		close $f
-		$log info "Saved $pid to $saveproc_filename"
+		# $log info "Saved $pid to $saveproc_filename"
+    log info "Saved $pid to $saveproc_filename"
 	}
 	
 	# this method is not re-entrant, but it won't return until the cmd is finished or cancelled.
@@ -83,16 +87,17 @@ itcl::class CExecLimit {
 	public method exec_limit {cmd limit_seconds result_name exec_stderr_name} {
 		upvar $result_name result
 		upvar $exec_stderr_name exec_stderr
-		$log info "running $cmd for a maximum of $limit_seconds seconds"
+		# $log info "running $cmd for a maximum of $limit_seconds seconds"
+    log info "running $cmd for a maximum of $limit_seconds seconds"
 		set result_output {}
 		# it seems that the same channel identifier is used in succeeding calls.
 		# set ch [open "|$cmd" r+]
 		set stderr_filename [file join $TEMPDIR "exec_stderr[to_filename $this]-[det_rnd].txt"] 
-		$log debug "stderr_filename: $stderr_filename"
+		log debug "stderr_filename: $stderr_filename"
 		set f_stderr [open $stderr_filename w]
 		set ch [open "| $cmd 2>@ $f_stderr" r+]
-		$log debug "Channel id of started process: $ch"
-		$log debug "PID (via Channel) of started process: [pid $ch]"
+		log debug "Channel id of started process: $ch"
+		log debug "PID (via Channel) of started process: [pid $ch]"
 		save_proc_id [pid $ch] $cmd
 		
 		# set ch [open [list "|$cmd"] r+]
@@ -114,11 +119,11 @@ itcl::class CExecLimit {
 		# 24-9-2008 vreen00: file delete kan fout gaan als sub-process het bestand nog vasthoudt. Filenaam is uniek, dus niet zo erg.		
 		catch {file delete $stderr_filename}
 	
-		$log info "exec_limit is done, value of run_status: $STR_RUN_STATUS($run_status)"
-		$log debug "end: llength(result_output): [llength $result_output]"
+		log info "exec_limit is done, value of run_status: $STR_RUN_STATUS($run_status)"
+		log debug "end: llength(result_output): [llength $result_output]"
 		set result [join $result_output "\n"]
 		set exec_stderr [join $result_stderr "\n"]
-		$log debug "#result: [string length $result]"
+		log debug "#result: [string length $result]"
 		# new ret_run_status var, so state of this object will be as before the call started. 
 		
 		set ret_run_status $run_status
@@ -129,15 +134,15 @@ itcl::class CExecLimit {
 	
 	private method read_output {ch} {
 		if {[eof $ch]} {
-			$log debug "EOF of channel reached, ending"
+			log debug "EOF of channel reached, ending"
 			after cancel $after_id
 			set run_status $FINISHED_OK
 		} else {
 			gets $ch line
 			# puts "line of output: $line"
-			$log trace $line
+			log trace $line
 			lappend result_output $line
-			$log debug "#result_output: [llength $result_output]"
+			log debug "#result_output: [llength $result_output]"
 			if {$obj_callback != ""} {
 				$obj_callback output_line $line
 			}
@@ -145,18 +150,18 @@ itcl::class CExecLimit {
 	}
 	
 	private method cancel_cmd {ch cmd} {
-		$log warn "time limit has exceeded, killing $cmd"
+		log warn "time limit has exceeded, killing $cmd"
 		# see if it works with a close
 		set pids [pid $ch]
-		$log debug "pids bij channel: $pids"
+		log debug "pids bij channel: $pids"
 		foreach pid $pids {
-			$log debug "killing $pid"
+			log debug "killing $pid"
 			kill $pid ; # kill is a tclx command.
 		}
 		
 		# close $ch ; # blijft hangen zolang app niet beeindigd is.
 		# puts "channel closed, is this enough?"
-		$log debug "Processes killed"
+		log debug "Processes killed"
 		set run_status $CANCELLED
 	}
 
@@ -169,7 +174,8 @@ itcl::class CExecLimit {
 	}
 
 	private method det_rnd {} {
-		return [::math::random]
+		# return [::math::random]
+    expr rand()
 	}
 
 }
@@ -210,10 +216,13 @@ proc main {argc argv} {
 }
 
 # aanroepen vanuit Ant, maar ook mogelijk om vanuit Tcl te doen.
-if {[file tail $argv0] == [file tail [info script]]} {
-  main $argc $argv
+# 2-1-2014 if 'info level' != 0, this script is called from another tcl script, so not at the main level, and main should not be called.
+# this is a generic solution, calling main here hardly ever seems necessary/useful.
+if {[info level] == 0} {
+  if {[file tail $argv0] == [file tail [info script]]} {
+    main $argc $argv
+  }
 }
-
 
 
 
