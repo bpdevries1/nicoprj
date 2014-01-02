@@ -44,10 +44,10 @@ proc graph_combined_imagelist {r dargv period} {
               legend.position right \
               legend.direction vertical
 
-    $r query "select 'all' scriptname, date_cet date, sum(per_page_sec)/(select count(distinct scriptname) from aggr_run) per_page_sec
-              from aggr_specific
-              where date_cet > '[period2startdate $period]'
-              and topic = 'imagelist-overhead'
+    $r query "select 'all' scriptname, a.date_cet date, sum(a.per_page_sec)/n.number per_page_sec
+              from aggr_specific a join nscripts n on n.date_cet = a.date_cet
+              where a.date_cet > '[period2startdate $period]'
+              and a.topic = 'imagelist-overhead'
               group by 1,2"
     $r qplot title "Daily average overhead of imagelist per script - $period" \
               x date y per_page_sec xlab "Date" ylab "Average overhead (sec)" \
@@ -57,10 +57,10 @@ proc graph_combined_imagelist {r dargv period} {
               legend.position right \
               legend.direction vertical
 
-    $r query "select topic, date_cet date, sum(per_page_sec)/(select count(distinct scriptname) from aggr_run) per_page_sec
-              from aggr_specific
-              where date_cet > '[period2startdate $period]'
-              and topic <> 'imagelist-overhead'
+    $r query "select a.topic, a.date_cet date, sum(a.per_page_sec)/n.number per_page_sec
+              from aggr_specific a join nscripts n on n.date_cet = a.date_cet
+              where a.date_cet > '[period2startdate $period]'
+              and a.topic <> 'imagelist-overhead'
               group by 1,2"
     $r qplot title "Daily average loading time of misc topics per script - $period" \
               x date y per_page_sec xlab "Date" ylab "Average overhead (sec)" \

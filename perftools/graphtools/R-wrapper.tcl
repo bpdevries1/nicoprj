@@ -2,6 +2,8 @@ package require TclOO
 
 package require struct::set
 
+ndv::source_once [file join [info script] .. .. .. lib CExecLimit.tcl]
+
 # @todo filefacet: filename ook als soort facet doen: voor bepaalde kolom een graph/file per kolom-waarde, soort facet dus.
 # @todo in theorie ook meerdere kolommen: dan voor elke combi van waarden een file.
 
@@ -396,6 +398,51 @@ oo::class create Rwrapper {
   }
   
   method doall {} {
+    my variable f cmdfilename dir dargv
+    my write [my pprint "\n# Finished\ndb.close(db)
+              print('R finished')
+              sink()
+              sink(type = 'message')"]
+    close $f
+    if {[:keepcmd $dargv]} {
+      file copy -force [file join $dir $cmdfilename] [file join $dir "R-latest.R"]
+    } else {
+      file rename -force [file join $dir $cmdfilename] [file join $dir "R-latest.R"]
+    }
+    set rbinary [my det_rbinary]
+    set script [file normalize [file join $dir "R-latest.R"]] 
+    
+    set exec_limit [CExecLimit #auto]
+    $exec_limit set_saveproc_filename "saveproc.txt"
+    
+    try_eval {
+      log info "Exec R: $rbinary $script"
+      # execute for a maximum of 5 minutes (300 seconds) 
+      # exec $rbinary $script
+      set exit_code [$exec_limit exec_limit "$rbinary $script" 300 result res_stderr]
+      log info "Exec R finished, exitcode = $exit_code, len(result)=[string length $result], len(stderr) = [string length $res_stderr]"
+      my log_last_lines [file normalize [file join $dir "R-output.txt"]] 
+    } {
+      log_error "Error while executing R"
+      log error "Error while executing R"
+      # continue?
+    }
+  }
+
+  method log_last_lines {filename} {
+    set f [open $filename r]
+    set text [read $f]
+    set lines [split $text "\n"]
+    set nlines 5
+    set last_lines [lrange $lines end-$nlines end]
+    log info "last $nlines from $filename:"
+    foreach line $last_lines {
+      log info "$line"
+    }
+    close $f
+  }
+  
+  method doall_old {} {
     my variable f cmdfilename dir dargv
     my write [my pprint "\n# Finished\ndb.close(db)
               print('R finished')

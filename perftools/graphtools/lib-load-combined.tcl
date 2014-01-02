@@ -7,6 +7,7 @@ proc graph_combined_default {r dargv period} {
     $r query "select date_cet date, avg(page_time_sec) page_time_sec, avg(avail) avail
               from aggr_run
               where date_cet > '[period2startdate $period]'
+              and datacount > 0
               group by 1
               order by 1"
     $r qplot title "Average daily page loading times averaged - $period" \
@@ -21,7 +22,10 @@ proc graph_combined_default {r dargv period} {
     # @todo met line-point en geen colour gaat het fout: shape=as.factor() e.d.            
    
     $r query "select scriptname, date_cet date, avail
-              from aggr_run where avail >= 0 and date_cet > '[period2startdate $period]'"
+              from aggr_run 
+              where avail >= 0 
+              and date_cet > '[period2startdate $period]'
+              and datacount > 0"
     $r qplot title "Availability - F - $period" \
               x date y avail \
               xlab "Date" ylab "Availability" \
@@ -39,7 +43,8 @@ proc graph_combined_default {r dargv period} {
   
     $r query "select scriptname, date_cet date, page_time_sec, avg_nkbytes, avg_nitems 
               from aggr_run
-              where date_cet > '[period2startdate $period]'"
+              where date_cet > '[period2startdate $period]'
+              and datacount > 0"
     # one generic graph per datatype, all in one graph with lines.
     # ymin 0
     $r qplot title "Average daily page loading times - C - $period" \
@@ -92,7 +97,10 @@ proc graph_combined_ttip {r dargv period} {
   if {[period2days $period] >= 7} {  
     # @note where clause to not get R warnings like 1: Removed 3 rows containing missing values (geom_point). 
     $r query "select scriptname, date_cet date, page_time_sec, page_ttip_sec, page_time_sec - page_ttip_sec async_sec
-              from aggr_run where page_time_sec >= 0 and date_cet > '[period2startdate $period]'"
+              from aggr_run 
+              where page_time_sec >= 0 
+              and date_cet > '[period2startdate $period]'
+              and datacount > 0"
     $r melt {page_time_sec page_ttip_sec async_sec}
     $r qplot title "Total and TTIP times - $period" \
               x date y value \
@@ -106,6 +114,7 @@ proc graph_combined_ttip {r dargv period} {
   }              
 }
  
+# @todo this one now uses nscripts view, so test if it works.
 proc graph_combined_topdomain {r dargv period} {
   if {[period2days $period] >= 7} {  
     $r query "select s.scriptname, s.date_cet date, s.keyvalue topdomain, 1.0*sum(s.avg_time_sec)/r.npages loadtime
@@ -123,13 +132,24 @@ proc graph_combined_topdomain {r dargv period} {
 
     # @todo maybe replace having loadtime2 > 0.1 with a subselect check: avg of this domain for the whole period should be more than 0.1 sec.
     # @note currently, if one day only has domain > 0.1s, it will appear in the graph, with a low avg noted in the legend.
+if {0} {
     $r query "select date, topdomain, sum(loadtime)/(select count(distinct scriptname) from aggr_run) loadtime2 from (              
                 select s.scriptname, s.date_cet date, s.keyvalue topdomain, 1.0*sum(s.avg_time_sec)/r.npages loadtime
                 from aggr_sub s join aggr_run r on s.date_cet = r.date_cet and s.scriptname = r.scriptname
                 where s.keytype = 'topdomain'
                 and s.date_cet > '[period2startdate $period]'
-                group by 1,2,3)
+                group by 1,2,3) a join nscripts n on n.date_cet = a.date
               group by 1,2"
+}              
+ 
+    $r query "select c.date, c.topdomain, sum(c.loadtime)/n.number loadtime2, n.number from (              
+                select s.scriptname, s.date_cet date, s.keyvalue topdomain, 1.0*sum(s.avg_time_sec)/r.npages loadtime
+                from aggr_sub s join aggr_run r on s.date_cet = r.date_cet and s.scriptname = r.scriptname
+                where s.keytype = 'topdomain'
+                and s.date_cet > '[period2startdate $period]'
+                group by 1,2,3) c join nscripts n on n.date_cet = c.date
+              group by 1,2"
+              
 # 26-11-2013 having hieronder verwijderd, zorgt voor fout avg berekening, achtergekomen door vgl met slow-items. Evt anders doen, op vgl
 # manier als met slow items.
               # having loadtime2 > 0.1"              
@@ -167,12 +187,12 @@ proc graph_combined_extension {r dargv period} {
               legend.avg 3 \
               legend.position right \
               legend.direction vertical
-    $r query "select date, extension, sum(loadtime)/(select count(distinct scriptname) from aggr_run) loadtime2 from (              
+    $r query "select c.date, c.extension, sum(c.loadtime)/n.number loadtime2 from (              
                 select s.scriptname, s.date_cet date, s.keyvalue extension, 1.0*sum(s.avg_time_sec)/r.npages loadtime
                 from aggr_sub s join aggr_run r on s.date_cet = r.date_cet and s.scriptname = r.scriptname
                 where s.keytype = 'extension'
                 and s.date_cet > '[period2startdate $period]'
-                group by 1,2,3)
+                group by 1,2,3) c join nscripts n on n.date_cet = c.date
               group by 1,2"
 # 26-11-2013 having hieronder verwijderd, zorgt voor fout avg berekening, achtergekomen door vgl met slow-items. Evt anders doen, op vgl
 # manier als met slow items.
@@ -201,6 +221,7 @@ proc graph_combined_slowitem {r dargv period} {
     #$r execquery "drop table if exists temp1"
     #$r execquery "create table temp1 as                   subselect"
     
+    # @todo nog eens count(distinct) met nscripts doen, staat nu alleen in having clause, dus niet zo belangrijk.
     $r query "select m.scriptname, m.date_cet date, m.keyvalue url, 1.0*sum(m.avg_page_sec)/r.npages loadtime
               from aggr_slowitem m join aggr_run r on m.date_cet = r.date_cet and m.scriptname = r.scriptname
               where m.keytype = 'urlnoparams'
@@ -225,7 +246,8 @@ proc graph_combined_slowitem {r dargv period} {
               legend.position bottom \
               legend.direction vertical    
     # use the main query above as a subquery here to aggregate over all scripts.
-    $r query "select date, url, sum(loadtime)/(select count(distinct scriptname) from aggr_run) loadtime2 from (
+    # @todo nog eens count(distinct) met nscripts doen, staat nu alleen in having clause, dus niet zo belangrijk.
+    $r query "select c.date, c.url, sum(c.loadtime)/n.number loadtime2 from (
                 select m.scriptname, m.date_cet date, m.keyvalue url, 1.0*sum(m.avg_page_sec)/r.npages loadtime
                 from aggr_slowitem m join aggr_run r on m.date_cet = r.date_cet and m.scriptname = r.scriptname
                 where m.keytype = 'urlnoparams'
@@ -240,7 +262,7 @@ proc graph_combined_slowitem {r dargv period} {
                   having 1.0*sum(m2.avg_page_sec)/
                       (r.npages*(select count(distinct scriptname) from aggr_run)*(select count(distinct date_cet) from aggr_run where date_cet > '[period2startdate $period]')) > 0.05
                   )
-                group by 1,2,3) 
+                group by 1,2,3) c join nscripts n on n.date_cet = c.date
               group by 1,2
               order by date"
 
@@ -307,13 +329,12 @@ proc graph_combined_gt3 {r dargv period} {
   if {[period2days $period] >= 7} {  
     if {[period2days $period] <= 50} {  
       # first the general one.
-      $r query "select a.date date, a.topdomain topdomain, sum(a.avg_page_sec) / 
-                      (select count(distinct scriptname) from aggr_run) avg_page_sec2
+      $r query "select a.date date, a.topdomain topdomain, sum(a.avg_page_sec) / n.number avg_page_sec2
                 from (select i.date_cet date, topdomain, i.scriptname, 0.001*sum(i.element_delta)/(r.datacount*r.npages) avg_page_sec,
                   0.001*sum(i.element_delta), r.datacount, r.npages
                 from pageitem_gt3 i join aggr_run r on r.date_cet = i.date_cet and r.scriptname = i.scriptname
                 where i.date_cet >= '[period2startdate $period]'
-                group by 1,2,3) a
+                group by 1,2,3) a join nscripts n on n.date_cet = a.date
                 group by 1,2
                 having avg_page_sec2 > 0.1"
       $r qplot title "Items longer than 3 sec averaged per page and script by topdomain - $period" \
@@ -324,13 +345,12 @@ proc graph_combined_gt3 {r dargv period} {
               legend.position right \
               legend.direction vertical
               
-      $r query "select a.date date, a.extension extension, sum(a.avg_page_sec) / 
-                      (select count(distinct scriptname) from aggr_run) avg_page_sec2
+      $r query "select a.date date, a.extension extension, sum(a.avg_page_sec) / n.number avg_page_sec2
                 from (select i.date_cet date, extension, i.scriptname, 0.001*sum(i.element_delta)/(r.datacount*r.npages) avg_page_sec,
                   0.001*sum(i.element_delta), r.datacount, r.npages
                 from pageitem_gt3 i join aggr_run r on r.date_cet = i.date_cet and r.scriptname = i.scriptname
                 where i.date_cet >= '[period2startdate $period]'
-                group by 1,2,3) a
+                group by 1,2,3) a join nscripts n on n.date_cet = a.date
                 group by 1,2
                 having avg_page_sec2 > 0.1"
       $r qplot title "Items longer than 3 sec averaged per page and script by extension - $period" \
@@ -341,7 +361,7 @@ proc graph_combined_gt3 {r dargv period} {
               legend.position right \
               legend.direction vertical
 
-      $r query "select a.date, a.functiontype, sum(a.avg_page_sec) / (select count(distinct scriptname) from aggr_run) avg_page_sec2
+      $r query "select a.date, a.functiontype, sum(a.avg_page_sec) / n.number avg_page_sec2
                 from (select i.date_cet date, 
                 CASE 
                 WHEN (i.urlnoparams like '%flash%' or extension = 'swf') THEN 'Flash'
@@ -357,7 +377,7 @@ proc graph_combined_gt3 {r dargv period} {
                 i.scriptname, 0.001*sum(i.element_delta)/(r.datacount*r.npages) avg_page_sec
                 from pageitem_gt3 i join aggr_run r on r.date_cet = i.date_cet and r.scriptname = i.scriptname
                 where i.date_cet >= '[period2startdate $period]'
-                group by 1,2,3) a
+                group by 1,2,3) a join nscripts n on n.date_cet = a.date
                 group by 1,2
                 having avg_page_sec2 > 0.1"
       $r qplot title "Items longer than 3 sec averaged per page and script by functiontype - $period" \
