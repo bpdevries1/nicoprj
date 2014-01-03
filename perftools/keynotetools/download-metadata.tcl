@@ -3,9 +3,6 @@
 package require Tclx
 package require ndv
 
-set log [::ndv::CLogger::new_logger [file tail [info script]] info]
-$log set_file "[file tail [info script]].log"
-
 proc main {argv} {
   # global nerrors
   
@@ -30,9 +27,11 @@ proc get_meta_data {dct_argv} {
   try_eval {
     set res [exec -ignorestderr {*}$cmd]
     log debug "res: $res"
+    return $filename
   } {
     log warn "$errorResult $errorCode $errorInfo, continuing"   
   }
+  return ""
 }
 
 proc det_api_key {api_key_loc} {
@@ -41,4 +40,11 @@ proc det_api_key {api_key_loc} {
   string trim [read_file $api_key_loc]
 }
 
-main $argv
+if {[info level] == 0} {
+  if {[file tail $argv0] == [file tail [info script]]} {
+    set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+    $log set_file "[file tail [info script]].log"
+    main $argv
+  }
+}
+

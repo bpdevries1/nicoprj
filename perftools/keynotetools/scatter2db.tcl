@@ -343,7 +343,6 @@ proc det_page_type {scriptname page_seq} {
   }
 }
 
-
 # handle each file in a DB trans, not a huge trans for all files.
 proc handle_files {root_dir db} {
   log info "Start reading"

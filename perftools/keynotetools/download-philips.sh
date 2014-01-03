@@ -18,6 +18,8 @@
 
 # when finished, download everything.
 # ./download-scatter.tcl -config config-all-noandroid.csv
-# [2013-11-03 11:48:40] all 75 left dirs have basically the same importance.
-./download-scatter.tcl -config config-all-win.csv
+# [2013-11-03 11:48:40] all 75 dirs left have basically the same importance.
+# ./download-scatter.tcl -config config-all-win.csv
 
+# don't use config file anymore, use slotmeta.db
+./download-scatter.tcl
