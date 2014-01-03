@@ -588,5 +588,11 @@ proc det_hostname {} {
   if {[array names env COMPUTERNAME] != ""} {
     return $env(COMPUTERNAME)
   }
+  try_eval {
+    set hostname [exec hostname]
+    return $hostname
+  } {
+    # nothing, continue with next one (if any)
+  }
   error "Cannot determine HOSTNAME from environment (env)"
 }
