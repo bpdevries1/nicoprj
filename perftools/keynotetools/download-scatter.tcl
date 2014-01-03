@@ -7,7 +7,8 @@ set log [::ndv::CLogger::new_logger [file tail [info script]] info]
 $log set_file "[file tail [info script]].log"
 
 set script_dir [file dirname [info script]]
-source [file join $script_dir download-check.tcl]
+# source [file join $script_dir download-check.tcl]
+ndv::source_once download-check.tcl libslotmeta.tcl
 
 # @todo eg Mobile-Android: new script, so no data before certain date, continuously we get zero result. In this case, should stop downloading
 # this data. How to determine?
@@ -25,7 +26,7 @@ proc main {argv} {
   log debug "argv: $argv"
   set options {
     {dir.arg "c:/projecten/Philips/KNDL" "Directory to put downloaded keynote files"}
-    {config.arg "config.csv" "Config file name"}
+    {config.arg "" "Config file name. If empty, use slotmeta.db"}
     {apikey.arg "~/.config/keynote/api-key.txt" "Location of file with Keynote API key"}
     {format.arg "json" "Format of downloaded file: json or xml"}
     {exitatok "Exit when one loop returns ok (instead of quota reached"}
@@ -34,7 +35,8 @@ proc main {argv} {
     {test "Test the script, just download a few hours of data"}       
   }
   set usage ": [file tail [info script]] \[options] :"
-  set dargv [::cmdline::getoptions argv $options $usage]
+  # set dargv [::cmdline::getoptions argv $options $usage]
+  set dargv [getoptions argv $options $usage]
 
   # put this in a loop, to start again at the whole next hour: either for newer data, 
   # or because the quota has been used for the Keynote API
@@ -73,9 +75,15 @@ proc download_keynote_main {dargv} {
   set root_dir [:dir $dargv]  
   log info "download_keynote_main: Downloading items to: $root_dir"
   
-  # set dct_config [csv2dictlist [file join $root_dir config.csv] ";"]
-  set dct_config [csv2dictlist [file join $root_dir [:config $dargv]] ";"]
-  make_subdirs $root_dir $dct_config
+  if {[:config $dargv] == ""} {
+    set dctl_config [query_config $root_dir [det_hostname] [two_weeks_ago]]
+  } else {
+    # allow old way of specifying for now, when just a part needs to be downloaded quickly.
+    # could also use a copy of the database and change something there.
+    set dctl_config [csv2dictlist [file join $root_dir [:config $dargv]] ";"]
+  }
+  
+  make_subdirs $root_dir $dctl_config
   
   # start with current time minus 4 hours, so Keynote has time to prepare the data.
   # also start on a whole hour.
@@ -89,7 +97,7 @@ proc download_keynote_main {dargv} {
     # do not use GMT here (but default CET in NL), as dashboards are presented by CET date.
     set sec_end [clock scan [:untildate $dargv] -format "%Y-%m-%d" -gmt 0]
   } else {
-    # auto: until most recent.
+    # auto/default: until most recent.
     # set sec_end [clock scan [clock format [expr [clock seconds] - 2 * 3600] -format "%Y-%m-%d %H" -gmt 1] -format "%Y-%m-%d %H" -gmt 1]
     # @note now set to current minus 1.5 hours, so at eg 8.30 the data from 7.00-8.00 can be downloaded.
     set sec_end [clock scan [clock format [expr round([clock seconds] - 1.5 * 3600)] -format "%Y-%m-%d %H" -gmt 1] -format "%Y-%m-%d %H" -gmt 1]    
@@ -113,10 +121,12 @@ proc download_keynote_main {dargv} {
   # @todo determine sec_start for each script - later, some possible issues where holes can occur, if one download fails but the next succeeds. Normally a failed one would be retried the next time. Also, downloading normally takes a lot more time than checking the DB.
   # @todo determine sec_end each time again, to download data ASAP.
   # @note this order also means that important scripts (placed at the start of the config) will be handled first.
-  foreach el_config $dct_config {
-    set sec_ts $sec_start
-    while {$sec_ts <= $sec_end} {
-      set res [download_keynote $root_dir $el_config $sec_ts $api_key [:format $dargv]]
+  foreach el_config $dctl_config {
+    # set sec_ts $sec_start
+    set sec_ts_slot [det_slot_start $sec_start $el_config]
+    set sec_end_slot [det_slot_end $sec_end $el_config]
+    while {$sec_ts_slot <= $sec_end_slot} {
+      set res [download_keynote $root_dir $el_config $sec_ts_slot $api_key [:format $dargv]]
       if {$res == "quota"} {
         log warn "Quota has been used completely, wait until next hour"
         return $res
@@ -124,8 +134,7 @@ proc download_keynote_main {dargv} {
         log warn "Limit of 60 reqs/minute is exceeded, wait one minute now."
         after 60000
       }
-      set sec_ts [expr $sec_ts + 3600]  
-      
+      set sec_ts_slot [expr $sec_ts_slot + 3600]  
     }
   }  
   $dl_check close
@@ -133,67 +142,41 @@ proc download_keynote_main {dargv} {
   return "ok"
 }
 
-proc download_keynote_main_old {dargv} {
-  global dl_check
-  
-  set root_dir [:dir $dargv]  
-  log info "download_keynote_main: Downloading items to: $root_dir"
-  
-  # set dct_config [csv2dictlist [file join $root_dir config.csv] ";"]
-  set dct_config [csv2dictlist [file join $root_dir [:config $dargv]] ";"]
-  make_subdirs $root_dir $dct_config
-  
-  # start with current time minus 4 hours, so Keynote has time to prepare the data.
-  # also start on a whole hour.
-  # set sec_start [clock scan [clock format [expr [clock seconds] - 4 * 3600] -format "%Y-%m-%d %H" -gmt 1] -format "%Y-%m-%d %H" -gmt 1]
-  
-  # 26-8-2013 Stel huidige tijd is 10:30 CET, dus 8:30 GMT. Dan laatste sec_start is 7:00 GMT, omdat er een uur bij op wordt geteld, zodat van 7-8 wordt opgehaald.
-  # om 10:00 CET, is 8:00 GMT, zal ook alles van 7-8 worden opgehaald, dit is wellicht iets te snel. Voor de zekerheid dan nog een uur eraf.  
-  # @note sec_end is actually the most recent time, and sec_start the oldest time. This is because the download happens forward. 
-  if {[:untildate $dargv] != ""} {
-    # do not use GMT here (but default CET in NL), as dashboards are presented by CET date.
-    set sec_start [clock scan [:untildate $dargv] -format "%Y-%m-%d" -gmt 0]
-  } else {
-    # auto: until most recent.
-    # @note now set to current minus 1.5 hours, so at eg 8.30 the data from 7.00-8.00 can be downloaded.
-    set sec_start [clock scan [clock format [expr round([clock seconds] - 1.5 * 3600)] -format "%Y-%m-%d %H" -gmt 1] -format "%Y-%m-%d %H" -gmt 1]
-  }
-  if {[:fromdate $dargv] != ""} {
-    # do not use GMT here (but default CET in NL), as dashboards are presented by CET date.
-    set sec_end [clock scan [:fromdate $dargv] -format "%Y-%m-%d" -gmt 0]
-  } else {
-    if {[:test $dargv]} {
-      set sec_end [expr $sec_start - (4 * 60 * 60)]
-    } else {
-      # 3-9-2013 6 weeks is long enough, and no detail data more than 6 weeks back.
-      set sec_end [expr $sec_start - (6 * 7 * 24 * 60 * 60)]
-    }
-  }
-  set nerrors 0
-  set api_key [det_api_key [:apikey $dargv]]
-  
-  set dl_check [DownloadCheck new $root_dir]
-  set sec_ts $sec_start
-  while {$sec_ts >= $sec_end} {
-    foreach el_config $dct_config {
-      set res [download_keynote $root_dir $el_config $sec_ts $api_key [:format $dargv]]
-      if {$res == "quota"} {
-        log warn "Quota has been used completely, wait until next hour"
-        return $res
-      } elseif {$res == "limit"} {
-        log warn "Limit of 60 reqs/minute is exceeded, wait one minute now."
-        after 60000
-      }
-    }
-    set sec_ts [expr $sec_ts - 3600] 
-  }
-  $dl_check close
-  $dl_check destroy 
-  return "ok"
+#    set sec_ts_slot [det_slot_start $sec_start $el_config]
+# @return seconds of date where download for this config slot item should start
+# the minimum is always sec_start, don't start before this value
+proc det_slot_start {sec_start el_config} {
+  # use :start_date, allow 2 days slack
+  set sec_slot [clock add [clock scan [:start_date $el_config] -gmt 1 -format "%Y-%m-%d"] -2 days]
+  expr max($sec_slot, $sec_start)
 }
 
-proc make_subdirs {root_dir dct_config} {
-  foreach el $dct_config {
+#    set sec_end_slot [det_slot_end $sec_end $el_config]
+# @return seconds of date where download for this config slot item should end
+# the maximum is always sec_end, don't end after this value
+proc det_slot_end {sec_end el_config} {
+  # use :end_date, allow 2 days slack
+  set sec_slot [clock add [clock scan [:end_date $el_config] -gmt 1 -format "%Y-%m-%d"] 2 days]
+  expr min($sec_slot, $sec_end)
+}
+
+# @return date of 2 weeks ago from now, formatted Y-m-d
+proc two_weeks_ago {} {
+  clock format [clock add [clock seconds] -2 weeks] -format "%Y-%m-%d"
+}
+
+# @return a list of dict elements, same as csv-config before: dirname, slotids, npages
+proc query_config {root_dir hostname checkdate} {
+  set db [get_slotmeta_db [file join $root_dir "slotmeta.db"]]
+  $db query "select dirname, slot_id slotids, npages, start_date, end_date
+             from slot_download
+             where download_pc = '$hostname'
+             and end_date >= '$checkdate'
+             order by download_order, dirname"
+}
+
+proc make_subdirs {root_dir dctl_config} {
+  foreach el $dctl_config {
     file mkdir [file join $root_dir [:dirname $el]] 
   }
 }
