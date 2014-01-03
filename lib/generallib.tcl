@@ -572,9 +572,21 @@ proc det_relative_path {sourcefile rootdir} {
   string range $sourcefile [string length $rootdir]+1 end
 }
 
+#### logging helper proc #### 
 proc log {args} {
   global log
   # variable log
   $log {*}$args
 }
 
+### determine HOSTNAME on both Linux and windows ###
+proc det_hostname {} {
+  global env
+  if {[array names env HOSTNAME] != ""} {
+    return $env(HOSTNAME)
+  }
+  if {[array names env COMPUTERNAME] != ""} {
+    return $env(COMPUTERNAME)
+  }
+  error "Cannot determine HOSTNAME from environment (env)"
+}

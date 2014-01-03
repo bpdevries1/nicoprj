@@ -225,7 +225,10 @@ oo::class create dbwrapper {
       return 1
     }
   }
-  
+
+  method function {fn_name}   {
+    [my get_db_handle] function $fn_name $fn_name
+  }
 }
 
 # proc breakpoint_dummy {} {
