@@ -175,7 +175,8 @@ proc update_daily_status_db {db actiontype datefrom_cet dateuntil_cet ts_start_c
 
 # possible that nothing is read, so last_read_date is today. Only update records which have date > last_read_date
 proc reset_daily_status_db {db last_read_date} {
-  log debug "reset daily status db to day before $last_read_date"
+  log info "reset daily status db to day before $last_read_date: start"
   set date_before [clock format [clock add [clock scan $last_read_date -format "%Y-%m-%d"] -1 day] -format "%Y-%m-%d"]
   $db exec2 "update dailystatus set dateuntil_cet = '$date_before' where dateuntil_cet > '$date_before'" -log  
+  log info "reset daily status db to day before $last_read_date: finished"
 }
