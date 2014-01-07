@@ -9,6 +9,7 @@ $log set_file "[file tail [info script]].log"
 set script_dir [file dirname [info script]]
 # source [file join $script_dir download-check.tcl]
 ndv::source_once download-check.tcl libslotmeta.tcl
+ndv::source_once [file join [info script] .. .. .. lib CExecLimit.tcl]
 
 # @todo eg Mobile-Android: new script, so no data before certain date, continuously we get zero result. In this case, should stop downloading
 # this data. How to determine?
@@ -70,7 +71,7 @@ proc wait_until_next_time {} {
 }
 
 proc download_keynote_main {dargv} {
-  global dl_check
+  global dl_check exec_limit
   
   set root_dir [:dir $dargv]  
   log info "download_keynote_main: Downloading items to: $root_dir"
@@ -117,6 +118,10 @@ proc download_keynote_main {dargv} {
   set api_key [det_api_key [:apikey $dargv]]
   
   set dl_check [DownloadCheck new $root_dir]
+
+  # for executing curl in a controlled way, with maximum time. When nog using this, either Curl or Tcl may hang.  
+  set exec_limit [CExecLimit #auto]
+  $exec_limit set_saveproc_filename "saveproc.txt"
   
   # @todo determine sec_start for each script - later, some possible issues where holes can occur, if one download fails but the next succeeds. Normally a failed one would be retried the next time. Also, downloading normally takes a lot more time than checking the DB.
   # @todo determine sec_end each time again, to download data ASAP.
@@ -184,7 +189,7 @@ proc make_subdirs {root_dir dctl_config} {
 # @param sec_ts - based on GMT/UTC and rounded to whole hour (using format/scan).
 # @param sec_ts - denoted start of period the data should be downloaded. An hour will be added for the end.
 proc download_keynote {root_dir el_config sec_ts api_key format } {
-  global dl_check
+  global dl_check exec_limit
   set filename [det_filename $root_dir $el_config $sec_ts $format]
   if {[$dl_check read? $filename]} {
     # log info "Already have $filename, continuing" ; # or stopping?
@@ -211,14 +216,33 @@ proc download_keynote {root_dir el_config sec_ts api_key format } {
 
   # 24-12-2013 ook hier timeout waarden instellen, lijkt af en toe voor te komen dat 'ie blijft hangen. Wel relatief grote waarden, kijken wat 'ie doet.
   set cmd [list curl --sslv3 --connect-timeout 60 --max-time 120 -o $tempfilename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
-
   log debug "cmd: $cmd"
-  try_eval {
-    set res [exec -ignorestderr {*}$cmd]
-    log debug "res: $res"
-  } {
-    log warn "$errorResult $errorCode $errorInfo, continuing"   
+
+  if {1} {
+    try_eval {
+      log info "Exec Curl: $cmd"
+      # execute for a maximum of 5 minutes (300 seconds) 
+      # exec $rbinary $script
+      # @todo is saveproc name reset, so need to set again and again?
+      $exec_limit set_saveproc_filename "saveproc.txt"
+      set exit_code [$exec_limit exec_limit $cmd 300 result res_stderr]
+      log info "Exec Curl finished, exitcode = $exit_code, len(result)=[string length $result], len(stderr) = [string length $res_stderr]"
+    } {
+      log_error "Error while executing Curl"
+      log error "Error while executing Curl"
+      # continue?
+    }  
+    # breakpoint
   }
+  if {0} {
+    try_eval {
+      set res [exec -ignorestderr {*}$cmd]
+      log debug "res: $res"
+    } {
+      log warn "$errorResult $errorCode $errorInfo, continuing"   
+    }
+  }
+  
   try_eval {
     file rename -force $tempfilename $filename
   } {
