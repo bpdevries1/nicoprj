@@ -22,7 +22,10 @@ $log set_file "[file tail [info script]].log"
 # source [file join $script_dir libmigrations.tcl]
 # source [file join $script_dir kn-migrations.tcl]
 # source [file join $script_dir checkrun-handler.tcl]
-## source [file join $script_dir dailystats.tcl]
+# # source [file join $script_dir dailystats.tcl]
+
+# if downloaded file has errors, move it to error-dir and mark in database so it can be downloaded again.
+ndv::source_once download-check.tcl
 
 ndv::source_once libpostproclogs.tcl libmigrations.tcl kn-migrations.tcl checkrun-handler.tcl libextraprocessing.tcl libextra.tcl
 
@@ -90,10 +93,11 @@ proc wait_until_next_hour_and_half {} {
 }
 
 proc scatter2db_main {dargv} {
-  global cr_handler
+  global cr_handler dl_check
   set root_dir [from_cygwin [:dir $dargv]]  
   set res "Ok"
   set cr_handler [checkrun_handler new]
+  set dl_check [DownloadCheck new $root_dir]
   if {[:justdir $dargv]} {
     # 6-9-2013 also handle current-dir, if script is called with one subdir as param
     # 16-9-2013 not correct, this would create huge keynotelogs.db file in the root when called normally.
@@ -352,6 +356,7 @@ proc handle_files {root_dir db} {
 }
 
 proc read_json_file {db filename root_dir} {
+  global dl_check
   if {[file tail [file dirname $filename]] == "read"} {
     # log info "ALready read with check on dirname/tail"
     # breakpoint
@@ -364,8 +369,15 @@ proc read_json_file {db filename root_dir} {
     # already in 'read' subdir, don't read again.
     return 
   }
-  read_json_file_db $db $filename $root_dir 1
-  move_read $filename
+  try_eval {
+    read_json_file_db $db $filename $root_dir 1
+    move_read $filename
+  } {
+    log warn "Something went wrong while reading: $filename, moving to error-dir and mark so it can be downloaded again"
+    move_read_error $filename
+    $dl_check set_read $filename "error"    
+  }
+  
 }
 
 proc move_read {filename} {
@@ -381,6 +393,17 @@ proc move_read {filename} {
       file rename $filename $to_file
     }
   }
+}
+
+proc move_read_error {filename} {
+  set to_file [file join [file dirname $filename] error [file tail $filename]]
+  log debug "Move $filename => $to_file"
+  file mkdir [file dirname $to_file]
+  if {[file exists $to_file]} {
+    set to_file "$to_file.[expr rand()]"
+    log warn "Target file already exists, add random number to filename: $to_file"
+  } 
+  file rename $filename $to_file
 }
 
 proc read_json_file_db {db filename root_dir {pageitem 1}} {

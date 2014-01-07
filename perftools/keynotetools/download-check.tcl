@@ -58,6 +58,10 @@ oo::class create DownloadCheck {
   method set_read {filename status} {
     my variable db
     # path filename status ts_utc ts_cet
+    set tail [file tail $filename]
+    # 7-1-2014 try to delete item with same filename. Could be old.
+    # usecase: file is downloaded ok, but when reading it, something wrong is found and file is deleted (or moved to error-dir) so it can be downloaded again.
+    $db exec2 "delete from filestatus where filename='$tail'"
     set sec [clock seconds]
     set dct [dict create path $filename filename [file tail $filename] \
       status $status ts_utc [clock format $sec -format "%Y-%m-%d %H:%M:%S" -gmt 1] \
