@@ -40,7 +40,7 @@ proc puts_changes {f res} {
     } elseif {$in_untracked} {
       if {[regexp {to include in what will be co} $line]} {
         # ignore this one.
-      } elseif {[regexp {git-add-commit.sh} $line]} {
+      } elseif {[ignore_file $line]} {
         # ignore this one.
       } elseif {[regexp {^#[ \t]+(.+[^/])$} $line z filename]} {
         # path should not end in /, don't add dirs.
@@ -71,6 +71,16 @@ proc puts_changes {f res} {
   }
   puts $f "git commit -m \"Changes for $prev_dir at $dt\""
   return $has_changes
+}
+
+proc ignore_file {line} {
+  if {[regexp {git-add-commit.sh} $line]} {
+    return 1
+  } elseif {[regexp {saveproc.txt} $line]} {
+    return 1
+  } else {
+    return 0
+  }
 }
 
 main $argv
