@@ -52,8 +52,14 @@ itcl::class CExecLimit {
 	}
 	
 	private method det_tempdir {} {
-		global env
-		set result "c:/temp"
+		global env tcl_platform
+		if {$tcl_platform(platform) == "windows"} {
+		  set result "c:/temp"
+		} elseif {$tcl_platform(platform) == "unix"} {
+		  set result "/tmp" 
+		} else {
+		  set result "/tmp" 
+		}
 		catch {set result $env(TEMP)}
 		catch {set result $env(TMP)}
 		return $result
