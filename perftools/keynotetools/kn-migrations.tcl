@@ -56,7 +56,10 @@ migrate_proc create_view_rpi "Create view rpi" {
 proc copy_script_pages {db} {
   set src_name "c:/projecten/Philips/script-pages/script-pages.db"
   if {![file exists $src_name]} {
-    error "Src db for script_pages does not exist" 
+    # error "Src db for script_pages does not exist" 
+	# 7-1-2014 no error now, want to have another look at page-names based on slot metadata in.
+	# the file does not exist at the PC/linux location.
+	log warn "Src db for script_pages does not exist: $src_name" 
   }
   $db exec "attach database '$src_name' as fromDB"
   set table "script_pages"
