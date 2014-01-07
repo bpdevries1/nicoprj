@@ -54,19 +54,30 @@ migrate_proc create_view_rpi "Create view rpi" {
 # @note maybe only copy rows that are for this script. But would need a way to pass params then.
 #       or in this case use $db get_dbname and look at the path.
 proc copy_script_pages {db} {
-  set src_name "c:/projecten/Philips/script-pages/script-pages.db"
+  # set src_name "c:/projecten/Philips/script-pages/script-pages.db"
+  set src_name [det_src_script_pages]
   if {![file exists $src_name]} {
     # error "Src db for script_pages does not exist" 
-	# 7-1-2014 no error now, want to have another look at page-names based on slot metadata in.
-	# the file does not exist at the PC/linux location.
-	log warn "Src db for script_pages does not exist: $src_name" 
+  	# 7-1-2014 no error now, want to have another look at page-names based on slot metadata in.
+	  # the file does not exist at the PC/linux location.
+	  log warn "Src db for script_pages does not exist: $src_name" 
+  } else {
+    $db exec "attach database '$src_name' as fromDB"
+    set table "script_pages"
+    # @note use main.$table, otherwise source might be dropped.
+    $db exec "drop table if exists main.$table"
+    $db exec_try "create table if not exists $table as select * from fromDB.$table"
+    $db exec "detach fromDB"
   }
-  $db exec "attach database '$src_name' as fromDB"
-  set table "script_pages"
-  # @note use main.$table, otherwise source might be dropped.
-  $db exec "drop table if exists main.$table"
-  $db exec_try "create table if not exists $table as select * from fromDB.$table"
-  $db exec "detach fromDB"
+}
+
+proc det_src_script_pages {} {
+  global tcl_platform
+  if {$tcl_platform(platform) == "windows"} {
+    return "c:/projecten/Philips/script-pages/script-pages.db"
+  } else {
+    return [file normalize "~/Ymor/Philips/script-pages/script-pages.db"]
+  }
 }
 
 # @note if orig table script_pages changes, just move this def as the latest to do the
@@ -500,6 +511,14 @@ migrate_proc remove_maxitem "Remove maxitem table" {
 migrate_proc add_logfile_indexes "Add logfile indexes" {
   $db exec2 "create index if not exists ix_logfile_1 on logfile (filename)" -log -try
 }
+
+# @note if orig table script_pages changes, just move this def as the latest to do the
+# migration again.
+# 7-1-2014 ignored copying the table on Linux, but still needed, so do copy.
+migrate_proc copy_script_pages2 "copy table script_pages" {
+  copy_script_pages $db
+}
+
 
 # LET OP: als pageitem tabel verandert, moet pageitem_gt3 en pageitem_topic mee veranderen!
 # LET OP: als je een table toevoegt, dan ook toevoegen bij add_daily_stats2, deze wordt aangeroepen voor nieuwe DB's.
