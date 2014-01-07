@@ -86,6 +86,12 @@ migrate_proc copy_script_pages "copy table script_pages" {
   copy_script_pages $db
 }
 
+# @note if orig table script_pages changes, just move this def as the latest to do the
+# migration again.
+migrate_proc copy_script_pages_1a "copy table script_pages" {
+  copy_script_pages $db
+}
+
 migrate_proc add_fill_page_type "Add and fill page type for page and item" {
   $db exec2 "alter table page add page_type" -try
   $db exec2 "alter table pageitem add page_type" -try
@@ -504,7 +510,7 @@ migrate_proc add_aggr_specific "Add aggr_specific table" {
 # @todo dropping the table does not seem to work.
 migrate_proc remove_maxitem "Remove maxitem table" {
   log info "Remove maxitem table"
-  $db exec2 "drop table aggr_maxitem" -log
+  $db exec2 "drop table aggr_maxitem" -log -try
   log info "Removed maxitem table"
 }
 
