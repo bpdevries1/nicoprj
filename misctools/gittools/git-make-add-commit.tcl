@@ -23,6 +23,7 @@ proc main {argv} {
   }
   puts $f "# name of file to exec: $filename"
   close $f
+  exec c:/util/notepad++/notepad++.exe $filename
 }
 
 proc puts_changes {f res} {
