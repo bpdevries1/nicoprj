@@ -354,7 +354,7 @@ proc handle_files {sub_dir db} {
   # handle_dir_rec $root_dir "*.json" [list warn_error read_json_file $db]
   # 7-1-2014 handle_dir_rec handles dir recursive, as designed. Just because read and error dirs are subdirs, this is not so good here, just need 1 level.
   foreach filename [glob -nocomplain -directory $sub_dir -type f *.json] {
-    warn_error read_json_file $db
+    warn_error read_json_file $db $filename $sub_dir
   }
   log info "Finished reading"
 }
@@ -607,25 +607,6 @@ proc handle_page {db scriptrun_id page dct_details pageitem scriptname datetime}
       $cr_handler add_pageitem dcti2
     }
   }
-  # MyPhilips structure with txnPageDetails looks a bit different, first handle seperately.
-  if {0} {
-    try_eval {
-      set details [:txnPageDetails $page]
-      if {$details != "null"} {
-        handle_element $db $scriptrun_id $page_id [:txnBasePage $details] 1 $scriptname $datetime [:page_seq $dct]
-        foreach elt [:txnPageElement $details] {
-          handle_element $db $scriptrun_id $page_id $elt 0 $scriptname $datetime [:page_seq $dct]
-        }
-      }
-    } {
-      if {[:debug $dargv]} {
-        log warn "$errorResult $errorCode $errorInfo, debug/breakpoint"
-        breakpoint  
-      } else {
-        log warn "$errorResult $errorCode $errorInfo, continuing"
-      }
-    }
-  }
   # 28-9-2013 If below fails 'in production', it should also stop.
   # @todo nanny.tcl process: read exit-code, based on this determine whether to continue/restart.
   set details [:txnPageDetails $page]
@@ -668,7 +649,7 @@ proc handle_element {db scriptrun_id page_id elt basepage scriptname datetime pa
   dict set dct page_type $page_type
   dict set dct urlnoparams [det_urlnoparams $url]
   $db insert pageitem $dct
-  $cr_handler add_pageitem dct
+  $cr_handler add_pageitem dct ; # give dct_name, not dct contents (should save memory, not copying data)
 }
 
 proc is_read {db filename} {
