@@ -111,6 +111,26 @@ proc graph_combined_ttip {r dargv period} {
               legend.avg 3 \
               legend.position bottom \
               legend.direction horizontal
+              
+    # also summarised over scripts.
+    # 8-1-2014: avg() is ok here. If script has no data, times should not be lower.
+    $r query "select date_cet date, avg(1.0*page_time_sec) page_time_sec, avg(1.0*page_ttip_sec) page_ttip_sec, 
+                     avg(1.0*(page_time_sec - page_ttip_sec)) async_sec
+              from aggr_run 
+              where page_time_sec >= 0 
+              and date_cet > '[period2startdate $period]'
+              and datacount > 0
+              group by 1"
+    $r melt {page_time_sec page_ttip_sec async_sec}
+    $r qplot title "Total and TTIP times averaged per script - $period" \
+              x date y value \
+              xlab "Date" ylab "Time (seconds)" \
+              geom line-point colour variable \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.0 height.perfacet 1.7 \
+              legend.avg 3 \
+              legend.position bottom \
+              legend.direction horizontal
+    
   }              
 }
  
