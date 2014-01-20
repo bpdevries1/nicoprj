@@ -120,6 +120,13 @@ proc update_slot_download {db} {
       log warn "[:slot_id $el]: [:slot_alias $el]"
     }
   }
+  set res [$db query "select * from slot_download where download_pc is null"]
+  if {[llength $res] > 0} {
+    log warn "Items in slot_download where download_pc is empty:"
+    foreach el $res {
+      log warn "[:slot_id $el]: [:dirname $el]"
+    }
+  }
   
 }
 
