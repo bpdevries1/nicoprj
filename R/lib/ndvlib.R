@@ -214,7 +214,7 @@ db.query.dt = function(db, query) {
   df
 }
 
-det.height = function(height.min, height.max, height.base, height.perfacet, facets, height.percolour, colours) {
+det.height = function(height.min, height.max, height.base, height.perfacet, facets, height.percolour, colours, legend.position = "") {
   # base height should include height for 1 facet.
   height = height.base
   if (height.perfacet > 0) {
@@ -223,7 +223,14 @@ det.height = function(height.min, height.max, height.base, height.perfacet, face
   }
   if (height.percolour > 0) {
     ncolours = length(levels(as.factor(colours)))
-    height = height + ncolours * height.percolour
+    if (legend.position == "right") {
+      height.colours = ncolours * height.percolour
+      if (height.colours > height) {
+        height = height.colours
+      }
+    } else {
+      height = height + ncolours * height.percolour
+    }
   }
   if (height > height.max) {
     height.max
