@@ -255,7 +255,7 @@ new:
       ssl_handshake_delta start_msec system_delta basepage record_seq \
       detail_component_1_msec detail_component_2_msec detail_component_3_msec \
       ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
-      header_bytes object_text header_code custom_object_trend status_code}
+      header_bytes object_text header_code custom_object_trend status_code aptimized}
   # msmt_conn_id: connection id? the TCP Stream, compare wireshark. #of those should be equal to nconnections field.
   if {0} {    
   Huidig, sorted:    
@@ -299,17 +299,18 @@ new:
   
   # [2013-11-04 12:31:24] add new tables also for new databases
   add_daily_status $db
-  # 26-11-2013 most likely this tabledef (pageitem_gt3) is not used here.
-  $db add_tabledef pageitem_gt3 {id} {scriptname ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
-      scontent_type url \
-      extension domain topdomain urlnoparams \
-      error_code connect_delta dns_delta element_delta first_packet_delta \
-      remain_packets_delta request_delta \
-      ssl_handshake_delta start_msec system_delta basepage record_seq \
-      detail_component_1_msec detail_component_2_msec detail_component_3_msec \
-      ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
-      header_bytes object_text header_code custom_object_trend status_code}  
-      
+  if {0} {
+    # 26-11-2013 most likely this tabledef (pageitem_gt3) is not used here.
+    $db add_tabledef pageitem_gt3 {id} {scriptname ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
+        scontent_type url \
+        extension domain topdomain urlnoparams \
+        error_code connect_delta dns_delta element_delta first_packet_delta \
+        remain_packets_delta request_delta \
+        ssl_handshake_delta start_msec system_delta basepage record_seq \
+        detail_component_1_msec detail_component_2_msec detail_component_3_msec \
+        ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
+        header_bytes object_text header_code custom_object_trend status_code}  
+  }
   $db add_tabledef aggr_sub {id} {date_cet scriptname {page_seq int} {npages int} keytype keyvalue \
     {avg_time_sec real} {avg_nkbytes real} {avg_nitems real}}
 
@@ -601,7 +602,7 @@ proc handle_page {db scriptrun_id page dct_details pageitem scriptname datetime}
       dict set dcti2 page_seq [:page_seq $dctp]
       dict set dcti2 page_type $page_type
       dict set dcti2 urlnoparams [det_urlnoparams [:url $dcti2]]
-      
+      dict set dcti2 aptimized [det_aptimized [:url $dcti2]]
       # breakpoint ; # page_seq not yet filled.
       $db insert pageitem $dcti2
       $cr_handler add_pageitem dcti2
@@ -648,6 +649,7 @@ proc handle_element {db scriptrun_id page_id elt basepage scriptname datetime pa
   dict set dct page_seq $page_seq
   dict set dct page_type $page_type
   dict set dct urlnoparams [det_urlnoparams $url]
+  dict set dct aptimized [det_aptimized $url]
   $db insert pageitem $dct
   $cr_handler add_pageitem dct ; # give dct_name, not dct contents (should save memory, not copying data)
 }
@@ -754,6 +756,10 @@ proc det_provider {target_id} {
   global dct_provider
   dict_get $dct_provider $target_id "Unknown"
   # return $ar_provider($target_id)
+}
+
+proc det_aptimized {url} {
+  regexp {aptimized} $url
 }
 
 ####################################################################################

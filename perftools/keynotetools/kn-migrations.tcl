@@ -525,6 +525,17 @@ migrate_proc copy_script_pages2 "copy table script_pages" {
   copy_script_pages $db
 }
 
+migrate_proc add_fill_aptimized "add fill aptimized column" {
+  $db exec2 "alter table pageitem add aptimized integer" -log -try
+  $db exec2 "alter table pageitem_gt3 add aptimized integer" -log -try
+  $db exec2 "alter table pageitem_topic add aptimized integer" -log -try
+  $db exec2 "update pageitem set aptimized = 1 where url like '%aptimized%' and aptimized is null" -log
+  $db exec2 "update pageitem set aptimized = 0 where aptimized is null" -log
+  $db exec2 "update pageitem_gt3 set aptimized = 1 where url like '%aptimized%' and aptimized is null" -log
+  $db exec2 "update pageitem_gt3 set aptimized = 0 where aptimized is null" -log
+  $db exec2 "update pageitem_topic set aptimized = 1 where url like '%aptimized%' and aptimized is null" -log
+  $db exec2 "update pageitem_topic set aptimized = 0 where aptimized is null" -log
+}
 
 # LET OP: als pageitem tabel verandert, moet pageitem_gt3 en pageitem_topic mee veranderen!
 # LET OP: als je een table toevoegt, dan ook toevoegen bij add_daily_stats2, deze wordt aangeroepen voor nieuwe DB's.
