@@ -27,17 +27,19 @@ oo::class create Rwrapper {
     log debug "Rwrapper constructed with: $dargv"
   }
 
-  method init {a_dir db} {
-    my variable f cmdfilename dir stacked_cmds
+  method init {a_dir db {a_file_addition ""}} {
+    my variable f cmdfilename dir stacked_cmds Routput Rlatest
     # set dir $a_dir
     log debug "RWrapper initialised with: $a_dir"
     set dir [file normalize [from_cygwin $a_dir]] ; # for R need Unix style (/) dir. 
     set cmdfilename "R-[my now].R"
     set f [open [file join $dir $cmdfilename] w]
+    set Routput "R-output${a_file_addition}.txt"
+    set Rlatest "R-latest${a_file_addition}.R"
     my write [my pprint "setwd('$dir')
-      zz = file('R-output.txt', open = 'wt')
-      # sink('R-output.txt')
-      # sink('R-output.txt', type = 'message')
+      zz = file('$Routput', open = 'wt')
+      # sink('$Routput')
+      # sink('$Routput', type = 'message')
       sink(zz)
       # cannot split the message stderr stream (, split=TRUE)
       sink(zz, type = 'message')
@@ -131,20 +133,27 @@ oo::class create Rwrapper {
       log debug "Graph already exists, not creating again: [:title $d]"
       return 
     }
-    my preprocess
-    log debug "Graph does not exist, so creating: [:title $d]"
-    set colour [ifp [= "" [:colour $d]] "" ", colour=as.factor([:colour $d]), shape=as.factor([:colour $d])"] 
-    my write "p = qplot([:xvar $d], [:yvar $d], data=df.plot, geom='[:geom $d]' $colour) +"
-    my write-if-filled :geom2 "geom_point(data=df.plot, aes(x=[:xvar $d], y=[:yvar $d], shape=as.factor([:colour $d]))) +"
-
-    my write_scales $colour
-    my write_facet
-    my write_legend
-    my write_extra
     
-    # for now labs as the latest, is not followed by '+'
-    my write_labs
-    my write_ggsave
+    # df has a value here (when executed in R), check if not empty
+    my write "if (nrow(df) > 0) {"
+    
+      my preprocess
+      log debug "Graph does not exist, so creating: [:title $d]"
+      set colour [ifp [= "" [:colour $d]] "" ", colour=as.factor([:colour $d]), shape=as.factor([:colour $d])"] 
+      my write "p = qplot([:xvar $d], [:yvar $d], data=df.plot, geom='[:geom $d]' $colour) +"
+      my write-if-filled :geom2 "geom_point(data=df.plot, aes(x=[:xvar $d], y=[:yvar $d], shape=as.factor([:colour $d]))) +"
+
+      my write_scales $colour
+      my write_facet
+      my write_legend
+      my write_extra
+      
+      # for now labs as the latest, is not followed by '+'
+      my write_labs
+      my write_ggsave
+      
+    # end of check df
+    my write "} else {print('WARNING: Dataframe df is empty, continue with next graph')}"
   }
 
   method plot_prepare {args} {
@@ -212,7 +221,7 @@ oo::class create Rwrapper {
       my write2 "scale_colour_discrete(name='[:colourlabel $d]') +"
     }
     if {([:geom $d] == "point") || ([:geom2 $d] == "point")} {
-      my write2 "scale_shape_manual(name='[:colourlabel $d]', values=rep(1:25,5)) +"
+      my write2 "scale_shape_manual(name='[:colourlabel $d]', values=rep(1:25,10)) +"
     }
     if {([:ymin $d] != "") && ([:ymax $d] != "")} {
       my write2 "scale_y_continuous(limits=c([:ymin $d], [:ymax $d])) +"
@@ -256,6 +265,9 @@ oo::class create Rwrapper {
     #       berekening in Tcl (dan ook query in tcl) of in R (beter, als dit kan).
     my write-if-filled :legend.position "theme(legend.position='[:legend.position $d]') +"
     my write-if-filled :legend.direction "theme(legend.direction='[:legend.direction $d]') +"
+    # 24-1-2014 tests to solve long labels in legends -> failed.
+    # my write "theme(legend.title.align = 1) + "
+    # my write "theme(legend.justification = 1) + "
     my write-if-filled :legend.ncol "guides(col = guide_legend(ncol = [:legend.ncol $d])) +"
     my write-if-filled :legend.nrow "guides(col = guide_legend(nrow = [:legend.nrow $d])) +"
   }
@@ -283,7 +295,7 @@ oo::class create Rwrapper {
       #} else {
       #  set facets "df\$[:facet $d])" 
       #}
-      my write "height = det.height(height.min=[:height.min $d], height.max=[:height.max $d], height.base=[:height.base $d], height.perfacet=[:height.perfacet $d], height.percolour=[:height.percolour $d], facets=$facets, colours=$colours)"
+      my write "height = det.height(height.min=[:height.min $d], height.max=[:height.max $d], height.base=[:height.base $d], height.perfacet=[:height.perfacet $d], height.percolour=[:height.percolour $d], facets=$facets, colours=$colours, legend.position='[:legend.position $d]')"
     }
  
     my write "print(concat('height: ', height))"
@@ -398,19 +410,19 @@ oo::class create Rwrapper {
   }
   
   method doall {} {
-    my variable f cmdfilename dir dargv
+    my variable f cmdfilename dir dargv Routput Rlatest
     my write [my pprint "\n# Finished\ndb.close(db)
               print('R finished')
               sink()
               sink(type = 'message')"]
     close $f
     if {[:keepcmd $dargv]} {
-      file copy -force [file join $dir $cmdfilename] [file join $dir "R-latest.R"]
+      file copy -force [file join $dir $cmdfilename] [file join $dir $Rlatest]
     } else {
-      file rename -force [file join $dir $cmdfilename] [file join $dir "R-latest.R"]
+      file rename -force [file join $dir $cmdfilename] [file join $dir $Rlatest]
     }
     set rbinary [my det_rbinary]
-    set script [file normalize [file join $dir "R-latest.R"]] 
+    set script [file normalize [file join $dir $Rlatest]] 
     
     set exec_limit [CExecLimit #auto]
     $exec_limit set_saveproc_filename "saveproc.txt"
@@ -421,7 +433,8 @@ oo::class create Rwrapper {
       # exec $rbinary $script
       set exit_code [$exec_limit exec_limit "$rbinary $script" 300 result res_stderr]
       log info "Exec R finished, exitcode = $exit_code, len(result)=[string length $result], len(stderr) = [string length $res_stderr]"
-      my log_last_lines [file normalize [file join $dir "R-output.txt"]] 
+      # my log_last_lines [file normalize [file join $dir "R-output.txt"]] 
+      my log_last_lines [file normalize [file join $dir $Routput]] 
     } {
       log_error "Error while executing R"
       log error "Error while executing R"
@@ -440,31 +453,6 @@ oo::class create Rwrapper {
       log info "$line"
     }
     close $f
-  }
-  
-  method doall_old {} {
-    my variable f cmdfilename dir dargv
-    my write [my pprint "\n# Finished\ndb.close(db)
-              print('R finished')
-              sink()
-              sink(type = 'message')"]
-    close $f
-    if {[:keepcmd $dargv]} {
-      file copy -force [file join $dir $cmdfilename] [file join $dir "R-latest.R"]
-    } else {
-      file rename -force [file join $dir $cmdfilename] [file join $dir "R-latest.R"]
-    }
-    set rbinary [my det_rbinary]
-    set script [file normalize [file join $dir "R-latest.R"]] 
-    try_eval {
-      log info "Exec R: $rbinary $script"
-      exec $rbinary $script
-      log info "Exec R finished"
-    } {
-      log_error "Error while executing R"
-      log error "Error while executing R"
-      # continue?
-    }
   }
   
   method det_rbinary {} {

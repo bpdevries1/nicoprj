@@ -174,10 +174,11 @@ if {0} {
 # manier als met slow items.
               # having loadtime2 > 0.1"              
     # ymin 0
+    # width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24
     $r qplot title "Sum of load times per topdomain averaged per page and script - $period" \
               x date y loadtime2 xlab "Date/time" ylab "Load time (seconds)" \
               geom line-point colour topdomain \
-              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.0  \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24  \
               legend.avg 3 \
               legend.position right \
               legend.direction vertical
@@ -185,7 +186,7 @@ if {0} {
     $r qplot title "Sum of load times per topdomain averaged per page and script - $period (logscale)" \
               x date y loadtime2 xlab "Date/time" ylab "Load time (seconds)" \
               geom line-point colour topdomain \
-              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.0 \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24 \
               legend.avg 3 \
               legend.position right \
               legend.direction vertical \
@@ -219,7 +220,7 @@ proc graph_combined_extension {r dargv period} {
     $r qplot title "Sum of load times per extension averaged per page and script - $period" \
               x date y loadtime2 xlab "Date/time" ylab "Load time (seconds)" \
               geom line-point colour extension \
-              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.0 \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24 \
               legend.avg 3 \
               legend.position right \
               legend.direction vertical
@@ -242,7 +243,7 @@ proc graph_combined_slowitem {r dargv period} {
     #$r execquery "create table temp1 as                   subselect"
     
     # @todo nog eens count(distinct) met nscripts doen, staat nu alleen in having clause, dus niet zo belangrijk.
-    $r query "select m.scriptname, m.date_cet date, m.keyvalue url, 1.0*sum(m.avg_page_sec)/r.npages loadtime
+    $r query "select m.scriptname, m.date_cet date, substr(m.keyvalue,1,100) url, 1.0*sum(m.avg_page_sec)/r.npages loadtime
               from aggr_slowitem m join aggr_run r on m.date_cet = r.date_cet and m.scriptname = r.scriptname
               where m.keytype = 'urlnoparams'
               and m.date_cet > '[period2startdate $period]'
@@ -267,7 +268,7 @@ proc graph_combined_slowitem {r dargv period} {
               legend.direction vertical    
     # use the main query above as a subquery here to aggregate over all scripts.
     # @todo nog eens count(distinct) met nscripts doen, staat nu alleen in having clause, dus niet zo belangrijk.
-    $r query "select c.date, c.url, sum(c.loadtime)/n.number loadtime2 from (
+    $r query "select c.date, substr(c.url,1,100) url, sum(c.loadtime)/n.number loadtime2 from (
                 select m.scriptname, m.date_cet date, m.keyvalue url, 1.0*sum(m.avg_page_sec)/r.npages loadtime
                 from aggr_slowitem m join aggr_run r on m.date_cet = r.date_cet and m.scriptname = r.scriptname
                 where m.keytype = 'urlnoparams'

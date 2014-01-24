@@ -16,11 +16,11 @@ proc main {argv} {
   log debug "argv: $argv"
   set options {
     {rootdir.arg "c:/projecten/Philips/KNDL" "Directory that contains db"}
-    {outrootdir.arg "c:/projecten/Philips/CBF-CN/daily/graphs" "Directory for output graphs"}
-    {pattern.arg "CBF-CN-*" "Pattern of scripts to handle"}
+    {outrootdir.arg "c:/projecten/Philips/Mobile-landing/daily/graphs" "Directory for output graphs"}
+    {pattern.arg "Mobile-landing-*" "Pattern of scripts to handle"}
     {outformat.arg "png" "Output format (all, png or svg)"}
     {loglevel.arg "info" "Log level (debug, info, warn)"}
-    {combineddb.arg "c:/projecten/Philips/CBF-CN/daily/daily.db" "DB with combined data from all shops"}
+    {combineddb.arg "c:/projecten/Philips/Mobile-landing/daily/daily.db" "DB with combined data from all shops"}
     {actions.arg "all" "List of actions to execute (comma separated)"}
     {combinedactions.arg "all" "List of actions to execute on combined DB (comma separated)"}
     {periods.arg "all" "Periods to make graphs for (2w, 6w, 2d, 1y, all=1y,6w,2d)"}

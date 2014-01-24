@@ -1,5 +1,6 @@
 # @todo? [12-11-2013] all_actions and all_combined_actions as global variable.
 
+# 24-1-2014 added param in dargv: Routput R-output-imagelist.txt or default Routput R-output.txt
 proc make_graphs {dargv} {
   set rootdir [:rootdir $dargv] 
   set pattern [:pattern $dargv]
@@ -21,7 +22,7 @@ proc make_graphs {dargv} {
   }
   set r [Rwrapper new $dargv]
   set combined_db [:combineddb $dargv]
-  $r init [file dirname $combined_db] [file tail $combined_db]
+  $r init [file dirname $combined_db] [file tail $combined_db] [:Rfileadd $dargv]
   $r set_outputroot [file normalize [from_cygwin [:outrootdir $dargv]]]
   $r set_outformat [:outformat $dargv]
   foreach action $actions {
@@ -36,7 +37,7 @@ proc make_graphs {dargv} {
 
 proc make_graphs_dir {dargv dir} {
   set r [Rwrapper new $dargv]
-  $r init $dir keynotelogs.db
+  $r init $dir keynotelogs.db [:Rfileadd $dargv]
   # $r set_outputroot [file normalize [from_cygwin [:outrootdir $dargv]]]
   $r set_outputroot [file normalize [file join [from_cygwin [:outrootdir $dargv]] [file tail $dir]]]
   $r set_outformat [:outformat $dargv]
