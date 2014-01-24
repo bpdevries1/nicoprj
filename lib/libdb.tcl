@@ -200,6 +200,8 @@ oo::class create dbwrapper {
     }
   }
   
+  # @todo multiline fields probably problematic, as newlines seem to be removed (shown in SqliteSpy).
+  #       check if select from Tcl also shows this, and if \n or \r\n should be added or some setting in the lib can be done.
   method insert {table dct args} {
     my variable db_insert_statements dbtype conn
     [dict get $db_insert_statements $table] $dct {*}$args
