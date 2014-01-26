@@ -1,0 +1,53 @@
+[2014-01-07 14:59:27] [scatter2db.tcl] [info] Opened logfile: scatter2db.tcl.log
+[2014-01-07 14:59:27] [scatter2db.tcl] [info] Running continuously
+[2014-01-07 14:59:28] [scatter2db.tcl] [info] Existing db: c:/projecten/Philips/KNDL/CBF-BR-40PFL6606/keynotelogs.db, don't create tables
+[2014-01-07 14:59:28] [scatter2db.tcl] [info] Determined procname for add_logfile_indexes: migrate_noop
+[2014-01-07 14:59:28] [scatter2db.tcl] [info] Start reading
+[2014-01-07 14:59:28] [scatter2db.tcl] [info] Reading c:/projecten/Philips/KNDL/CBF-BR-40PFL6606/CBF-BR-40PFL6606-2014-01-05--04-00.json
+[2014-01-07 14:59:28] [scatter2db.tcl] [warn] input string does not match supplied format CLOCK badInputString input string does not match supplied format
+    while executing
+"return -options $opts $result"
+    (procedure "::tcl::clock::scan" line 83)
+    invoked from within
+"clock scan $datetime -format "%Y-%b-%d %H:%M:%S" -gmt 1"
+    (procedure "det_ts_utc" line 2)
+    invoked from within
+"det_ts_utc [:datetime $dct]"
+    ("foreach" body line 20)
+    invoked from within
+"foreach run $l {
+          # @note only look in part of run that has main items, to be sure that info like delta_msec is not from sub-request.
+       ..."
+    ("foreach" body line 3)
+    invoked from within
+"foreach l $json {
+        # this l is either a list of TxnMeasurement(s) or a list of WxnMeasurement(s)
+        foreach run $l {
+          # @note onl..."
+    ("uplevel" body line 14)
+    invoked from within
+"uplevel $block", continuing
+[2014-01-07 14:59:28] [scatter2db.tcl] [warn] Rolling back transaction and raising error
+[2014-01-07 14:59:28] [scatter2db.tcl] [warn] Rolled back transaction NONE Rolled back transaction
+    while executing
+"error "Rolled back transaction""
+    invoked from within
+"try_eval {
+      uplevel $block
+    } {
+      log_error "Rolling back transaction and raising error"
+      my exec "rollback"
+      error "Rolled back..."
+    (class "::dbwrapper" method "in_trans" line 4)
+    invoked from within
+"$db in_trans {    
+    set logfile_id [$db insert logfile [dict create path $filename filename [file tail $filename] filesize [file size $filename]] 1..."
+    (procedure "read_json_file_db" line 10)
+    invoked from within
+"read_json_file_db $db $filename $root_dir 1"
+    (procedure "read_json_file" line 14)
+    invoked from within
+"$proc_name {*}$args", continuing
+[2014-01-07 14:59:28] [scatter2db.tcl] [warn] continuing...
+[2014-01-07 14:59:28] [scatter2db.tcl] [info] Reading c:/projecten/Philips/KNDL/CBF-BR-40PFL6606/CBF-BR-40PFL6606-2014-01-07--10-00.json
+[2014-01-07 14:59:29] [scatter2db.tcl] [info] Reading c:/projecten/Philips/KNDL/CBF-BR-40PFL6606/CBF-BR-40PFL6606-2014-01-07--11-00.json

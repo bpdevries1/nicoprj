@@ -393,7 +393,7 @@ migrate_proc add_pageitem_gt3 "Add pageitem_gt3 table" {
       ssl_handshake_delta start_msec system_delta basepage record_seq \
       detail_component_1_msec detail_component_2_msec detail_component_3_msec \
       ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
-      header_bytes object_text header_code custom_object_trend status_code}
+      header_bytes object_text header_code custom_object_trend status_code aptimized}
   $db create_tables 0
 }
 
@@ -427,6 +427,18 @@ proc add_daily_stats2 {db {create_tables 1}} {
       detail_component_1_msec detail_component_2_msec detail_component_3_msec \
       ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
       header_bytes object_text header_code custom_object_trend status_code}
+
+  # 26-1-2014 BUGFIX: added here for new DB's.
+  $db add_tabledef pageitem_gt3 {id} {scriptname ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
+      scontent_type url \
+      extension domain topdomain urlnoparams \
+      error_code connect_delta dns_delta element_delta first_packet_delta \
+      remain_packets_delta request_delta \
+      ssl_handshake_delta start_msec system_delta basepage record_seq \
+      detail_component_1_msec detail_component_2_msec detail_component_3_msec \
+      ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
+      header_bytes object_text header_code custom_object_trend status_code aptimized}
+      
   $db add_tabledef domain_ip_time {id} {scriptname date_cet topdomain domain ip_address {number int} {min_conn_msec real}}
   $db add_tabledef aggr_specific {id} {scriptname date_cet topic {per_page_sec real}}
   

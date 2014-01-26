@@ -265,15 +265,19 @@ proc det_api_key {api_key_loc} {
 # @note 2013-08-03 Keynote API seems to be fixed, no need to repeat slot-id anymore in slotidlist param when you want >1 page, now as expected:
 # slotidlist: 1
 # pages: 1:1, 1:2, 1:3.
-# @todo 2013-08-03 15:30 all MyPhilips downloads before this time are 3 times the size, so remove and download again when all the rest has been done.
+# 25-1-2014 add 5 to the number of pages, because the number may change sometimes, don't want to miss pages.
+# test showed that nothing extra is downloaded for non existing pages.
 proc det_slots_pages {el_config} {
   foreach slotid [split [:slotids $el_config] ","] {
     lappend slotidlist $slotid
-    for {set i 1} {$i <= [:npages $el_config]} {incr i} {
+    for {set i 1} {$i <= [expr [:npages $el_config] + 5]} {incr i} {
       lappend transpagelist "$slotid:$i"
     }
   }
-  list [join $slotidlist ","] [join $transpagelist ","]
+  # 26-1-2014 deze optie gezien in interactieve gebeuren, blijkt ook hier te werken, wel zo gemakkelijk.
+  # vanaf 26-1-2014 13:30 deze methode gebruiken.
+  # list [join $slotidlist ","] [join $transpagelist ","]
+  list [join $slotidlist ","] "ALL"
 }
 
 # @note 30-10-2013 when an known 'error' occurs, just remove the file.

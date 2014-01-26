@@ -158,7 +158,6 @@ proc scatter2db_subdir {dargv subdir} {
     add_daily_stats2 $db 0 ; # to define tables for insert-statements.
   }
   migrate_db $db $existing_db
-  # @todo nog even if 0, want niet in 'productie'
   if {1} {
     set has_fields [add_checkrun $db]
     $cr_handler set_has_fields $has_fields
