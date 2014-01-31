@@ -1,4 +1,4 @@
-#!/home/nico/bin/tclsh
+#!/usr/bin/env tclsh86
 
 # 11-8-2010 NdV ook een background page, met o.a. Apache Loadbalancer.
 
