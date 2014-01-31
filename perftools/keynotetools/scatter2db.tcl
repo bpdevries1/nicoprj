@@ -26,6 +26,7 @@ $log set_file "[file tail [info script]].log"
 
 # if downloaded file has errors, move it to error-dir and mark in database so it can be downloaded again.
 ndv::source_once download-check.tcl
+ndv::source_once libkeynote.tcl
 
 ndv::source_once libpostproclogs.tcl libmigrations.tcl kn-migrations.tcl checkrun-handler.tcl libextraprocessing.tcl libextra.tcl
 
@@ -338,13 +339,95 @@ proc read_script_pages {db} {
   }
 }
 
-proc det_page_type {scriptname page_seq} {
+proc det_page_type_orig {scriptname page_seq page_name} {
   global dct_page_type
+  # use upvar, so call by ref can be used, should be quicker.
+  upvar $page_name page
   if {[dict exists $dct_page_type $scriptname $page_seq]} {
     dict get $dct_page_type $scriptname $page_seq
   } else {
     return "<none>" 
   }
+}
+
+# @todo new way to determine page_type, based on basepage_url
+# so try new way, by finding the basepage items. Should be only one.
+proc det_page_type {scriptname page_seq page_name} {
+  global dct_page_type ; # 27-1-2014 keep this var for now, for fallback scenario.
+  # use upvar, so call by ref can be used, should be quicker.
+  upvar $page_name page
+  
+  # listc {$i * $i} i <- {1 2 3 4 5} {$i % 2 == 0} => 4 16
+  # breakpoint
+  # ene for mobile en onhandig, de andere voor de rest. Alleen de rest gebruiken.
+  # foreach detail [:wxn_page_details $page]
+  # set details [:txnPageDetails $page]
+  
+  # set t [:txnPageDetails $page]
+  # set items [:txnPageElement $t]
+  # set i0 [lindex $items 0]
+  # set b [:txnBasePage $t]
+  # set bd [:txnDetailObject $b]
+  # set ot [:object_text [lindex $bd 0]]
+  # breakpoint
+  # set obj_txt [:object_text [lindex [:txnDetailObject [:txnBasePage [:txnPageDetails $page]]] 0]]
+  set t [lindex [:txnDetailObject [:txnBasePage [:txnPageDetails $page]]] 0]
+  set url "[:conn_string_text $t][:object_text $t]"
+  
+  # would like clojure threading operator:
+  # set obj_txt [-> $page :txnPageDetails :txnBasePage :txnDetailObject :0 :object_text]
+  # where :0 == [lindex $x 0]
+  # set res [objtxt2pagetype $obj_txt]
+  set res [url2pagetype $url]
+  if {0} {
+    # 29-1-2014 don't fall back to old way anymore.
+    if {$res == ""} {
+      if {[dict exists $dct_page_type $scriptname $page_seq]} {
+        set res [dict get $dct_page_type $scriptname $page_seq]
+      } else {
+        set res "<none>" 
+      }
+    }
+  }
+  # breakpoint
+  return $res
+}
+
+# /c/catalog_selector.jsp wordt mss nooit gebruikt, maar wel zo ingetypt, dus even laten staan.
+set pagetype_regexps {{/c/$} landing 
+                      {/cat/$} category 
+                      {/prd/$} detail 
+                      {\?t=support$} support 
+                      {/c/locators} dealerloc 
+                      {featureselector} decision 
+                      {wtb_widget} wheretobuy 
+                      {\.livecom.net/} livecom 
+                      {/5g/hdl/} livecom 
+                      {ace3\.adoftheyear\.com} adoftheyear 
+                      {/philips_p11026/cookie.php} adoftheyear 
+                      {/c/catalog_selector.jsp} catalogselector
+                      {/c/catalog/catalog_selector.jsp} catalogselector}
+
+# also possible to use this one within SQLite queries.
+proc objtxt2pagetype {obj_txt} {
+  global pagetype_regexps
+  foreach {re pagetype} $pagetype_regexps {
+    if {[regexp -nocase -- $re $obj_txt]} {
+      return $pagetype
+    }
+  }
+  return ""
+}
+
+# @note should use whole URL to determine pagetype, also for errors.
+proc url2pagetype {url} {
+  global pagetype_regexps
+  foreach {re pagetype} $pagetype_regexps {
+    if {[regexp -nocase -- $re $url]} {
+      return $pagetype
+    }
+  }
+  return ""
 }
 
 # handle each file in a DB trans, not a huge trans for all files.
@@ -557,7 +640,7 @@ proc handle_page {db scriptrun_id page dct_details pageitem scriptname datetime}
   dict set dctp scriptname $scriptname
   dict set dctp ts_cet [det_ts_cet $datetime]
   dict set dctp date_cet [det_date_cet $datetime]
-  set page_type [det_page_type $scriptname [:page_seq $dctp]]
+  set page_type [det_page_type $scriptname [:page_seq $dctp] page]
   dict set dctp page_type $page_type
   
   set page_id [$db insert page $dctp 1]

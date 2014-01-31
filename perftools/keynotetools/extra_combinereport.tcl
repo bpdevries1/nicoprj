@@ -128,9 +128,9 @@ proc copy_to_target_db {db scriptname targetdir datefrom_cet dateuntil_cet} {
       set new_table 1
     }
     if {$new_table} {
+      # 27-1-2014 if table did not exist yet, then copy everything.
       $db exec2 "create table toDB.$table as 
-                 select '$scriptname' _scriptname, * from main.$table
-                 where date_cet between '$datefrom_cet' and '$dateuntil_cet'" -log -try
+                 select '$scriptname' _scriptname, * from main.$table" -log -try
     } else {
       $db exec2 "insert into toDB.$table 
                  select '$scriptname' _scriptname, * from main.$table

@@ -2,6 +2,7 @@
 
 package require ndv
 ndv::source_once libmigrations.tcl
+ndv::source_once libkeynote.tcl
 
 migrate_proc add_fk_indexes "Add foreign key indexes" {
   $db exec2 "create index if not exists ix_page_1 on page (scriptrun_id)"
@@ -137,25 +138,6 @@ proc set_task_succeed_calc {db} {
 migrate_proc add_fill_task_succeed "Fill task_succeed field" {
   $db exec2 "alter table scriptrun add task_succeed_calc integer" -log -try
   set_task_succeed_calc $db
-}
-
-# @note also used in migrations and scatter2db.
-proc det_topdomain {domain} {
-  # return $domain 
-  # if it's something like www.xxx.co(m).yy, then return xxx.co(m).yy
-  # otherwise if it's like www.xxx.yy, then return xxx.yy
-  # maybe regexp isn't the quickest, try split/join first.
-  set l [split $domain "."]
-  set p [lindex $l end-1]
-  if {($p == "com") || ($p == "co")} {
-    join [lrange $l end-2 end] "." 
-  } else {
-    if {$domain == "images.philips.com"} {
-      return "scene7" 
-    } else {
-      join [lrange $l end-1 end] "."
-    }
-  }  
 }
 
 # add a field topdomain to pageitem, fill it with topdomain based on domain.
@@ -413,7 +395,7 @@ proc add_daily_stats2 {db {create_tables 1}} {
     
   $db add_tabledef aggr_page {id} {date_cet scriptname {page_seq int}   
     {avg_time_sec real} {avg_nkbytes real} {avg_nitems real} {datacount int}
-    {avg_ttip_sec real} {avail real}}
+    {avg_ttip_sec real} {avail real} page_type}
   
   # 24-12-2013 add 4 other tables for new databases: aggr_slowitem, pageitem_topic, domain_ip_time, aggr_specific
   $db add_tabledef aggr_slowitem {id} {date_cet scriptname {page_seq int} keytype keyvalue {seqnr int} \
@@ -548,6 +530,91 @@ migrate_proc add_fill_aptimized "add fill aptimized column" {
   $db exec2 "update pageitem_topic set aptimized = 1 where url like '%aptimized%' and aptimized is null" -log
   $db exec2 "update pageitem_topic set aptimized = 0 where aptimized is null" -log
 }
+
+proc refill_pagetype {db} {
+  $db function objtxt2pagetype
+  log info "About to update page for pagetype"
+
+  if {0} {
+    $db exec2 "update page
+               set page_type = (select objtxt2pagetype(i.object_text) from pageitem i where i.page_id = page.id and i.basepage = 1)
+               where page_type is null or page_type = '' or page_type = '<none>' or page_type like '%-%'" -log 
+  }
+
+  $db exec2 "drop table if exists temp_page_type" -log
+  
+  $db exec2 "create table temp_page_type as
+             select p.id page_id, objtxt2pagetype(i.object_text) page_type
+             from page p join pageitem i on i.page_id = p.id
+             where i.basepage = 1
+             and (p.page_type is null or p.page_type = '' or p.page_type = '<none>' or p.page_type like '%-%')" -log
+
+  $db exec2 "create index ix_temp_page_type on temp_page_type(page_id)" -log
+
+  $db exec2 "update page
+             set page_type = (select page_type from temp_page_type t where t.page_id = page.id)
+             where (page_type is null or page_type = '' or page_type = '<none>' or page_type like '%-%')" -log
+  
+  # $db exec2 "drop table temp_page_type" -log
+
+  log info "Updated page for pagetype, now pageitems"
+  
+  #breakpoint
+  $db exec2 "update pageitem set page_type = (select page_type from page p where p.id = pageitem.page_id)
+             where page_type is null or page_type = '' or page_type = '<none>' or page_type like '%-%'" -log 
+  log info "Updated pageitem for pagetype, done"
+  #breakpoint
+
+}
+
+# pagetype will become empty for items older than 6 weeks, because pageitems are no longer available. Oh well.
+migrate_proc refill_pagetype "Refill pagetype fields" {
+  # objtxt2pagetype should be available here.
+  #breakpoint
+  refill_pagetype $db  
+}
+
+migrate_proc add_aggr_page_pagetype "Add page_type field to aggr_page" {
+  $db exec2 "alter table aggr_page add page_type" -try -log
+}
+
+migrate_proc redo_aggrrunpage_20140128 "Redo all aggr-run-page records" {
+  # 28-1-2014 don't redo all items, just the ones max 6 weeks ago, with a little bit less, so no gaps are introduced.
+  # with redo-action, the field 'page_type' will get filled.
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('dailystats')"
+}
+
+migrate_proc redo_combinereport_20140128 "Redo combinereport" {
+  # 28-1-2014 don't redo all items, just the ones max 6 weeks ago, with a little bit less, so no gaps are introduced.
+  # with redo-action, the field 'page_type' will get filled.
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('combinereport')"
+}
+
+migrate_proc redo_aggrrunpage_20140128_2 "Redo all aggr-run-page records take 2" {
+  # 28-1-2014 don't redo all items, just the ones max 6 weeks ago, with a little bit less, so no gaps are introduced.
+  # with redo-action, the field 'page_type' will get filled.
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('dailystats')"
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('combinereport')"
+}
+
+migrate_proc redo_aggrrunpage_20140129_1 "Redo all aggr-run-page records" {
+  # 28-1-2014 don't redo all items, just the ones max 6 weeks ago, with a little bit less, so no gaps are introduced.
+  # with redo-action, the field 'page_type' will get filled.
+  # 29-1-2014 All this is quite a lot of work, but is necessary: src needs to be changed, then aggregate tables, then aggregate DB.
+  refill_pagetype $db
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('dailystats')"
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('combinereport')"
+}
+
+migrate_proc redo_aggrrunpage_20140129_2 "Redo all aggr-run-page records" {
+  # 28-1-2014 don't redo all items, just the ones max 6 weeks ago, with a little bit less, so no gaps are introduced.
+  # with redo-action, the field 'page_type' will get filled.
+  # 29-1-2014 All this is quite a lot of work, but is necessary: src needs to be changed, then aggregate tables, then aggregate DB.
+  refill_pagetype $db
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('dailystats')"
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('combinereport')"
+}
+
 
 # LET OP: als pageitem tabel verandert, moet pageitem_gt3 en pageitem_topic mee veranderen!
 # LET OP: als je een table toevoegt, dan ook toevoegen bij add_daily_stats2, deze wordt aangeroepen voor nieuwe DB's.
