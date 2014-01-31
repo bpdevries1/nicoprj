@@ -145,7 +145,7 @@ proc graph_combined_topdomain {r dargv period} {
     $r qplot title "Sum of load times per topdomain averaged per page by script - $period" \
               x date y loadtime xlab "Date/time" ylab "Load time (seconds)" \
               geom line-point colour topdomain facet scriptname \
-              width 11 height.min 9 height.max 20 height.base 3.4 height.percolour 0.0 height.perfacet 1.7 \
+              width 11 height.min 9 height.max 20 height.base 3.4 height.percolour 0.24 height.perfacet 1.7 \
               legend.avg 3 \
               legend.position right \
               legend.direction vertical
@@ -295,54 +295,37 @@ proc graph_combined_slowitem {r dargv period} {
               legend.avg 3 \
               legend.position bottom \
               legend.direction vertical
-  }
-}
-
-proc graph_combined_maxitem_old {r dargv period} {
-  if {[period2days $period] >= 7} {  
-    $r query "select m.scriptname, m.date_cet date, m.keyvalue url, 1.0*sum(m.avg_time_sec)/r.npages loadtime
-              from aggr_maxitem m join aggr_run r on m.date_cet = r.date_cet and m.scriptname = r.scriptname
-              where m.keytype = 'urlnoparams'
-              and m.keyvalue in (
-                select a2.keyvalue
-                from aggr_maxitem a2
-                where a2.date_cet = (select max(date_cet) from aggr_run)
-                and a2.keytype = 'urlnoparams'
-                and a2.seqnr <= 2
-              )
-              and m.date_cet > '[period2startdate $period]'
-              group by 1,2,3
-              order by m.date_cet"
-    $r qplot title "__Max URLs averaged per page by script - $period" \
-              x date y loadtime xlab "Date" ylab "Load time (seconds)" \
-              geom line-point colour url facet scriptname \
-              width 11 height.min 5 height.max 20 height.base 3.4 height.perfacet 1.7 height.percolour 0.24 \
-              legend.avg 3 \
-              legend.position bottom \
-              legend.direction vertical    
-    # use the main query above as a subquery here to aggregate over all scripts.
-    $r query "select date, url, avg(loadtime) loadtime from (
-                select m.scriptname, m.date_cet date, m.keyvalue url, 1.0*sum(m.avg_time_sec)/r.npages loadtime
-                from aggr_maxitem m join aggr_run r on m.date_cet = r.date_cet and m.scriptname = r.scriptname
+              
+    # 27-1-2014 temporary also graphs for landing page and (other) ATG items wrt 2 MyPhilips changes.
+    $r query "select c.date, substr(c.url,1,100) url, sum(c.loadtime)/n.number loadtime2 from (
+                select m.scriptname, m.date_cet date, m.keyvalue url, 1.0*sum(m.avg_page_sec)/r.npages loadtime
+                from aggr_slowitem m join aggr_run r on m.date_cet = r.date_cet and m.scriptname = r.scriptname
                 where m.keytype = 'urlnoparams'
-                and m.keyvalue in (
-                  select a2.keyvalue
-                  from aggr_maxitem a2
-                  where a2.date_cet = (select max(date_cet) from aggr_run)
-                  and a2.keytype = 'urlnoparams'
-                  and a2.seqnr <= 2
-                )
                 and m.date_cet > '[period2startdate $period]'
-                group by 1,2,3) 
-              group by 1,2"                
+                and m.keyvalue in (
+                  select keyvalue
+                  from aggr_slowitem m2 
+                    join aggr_run r on m2.date_cet = r.date_cet and m2.scriptname = r.scriptname
+                  where m2.date_cet > '[period2startdate $period]'
+                  and m2.keytype = 'urlnoparams'
+                  and m2.keyvalue like '%secure.philips.%'
+                  group by 1
+                  having 1.0*sum(m2.avg_page_sec)/
+                      (r.npages*(select count(distinct scriptname) from aggr_run)*(select count(distinct date_cet) from aggr_run where date_cet > '[period2startdate $period]')) > 0.05
+                  )
+                group by 1,2,3) c join nscripts n on n.date_cet = c.date
+              group by 1,2
+              order by date"
+
     # legend.avg 3 => add averages of values to legend-colours rounded to 3 decimals.
-    $r qplot title "__Max URLs averaged per page and script - $period" \
-              x date y loadtime xlab "Date" ylab "Load time (seconds)" \
+    $r qplot title "Slow URLs averaged per page and script - ATG - $period" \
+              x date y loadtime2 xlab "Date" ylab "Load time (seconds)" \
               geom line-point colour url \
-              width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.24 \
+              width 11 height.min 5 height.max 20 height.base 5 height.percolour 0.24 \
               legend.avg 3 \
               legend.position bottom \
               legend.direction vertical
+    
   }
 }
 
@@ -416,4 +399,51 @@ proc graph_combined_gt3 {r dargv period} {
     log info "TODO: GT3 graphs for 2 days"
   }
 
+}
+
+# Show influence of different pagetypes (mostly useful for CBF scripts
+proc graph_combined_pagetype {r dargv period} {
+  if {[period2days $period] >= 7} {  
+    $r query "select a.date_cet date, a.page_type, sum(a.avg_time_sec) / n.number avg_time_sec
+              from aggr_page a join nscripts n on n.date_cet = a.date_cet
+              where a.date_cet > '[period2startdate $period]'
+              and a.datacount > 0
+              group by 1,2
+              order by 1,2"
+    $r qplot title "Average daily page loading per pagetype and script - $period" \
+              x date y avg_time_sec xlab "Date/time" ylab "Page load time (seconds)" \
+              geom line-point colour page_type \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+
+    $r query "select date_cet date, scriptname, page_type, sum(avg_time_sec) avg_time_sec
+              from aggr_page 
+              where date_cet > '[period2startdate $period]'
+              and datacount > 0
+              group by 1,2,3
+              order by 1,2,3"
+    $r qplot title "Average daily page loading per pagetype by script - $period" \
+              x date y avg_time_sec xlab "Date/time" ylab "Page load time (seconds)" \
+              geom line-point colour page_type facet scriptname \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.perfacet 1.7 height.percolour 0.24 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+    
+    $r query "select date_cet date, scriptname, page_seq || '-' || page_type page_type, sum(avg_time_sec) avg_time_sec
+              from aggr_page 
+              where date_cet > '[period2startdate $period]'
+              and datacount > 0
+              group by 1,2,3
+              order by 1,2,3"
+    $r qplot title "Average daily page loading per pagetype (seq) by script - $period" \
+              x date y avg_time_sec xlab "Date/time" ylab "Page load time (seconds)" \
+              geom line-point colour page_type facet scriptname \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.perfacet 1.7 height.percolour 0.24 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+  }
 }
