@@ -21,5 +21,5 @@
 # [2013-11-03 11:48:40] all 75 dirs left have basically the same importance.
 # ./download-scatter.tcl -config config-all-win.csv
 
-# don't use config file anymore, use slotmeta.db
+# don't use config file anymore, use slotmeta-domains.db
 ./download-scatter.tcl

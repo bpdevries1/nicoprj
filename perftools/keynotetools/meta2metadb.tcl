@@ -1,6 +1,6 @@
 #!/usr/bin/env tclsh86
 
-# meta2metadb.tcl - import Keynote download config.csv into slotmeta.db
+# meta2metadb.tcl - import Keynote download config.csv into slotmeta-domains.db
 
 package require tdbc::sqlite3
 package require Tclx
@@ -15,7 +15,8 @@ ndv::source_once libslotmeta.tcl download-metadata.tcl
 proc main {argv} {
   log debug "argv: $argv"
   set options {
-    {dir.arg "c:/projecten/Philips/KNDL" "Directory to put downloaded keynote files and also slotmeta.db"}
+    {dir.arg "c:/projecten/Philips/KNDL" "Directory to put downloaded keynote files"}
+    {db.arg "c:/projecten/Philips/KNDL/slotmeta-domains.db" "DB to use"}
     {filename.arg "" "File with slotmetadata to read (empty if new one must be downloaded)"}
     {apikey.arg "~/.config/keynote/api-key.txt" "Location of file with Keynote API key"}
     {format.arg "json" "Format of downloaden file: json or xml"}
@@ -36,7 +37,7 @@ proc meta2metadb {dargv} {
   if {$filename == ""} {
     error "filename is empty, download went wrong"
   }
-  set db [get_slotmeta_db [file join [:dir $dargv] slotmeta.db]]
+  set db [get_slotmeta_db [:db $dargv]]
   set json [json::json2dict [read_file $filename]]
   $db in_trans {
     foreach prd_el [:product $json] {

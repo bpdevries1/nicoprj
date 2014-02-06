@@ -27,7 +27,7 @@ proc main {argv} {
   log debug "argv: $argv"
   set options {
     {dir.arg "c:/projecten/Philips/KNDL" "Directory to put downloaded keynote files"}
-    {config.arg "" "Config file name. If empty, use slotmeta.db"}
+    {config.arg "" "Config file name. If empty, use slotmeta-domains.db"}
     {apikey.arg "~/.config/keynote/api-key.txt" "Location of file with Keynote API key"}
     {format.arg "json" "Format of downloaded file: json or xml"}
     {exitatok "Exit when one loop returns ok (instead of quota reached"}
@@ -172,7 +172,7 @@ proc two_weeks_ago {} {
 
 # @return a list of dict elements, same as csv-config before: dirname, slotids, npages
 proc query_config {root_dir hostname checkdate} {
-  set db [get_slotmeta_db [file join $root_dir "slotmeta.db"]]
+  set db [get_slotmeta_db [file join $root_dir "slotmeta-domains.db"]]
   $db query "select dirname, slot_id slotids, npages, start_date, end_date
              from slot_download
              where download_pc = '$hostname'

@@ -1,6 +1,6 @@
 #!/usr/bin/env tclsh86
 
-# scripts2metadb.tcl - import Keynote download config.csv into slotmeta.db
+# scripts2metadb.tcl - import Keynote download config.csv into slotmeta-domains.db
 
 package require tdbc::sqlite3
 package require Tclx
@@ -16,7 +16,7 @@ ndv::source_once libslotmeta.tcl
 proc main {argv} {
   log debug "argv: $argv"
   set options {
-    {db.arg "c:/projecten/Philips/KNDL/slotmeta-scripts.db" "Directory to put downloaded keynote files and also slotmeta.db"}
+    {db.arg "c:/projecten/Philips/KNDL/slotmeta-domains.db" "Slotmeta-domains.db location"}
     {dir.arg "c:/projecten/Philips/Keynote-scripts" "Directory with script files to read"}
     {test "Test the script, just download a few hours of data"}       
   }

@@ -37,20 +37,20 @@ proc meta_domains {dargv} {
   $db create_tables 0 ; # because added defs
   slotmeta_create_indexes $db
   
-  #$db add_tabledef domaindisabled {id} {script_id slot_id domainspec domainspectype}
-  #$db add_tabledef domainused {id} {scriptname slot_id domain topdomain date_cet {number int} {sum_loadtimes_sec real}}
-  #$db add_tabledef domaincontract {id} {domain topdomain contractparty domaintype disable notes}
-  
-  # fill_domaindisabled $db
-  # fill_domainused $db $dargv
-  # fill_aggregates $db
-  # fill_domaincontract $db
+  fill_domaindisabled $db
+  fill_domainused $db $dargv
+  fill_aggregates $db
+  fill_domaincontract $db
   update_domaincontract $db
+  create_views $db
   $db close
 }
 
 # read script texts, determine which domains are disabled in script and fill domaindisabled table with this
 proc fill_domaindisabled {db} {
+  # @todo later alleen incremental uitvoeren.
+  $db exec2 "delete from domaindisabled" -log
+  
   set res [$db query "select id script_id, slot_id, ts_cet script_ts_cet, contents
                       from script
                       where filesize > 0"]
@@ -103,12 +103,22 @@ proc det_host_ip_type {host ns} {
       set ipaddress ""
     }
   }
+  
   set type ""
-  if {$elt != ""} {
-    if {[$elt hasAttribute type]} {
-      set type [$elt @type]
+  if {[$host hasAttribute RegEx]} {
+    set regex [$host @RegEx]
+    if {$regex} {
+      set type "RegEx"
     }
-  }  
+  }
+
+  if {$type == ""} {
+    if {$elt != ""} {
+      if {[$elt hasAttribute type]} {
+        set type [$elt @type]
+      }
+    }  
+  }
       
   dict create domainspec $name topdomain [det_topdomain $name] domainspectype $type ipaddress $ipaddress
 }
@@ -117,6 +127,9 @@ proc fill_domainused {db dargv} {
   set srcdbname [:useddb $dargv]
   # test with CN for now:
   # set srcdbname "c:/projecten/Philips/CBF-CN/daily/daily.db" 
+  
+  # @todo later alleen incremental doen.
+  $db exec2 "delete from domainused" -log  
   
   $db exec2 "attach database '$srcdbname' as fromDB"
   # $db add_tabledef domainused {id} {scriptname slot_id domain topdomain date_cet {number real} {sum_nkbytes real} {page_time_sec real}}
@@ -280,6 +293,18 @@ proc mark_contract {db topdomain contractparty domaintype notes} {
   $db exec2 "update domaincontract
              set contractparty = '$contractparty', domaintype = '$domaintype', notes = '$notes'
              where topdomain = '$topdomain'" -log
+}
+
+proc create_views {db} {
+  $db exec2 "drop view if exists domaindisabled_view" -log
+  $db exec2 "create view domaindisabled_view as
+             select m.slot_alias, d.*
+             from domaindisabled d join slot_meta m on m.slot_id = d.slot_id" -log
+
+  $db exec2 "drop view if exists domainused_view" -log
+  $db exec2 "create view domainused_view as
+             select m.slot_alias, u.*
+             from domainused u join slot_meta m on m.slot_id = u.slot_id" -log
 }
 
 main $argv

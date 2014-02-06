@@ -1,4 +1,4 @@
-# libslotmeta.tcl - lib functions for accessing slotmeta.db and possibly other functions.
+# libslotmeta.tcl - lib functions for accessing slotmeta-domains.db and possibly other functions.
 # this database should be used read only from download-scatter.tcl
 # and maybe also used from scatter2db.tcl
 
@@ -33,6 +33,9 @@ proc slotmeta_define_tables {db} {
   $db add_tabledef domaindisabled_aggr {} {topdomain last_script_ts_cet}
   $db add_tabledef domainused_aggr {} {topdomain date_cet}
   
+  # mapping of categories, also for determining #pages wrt daily dashboard
+  $db add_tabledef category {id} {linenr ts_cet catgroup category category_full}
+  $db add_tabledef slot_cat {id} {category_id countrycode slot_id slot_alias}
 }
 
 proc slotmeta_create_indexes {db} {

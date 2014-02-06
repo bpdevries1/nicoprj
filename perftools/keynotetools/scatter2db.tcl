@@ -500,21 +500,16 @@ proc read_json_file_db {db filename root_dir {pageitem 1}} {
     return
   }
   log info "Reading $filename"
-  # @todo make $db in_trans function, with max nr of statements to exec in a trans. Goal is speed then, not correct trans boundaries.
-  # db_in_trans [$db get_conn] {}
   $db in_trans {    
     set logfile_id [$db insert logfile [dict create path $filename filename [file tail $filename] filesize [file size $filename]] 1]
     set text [read_file $filename]
     if {[regexp {Bad Request} $text]} {
       log warn "Bad Request in result json, continue"
     } elseif {[string length $text] < 500} {
-      log warn "Json file too small, continue"
+      log debug "Json file too small, continue"
     } else {
       set json [json::json2dict $text]
       # @todo possibly add check if json just contains error message like invalid slotid list.
-      
-      # breakpoint
-        # agent_id agent_inst datetime profile_id slot_id target_id wxn_Script wxn_detail_object wxn_page wxn_summary
       foreach l $json {
         # this l is either a list of TxnMeasurement(s) or a list of WxnMeasurement(s)
         foreach run $l {
@@ -698,6 +693,12 @@ proc handle_page {db scriptrun_id page dct_details pageitem scriptname datetime}
     foreach elt [:txnPageElement $details] {
       handle_element $db $scriptrun_id $page_id $elt 0 $scriptname $datetime [:page_seq $dctp] $page_type
     }
+    # 4-2-2014 redirects can also occur, in seperate element:
+    # @todo 4-2-2014 maybe mark those elements as basepage (too), but this occurs mainly when there is an error.
+    foreach elt [:txnRedirect $details] {
+      handle_element $db $scriptrun_id $page_id $elt 0 $scriptname $datetime [:page_seq $dctp] $page_type
+    }
+    
   }
   
 }
