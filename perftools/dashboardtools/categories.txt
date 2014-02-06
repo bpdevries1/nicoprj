@@ -1,0 +1,34 @@
+Consumer flows	
+	Catalogue browsing (M&CC) - [SCF683 / SCF310 / SCF300 / SCF504 / SCF671]
+	Catalogue browsing (Oral Health Care) - [HX6921 / HX6932 / HX6074 / HX9332 / HX9170]
+	Catalogue browsing (Food Preparation) - [HD9220 / RI9225 / HD3620 / HR1669 / HL1646 / HD6136 / HD6163]
+	Catalogue browsing (Garment) - [GC670 / GC9220 / GC3320 / GC9222 / GC1480]
+	Catalogue browsing (Espresso) - [HD8946 / HD8930 / HD8764 / HD8763 / HD8856]
+	Catalogue browsing (Filtercoffee) - [HD5405 / HD7546 / HD8746]
+	Catalogue browsing (Cordless Phones) - [DCTG5752W / CD4901B / SE8881B / CD3951W / S9H / CD2951W]
+	Catalogue browsing (Men's Shavers) - [RQ1280 / RQ1285 / RQ1290 / RQ1250 / RQ1295 / RQ1296]
+	Catalogue browsing (Male Grooming Acc.) - [RQ12]
+	Catalogue browsing (HCS) - [CSS2123 / HTS3541 / HTL7180]
+	Catalogue browsing (Docking) - [DS9800W / DS3205]
+	Catalogue browsing (Male Trimming) - [TT2039]
+	Catalogue browsing (Female Depilation) - [HP6576 / HP6578 / HP6522 / HP6579]
+	Catalogue browsing (Haircare) - [HP8650]
+	Catalogue browsing (Floor Care) - [FC7070]
+	Catalogue browsing (Air) - [AC4030]
+	Catalogue browsing (BluRay) - [HMP2000]
+	Catalogue browsing (TV) - [55PFL6007G / 42PFL6007K / 55PFL6007K / 47PFL6097T / 55PFL6008K / 55PFL6008S / 60PFL6008S]
+	Lighting B2C (Lamps direct) - [CBF-CL-LampsDirect]
+	Lighting B2C (Luminaires direct) - [CBF-CL-LumnsDirect]
+	Professional Lighting (Product) - [CBF-PL-Product]
+	Professional Lighting (LED) - [CBF-PL-LED]
+	Professional Healthcare
+Microsites	
+	Promotions
+Support flows	
+	Support (P4C)
+CRM flows	
+	MyPhilips
+Philips Online Shop flow	
+	Shop 3.0 browsing flow
+Mobile flows	
+	Consumer Lifestyle (Mobile - Landing page) 
