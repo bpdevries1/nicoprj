@@ -103,7 +103,9 @@ proc det_prev_dateuntil {db actiontype} {
   if {[llength $res] == 1} {
     clock scan [:dateuntil_cet [lindex $res 0]] -format "%Y-%m-%d" 
   } else {
-    set res [$db query "select min(date_cet) date from scriptrun"]
+    # set res [$db query "select min(date_cet) date from scriptrun"]
+    # 7-2-2014 select min(date) minus one day, so first (partial) day will also be handled.
+    set res [$db query "select date(min(date_cet), '-1 day') date from scriptrun"]
     log info "res: $res"
     if {[llength $res] == 1} {
       try_eval {

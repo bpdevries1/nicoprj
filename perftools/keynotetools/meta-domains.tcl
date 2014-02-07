@@ -42,7 +42,6 @@ proc meta_domains {dargv} {
   fill_aggregates $db
   fill_domaincontract $db
   update_domaincontract $db
-  create_views $db
   $db close
 }
 
@@ -293,18 +292,6 @@ proc mark_contract {db topdomain contractparty domaintype notes} {
   $db exec2 "update domaincontract
              set contractparty = '$contractparty', domaintype = '$domaintype', notes = '$notes'
              where topdomain = '$topdomain'" -log
-}
-
-proc create_views {db} {
-  $db exec2 "drop view if exists domaindisabled_view" -log
-  $db exec2 "create view domaindisabled_view as
-             select m.slot_alias, d.*
-             from domaindisabled d join slot_meta m on m.slot_id = d.slot_id" -log
-
-  $db exec2 "drop view if exists domainused_view" -log
-  $db exec2 "create view domainused_view as
-             select m.slot_alias, u.*
-             from domainused u join slot_meta m on m.slot_id = u.slot_id" -log
 }
 
 main $argv

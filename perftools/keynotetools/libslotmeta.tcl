@@ -50,3 +50,45 @@ proc slotmeta_create_indexes {db} {
   $db exec2 "create index if not exists ix_domainused_3 on domainused (topdomain)" -log -try
   $db exec2 "create index if not exists ix_domaincontract on domaincontract (domain)" -log -try
 }
+
+proc slotmeta_create_views {db} {
+  $db exec2 "drop view if exists domaindisabled_view" -log
+  $db exec2 "create view domaindisabled_view as
+             select m.slot_alias, d.*
+             from domaindisabled d join slot_meta m on m.slot_id = d.slot_id" -log
+
+  $db exec2 "drop view if exists domainused_view" -log
+  $db exec2 "create view domainused_view as
+             select m.slot_alias, u.*
+             from domainused u join slot_meta m on m.slot_id = u.slot_id" -log
+             
+  $db exec2 "drop view if exists script_domain_should_disable" -log
+
+  $db exec2 "create view script_domain_should_disable as
+              select u.slot_alias slot_alias, u.slot_id slot_id, u.topdomain topdomain, u.date_cet date_cet, 
+                     u.sum_nkbytes sum_nkbytes, u.page_time_sec page_time_sec
+              from domainused_view u
+              where u.date_cet > date('now', '-5 days')
+              and u.page_time_sec > 0.002
+              and u.topdomain in (
+                select topdomain
+                from domaincontract c
+                where c.disable_soll = 1
+              )
+              and not exists (
+                select 1
+                from domaindisabled d
+                where d.slot_id = u.slot_id
+                and d.topdomain = u.topdomain
+              )
+              and not exists (
+                select 1
+                from domainused u2
+                where u2.slot_id = u.slot_id
+                and u2.topdomain = u.topdomain
+                and u2.date_cet > u.date_cet
+                and u2.page_time_sec > 0.002
+              )
+              order by 1,2,3"
+
+}
