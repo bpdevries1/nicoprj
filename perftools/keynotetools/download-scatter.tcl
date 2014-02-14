@@ -4,11 +4,12 @@ package require Tclx
 package require ndv
 
 set log [::ndv::CLogger::new_logger [file tail [info script]] info]
-$log set_file "[file tail [info script]].log"
+# $log set_file "[file tail [info script]].log"
+$log set_file "[file tail [info script]]-[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"].log"
 
 set script_dir [file dirname [info script]]
 # source [file join $script_dir download-check.tcl]
-ndv::source_once download-check.tcl libslotmeta.tcl
+ndv::source_once download-check.tcl libslotmeta.tcl libkeynote.tcl
 ndv::source_once [file join [info script] .. .. .. lib CExecLimit.tcl]
 
 # @todo eg Mobile-Android: new script, so no data before certain date, continuously we get zero result. In this case, should stop downloading
@@ -33,6 +34,7 @@ proc main {argv} {
     {exitatok "Exit when one loop returns ok (instead of quota reached"}
     {fromdate.arg "" "Set a date (2013-08-21) from which data should be downloaded (inclusive!)"}
     {untildate.arg "" "Set a date (2013-08-29) until which data should be downloaded (non-inclusive!)"}
+    {checkfile.arg "" "Checkfile for nanny process"}
     {test "Test the script, just download a few hours of data"}       
   }
   set usage ": [file tail [info script]] \[options] :"
@@ -48,14 +50,15 @@ proc main {argv} {
     if {($res == "ok") && $exitatok} {
       break 
     }
-    wait_until_next_time 
+    wait_until_next_time [:checkfile $dargv]
   }
   log info "Exiting, result = ok, and exitatok"
 }
 
 # Start each run each half an hour.
-proc wait_until_next_time {} {
+proc wait_until_next_time {checkfile} {
   set finished 0
+  update_checkfile $checkfile
   while {!$finished} {
     set minute [scan [clock format [clock seconds] -format "%M"] %d]
     log info "Time: [clock format [clock seconds]]"
@@ -66,6 +69,7 @@ proc wait_until_next_time {} {
       log info "Wait another (small) minute, until minute is 0 or 30" 
     }
     after 55000
+    update_checkfile $checkfile
     # after 5000
   }
 }
@@ -83,6 +87,7 @@ proc download_keynote_main {dargv} {
     # could also use a copy of the database and change something there.
     set dctl_config [csv2dictlist [file join $root_dir [:config $dargv]] ";"]
   }
+  set checkfile [:checkfile $dargv]
   
   make_subdirs $root_dir $dctl_config
   
@@ -140,6 +145,7 @@ proc download_keynote_main {dargv} {
         after 60000
       }
       set sec_ts_slot [expr $sec_ts_slot + 3600]  
+      update_checkfile $checkfile
     }
   }  
   $dl_check close
