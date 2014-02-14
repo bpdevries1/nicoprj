@@ -34,7 +34,7 @@ oo::class create Rwrapper {
     set dir [file normalize [from_cygwin $a_dir]] ; # for R need Unix style (/) dir. 
     set cmdfilename "R-[my now].R"
     set f [open [file join $dir $cmdfilename] w]
-    set Routput "R-output${a_file_addition}.txt"
+    set Routput "R-output${a_file_addition}-[my format_now_filename].txt"
     set Rlatest "R-latest${a_file_addition}.R"
     my write [my pprint "setwd('$dir')
       zz = file('$Routput', open = 'wt')
@@ -49,6 +49,10 @@ oo::class create Rwrapper {
       db = db.open('$db')"]
     set stacked_cmds {}
     my set_outputroot $dir ; # default output-dir is same as DB
+  }
+  
+  method format_now_filename {} {
+    clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"
   }
   
   method set_outputroot {a_dir} {
