@@ -18,7 +18,8 @@ proc main {argv} {
     {srcdir.arg "c:/projecten/Philips/KNDL" "Directory where downloaded keynote files are (in subdirs) and where DB's (in subdirs) will be created."}
     {db.arg "combinereport.db" "DB name to use for combined reports"}
     {targetdir.arg "" "Name of target directory"}
-    {pattern.arg "*" "Add subdirs that have pattern"}
+    {pattern.arg "" "Add subdirs that have pattern. Use either this or subdirfile"}
+    {subdirfile.arg "" "Add subdirs from filename. Use either this or pattern"}
     {cmdfile.arg "" "(Shell) file with commands to execute when a combined reports must be made."} 
     {loglevel.arg "info" "Log level (debug, info, warn)"}
     {debug "Run in debug mode, stop when an error occurs"}
@@ -32,15 +33,41 @@ proc main {argv} {
   set targetdir [from_cygwin [:targetdir $dargv]]
   # make possible old definition inactive.
   $db exec2 "update combinedef set active = 0 where targetdir = '$targetdir'" -log
+  if {[:pattern $dargv] != ""} {
+    set srcpattern [:pattern $dargv]
+  } else {
+    set srcpattern [:subdirfile $dargv]
+  }
   set dct [dict create cmds $cmds srcdir [from_cygwin [:srcdir $dargv]] \
-    active 1 srcpattern [:pattern $dargv] \
+    active 1 srcpattern $srcpattern \
     targetdir $targetdir]
   set cd_id [$db insert combinedef $dct 1]
   set ndirs 0
-  foreach subdir [glob -directory [from_cygwin [:srcdir $dargv]] -type d [:pattern $dargv]] {
-    $db insert combinedefdir [dict create combinedef_id $cd_id dir $subdir]
-    delete_dailystatus_combinereport $subdir
-    incr ndirs
+  
+  if {[:pattern $dargv] != ""} {
+    foreach subdir [glob -directory [from_cygwin [:srcdir $dargv]] -type d [:pattern $dargv]] {
+      $db insert combinedefdir [dict create combinedef_id $cd_id dir $subdir]
+      delete_dailystatus_combinereport $subdir
+      incr ndirs
+    }
+  } else {
+    # subdirs are given in :subdirfile. One subdir per line.
+    set f [open [:subdirfile $dargv] r]
+    while {![eof $f]} {
+      gets $f line
+      set line [string trim $line]
+      if {$line != ""} {
+        set subdir [file join [from_cygwin [:srcdir $dargv]] $line]
+        $db insert combinedefdir [dict create combinedef_id $cd_id dir $subdir]
+        incr ndirs
+        if {[file exists $subdir]} {
+          delete_dailystatus_combinereport $subdir
+        } else {
+          log warn "$subdir does not exist, but adding anyway"
+        }
+      }
+    }
+    close $f
   }
   $db exec2 "update combinedef set ndirs = $ndirs where id = $cd_id"
   $db close

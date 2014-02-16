@@ -18,3 +18,24 @@ proc det_topdomain {domain} {
     }
   }  
 }
+
+# update checkfile wrt nanny process.
+proc update_checkfile {checkfile} {
+  if {$checkfile != ""} {
+    set f [open $checkfile w]
+    puts $f "[file tail [info script]] still alive at [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]"
+    close $f
+  }
+}
+
+proc format_dt {sec} {
+  clock format $sec -format "%Y-%m-%d %H:%M:%S"
+}
+
+proc format_now {} {
+  format_dt [clock seconds]
+}
+
+proc format_now_filename {} {
+  clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"
+}

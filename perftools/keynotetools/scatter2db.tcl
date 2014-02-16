@@ -14,15 +14,7 @@ package require ndv
 package require json
 
 set log [::ndv::CLogger::new_logger [file tail [info script]] info]
-$log set_file "[file tail [info script]].log"
-
-# libpostproclogs: set_task_succeed (and maybe others)
-# set script_dir [file dirname [info script]]
-# source [file join $script_dir libpostproclogs.tcl]
-# source [file join $script_dir libmigrations.tcl]
-# source [file join $script_dir kn-migrations.tcl]
-# source [file join $script_dir checkrun-handler.tcl]
-# # source [file join $script_dir dailystats.tcl]
+$log set_file "[file tail [info script]]-[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"].log"
 
 # if downloaded file has errors, move it to error-dir and mark in database so it can be downloaded again.
 ndv::source_once download-check.tcl
@@ -45,6 +37,7 @@ proc main {argv} {
     {maxitem.arg "20" "Number of maxitems to determine"}
     {minsec.arg "0.2" "Only put items > minsec in slowitem table"}
     {pattern.arg "*" "Just handle subdirs that have pattern"}
+    {checkfile.arg "" "Checkfile for nanny process"}
     {loglevel.arg "info" "Log level (debug, info, warn)"}
     {debug "Run in debug mode, stop when an error occurs"}
   }
@@ -64,7 +57,7 @@ proc main {argv} {
     while {1} {
       set res [scatter2db_main $dargv]
       log info "Scatter2db main finished with return code: $res"
-      wait_until_next_hour_and_half
+      wait_until_next_hour_and_half [:checkfile $dargv]
     }
   } else {
     log info "Running only once"
@@ -76,7 +69,7 @@ proc main {argv} {
 # wait eg at 17.40 until it's 18.30, and at 17.25 until it's 17.30
 # reason is to not start at the same time with the next download-scatter run.
 # @note if you want to run at x:45, add 900 (!) to clock seconds: adding 15 minutes to x:45 results in (x+1):00
-proc wait_until_next_hour_and_half {} {
+proc wait_until_next_hour_and_half {checkfile} {
   set finished 0
   set start_hour [clock format [expr [clock seconds] + 1800] -format "%H"]
   while {!$finished} {
@@ -89,6 +82,7 @@ proc wait_until_next_hour_and_half {} {
       log info "Wait another 5 minutes, until hour != $start_hour" 
     }
     after 300000
+    update_checkfile $checkfile
     # after 5000
   }
 }
@@ -99,6 +93,7 @@ proc scatter2db_main {dargv} {
   set res "Ok"
   set cr_handler [checkrun_handler new]
   set dl_check [DownloadCheck new $root_dir]
+  set checkfile [:checkfile $dargv]
   if {[:justdir $dargv]} {
     # 6-9-2013 also handle current-dir, if script is called with one subdir as param
     # 16-9-2013 not correct, this would create huge keynotelogs.db file in the root when called normally.
@@ -116,6 +111,7 @@ proc scatter2db_main {dargv} {
       } else {
         set res [scatter2db_subdir $dargv $subdir]
       }
+      update_checkfile $checkfile
     }
   }
   $cr_handler destroy
@@ -175,6 +171,7 @@ proc scatter2db_subdir {dargv subdir} {
   # @note [global] last_read_date contains minimum date of currently read json files. Give this one to update_daily_stats.
   set last_read_date [clock format [clock seconds] -format "%Y-%m-%d"]
   handle_files $subdir $db
+  update_checkfile [:checkfile $dargv]
   reset_daily_status_db $db $last_read_date
   $db close
   log info "Created/updated db $db_name, size is now [file size $db_name]"

@@ -22,4 +22,13 @@
 # ./download-scatter.tcl -config config-all-win.csv
 
 # don't use config file anymore, use slotmeta-domains.db
-./download-scatter.tcl
+# ./download-scatter.tcl
+
+# 7-2 use nanny2.tcl, check logfile if it's updated recently
+# ./nanny.tcl tclsh ./scatter2db.tcl -nopost -moveread -continuous -actions all
+# ./nanny2.tcl -checkfile download-scatter.tcl.log -timeout 1800 tclsh ./download-scatter.tcl >&@ stdout
+# ./nanny2.tcl -checkfile download-scatter.tcl.log -timeout 1800 tclsh ./download-scatter.tcl
+
+# 8-2 logfile nu dynamisch, dus andere checkfile.
+./nanny2.tcl -checkfile download-scatter-check.log -timeout 1800 tclsh ./download-scatter.tcl -checkfile download-scatter-check.log
+

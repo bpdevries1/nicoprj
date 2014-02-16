@@ -38,6 +38,7 @@ proc extraproc_subdir {dargv subdir} {
   foreach action $actions {
     # @note - per action bepalen of je iets als check_do_daily wilt gebruiken.
     extra_update_$action $db $dargv $subdir
+    update_checkfile [:checkfile $dargv]
     #check_do_daily $db $action {
     #  extra_update_$action $db $dargv $subdir
     #}
