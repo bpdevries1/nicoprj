@@ -9,9 +9,8 @@ proc make_graphs {dargv} {
     # exit ; # for test
   }
   if {[:combinedactions $dargv] == "all"} {
-    # set actions [list kn3 hour ttip]
-    # @todo actions weer kn3 laten includen. Doet het [2013-10-31 12:57:46] niet, omdat tabel niet bestaat.
-    set actions [list default ttip topdomain extension slowitem gt3 pagetype]
+    # set actions [list default ttip topdomain extension slowitem gt3 pagetype]
+    set actions [list default ttip aggrsub slowitem gt3 pagetype]
   } else {
     set actions [split [:combinedactions $dargv] ","] 
   }

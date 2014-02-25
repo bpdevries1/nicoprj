@@ -133,9 +133,135 @@ proc graph_combined_ttip {r dargv period} {
     
   }              
 }
- 
+
+#* facet=script, x=date, y=loadtime, colour = 3 lijnen
+#* geen facet, x=date, y=loadtime, colour = 3 lijnen. Gebruik weer query van graph1 en group by gebruiken.
+proc graph_combined_pageload3 {r dargv period} {
+  if {[period2days $period] >= 7} {  
+    # @note where clause to not get R warnings like 1: Removed 3 rows containing missing values (geom_point). 
+    $r query "select scriptname, date_cet date, fullpage, ttip, pageload_avg
+              from pageload_all3 
+              where fullpage >= 0 
+              and date_cet > '[period2startdate $period]'"
+    $r melt {fullpage ttip pageload_avg}
+    $r qplot title "Page loading times measured in 3 ways by script - $period" \
+              x date y value \
+              xlab "Date" ylab "Time (seconds)" \
+              geom line-point colour variable \
+              facet scriptname \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.0 height.perfacet 1.7 \
+              hline 3.0 \
+              legend.avg 3 \
+              legend.position bottom \
+              legend.direction horizontal
+              
+    $r query "select date_cet date, avg(fullpage) fullpage, avg(ttip) ttip, avg(pageload_avg) pageload_avg
+              from pageload_all3
+              where fullpage >= 0
+              and date_cet > '[period2startdate $period]'
+              group by 1"
+    $r melt {fullpage ttip pageload_avg}
+    $r qplot title "Page loading times measured in 3 ways per script - $period" \
+              x date y value \
+              xlab "Date" ylab "Time (seconds)" \
+              geom line-point colour variable \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.0 height.perfacet 1.7 \
+              hline 3.0 \
+              legend.avg 3 \
+              legend.position bottom \
+              legend.direction horizontal
+  }
+}
+
+
+proc graph_combined_aggrsub {r dargv period} {
+  # @todo check which keytypes occur in aggrsub, make graphs for each of those.
+  # als je het ook maakt voor andere types, dan leteen op ':' in keytype/values, kan niet in filenames. Maar mss geen last van, als keytype simpel is.
+
+  foreach keytype {topdomain extension domain content_type basepage aptimized cntype_apt domain_gt_100k} {
+    graph_combined_aggrsub_keytype $r $dargv $period $keytype
+  }
+}
+
+proc graph_combined_aggrsub_keytype {r dargv period keytype} {
+  if {[period2days $period] >= 7} {
+    $r query "select s.scriptname, s.date_cet date, s.keyvalue $keytype, 1.0*sum(s.avg_time_sec)/r.npages loadtime,
+                     1.0*sum(s.avg_nitems) nitems, 1.0*sum(s.avg_nkbytes) nkbytes
+              from aggr_sub s join aggr_run r on s.date_cet = r.date_cet and s.scriptname = r.scriptname
+              where s.keytype = '$keytype'
+              and s.date_cet > '[period2startdate $period]'
+              group by 1,2,3"
+    $r qplot title "Sum of load times per $keytype averaged per page by script - $period" \
+              x date y loadtime xlab "Date/time" ylab "Load time (seconds)" \
+              geom line-point colour $keytype facet scriptname \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24 height.perfacet 1.7 \
+              maxcolours 10 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+
+    $r qplot title "Sum of nitems per $keytype averaged per page by script - $period" \
+              x date y nitems xlab "Date/time" ylab "#Items" \
+              geom line-point colour $keytype facet scriptname \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24 height.perfacet 1.7 \
+              maxcolours 10 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+
+    $r qplot title "Sum of nkbytes per $keytype averaged per page by script - $period" \
+              x date y nkbytes xlab "Date/time" ylab "#kbytes" \
+              geom line-point colour $keytype facet scriptname \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24 height.perfacet 1.7 \
+              maxcolours 10 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+              
+    $r query "select c.date, c.$keytype, sum(c.loadtime)/n.number loadtime2, sum(c.nitems)/n.number nitems2,
+                     sum(c.nkbytes)/n.number nkbytes2
+              from (              
+                select s.scriptname, s.date_cet date, s.keyvalue $keytype, 1.0*sum(s.avg_time_sec)/r.npages loadtime,
+                       1.0*sum(s.avg_nitems) nitems, 1.0*sum(s.avg_nkbytes) nkbytes
+                from aggr_sub s join aggr_run r on s.date_cet = r.date_cet and s.scriptname = r.scriptname
+                where s.keytype = '$keytype'
+                and s.date_cet > '[period2startdate $period]'
+                group by 1,2,3) c join nscripts n on n.date_cet = c.date
+              group by 1,2"
+    $r qplot title "Sum of load times per $keytype averaged per page and script - $period" \
+              x date y loadtime2 xlab "Date/time" ylab "Load time (seconds)" \
+              geom line-point colour $keytype \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24 \
+              maxcolours 10 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+    
+    $r qplot title "Sum of nitems per $keytype averaged per page and script - $period" \
+              x date y nitems2 xlab "Date/time" ylab "#items" \
+              geom line-point colour $keytype \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24 \
+              maxcolours 10 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+
+    $r qplot title "Sum of nkbytes per $keytype averaged per page and script - $period" \
+              x date y nkbytes2 xlab "Date/time" ylab "#kbytes" \
+              geom line-point colour $keytype \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24 \
+              maxcolours 10 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+              
+    # 2014-02-22 also #items and nkbytes here
+    
+  }
+}
+
 # @todo this one now uses nscripts view, so test if it works.
-proc graph_combined_topdomain {r dargv period} {
+proc graph_combined_topdomain_old {r dargv period} {
   if {[period2days $period] >= 7} {  
     $r query "select s.scriptname, s.date_cet date, s.keyvalue topdomain, 1.0*sum(s.avg_time_sec)/r.npages loadtime
               from aggr_sub s join aggr_run r on s.date_cet = r.date_cet and s.scriptname = r.scriptname
@@ -152,15 +278,6 @@ proc graph_combined_topdomain {r dargv period} {
 
     # @todo maybe replace having loadtime2 > 0.1 with a subselect check: avg of this domain for the whole period should be more than 0.1 sec.
     # @note currently, if one day only has domain > 0.1s, it will appear in the graph, with a low avg noted in the legend.
-if {0} {
-    $r query "select date, topdomain, sum(loadtime)/(select count(distinct scriptname) from aggr_run) loadtime2 from (              
-                select s.scriptname, s.date_cet date, s.keyvalue topdomain, 1.0*sum(s.avg_time_sec)/r.npages loadtime
-                from aggr_sub s join aggr_run r on s.date_cet = r.date_cet and s.scriptname = r.scriptname
-                where s.keytype = 'topdomain'
-                and s.date_cet > '[period2startdate $period]'
-                group by 1,2,3) a join nscripts n on n.date_cet = a.date
-              group by 1,2"
-}              
  
     $r query "select c.date, c.topdomain, sum(c.loadtime)/n.number loadtime2, n.number from (              
                 select s.scriptname, s.date_cet date, s.keyvalue topdomain, 1.0*sum(s.avg_time_sec)/r.npages loadtime
@@ -194,7 +311,7 @@ if {0} {
   }
 }
 
-proc graph_combined_extension {r dargv period} {
+proc graph_combined_extension_old {r dargv period} {
   if {[period2days $period] >= 7} {
     $r query "select s.scriptname, s.date_cet date, s.keyvalue extension, 1.0*sum(s.avg_time_sec)/r.npages loadtime
               from aggr_sub s join aggr_run r on s.date_cet = r.date_cet and s.scriptname = r.scriptname

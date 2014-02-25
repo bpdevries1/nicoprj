@@ -144,6 +144,7 @@ oo::class create Rwrapper {
       my preprocess
       log debug "Graph does not exist, so creating: [:title $d]"
       set colour [ifp [= "" [:colour $d]] "" ", colour=as.factor([:colour $d]), shape=as.factor([:colour $d])"] 
+      # set colour [ifp [= "" [:colour2 $d]] "" ", colour=as.factor([:colour2 $d]), shape=as.factor([:colour2 $d])"] 
       my write "p = qplot([:xvar $d], [:yvar $d], data=df.plot, geom='[:geom $d]' $colour) +"
       my write-if-filled :geom2 "geom_point(data=df.plot, aes(x=[:xvar $d], y=[:yvar $d], shape=as.factor([:colour $d]))) +"
 
@@ -151,6 +152,7 @@ oo::class create Rwrapper {
       my write_facet
       my write_legend
       my write_extra
+      my write_hline
       
       # for now labs as the latest, is not followed by '+'
       my write_labs
@@ -199,14 +201,21 @@ oo::class create Rwrapper {
       }
       
       # my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/nxvalues avrg, avg([:yvar $d]) avg2, count([:yvar $d]) nr from df, dfnvalues group by 1')"
-      my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/(nxvalues*nfacets) avrg, avg([:yvar $d]) avg2, count([:yvar $d]) nr from df, dfnvalues group by 1')"
+      # my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/(nxvalues*nfacets) avrg, avg([:yvar $d]) avg2, count([:yvar $d]) nr from df, dfnvalues group by 1')"
+      if {[:maxcolours $d] == 0} {
+        my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/(nxvalues*nfacets) avrg, avg([:yvar $d]) avg2, count([:yvar $d]) nr from df, dfnvalues group by 1')"
+      } else {
+        my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/(nxvalues*nfacets) avrg, avg([:yvar $d]) avg2, count([:yvar $d]) nr from df, dfnvalues group by 1 order by 2 desc limit 10')"
+      }
       my write_df dft
       # my write not possible below, single quotes should stay single quotes.
       puts $f "df.plot = sqldf(\"select df.*, '\['||round(dft.avrg,[:legend.avg $d])||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\")"
       my write_df df.plot
       dict set d colour "label_avg"
+      # dict set d colour2 "label_avg"
     } else {
       my write "df.plot = df"
+      # dict set d colour2 [:colour $d]
     }
   }
 
@@ -221,11 +230,18 @@ oo::class create Rwrapper {
     my variable d
     # @note scale_colour should be put before scale_shape, in order for guides(ncol) to work.
     #       doesn't matter if guides is put first.    
+    if {[:maxcolours $d] > 0} {
+      set colourlabel "[:colourlabel $d] (top [:maxcolours $d])"
+    } else {
+      set colourlabel [:colourlabel $d]
+    }
     if {$colour != ""} {
-      my write2 "scale_colour_discrete(name='[:colourlabel $d]') +"
+      # my write2 "scale_colour_discrete(name='[:colourlabel $d]') +"
+      my write2 "scale_colour_discrete(name='$colourlabel') +"
     }
     if {([:geom $d] == "point") || ([:geom2 $d] == "point")} {
-      my write2 "scale_shape_manual(name='[:colourlabel $d]', values=rep(1:25,10)) +"
+      # my write2 "scale_shape_manual(name='[:colourlabel $d]', values=rep(1:25,10)) +"
+      my write2 "scale_shape_manual(name='$colourlabel', values=rep(1:25,10)) +"
     }
     if {([:ymin $d] != "") && ([:ymax $d] != "")} {
       my write2 "scale_y_continuous(limits=c([:ymin $d], [:ymax $d])) +"
@@ -267,6 +283,13 @@ oo::class create Rwrapper {
     my variable d
     # @todo als pos=bottom en dir=vertical, dan checken hoeveel 'kleuren' er zijn. Als veel, dan grafiek groter maken.
     #       berekening in Tcl (dan ook query in tcl) of in R (beter, als dit kan).
+    if 0 {
+      if {[:maxcolours $d] != 0} {
+        my write2 "theme(legend.title='[:colour $d] (top [:maxcolours $d])') +"
+      } else {
+        my write2 "theme(legend.title='[:colour $d]') +"
+      }
+    }
     my write-if-filled :legend.position "theme(legend.position='[:legend.position $d]') +"
     my write-if-filled :legend.direction "theme(legend.direction='[:legend.direction $d]') +"
     # 24-1-2014 tests to solve long labels in legends -> failed.
@@ -286,6 +309,11 @@ oo::class create Rwrapper {
     my write-if-filled :extra "[:extra $d] +"
   }
   
+  method write_hline {} {
+    my variable d
+    my write-if-filled :hline "geom_hline(yintercept=[:hline $d]) +"
+  }
+  
   method write_ggsave {} {
     my variable d outputroot outformats
     if {[:height $d] != ""} {
@@ -294,11 +322,6 @@ oo::class create Rwrapper {
     } else {
       set facets [ifp [= [:facet $d] ""] "NA" "df.plot\$[:facet $d]"]
       set colours [ifp [= [:colour $d] ""] "NA" "df.plot\$[:colour $d]"]
-      #if {[:facet $d] == ""} {
-      #  set facets "NA"
-      #} else {
-      #  set facets "df\$[:facet $d])" 
-      #}
       my write "height = det.height(height.min=[:height.min $d], height.max=[:height.max $d], height.base=[:height.base $d], height.perfacet=[:height.perfacet $d], height.percolour=[:height.percolour $d], facets=$facets, colours=$colours, legend.position='[:legend.position $d]')"
     }
  
@@ -314,16 +337,6 @@ oo::class create Rwrapper {
       my write "print(concat('Made graph: ', '$outname'))"
     }
     
-    if {0} {
-      # my write "ggsave('[:pngname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-      my write "ggsave('[file join $outputroot [:pngname $d]]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-      # ook voor SVG wel dimensies opgeven, anders vierkant en blijft vierkant.
-      # my write "ggsave('[:svgname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-      my write "ggsave('[file join $outputroot [:svgname $d]]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-      # my write "ggsave('[:pngname $d].svg', plot=p)"
-      my write "print(concat('Made graph: ', '[:pngname $d]'))"
-    }
-  
   }
   
   method write-if-filled {key expr} {
@@ -398,6 +411,7 @@ oo::class create Rwrapper {
     # @note default for height.perfacet/colour are 0, graphs might have just one of those items. If 0 don't check the df column.
     my dset dct height.perfacet 0
     my dset dct height.percolour 0
+    my dset dct maxcolours 0
     return $dct
   }
   
