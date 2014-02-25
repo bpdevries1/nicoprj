@@ -3,6 +3,8 @@
 # meta-domains.tcl - Determine excluded domains in Keynote scripts and compare with domains that should be excluded.
 # examples: livecom, omniture, eloqua
 
+# @todo maybe redo this based on actual domains, not top-domains.
+
 package require tdbc::sqlite3
 package require Tclx
 package require ndv

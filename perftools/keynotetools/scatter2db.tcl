@@ -190,24 +190,6 @@ proc define_tables {db {pageitem 1}} {
     delta_user_msec bandwidth_kbsec cookie_count domain_count connection_count browser_errors \
     setup_msec attempts speed phone_number}
 
-if {0} {    
-Under TxnMeasurement
-New <txn__summary>:
-<element__count> 
-<content__errors> 
-<resp_bytes>1059517</resp_bytes>
-<estimated_cache_delta_msec>13026</estimated_cache_delta_msec>
-<trans_level_comp_msec/>
-<delta_user_msec>15309</delta_user_msec>
-<bandwidth_kbsec>70.64</bandwidth_kbsec>
-<cookie_count/>
-<domain_count>10</domain_count>
-<connection_count>23</connection_count>
-<browser_errors/>
-
-Dialer:
-<setup__msec/><attempts/><speed/><phone__number/>    
-    }
   $db add_tabledef page {id} {scriptname ts_cet date_cet scriptrun_id page_seq page_type connect_delta delta_msec \
     dns_lookup_msec first_packet_delta new_connection remain_packets_delta request_delta \
     ssl_handshake_delta start_msec system_delta \
@@ -219,30 +201,6 @@ Dialer:
     first_paint_msec full_screen_msec time_to_interactive_page custom_component_1_msec \
     custom_component_2_msec custom_component_3_msec}
 
-if {0} {    
-<txnPagePerformance>
-new:
-<delta_user_msec>1631</delta_user_msec>
-<first_byte_msec>31</first_byte_msec> - maybe equal to first_packet_delta
-<estimated_cache_delta_msec>1097</estimated_cache_delta_msec>
-<bandwidth_kbsec>661.23</bandwidth_kbsec>
-<cookie_count/>
-<domain_count>6</domain_count>
-<connection_count>13</connection_count>
-<browser_errors/>
-<dom_unload_time/>
-<dom_interactive_msec>158</dom_interactive_msec>
-<dom_content_load_time>22</dom_content_load_time>
-<dom_complete_msec>1502</dom_complete_msec>
-<dom_load_time>0</dom_load_time>
-<first_paint_msec>407</first_paint_msec>
-<full_screen_msec/>
-<time_to_interactive_page>1504</time_to_interactive_page>
-<custom_component_1_msec/>
-<custom_component_2_msec/>
-<custom_component_3_msec/>
-    }
-    
   if {$pageitem} {
     $db add_tabledef pageitem {id} {scriptname ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
       scontent_type url \
@@ -253,61 +211,10 @@ new:
       detail_component_1_msec detail_component_2_msec detail_component_3_msec \
       ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
       header_bytes object_text header_code custom_object_trend status_code aptimized}
-  # msmt_conn_id: connection id? the TCP Stream, compare wireshark. #of those should be equal to nconnections field.
-  if {0} {    
-  Huidig, sorted:    
-  connect_delta
-  content_type
-  dns_delta
-  domain
-  element_delta
-  error_code
-  extension
-  first_packet_delta
-  page_id
-  remain_packets_delta
-  request_delta
-  resource_id
-  scontent_type
-  scriptrun_id
-  ssl_handshake_delta
-  start_msec
-  system_delta
-  url
-      
-  New:
-  TxnDetailPerformance:
-  detail_component_1_msec detail_component_2_msec detail_component_3_msec
-  
-  ip_address
-  element_cached
-  msmt_conn_id
-  conn_string_text
-  request_bytes
-  content_bytes
-  header_bytes
-  object_text
-  header_code
-  custom_object_trend
-  status_code
-  url: calc field: concat(conn_string_text, object_text)
-  }
   }
   
   # [2013-11-04 12:31:24] add new tables also for new databases
   add_daily_status $db
-  if {0} {
-    # 26-11-2013 most likely this tabledef (pageitem_gt3) is not used here.
-    $db add_tabledef pageitem_gt3 {id} {scriptname ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
-        scontent_type url \
-        extension domain topdomain urlnoparams \
-        error_code connect_delta dns_delta element_delta first_packet_delta \
-        remain_packets_delta request_delta \
-        ssl_handshake_delta start_msec system_delta basepage record_seq \
-        detail_component_1_msec detail_component_2_msec detail_component_3_msec \
-        ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
-        header_bytes object_text header_code custom_object_trend status_code}  
-  }
   $db add_tabledef aggr_sub {id} {date_cet scriptname {page_seq int} {npages int} keytype keyvalue \
     {avg_time_sec real} {avg_nkbytes real} {avg_nitems real}}
 

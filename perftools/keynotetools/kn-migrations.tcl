@@ -323,6 +323,7 @@ proc add_daily_stats1 {db {create_tables 1}} {
     {npages int} {avail real} {datacount int} {total_ttip_sec real} {page_ttip_sec real}}
   $db add_tabledef aggr_page {id} {scriptname date_cet {page_seq int} {avail real} \
     {page_time_sec real} {page_ttip_sec real} {datacount int}}
+    
   if {$create_tables} {
     $db create_tables 0
   }
@@ -425,6 +426,10 @@ proc add_daily_stats2 {db {create_tables 1}} {
       
   $db add_tabledef domain_ip_time {id} {scriptname date_cet topdomain domain ip_address {number int} {min_conn_msec real}}
   $db add_tabledef aggr_specific {id} {scriptname date_cet topic {per_page_sec real}}
+  
+  # 19-2-2014 determine minimum (and max, avg to check) connection times to servers to determine physical locations.
+  $db add_tabledef aggr_connect_time {id} {scriptname date_cet domain topdomain ip_address {min_conn_msec real} \
+    {max_conn_msec real} {avg_conn_msec real} {number int}}
   
   if {$create_tables} {
     $db create_tables 0
@@ -616,6 +621,29 @@ migrate_proc redo_aggrrunpage_20140129_2 "Redo all aggr-run-page records" {
   $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('dailystats')"
   $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('combinereport')"
 }
+
+# @note redo aggrsub because some things are added: domain, ipaddress, content_type, aptimized, and some combinations.
+migrate_proc redo_aggrsub_20140218 "Redo all aggr-sub records" {
+  $db exec2 "update dailystatus set dateuntil_cet = date('now', '-42 days') where actiontype in ('aggrsub', 'combinereport')"
+}
+
+# @note redo aggrsub because some things are added: domain, ipaddress, content_type, aptimized, and some combinations.
+migrate_proc add_aggr_connect_time "Add aggr_connect_time table" {
+  add_daily_stats2 $db 1
+}
+
+migrate_proc redo_combinereport_20140219 "Redo all aggr-sub records" {
+  $db exec2 "update dailystatus set dateuntil_cet = date('now', '-42 days') where actiontype in ('combinereport')"
+}
+
+migrate_proc redo_aggrsub_20140222 "Redo aggrsub wrt gt100k" {
+  $db exec2 "update dailystatus set dateuntil_cet = date('now', '-42 days') where actiontype in ('aggrsub', 'combinereport')"
+}
+
+migrate_proc redo_aggrsub_no_ip_20140222 "Remove IP related stuff from aggr-sub" {
+  $db exec2 "delete from aggr_sub where keytype in ('ip_address', 'dom_ip')"
+}
+
 
 
 # LET OP: als pageitem tabel verandert, moet pageitem_gt3 en pageitem_topic mee veranderen!

@@ -118,7 +118,7 @@ proc copy_to_target_db {db scriptname targetdir datefrom_cet dateuntil_cet} {
   set targetdbname [det_targetdbname $targetdir]
   log info "Copying aggregate data to targetDB: $targetdbname"
   $db exec2 "attach database '$targetdbname' as toDB"
-  foreach table {aggr_run aggr_page aggr_slowitem aggr_sub pageitem_gt3 pageitem_topic domain_ip_time aggr_specific} {
+  foreach table {aggr_run aggr_page aggr_slowitem aggr_sub aggr_connect_time pageitem_gt3 pageitem_topic domain_ip_time aggr_specific} {
     set new_table 0
     try_eval {
       # @note hier geen -try bijzetten, want wil exceptie als het fout gaat.
