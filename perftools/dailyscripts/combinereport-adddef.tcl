@@ -48,6 +48,7 @@ proc main {argv} {
     foreach subdir [glob -directory [from_cygwin [:srcdir $dargv]] -type d [:pattern $dargv]] {
       $db insert combinedefdir [dict create combinedef_id $cd_id dir $subdir]
       delete_dailystatus_combinereport $subdir
+      log info "Adding dir: $subdir"
       incr ndirs
     }
   } else {
@@ -60,6 +61,7 @@ proc main {argv} {
         set subdir [file join [from_cygwin [:srcdir $dargv]] $line]
         $db insert combinedefdir [dict create combinedef_id $cd_id dir $subdir]
         incr ndirs
+        log info "Adding dir: $subdir"
         if {[file exists $subdir]} {
           delete_dailystatus_combinereport $subdir
         } else {
@@ -71,6 +73,7 @@ proc main {argv} {
   }
   $db exec2 "update combinedef set ndirs = $ndirs where id = $cd_id"
   $db close
+  log info "Added $ndirs dirs"
 }
 
 proc det_cmds {dargv} {
