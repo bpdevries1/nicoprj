@@ -12,15 +12,6 @@ proc main {argv} {
   puts $f "# $filename"
   puts $f "# Adding files to git and commit"
   set has_changes [puts_changes $f $res]
-  if {0} {
-    if {$has_changes} {
-      set dt [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
-      puts $f "git commit -m \"Changes for $dt\""
-      puts $f "# gitpush"
-    } else {
-      puts $f "# No changes"
-    }
-  }
   puts $f "# name of file to exec: $filename"
   close $f
   exec c:/util/notepad++/notepad++.exe $filename
@@ -32,8 +23,8 @@ proc puts_changes {f res} {
   set files {}
   foreach line [split $res "\n"] {
     if {[regexp {^#[ \t]+modified:[ \t]+(.+)$} $line z filename]} {
-      puts $f "# modified file: $filename"
-      puts $f "# git add $filename"
+      # puts $f "# modified file: $filename"
+      # puts $f "# git add $filename"
       lappend files $filename
       set has_changes 1
     } elseif {[regexp {Untracked files:} $line]} {
@@ -45,13 +36,13 @@ proc puts_changes {f res} {
         # ignore this one.
       } elseif {[regexp {^#[ \t]+(.+[^/])$} $line z filename]} {
         # path should not end in /, don't add dirs.
-        puts $f "# new file: $filename"
-        puts $f "# git add $filename"
+        # puts $f "# new file: $filename"
+        # puts $f "# git add $filename"
         lappend files $filename
         set has_changes 1
       } elseif {[regexp {^#[ \t]+(.+[/])$} $line z filename]} {
-        puts $f "# new DIRECTORY: $filename"
-        puts $f "# git add $filename"
+        # puts $f "# new DIRECTORY: $filename"
+        # puts $f "# git add $filename"
         lappend files $filename
         set has_changes 1
       }
