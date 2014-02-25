@@ -3,6 +3,7 @@
 *~
 *.log
 *.$$$
+*.out
 
 # quote hash-marks
 \#*\#
