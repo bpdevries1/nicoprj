@@ -16,6 +16,7 @@ proc main {argv} {
     {dbpattern.arg "*.db" "Databases within rootdir to exec script in"}
     {script.arg "" "script.sql to execute"}
     {output.arg "" "If set, file to send query output to"}
+    {append "If set, append to output file"}
     {coe "If set, continue-on-error"}
     {dryrun "If set, just print databases and statements, don't exec anything"}
     {loglevel.arg "info" "Log level (debug, info, warn)"}
@@ -32,7 +33,11 @@ proc do_script_dbs {dargv} {
   # first handle single db argument, then rootdir/dbpattern combination.
   set stmts [det_statements [:script $dargv]]
   if {[:output $dargv] != ""} {
-    set fo [open [:output $dargv] w]
+    if {[:append $dargv]} {
+      set fo [open [:output $dargv] a]
+    } else {
+      set fo [open [:output $dargv] w]
+    }
     puts "Executing script: [:script $dargv] for DB's [:pattern $dargv]"
   } else {
     set fo ""
@@ -42,7 +47,12 @@ proc do_script_dbs {dargv} {
     do_statements_db [:db $dargv] $stmts $dargv 
   }
   if {[:rootdir $dargv] != ""} {
-    foreach dbname [fileutil::findByPattern [:rootdir $dargv] [:dbpattern $dargv]] {
+    if 0 {
+      foreach dbname [fileutil::findByPattern [:rootdir $dargv] [:dbpattern $dargv]] {
+        do_statements_db $dbname $stmts $dargv
+      }
+    }
+    foreach dbname [find_files [:rootdir $dargv] [:dbpattern $dargv]] {
       do_statements_db $dbname $stmts $dargv
     }
   }
@@ -50,6 +60,7 @@ proc do_script_dbs {dargv} {
     close $fo
   }
 }
+
 
 proc det_statements {scriptname} {
   set lines [split [read_file $scriptname] "\n"]
@@ -111,6 +122,26 @@ proc res2table {res} {
     set header [join [dict keys [lindex $res 0]] "\t"]
     set rows [listc {[join [dict values $row] "\t"]} row <- $res]
     return "$header\n[join $rows "\n"]"
+  }
+}
+
+# for ndv lib
+# @param pattern - glob pattern
+# eg find_files "KNDL" "CBF-CN/keynotelogs.db" should work.
+# @todo: ** means one or more subdirs, se descend with same pattern.
+# @todo: add option to use regexp's:
+# - either one regexp for the whole path, then need to find all files first and then check.
+# - divide pattern into subdirs in same way as with glob patterns, should perform better.
+proc find_files {root_dir pattern} {
+  set specs [file split $pattern]
+  if {[llength $specs] <= 1} {
+    glob -nocomplain -directory $root_dir $pattern
+  } else {
+    set res {}
+    foreach subdir [glob -nocomplain -directory $root_dir [lindex $specs 0]] {
+      set res [concat $res [find_files $subdir [file join {*}[lrange $specs 1 end]]]]
+    }
+    return $res
   }
 }
 
