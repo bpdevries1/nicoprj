@@ -132,3 +132,21 @@ proc unknown args {
   uplevel 1 [list _original_unknown {*}$args]
 }
 
+# 26-2-2014 also some list helpers here. Should be in separate lib, but keep here, because names also start with :
+# don't use #, 0, 1 without : => # is a comment, others would be too confusing.
+proc :# {l} {
+  llength $l
+}
+
+proc :0 {l} {
+  lindex $l 0
+}
+
+proc :1 {l} {
+  lindex $l 1
+}
+
+proc :k {d} {
+  dict keys $d
+}
+
