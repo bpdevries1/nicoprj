@@ -27,6 +27,20 @@ oo::class create Rwrapper {
     log debug "Rwrapper constructed with: $dargv"
   }
 
+  # @note dit kan main aanroep zijn. Na construct meteen (en alleen) deze.
+  method main {body} {
+    my variable dargv
+    my init [:dir $dargv] [file join [:dir $dargv] [:dbname $dargv]]
+    my set_outformat [:outformat $dargv]
+
+    uplevel $body
+    
+    my doall
+    my cleanup
+    my destroy
+  }
+  
+  # @todo remove need for a_dir and db, everything should be set in dargv given to constructor.
   method init {a_dir db {a_file_addition ""}} {
     my variable f cmdfilename dir stacked_cmds Routput Rlatest
     # set dir $a_dir
@@ -51,10 +65,6 @@ oo::class create Rwrapper {
     my set_outputroot $dir ; # default output-dir is same as DB
   }
   
-  method format_now_filename {} {
-    clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"
-  }
-  
   method set_outputroot {a_dir} {
     my variable outputroot
     set outputroot $a_dir
@@ -70,42 +80,7 @@ oo::class create Rwrapper {
     }
   }
   
-  method now {} {
-    clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S" 
-  }
   
-  # replace ' with " before writing.
-  method write {cmd} {
-    my variable f
-    # regsub -all {\'} $cmd "\42" cmd2
-    # puts $f $cmd2
-    # puts $f [my indent [my replace_quotes $cmd]]
-    puts $f [my replace_quotes $cmd]
-  }
-  
-  method write2 {cmd} {
-    my write "  $cmd" 
-  }
-  
-  method replace_quotes {cmd} {
-    regsub -all {\'} $cmd "\42" cmd2
-    return $cmd2
-  }
-  
-  method indent {str} {
-    # @todo first start all at line 1, maybe indent for queries and plot commands.
-    # @todo maybe not use this function.
-  }
-  
-  # start first line at col 0, next at col 2.
-  method pprint {str} {
-    set str [string trim $str]
-    # remove all spaces from start of lines
-    while {[regsub -all {\n } $str "\n" str]} {}
-    # put 2 spaces in front of every line but the first
-    regsub -all {\n} $str "\n  " str
-    return $str
-  }
   
   method query {query} {
     my variable f stacked_cmds
@@ -117,6 +92,12 @@ oo::class create Rwrapper {
     # my write 
   }
 
+  method dbexec {query} {
+    my variable f
+    # @note 25-2-2014 query can contain single quotes, so cannot use write, so use write2.
+    puts $f "db.exec(db, \"$query\")"
+  }
+  
   method melt {value_vars} {
     my variable stacked_cmds
     # my write "df = melt(df, measure.vars=c("resp_bytes", "element_count", "domain_count", "content_errors", "connection_count"))
@@ -210,6 +191,10 @@ oo::class create Rwrapper {
       my write_df dft
       # my write not possible below, single quotes should stay single quotes.
       puts $f "df.plot = sqldf(\"select df.*, '\['||round(dft.avrg,[:legend.avg $d])||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\")"
+      # puts $f "df.plot = sqldf(\"select df.*, '\['||printf('%.[:legend.avg $d]f', dft.avrg)||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\")"
+      
+      # printf("%.2f", floatField) => kent 'ie niet, ook niet vanaf R. En vanaf tcl zelfs ook niet, alleen hier wel zelf toe te voegen natuurlijk.
+      
       my write_df df.plot
       dict set d colour "label_avg"
       # dict set d colour2 "label_avg"
@@ -484,7 +469,49 @@ oo::class create Rwrapper {
   }
   
   method cleanup {} {
-    # may todo: remove commands file. 
+    # maybe todo: remove commands file. 
+  }
+
+  # Helper methods
+  method now {} {
+    clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S" 
+  }
+  
+  # replace ' with " before writing.
+  method write {cmd} {
+    my variable f
+    # regsub -all {\'} $cmd "\42" cmd2
+    # puts $f $cmd2
+    # puts $f [my indent [my replace_quotes $cmd]]
+    puts $f [my replace_quotes $cmd]
+  }
+  
+  method write2 {cmd} {
+    my write "  $cmd" 
+  }
+  
+  method replace_quotes {cmd} {
+    regsub -all {\'} $cmd "\42" cmd2
+    return $cmd2
+  }
+  
+  method indent {str} {
+    # @todo first start all at line 1, maybe indent for queries and plot commands.
+    # @todo maybe not use this function.
+  }
+  
+  # start first line at col 0, next at col 2.
+  method pprint {str} {
+    set str [string trim $str]
+    # remove all spaces from start of lines
+    while {[regsub -all {\n } $str "\n" str]} {}
+    # put 2 spaces in front of every line but the first
+    regsub -all {\n} $str "\n  " str
+    return $str
+  }
+  
+  method format_now_filename {} {
+    clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"
   }
   
 }
