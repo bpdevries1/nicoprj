@@ -21,6 +21,22 @@ ndv::source_once [file join [info script] .. .. .. lib CExecLimit.tcl]
 # @todo order van legend moet (soms, altijd?) net andersom, bv met guides(colour = guide_legend(reverse = TRUE), shape = guide_legend(reverse = TRUE)), maar werkt nog niet zo.
 # @todo [1-3-2014] BUG lijkt dat dict var's soms een waarde houden van de vorige graph. Bv 'df.avail' wordt gebruik bij legend.avg en sqldf, terwijl je al met loading times bezig bent, en avail helemaal niet als veld in deze df zit.
 # @todo [1-3-2014] BUG top 10 die je wilt tonen werkt (waarsch) alleen in combi met legend.avg, deze ook op 0 zetten dan?
+
+if 0 {
+Instance vars for RWrapper:
+* dargv - bij constructor gezet, blijft hierna constant, wel vaker gebruikt, is prima.
+* outputroot - bij init een default, en speciale method om te zetten: set_outputroot
+* outformats - method: set_outformat
+* dir - in init gezet
+* fcmd - eenmalig voor command-file.
+* cmdfilename - in init gezet
+* Routput - in init gezet.
+* Rlatest - in init gezet.
+* stacked_cmds - in init op {} gezet. Bij query gevuld, ook eerst op leeg gezet. In melt() aangevuld. In plot_prepare() uitgevoerd en hierna op leeg gezet.
+* d - bij qplot opnieuw gezet, als resultaat van plot_prepare. In plot_prepare als result van det_plot_dct gezet.
+}
+
+
 oo::class create Rwrapper {
 
   constructor {a_dargv} {
@@ -44,12 +60,12 @@ oo::class create Rwrapper {
   
   # @todo remove need for a_dir and db, everything should be set in dargv given to constructor.
   method init {a_dir db {a_file_addition ""}} {
-    my variable f cmdfilename dir stacked_cmds Routput Rlatest
+    my variable fcmd cmdfilename dir stacked_cmds Routput Rlatest
     # set dir $a_dir
     log debug "RWrapper initialised with: $a_dir"
     set dir [file normalize [from_cygwin $a_dir]] ; # for R need Unix style (/) dir. 
     set cmdfilename "R-[my now].R"
-    set f [open [file join $dir $cmdfilename] w]
+    set fcmd [open [file join $dir $cmdfilename] w]
     set Routput "R-output${a_file_addition}-[my format_now_filename].txt"
     set Rlatest "R-latest${a_file_addition}.R"
     my write [my pprint "setwd('$dir')
@@ -83,22 +99,24 @@ oo::class create Rwrapper {
   }
   
   method query {query} {
-    my variable f stacked_cmds
-    # puts $f "query = \"$query\""
+    my variable fcmd stacked_cmds
+    # puts $fcmd "query = \"$query\""
     set stacked_cmds {} ; # when a new query starts, other cmds on the stack can be removed, not used anymore, overwritten.
     lappend stacked_cmds [my pprint "query = \"$query\""]
     lappend stacked_cmds "print.log(\"Query - start\")"
-    lappend stacked_cmds "df = db.query.dt(db, query)"
+    # lappend stacked_cmds "df = db.query.dt(db, query)"
+    # 2-3-2014 add Date field after sqldf has been done. Sqldf doesn't like Date fields anymore (since update 1-3-2014).
+    lappend stacked_cmds "df = db.query(db, query)"
     lappend stacked_cmds "print.log(\"Query - finished\")"
     lappend stacked_cmds "print(head(df))" 
     # my write 
   }
 
   method dbexec {query} {
-    my variable f
+    my variable fcmd
     # @note 25-2-2014 query can contain single quotes, so cannot use write, so use write2.
     my write "print.log('Query - start')"
-    puts $f "db.exec(db, \"$query\")"
+    puts $fcmd "db.exec(db, \"$query\")"
     my write "print.log('Query - finished')"
   }
   
@@ -115,7 +133,7 @@ oo::class create Rwrapper {
   # - direct als params, dan wel backslash nodig, maar geen [list], en parameter substitutie.
   # beide kunnen nu, in plot_prepare opgelost.
   method qplot {args} {
-    my variable dargv dir stacked_cmds f d outputroot outformats
+    my variable dargv dir stacked_cmds fcmd d outputroot outformats
     set d [my plot_prepare {*}$args]
     if {$d == {}} {
       # graph already exists and in incr(emental) mode: return.
@@ -156,7 +174,7 @@ oo::class create Rwrapper {
   # - direct als params, dan wel backslash nodig, maar geen [list], en parameter substitutie.
   # beide kunnen nu, in plot_prepare opgelost.
   method percplot {args} {
-    my variable dargv dir stacked_cmds f d outputroot outformats
+    my variable dargv dir stacked_cmds fcmd d outputroot outformats
     set d [my plot_prepare {*}$args]
     if {$d == {}} {
       # graph already exists and in incr(emental) mode: return.
@@ -191,8 +209,8 @@ oo::class create Rwrapper {
   
   
   method plot_prepare {args} {
-    # my variable dargv dir stacked_cmds f d
-    my variable dargv dir stacked_cmds f d outputroot
+    # my variable dargv dir stacked_cmds fcmd d
+    my variable dargv dir stacked_cmds fcmd d outputroot
     set dct [ifp [= 1 [llength $args]] [lindex $args 0] $args]
     set d [my det_plot_dct $dct]
     log debug "dct: $dct"
@@ -210,22 +228,27 @@ oo::class create Rwrapper {
       my melt [:melt $d] 
     }
     foreach cmd $stacked_cmds {
-      puts $f $cmd ; # replace quotes already done where needed (not with query!)
+      puts $fcmd $cmd ; # replace quotes already done where needed (not with query!)
     }
     set stacked_cmds {}
     return $d
   }
 
   # stuff to to before qplot (or ggplot?) is called
+  # @pre df does not contain an R-Date field (does contain date, with sql date, so R string).
+  # @post df does contain an R-Date field (if x-axis has dates or times that is).
   method preprocess {} {
-    my variable f d
+    my variable fcmd d
     if {[:legend.avg $d] != ""} {
       # add average of values to legend, add to df here using library(sqldf)
       # my write "dft = sqldf('select [:colour $d], avg([:yvar $d]) avrg from df group by 1')"
       if {[:facet $d] != ""} {
-        my write "dfnvalues = data.frame(nxvalues = length(levels(as.factor(df\$[:xvar $d]))), nfacets=length(levels(as.factor(df\$[:facet $d]))))"
+        # xvar is op date_Date gezet, en bestaat hier nog niet, dus gebruik :x, staat (gewoon) op date.
+        # my write "dfnvalues = data.frame(nxvalues = length(levels(as.factor(df\$[:xvar $d]))), nfacets=length(levels(as.factor(df\$[:facet $d]))))"
+        my write "dfnvalues = data.frame(nxvalues = length(levels(as.factor(df\$[:x $d]))), nfacets=length(levels(as.factor(df\$[:facet $d]))))"
       } else {
-        my write "dfnvalues = data.frame(nxvalues = length(levels(as.factor(df\$[:xvar $d]))), nfacets=1)"
+        # my write "dfnvalues = data.frame(nxvalues = length(levels(as.factor(df\$[:xvar $d]))), nfacets=1)"
+        my write "dfnvalues = data.frame(nxvalues = length(levels(as.factor(df\$[:x $d]))), nfacets=1)"
       }
       
       # my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/nxvalues avrg, avg([:yvar $d]) avg2, count([:yvar $d]) nr from df, dfnvalues group by 1')"
@@ -235,18 +258,26 @@ oo::class create Rwrapper {
       } else {
         my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/(nxvalues*nfacets) avrg, avg([:yvar $d]) avg2, count([:yvar $d]) nr from df, dfnvalues group by 1 order by 2 desc limit [:maxcolours $d]')"
       }
+      # @todo bepaal of 8 goede waarde is, door ceiling(log10(m)), waarbij m = max(dft$avrg)
+      # my write "dft\$avrg_f = sprintf('\[%8.[:legend.avg $d]f\] ', dft\$avrg)"
+      my write "fmt.string = det.fmt.string(dft\$avrg, [:legend.avg $d])"
+      my write "dft\$avrg_f = sprintf(fmt.string, dft\$avrg)"
+      
       my write_df dft
       # my write not possible below, single quotes should stay single quotes.
-      puts $f "df.plot = sqldf(\"select df.scriptname, df.date, df.avail, '\['||round(dft.avrg,[:legend.avg $d])||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\")"
-      # puts $f "df.plot = sqldf(\"select df.*, '\['||printf('%.[:legend.avg $d]f', dft.avrg)||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\")"
-      
+      # 2-3-2014 df.avail staat hier nog, niet goed. Orig: select df.*, '\[' etc 
+      # df is result query, dus je weet velden eigenlijk niet goed. Dan toch date_Date nog niet toevoegen zodat je weer * kunt doen en later toevoegen.
+      # was new, but does not work: puts $fcmd "df.plot = sqldf(\"select df.scriptname, df.date, df.avail, '\['||round(dft.avrg,[:legend.avg $d])||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\")"
+      # puts $fcmd "df.plot = sqldf(\"select df.*, '\['||printf('%.[:legend.avg $d]f', dft.avrg)||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\")"
+      # puts $fcmd "df.plot = df.add.dt(sqldf(\"select df.*, '\['||round(dft.avrg, [:legend.avg $d])||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\"))"
+      puts $fcmd "df.plot = df.add.dt(sqldf(\"select df.*, dft.avrg_f || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\"))"
       # printf("%.2f", floatField) => kent 'ie niet, ook niet vanaf R. En vanaf tcl zelfs ook niet, alleen hier wel zelf toe te voegen natuurlijk.
       
       my write_df df.plot
       dict set d colour "label_avg"
       # dict set d colour2 "label_avg"
     } else {
-      my write "df.plot = df"
+      my write "df.plot = df.add.dt(df)"
       # dict set d colour2 [:colour $d]
     }
   }
@@ -446,8 +477,9 @@ oo::class create Rwrapper {
     my dset dct maxcolours 0
     
     # @todo 1-3-2014 temporary problem with sqldf, avg. Also effect on maxcolours.
-    dict unset dct legend.avg
-    dict unset dct maxcolours
+    # 2-3-2014 test if it works now, with adding real Date field after sqldf handling.
+    #dict unset dct legend.avg
+    #dict unset dct maxcolours
     
     return $dct
   }
@@ -465,12 +497,12 @@ oo::class create Rwrapper {
   }
   
   method doall {} {
-    my variable f cmdfilename dir dargv Routput Rlatest
+    my variable fcmd cmdfilename dir dargv Routput Rlatest
     my write [my pprint "\n# Finished\ndb.close(db)
               print.log('R finished')
               sink()
               sink(type = 'message')"]
-    close $f
+    close $fcmd
     if {[:keepcmd $dargv]} {
       file copy -force [file join $dir $cmdfilename] [file join $dir $Rlatest]
     } else {
@@ -531,17 +563,18 @@ oo::class create Rwrapper {
   
   # replace ' with " before writing.
   method write {cmd} {
-    my variable f
+    my variable fcmd
     # regsub -all {\'} $cmd "\42" cmd2
-    # puts $f $cmd2
-    # puts $f [my indent [my replace_quotes $cmd]]
-    puts $f [my replace_quotes $cmd]
+    # puts $fcmd $cmd2
+    # puts $fcmd [my indent [my replace_quotes $cmd]]
+    puts $fcmd [my replace_quotes $cmd]
   }
   
   method write2 {cmd} {
     my write "  $cmd" 
   }
   
+  # replace single quotes by double quotes.
   method replace_quotes {cmd} {
     regsub -all {\'} $cmd "\42" cmd2
     return $cmd2
@@ -562,6 +595,7 @@ oo::class create Rwrapper {
     return $str
   }
   
+  # format now so it can be used in filename (no ':')
   method format_now_filename {} {
     clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"
   }
