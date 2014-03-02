@@ -19,6 +19,8 @@ ndv::source_once [file join [info script] .. .. .. lib CExecLimit.tcl]
 # @todo in R-wrapper bepalen hoe hoog graph moet worden. height.percolour/perfacet op default zetten, afh plaatsing legend en ook #columns
 #       bepalen of deze meegenomen moeten worden. Bv ook als er veel colours zijn, en de hoogte groter moet worden dan voor een facet.
 # @todo order van legend moet (soms, altijd?) net andersom, bv met guides(colour = guide_legend(reverse = TRUE), shape = guide_legend(reverse = TRUE)), maar werkt nog niet zo.
+# @todo [1-3-2014] BUG lijkt dat dict var's soms een waarde houden van de vorige graph. Bv 'df.avail' wordt gebruik bij legend.avg en sqldf, terwijl je al met loading times bezig bent, en avail helemaal niet als veld in deze df zit.
+# @todo [1-3-2014] BUG top 10 die je wilt tonen werkt (waarsch) alleen in combi met legend.avg, deze ook op 0 zetten dan?
 oo::class create Rwrapper {
 
   constructor {a_dargv} {
@@ -57,8 +59,8 @@ oo::class create Rwrapper {
       sink(zz)
       # cannot split the message stderr stream (, split=TRUE)
       sink(zz, type = 'message')
-      print('R started')
       source('~/nicoprj/R/lib/ndvlib.R')
+      print.log('R started')
       load.def.libs()
       db = db.open('$db')"]
     set stacked_cmds {}
@@ -80,14 +82,14 @@ oo::class create Rwrapper {
     }
   }
   
-  
-  
   method query {query} {
     my variable f stacked_cmds
     # puts $f "query = \"$query\""
     set stacked_cmds {} ; # when a new query starts, other cmds on the stack can be removed, not used anymore, overwritten.
     lappend stacked_cmds [my pprint "query = \"$query\""]
+    lappend stacked_cmds "print.log(\"Query - start\")"
     lappend stacked_cmds "df = db.query.dt(db, query)"
+    lappend stacked_cmds "print.log(\"Query - finished\")"
     lappend stacked_cmds "print(head(df))" 
     # my write 
   }
@@ -95,7 +97,9 @@ oo::class create Rwrapper {
   method dbexec {query} {
     my variable f
     # @note 25-2-2014 query can contain single quotes, so cannot use write, so use write2.
+    my write "print.log('Query - start')"
     puts $f "db.exec(db, \"$query\")"
+    my write "print.log('Query - finished')"
   }
   
   method melt {value_vars} {
@@ -106,10 +110,10 @@ oo::class create Rwrapper {
     lappend stacked_cmds "print(tail(df))"
   }
   
-  # @todo idee: ook als args mee kunnen geven, dan 2 opties:
-  # - als dct zoals nu, met accolades, dan geen backslash nodig bij einde regel.
+  # @note: ook als args mee kunnen geven, dan 2 opties:
+  # - als dct (zoals nu), met accolades, dan geen backslash nodig bij einde regel.
   # - direct als params, dan wel backslash nodig, maar geen [list], en parameter substitutie.
-  # - of: parameter substitutie binnen qplot doen, maar mss gevaarlijk.
+  # beide kunnen nu, in plot_prepare opgelost.
   method qplot {args} {
     my variable dargv dir stacked_cmds f d outputroot outformats
     set d [my plot_prepare {*}$args]
@@ -126,6 +130,48 @@ oo::class create Rwrapper {
       log debug "Graph does not exist, so creating: [:title $d]"
       set colour [ifp [= "" [:colour $d]] "" ", colour=as.factor([:colour $d]), shape=as.factor([:colour $d])"] 
       # set colour [ifp [= "" [:colour2 $d]] "" ", colour=as.factor([:colour2 $d]), shape=as.factor([:colour2 $d])"] 
+      my write "print.log('Starting qplot')"
+      my write "p = qplot([:xvar $d], [:yvar $d], data=df.plot, geom='[:geom $d]' $colour) +"
+      my write-if-filled :geom2 "geom_point(data=df.plot, aes(x=[:xvar $d], y=[:yvar $d], shape=as.factor([:colour $d]))) +"
+
+      my write_scales $colour
+      my write_facet
+      my write_legend
+      my write_extra
+      my write_hline
+      
+      # for now labs as the latest, is not followed by '+'
+      my write_labs
+      my write "print.log('ggsave - start')"
+      my write_ggsave
+      my write "print.log('ggsave - finished')"
+      
+    # end of check df
+    my write "} else {print.log('WARNING: Dataframe df is empty, continue with next graph')}"
+  }
+
+  # Percentile plot: x contains percentile, y the values. Colours and facets are possible.
+  # @note: ook als args mee kunnen geven, dan 2 opties:
+  # - als dct (zoals nu), met accolades, dan geen backslash nodig bij einde regel.
+  # - direct als params, dan wel backslash nodig, maar geen [list], en parameter substitutie.
+  # beide kunnen nu, in plot_prepare opgelost.
+  method percplot {args} {
+    my variable dargv dir stacked_cmds f d outputroot outformats
+    set d [my plot_prepare {*}$args]
+    if {$d == {}} {
+      # graph already exists and in incr(emental) mode: return.
+      log debug "Graph already exists, not creating again: [:title $d]"
+      return 
+    }
+    
+    # df has a value here (when executed in R), check if not empty
+    my write "if (nrow(df) > 0) {"
+    
+      my preprocess
+      log debug "Graph does not exist, so creating: [:title $d]"
+      set colour [ifp [= "" [:colour $d]] "" ", colour=as.factor([:colour $d]), shape=as.factor([:colour $d])"] 
+      # set colour [ifp [= "" [:colour2 $d]] "" ", colour=as.factor([:colour2 $d]), shape=as.factor([:colour2 $d])"] 
+      my write "print.log('Starting qplot')"
       my write "p = qplot([:xvar $d], [:yvar $d], data=df.plot, geom='[:geom $d]' $colour) +"
       my write-if-filled :geom2 "geom_point(data=df.plot, aes(x=[:xvar $d], y=[:yvar $d], shape=as.factor([:colour $d]))) +"
 
@@ -140,9 +186,10 @@ oo::class create Rwrapper {
       my write_ggsave
       
     # end of check df
-    my write "} else {print('WARNING: Dataframe df is empty, continue with next graph')}"
+    my write "} else {print.log('WARNING: Dataframe df is empty, continue with next graph')}"
   }
-
+  
+  
   method plot_prepare {args} {
     # my variable dargv dir stacked_cmds f d
     my variable dargv dir stacked_cmds f d outputroot
@@ -155,7 +202,7 @@ oo::class create Rwrapper {
       log debug "File already exists, incr: return: [file join $outputroot [:pngname $d]]"
       return {}
     }
-    my write "\nprint(concat('Making graph: ', '[:pngname $d]'))"
+    my write "\nprint.log(concat('Making graph: ', '[:pngname $d]'))"
     if {[:query $d] != ""} {
       my query [:query $d] 
     }
@@ -186,11 +233,11 @@ oo::class create Rwrapper {
       if {[:maxcolours $d] == 0} {
         my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/(nxvalues*nfacets) avrg, avg([:yvar $d]) avg2, count([:yvar $d]) nr from df, dfnvalues group by 1')"
       } else {
-        my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/(nxvalues*nfacets) avrg, avg([:yvar $d]) avg2, count([:yvar $d]) nr from df, dfnvalues group by 1 order by 2 desc limit 10')"
+        my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/(nxvalues*nfacets) avrg, avg([:yvar $d]) avg2, count([:yvar $d]) nr from df, dfnvalues group by 1 order by 2 desc limit [:maxcolours $d]')"
       }
       my write_df dft
       # my write not possible below, single quotes should stay single quotes.
-      puts $f "df.plot = sqldf(\"select df.*, '\['||round(dft.avrg,[:legend.avg $d])||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\")"
+      puts $f "df.plot = sqldf(\"select df.scriptname, df.date, df.avail, '\['||round(dft.avrg,[:legend.avg $d])||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\")"
       # puts $f "df.plot = sqldf(\"select df.*, '\['||printf('%.[:legend.avg $d]f', dft.avrg)||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\")"
       
       # printf("%.2f", floatField) => kent 'ie niet, ook niet vanaf R. En vanaf tcl zelfs ook niet, alleen hier wel zelf toe te voegen natuurlijk.
@@ -205,7 +252,7 @@ oo::class create Rwrapper {
   }
 
   method write_df {df_name} {
-    my write "print('Summary of data frame: $df_name')"
+    my write "print.log('Summary of data frame: $df_name')"
     my write "print(head($df_name))"
     my write "print(tail($df_name))"
     my write "print(summary($df_name))"
@@ -310,7 +357,7 @@ oo::class create Rwrapper {
       my write "height = det.height(height.min=[:height.min $d], height.max=[:height.max $d], height.base=[:height.base $d], height.perfacet=[:height.perfacet $d], height.percolour=[:height.percolour $d], facets=$facets, colours=$colours, legend.position='[:legend.position $d]')"
     }
  
-    my write "print(concat('height: ', height))"
+    my write "print.log(concat('height: ', height))"
     foreach outformat $outformats {
       # outprocname: :0name
       set outprocname ":${outformat}name"
@@ -319,7 +366,7 @@ oo::class create Rwrapper {
       my write "# outname: $outname"
       # my write "ggsave('[file join $outputroot $outname]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
       my write "ggsave('[file join $outputroot $outname]', dpi=100, width=[:width $d], height=height, plot=p)"
-      my write "print(concat('Made graph: ', '$outname'))"
+      my write "print.log(concat('Made graph: ', '$outname'))"
     }
     
   }
@@ -397,6 +444,11 @@ oo::class create Rwrapper {
     my dset dct height.perfacet 0
     my dset dct height.percolour 0
     my dset dct maxcolours 0
+    
+    # @todo 1-3-2014 temporary problem with sqldf, avg. Also effect on maxcolours.
+    dict unset dct legend.avg
+    dict unset dct maxcolours
+    
     return $dct
   }
   
@@ -415,7 +467,7 @@ oo::class create Rwrapper {
   method doall {} {
     my variable f cmdfilename dir dargv Routput Rlatest
     my write [my pprint "\n# Finished\ndb.close(db)
-              print('R finished')
+              print.log('R finished')
               sink()
               sink(type = 'message')"]
     close $f
