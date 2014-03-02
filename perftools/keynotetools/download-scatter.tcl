@@ -221,7 +221,8 @@ proc download_keynote {root_dir el_config sec_ts api_key format } {
   # set cmd [list curl --sslv3 -o $tempfilename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
 
   # 24-12-2013 ook hier timeout waarden instellen, lijkt af en toe voor te komen dat 'ie blijft hangen. Wel relatief grote waarden, kijken wat 'ie doet.
-  set cmd [list curl --sslv3 --connect-timeout 60 --max-time 120 -o $tempfilename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
+  # 2-3-2014 curl van cygwin doet het plots niet meer (na upgrade), dus losse curl gebruiken (=64 bits)
+  set cmd [list c:/util/curl/curl.exe --sslv3 --connect-timeout 60 --max-time 120 -o $tempfilename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
   log debug "cmd: $cmd"
 
   if {1} {
@@ -234,7 +235,6 @@ proc download_keynote {root_dir el_config sec_ts api_key format } {
       set exit_code [$exec_limit exec_limit $cmd 300 result res_stderr]
       log info "Exec Curl finished, exitcode = $exit_code, len(result)=[string length $result], len(stderr) = [string length $res_stderr]"
     } {
-      log_error "Error while executing Curl"
       log error "Error while executing Curl"
       # continue?
     }  
