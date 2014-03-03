@@ -4,27 +4,15 @@ package require Tclx
 package require ndv
 
 set log [::ndv::CLogger::new_logger [file tail [info script]] info]
-# $log set_file "[file tail [info script]].log"
 $log set_file "[file tail [info script]]-[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"].log"
 
 set script_dir [file dirname [info script]]
-# source [file join $script_dir download-check.tcl]
 ndv::source_once download-check.tcl libslotmeta.tcl libkeynote.tcl
 ndv::source_once [file join [info script] .. .. .. lib CExecLimit.tcl]
 
-# @todo eg Mobile-Android: new script, so no data before certain date, continuously we get zero result. In this case, should stop downloading
-# this data. How to determine?
-
-# @todo use stdlib to determine status of each file?
-# 15-9-2013 added 'read' subdir to move files to after scatter2db has read them. Needed to change download and check-progress as well.
-# can imagine using eg one subdir per month, because number of file in each dir grows. One month is about 30*24=720 files, that's ok.
-# noticed that scatter2db was never finished, so possibly checking if a file has been read takes quite some time.
-
-# @todo handle: Request blocked. Exceeded 60 requests/minute limit.
+# @todo curl.exe path now hardcoded for windows. This will fail on linux, so make platform dependent.
 
 proc main {argv} {
-  # global nerrors
-  
   log debug "argv: $argv"
   set options {
     {dir.arg "c:/projecten/Philips/KNDL" "Directory to put downloaded keynote files"}
@@ -38,7 +26,6 @@ proc main {argv} {
     {test "Test the script, just download a few hours of data"}       
   }
   set usage ": [file tail [info script]] \[options] :"
-  # set dargv [::cmdline::getoptions argv $options $usage]
   set dargv [getoptions argv $options $usage]
 
   # put this in a loop, to start again at the whole next hour: either for newer data, 
@@ -222,7 +209,10 @@ proc download_keynote {root_dir el_config sec_ts api_key format } {
 
   # 24-12-2013 ook hier timeout waarden instellen, lijkt af en toe voor te komen dat 'ie blijft hangen. Wel relatief grote waarden, kijken wat 'ie doet.
   # 2-3-2014 curl van cygwin doet het plots niet meer (na upgrade), dus losse curl gebruiken (=64 bits)
-  set cmd [list c:/util/curl/curl.exe --sslv3 --connect-timeout 60 --max-time 120 -o $tempfilename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
+  # set cmd [list c:/util/curl/curl.exe --sslv3 --connect-timeout 60 --max-time 120 -o $tempfilename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
+
+  set cmd [list [curl_path] --sslv3 --connect-timeout 60 --max-time 120 -o $tempfilename "https://api.keynote.com/keynote/api/getgraphdata?api_key=$api_key\&format=$format\&slotidlist=$slotidlist\&graphtype=scatter\&timemode=absolute\&timezone=UTC\&absolutetimestart=$start\&absolutetimeend=$end\&transpagelist=$transpagelist"]
+
   log debug "cmd: $cmd"
 
   if {1} {

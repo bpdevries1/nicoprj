@@ -39,3 +39,13 @@ proc format_now {} {
 proc format_now_filename {} {
   clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"
 }
+
+# determine curl path based on platform.
+proc curl_path {} {
+  global tcl_platform
+  if {$tcl_platform(platform) == "windows"} {
+    return "c:/util/curl/curl.exe"
+  } else {
+    return "curl"
+  }
+}
