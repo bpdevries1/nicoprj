@@ -179,8 +179,13 @@ itcl::class CExecLimit {
 	}
 
   private method kill_tree {pid} {
-    log debug "killing $pid whole tree with taskkill"
-    exec C:\\Windows\\system32\\taskkill.exe /PID $pid /T /F
+    global tcl_platform
+    if {$tcl_platform(platform) == "windows"} {
+      log debug "killing $pid whole tree with taskkill"
+      exec C:\\Windows\\system32\\taskkill.exe /PID $pid /T /F
+    } else {
+      kill $pid ; # kill is a tclx command.
+    }
   }
   
 	# convert a fully qualified varname to a filename
