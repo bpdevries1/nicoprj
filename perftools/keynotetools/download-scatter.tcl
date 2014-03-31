@@ -113,7 +113,7 @@ proc download_keynote_main {dargv} {
 
   # for executing curl in a controlled way, with maximum time. When nog using this, either Curl or Tcl may hang.  
   set exec_limit [CExecLimit #auto]
-  $exec_limit set_saveproc_filename "saveproc.txt"
+  # $exec_limit set_saveproc_filename "saveproc.txt"
   
   # @todo determine sec_start for each script - later, some possible issues where holes can occur, if one download fails but the next succeeds. Normally a failed one would be retried the next time. Also, downloading normally takes a lot more time than checking the DB.
   # @todo determine sec_end each time again, to download data ASAP.
@@ -217,13 +217,17 @@ proc download_keynote {root_dir el_config sec_ts api_key format } {
 
   if {1} {
     try_eval {
-      log info "Exec Curl: $cmd"
+      # log info "Exec Curl: $cmd"
       # execute for a maximum of 5 minutes (300 seconds) 
       # exec $rbinary $script
       # @todo is saveproc name reset, so need to set again and again?
-      $exec_limit set_saveproc_filename "saveproc.txt"
+      # $exec_limit set_saveproc_filename "saveproc.txt"
       set exit_code [$exec_limit exec_limit $cmd 300 result res_stderr]
       log info "Exec Curl finished, exitcode = $exit_code, len(result)=[string length $result], len(stderr) = [string length $res_stderr]"
+      # 8-3-2014 NdV curious what stderr holds: really an error or just info?
+      if {[string length  $res_stderr] > 0} {
+        log info "stderr: $res_stderr"
+      }
     } {
       log error "Error while executing Curl"
       # continue?

@@ -644,6 +644,9 @@ migrate_proc redo_aggrsub_no_ip_20140222 "Remove IP related stuff from aggr-sub"
   $db exec2 "delete from aggr_sub where keytype in ('ip_address', 'dom_ip')"
 }
 
+migrate_proc redo_aggrsub_20140227 "Redo aggrsub wrt dynamic" {
+  $db exec2 "update dailystatus set dateuntil_cet = date('now', '-42 days') where actiontype in ('aggrsub', 'combinereport')"
+}
 
 
 # LET OP: als pageitem tabel verandert, moet pageitem_gt3 en pageitem_topic mee veranderen!

@@ -10,7 +10,7 @@ package require json
 set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 $log set_file "[file tail [info script]].log"
 
-ndv::source_once libslotmeta.tcl download-metadata.tcl
+ndv::source_once libkeynote.tcl libslotmeta.tcl download-metadata.tcl
 
 proc main {argv} {
   log debug "argv: $argv"
