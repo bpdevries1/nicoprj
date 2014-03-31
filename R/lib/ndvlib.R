@@ -215,7 +215,13 @@ df.add.dt = function(df) {
 # eg maxval = 123.456, ndigits = 3 => result = '[%6.3d] '. The 6 is the total number of digits
 det.fmt.string = function(vct, ndigits) {
   # totaldigits includes the decimal point, so add 1.
-  totaldigits = ndigits + ceiling(log10(max(vct))) + 1
+  m = max(vct)
+  if (m > 0) {
+    totaldigits = ndigits + ceiling(log10(max(vct))) + 1
+  } else {
+    # eg no values, max=-Inf, return default format string.
+    totaldigits = ndigits + 2;    
+  }
   concat('[%', totaldigits, '.', ndigits, 'f] ')
 }
 
@@ -244,7 +250,10 @@ det.height = function(height.min, height.max, height.base, height.perfacet, face
   height = height.base
   if (height.perfacet > 0) {
     nfacets = length(levels(as.factor(facets)))
-    height = height + (nfacets-1) * height.perfacet
+    # only change hight if minimal 2 facets.
+    if (nfacets >= 2) {
+      height = height + (nfacets-1) * height.perfacet
+    }
   }
   if (height.percolour > 0) {
     ncolours = length(levels(as.factor(colours)))
@@ -269,5 +278,6 @@ det.height = function(height.min, height.max, height.base, height.perfacet, face
 }
 
 print.log = function(str) {
-  print(concat(format(Sys.time(), "[%Y-%m-%d %H:%M:%S] "), str))
+  # print(concat(format(Sys.time(), "[%Y-%m-%d %H:%M:%S] "), str))
+  cat(concat(format(Sys.time(), "[%Y-%m-%d %H:%M:%S] "), str, "\n"))
 }
