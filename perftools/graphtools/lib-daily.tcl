@@ -14,36 +14,43 @@ proc make_graphs {dargv} {
   } else {
     set actions [split [:combinedactions $dargv] ","] 
   }
-  if {[:periods $dargv] == "all"} {
-    set periods [list "1y" "6w" "2d"]
-  } else {
-    set periods [split [:periods $dargv] ","]
-  }
-  set r [Rwrapper new $dargv]
-  set combined_db [:combineddb $dargv]
-  $r init [file dirname $combined_db] [file tail $combined_db] [:Rfileadd $dargv]
-  $r set_outputroot [file normalize [from_cygwin [:outrootdir $dargv]]]
-  $r set_outformat [:outformat $dargv]
-  foreach action $actions {
-    foreach period $periods {
-      graph_combined_$action $r $dargv $period
+  if {$actions != ""} {
+    if {[:periods $dargv] == "all"} {
+      set periods [list "1y" "6w" "2d"]
+    } else {
+      set periods [split [:periods $dargv] ","]
     }
+    set r [Rwrapper new $dargv]
+    set combined_db [:combineddb $dargv]
+    $r init [file dirname $combined_db] [file tail $combined_db] [:Rfileadd $dargv]
+    $r set_outputroot [file normalize [from_cygwin [:outrootdir $dargv]]]
+    $r set_outformat [:outformat $dargv]
+    foreach action $actions {
+      foreach period $periods {
+        graph_combined_$action $r $dargv $period
+      }
+    }
+    $r doall
+    $r cleanup
+    $r destroy
   }
-  $r doall
-  $r cleanup
-  $r destroy
 }
 
 proc make_graphs_dir {dargv dir} {
   set r [Rwrapper new $dargv]
   $r init $dir keynotelogs.db [:Rfileadd $dargv]
   # $r set_outputroot [file normalize [from_cygwin [:outrootdir $dargv]]]
-  $r set_outputroot [file normalize [file join [from_cygwin [:outrootdir $dargv]] [file tail $dir]]]
+  if {[:outrootdir $dargv] != ""} {
+    $r set_outputroot [file normalize [file join [from_cygwin [:outrootdir $dargv]] [file tail $dir]]]
+  } else {
+    $r set_outputroot [file normalize [file join $dir graphs]]
+  }
+  
   $r set_outformat [:outformat $dargv]
   if {[:actions $dargv] == "all"} {
     # set actions [list kn3 hour ttip]
     # @todo actions weer kn3 laten includen. Doet het [2013-10-31 12:57:46] niet, omdat tabel niet bestaat.
-    set actions [list dashboard slowitem topdomain extension ttip]
+    set actions [list dashboard slowitem topdomain domain slowitem extension ttip]
   } else {
     set actions [split [:actions $dargv] ","] 
   }
@@ -82,6 +89,23 @@ proc period2days {period} {
   if {[regexp {^(\d+)(.)$} $period z n unit]} {
     set s [clock seconds]
     expr round(($s - [clock add $s -$n [dict get $time_units $unit]]) / (24*60*60))
+  } else {
+    error "Cannot parse period: $period"
+  }
+}
+
+# 2d -> -2 days, to be used in sqlite datetime functions as a modifier/offset.
+
+proc period2sqlite {period} {
+  set time_units [list h hours d days w weeks m months y years]
+  if {[regexp {^(\d+)(.)$} $period z n unit]} {
+    set sql_unit [dict get $time_units $unit]
+    if {$sql_unit == "weeks"} {
+      # convert to days
+      set sql_unit "days"
+      set n [expr $n * 7]
+    }
+    return "-$n $sql_unit"
   } else {
     error "Cannot parse period: $period"
   }

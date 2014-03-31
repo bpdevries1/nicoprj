@@ -31,6 +31,7 @@ proc main {argv} {
     graph_url_network $r $dargv
     graph_url_network $r [dict merge $dargv [dict create url "http://images.philips.com/is/image/PhilipsConsumer/RQ12_52-IMS-en_US?wid=460&hei=335&\$pngsmall\$" urlshort "RQ12_52-IMS-en_US"]]
     graph_allurls_network $r $dargv "images.philips.com"
+    graph_allurls_percentile $r $dargv "images.philips.com"
     unprepare_db $r $dargv
     
     prepare_db $r $dargv "www.usa.philips.com"
@@ -124,5 +125,21 @@ proc graph_allurls_network {r dargv domain} {
             legend.position bottom \
             legend.direction vertical
 }
+
+proc graph_allurls_percentile {r dargv domain} {
+  # new type of graph
+  set date [:date $dargv]
+  $r query "select i.scriptname scriptname, i.ts_cet ts, 0.001*i.element_delta loadtime
+            from pageitem_combined i
+            where i.date_cet = '$date'"
+  # x is always the percentile to plot
+  $r percplot title "Load times percentiles all $domain - $date" \
+            y loadtime xlab "Percentile" ylab "Load time (seconds)" \
+            geom line-point colour scriptname \
+            width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.24 height.perfacet 1.7 \
+            legend.position bottom \
+            legend.direction vertical
+}
+
 
 main $argv
