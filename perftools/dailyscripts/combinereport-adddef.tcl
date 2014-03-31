@@ -52,6 +52,9 @@ proc main {argv} {
       incr ndirs
     }
   } else {
+    if {[:subdirfile $dargv] == ""} {
+      error "Both pattern and subdirfile are empty: $dargv"
+    }
     # subdirs are given in :subdirfile. One subdir per line.
     set f [open [:subdirfile $dargv] r]
     while {![eof $f]} {
