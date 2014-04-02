@@ -278,6 +278,43 @@ proc graph_extension {r dir period} {
   }
 }
 
+proc graph_aggrsub {r dir period} {
+  # @todo check which keytypes occur in aggrsub, make graphs for each of those.
+  # als je het ook maakt voor andere types, dan leteen op ':' in keytype/values, kan niet in filenames. Maar mss geen last van, als keytype simpel is.
+
+  foreach keytype {topdomain extension domain content_type basepage aptimized cntype_apt domain_gt_100k domain_dynamic} {
+    graph_aggrsub_keytype $r $dir $period $keytype
+  }
+}
+
+proc graph_aggrsub_keytype {r dir period keytype} {
+  set scriptname [file tail $dir]
+  if {[period2days $period] >= 7} {
+    $r query "select date_cet date, page_seq, keyvalue $keytype, avg_time_sec loadtime
+              from aggr_sub
+              where keytype = '$keytype'
+              and date_cet > '[period2startdate $period]'"
+    $r qplot title "$scriptname - Sum of load times per $keytype by page - $period" \
+              x date y loadtime xlab "Date/time" ylab "Load time (seconds)" \
+              geom line-point colour $keytype facet page_seq \
+              width 11 height {min 5 max 20 base 3.4 percolour 0.24 perfacet 1.7} \
+              maxcolours 15 \
+              legend {avgdec 3 avgtype sum position right direction vertical}
+    
+    $r query "select s.date_cet date, s.keyvalue $keytype, 1.0*sum(s.avg_time_sec)/r.npages loadtime
+              from aggr_sub s join aggr_run r on s.date_cet = r.date_cet
+              where s.keytype = '$keytype'
+              and s.date_cet > '[period2startdate $period]'
+              group by 1,2"
+    $r qplot title "$scriptname - Sum of load times per $keytype averaged per page - $period" \
+              x date y loadtime xlab "Date/time" ylab "Load time (seconds)" \
+              geom line-point colour $keytype \
+              width 11 height 7 \
+              maxcolours 15 \
+              legend {avgdec 3 avgtype sum position right direction vertical}
+  }
+}
+
 proc graph_ttip {r dir period} {
   set scriptname [file tail $dir]
   # breakpoint
@@ -367,7 +404,7 @@ proc graph_slowitem {r dir period} {
     #$r execquery "create table temp1 as                   subselect"
     
     # @todo nog eens count(distinct) met nscripts doen, staat nu alleen in having clause, dus niet zo belangrijk.
-    $r query "select m.page_seq, m.date_cet date, substr(m.keyvalue,1,100) url, 1.0*sum(m.avg_page_sec) loadtime
+    $r query "select m.page_seq, m.date_cet date, m.keyvalue url, 1.0*sum(m.avg_page_sec) loadtime
               from aggr_slowitem m join aggr_run r on m.date_cet = r.date_cet and m.scriptname = r.scriptname
               where m.keytype = 'urlnoparams'
               and m.date_cet > '[period2startdate $period]'
@@ -390,7 +427,7 @@ proc graph_slowitem {r dir period} {
               geom line-point colour url facet page_seq \
               width 11 height {min 5 max 20 base 3.4 percolour 0.24 perfacet 1.7} \
               maxcolours 10 \
-              legend {avgdec 3 avgtype sum position bottom direction vertical}
+              legend {avgdec 3 avgtype avg position bottom direction vertical maxchars 120}
   }
 }
 
@@ -406,7 +443,7 @@ proc graph_slowitem {r dir period} {
 proc graph_mobile {r dir period} {
   set scriptname [file tail $dir]
   if {[period2days $period] <= 3} {  
-    $r query "select 0.001*page_bytes nkbytes, 0.001*delta_user_msec load_msec, 1*element_count nelts
+    $r query "select p.page_seq page, 0.001*page_bytes nkbytes, 0.001*delta_user_msec load_msec, 1*element_count nelts
               from page p, (select max(ts_cet) ts_cet_max from scriptrun) m
               where ts_cet > datetime(m.ts_cet_max, '[period2sqlite $period]')
               and 1*error_code=200
@@ -414,10 +451,11 @@ proc graph_mobile {r dir period} {
               and 1*page_succeed = 1"
     $r qplot title "$scriptname - page load time vs page_bytes - $period" \
               x nkbytes y load_msec xlab "#kbytes" ylab "Load time (sec)" \
-              geom point colour nelts \
-              width 11 height 6
+              geom point colour nelts facet page \
+              width 11 height {min 5 max 20 base 3.4 percolour 0.24 perfacet 1.7} \
+              legend {avgdec 3 avgtype avg position bottom direction vertical maxchars 120}
 
-    $r query "select p.ts_cet ts, 0.001*p.page_bytes nkbytes, 0.001*p.delta_user_msec load_msec, r.agent_inst, r.profile_id, r.network
+    $r query "select p.page_seq page, p.ts_cet ts, 0.001*p.page_bytes nkbytes, 0.001*p.delta_user_msec load_msec, r.agent_inst, r.profile_id, r.network
               from page p join scriptrun r on r.id = p.scriptrun_id, (select max(ts_cet) ts_cet_max from scriptrun) m
               where p.ts_cet > datetime(m.ts_cet_max, '[period2sqlite $period]')
               and 1*p.error_code=200
@@ -427,38 +465,57 @@ proc graph_mobile {r dir period} {
     foreach colour {agent_inst profile_id network} {
       $r qplot title "$scriptname - page load time vs page_bytes per $colour - $period" \
                 x nkbytes y load_msec xlab "#kbytes" ylab "Load time (sec)" \
-                geom point colour $colour \
-                width 11 height 6 \
-                legend {avgtype avg avgdec 3 position right direction vertical}
+                geom point colour $colour facet page \
+                width 11 height {min 5 max 20 base 3.4 percolour 0.24 perfacet 1.7} \
+                legend {avgdec 3 avgtype avg position bottom direction vertical maxchars 120}
       $r qplot title "$scriptname - page load time per $colour - $period" \
                 x ts y load_msec xlab "Date/time" ylab "Load time (sec)" \
-                geom point colour $colour \
-                width 11 height 6 \
-                legend {avgtype avg avgdec 3 position right direction vertical}
+                geom point colour $colour facet page \
+                width 11 height {min 5 max 20 base 3.4 percolour 0.24 perfacet 1.7} \
+                legend {avgdec 3 avgtype avg position bottom direction vertical maxchars 120}
     }
     $r qplot title "$scriptname - page weight per network - $period" \
               x ts y nkbytes xlab "Date/time" ylab "#kbytes" \
-              geom point colour network \
-              width 11 height 6 \
-              legend {avgtype avg avgdec 3 position right direction vertical}
+              geom point colour network facet page \
+              width 11 height {min 5 max 20 base 3.4 percolour 0.24 perfacet 1.7} \
+              legend {avgdec 3 avgtype avg position bottom direction vertical maxchars 120}
    
     # load times for all runs, not just the ones without errors
-    $r query "select p.ts_cet ts, 0.001*p.page_bytes nkbytes, 0.001*p.delta_user_msec load_msec, r.agent_inst, r.profile_id, r.network
+    $r query "select p.page_seq page, p.ts_cet ts, 0.001*p.page_bytes nkbytes, 0.001*p.delta_user_msec load_msec, r.agent_inst, r.profile_id, r.network
               from page p join scriptrun r on r.id = p.scriptrun_id, (select max(ts_cet) ts_cet_max from scriptrun) m
               where p.ts_cet > datetime(m.ts_cet_max, '[period2sqlite $period]')"
               
     foreach colour {agent_inst profile_id network} {
       $r qplot title "$scriptname - All - page load time vs page_bytes per $colour - $period" \
                 x nkbytes y load_msec xlab "#kbytes" ylab "Load time (sec)" \
-                geom point colour $colour \
-                width 11 height 6 \
+                geom point colour $colour facet page \
+                width 11 height {min 5 max 20 base 3.4 percolour 0.24 perfacet 1.7} \
                 legend {avgtype avg avgdec 3 position right direction vertical}
       $r qplot title "$scriptname - All - page load time per $colour - $period" \
                 x ts y load_msec xlab "Date/time" ylab "Load time (sec)" \
-                geom point colour $colour \
-                width 11 height 6 \
+                geom point colour $colour facet page \
+                width 11 height {min 5 max 20 base 3.4 percolour 0.24 perfacet 1.7} \
                 legend {avgtype avg avgdec 3 position right direction vertical}
     }
   }  
  
+}
+
+proc graph_avail_network {r dir period} {
+  set scriptname [file tail $dir]
+  if {[period2days $period] >= 7} {  
+    $r query "select date_cet date, rs.network, round(1.0*count(rs.ts_cet)/
+                (select count(ra.ts_cet)
+                 from scriptrun ra 
+                 where ra.date_cet = rs.date_cet
+                 and ra.network = rs.network), 3) avail
+              from scriptrun rs
+              where 1*rs.task_succeed_calc = 1
+              group by 1,2"
+    $r qplot title "$scriptname - Availability per network - $period" \
+                x date y avail xlab "Date" ylab "Availability" \
+                geom line-point colour network \
+                width 11 height {min 5 max 20 base 3.4 percolour 0.24 perfacet 1.7} \
+                legend {avgtype avg avgdec 3 position right direction vertical}
+  }
 }
