@@ -1,5 +1,12 @@
 #!/usr/bin/env tclsh86
 
+# for use in SQLiteSpy:
+if 0 {
+ attach 'c:/projecten/Philips/dns-ip/dnsip.db' as ip;
+ attach 'c:/projecten/Philips/AllScripts/daily/daily.db' as al;
+ attach 'c:/projecten/Philips/KNDL/slotmeta-domains.db' as meta;
+}
+
 package require Tclx
 package require ndv
 package require json
@@ -19,6 +26,7 @@ proc main {argv} {
     {alldb.arg "c:/projecten/Philips/AllScripts/daily/daily.db" "AllScripts DB"}
     {metadb.arg "c:/projecten/Philips/KNDL/slotmeta-domains.db" "Meta DB"}
     {dnsipdir.arg "c:/projecten/Philips/dns-ip" "Dir with DNS/IP specific files/db's"}
+    {config.arg "~/.config/keynote/nslookup.json" "File with Keynote specific config"}
     {actions.arg "all" "Actions to execute"}
     {h "Show help, including all actions"}
     {loglevel.arg "debug" "Log level (debug, info, warn)"}
@@ -43,12 +51,6 @@ proc fill_cq5_domains {dargv} {
   global action_procs
   set db [dbwrapper new [:cq5db $dargv]]
   # $db exec2 "attach 'c:/projecten/Philips/KNDL/slotmeta-domains.db' as meta"
-  # for use in SQLiteSpy:
-  if 0 {
-   attach 'c:/projecten/Philips/dns-ip/dnsip.db' as ip;
-   attach 'c:/projecten/Philips/AllScripts/daily/daily.db' as al;
-   attach 'c:/projecten/Philips/KNDL/slotmeta-domains.db' as meta;
-  }
   $db exec2 "attach '[:ipdb $dargv]' as ip"
   $db exec2 "attach '[:alldb $dargv]' as al" ; # all is a keyword in SQLite.
   $db exec2 "attach '[:metadb $dargv]' as meta"
@@ -74,6 +76,9 @@ proc prepare_db {db} {
   $db add_tabledef ip.agent_phys_loc {id} {agent_name phys_loc phys_loc_type}
   $db add_tabledef ip.kn_agent {id} {agent_loc city backbones ipnr}
   $db add_tabledef ip.ipinfo {id} {ts_cet filename ip hostname city region country loc lat long org postal}
+  $db add_tabledef ip.pingresult {id} {ts_cet filename agent_ip dest_ip agent_name contents {ping_min_msec int} {ping_max_msec int} {ping_avg_msec int}}
+  $db add_tabledef ip.city_loc {id} {city country {lat real} {long real}}
+  $db add_tabledef ip.kn_agent_ok {id} {agent_loc city region country backbones ipnr org {lat real} {long real}}
   
   $db create_tables 0
   $db prepare_insert_statements
@@ -252,7 +257,7 @@ actionproc update_ignored {db} {
              
   $db exec2 "update cq5_domain
              set risk = 0, risc_reason = 'other country', inscope = 0, notes = 'Other country, not for CN'
-             where domain like '%.us' or domain like '%.de' or domain like '%.uk'" -log
+             where domain like '%.us' or domain like '%.de' or domain like '%.uk' or domain like '%.usa.philips.%'" -log
 
   # Facebook not used in China
   $db exec2 "update cq5_domain
@@ -263,7 +268,13 @@ actionproc update_ignored {db} {
   $db exec2 "update cq5_domain
              set risk = 0, risc_reason = 'youtube', inscope = 0, notes = 'Youtube not for CN'
              where domain like '%youtube%'" -log
+
+  # Twitter also not in China
+  $db exec2 "update cq5_domain
+             set risk = 0, risc_reason = 'twitter', inscope = 0, notes = 'Twitter not for CN'
+             where domain like '%twitter%' or domain like '%twimg%'" -log
   
+             
 }
 
 
@@ -395,22 +406,6 @@ actionproc read_keynote_ips {db} {
 
 actionproc ipinfo_kn {db} {
   global dargv
-  
-  if 0 {
-  "ip": "173.194.118.15",
-  "hostname": "gru06s09-in-f15.1e100.net",
-  "city": "Mountain View",
-  "region": "California",
-  "country": "US",
-  "loc": "37.4192,-122.0574",
-  "org": "AS15169 Google Inc.",
-  "postal": "94043"  
-  
-  $db add_tabledef ip.ipinfo {id} {ts_cet filename ip hostname city region country lat long org postal}
-  
-  
-  }
-  
   # foreach ip in kn_agent that has no record yet in ipinfo:
   # do curl to ipinfo.io: curl -o ipinfo.json http://ipinfo.io/173.194.118.15
   #   output in main/ipinfo/ipinfo-<ip>.json
@@ -423,18 +418,48 @@ actionproc ipinfo_kn {db} {
   foreach row $rows {
     incr it
     set ip [:ipnr $row]
-    set filename [file join $ipinfo_dir "ipinfo-$ip.json"]
     log debug "$it: Exec curl ipinfo.io for ip: $ip"
-    exec -ignorestderr [curl_path] --connect-timeout 60 --max-time 120 -o $filename "http://ipinfo.io/$ip"
-    if {[file exists $filename]} {
-      set json [read_file $filename]
-      set dct [json::json2dict $json]
-      lassign [split [:loc $dct] ","] lat long
+    if {[curl_ipinfo $db $ipinfo_dir $ip] != "ok"} {
+      log warn "curl_ipinfo did not return ok, so break and return"
+      break
+    }
+  }
+}
+
+proc curl_ipinfo {db ipinfo_dir ip} {
+  # only handle IPv4 for now.
+  if {[det_iptype $ip] == "IPv6"} {
+    log warn "IPv6 address, don't handle, return"
+    return "IPv6"
+  }
+  set filename [file join $ipinfo_dir "ipinfo-$ip.json"]
+  # log debug "$it: Exec curl ipinfo.io for ip: $ip"
+  exec -ignorestderr [curl_path] --connect-timeout 60 --max-time 120 -o $filename "http://ipinfo.io/$ip"
+  if {[file exists $filename]} {
+    set json [read_file $filename]
+    set dct [json::json2dict $json]
+    set lat ""; set long ""
+    lassign [split [:loc $dct] ","] lat long
+    if {($lat != "") && ($long != "")} {
       set ts_cet [clock format [file atime $filename] -format "%Y-%m-%d %H:%M:%S"]
       $db insert ip.ipinfo [dict merge $dct [vars_to_dict lat long filename ts_cet]]
+      return "ok"
     } else {
-      log warn "Outfile not found: $filename"
+      log warn "long/lat not found in response json, possibly quata used, so return"
+      return "empty"
     }
+  } else {
+    log warn "Outfile not found: $filename"
+  }
+}
+  
+proc det_iptype {ip} {
+  if {[regexp {:} $ip]} {
+    return "IPv6"
+  } elseif {[:# [split $ip "."]] == 4} {
+    return "IPv4"
+  } else {
+    error "Don't know how to determine iptype of ip: $ip"
   }
 }
 
@@ -442,8 +467,39 @@ actionproc ipinfo_kn {db} {
 actionproc kn_agent_ipinfo {db} {
   $db exec2 "drop table if exists ip.kn_agent_ipinfo"
   $db exec2 "create table ip.kn_agent_ipinfo as
-             select k.agent_loc, i.city, i.region, i.country, i.loc, *
+             select k.agent_loc, k.city, i.region, i.country, i.loc, i.city city2, *
              from ip.kn_agent k left join ip.ipinfo i on i.ip = k.ipnr" -log
+}
+
+actionproc fill_city_loc {db} {
+  # $db add_tabledef ip.city_loc {id} {city country {lat real} {long real}}
+  $db exec "delete from ip.city_loc"
+  
+  $db insert ip.city_loc [dict create city Beijing country CN lat 39.9 long 116.4]
+  $db insert ip.city_loc [dict create city Shanghai country CN lat 31.2 long 121.5]
+  $db insert ip.city_loc [dict create city Tianjin country CN lat 39.1 long 117.2]
+  $db insert ip.city_loc [dict create city Wuhan country CN lat 30.6 long 114.3]
+
+  $db insert ip.city_loc [dict create city "Los Angeles" country US lat 37.555 long -122.2867]
+  $db insert ip.city_loc [dict create city "New York" country US lat 40.7 long -74.0]
+  $db insert ip.city_loc [dict create city "Pittsburgh" country US lat 40.44 long -80.0]
+  $db insert ip.city_loc [dict create city "San Francisco" country US lat 37.775 long -122.4194]
+  $db insert ip.city_loc [dict create city "Washington D.C." country US lat 38.9 long -77.0]
+  $db insert ip.city_loc [dict create city "Washington" country US lat 38.9 long -77.0]
+}
+
+actionproc fill_kn_agent_ok {db} {
+  $db exec2 "delete from ip.kn_agent_ok"
+  
+  $db exec2 "insert into ip.kn_agent_ok (agent_loc, city, region, country, backbones, ipnr, org, lat, long)
+             select agent_loc, city, region, country, backbones, ip, org, lat, long
+             from ip.kn_agent_ipinfo
+             where country not in ('US','CN')"
+  $db exec2 "insert into ip.kn_agent_ok (agent_loc, city, region, country, backbones, ipnr, org, lat, long)
+             select i.agent_loc, i.city, i.region, i.country, i.backbones, i.ip, i.org, c.lat, c.long
+             from ip.kn_agent_ipinfo i
+               join city_loc c on i.city = c.city and i.country = c.country
+             where i.country in ('CN', 'US')"
 }
 
 # fill from both KN script usage and NSLookup from KN agent (in Beijing)
@@ -471,6 +527,160 @@ actionproc fill_cq5_domain_ip {db} {
                join domainip d on cq.domain = d.domain
              where d.dnsserver like '%-BJ-CNC'" -log
              
+}
+
+actionproc read_ping_results {db} {
+  global dargv
+  set pingdir [file join [:dnsipdir $dargv] pingresults]
+  # $db add_tabledef ip.pingresult {id} {ts_cet filename client_ip dest_ip agent_name contents ping_min_msec ping_max_msec ping_avg_msec}  
+  $db in_trans {
+    $db exec2 "delete from ip.pingresult"
+    set it 0
+    foreach filename [glob -directory $pingdir ping-*.html] {
+      incr it
+      log debug "$it: handling: $filename"
+      set contents [read_file $filename]
+      set ts_cet [clock format [file atime $filename] -format "%Y-%m-%d %H:%M:%S"]
+      lassign [det_agent_dest_ip $filename] agent_ip dest_ip
+      if {[regexp {Keynote Diagnostic Center -- ([^\n]+)\n} $contents z ag]} {
+        set agent_name $ag
+      } else {
+        set agent_name "<unknown>"
+      }
+      if {![regexp {Minimum = (\d+)ms, Maximum = (\d+)ms, Average = (\d+)ms} $contents z ping_min_msec ping_max_msec ping_avg_msec]} {
+        set ping_min_msec ""
+        set ping_max_msec ""
+        set ping_avg_msec ""
+      }
+      $db insert ip.pingresult [vars_to_dict ts_cet filename agent_ip dest_ip agent_name contents ping_min_msec ping_max_msec ping_avg_msec]
+    }
+  }
+}
+  
+proc det_agent_dest_ip {filename} {
+  # agent_ip dest_ip  
+  # ping-103.245.222.184-111.87.38.15.html (dest_ip - agent_ip)
+  if {[regexp {ping-([^\-]+)-([^\-]+)\.html} [file tail $filename] z dest_ip agent_ip]} {
+    list $agent_ip $dest_ip
+  } else {
+    error "Cannot parse client and dest ip from: $filename"
+  }
+} 
+
+actionproc ipinfo_cq5_domain {db} {
+  global dargv
+  # foreach ip in kn_agent that has no record yet in ipinfo:
+  # do curl to ipinfo.io: curl -o ipinfo.json http://ipinfo.io/173.194.118.15
+  #   output in main/ipinfo/ipinfo-<ip>.json
+  # parse json and put in DB: no db_trans needed.
+  set ipinfo_dir [file join [:dnsipdir $dargv] ipinfo]
+  file mkdir $ipinfo_dir
+  set rows [$db query "select domain, ip_address, random() rnd, src_type
+                       from cq5_domain_ip
+                       where not ip_address in (select ip from ip.ipinfo)
+                       order by 1, 3"]
+  log info "Total rows to handle (ipinfo): [:# $rows]"
+  set it 0
+  set it_handled 0
+  set prev_domain "<none>"
+  foreach row $rows {
+    incr it
+    set ip [:ip_address $row]
+    if {($prev_domain != [:domain $row]) || ([:src_type $row] == "kn-nslookup")} {
+      log debug "$it: Exec curl ipinfo.io for ip: $ip"
+      set res [curl_ipinfo $db $ipinfo_dir $ip]
+      if {[lsearch {ok IPv6} $res] < 0} {
+        log warn "curl_ipinfo did not return ok/IPv6, so break and return"
+        break
+      }
+      incr it_handled
+    } else {
+      log debug "Domain same as previous, don't do ipinfo for this ip now: $ip"
+    }
+    set prev_domain [:domain $row]
+  }
+  log info "Total ip's to consider: $it"
+  log info "Total ip's handled: $it_handled"
+}
+
+actionproc test_distance {db} {
+  $db function earth_distance
+  set res [$db query "select earth_distance(49.2000, -98.1000, 35.9939, -78.8989) dist"]
+  log info "Result of distance: [:dist [:0 $res]]"
+  
+  # find closest agent to 173.194.43.15
+  set res [$db query "select i.city srv_city, k.city kn_city, earth_distance(i.lat, i.long, k.lat, k.long) dist
+                      from ip.kn_agent_ok k join ip.ipinfo i
+                      where i.ip = '173.194.43.15'
+                      order by 3
+                      limit 10"]
+  foreach row $res {
+    log info $row
+  }  
+}
+
+actionproc make_curl_ping {db} {
+  global dargv
+  dict_to_vars [json::json2dict [read_file [:config $dargv]]] ; # ts var among others.
+  set outdir [file join [:dnsipdir $dargv] pingresults]
+  set dt [clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"]
+  $db function earth_distance
+  #First only cq5_domain_ip.src_type = kn-nslookup
+  #164, with a few IPv6 to ignore for now.
+  # query in random order, so similar IP's will not be done around the same time and to the same KN agent.
+  set res [$db query "select c.ip_address, i.lat, i.long, i.city, i.country, random() rnd
+                      from cq5_domain_ip c
+                      join ip.ipinfo i on i.ip = c.ip_address
+                      where c.src_type = 'kn-nslookup'
+                      order by rnd"]
+  set fo [open [file join $outdir "do-pings-$dt.sh"] w]                      
+  fconfigure $fo -translation lf
+  # puts $fo "@echo off" ; # no, it's a shell script.
+  set it 0
+  foreach row $res {
+    incr it
+    dict_to_vars $row
+    if {[det_iptype $ip_address] != "IPv4"} {
+      puts $fo "echo \"$it: IP is not IPv4: $ip_address\""
+      continue
+    }
+    puts $fo "echo \"$it: Ping $ip_address ($city in $country, $lat/$long) from nearest KN agent\""
+    set res2 [$db query "select k.city kn_city, k.country kn_country, k.ipnr kn_ip,
+                                round(earth_distance($lat, $long, k.lat, k.long),0) dist, k.lat kn_lat, k.long kn_long
+                      from ip.kn_agent_ok k
+                      order by dist
+                      limit 1"]
+    if {[:# $res2] == 1} {
+      dict_to_vars [:0 $res2]
+      puts $fo "echo \"closest agent: $kn_ip ($kn_city in $kn_country, $kn_lat, $kn_long), dist=$dist km, min. roundtrip=[format %.0f [expr 2.0*$dist/300]]msec\""
+      puts $fo "curl -o ping-$ip_address-$kn_ip-$dt.html \"http://${kn_ip}/scripts/diag2.plx?function=ping&target=${ip_address}&ts=$ts\""
+    } else {
+      puts $fo "echo \"No Keynote agent found, probably error in code\""
+    }
+  
+  }                   
+  close $fo                        
+}
+
+proc puts_curl_pings_old {fo ip_address dargv} {
+  puts $fo "# pinging $ip_address from several locations"
+  dict_to_vars [json::json2dict [read_file [:config $dargv]]]
+   
+  foreach host_ip $ping_ips {
+    puts $fo "curl -o ping-$ip_address-$host_ip.html \"http://${host_ip}/scripts/diag2.plx?function=ping&target=${ip_address}&ts=$ts\""
+  }
+  puts $fo ""
+}
+
+
+# @param all in degrees
+# ex: earth_distance 49.2000 -98.1000 35.9939 -78.8989 => 2139.4282703766235
+proc earth_distance {lat1 long1 lat2 long2} {
+  foreach varname {lat1 long1 lat2 long2} {
+    set $varname [expr [set $varname] * 3.141592653589793/180]
+  }
+  set earth_radius 6371.009
+  expr $earth_radius * acos(sin($lat1)*sin($lat2) + cos($lat1)*cos($lat2)*cos($long1-$long2))
 }
   
 main $argv
