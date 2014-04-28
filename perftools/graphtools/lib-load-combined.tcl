@@ -175,17 +175,104 @@ proc graph_combined_pageload3 {r dargv period} {
   }
 }
 
-
 proc graph_combined_aggrsub {r dargv period} {
   # @todo check which keytypes occur in aggrsub, make graphs for each of those.
   # als je het ook maakt voor andere types, dan leteen op ':' in keytype/values, kan niet in filenames. Maar mss geen last van, als keytype simpel is.
 
-  foreach keytype {topdomain extension domain content_type basepage aptimized cntype_apt domain_gt_100k domain_dynamic} {
+  foreach keytype {topdomain extension domain content_type basepage aptimized cntype_apt domain_gt_100k domain_dynamic phys_loc phys_loc_type akh_expiry domain_phys_loc_type} {
     graph_combined_aggrsub_keytype $r $dargv $period $keytype
+  }
+  graph_combined_aggrsub_keytype $r $dargv $period is_dynamic_url "and 1*s.keyvalue = 1"
+  graph_combined_aggrsub_keytype $r $dargv $period status_code_type "and s.keyvalue <> 'ok'"
+  graph_combined_aggrsub_keytype $r $dargv $period disable_domain "and 1*s.keyvalue = 1"
+  graph_combined_aggrsub_keytype $r $dargv $period akh_cache_control "and s.keyvalue <> 'nseconds'"
+  graph_combined_aggrsub_keytype $r $dargv $period akh_x_check_cacheable "and s.keyvalue <> 'YES'"
+
+  # with domain and another field and extra where-clause  
+  graph_combined_aggrsub_keytype $r $dargv $period domain_is_dynamic "and s.keyvalue like '%:1'"
+  graph_combined_aggrsub_keytype $r $dargv $period domain_result "and s.keyvalue not like '%:ok'"
+  graph_combined_aggrsub_keytype $r $dargv $period domain_disable_domain "and s.keyvalue like '%:1'"
+  graph_combined_aggrsub_keytype $r $dargv $period domain_cacheable "and s.keyvalue not like '%:YES'"
+}
+
+proc graph_combined_aggrsub_keytype {r dargv period keytype {where_extra ""}} {
+  if {[period2days $period] >= 7} {
+    $r query "select s.scriptname, s.date_cet date, s.keyvalue $keytype, 1.0*sum(s.avg_time_sec)/r.npages loadtime,
+                     1.0*sum(s.avg_nitems) nitems, 1.0*sum(s.avg_nkbytes) nkbytes
+              from aggr_sub s join aggr_run r on s.date_cet = r.date_cet and s.scriptname = r.scriptname
+              where s.keytype = '$keytype' $where_extra
+              and s.date_cet > '[period2startdate $period]'
+              group by 1,2,3"
+    $r qplot title "Sum of load times per $keytype averaged per page by script - $period" \
+              x date y loadtime xlab "Date/time" ylab "Load time (seconds)" \
+              geom line-point colour $keytype facet scriptname \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24 height.perfacet 1.7 \
+              maxcolours 10 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+
+    $r qplot title "Sum of nitems per $keytype averaged per page by script - $period" \
+              x date y nitems xlab "Date/time" ylab "#Items" \
+              geom line-point colour $keytype facet scriptname \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24 height.perfacet 1.7 \
+              maxcolours 10 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+
+    $r qplot title "Sum of nkbytes per $keytype averaged per page by script - $period" \
+              x date y nkbytes xlab "Date/time" ylab "#kbytes" \
+              geom line-point colour $keytype facet scriptname \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24 height.perfacet 1.7 \
+              maxcolours 10 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+              
+    $r query "select c.date, c.$keytype, sum(c.loadtime)/n.number loadtime2, sum(c.nitems)/n.number nitems2,
+                     sum(c.nkbytes)/n.number nkbytes2
+              from (              
+                select s.scriptname, s.date_cet date, s.keyvalue $keytype, 1.0*sum(s.avg_time_sec)/r.npages loadtime,
+                       1.0*sum(s.avg_nitems) nitems, 1.0*sum(s.avg_nkbytes) nkbytes
+                from aggr_sub s join aggr_run r on s.date_cet = r.date_cet and s.scriptname = r.scriptname
+                where s.keytype = '$keytype' $where_extra
+                and s.date_cet > '[period2startdate $period]'
+                group by 1,2,3) c join nscripts n on n.date_cet = c.date
+              group by 1,2"
+    $r qplot title "Sum of load times per $keytype averaged per page and script - $period" \
+              x date y loadtime2 xlab "Date/time" ylab "Load time (seconds)" \
+              geom line-point colour $keytype \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24 \
+              maxcolours 10 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+    
+    $r qplot title "Sum of nitems per $keytype averaged per page and script - $period" \
+              x date y nitems2 xlab "Date/time" ylab "#items" \
+              geom line-point colour $keytype \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24 \
+              maxcolours 10 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+
+    $r qplot title "Sum of nkbytes per $keytype averaged per page and script - $period" \
+              x date y nkbytes2 xlab "Date/time" ylab "#kbytes" \
+              geom line-point colour $keytype \
+              width 11 height.min 7 height.max 20 height.base 3.4 height.percolour 0.24 \
+              maxcolours 10 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+              
+    # 2014-02-22 also #items and nkbytes here
+    
   }
 }
 
-proc graph_combined_aggrsub_keytype {r dargv period keytype} {
+proc graph_combined_aggrsub_keytype_old {r dargv period keytype} {
   if {[period2days $period] >= 7} {
     $r query "select s.scriptname, s.date_cet date, s.keyvalue $keytype, 1.0*sum(s.avg_time_sec)/r.npages loadtime,
                      1.0*sum(s.avg_nitems) nitems, 1.0*sum(s.avg_nkbytes) nkbytes
