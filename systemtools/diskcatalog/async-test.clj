@@ -8,7 +8,17 @@
 ; duplicates are not wrong per se, could be backups.
 ; also files on laptop might be gone any time...
 
-(load-file "/home/nico/nicoprj/clojure/lib/def-libs.clj") 
+; (load-file "/home/nico/nicoprj/clojure/lib/def-libs.clj") 
+
+; (load-file "c:/nico/nicoprj/clojure/lib/def-libs.clj") 
+(load-file "/nico/nicoprj/clojure/lib/def-libs.clj") 
+
+; diverse opties om load-file zowel op linux als windows werkend te krijgen:
+; cygwin symlinks en sowieso cygwin paden werken niet.
+; dus linux pad werkend onder cygwin lijkt lastig.
+; dan ofwel 2 losse scripts, niet compatible, of heel klein wrapper script, evt soort lein-exec-win.
+; of onder linux werkend maken met /c/nico/nicoprj door de goede symlink te maken, kan wel.
+; of mss een ENV-var gebruiken?
 
 (deps '[[org.clojure/core.async "0.1.278.0-76b25b-alpha"]])
 (require '[clojure.core.async :as async :refer [>! <! >!! <!!]])
