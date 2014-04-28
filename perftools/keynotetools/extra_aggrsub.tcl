@@ -18,7 +18,8 @@ proc extra_update_aggrsub {db dargv subdir} {
         # @todo formattering kan ook in sql, door round(val,3) te gebruiken.
         # @note 2014-02-22 IP gerelateerde dingen nu toch eerst weg, want erg veel, AllScripts.db is groot (1.7G) en kopieren naar deze DB is traag (kan zo 3 minuten zijn).        
         # @note 2014-02-22 verwijderd: ip_address {dom_ip domain ip_address} 
-        foreach keytypespec {topdomain extension domain content_type basepage aptimized {cntype_apt content_type aptimized}} {
+        # @note 2014-04-18 add aggregates for extra fields: phys_loc and akamai headers
+        foreach keytypespec {topdomain extension domain content_type basepage aptimized {cntype_apt content_type aptimized} phys_loc phys_loc_type is_dynamic_url status_code_type disable_domain akh_cache_control akh_x_check_cacheable akh_x_cache akh_expiry {domain_is_dynamic domain is_dynamic_url} {domain_result domain status_code_type} {domain_disable_domain domain disable_domain} {domain_cacheable domain akh_x_check_cacheable} {domain_phys_loc_type domain phys_loc_type}} {
           lassign [det_keytype_colselect $keytypespec] keytype colselect
           aggrsub_keytype $db $datacount $date_cet $scriptname $keytype $colselect
         }

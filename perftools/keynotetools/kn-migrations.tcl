@@ -403,6 +403,7 @@ proc add_daily_stats2 {db {create_tables 1}} {
     {avg_page_sec real} {avg_loadtime_sec real} {nitems int}} 
   
   # 4-2-2014 maak deze defs DRY, dus fielddefs 1x noemen, en opnemen bij 3 tabellen: pageitem, _topic en _gt3. _topic heeft extra veld 'topic'  
+  # 14-4-2014 added more fields.
   $db add_tabledef pageitem_topic {id} {scriptname topic ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
       scontent_type url \
       extension domain topdomain urlnoparams \
@@ -411,7 +412,8 @@ proc add_daily_stats2 {db {create_tables 1}} {
       ssl_handshake_delta start_msec system_delta basepage record_seq \
       detail_component_1_msec detail_component_2_msec detail_component_3_msec \
       ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
-      header_bytes object_text header_code custom_object_trend status_code aptimized}
+      header_bytes object_text header_code custom_object_trend status_code aptimized \
+      ip_oct3 phys_loc phys_loc_type {is_dynamic_url int} status_code_type {disable_domain int} akh_cache_control akh_pragma akh_x_check_cacheable ahk_x_cache ahk_expiry akh_x_cache akh_expiry}
 
   # 26-1-2014 BUGFIX: added here for new DB's.
   $db add_tabledef pageitem_gt3 {id} {scriptname ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
@@ -422,7 +424,8 @@ proc add_daily_stats2 {db {create_tables 1}} {
       ssl_handshake_delta start_msec system_delta basepage record_seq \
       detail_component_1_msec detail_component_2_msec detail_component_3_msec \
       ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
-      header_bytes object_text header_code custom_object_trend status_code aptimized}
+      header_bytes object_text header_code custom_object_trend status_code aptimized \
+      ip_oct3 phys_loc phys_loc_type {is_dynamic_url int} status_code_type {disable_domain int} akh_cache_control akh_pragma akh_x_check_cacheable ahk_x_cache ahk_expiry akh_x_cache akh_expiry}
       
   $db add_tabledef domain_ip_time {id} {scriptname date_cet topdomain domain ip_address {number int} {min_conn_msec real}}
   $db add_tabledef aggr_specific {id} {scriptname date_cet topic {per_page_sec real}}
@@ -648,6 +651,109 @@ migrate_proc redo_aggrsub_20140227 "Redo aggrsub wrt dynamic" {
   $db exec2 "update dailystatus set dateuntil_cet = date('now', '-42 days') where actiontype in ('aggrsub', 'combinereport')"
 }
 
+migrate_proc add_pageitem_20140415 "Add extra pageitem fields" {
+  foreach table {pageitem pageitem_gt3} {
+    foreach field {ip_oct3 phys_loc phys_loc_type status_code_type akh_cache_control akh_pragma akh_x_check_cacheable ahk_x_cache} {
+      $db exec2 "alter table $table add $field" -try -log
+    }
+    foreach field {is_dynamic_url disable_domain} {
+      $db exec2 "alter table $table add $field int" -try -log
+    }
+  }
+}
 
-# LET OP: als pageitem tabel verandert, moet pageitem_gt3 en pageitem_topic mee veranderen!
-# LET OP: als je een table toevoegt, dan ook toevoegen bij add_daily_stats2, deze wordt aangeroepen voor nieuwe DB's.
+migrate_proc add_pageitem_topic_20140416 "Add extra pageitem_topic fields" {
+  # 16-4-2014 pageitem_topic still used, even if mostly empty.
+  foreach table {pageitem_topic} {
+    foreach field {ip_oct3 phys_loc phys_loc_type status_code_type akh_cache_control akh_pragma akh_x_check_cacheable ahk_x_cache} {
+      $db exec2 "alter table $table add $field" -try -log
+    }
+    foreach field {is_dynamic_url disable_domain} {
+      $db exec2 "alter table $table add $field int" -try -log
+    }
+  }
+}
+
+migrate_proc add_pageitem_topic_gt3_20140418 "Add extra pageitem (topic, gt3) fields" {
+  # 16-4-2014 pageitem_topic still used, even if mostly empty.
+  foreach table {pageitem pageitem_gt3 pageitem_topic} {
+    foreach field {ahk_expiry} {
+      $db exec2 "alter table $table add $field" -try -log
+    }
+  }
+}
+
+migrate_proc redo_aggrsub_20140418 "Redo aggrsub wrt testing extra fields" {
+  $db exec2 "update dailystatus set dateuntil_cet = '2014-04-14' where actiontype in ('aggrsub', 'combinereport')"
+}
+
+migrate_proc add_pageitem_topic_gt3_20140418b "Add extra pageitem (topic, gt3) fields" {
+  # 16-4-2014 pageitem_topic still used, even if mostly empty.
+  foreach table {pageitem pageitem_gt3 pageitem_topic} {
+    foreach field {akh_x_cache akh_expiry} {
+      $db exec2 "alter table $table add $field" -try -log
+    }
+  }
+}
+
+
+migrate_proc fill_phys_akh_fields "Fill new phys and akh fields" {
+  global phloc_finder akh_finder
+  if {[regexp {CN} [$db get_dbname]]} {
+    set cont 1
+    while {$cont} {
+      $db in_trans {
+        # @todo? first count items, see if it gets less.
+        set res [$db query "select id, scriptname, ip_address, status_code, error_code,
+                                       domain, url, urlnoparams
+                                from pageitem
+                                where akh_x_check_cacheable is null
+                                limit 1000"]
+        log info "Found [:# $res] records (max 1000) to update in pageitem"  
+        log info "First record: [:0 $res]"
+        if {[:# $res] <= 0} {
+          log info "Found no more record to update: return"
+          set cont 0
+        }
+        foreach row $res {
+          set ip_oct3 [det_ip_oct3 [:ip_address $row]]
+          set status_code_type [det_status_code_type [:status_code $row] [:error_code $row]]
+          set disable_domain [det_disable_domain [:domain $row]]
+          set is_dynamic_url [det_is_dynamic_url [:url $row]]
+          set phloc_res [$phloc_finder find [:scriptname $row] $ip_oct3]
+          set phys_loc [:0 $phloc_res]
+          set phys_loc_type [:1 $phloc_res]
+          set akh_cache_control ""
+          set akh_x_check_cacheable ""
+          set akh_x_cache ""
+          set akh_expiry ""
+          set akh_res [$akh_finder find [:scriptname $row] [:urlnoparams $row]]
+          dict for {k v} $akh_res {
+            set $k $v
+          }  
+          $db exec2 "update pageitem
+                     set ip_oct3 = '$ip_oct3',
+                         status_code_type = '$status_code_type',
+                         disable_domain = $disable_domain,
+                         is_dynamic_url = $is_dynamic_url,
+                         phys_loc = '$phys_loc',
+                         phys_loc_type = '$phys_loc_type',
+                         akh_cache_control = '$akh_cache_control',
+                         akh_x_check_cacheable = '$akh_x_check_cacheable',
+                         akh_x_cache = '$akh_x_cache',
+                         akh_expiry = '$akh_expiry'
+                     where id = [:id $row]"
+        }                           
+      }
+    }    
+  } else {
+    # no CN script, dus extra fields don't have a lot of value
+  }
+} 
+
+migrate_proc redo_aggrsub_20140418b "Redo aggrsub wrt physloc/akh" {
+  $db exec2 "update dailystatus set dateuntil_cet = date('now', '-42 days') where actiontype in ('aggrsub', 'combinereport')"
+}
+
+# ATTENTION: if you change pageitem table, you should also change pageitem_gt3 and pageitem_topic!
+# ATTENTION: if you add a table, add it also in add_daily_stats2. This one is called for new databases.

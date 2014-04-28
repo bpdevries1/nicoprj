@@ -20,7 +20,7 @@ $log set_file "[file tail [info script]]-[clock format [clock seconds] -format "
 ndv::source_once download-check.tcl
 ndv::source_once libkeynote.tcl
 
-ndv::source_once libpostproclogs.tcl libmigrations.tcl kn-migrations.tcl checkrun-handler.tcl libextraprocessing.tcl libextra.tcl
+ndv::source_once libpostproclogs.tcl libmigrations.tcl kn-migrations.tcl checkrun-handler.tcl libextraprocessing.tcl libextra.tcl physloc_finder.tcl akheader_finder.tcl
 
 proc main {argv} {
   global dargv
@@ -33,7 +33,7 @@ proc main {argv} {
     {nomain2 "Do not put data in a main db"}
     {moveread "Move read files to subdirectory 'read'"}
     {continuous "Keep running this script, to automatically put new items downloaded in DB's"}
-    {actions.arg "" "List of actions to do in post processing (comma separated: dailystats,gt3,maxitem,slowitem,topic,aggr_specific,domain_ip,removeold,combinereport,analyze,vacuum)"}
+    {actions.arg "" "List of actions to do in post processing (comma separated: dailystats,gt3,maxitem,slowitem,topic,aggr_specific,aggrsub,domain_ip,removeold,combinereport,analyze,vacuum)"}
     {maxitem.arg "20" "Number of maxitems to determine"}
     {minsec.arg "0.2" "Only put items > minsec in slowitem table"}
     {pattern.arg "*" "Just handle subdirs that have pattern"}
@@ -88,11 +88,13 @@ proc wait_until_next_hour_and_half {checkfile} {
 }
 
 proc scatter2db_main {dargv} {
-  global cr_handler dl_check
+  global cr_handler dl_check phloc_finder akh_finder
   set root_dir [from_cygwin [:dir $dargv]]  
   set res "Ok"
   set cr_handler [checkrun_handler new]
   set dl_check [DownloadCheck new $root_dir]
+  set phloc_finder [physloc_finder new]
+  set akh_finder [akheader_finder new]
   set checkfile [:checkfile $dargv]
   if {[:justdir $dargv]} {
     # 6-9-2013 also handle current-dir, if script is called with one subdir as param
@@ -210,7 +212,8 @@ proc define_tables {db {pageitem 1}} {
       ssl_handshake_delta start_msec system_delta basepage record_seq \
       detail_component_1_msec detail_component_2_msec detail_component_3_msec \
       ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
-      header_bytes object_text header_code custom_object_trend status_code aptimized}
+      header_bytes object_text header_code custom_object_trend status_code aptimized \
+      ip_oct3 phys_loc phys_loc_type {is_dynamic_url int} status_code_type {disable_domain int} akh_cache_control akh_pragma akh_x_check_cacheable ahk_x_cache ahk_expiry akh_x_cache akh_expiry}
   }
   
   # [2013-11-04 12:31:24] add new tables also for new databases
@@ -483,7 +486,7 @@ proc get_details {run} {
 }
 
 proc handle_page {db scriptrun_id page dct_details pageitem scriptname datetime} {
-  global dargv cr_handler
+  global dargv cr_handler phloc_finder akh_finder
   set page_main [dict_get_multi -withname $page page_seq wxn_page_object wxn_page_performance wxn_page_status \
     txnPagePerformance txnPageObject txnPageStatus]
   set dctp [dict_flat $page_main {page_seq connect_delta delta_msec dns_lookup_msec first_packet_delta new_connection \
@@ -549,6 +552,19 @@ proc handle_page {db scriptrun_id page dct_details pageitem scriptname datetime}
       dict set dcti2 page_type $page_type
       dict set dcti2 urlnoparams [det_urlnoparams [:url $dcti2]]
       dict set dcti2 aptimized [det_aptimized [:url $dcti2]]
+      dict set dcti2 ip_oct3 [det_ip_oct3 [:ip_address $dcti2]]
+      dict set dcti2 status_code_type [det_status_code_type [:status_code $dcti2] [:error_code $dcti2]]
+      dict set dcti2 disable_domain [det_disable_domain $domain]
+      dict set dcti2 is_dynamic_url [det_is_dynamic_url [:url $dcti2]]
+      set phloc_res [$phloc_finder find $scriptname [:ip_oct3 $dcti2]]
+      dict set dcti2 phys_loc [:0 $phloc_res]
+      dict set dcti2 phys_loc_type [:1 $phloc_res]
+      
+      set akh_res [$akh_finder find $scriptname [:urlnoparams $dcti2]]
+      dict for {k v} $akh_res {
+        dict set dcti2 $k $v
+      }  
+      
       # breakpoint ; # page_seq not yet filled.
       $db insert pageitem $dcti2
       $cr_handler add_pageitem dcti2
@@ -573,7 +589,7 @@ proc handle_page {db scriptrun_id page dct_details pageitem scriptname datetime}
 }
 
 proc handle_element {db scriptrun_id page_id elt basepage scriptname datetime page_seq page_type} {
-  global cr_handler
+  global cr_handler phloc_finder akh_finder
   if {($elt == "null") || ($elt == "")} {
     return 
   }
@@ -602,6 +618,17 @@ proc handle_element {db scriptrun_id page_id elt basepage scriptname datetime pa
   dict set dct page_type $page_type
   dict set dct urlnoparams [det_urlnoparams $url]
   dict set dct aptimized [det_aptimized $url]
+  dict set dct ip_oct3 [det_ip_oct3 [:ip_address $dct]]
+  dict set dct status_code_type [det_status_code_type [:status_code $dct] [:error_code $dct]]
+  dict set dct disable_domain [det_disable_domain $domain]
+  dict set dct is_dynamic_url [det_is_dynamic_url $url]
+  set phloc_res [$phloc_finder find $scriptname [:ip_oct3 $dct]]
+  dict set dct phys_loc [:0 $phloc_res]
+  dict set dct phys_loc_type [:1 $phloc_res]
+  set akh_res [$akh_finder find $scriptname [:urlnoparams $dct]]
+  dict for {k v} $akh_res {
+    dict set dct $k $v
+  }  
   $db insert pageitem $dct
   $cr_handler add_pageitem dct ; # give dct_name, not dct contents (should save memory, not copying data)
 }
@@ -714,6 +741,72 @@ proc det_aptimized {url} {
   regexp {aptimized} $url
 }
 
+proc det_ip_oct3 {ip_address} {
+  join [lrange [split $ip_address "."] 0 2] "."
+}
+
+proc det_status_code_type {status_code error_code} {
+  if {$status_code == ""} {
+    set status_code $error_code
+  }
+  if {$status_code == ""} {
+    return "empty"
+  }
+  if {[regexp {^2..$} $status_code]} {
+    return "ok"
+  }
+  if {[regexp {^3..$} $status_code]} {
+    if {$status_code == "304"} {
+      return "notmodified"
+    } else {
+      # especially those are important, could/should be optimised.
+      return "redirect"
+    }
+  }
+  if {[regexp {^4..$} $status_code]} {
+    return "clienterror"
+  }
+  if {[regexp {^5..$} $status_code]} {
+    return "servererror"
+  }
+  return "other"
+}
+
+proc det_disable_domain {domain} {
+  set regexps {.*\.en25\.com$ .*\.eloqua\.com$ .*\.livecom.net$ metrixlab.*\.customers.luna.net$ ^r.turn.com$  \.adnxs.com$ ^ace3.adoftheyear.com$ ^philips.112.2o7.net$}
+  foreach re $regexps {
+    if {[regexp $re $domain]} {
+      # puts "Matched: $re"
+      return 1
+    }
+  }
+  return 0
+}
+
+proc det_is_dynamic_url {url} {
+  # if omniture, set to 0, should be disabled anyway.
+  if {[regexp {philips.112.2o7.net} $url]} {
+    return 0
+  }
+  if {[regexp {jsessionid} $url]} {
+    # jsessionid is part of the X-Cache-Key (in Akamai) and X-True-Cache-Key.
+    return 1
+  }
+  if {[regexp {\?(.*)$} $url z params]} {
+    foreach param [split $params "&"] {
+      if {[regexp {^([^=]+)=(.*)$} $param z nm val]} {
+        if {[lsearch {_ accessToken _requestid} $nm] >= 0} {
+          return 1
+        }
+        if {[regexp {1[3-9]\d{8}} $val]} {
+          return 1
+        }
+      }
+    }
+  }
+  return 0
+}
+
 ####################################################################################
 
 # library functions
@@ -772,6 +865,36 @@ proc is_dict {dct} {
   }
   return 0
 }
+
+# memoize function. Use by calling memoize as first statement in function.
+# source: http://wiki.tcl.tk/10779
+# @note maybe would prefer clojure way: first define function, then do: (def f-mem (memoize f)), but this would need 2 functions.
+proc memoize {args} {
+  global memo
+  set cmd [info level -1]
+  set d [info level]
+  if {$d > 2} {
+    set u2 [info level -2]
+    if {[lindex $u2 0] == "memoize"} {
+            return
+    }
+  }
+  if {[info exists memo($cmd)]} {
+    set val $memo($cmd)
+  } else {
+    set val [eval $cmd]
+    set memo($cmd) $val
+  }
+  return -code return $val
+}
+
+# example:
+proc fibonacci-memo {x} {
+  memoize
+  if {$x < 3} {return 1}
+  return [expr [fibonacci-memo [expr $x - 1]] + [fibonacci-memo [expr $x - 2]]]
+}
+  
 
 main $argv
 

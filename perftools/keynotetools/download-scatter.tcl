@@ -118,7 +118,9 @@ proc download_keynote_main {dargv} {
   # @todo determine sec_start for each script - later, some possible issues where holes can occur, if one download fails but the next succeeds. Normally a failed one would be retried the next time. Also, downloading normally takes a lot more time than checking the DB.
   # @todo determine sec_end each time again, to download data ASAP.
   # @note this order also means that important scripts (placed at the start of the config) will be handled first.
+  # breakpoint
   foreach el_config $dctl_config {
+    log info "Handling config element: $el_config"
     # set sec_ts $sec_start
     set sec_ts_slot [det_slot_start $sec_start $el_config]
     set sec_end_slot [det_slot_end $sec_end $el_config]
