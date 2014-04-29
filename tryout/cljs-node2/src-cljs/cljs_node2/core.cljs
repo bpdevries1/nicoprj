@@ -18,7 +18,8 @@
 ;;           (.run db "CREATE TABLE IF NOT EXISTS Stuff2 (thing TEXT)")
 ;;           (.run db "insert into Stuff2 values ('Tweede tekst')")))
 ;;         
-; @todo #() constructie gebruiken.
+; @todo #() constructie gebruiken => werkt niet zoals hieronder staat.
+; @todo evt nog kijken welke code gegenereerd wordt, en of je hier iets mee kan.
 (defn db-exec [db stmt]
   (.serialize db (fn [] (.run db stmt))))
 

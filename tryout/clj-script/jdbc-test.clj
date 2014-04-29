@@ -1,8 +1,16 @@
 #!/bin/bash lein-exec
 
+; (load-file "mylib.clj") ; deze werkt, dus dan wel soort prelude te doen.
+; (load-file "~/nicoprj/clojure/lib/mylib.clj") ; werkt niet ~ niet begrepen.
+; @todo load-file mss beter met relative path, dan werkend op zowel linux als windows. Mss afhankelijk van waar script moet draaien. Mss kan env-var nog werken.
+;       maar mss toch soort wrapper script maken, naast lein-exec. Of is lein-exec nog te tunen?
+(load-file "/home/nico/nicoprj/clojure/lib/mylib.clj") 
+
 (use '[leiningen.exec :only  (deps)])
 (deps '[[org.clojure/java.jdbc "0.1.1"]
         [org.xerial/sqlite-jdbc "3.7.2"]])
+
+; 3-4-2014 needing to do both deps and require is a bit double, possible to do it in one statement?
 
 ;(use 'java.jdbc)
 (require '[clojure.java.jdbc :as jdbc])
@@ -14,6 +22,8 @@
 (use 'clojure.pprint)
 
 (println "jdbc hello world, java.jdbc and sqlite loaded succesfully!")
+
+(println (str "Result from fn from mylib.clj: " (mylib-fn 12)))
 
 ; remove orig test.db
 (io/delete-file (io/file "test.db"))
