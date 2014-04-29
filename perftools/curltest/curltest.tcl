@@ -11,7 +11,7 @@ $log set_file "[file tail [info script]].log"
 proc main {argv} {
   log debug "argv: $argv"
   set options {
-    {dir.arg "~/Dropbox/Philips/Shop/curltest" "Dir to put output"}
+    {dir.arg "~/Ymor/Philips/Shop/curltest" "Dir to put output"}
     {loglevel.arg "info" "Log level (debug, info, warn)"}
     {qadev "Also do QA and DEV environments"}
     {interval.arg "300" "Interval in seconds"}
