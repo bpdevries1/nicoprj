@@ -6,7 +6,6 @@
   ; find-files is recursive, don't want that, so use glob, which isn't recursive.
   (->> (fs/glob (io/as-file target-root) "*")
        (filter fs/directory?)
-       ;(filter #(not (.isFile %)))
        (map fs/base-name)))
 
 (defn file-is-serie? 

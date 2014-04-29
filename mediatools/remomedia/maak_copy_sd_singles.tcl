@@ -1,4 +1,4 @@
-#!/home/nico/bin/tclsh
+#!/home/nico/bin/tclsh86
 
 # note: car-player snapt .m4a niet.
 
@@ -10,7 +10,7 @@ package require Tclx
 # set SINGLES_ON_SD 150 ; # 1GB?
 
 # @todo: have option copy-until-full, but then copy directly in this script, don't create batch file
-set SINGLES_ON_SD 550 ; # 4GB? Bij 600 te veel, 550 lijkt ongeveer te kunnen.
+set SINGLES_ON_SD 530 ; # 4GB? Bij 600 te veel, 550 lijkt ongeveer te kunnen. 10-1-2014 toch maar 530 doen.
 # set SINGLES_ON_SD 594 ; # test
 
 set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
@@ -21,14 +21,15 @@ proc main {argc argv} {
 	$log info "Starting"
 
   set options {
-    {drv.arg "/media/PHILIPS" "USB Drive to copy music files to (on windows machine)"}
+    {drv.arg "/media/nico/PHILIPS" "USB Drive to copy music files to (on linux machine)"}
     {bat.arg "/media/nas/copy-sd.sh" "Batch/shell file to create"}
     {groupname.arg "Singles-car" "Group name to use"}
     {np "Don't mark selected files as played in database (for testing)"}
   }
 
   set usage ": [file tail [info script]] \[options] :"
-  set dargv [::cmdline::getoptions argv $options $usage]
+  # set dargv [::cmdline::getoptions argv $options $usage]
+  set dargv [getoptions argv $options $usage]
   array set ar_argv $dargv
 
 	set to_drive $ar_argv(drv)
@@ -49,7 +50,10 @@ proc main {argc argv} {
   if {!$ar_argv(np)} {
     $log info "Mark files as played in database"
     # $log warn "NOT: still in testing mode!"
+    # 10-01-2014 exec within transaction, otherwise very slow. NOT TESTED YET!
+    ::mysql::exec $conn "start transaction"
     ::ndv::music_random_update $db $lst "sd-auto" "-tablemain generic -viewmain singles -tableplayed played"
+    ::mysql::exec $conn "commit"
   } else {
     $log info "Don't mark files as played in database" 
   }

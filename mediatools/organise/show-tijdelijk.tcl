@@ -10,12 +10,17 @@ source [file join [file dirname [info script]] .. lib setenv-media.tcl]
 
 proc main {argc argv} {
 	global env
+	foreach key [array names env] {
+	  if {[regexp -nocase media $key]} {
+	    # puts "env.$key = $env($key)" 
+	  }
+	}
   check_params $argc $argv
   set search_strings [string tolower $argv]
   search_files $env(MEDIA_COMPLETE) $search_strings
   puts "====================="
   search_files $env(MEDIA_NEW) $search_strings
-  search_files $env(MEDIA_TEMP) $search_strings
+  search_files [file join $env(MEDIA_TEMP) music] $search_strings
 }
 
 proc check_params {argc argv} {
