@@ -42,3 +42,6 @@ source [file join [file dirname [info script]] libcyg.tcl]
 # 12-10-2013 added libfp.tcl (test needed that functions do not overlap/name clash)
 source [file join [file dirname [info script]] libfp.tcl]
 
+# 26-01-2014 added listc - list comprehensions
+source [file join [file dirname [info script]] listc.tcl]
+

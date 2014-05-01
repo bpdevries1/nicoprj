@@ -10,6 +10,22 @@ $log set_file "[file tail [info script]].log"
 # @todo nanny.tcl othertcl.tcl params does not work, as exec does not use bash, so first line '#!/usr/bin/env tclsh' is not read/handled correctly.
 # for now, nanny.tcl tclsh othertcl.tcl works.
 
+if {0} {
+# @todo:
+./nanny.tcl tclsh ./scatter2db.tcl -nopost -continuous -moveread
+
+vervangen kan worden door:
+
+./nanny.tcl ./scatter2db.tcl -nopost -continuous -moveread
+
+Door ofwel de exec via bash te doen (en bash mss afleiden uit parent proces van nanny.tcl, ofwel (vgl bash) zelf de eerste regel te lezen (en evt ook extensie van de file)
+
+# @todo
+Als dit process nanny.tcl wordt gesloten met ctrl-c, moeten ook child processes worden gekilled.
+22-1-2014 Dit gebeurde tot voor kort wel, maar child wordt nu een orphan, en blijft draaien.
+
+}
+
 proc main {argv} {
   global stdout
   set stop 0

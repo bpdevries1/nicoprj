@@ -24,10 +24,17 @@ db.query = function(db, query) {
   dbGetQuery(db, query)
 }
 
-# always forget about paste, so use concat as an alias.
-concat = function(...) {
-  paste0(...)
+db.exec = function(db, query) {
+  res = dbSendQuery(db, query)
+  dbClearResult(res)
 }
+
+# always forget about paste, so use concat as an alias.
+# zou concat = paste0 ook kunnen?
+concat = paste0
+#concat = function(...) {
+#  paste0(...)
+#}
 
 # check if R/RStudio are started from cygwin (in windows) so ~ is set to c:/nico
 check.cygwin = function() {
@@ -175,27 +182,50 @@ add.psxtime = function(df, from, to, format="%Y-%m-%d") {
   df
 }
 
-# df = add.psxtime(db.query(db, query), "ts_cet", "psx_date", format="%Y-%m-%d %H:%M:%S")
-
 # add ts_psx if ts is present as a field in result of query
 # add date_psx if date is present as a field in result of query
 # first try is add fields blindly, possibly with null values
 # second try is to check which fields are available,
 # or add a try-catch.
-
-# [2013-10-25 14:09:15] stond er dubbel in, geen idee waarom...
-# db.query.dt = function(db, query) {
-#   df = db.query(db, query)
-#   if (match("ts", colnames(df)) > 0) {
-#     df$ts_psx = as.POSIXct(strptime(df$ts, format="%Y-%m-%d %H:%M:%S"))
-#   }
-#   if (match("date", colnames(df)) > 0) {
-#     df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d"))
-#   }
-#   df
-# }
-
+# Used from R-wrapper.tcl
 db.query.dt = function(db, query) {
+  df = db.query(db, query)
+  df.add.dt(df)
+}
+
+df.add.dt = function(df) {
+  if ("ts" %in% colnames(df)) {
+    df$ts_psx = as.POSIXct(strptime(df$ts, format="%Y-%m-%d %H:%M:%S"))
+  }
+  if ("date" %in% colnames(df)) {
+    # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d"))
+    # df$date_date = as.Date(df$date, "%Y-%m-%d")
+    # @todo rename field to date_parsed, and ts_parsed, cause format is not Posix always.
+    df$date_Date = as.Date(df$date, "%Y-%m-%d")
+    # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d", tz="UTC"))
+    # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d", tz="GMT"))
+  }
+  if ("time" %in% colnames(df)) {
+    df$time_psx = as.POSIXct(strptime(df$time, format="%H:%M:%S"))
+  }
+  df
+}
+
+# determine sprintf format string based on values in vct (vector) and ndigits after decimal point.
+# eg maxval = 123.456, ndigits = 3 => result = '[%6.3d] '. The 6 is the total number of digits
+det.fmt.string = function(vct, ndigits) {
+  # totaldigits includes the decimal point, so add 1.
+  m = max(vct)
+  if (m > 0) {
+    totaldigits = ndigits + ceiling(log10(max(vct))) + 1
+  } else {
+    # eg no values, max=-Inf, return default format string.
+    totaldigits = ndigits + 2;    
+  }
+  concat('[%', totaldigits, '.', ndigits, 'f] ')
+}
+
+db.query.dt.old = function(db, query) {
   df = db.query(db, query)
   if ("ts" %in% colnames(df)) {
     df$ts_psx = as.POSIXct(strptime(df$ts, format="%Y-%m-%d %H:%M:%S"))
@@ -214,16 +244,27 @@ db.query.dt = function(db, query) {
   df
 }
 
-det.height = function(height.min, height.max, height.base, height.perfacet, facets, height.percolour, colours) {
+# Used from R-wrapper.tcl
+det.height = function(height.min, height.max, height.base, height.perfacet, facets, height.percolour, colours, legend.position = "") {
   # base height should include height for 1 facet.
   height = height.base
   if (height.perfacet > 0) {
     nfacets = length(levels(as.factor(facets)))
-    height = height + (nfacets-1) * height.perfacet
+    # only change hight if minimal 2 facets.
+    if (nfacets >= 2) {
+      height = height + (nfacets-1) * height.perfacet
+    }
   }
   if (height.percolour > 0) {
     ncolours = length(levels(as.factor(colours)))
-    height = height + ncolours * height.percolour
+    if (legend.position == "right") {
+      height.colours = ncolours * height.percolour
+      if (height.colours > height) {
+        height = height.colours
+      }
+    } else {
+      height = height + ncolours * height.percolour
+    }
   }
   if (height > height.max) {
     height.max
@@ -234,4 +275,9 @@ det.height = function(height.min, height.max, height.base, height.perfacet, face
       height
     }
   }
+}
+
+print.log = function(str) {
+  # print(concat(format(Sys.time(), "[%Y-%m-%d %H:%M:%S] "), str))
+  cat(concat(format(Sys.time(), "[%Y-%m-%d %H:%M:%S] "), str, "\n"))
 }

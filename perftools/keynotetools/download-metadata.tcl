@@ -22,7 +22,8 @@ proc get_meta_data {dct_argv} {
   set root_dir [:dir $dct_argv]  
   set filename [file join $root_dir "slotmetadata-[clock format [clock seconds] -format "%Y-%m-%d"].[:format $dct_argv]"]
   set api_key [det_api_key [:apikey $dct_argv]]
-  set cmd [list curl --sslv3 -o $filename "https://api.keynote.com/keynote/api/getslotmetadata?api_key=$api_key\&format=[:format $dct_argv]"]
+  # set cmd [list curl --sslv3 -o $filename "https://api.keynote.com/keynote/api/getslotmetadata?api_key=$api_key\&format=[:format $dct_argv]"]
+  set cmd [list [curl_path] --sslv3 -o $filename "https://api.keynote.com/keynote/api/getslotmetadata?api_key=$api_key\&format=[:format $dct_argv]"]
   log debug "cmd: $cmd"
   try_eval {
     set res [exec -ignorestderr {*}$cmd]

@@ -74,6 +74,36 @@ proc dict_lappend {args} {
   return $dct
 }
 
+# return flattened dict, so eg {height {min 5 max 7}} becomes {height.min 5 height.max 7}
+# @todo multilevel, first only single level. Repeatedly calling this function is a workaround.
+# @note also keep orig (nested) value in dict, because of things like 'title "Scriptrun times"'. Tcl does not distinguish between these strings and actual dicts.
+proc dict_flatten {dct {sep .}} {
+  # maybe should use dict map, but then also still flatten needed, as the map-function may return more than one key (essence of this function).
+  set res [dict create]
+  foreach key [dict keys $dct] {
+    set val [dict get $dct $key]
+    if {[dict? $val]} {
+      # sub-dict
+      foreach subkey [dict keys $val] {
+        dict set res "$key$sep$subkey" [dict get $val $subkey]
+      }
+    } 
+    # single value, and also keep orig for nested values.
+    dict set res $key $val
+  }
+  return $res
+}
+
+# returns 1 if x is (looks like) a dict. This cannot strictly be determined, so check if x is a list and has an even number of items.
+proc dict? {x} {
+  if {[string is list $x]} {    # Only [string is] where -strict has no effect
+    if {[expr [llength $x]&1] == 0} {
+      return 1
+    }
+  }
+  return 0
+}
+
 # experimental: creating :accessor procs for dicts on the fly using unknown statement
 # possible alternative is to create these accessors explicity.
 # eg dict_make_accessors :bla :att {:lb lb}
@@ -130,5 +160,23 @@ proc unknown args {
   log warn "WARNING: unknown command: [string range $args 0 100]"
   log warn "calling original unknown for $args"
   uplevel 1 [list _original_unknown {*}$args]
+}
+
+# 26-2-2014 also some list helpers here. Should be in separate lib, but keep here, because names also start with :
+# don't use #, 0, 1 without : => # is a comment, others would be too confusing.
+proc :# {l} {
+  llength $l
+}
+
+proc :0 {l} {
+  lindex $l 0
+}
+
+proc :1 {l} {
+  lindex $l 1
+}
+
+proc :k {d} {
+  dict keys $d
 }
 

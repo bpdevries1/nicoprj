@@ -58,7 +58,7 @@ proc lookup_entries_parallel {conn table_def src_table_defs ts_start ts_treshold
 proc lookup_entries_parallel_src {conn table_def src_table_def ts_start ts_treshold nparallel} {
   global ndone finished jobs_running
   set max_rows 100
-  # set max_rows 5
+  # set max_rows 10
   set total_todo [det_total_todo $conn $src_table_def $table_def $ts_treshold]
   log info "Total to do for $src_table_def: $total_todo"
   set gen [gen_urls $conn $src_table_def $table_def $max_rows $ts_treshold]
@@ -98,7 +98,8 @@ proc start_job {job global_values} {
 proc start_job_part {job_part rest global_values} {
   global job_output jobs_running
   dict_to_vars $job_part
-  set f [open "|curl -IXGET -H \"Pragma: akamai-x-cache-on, akamai-x-cache-remote-on, akamai-x-check-cacheable, akamai-x-get-cache-key, akamai-x-get-extracted-values, akamai-x-get-nonces, akamai-x-get-ssl-client-session-id, akamai-x-get-true-cache-key, akamai-x-serial-no\" -L --connect-timeout 20 --max-time 30 \"$url\"" r]
+  # 15-3-2014 added max-redirs 5, because home.jsp (myphilips) in an endless loop.
+  set f [open "|curl -IXGET -H \"Pragma: akamai-x-cache-on, akamai-x-cache-remote-on, akamai-x-check-cacheable, akamai-x-get-cache-key, akamai-x-get-extracted-values, akamai-x-get-nonces, akamai-x-get-ssl-client-session-id, akamai-x-get-true-cache-key, akamai-x-serial-no\" -L  --max-redirs 5 --connect-timeout 20 --max-time 30 \"$url\"" r]
   set job_output($f) ""
   fconfigure $f -blocking 0
   set job_info [dict create msec_start [clock milliseconds]]

@@ -7,6 +7,11 @@ proc main {argv} {
   set target_root "/media/nico/Iomega HDD/media/Series"
   set src_root "/home/nico/media/tijdelijk"
   set series [det_series $target_root]
+  handle_dir_root $src_root $target_root $series
+  handle_dir_root [file join $src_root Series] $target_root $series
+}
+
+proc handle_dir_root {src_root target_root series} {
   foreach filename [glob -nocomplain -directory $src_root -type f *] {
     handle_file $filename $target_root $series
   }

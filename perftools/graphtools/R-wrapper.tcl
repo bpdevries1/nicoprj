@@ -1,6 +1,7 @@
 package require TclOO 
 
 package require struct::set
+package require ndv
 
 ndv::source_once [file join [info script] .. .. .. lib CExecLimit.tcl]
 
@@ -19,6 +20,24 @@ ndv::source_once [file join [info script] .. .. .. lib CExecLimit.tcl]
 # @todo in R-wrapper bepalen hoe hoog graph moet worden. height.percolour/perfacet op default zetten, afh plaatsing legend en ook #columns
 #       bepalen of deze meegenomen moeten worden. Bv ook als er veel colours zijn, en de hoogte groter moet worden dan voor een facet.
 # @todo order van legend moet (soms, altijd?) net andersom, bv met guides(colour = guide_legend(reverse = TRUE), shape = guide_legend(reverse = TRUE)), maar werkt nog niet zo.
+# @todo [1-3-2014] BUG lijkt dat dict var's soms een waarde houden van de vorige graph. Bv 'df.avail' wordt gebruik bij legend.avg en sqldf, terwijl je al met loading times bezig bent, en avail helemaal niet als veld in deze df zit.
+# @todo [1-3-2014] BUG top 10 die je wilt tonen werkt (waarsch) alleen in combi met legend.avg, deze ook op 0 zetten dan?
+
+if 0 {
+Instance vars for RWrapper:
+* dargv - bij constructor gezet, blijft hierna constant, wel vaker gebruikt, is prima.
+* outputroot - bij init een default, en speciale method om te zetten: set_outputroot
+* outformats - method: set_outformat
+* dir - in init gezet
+* fcmd - eenmalig voor command-file.
+* cmdfilename - in init gezet
+* Routput - in init gezet.
+* Rlatest - in init gezet.
+* stacked_cmds - in init op {} gezet. Bij query gevuld, ook eerst op leeg gezet. In melt() aangevuld. In plot_prepare() uitgevoerd en hierna op leeg gezet.
+* d - bij qplot opnieuw gezet, als resultaat van plot_prepare. In plot_prepare als result van det_plot_dct gezet.
+}
+
+
 oo::class create Rwrapper {
 
   constructor {a_dargv} {
@@ -27,22 +46,38 @@ oo::class create Rwrapper {
     log debug "Rwrapper constructed with: $dargv"
   }
 
-  method init {a_dir db} {
-    my variable f cmdfilename dir stacked_cmds
+  # @note dit kan main aanroep zijn. Na construct meteen (en alleen) deze.
+  method main {body} {
+    my variable dargv
+    my init [:dir $dargv] [file join [:dir $dargv] [:dbname $dargv]]
+    my set_outformat [:outformat $dargv]
+
+    uplevel $body
+    
+    my doall
+    my cleanup
+    my destroy
+  }
+  
+  # @todo remove need for a_dir and db, everything should be set in dargv given to constructor.
+  method init {a_dir db {a_file_addition ""}} {
+    my variable fcmd cmdfilename dir stacked_cmds Routput Rlatest
     # set dir $a_dir
     log debug "RWrapper initialised with: $a_dir"
     set dir [file normalize [from_cygwin $a_dir]] ; # for R need Unix style (/) dir. 
     set cmdfilename "R-[my now].R"
-    set f [open [file join $dir $cmdfilename] w]
+    set fcmd [open [file join $dir $cmdfilename] w]
+    set Routput "R-output${a_file_addition}-[my format_now_filename].txt"
+    set Rlatest "R-latest${a_file_addition}.R"
     my write [my pprint "setwd('$dir')
-      zz = file('R-output.txt', open = 'wt')
-      # sink('R-output.txt')
-      # sink('R-output.txt', type = 'message')
+      zz = file('$Routput', open = 'wt')
+      # sink('$Routput')
+      # sink('$Routput', type = 'message')
       sink(zz)
       # cannot split the message stderr stream (, split=TRUE)
       sink(zz, type = 'message')
-      print('R started')
       source('~/nicoprj/R/lib/ndvlib.R')
+      print.log('R started')
       load.def.libs()
       db = db.open('$db')"]
     set stacked_cmds {}
@@ -64,102 +99,136 @@ oo::class create Rwrapper {
     }
   }
   
-  method now {} {
-    clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S" 
-  }
-  
-  # replace ' with " before writing.
-  method write {cmd} {
-    my variable f
-    # regsub -all {\'} $cmd "\42" cmd2
-    # puts $f $cmd2
-    # puts $f [my indent [my replace_quotes $cmd]]
-    puts $f [my replace_quotes $cmd]
-  }
-  
-  method write2 {cmd} {
-    my write "  $cmd" 
-  }
-  
-  method replace_quotes {cmd} {
-    regsub -all {\'} $cmd "\42" cmd2
-    return $cmd2
-  }
-  
-  method indent {str} {
-    # @todo first start all at line 1, maybe indent for queries and plot commands.
-    # @todo maybe not use this function.
-  }
-  
-  # start first line at col 0, next at col 2.
-  method pprint {str} {
-    set str [string trim $str]
-    # remove all spaces from start of lines
-    while {[regsub -all {\n } $str "\n" str]} {}
-    # put 2 spaces in front of every line but the first
-    regsub -all {\n} $str "\n  " str
-    return $str
-  }
-  
   method query {query} {
-    my variable f stacked_cmds
-    # puts $f "query = \"$query\""
+    my variable fcmd stacked_cmds
+    # puts $fcmd "query = \"$query\""
     set stacked_cmds {} ; # when a new query starts, other cmds on the stack can be removed, not used anymore, overwritten.
     lappend stacked_cmds [my pprint "query = \"$query\""]
-    lappend stacked_cmds "df = db.query.dt(db, query)"
-    lappend stacked_cmds "print(head(df))" 
+    lappend stacked_cmds "print.log(\"Query - start\")"
+    # lappend stacked_cmds "df = db.query.dt(db, query)"
+    # 2-3-2014 add Date field after sqldf has been done. Sqldf doesn't like Date fields anymore (since update 1-3-2014).
+    lappend stacked_cmds "df = db.query(db, query)"
+    lappend stacked_cmds "print.log(\"Query - finished\")"
+    # lappend stacked_cmds "print(head(df))" 
+    lappend stacked_cmds [my cmds_write_df df]
     # my write 
   }
 
+  method dbexec {query} {
+    my variable fcmd
+    # @note 25-2-2014 query can contain single quotes, so cannot use write, so use write2.
+    my write "print.log('Query - start')"
+    puts $fcmd "db.exec(db, \"$query\")"
+    my write "print.log('Query - finished')"
+  }
+  
   method melt {value_vars} {
     my variable stacked_cmds
     # my write "df = melt(df, measure.vars=c("resp_bytes", "element_count", "domain_count", "content_errors", "connection_count"))
     lappend stacked_cmds [my replace_quotes "df = melt(df, measure.vars=c([join [lmap el $value_vars {str "'" $el "'"}] ", "]))"]
-    lappend stacked_cmds "print(head(df))"
-    lappend stacked_cmds "print(tail(df))"
+    #lappend stacked_cmds "print(head(df))"
+    #lappend stacked_cmds "print(tail(df))"
+    #my write_df df.plot
+    lappend stacked_cmds [my cmds_write_df df]
   }
   
-  # @todo idee: ook als args mee kunnen geven, dan 2 opties:
-  # - als dct zoals nu, met accolades, dan geen backslash nodig bij einde regel.
+  # @note: ook als args mee kunnen geven, dan 2 opties:
+  # - als dct (zoals nu), met accolades, dan geen backslash nodig bij einde regel.
   # - direct als params, dan wel backslash nodig, maar geen [list], en parameter substitutie.
-  # - of: parameter substitutie binnen qplot doen, maar mss gevaarlijk.
+  # beide kunnen nu, in plot_prepare opgelost.
   method qplot {args} {
-    my variable dargv dir stacked_cmds f d outputroot outformats
+    my variable dargv dir stacked_cmds fcmd d outputroot outformats
     set d [my plot_prepare {*}$args]
     if {$d == {}} {
       # graph already exists and in incr(emental) mode: return.
       log debug "Graph already exists, not creating again: [:title $d]"
       return 
     }
-    my preprocess
-    log debug "Graph does not exist, so creating: [:title $d]"
-    set colour [ifp [= "" [:colour $d]] "" ", colour=as.factor([:colour $d]), shape=as.factor([:colour $d])"] 
-    my write "p = qplot([:xvar $d], [:yvar $d], data=df.plot, geom='[:geom $d]' $colour) +"
-    my write-if-filled :geom2 "geom_point(data=df.plot, aes(x=[:xvar $d], y=[:yvar $d], shape=as.factor([:colour $d]))) +"
-
-    my write_scales $colour
-    my write_facet
-    my write_legend
-    my write_extra
     
-    # for now labs as the latest, is not followed by '+'
-    my write_labs
-    my write_ggsave
+    # df has a value here (when executed in R), check if not empty
+    my write "if (nrow(df) > 0) {"
+    
+      my preprocess
+      log debug "Graph does not exist, so creating: [:title $d]"
+      set colour [ifp [= "" [:colour $d]] "" ", colour=as.factor([:colour $d]), shape=as.factor([:colour $d])"] 
+      # set colour [ifp [= "" [:colour2 $d]] "" ", colour=as.factor([:colour2 $d]), shape=as.factor([:colour2 $d])"] 
+      my write "print.log('Starting qplot')"
+      my write "p = qplot([:xvar $d], [:yvar $d], data=df.plot, geom='[:geom $d]' $colour) +"
+      my write-if-filled :geom2 "geom_point(data=df.plot, aes(x=[:xvar $d], y=[:yvar $d], shape=as.factor([:colour $d]))) +"
+
+      my write_scales $colour
+      my write_facet
+      my write_legend
+      my write_extra
+      my write_hline
+      
+      # for now labs as the latest, is not followed by '+'
+      my write_labs
+      my write "print.log('ggsave - start')"
+      my write_ggsave
+      my write "print.log('ggsave - finished')"
+      
+    # end of check df
+    my write "} else {print.log('WARNING: Dataframe df is empty, continue with next graph')}"
   }
 
+  # free format plot command.
+  # the cmds parameter should contain direct R/ggplot commands.
+  # precondition for these command: a dataframe df.plot is available.
+  # postcondition for these commands: a var 'p' with the plot should be made, so it can be saved.
+  method myplot {args} {
+    my variable dargv dir stacked_cmds fcmd d outputroot outformats
+    set d [my plot_prepare {*}$args]
+    if {$d == {}} {
+      # graph already exists and in incr(emental) mode: return.
+      log debug "Graph already exists, not creating again: [:title $d]"
+      return 
+    }
+    
+    # df has a value here (when executed in R), check if not empty
+    my write "if (nrow(df) > 0) {"
+    
+      my preprocess ; # geen legend.avg meegeven, dan std df.plot gemaakt.
+      
+      log debug "Graph does not exist, so creating: [:title $d]"
+      # set colour [ifp [= "" [:colour $d]] "" ", colour=as.factor([:colour $d]), shape=as.factor([:colour $d])"] 
+      # set colour [ifp [= "" [:colour2 $d]] "" ", colour=as.factor([:colour2 $d]), shape=as.factor([:colour2 $d])"] 
+      my write "print.log('Starting myplot')"
+      my write "[:cmds $d] +"
+      
+      #my write "p = qplot([:xvar $d], [:yvar $d], data=df.plot, geom='[:geom $d]' $colour) +"
+      #my write-if-filled :geom2 "geom_point(data=df.plot, aes(x=[:xvar $d], y=[:yvar $d], shape=as.factor([:colour $d]))) +"
+
+      #my write_scales $colour
+      #my write_facet
+      #my write_legend
+      #my write_extra
+      #my write_hline
+      
+      # for now labs as the latest, is not followed by '+'
+      # evt hierin checken wat gezet is, sowieso moet er iets bij, want vorige regel heeft een '+'. Of eerst de regels opbouwen en dan join met +.
+      my write_labs 
+      my write_ggsave
+      
+    # end of check df
+    my write "} else {print.log('WARNING: Dataframe df is empty, continue with next graph')}"
+  }
+  
   method plot_prepare {args} {
-    # my variable dargv dir stacked_cmds f d
-    my variable dargv dir stacked_cmds f d outputroot
+    # my variable dargv dir stacked_cmds fcmd d
+    my variable dargv dir stacked_cmds fcmd d outputroot
     set dct [ifp [= 1 [llength $args]] [lindex $args 0] $args]
     set d [my det_plot_dct $dct]
     log debug "dct: $dct"
     log debug "d: $d"
-    if {([:incr $dargv]) && [file exists [file join $outputroot [:pngname $d]]]} {
+    set pngname [file join $outputroot [:pngname $d]]
+    # 12-3-2014 if file exists, but is very small (2k?), then probably something went wrong previous time so create again.
+    if {([:incr $dargv]) && [file exists $pngname] && ([file size $pngname] > 2000)} {
       # 14-11-2013 bugfix: use outputroot, not dir.
       log debug "File already exists, incr: return: [file join $outputroot [:pngname $d]]"
       return {}
     }
-    my write "\nprint(concat('Making graph: ', '[:pngname $d]'))"
+    my write "\nprint.log(concat('Making graph: ', '[:pngname $d]'))"
     if {[:query $d] != ""} {
       my query [:query $d] 
     }
@@ -167,52 +236,94 @@ oo::class create Rwrapper {
       my melt [:melt $d] 
     }
     foreach cmd $stacked_cmds {
-      puts $f $cmd ; # replace quotes already done where needed (not with query!)
+      puts $fcmd $cmd ; # replace quotes already done where needed (not with query!)
     }
     set stacked_cmds {}
     return $d
   }
 
   # stuff to to before qplot (or ggplot?) is called
+  # @pre df does not contain an R-Date field (does contain date, with sql date, so R string).
+  # @post df does contain an R-Date field (if x-axis has dates or times that is).
   method preprocess {} {
-    my variable f d
-    if {[:legend.avg $d] != ""} {
+    my variable fcmd d
+    if {[:legend.avgtype $d] != ""} {
       # add average of values to legend, add to df here using library(sqldf)
       # my write "dft = sqldf('select [:colour $d], avg([:yvar $d]) avrg from df group by 1')"
       if {[:facet $d] != ""} {
-        my write "dfnvalues = data.frame(nxvalues = length(levels(as.factor(df\$[:xvar $d]))), nfacets=length(levels(as.factor(df\$[:facet $d]))))"
+        # xvar is op date_Date gezet, en bestaat hier nog niet, dus gebruik :x, staat (gewoon) op date.
+        # my write "dfnvalues = data.frame(nxvalues = length(levels(as.factor(df\$[:xvar $d]))), nfacets=length(levels(as.factor(df\$[:facet $d]))))"
+        my write "dfnvalues = data.frame(nxvalues = length(levels(as.factor(df\$[:x $d]))), nfacets=length(levels(as.factor(df\$[:facet $d]))))"
       } else {
-        my write "dfnvalues = data.frame(nxvalues = length(levels(as.factor(df\$[:xvar $d]))), nfacets=1)"
+        # my write "dfnvalues = data.frame(nxvalues = length(levels(as.factor(df\$[:xvar $d]))), nfacets=1)"
+        my write "dfnvalues = data.frame(nxvalues = length(levels(as.factor(df\$[:x $d]))), nfacets=1)"
       }
       
       # my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/nxvalues avrg, avg([:yvar $d]) avg2, count([:yvar $d]) nr from df, dfnvalues group by 1')"
-      my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/(nxvalues*nfacets) avrg, avg([:yvar $d]) avg2, count([:yvar $d]) nr from df, dfnvalues group by 1')"
+      # my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/(nxvalues*nfacets) avrg, avg([:yvar $d]) avg2, count([:yvar $d]) nr from df, dfnvalues group by 1')"
+      if {[:maxcolours $d] == 0} {
+        my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/(nxvalues*nfacets) avg_sum, avg([:yvar $d]) avg_avg, count([:yvar $d]) nr from df, dfnvalues group by 1')"
+      } else {
+        my write "dft = sqldf('select [:colour $d], 1.0*sum([:yvar $d])/(nxvalues*nfacets) avg_sum, avg([:yvar $d]) avg_avg, count([:yvar $d]) nr from df, dfnvalues group by 1 order by 2 desc limit [:maxcolours $d]')"
+      }
+      # @todo bepaal of 8 goede waarde is, door ceiling(log10(m)), waarbij m = max(dft$avrg)
+      # my write "dft\$avrg_f = sprintf('\[%8.[:legend.avg $d]f\] ', dft\$avrg)"
+      my write "fmt.string = det.fmt.string(dft\$avg_[:legend.avgtype $d], [:legend.avgdec $d])"
+      my write "dft\$avrg_f = sprintf(fmt.string, dft\$avg_[:legend.avgtype $d])"
+      
       my write_df dft
       # my write not possible below, single quotes should stay single quotes.
-      puts $f "df.plot = sqldf(\"select df.*, '\['||round(dft.avrg,[:legend.avg $d])||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\")"
+      # 2-3-2014 df.avail staat hier nog, niet goed. Orig: select df.*, '\[' etc 
+      # df is result query, dus je weet velden eigenlijk niet goed. Dan toch date_Date nog niet toevoegen zodat je weer * kunt doen en later toevoegen.
+      # was new, but does not work: puts $fcmd "df.plot = sqldf(\"select df.scriptname, df.date, df.avail, '\['||round(dft.avrg,[:legend.avg $d])||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\")"
+      # puts $fcmd "df.plot = sqldf(\"select df.*, '\['||printf('%.[:legend.avg $d]f', dft.avrg)||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\")"
+      # puts $fcmd "df.plot = df.add.dt(sqldf(\"select df.*, '\['||round(dft.avrg, [:legend.avg $d])||'\] ' || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\"))"
+      # puts $fcmd "df.plot = df.add.dt(sqldf(\"select df.*, dft.avrg_f || df.[:colour $d] label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\"))"
+      # puts $fcmd "df.plot = df.add.dt(sqldf(\"select df.*, dft.avrg_f || substr(df.[:colour $d],1,100) label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\"))"
+      puts $fcmd "df.plot = df.add.dt(sqldf(\"select df.*, dft.avrg_f || substr(df.[:colour $d],1,[:legend.maxchars $d]) label_avg from df join dft on df.[:colour $d]=dft.[:colour $d]\"))"
+      # printf("%.2f", floatField) => kent 'ie niet, ook niet vanaf R. En vanaf tcl zelfs ook niet, alleen hier wel zelf toe te voegen natuurlijk.
+      
       my write_df df.plot
       dict set d colour "label_avg"
+      # dict set d colour2 "label_avg"
     } else {
-      my write "df.plot = df"
+      my write "df.plot = df.add.dt(df)"
+      my write_df df.plot
+      # dict set d colour2 [:colour $d]
     }
   }
 
   method write_df {df_name} {
-    my write "print('Summary of data frame: $df_name')"
-    my write "print(head($df_name))"
-    my write "print(tail($df_name))"
-    my write "print(summary($df_name))"
+    my write [my cmds_write_df $df_name]
+  }
+  
+  method cmds_write_df {df_name} {
+    #my write "print.log('Summary of data frame: $df_name')"
+    #my write "print(head($df_name))"
+    #my write "print(tail($df_name))"
+    #my write "print(summary($df_name))"
+    return [join [list "print.log('Summary of data frame: $df_name')" \
+                       "print(head($df_name))" \
+                       "print(tail($df_name))" \
+                       "print(summary($df_name))"] "\n"]
   }
   
   method write_scales {colour} {
     my variable d
     # @note scale_colour should be put before scale_shape, in order for guides(ncol) to work.
     #       doesn't matter if guides is put first.    
+    if {[:maxcolours $d] > 0} {
+      set colourlabel "[:colourlabel $d] (top [:maxcolours $d])"
+    } else {
+      set colourlabel [:colourlabel $d]
+    }
     if {$colour != ""} {
-      my write2 "scale_colour_discrete(name='[:colourlabel $d]') +"
+      # my write2 "scale_colour_discrete(name='[:colourlabel $d]') +"
+      my write2 "scale_colour_discrete(name='$colourlabel') +"
     }
     if {([:geom $d] == "point") || ([:geom2 $d] == "point")} {
-      my write2 "scale_shape_manual(name='[:colourlabel $d]', values=rep(1:25,5)) +"
+      # my write2 "scale_shape_manual(name='[:colourlabel $d]', values=rep(1:25,10)) +"
+      my write2 "scale_shape_manual(name='$colourlabel', values=rep(1:25,10)) +"
     }
     if {([:ymin $d] != "") && ([:ymax $d] != "")} {
       my write2 "scale_y_continuous(limits=c([:ymin $d], [:ymax $d])) +"
@@ -254,8 +365,24 @@ oo::class create Rwrapper {
     my variable d
     # @todo als pos=bottom en dir=vertical, dan checken hoeveel 'kleuren' er zijn. Als veel, dan grafiek groter maken.
     #       berekening in Tcl (dan ook query in tcl) of in R (beter, als dit kan).
+    if 0 {
+      if {[:maxcolours $d] != 0} {
+        my write2 "theme(legend.title='[:colour $d] (top [:maxcolours $d])') +"
+      } else {
+        my write2 "theme(legend.title='[:colour $d]') +"
+      }
+    }
     my write-if-filled :legend.position "theme(legend.position='[:legend.position $d]') +"
     my write-if-filled :legend.direction "theme(legend.direction='[:legend.direction $d]') +"
+    
+    #legend.key.size 	size of legend keys (unit; inherits from legend.key.size)
+    #legend.key.height 	key background height (unit; inherits from legend.key.size) 
+    # my write "theme(legend.key.height=unit(1.0, 'char')) +"
+    my write-if-filled :legend.keyheight "theme(legend.key.height=unit([:legend.keyheight $d], 'char')) +"
+    
+    # 24-1-2014 tests to solve long labels in legends -> failed.
+    # my write "theme(legend.title.align = 1) + "
+    # my write "theme(legend.justification = 1) + "
     my write-if-filled :legend.ncol "guides(col = guide_legend(ncol = [:legend.ncol $d])) +"
     my write-if-filled :legend.nrow "guides(col = guide_legend(nrow = [:legend.nrow $d])) +"
   }
@@ -270,23 +397,24 @@ oo::class create Rwrapper {
     my write-if-filled :extra "[:extra $d] +"
   }
   
+  method write_hline {} {
+    my variable d
+    my write-if-filled :hline "geom_hline(yintercept=[:hline $d]) +"
+  }
+  
   method write_ggsave {} {
     my variable d outputroot outformats
-    if {[:height $d] != ""} {
-      set height [:height $d]
+    # @note 7-3-2014 with nested dict's, both height and height.min can exists, so check on height.min
+    if {([:height.fixed $d] != "") && ([:height.fixed $d] > 0)} {
+      set height [:height.fixed $d]
       my write "height = $height"
     } else {
       set facets [ifp [= [:facet $d] ""] "NA" "df.plot\$[:facet $d]"]
       set colours [ifp [= [:colour $d] ""] "NA" "df.plot\$[:colour $d]"]
-      #if {[:facet $d] == ""} {
-      #  set facets "NA"
-      #} else {
-      #  set facets "df\$[:facet $d])" 
-      #}
-      my write "height = det.height(height.min=[:height.min $d], height.max=[:height.max $d], height.base=[:height.base $d], height.perfacet=[:height.perfacet $d], height.percolour=[:height.percolour $d], facets=$facets, colours=$colours)"
+      my write "height = det.height(height.min=[:height.min $d], height.max=[:height.max $d], height.base=[:height.base $d], height.perfacet=[:height.perfacet $d], height.percolour=[:height.percolour $d], facets=$facets, colours=$colours, legend.position='[:legend.position $d]')"
     }
  
-    my write "print(concat('height: ', height))"
+    my write "print.log(concat('height: ', height))"
     foreach outformat $outformats {
       # outprocname: :0name
       set outprocname ":${outformat}name"
@@ -295,19 +423,9 @@ oo::class create Rwrapper {
       my write "# outname: $outname"
       # my write "ggsave('[file join $outputroot $outname]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
       my write "ggsave('[file join $outputroot $outname]', dpi=100, width=[:width $d], height=height, plot=p)"
-      my write "print(concat('Made graph: ', '$outname'))"
+      my write "print.log(concat('Made graph: ', '$outname'))"
     }
     
-    if {0} {
-      # my write "ggsave('[:pngname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-      my write "ggsave('[file join $outputroot [:pngname $d]]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-      # ook voor SVG wel dimensies opgeven, anders vierkant en blijft vierkant.
-      # my write "ggsave('[:svgname $d]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-      my write "ggsave('[file join $outputroot [:svgname $d]]', dpi=100, width=[:width $d], height=[:height $d], plot=p)"
-      # my write "ggsave('[:pngname $d].svg', plot=p)"
-      my write "print(concat('Made graph: ', '[:pngname $d]'))"
-    }
-  
   }
   
   method write-if-filled {key expr} {
@@ -318,6 +436,15 @@ oo::class create Rwrapper {
   }
 
   method det_plot_dct {dct} {
+    log debug "det_plot_dct: start, dct=$dct"
+    if {[dict? [:height $dct]]} {
+      # dynamic calculation of height
+      my dset dct height.fixed -1
+    } else {
+      # fixed height
+      my dset dct height.fixed [:height $dct]
+    }
+    set dct [dict_flatten $dct "."] ; # so height {min 5 max 7} can be used.
     if {[:x $dct] == "date"} {
       # my dset dct xvar "date_psx"
       my dset dct xvar "date_Date"
@@ -378,10 +505,23 @@ oo::class create Rwrapper {
     # height of graph, 2 options: 1) fixed height 2) based on #facets.
     my dset dct height.min 5
     my dset dct height.max 20
-    my dset dct height.min 3
+    my dset dct height.base 3.4
     # @note default for height.perfacet/colour are 0, graphs might have just one of those items. If 0 don't check the df column.
     my dset dct height.perfacet 0
     my dset dct height.percolour 0
+    my dset dct maxcolours 0
+    
+    # @note avg can be calculated in 2 ways: 1) with sum/total possible values or 2) just average of existing values.
+    # 1) is used to show relative impact of items: if an item has a high value, but occurs only once, this way of calculating doesn't put it at the top. Other items
+    #    with a lower average but occuring always will be put higher.
+    # default/deprecated: legend.avg 3 -> legend.avgtype sum legend.avgdec 3
+    if {[:legend.avg $dct] != ""} {
+      my dset dct legend.avgtype sum
+      my dset dct legend.avgdec [:legend.avg $dct]
+    }
+    my dset dct legend.keyheight 1.0
+    my dset dct legend.maxchars 120
+    
     return $dct
   }
   
@@ -398,30 +538,34 @@ oo::class create Rwrapper {
   }
   
   method doall {} {
-    my variable f cmdfilename dir dargv
+    my variable fcmd cmdfilename dir dargv Routput Rlatest
     my write [my pprint "\n# Finished\ndb.close(db)
-              print('R finished')
+              print.log('R finished')
               sink()
               sink(type = 'message')"]
-    close $f
+    close $fcmd
     if {[:keepcmd $dargv]} {
-      file copy -force [file join $dir $cmdfilename] [file join $dir "R-latest.R"]
+      file copy -force [file join $dir $cmdfilename] [file join $dir $Rlatest]
     } else {
-      file rename -force [file join $dir $cmdfilename] [file join $dir "R-latest.R"]
+      file rename -force [file join $dir $cmdfilename] [file join $dir $Rlatest]
     }
     set rbinary [my det_rbinary]
-    set script [file normalize [file join $dir "R-latest.R"]] 
+    set script [file normalize [file join $dir $Rlatest]] 
     
     set exec_limit [CExecLimit #auto]
-    $exec_limit set_saveproc_filename "saveproc.txt"
+    # $exec_limit set_saveproc_filename "saveproc.txt"
     
     try_eval {
       log info "Exec R: $rbinary $script"
-      # execute for a maximum of 5 minutes (300 seconds) 
-      # exec $rbinary $script
-      set exit_code [$exec_limit exec_limit "$rbinary $script" 300 result res_stderr]
+      if {[:execlimit $dargv] != ""} {
+        set execlimit [:execlimit $dargv]
+      } else {
+        set execlimit 600 ; # 10 minutes is better for the CN graphs, take about 7 minutes.
+      }
+      set exit_code [$exec_limit exec_limit "$rbinary $script" $execlimit result res_stderr]
       log info "Exec R finished, exitcode = $exit_code, len(result)=[string length $result], len(stderr) = [string length $res_stderr]"
-      my log_last_lines [file normalize [file join $dir "R-output.txt"]] 
+      # my log_last_lines [file normalize [file join $dir "R-output.txt"]] 
+      my log_last_lines [file normalize [file join $dir $Routput]] 
     } {
       log_error "Error while executing R"
       log error "Error while executing R"
@@ -435,50 +579,67 @@ oo::class create Rwrapper {
     set lines [split $text "\n"]
     set nlines 5
     set last_lines [lrange $lines end-$nlines end]
-    log info "last $nlines from $filename:"
-    foreach line $last_lines {
-      log info "$line"
-    }
+    log info "last $nlines from $filename:\n[join $last_lines "\n"]"
     close $f
-  }
-  
-  method doall_old {} {
-    my variable f cmdfilename dir dargv
-    my write [my pprint "\n# Finished\ndb.close(db)
-              print('R finished')
-              sink()
-              sink(type = 'message')"]
-    close $f
-    if {[:keepcmd $dargv]} {
-      file copy -force [file join $dir $cmdfilename] [file join $dir "R-latest.R"]
-    } else {
-      file rename -force [file join $dir $cmdfilename] [file join $dir "R-latest.R"]
-    }
-    set rbinary [my det_rbinary]
-    set script [file normalize [file join $dir "R-latest.R"]] 
-    try_eval {
-      log info "Exec R: $rbinary $script"
-      exec $rbinary $script
-      log info "Exec R finished"
-    } {
-      log_error "Error while executing R"
-      log error "Error while executing R"
-      # continue?
-    }
   }
   
   method det_rbinary {} {
     global tcl_platform
     # @todo find R binary for windows in a better way.
+    # windows {return "c:/develop/R/R-2.15.3/bin/i386/Rscript.exe"}
     switch $tcl_platform(platform) {
       unix {return "/usr/bin/Rscript"}
-      windows {return "c:/develop/R/R-2.15.3/bin/Rscript.exe"}
+      windows {return "c:/develop/R/R-2.15.3/bin/x64/Rscript.exe"}
       default {error "Don't know how to find R binary for platform: $tcl_platform(platform)"} 
     }
   }
   
   method cleanup {} {
-    # may todo: remove commands file. 
+    # maybe todo: remove commands file. 
+  }
+
+  # Helper methods
+  method now {} {
+    clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S" 
+  }
+  
+  # replace ' with " before writing.
+  method write {cmd} {
+    my variable fcmd
+    # regsub -all {\'} $cmd "\42" cmd2
+    # puts $fcmd $cmd2
+    # puts $fcmd [my indent [my replace_quotes $cmd]]
+    puts $fcmd [my replace_quotes $cmd]
+  }
+  
+  method write2 {cmd} {
+    my write "  $cmd" 
+  }
+  
+  # replace single quotes by double quotes.
+  method replace_quotes {cmd} {
+    regsub -all {\'} $cmd "\42" cmd2
+    return $cmd2
+  }
+  
+  method indent {str} {
+    # @todo first start all at line 1, maybe indent for queries and plot commands.
+    # @todo maybe not use this function.
+  }
+  
+  # start first line at col 0, next at col 2.
+  method pprint {str} {
+    set str [string trim $str]
+    # remove all spaces from start of lines
+    while {[regsub -all {\n } $str "\n" str]} {}
+    # put 2 spaces in front of every line but the first
+    regsub -all {\n} $str "\n  " str
+    return $str
+  }
+  
+  # format now so it can be used in filename (no ':')
+  method format_now_filename {} {
+    clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"
   }
   
 }

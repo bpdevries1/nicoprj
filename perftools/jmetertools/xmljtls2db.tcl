@@ -48,9 +48,9 @@ proc create_db {dirname} {
   file delete -force $db_file
   set conn [open_db $db_file]
   set td_jtlfile [make_table_def_keys jtlfile {id} {path}]
-  set td_httpsample [make_table_def_keys httpsample {id} {level parent_id jtlfile_id t lt ts ts_utc s lb rc rm tn dt \
+  set td_httpsample [make_table_def_keys httpsample {id} {level parent_id jtlfile_id t lt ts ts_utc ts_utc_run s lb rc rm tn dt \
     de by ng na hn ec it sc responseHeader requestHeader responseFile cookies \
-    method queryString redirectLocation java_net_URL cachetype akserver cacheable \
+    method queryString redirectLocation java_net_URL url cachetype akserver cacheable \
     expires expiry maxage cachekey protocol server path extension domain}]
   set td_assertionresult [make_table_def_keys assertionresult {id} {parent_id name failure error}]
   set table_defs [list $td_jtlfile $td_httpsample $td_assertionresult]
@@ -77,7 +77,8 @@ proc read_jtls {conn dirname dct_insert_stmts} {
 }
 
 proc read_jtl {conn jtlfile dct_insert_stmts} {
-  global elt_stack jtlfile_id
+  global elt_stack jtlfile_id ts_utc_run
+  set ts_utc_run "<none>"
   log info "Reading jtl: $jtlfile" 
   db_eval $conn "begin transaction"
   set jtlfile_id [[:jtlfile $dct_insert_stmts] [dict create path $jtlfile] 1]
@@ -221,7 +222,7 @@ proc xml_default {data} {
 }
 
 proc handle_main_sample {sample} {
-  global conn dct_insert_stmts jtlfile_id
+  global conn dct_insert_stmts jtlfile_id 
   # log debug "handle main sample: [first_line $sample]"
   # log debug "latency of main sample: [dict get $sample attrs lt]"
   # breakpoint
@@ -234,13 +235,19 @@ proc handle_main_sample {sample} {
 }
 
 proc insert_sample {sample parent_id level} {
-  global conn dct_insert_stmts jtlfile_id
+  global conn dct_insert_stmts jtlfile_id ts_utc_run
   # log debug "insert_sample: start"
   set dct [:attrs $sample {}] ; # std attrs like t, ts, ...
   dict set dct jtlfile_id $jtlfile_id
   dict set dct parent_id $parent_id
   dict set dct level $level
   dict set dct ts_utc [clock format [expr round(0.001*[:ts $dct 0])] -format "%Y-%m-%d %H:%M:%S" -gmt 1]
+  
+  # 6-3-2014 if main label starts with '01', start a new run/iteration.
+  if {[regexp {^01} [:lb $dct]]} {
+    set ts_utc_run [:ts_utc $dct]
+  }
+  dict set dct ts_utc_run $ts_utc_run
   foreach sub_elt [:subelts $sample {}] {
     set sub_tag [:tag $sub_elt]
     if {$sub_tag == "assertionResult"} {
@@ -251,6 +258,12 @@ proc insert_sample {sample parent_id level} {
       dict set dct $sub_tag [:text $sub_elt ""] 
     }
   }
+  # 7-3-2014 add url, possibly including request params.
+  if {$level == 1} {
+   #breakpoint
+  }
+  dict set dct url [dict_get $dct "java.net.URL"]
+  
   add_akamai_fields dct
   dict set dct extension [det_extension [:lb $dct]]
   dict set dct domain [det_domain [:lb $dct]]

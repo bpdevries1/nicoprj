@@ -19,4 +19,11 @@ rename-files.tcl - helper script for converting m4a to mp3, to do changes in DB 
 temp-filenames.tcl - DB cleanup?
 test-db.tcl - just test on DB connection.
 
+Copy new items to Philips MP3 player (10-01-2014)
+=================================================
+* Use maak_copy_sd_singles.tcl - std parameters should work.
+* Check the generated file: /media/nas/copy-sd.sh
+* Delete the current contents of the MP3 player
+* execute copy-sd.sh script, this may take some time.
+* Check if all files are available on MP3 player, and there is still some space available.
 

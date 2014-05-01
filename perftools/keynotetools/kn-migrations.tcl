@@ -2,6 +2,7 @@
 
 package require ndv
 ndv::source_once libmigrations.tcl
+ndv::source_once libkeynote.tcl
 
 migrate_proc add_fk_indexes "Add foreign key indexes" {
   $db exec2 "create index if not exists ix_page_1 on page (scriptrun_id)"
@@ -54,21 +55,41 @@ migrate_proc create_view_rpi "Create view rpi" {
 # @note maybe only copy rows that are for this script. But would need a way to pass params then.
 #       or in this case use $db get_dbname and look at the path.
 proc copy_script_pages {db} {
-  set src_name "c:/projecten/Philips/script-pages/script-pages.db"
+  # set src_name "c:/projecten/Philips/script-pages/script-pages.db"
+  set src_name [det_src_script_pages]
   if {![file exists $src_name]} {
-    error "Src db for script_pages does not exist" 
+    # error "Src db for script_pages does not exist" 
+  	# 7-1-2014 no error now, want to have another look at page-names based on slot metadata in.
+	  # the file does not exist at the PC/linux location.
+	  log warn "Src db for script_pages does not exist: $src_name" 
+  } else {
+    $db exec "attach database '$src_name' as fromDB"
+    set table "script_pages"
+    # @note use main.$table, otherwise source might be dropped.
+    $db exec "drop table if exists main.$table"
+    $db exec_try "create table if not exists $table as select * from fromDB.$table"
+    $db exec "detach fromDB"
   }
-  $db exec "attach database '$src_name' as fromDB"
-  set table "script_pages"
-  # @note use main.$table, otherwise source might be dropped.
-  $db exec "drop table if exists main.$table"
-  $db exec_try "create table if not exists $table as select * from fromDB.$table"
-  $db exec "detach fromDB"
+}
+
+proc det_src_script_pages {} {
+  global tcl_platform
+  if {$tcl_platform(platform) == "windows"} {
+    return "c:/projecten/Philips/script-pages/script-pages.db"
+  } else {
+    return [file normalize "~/Ymor/Philips/script-pages/script-pages.db"]
+  }
 }
 
 # @note if orig table script_pages changes, just move this def as the latest to do the
 # migration again.
 migrate_proc copy_script_pages "copy table script_pages" {
+  copy_script_pages $db
+}
+
+# @note if orig table script_pages changes, just move this def as the latest to do the
+# migration again.
+migrate_proc copy_script_pages_1a "copy table script_pages" {
   copy_script_pages $db
 }
 
@@ -117,25 +138,6 @@ proc set_task_succeed_calc {db} {
 migrate_proc add_fill_task_succeed "Fill task_succeed field" {
   $db exec2 "alter table scriptrun add task_succeed_calc integer" -log -try
   set_task_succeed_calc $db
-}
-
-# @note also used in migrations and scatter2db.
-proc det_topdomain {domain} {
-  # return $domain 
-  # if it's something like www.xxx.co(m).yy, then return xxx.co(m).yy
-  # otherwise if it's like www.xxx.yy, then return xxx.yy
-  # maybe regexp isn't the quickest, try split/join first.
-  set l [split $domain "."]
-  set p [lindex $l end-1]
-  if {($p == "com") || ($p == "co")} {
-    join [lrange $l end-2 end] "." 
-  } else {
-    if {$domain == "images.philips.com"} {
-      return "scene7" 
-    } else {
-      join [lrange $l end-1 end] "."
-    }
-  }  
 }
 
 # add a field topdomain to pageitem, fill it with topdomain based on domain.
@@ -321,6 +323,7 @@ proc add_daily_stats1 {db {create_tables 1}} {
     {npages int} {avail real} {datacount int} {total_ttip_sec real} {page_ttip_sec real}}
   $db add_tabledef aggr_page {id} {scriptname date_cet {page_seq int} {avail real} \
     {page_time_sec real} {page_ttip_sec real} {datacount int}}
+    
   if {$create_tables} {
     $db create_tables 0
   }
@@ -373,7 +376,7 @@ migrate_proc add_pageitem_gt3 "Add pageitem_gt3 table" {
       ssl_handshake_delta start_msec system_delta basepage record_seq \
       detail_component_1_msec detail_component_2_msec detail_component_3_msec \
       ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
-      header_bytes object_text header_code custom_object_trend status_code}
+      header_bytes object_text header_code custom_object_trend status_code aptimized}
   $db create_tables 0
 }
 
@@ -393,11 +396,14 @@ proc add_daily_stats2 {db {create_tables 1}} {
     
   $db add_tabledef aggr_page {id} {date_cet scriptname {page_seq int}   
     {avg_time_sec real} {avg_nkbytes real} {avg_nitems real} {datacount int}
-    {avg_ttip_sec real} {avail real}}
+    {avg_ttip_sec real} {avail real} page_type}
   
   # 24-12-2013 add 4 other tables for new databases: aggr_slowitem, pageitem_topic, domain_ip_time, aggr_specific
   $db add_tabledef aggr_slowitem {id} {date_cet scriptname {page_seq int} keytype keyvalue {seqnr int} \
     {avg_page_sec real} {avg_loadtime_sec real} {nitems int}} 
+  
+  # 4-2-2014 maak deze defs DRY, dus fielddefs 1x noemen, en opnemen bij 3 tabellen: pageitem, _topic en _gt3. _topic heeft extra veld 'topic'  
+  # 14-4-2014 added more fields.
   $db add_tabledef pageitem_topic {id} {scriptname topic ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
       scontent_type url \
       extension domain topdomain urlnoparams \
@@ -406,9 +412,27 @@ proc add_daily_stats2 {db {create_tables 1}} {
       ssl_handshake_delta start_msec system_delta basepage record_seq \
       detail_component_1_msec detail_component_2_msec detail_component_3_msec \
       ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
-      header_bytes object_text header_code custom_object_trend status_code}
+      header_bytes object_text header_code custom_object_trend status_code aptimized \
+      ip_oct3 phys_loc phys_loc_type {is_dynamic_url int} status_code_type {disable_domain int} akh_cache_control akh_pragma akh_x_check_cacheable ahk_x_cache ahk_expiry akh_x_cache akh_expiry}
+
+  # 26-1-2014 BUGFIX: added here for new DB's.
+  $db add_tabledef pageitem_gt3 {id} {scriptname ts_cet date_cet scriptrun_id page_seq page_type page_id content_type resource_id \
+      scontent_type url \
+      extension domain topdomain urlnoparams \
+      error_code connect_delta dns_delta element_delta first_packet_delta \
+      remain_packets_delta request_delta \
+      ssl_handshake_delta start_msec system_delta basepage record_seq \
+      detail_component_1_msec detail_component_2_msec detail_component_3_msec \
+      ip_address element_cached msmt_conn_id conn_string_text request_bytes content_bytes \
+      header_bytes object_text header_code custom_object_trend status_code aptimized \
+      ip_oct3 phys_loc phys_loc_type {is_dynamic_url int} status_code_type {disable_domain int} akh_cache_control akh_pragma akh_x_check_cacheable ahk_x_cache ahk_expiry akh_x_cache akh_expiry}
+      
   $db add_tabledef domain_ip_time {id} {scriptname date_cet topdomain domain ip_address {number int} {min_conn_msec real}}
   $db add_tabledef aggr_specific {id} {scriptname date_cet topic {per_page_sec real}}
+  
+  # 19-2-2014 determine minimum (and max, avg to check) connection times to servers to determine physical locations.
+  $db add_tabledef aggr_connect_time {id} {scriptname date_cet domain topdomain ip_address {min_conn_msec real} \
+    {max_conn_msec real} {avg_conn_msec real} {number int}}
   
   if {$create_tables} {
     $db create_tables 0
@@ -490,7 +514,7 @@ migrate_proc add_aggr_specific "Add aggr_specific table" {
 # @todo dropping the table does not seem to work.
 migrate_proc remove_maxitem "Remove maxitem table" {
   log info "Remove maxitem table"
-  $db exec2 "drop table aggr_maxitem" -log
+  $db exec2 "drop table aggr_maxitem" -log -try
   log info "Removed maxitem table"
 }
 
@@ -498,5 +522,238 @@ migrate_proc add_logfile_indexes "Add logfile indexes" {
   $db exec2 "create index if not exists ix_logfile_1 on logfile (filename)" -log -try
 }
 
-# LET OP: als pageitem tabel verandert, moet pageitem_gt3 en pageitem_topic mee veranderen!
-# LET OP: als je een table toevoegt, dan ook toevoegen bij add_daily_stats2, deze wordt aangeroepen voor nieuwe DB's.
+# @note if orig table script_pages changes, just move this def as the latest to do the
+# migration again.
+# 7-1-2014 ignored copying the table on Linux, but still needed, so do copy.
+migrate_proc copy_script_pages2 "copy table script_pages" {
+  copy_script_pages $db
+}
+
+migrate_proc add_fill_aptimized "add fill aptimized column" {
+  $db exec2 "alter table pageitem add aptimized integer" -log -try
+  $db exec2 "alter table pageitem_gt3 add aptimized integer" -log -try
+  $db exec2 "alter table pageitem_topic add aptimized integer" -log -try
+  $db exec2 "update pageitem set aptimized = 1 where url like '%aptimized%' and aptimized is null" -log
+  $db exec2 "update pageitem set aptimized = 0 where aptimized is null" -log
+  $db exec2 "update pageitem_gt3 set aptimized = 1 where url like '%aptimized%' and aptimized is null" -log
+  $db exec2 "update pageitem_gt3 set aptimized = 0 where aptimized is null" -log
+  $db exec2 "update pageitem_topic set aptimized = 1 where url like '%aptimized%' and aptimized is null" -log
+  $db exec2 "update pageitem_topic set aptimized = 0 where aptimized is null" -log
+}
+
+proc refill_pagetype {db} {
+  $db function objtxt2pagetype
+  log info "About to update page for pagetype"
+
+  if {0} {
+    $db exec2 "update page
+               set page_type = (select objtxt2pagetype(i.object_text) from pageitem i where i.page_id = page.id and i.basepage = 1)
+               where page_type is null or page_type = '' or page_type = '<none>' or page_type like '%-%'" -log 
+  }
+
+  $db exec2 "drop table if exists temp_page_type" -log
+  
+  $db exec2 "create table temp_page_type as
+             select p.id page_id, objtxt2pagetype(i.object_text) page_type
+             from page p join pageitem i on i.page_id = p.id
+             where i.basepage = 1
+             and (p.page_type is null or p.page_type = '' or p.page_type = '<none>' or p.page_type like '%-%')" -log
+
+  $db exec2 "create index ix_temp_page_type on temp_page_type(page_id)" -log
+
+  $db exec2 "update page
+             set page_type = (select page_type from temp_page_type t where t.page_id = page.id)
+             where (page_type is null or page_type = '' or page_type = '<none>' or page_type like '%-%')" -log
+  
+  # $db exec2 "drop table temp_page_type" -log
+
+  log info "Updated page for pagetype, now pageitems"
+  
+  #breakpoint
+  $db exec2 "update pageitem set page_type = (select page_type from page p where p.id = pageitem.page_id)
+             where page_type is null or page_type = '' or page_type = '<none>' or page_type like '%-%'" -log 
+  log info "Updated pageitem for pagetype, done"
+  #breakpoint
+
+}
+
+# pagetype will become empty for items older than 6 weeks, because pageitems are no longer available. Oh well.
+migrate_proc refill_pagetype "Refill pagetype fields" {
+  # objtxt2pagetype should be available here.
+  #breakpoint
+  refill_pagetype $db  
+}
+
+migrate_proc add_aggr_page_pagetype "Add page_type field to aggr_page" {
+  $db exec2 "alter table aggr_page add page_type" -try -log
+}
+
+migrate_proc redo_aggrrunpage_20140128 "Redo all aggr-run-page records" {
+  # 28-1-2014 don't redo all items, just the ones max 6 weeks ago, with a little bit less, so no gaps are introduced.
+  # with redo-action, the field 'page_type' will get filled.
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('dailystats')"
+}
+
+migrate_proc redo_combinereport_20140128 "Redo combinereport" {
+  # 28-1-2014 don't redo all items, just the ones max 6 weeks ago, with a little bit less, so no gaps are introduced.
+  # with redo-action, the field 'page_type' will get filled.
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('combinereport')"
+}
+
+migrate_proc redo_aggrrunpage_20140128_2 "Redo all aggr-run-page records take 2" {
+  # 28-1-2014 don't redo all items, just the ones max 6 weeks ago, with a little bit less, so no gaps are introduced.
+  # with redo-action, the field 'page_type' will get filled.
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('dailystats')"
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('combinereport')"
+}
+
+migrate_proc redo_aggrrunpage_20140129_1 "Redo all aggr-run-page records" {
+  # 28-1-2014 don't redo all items, just the ones max 6 weeks ago, with a little bit less, so no gaps are introduced.
+  # with redo-action, the field 'page_type' will get filled.
+  # 29-1-2014 All this is quite a lot of work, but is necessary: src needs to be changed, then aggregate tables, then aggregate DB.
+  refill_pagetype $db
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('dailystats')"
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('combinereport')"
+}
+
+migrate_proc redo_aggrrunpage_20140129_2 "Redo all aggr-run-page records" {
+  # 28-1-2014 don't redo all items, just the ones max 6 weeks ago, with a little bit less, so no gaps are introduced.
+  # with redo-action, the field 'page_type' will get filled.
+  # 29-1-2014 All this is quite a lot of work, but is necessary: src needs to be changed, then aggregate tables, then aggregate DB.
+  refill_pagetype $db
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('dailystats')"
+  $db exec2 "update dailystatus set dateuntil_cet = '2013-12-19' where actiontype in ('combinereport')"
+}
+
+# @note redo aggrsub because some things are added: domain, ipaddress, content_type, aptimized, and some combinations.
+migrate_proc redo_aggrsub_20140218 "Redo all aggr-sub records" {
+  $db exec2 "update dailystatus set dateuntil_cet = date('now', '-42 days') where actiontype in ('aggrsub', 'combinereport')"
+}
+
+# @note redo aggrsub because some things are added: domain, ipaddress, content_type, aptimized, and some combinations.
+migrate_proc add_aggr_connect_time "Add aggr_connect_time table" {
+  add_daily_stats2 $db 1
+}
+
+migrate_proc redo_combinereport_20140219 "Redo all aggr-sub records" {
+  $db exec2 "update dailystatus set dateuntil_cet = date('now', '-42 days') where actiontype in ('combinereport')"
+}
+
+migrate_proc redo_aggrsub_20140222 "Redo aggrsub wrt gt100k" {
+  $db exec2 "update dailystatus set dateuntil_cet = date('now', '-42 days') where actiontype in ('aggrsub', 'combinereport')"
+}
+
+migrate_proc redo_aggrsub_no_ip_20140222 "Remove IP related stuff from aggr-sub" {
+  $db exec2 "delete from aggr_sub where keytype in ('ip_address', 'dom_ip')"
+}
+
+migrate_proc redo_aggrsub_20140227 "Redo aggrsub wrt dynamic" {
+  $db exec2 "update dailystatus set dateuntil_cet = date('now', '-42 days') where actiontype in ('aggrsub', 'combinereport')"
+}
+
+migrate_proc add_pageitem_20140415 "Add extra pageitem fields" {
+  foreach table {pageitem pageitem_gt3} {
+    foreach field {ip_oct3 phys_loc phys_loc_type status_code_type akh_cache_control akh_pragma akh_x_check_cacheable ahk_x_cache} {
+      $db exec2 "alter table $table add $field" -try -log
+    }
+    foreach field {is_dynamic_url disable_domain} {
+      $db exec2 "alter table $table add $field int" -try -log
+    }
+  }
+}
+
+migrate_proc add_pageitem_topic_20140416 "Add extra pageitem_topic fields" {
+  # 16-4-2014 pageitem_topic still used, even if mostly empty.
+  foreach table {pageitem_topic} {
+    foreach field {ip_oct3 phys_loc phys_loc_type status_code_type akh_cache_control akh_pragma akh_x_check_cacheable ahk_x_cache} {
+      $db exec2 "alter table $table add $field" -try -log
+    }
+    foreach field {is_dynamic_url disable_domain} {
+      $db exec2 "alter table $table add $field int" -try -log
+    }
+  }
+}
+
+migrate_proc add_pageitem_topic_gt3_20140418 "Add extra pageitem (topic, gt3) fields" {
+  # 16-4-2014 pageitem_topic still used, even if mostly empty.
+  foreach table {pageitem pageitem_gt3 pageitem_topic} {
+    foreach field {ahk_expiry} {
+      $db exec2 "alter table $table add $field" -try -log
+    }
+  }
+}
+
+migrate_proc redo_aggrsub_20140418 "Redo aggrsub wrt testing extra fields" {
+  $db exec2 "update dailystatus set dateuntil_cet = '2014-04-14' where actiontype in ('aggrsub', 'combinereport')"
+}
+
+migrate_proc add_pageitem_topic_gt3_20140418b "Add extra pageitem (topic, gt3) fields" {
+  # 16-4-2014 pageitem_topic still used, even if mostly empty.
+  foreach table {pageitem pageitem_gt3 pageitem_topic} {
+    foreach field {akh_x_cache akh_expiry} {
+      $db exec2 "alter table $table add $field" -try -log
+    }
+  }
+}
+
+
+migrate_proc fill_phys_akh_fields "Fill new phys and akh fields" {
+  global phloc_finder akh_finder
+  if {[regexp {CN} [$db get_dbname]]} {
+    set cont 1
+    while {$cont} {
+      $db in_trans {
+        # @todo? first count items, see if it gets less.
+        set res [$db query "select id, scriptname, ip_address, status_code, error_code,
+                                       domain, url, urlnoparams
+                                from pageitem
+                                where akh_x_check_cacheable is null
+                                limit 1000"]
+        log info "Found [:# $res] records (max 1000) to update in pageitem"  
+        log info "First record: [:0 $res]"
+        if {[:# $res] <= 0} {
+          log info "Found no more record to update: return"
+          set cont 0
+        }
+        foreach row $res {
+          set ip_oct3 [det_ip_oct3 [:ip_address $row]]
+          set status_code_type [det_status_code_type [:status_code $row] [:error_code $row]]
+          set disable_domain [det_disable_domain [:domain $row]]
+          set is_dynamic_url [det_is_dynamic_url [:url $row]]
+          set phloc_res [$phloc_finder find [:scriptname $row] $ip_oct3]
+          set phys_loc [:0 $phloc_res]
+          set phys_loc_type [:1 $phloc_res]
+          set akh_cache_control ""
+          set akh_x_check_cacheable ""
+          set akh_x_cache ""
+          set akh_expiry ""
+          set akh_res [$akh_finder find [:scriptname $row] [:urlnoparams $row]]
+          dict for {k v} $akh_res {
+            set $k $v
+          }  
+          $db exec2 "update pageitem
+                     set ip_oct3 = '$ip_oct3',
+                         status_code_type = '$status_code_type',
+                         disable_domain = $disable_domain,
+                         is_dynamic_url = $is_dynamic_url,
+                         phys_loc = '$phys_loc',
+                         phys_loc_type = '$phys_loc_type',
+                         akh_cache_control = '$akh_cache_control',
+                         akh_x_check_cacheable = '$akh_x_check_cacheable',
+                         akh_x_cache = '$akh_x_cache',
+                         akh_expiry = '$akh_expiry'
+                     where id = [:id $row]"
+        }                           
+      }
+    }    
+  } else {
+    # no CN script, dus extra fields don't have a lot of value
+  }
+} 
+
+migrate_proc redo_aggrsub_20140418b "Redo aggrsub wrt physloc/akh" {
+  $db exec2 "update dailystatus set dateuntil_cet = date('now', '-42 days') where actiontype in ('aggrsub', 'combinereport')"
+}
+
+# ATTENTION: if you change pageitem table, you should also change pageitem_gt3 and pageitem_topic!
+# ATTENTION: if you add a table, add it also in add_daily_stats2. This one is called for new databases.

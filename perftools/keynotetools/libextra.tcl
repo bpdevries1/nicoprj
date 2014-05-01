@@ -103,7 +103,9 @@ proc det_prev_dateuntil {db actiontype} {
   if {[llength $res] == 1} {
     clock scan [:dateuntil_cet [lindex $res 0]] -format "%Y-%m-%d" 
   } else {
-    set res [$db query "select min(date_cet) date from scriptrun"]
+    # set res [$db query "select min(date_cet) date from scriptrun"]
+    # 7-2-2014 select min(date) minus one day, so first (partial) day will also be handled.
+    set res [$db query "select date(min(date_cet), '-1 day') date from scriptrun"]
     log info "res: $res"
     if {[llength $res] == 1} {
       try_eval {
@@ -175,7 +177,8 @@ proc update_daily_status_db {db actiontype datefrom_cet dateuntil_cet ts_start_c
 
 # possible that nothing is read, so last_read_date is today. Only update records which have date > last_read_date
 proc reset_daily_status_db {db last_read_date} {
-  log debug "reset daily status db to day before $last_read_date"
+  log info "reset daily status db to day before $last_read_date: start"
   set date_before [clock format [clock add [clock scan $last_read_date -format "%Y-%m-%d"] -1 day] -format "%Y-%m-%d"]
   $db exec2 "update dailystatus set dateuntil_cet = '$date_before' where dateuntil_cet > '$date_before'" -log  
+  log info "reset daily status db to day before $last_read_date: finished"
 }

@@ -52,8 +52,14 @@ itcl::class CExecLimit {
 	}
 	
 	private method det_tempdir {} {
-		global env
-		set result "c:/temp"
+		global env tcl_platform
+		if {$tcl_platform(platform) == "windows"} {
+		  set result "c:/temp"
+		} elseif {$tcl_platform(platform) == "unix"} {
+		  set result "/tmp" 
+		} else {
+		  set result "/tmp" 
+		}
 		catch {set result $env(TEMP)}
 		catch {set result $env(TMP)}
 		return $result
@@ -75,11 +81,13 @@ itcl::class CExecLimit {
 	} 
 
 	public method save_proc_id {pid cmd} {
-		set f [open $saveproc_filename a]
-		puts $f "$pid\t$cmd"
-		close $f
-		# $log info "Saved $pid to $saveproc_filename"
-    log info "Saved $pid to $saveproc_filename"
+		if {$saveproc_filename != ""} {
+      set f [open $saveproc_filename a]
+      puts $f "$pid\t$cmd"
+      close $f
+      # $log info "Saved $pid to $saveproc_filename"
+      log info "Saved $pid to $saveproc_filename"
+    }
 	}
 	
 	# this method is not re-entrant, but it won't return until the cmd is finished or cancelled.
@@ -153,10 +161,15 @@ itcl::class CExecLimit {
 		log warn "time limit has exceeded, killing $cmd"
 		# see if it works with a close
 		set pids [pid $ch]
-		log debug "pids bij channel: $pids"
+		log info "pids for channel: $pids, about to be killed"
+    # @todo find child-pids, they should also be killed.
+    # std tcl, tclx, twapi?
+    # 13-3-2014 wel wat dingen mogelijk, maar alleen: getAllProcesses en parent-pid per proces. Dus niet child-processes per process.
+    # dan iets als: get_all_child_processes $pid -> ook grand-children etc.
 		foreach pid $pids {
 			log debug "killing $pid"
-			kill $pid ; # kill is a tclx command.
+			# kill $pid ; # kill is a tclx command.
+      kill_tree $pid
 		}
 		
 		# close $ch ; # blijft hangen zolang app niet beeindigd is.
@@ -165,6 +178,16 @@ itcl::class CExecLimit {
 		set run_status $CANCELLED
 	}
 
+  private method kill_tree {pid} {
+    global tcl_platform
+    if {$tcl_platform(platform) == "windows"} {
+      log debug "killing $pid whole tree with taskkill"
+      exec C:\\Windows\\system32\\taskkill.exe /PID $pid /T /F
+    } else {
+      kill $pid ; # kill is a tclx command.
+    }
+  }
+  
 	# convert a fully qualified varname to a filename
 	# used for generating a unique filename, based on this instance.
 	private method to_filename {ns_varname} {

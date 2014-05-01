@@ -1,7 +1,8 @@
 # libextraprocessing.tcl - called by scatter2db.tcl and extraprocessing.tcl
 
 # ndv::source_once dailystats.tcl updatemaxitem.tcl extra_gt3.tcl
-ndv::source_once extra_dailystats.tcl extra_slowitem.tcl extra_gt3.tcl extra_topic.tcl extra_aggr_specific.tcl extra_domain_ip.tcl extra_janitor.tcl extra_aggrsub.tcl extra_removeold.tcl extra_combinereport.tcl
+# @todo use glob to get all 'extra' scripts and source them in a loop.
+ndv::source_once extra_dailystats.tcl extra_slowitem.tcl extra_gt3.tcl extra_topic.tcl extra_aggr_specific.tcl extra_domain_ip.tcl extra_janitor.tcl extra_aggrsub.tcl extra_removeold.tcl extra_combinereport.tcl extra_aggr_connect.tcl
 
 # @note 24-12-2013 op het moment dat deze proc wordt aangeroepen, gaat 'ie aan de slag voor de dagen dat het de bedoeling is.
 # dus check wanneer wordt elders/eerder gedaan.
@@ -31,16 +32,14 @@ proc extraproc_subdir {dargv subdir} {
     # set actions [list dailystats gt3 aggrsub slowitem topic domain_ip aggr_specific vacuum analyze] 
     # set actions [list dailystats gt3 aggrsub slowitem topic domain_ip aggr_specific removeold vacuum analyze] 
     # 23-12-2013 add combinereport to standard actions when this works ok.
-    set actions [list dailystats gt3 aggrsub slowitem topic domain_ip aggr_specific removeold combinereport analyze vacuum] 
+    # 19-2-2014 added aggrconnect
+    set actions [list dailystats gt3 aggrsub slowitem topic domain_ip aggr_specific aggrconnect removeold combinereport analyze vacuum] 
   } else {
     set actions [split [:actions $dargv] ","] 
   }
   foreach action $actions {
-    # @note - per action bepalen of je iets als check_do_daily wilt gebruiken.
     extra_update_$action $db $dargv $subdir
-    #check_do_daily $db $action {
-    #  extra_update_$action $db $dargv $subdir
-    #}
+    update_checkfile [:checkfile $dargv]
   }  
   
   $db close

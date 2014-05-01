@@ -70,6 +70,42 @@ proc graph_combined_imagelist {r dargv period} {
               legend.position right \
               legend.direction vertical
               
+    # 8-1-2014 also per script, to see if issues only occur on some scripts
+    $r query "select a.topic, a.date_cet date, a.scriptname scriptname, sum(a.per_page_sec) per_page_sec
+              from aggr_specific a join nscripts n on n.date_cet = a.date_cet
+              where a.date_cet > '[period2startdate $period]'
+              and a.topic <> 'imagelist-overhead'
+              group by 1,2,3"
+    $r qplot title "Daily average loading time of misc topics by script and topic - $period" \
+              x date y per_page_sec xlab "Date" ylab "Average overhead (sec)" \
+              geom line-point facet scriptname colour topic \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.0 height.perfacet 1.7 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+    $r qplot title "Daily average loading time of misc topics by topic and script - $period" \
+              x date y per_page_sec xlab "Date" ylab "Average overhead (sec)" \
+              geom line-point facet topic colour scriptname \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.0 height.perfacet 1.7 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+    
+    # only mobile - maybe temporarily
+    $r query "select a.topic, a.date_cet date, a.scriptname scriptname, sum(a.per_page_sec) per_page_sec
+              from aggr_specific a join nscripts n on n.date_cet = a.date_cet
+              where a.date_cet > '[period2startdate $period]'
+              and a.topic <> 'imagelist-overhead'
+              and a.topic = 'ph-mobile'
+              group by 1,2,3"
+    $r qplot title "Daily average loading time of misc topics by topic and script - mobile - $period" \
+              x date y per_page_sec xlab "Date" ylab "Average overhead (sec)" \
+              geom line-point facet topic colour scriptname \
+              width 11 height.min 5 height.max 20 height.base 3.4 height.percolour 0.0 height.perfacet 1.7 \
+              legend.avg 3 \
+              legend.position right \
+              legend.direction vertical
+    
   }
 }
 

@@ -6,7 +6,8 @@ package require Tclx
 package require ndv
 
 set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
-$log set_file "[file tail [info script]].log"
+# $log set_file "[file tail [info script]].log"
+$log set_file "[file tail [info script]]-[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"].log"
 
 proc main {argv} {
   set root_src "c:/projecten/Philips/KNDL"

@@ -25,6 +25,7 @@ proc main {argv} {
     {combinedactions.arg "all" "List of actions to execute on combined DB (comma separated)"}
     {periods.arg "all" "Periods to make graphs for (2w, 6w, 2d, 1y, all=1y,6w,2d)"}
     {keepcmd "Keep R command file with timestamp"}
+    {Rfileadd.arg "" "R file/output addition (-imagelist -> R-latest-imagelist.R and R-output-imagelist.txt)"}
     {incr "Incremental: only create graphs if they do not exist yet"}
   }
   set usage ": [file tail [info script]] \[options] :"

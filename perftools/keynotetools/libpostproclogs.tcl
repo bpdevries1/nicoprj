@@ -307,13 +307,16 @@ proc det_support_page_seq {db dir} {
 proc copy_script_pages {db} {
   set src_name "c:/projecten/Philips/script-pages/script-pages.db"
   if {![file exists $src_name]} {
-    error "Src db for script_pages does not exist" 
+    # error "Src db for script_pages does not exist" 
+    # 7-1-2014 no error now, this db does not exist on Linux, want to review this process of page-names.
+    log warn "Src db for script_pages does not exist" 
+  } else {
+    $db exec2 "attach database '$src_name' as fromDB" -log
+    set table "script_pages"
+    # @note possibly the drop table works on fromDB.table, if this is the only one.
+    # $db exec "drop table if exists $table"
+    $db exec2 "create table $table as select * from fromDB.$table" -try -log
+    $db exec2 "detach fromDB" -log
   }
-  $db exec2 "attach database '$src_name' as fromDB" -log
-  set table "script_pages"
-  # @note possibly the drop table works on fromDB.table, if this is the only one.
-  # $db exec "drop table if exists $table"
-  $db exec2 "create table $table as select * from fromDB.$table" -try -log
-  $db exec2 "detach fromDB" -log
 }
 

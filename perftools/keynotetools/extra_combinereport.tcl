@@ -12,6 +12,7 @@ proc extra_update_combinereport {db dargv subdir} {
     # only need dateuntil_cet here, to make/check combined reports.
     set dbcr [get_combine_report_db [dict create srcdir [file dirname $subdir] db "combinereport.db"]]
     set def_list [det_def_list $dbcr $subdir]
+    set made_graphs 0
     foreach cdef_row $def_list {
       copy_to_target_db $db $scriptname [:targetdir $cdef_row] $datefrom_cet $dateuntil_cet
       set cdef_id [:combinedef_id $cdef_row]
@@ -21,12 +22,13 @@ proc extra_update_combinereport {db dargv subdir} {
       set ncurrent [det_ncurrent $dbcr $cdate_id]
       if {$ncurrent >= [:ndirs $cdef_row]} {
         do_combined_report $dbcr $cdef_row $dateuntil_cet $cdate_id
+        set made_graphs 1
       } else {
         log info "Not complete yet ($ncurrent < [:ndirs $cdef_row]), so wait until next one."
       }
     }
     $dbcr close
-    identity "combinereport - $dateuntil_cet"
+    identity "combinereport - $dateuntil_cet (made_graphs: $made_graphs)"
   }
 }
 
@@ -116,27 +118,31 @@ proc copy_to_target_db {db scriptname targetdir datefrom_cet dateuntil_cet} {
   file mkdir [file join $targetdir daily]
   # set targetdbname [file join $targetdir daily daily.db]
   set targetdbname [det_targetdbname $targetdir]
-  log info "Copying aggregate data to targetDB: $targetdbname"
+  log info "Copying aggregate data to targetDB: $targetdbname ($scriptname)"
   $db exec2 "attach database '$targetdbname' as toDB"
-  foreach table {aggr_run aggr_page aggr_slowitem aggr_sub pageitem_gt3 pageitem_topic domain_ip_time aggr_specific} {
+  foreach table {aggr_run aggr_page aggr_slowitem aggr_sub aggr_connect_time pageitem_gt3 pageitem_topic domain_ip_time aggr_specific} {
     set new_table 0
     try_eval {
       # @note hier geen -try bijzetten, want wil exceptie als het fout gaat.
+      log info "Deleting old date from toDB.$table"
       $db exec2 "delete from toDB.$table where date_cet between '$datefrom_cet' and '$dateuntil_cet' and _scriptname = '$scriptname'" -log
     } {
       # if this one fails, this could mean that the target table does not exist yet, so create it.
       set new_table 1
     }
     if {$new_table} {
+      # 27-1-2014 if table did not exist yet, then copy everything.
+      log info "Create toDB.$table with new data"
       $db exec2 "create table toDB.$table as 
-                 select '$scriptname' _scriptname, * from main.$table
-                 where date_cet between '$datefrom_cet' and '$dateuntil_cet'" -log -try
+                 select '$scriptname' _scriptname, * from main.$table" -log -try
     } else {
+      log info "Insert into toDB.$table"
       $db exec2 "insert into toDB.$table 
                  select '$scriptname' _scriptname, * from main.$table
                  where date_cet between '$datefrom_cet' and '$dateuntil_cet'" -log -try
     }
   }
+  log info "Copying aggregate data to targetDB: $targetdbname ($scriptname) - finished"
   $db exec2 "detach toDB"
 }
 

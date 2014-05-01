@@ -1,6 +1,6 @@
 #!/usr/bin/env tclsh86
 
-# meta2metadb.tcl - import Keynote download config.csv into slotmeta.db
+# meta2metadb.tcl - import Keynote download config.csv into slotmeta-domains.db
 
 package require tdbc::sqlite3
 package require Tclx
@@ -10,12 +10,13 @@ package require json
 set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 $log set_file "[file tail [info script]].log"
 
-ndv::source_once libslotmeta.tcl download-metadata.tcl
+ndv::source_once libkeynote.tcl libslotmeta.tcl download-metadata.tcl
 
 proc main {argv} {
   log debug "argv: $argv"
   set options {
-    {dir.arg "c:/projecten/Philips/KNDL" "Directory to put downloaded keynote files and also slotmeta.db"}
+    {dir.arg "c:/projecten/Philips/KNDL" "Directory to put downloaded keynote files"}
+    {db.arg "c:/projecten/Philips/KNDL/slotmeta-domains.db" "DB to use"}
     {filename.arg "" "File with slotmetadata to read (empty if new one must be downloaded)"}
     {apikey.arg "~/.config/keynote/api-key.txt" "Location of file with Keynote API key"}
     {format.arg "json" "Format of downloaden file: json or xml"}
@@ -36,7 +37,7 @@ proc meta2metadb {dargv} {
   if {$filename == ""} {
     error "filename is empty, download went wrong"
   }
-  set db [get_slotmeta_db [file join [:dir $dargv] slotmeta.db]]
+  set db [get_slotmeta_db [:db $dargv]]
   set json [json::json2dict [read_file $filename]]
   $db in_trans {
     foreach prd_el [:product $json] {
@@ -118,6 +119,13 @@ proc update_slot_download {db} {
     log warn "Items in slot_meta not in slot_download:"
     foreach el $res {
       log warn "[:slot_id $el]: [:slot_alias $el]"
+    }
+  }
+  set res [$db query "select * from slot_download where download_pc is null"]
+  if {[llength $res] > 0} {
+    log warn "Items in slot_download where download_pc is empty:"
+    foreach el $res {
+      log warn "[:slot_id $el]: [:dirname $el]"
     }
   }
   
