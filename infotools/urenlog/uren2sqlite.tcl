@@ -25,7 +25,7 @@ proc convert_tsv {uren_xls_filename basename} {
   set infile [file nativename [file normalize $uren_xls_filename]]
   set outbase [file nativename [file normalize $basename]]
   set scriptname [file nativename [file normalize [file join .. excel-export xls2tsv.vbs]]]
-  foreach filename [glob -directory [file dirname $basename] "[file tail $basename]_*.tsv"] {
+  foreach filename [glob -nocomplain -directory [file dirname $basename] "[file tail $basename]_*.tsv"] {
     log info "Delete: $filename"
     file delete $filename
   }
