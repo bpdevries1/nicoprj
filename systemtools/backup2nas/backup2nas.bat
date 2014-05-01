@@ -17,6 +17,9 @@ rem sinds 18-1-2012 glasvezel, met ander subnet.
 rem tclsh backup-files.tcl -settingsdir "~/.backup2nas/laptop2nas" -t \\192.168.178.200\public\backups\YmorLaptop -paths paths.txt -r results.txt -p -ignoreregexps ignoreregexps-programs.txt
 rem 10-2-2013 install-dir nu niet gebackupped, wel quest dingen in, sommige moeilijk te downloaden. Dus wil deze toch ook, verwijderd uit ignoreregexps-programs.txt
 
+echo Don't close outlook for now.
+goto outlookclosed
+
 echo closing Outlook in 30 seconds, ctrl-c to abort...
 delay 30
 echo closing Outlook now
@@ -31,8 +34,11 @@ pslist outlook
 echo There should be no outlook now in list above.
 delay 5
 
+
+:outlookclosed
 tclsh backup-files.tcl -settingsdir "~/.backup2nas/laptop2nas" -t \\192.168.178.200\public\backups\YmorLaptop -paths paths.txt -r results.txt -p -ignoreregexps ignoreregexps-programs.txt
 
 rem 16-1-2011 even een pauze inzetten, even kijken of het goed gaat. Evt later alleen een pauze als het fout gaat.
-pause "Check results and press a key"
+rem 7-1-2014 pauze nu even niet meer.
+rem pause "Check results and press a key"
 
