@@ -19,3 +19,7 @@ perftools/iptools/hosts
 **/web2py/sessions/
 
 output/
+
+# 9-5-2014 ignore db files
+*.db
+
