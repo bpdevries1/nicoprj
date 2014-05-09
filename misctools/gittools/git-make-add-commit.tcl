@@ -4,8 +4,15 @@ package require ndv
 
 proc main {argv} {
   # eerst alleen nicoprj
-  cd "c:/nico/nicoprj"
+  set os [det_os]
+  if {$os == "windows"} {
+    cd "c:/nico/nicoprj"
+  } else {
+    cd ~/nicoprj 
+  }
   set res [exec git status]
+  puts "result of git-status:"
+  puts $res
   set filename "git-add-commit.sh" 
   set f [open $filename w]
   fconfigure $f -translation lf
@@ -14,7 +21,21 @@ proc main {argv} {
   set has_changes [puts_changes $f $res]
   puts $f "# name of file to exec: $filename"
   close $f
-  exec c:/util/notepad++/notepad++.exe $filename
+  if {$os == "windows"} {
+    exec c:/util/notepad++/notepad++.exe $filename
+  } else {
+    exec -ignorestderr chmod +x $filename
+    exec -ignorestderr gedit $filename &
+  }
+}
+
+proc det_os {} {
+  global tcl_platform
+  if {$tcl_platform(platform) == "windows"} {
+    return windows 
+  } else {
+    return unix 
+  }
 }
 
 proc puts_changes {f res} {
@@ -22,29 +43,47 @@ proc puts_changes {f res} {
   set in_untracked 0
   set files {}
   foreach line [split $res "\n"] {
-    if {[regexp {^#[ \t]+modified:[ \t]+(.+)$} $line z filename]} {
+    puts "handle line: $line"
+    # linux: no # at start of line, maybe dependent on git version.
+    if {[regexp {^#?[ \t]+modified:[ \t]+(.+)$} $line z filename]} {
       # puts $f "# modified file: $filename"
       # puts $f "# git add $filename"
+      puts "-> added"
       lappend files $filename
       set has_changes 1
     } elseif {[regexp {Untracked files:} $line]} {
       set in_untracked 1
+      puts "-> in_untracked"
     } elseif {$in_untracked} {
       if {[regexp {to include in what will be co} $line]} {
         # ignore this one.
+        puts "-> ignored 1"
       } elseif {[ignore_file $line]} {
         # ignore this one.
-      } elseif {[regexp {^#[ \t]+(.+[^/])$} $line z filename]} {
+        puts "-> ignored 2"
+      } elseif {[regexp {^#?[ \t]+(.+[^/])$} $line z filename]} {
         # path should not end in /, don't add dirs.
         # puts $f "# new file: $filename"
         # puts $f "# git add $filename"
+        puts "-> added"
         lappend files $filename
         set has_changes 1
-      } elseif {[regexp {^#[ \t]+(.+[/])$} $line z filename]} {
+      } elseif {[regexp {^#?[ \t]+(.+[/])$} $line z filename]} {
         # puts $f "# new DIRECTORY: $filename"
         # puts $f "# git add $filename"
+        puts "-> added"
         lappend files $filename
         set has_changes 1
+      } else {
+        puts "-> ignored 3" 
+        if {[regexp {clj} $line]} {
+          breakpoint
+        }
+      }
+    } else {
+      puts "-> ignored 4" 
+      if {[regexp {modified} $line]} {
+        breakpoint
       }
     }
   }
