@@ -43,47 +43,47 @@ proc puts_changes {f res} {
   set in_untracked 0
   set files {}
   foreach line [split $res "\n"] {
-    puts "handle line: $line"
+    # puts "handle line: $line"
     # linux: no # at start of line, maybe dependent on git version.
     if {[regexp {^#?[ \t]+modified:[ \t]+(.+)$} $line z filename]} {
       # puts $f "# modified file: $filename"
       # puts $f "# git add $filename"
-      puts "-> added"
+      # puts "-> added"
       lappend files $filename
       set has_changes 1
     } elseif {[regexp {Untracked files:} $line]} {
       set in_untracked 1
-      puts "-> in_untracked"
+      # puts "-> in_untracked"
     } elseif {$in_untracked} {
       if {[regexp {to include in what will be co} $line]} {
         # ignore this one.
-        puts "-> ignored 1"
+        # puts "-> ignored 1"
       } elseif {[ignore_file $line]} {
         # ignore this one.
-        puts "-> ignored 2"
+        # puts "-> ignored 2"
       } elseif {[regexp {^#?[ \t]+(.+[^/])$} $line z filename]} {
         # path should not end in /, don't add dirs.
         # puts $f "# new file: $filename"
         # puts $f "# git add $filename"
-        puts "-> added"
+        # puts "-> added"
         lappend files $filename
         set has_changes 1
       } elseif {[regexp {^#?[ \t]+(.+[/])$} $line z filename]} {
         # puts $f "# new DIRECTORY: $filename"
         # puts $f "# git add $filename"
-        puts "-> added"
+        # puts "-> added"
         lappend files $filename
         set has_changes 1
       } else {
-        puts "-> ignored 3" 
+        # puts "-> ignored 3" 
         if {[regexp {clj} $line]} {
-          breakpoint
+          # breakpoint
         }
       }
     } else {
-      puts "-> ignored 4" 
+      # puts "-> ignored 4" 
       if {[regexp {modified} $line]} {
-        breakpoint
+        # breakpoint
       }
     }
   }
