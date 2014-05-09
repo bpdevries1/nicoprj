@@ -40,5 +40,5 @@ tclsh backup-files.tcl -settingsdir "~/.backup2nas/laptop2nas" -t \\192.168.178.
 
 rem 16-1-2011 even een pauze inzetten, even kijken of het goed gaat. Evt later alleen een pauze als het fout gaat.
 rem 7-1-2014 pauze nu even niet meer.
-rem pause "Check results and press a key"
+pause "Check results and press a key"
 

@@ -66,7 +66,7 @@ proc main {argc argv} {
     puts [::cmdline::usage $options $usage]
     exit 1
   }
-
+  puts "Normalised path to settingsdir: [file normalize $params(settingsdir)]"
   # ::ndv::CLogger::set_logfile [file join $params(settingsdir) "backup2nas.log"]
   $log set_file [file join $params(settingsdir) "backup2nas.log"]
   
@@ -89,6 +89,8 @@ proc backup_main {} {
   }
   signal trap SIGINT handle_signal
   lock_backup
+  set totalfiles 0
+  set totalbytes 0
   try_eval {
     lassign [set_params] lst_ignore_regexps lst_paths time_treshold
     
