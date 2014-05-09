@@ -11,7 +11,8 @@
 ; (load-file "/home/nico/nicoprj/clojure/lib/def-libs.clj") 
 
 ; (load-file "c:/nico/nicoprj/clojure/lib/def-libs.clj") 
-(load-file "/nico/nicoprj/clojure/lib/def-libs.clj") 
+; (load-file "/nico/nicoprj/clojure/lib/def-libs.clj")
+(load-file "../../clojure/lib/def-libs.clj")
 
 ; diverse opties om load-file zowel op linux als windows werkend te krijgen:
 ; cygwin symlinks en sowieso cygwin paden werken niet.

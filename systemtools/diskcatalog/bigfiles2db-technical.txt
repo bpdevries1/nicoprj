@@ -1,0 +1,57 @@
+Issues
+======
+* go-loop wordt vertaald naar threads, dan context kwijt, zoals jdbc/with-connection.
+  - deze moet dan in de go-loop gestart worden, lijkt minder performant.
+  - opties:
+    - met object werken, maar dit is ook context, en gaat mss ook fout.
+    - maar dan mss wel een expliciete context, door de with-xxx is deze weg.
+    - with-db-connection lijkt explicieter dan with-connection (is een macro).
+    - eerst zo laten, mss performant genoeg. Op zich wel beter om elke message in eigen transactie af te handelen.
+  - google: niets gevonden behalve hetzelfde als eerder: lijkt niet zo nuttig.
+  - jdbc/insert-records of do-commands uitvoeren met db-spec als parameter? Dus niet in with-connection scope?
+
+JDBC versie
+===========
+$ lein try org.clojure/java.jdbc
+Retrieving org/clojure/java.jdbc/0.3.3/java.jdbc-0.3.3.pom from central
+Retrieving org/clojure/java.jdbc/0.3.3/java.jdbc-0.3.3.jar from central
+
+0.3.3 dus de huidige, maar aardig wat dingen anders nu.
+
+File system functions
+=====================
+* From me.raynes.fs
+* find-files: werkt met RE, geeft File objects terug. Werkt recursief. Geeft ook dirs terug.
+  - gebruikt file-seq
+* glob: niet recursief, gebruikt in move-series.clj.
+* iterate-dir: soort geneste sequence, voor als boomstructuur behouden moet blijven.
+* list-dir: geeft zowel * als .* results, wel als string, dus voor verdere verwerking weer koppelen met dir.
+* walk: alles langslopen, steeds functie aanroepen. Kan mss ook voor bigfiles. Structuur van params lijkt op iterate-dir.
+=> find-files lijkt nu dus het handigst. Met map-filter alleen de goede dingen.
+* mod-time en size: kunnen File object aan. Size in bytes, mod-time als msec sinds epoch.
+* (fs/base-name f10) => "backup2nas.bat"
+* (str (fs/parent f10)) => "/home/nico/nicoprj/systemtools/diskcatalog/../backup2nas"
+
+Date-time formatting
+====================
+user=> (def cal-format (java.text.SimpleDateFormat. "EEE M/d/yyyy"))
+#'user/cal-format
+user=> (.format cal-format (fs/mod-time f10))
+"Sat 3/23/2013"
+* Mooi, had verwacht nog iets te moeten omzetten.
+
+Done
+====
+* Create DB, will with some dummy data.
+* fill based on channel data, fill channel with dummy data as currently.
+  - with-connection en transaction
+  - with-transaction te doen, alles ineen?
+  - deze beide niet zo nodig nu.
+* walk directory, first a subdir with treshold a bit lower.
+* cmd-line params for root-dir and treshold with default.
+* flag: delete-db. normally not.
+* symlinks niet volgen!
+  - pas checken bij behandelen is te laat, moet gewoon niet deze dir in.
+  - dan mss eigen recursieve functie -> done, obv orig functies, met volledige source goed te doen!
+  - of optie in fs-lib vinden.
+  - of andere lib vinden.

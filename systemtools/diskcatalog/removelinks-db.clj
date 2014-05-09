@@ -1,20 +1,15 @@
 #!/bin/bash lein-exec
 
-; walk (complete) directory structure, find files bigger than treshold, put in sqlite DB.
-; goal: further analysis, de-duplicate where possible.
-; @todo later: also do on laptops, to find more duplicates.
-; duplicates are not wrong per se, could be backups.
-; also files on laptop might be gone any time...
-
-; @todo nog kijken hoe het eruit ziet zonder async? dan for [file files] (insert! file)
-;       wat voegt async dan toe, behalve leerzame ervaring?
+; removelinks-db.clj - remove files from bigfiles.db that are symlinks or hardlinks.
 
 (load-file "../../clojure/lib/def-libs.clj") 
 
+; @todo async weg, maar eerst nog nodig met huidige functies.
 (deps '[[org.clojure/core.async "0.1.278.0-76b25b-alpha"]])
 ; [2014-05-04 14:49:26] onderstaande is huidige op https://github.com/clojure/core.async, maar geeft vage melding ivm memoize.
 ;(deps '[[org.clojure/core.async "0.1.301.0-deb34a-alpha"]])
 (require '[clojure.core.async :as async :refer [>! <! >!! <!!]])
+
 
 (defn database-consumer
   "Accept messages and pass them to web browsers via SSE."
@@ -110,7 +105,16 @@
             [:ts_cet "varchar"])))
     db-spec))
 
-(def required-opts #{:root})
+(defn remove-links 
+  "remove records in db-spec for files that are links"
+  [db-spec]
+  (doseq [row (jdbc/query db-spec "select fullpath from file")]
+    ; (println (str "row: " row))
+    (when (fs/link? (:fullpath row))
+      (println (str "delete from DB (link): " (:fullpath row)))
+      (jdbc/delete! db-spec :file ["fullpath = ?" (:fullpath row)]))))
+
+(def required-opts #{:database})
 
 (defn missing-required?
   "Returns true if opts is missing any of the required-opts"
@@ -123,20 +127,14 @@
   (let [[opts args banner] (cli (rest args)
             ["-h" "--help" "Print this help"
                   :default false :flag true]
-            ["-t" "--treshold" "Treshold for big files in bytes" 
-                  :default 10e6 :parse-fn #(Float. %)]
             ["-db" "--database" "Database path" :default "~/projecten/diskusage/bigfiles.db"]
-            ["-d" "--deletedb" "Delete DB before reading"
-                  :default false :flag true]
             ["-r" "--root" "Root directory to find big files in"])]
   (if (or (:help opts)
           (missing-required? opts))
     (println banner)
     (do (println (str "opts: " opts ", remaining args: " args))
-        (let [db-spec (create-db opts)
-              finish-chan (async/chan 1)]
-          (bigfiles-producer opts (database-consumer db-spec finish-chan))
-          (println (str "Result of reading finish-chan: " (<!! finish-chan))))
+        (let [db-spec (create-db opts)]
+          (remove-links db-spec))
         (println "Finished")))))
 
 (main *command-line-args*)
