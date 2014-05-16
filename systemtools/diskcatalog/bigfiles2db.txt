@@ -5,6 +5,7 @@ Bigfiles2db
 
 Steps/todo
 ==========
+* Nu eerst dingen bepalen obv dubbele dingen.
 * Gegevens nu in database, dan volgt (deels handmatige) analyse:
   - welke groepen te onderscheiden.
   - dingen als backups die weg kunnen: progs, oude data.
@@ -15,6 +16,9 @@ Later/not
 =========
 * abstract away DB tasks, compare Tcl dbwrapper, possibly making it an object (use chart to see which kind we need to choose).
   - vraag of dit nodig is, nu eigenlijk met db-spec al voldoende.
+* Films, boeken, muziek: deze los bekijken en bij elk hiervan specifieke aandachtspunten en manieren. Voor muziek bv
+  de soundhound achtige dingen, voor films mss IMDB of iets anders als kanonieke resource. Hierbij niet zelf vergelijking doen
+  (zoals al eerder begonnen met films), want dan micro-programming en schiet niet op).
 
 Uitgangspunten/richtlijnen/'directions' guideline, directive, regulation, requirement
 =====================================================================================
@@ -24,6 +28,9 @@ Uitgangspunten/richtlijnen/'directions' guideline, directive, regulation, requir
   niet backuppen? Want zou sneu als bij backup de dingen weer dubbel voorkomen. Dus als iets een symlink is, moet
   de backup dit ook zijn, mag best naar de originele enige echte source, hoeft niet naar backup-item.
 * Wat wil je met grote project-files? Vooral logfiles, wireshark traces, DB's.  
+  - afhankelijk van de grootte toch.
+  - deels belangrijk (documenten, zelf gemaakt), deze wel backup.
+  - deels minder belangrijk: grote logfiles: leuk zolang is ze heb, maar als ergens wat corrupt raakt, zij dat zo.
 * sort-of ironisch:
   - nu 1 backup dir van laptop die ik niet meer heb, dus eenmalig de data.
   - wil eigenlijk dat dit naar archief gaat, dan mogelijk hier wel ook backup van, dus data tweemalig dan. Daar ga je met je goed gedrag...
@@ -37,21 +44,52 @@ Extra velden
 ============
 * MD5 - bij gelijke size (en ongelijke filename) meer zekerheid dat inhoud hetzelfde is.
   - vullen met clj code of door md5sum tool.
-* source/backup
-* functie: los van het type: hulp, media, werk-project-data: sort-of functioneel, functie-veld
+  - toch wel zinvol dit voor alle files te doen, want:
+    - ook al zijn filename en size hetzelfde, dit is nog geen garantie, MD5 ook niet, maar praktisch wel.
+    - door MD5 te bepalen, lees je de hele file, meteen een check dat deze niet corrupt is geraakt.
+* source/backup/symlink - symlink als doel/todo, bv to_symlink. De link-to zou gevonden moeten worden.
+  - source
+  - backup
+  - cache - kan handig zijn om het hier te laten.
+  - temp - als het ook source is, kan de temp weg (bv een/sommige dropbox dir, download dir, aaa dir)
+* functie: los van het type: doel/goal
+  - hulp, 
+  - media, 
+  - werk-project-data:
+  - werk-project-doc: belangrijk
+  - system - deel van windows.
+  - progs-installed
+  - install
+  - config (configdata in .qqq directories) of in c:/users. en dan mogelijk ook source.
 * belang: groot (=backup nodig), medium (=backup afh van grootte), klein (=geen backup), niets (=verwijderen).
   - persoonlijke data (incl e-mail), project-docs, eigen sources zijn belangrijk.
-  - bepaalde (niet open-source, gratis) software waar niet/moeilijk aan te komen is: mogelijk belangrijk, zelfs iets als Atlas routeplanner (in de tijd van google maps etc).
+  - bepaalde (niet open-source, niet gratis) software waar niet/moeilijk aan te komen is: mogelijk belangrijk, zelfs iets als Atlas routeplanner (in de tijd van google maps etc).
   - ook eigen foto's zijn belangrijk.
   - meeste media (zeker series en films) zijn medium, dus niet backuppen.
   - maar bepaalde boeken mss wel backup (lastiger aan te komen, wil/moet het nog lezen).
   - als dingen idd belangrijk zijn, is er dan wel een backup van?
-  
+  -> is belang een directe (pure) functie van 'functie'? Kan zijn, toch los houden: functie is objectief, 
+     belang is subjectief.
+* computer - op welke computer is de bigfiles2db gedaan? Dan beter 2 files te combineren.     
+* action - wat moet er gebeuren met deze, bv to-link, to-delete, to-backup.
+  - zou mss losse tabel moeten worden, met later ook history van de actie erin, en meerdere acties op 1 file.
+  - ook do-md5 kan een actie zijn, md5 niet op alle files, duurt lang.
+
 Checken
 =======
 * Zitten er file-symlinks bij? Want deze zijn niet boeiend, dus deleten en zorgen dat ze niet opnieuw worden ingelezen.
 * Kan zijn dat je dirs vindt die helemaal weg kunnen, dan wel alles doen, niet alleen dingen >10MB.
 * En evt ook voor roman-boeken met zelfde inhoud, andere naam: maar dan wel vraag of het automatisch kan, anders weer te veel werk.
+
+Bieb directories
+================
+* "/home/nico/bieb/van-dropbox/ICT-books/graphing" -> deze evt als symlink
+* "/home/nico/AeroFS/bieb/ICT-books/graphing" -> toch maar als source dan. 
+* "/media/nas/backups/YmorLaptop/c/nico/Dropbox/bieb/ICT-books/graphing" - backup
+
+* AeroFS files als symlink werkt waarsch niet, dan op windows de echte file en later mss ook op linux weer.
+
+* Check /media/nas/media en /nico/2TB.
 
 Done
 ====
@@ -65,4 +103,11 @@ Done
   - [2014-05-04 21:59:08] gestart
   - [2014-05-04 22:48:08] al weer een tijdje klaar.
 
+Detail beslissingen en logs
+===========================
+* /home/nico/media/ebooks-kobo verwijderd. Doel was mirror van inhoud van kobo, maar is niet automatisch, dus niet
+  betrouwbaar, heeft dan geen nut. Heb in dropbox/media/leesmij.txt wel een stukje met de acties, ook niet automatisch,
+  maar kost geen ruimte.
+* /home/nico/bieb weg, stond alleen van-dropbox in. Staat nu in AeroFS, was idd gelijk.
+* [2014-05-11 15:24:35] /home/nico/oldpc/.wine weg, stonden bv installs van Word in. Rest van oldpc mogelijk nog wel boeiend.
 
