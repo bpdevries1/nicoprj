@@ -7,14 +7,7 @@
 (deps '[[digest "1.4.4"]])
 (require 'digest)
 
-; c:\bieb\ICT-books\(eBook - comp) Introduction To Evolutionary Computing - A.eiben,j.smith (2003).djvu
-; => /media/laptop/bieb/ICT-books/(eBook - comp) Introduction To Evolutionary Computing - A.eiben,j.smith (2003).djvu
-(defn to-linux-path 
-  "Convert laptop/windows path like c:\\bieb to /media/laptop/bieb"
-  [path]
-  (if-let [[_ part] (re-find #"^c:\\(.+)$" path)] 
-    (str "/media/laptop/" (clojure.string/replace part "\\" "/"))
-    path))
+(load-file "lib-diskcat.clj")
 
 ; @todo delete path from exception message. Only keep everything between parens.
 (defn file-md5
@@ -37,8 +30,8 @@
   (when-let [opts (my-cli args #{:database}
         ["-h" "--help" "Print this help"
               :default false :flag true]
-        ["-p" "--projectdir" "Project directory" :default "~/projecten/diskusage"]
-        ["-db" "--database" "Database path" :default "~/projecten/diskusage/bigfiles.db"]
+        ["-p" "--projectdir" "Project directory" :default "~/projecten/diskcatalog"]
+        ["-db" "--database" "Database path" :default "~/projecten/diskcatalog/bigfiles.db"]
         ["-r" "--root" "Root directory to find big files in"])]
     (let [db-spec (db-spec-path db-spec-sqlite (:database opts))]
        (calc-md5! db-spec))))
