@@ -133,7 +133,7 @@
                   :default false :flag true]
             ["-t" "--treshold" "Treshold for big files in bytes" 
                   :default 10e6 :parse-fn #(Float. %)]
-            ["-db" "--database" "Database path" :default "~/projecten/diskusage/bigfiles.db"]
+            ["-db" "--database" "Database path" :default "~/projecten/diskcatalog/bigfiles.db"]
             ["-d" "--deletedb" "Delete DB before reading"
                   :default false :flag true]
             ["-r" "--root" "Root directory to find big files in"])]

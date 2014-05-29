@@ -29,7 +29,7 @@
   (let [[opts args banner] (cli (rest args)
             ["-h" "--help" "Print this help"
                   :default false :flag true]
-            ["-db" "--database" "Database path" :default "~/projecten/diskusage/bigfiles.db"]
+            ["-db" "--database" "Database path" :default "~/projecten/diskcatalog/bigfiles.db"]
             ["-r" "--root" "Root directory to find big files in"])]
   (if (or (:help opts)
           (missing-required? opts))

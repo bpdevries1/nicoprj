@@ -18,8 +18,8 @@
   (when-let [opts (my-cli args #{:database}
         ["-h" "--help" "Print this help"
               :default false :flag true]
-        ["-p" "--projectdir" "Project directory" :default "~/projecten/diskusage"]
-        ["-db" "--database" "Database path" :default "~/projecten/diskusage/bigfiles.db"]
+        ["-p" "--projectdir" "Project directory" :default "~/projecten/diskcatalog"]
+        ["-db" "--database" "Database path" :default "~/projecten/diskcatalog/bigfiles.db"]
         ["-r" "--root" "Root directory to find big files in"])]
     (let [db-spec (db-spec-path db-spec-sqlite (:database opts))]
        (delete-removed! db-spec))))
