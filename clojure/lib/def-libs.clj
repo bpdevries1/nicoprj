@@ -48,9 +48,13 @@
 (defn my-cli
   "Wrapper around cli function in clojure.tools.cli. Return nil if not parsed correctly, also print banner then"
   [args required-opts & specs]
-  (let [[opts args banner] (apply cli (rest args) specs)]
-    (if (or (:help opts)
-            (missing-required? opts required-opts))
-      (println banner) ; also returns nil
-      opts)))  
-
+  (try 
+    (let [[opts args banner] (apply cli (rest args) specs)]
+      (if (or (:help opts)
+              (missing-required? opts required-opts))
+        (println banner) ; also returns nil
+        opts))  
+    (catch java.lang.Exception e 
+      (do (println (.getMessage e)) 
+          (println specs))))) ; also returns nil
+  
