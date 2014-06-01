@@ -1,0 +1,762 @@
+Test Clojure SQLite User Defined Functions
+==========================================
+
+      Class.forName("org.sqlite.JDBC");
+      Connection conn = DriverManager.getConnection("jdbc:sqlite:");
+
+      Function.create(conn, "myFunc", new Function() {
+          protected void xFunc() {
+              System.out.println("myFunc called!");
+          }
+      });
+
+      conn.createStatement().execute("select myFunc();");
+      
+      
+[2014-05-29 12:53:47] in Repl, waarsch wel def-libs.clj ge-source-d.
+
+user=> Class
+java.lang.Class
+user=> (Class/forName "org.sqlite.JDBC")
+org.sqlite.JDBC
+user=> (Class/forName "org.sqlite.JDBC2")
+
+ClassNotFoundException org.sqlite.JDBC2  java.net.URLClassLoader$1.run (URLClassLoader.java:366)
+
+(def conn (DriverManager/getConnection "jdbc:sqlite:"))
+DriverManager kent 'ie niet.
+
+java.jdbc.DriverManager
+org.sqlite.DriverManager
+org.sqlite.JDBC.DriverManager
+-> alle drie niet gevonden.
+
+java.sql.DriverManager
+-> is er wel.
+
+user=> (def conn (java.sql.DriverManager/getConnection "jdbc:sqlite:"))
+#'user/conn
+user=> conn
+#<Conn org.sqlite.Conn@5650216a>
+
+-> ok.
+
+Function
+-> not.
+
+org.sqlite.Function
+-> ok
+
+wil nu een constructor aanroepen op Function terwijl ik een functie meegeef.
+
+user=> (String.)
+""
+user=> (java.lang.String.)
+""
+
+iets met reify?
+
+Voorbeeld met proxy
+===================
+
+(defn proxy-coll []
+  (proxy [java.util.Collection] []
+    (add [o]
+         (println o)
+         true)))
+
+(defn reify-coll []
+  (reify java.util.Collection
+    (add [this o]
+         (println o)
+         (println this)
+         true)))
+
+(defn main []
+  (.add (proxy-coll) "this string is printed on proxied.add")
+  (.add (reify-coll) "this string is printed on reified.add"))
+  
+-> ok, werkt.
+
+      Function.create(conn, "myFunc", new Function() {
+          protected void xFunc() {
+              System.out.println("myFunc called!");
+          }
+      });
+      
+new Function() {
+          protected void xFunc() {
+              System.out.println("myFunc called!");
+          }
+      }
+
+(defn proxy-fn []
+  (proxy [org.sqlite.Function] []
+    (xFunc []
+      (println "myFunc called!"))))
+
+(System.out.println "myFunc called!")      
+
+user=> (println "abc")
+abc
+nil
+user=> 
+
+(defn proxy-fn []
+  (proxy [org.sqlite.Function] []
+    (xFunc []
+      (println "myFunc called!"))))
+-> ok
+
+(def my-proxy-fn (proxy-fn))
+
+user=> (defn proxy-fn []
+  #_=>   (proxy [org.sqlite.Function] []
+  #_=>     (xFunc []
+  #_=>       (println "myFunc called!"))))
+#'user/proxy-fn
+user=> (def my-proxy-fn (proxy-fn))
+#'user/my-proxy-fn
+user=> my-proxy-fn
+#<Function$0 user.proxy$org.sqlite.Function$0@3ba6d328>
+
+      Function.create(conn, "myFunc", new Function() {
+          protected void xFunc() {
+              System.out.println("myFunc called!");
+          }
+      });
+      
+(org.sqlite.Function/create conn "myFunc" my-proxy-fn)      
+-> nil, dus goed.
+
+      conn.createStatement().execute("select myFunc();");
+
+(def stmt (.createStatement conn))
+-> ok
+
+(.execute stmt "select myFunc();")
+
+user=> (.execute stmt "select myFunc();")
+myFunc called!
+true
+
+=> lijkt dus mooi!
+
+
+(defn reify-coll []
+  (reify java.util.Collection
+    (add [this o]
+         (println o)
+         (println this)
+         true)))
+
+(defn proxy-fn []
+  (proxy [org.sqlite.Function] []
+    (xFunc []
+      (println "myFunc called!"))))
+      
+(defn reify-fn []
+  (reify org.sqlite.Function
+    (xFunc [this]
+       (println "myFunc reify called!"))))
+-> gaat niet goed, only Interfaces are supported.
+
+(load-file "../../clojure/lib/def-libs.clj")
+(def db-spec (db-spec-path db-spec-sqlite "~/projecten/diskcatalog/bigfiles.db"))
+(jdbc/query db-spec "select myFunc()")
+
+SQLException [SQLITE_ERROR] SQL error or missing database (no such function: myFunc)  org.sqlite.DB.newSQLException (DB.java:383)
+
+-> waarsch 2 verschillende connecties, op 1 is functie erbij gezet, op de andere wordt de query gedaan.
+
+
+(org.sqlite.Function/create conn "myFunc" my-proxy-fn)      
+-> hier ipv conn de db-spec gebruiken.
+-> of by jdbc/query de conn ipv db-spec gebruiken.
+
+conn ipv db-spec is best ok, dan heb je tenminste een 'echte' connectie waarop je werkt.
+
+(jdbc/query conn "select myFunc()")
+
+user=> (jdbc/query conn "select myFunc()")
+
+IllegalArgumentException db-spec org.sqlite.Conn@5650216a is missing a required parameter  clojure.java.jdbc/get-connection (jdbc.clj:259)
+
+Moet dus ofwel (1) van db-spec -> conn of (2) van conn -> db-spec. (1) lijkt het handigst.
+
+(with-db-connection [db-con db-spec]
+  (let [;; fetch some rows using this connection
+        rows (jdbc/query db-con ["SELECT * FROM table WHERE id = ?" 42])]
+    ;; insert a copy of the first row using the same connection
+    (jdbc/insert! db-con :table (dissoc (first rows) :id))))
+
+(jdbc/with-db-connection [db-con db-spec]
+  (jdbc/query db-con "select 'abc' def1"))    
+    
+user=> (jdbc/with-db-connection [db-con db-spec]
+  #_=>   (jdbc/query db-con "select 'abc' def1"))    
+({:def1 "abc"})
+-> het is dus ofwel deze with-macro, of connection-pool gebruiken. Maar bij pool moet dan elke connectie de functie
+   hebben, of een poolsize van 1. Eerst kijken of dit werkt.
+   
+(def stmt (.createStatement conn))   
+(.execute stmt "select myFunc();")
+  
+
+  ; (println (.execute (.createStatement db-con) "select 'abc2' def2")))
+(jdbc/with-db-connection [db-con db-spec]
+  (println (jdbc/query db-con "select 'abc' def1"))
+  (println db-con)
+  (println (type db-con)))  
+
+(jdbc/with-db-connection [db-con db-spec]
+  (println (jdbc/query db-con "select 'abc' def1"))
+  (println db-con)
+  (println (type db-con))
+  (println (.execute (.createStatement (:connection db-con)) "select 'abc2' def2")))
+-> geen foutmelding, print true, waarsch resultaat van de execute.
+
+Hiermee:
+
+(jdbc/with-db-connection [db-con db-spec]
+  (org.sqlite.Function/create (:connection db-con) "myFunc" my-proxy-fn)
+  (jdbc/query db-con "select myFunc()"))
+
+
+user=> (jdbc/with-db-connection [db-con db-spec]
+  #_=>   (org.sqlite.Function/create (:connection db-con) "myFunc" my-proxy-fn)
+  #_=>   (jdbc/query db-con "select myFunc()"))
+myFunc called!
+({:myfunc() nil})
+
+=> dit werkt, mooi!
+
+; kijken of het ook los kan, wel tricky:
+
+(jdbc/with-db-connection [db-con db-spec]
+  (org.sqlite.Function/create (:connection db-con) "myFunc" my-proxy-fn))
+  
+(jdbc/query db-spec "select myFunc()")  
+-> helaas, is 'em alweer vergeten dan... Mss maar beter ook.
+
+Dan regexp functie die 2 string params verwacht: de RE en de string.
+(defn sqlregexp
+  "Regular expression function to be used in SQLite. 
+   If there is a match, and parens are used, the first match will be returned."
+  [re str]
+  (when-let [res (re-find (re-pattern re) str)]
+    (cond (= (type res) java.lang.String) res
+          (= (type res) clojure.lang.PersistentVector) (second res))))
+
+; @todo should be able to give just function or the name: macro? or meta-data?
+; or function to get fn from fn-name?
+; something like: (resolve (symbol "sqlregexp"))
+; @todo #params not fixed. Maybe used & rest/params
+(defn register-sqlite-function
+  "Register a clojure function to SQLite. 
+   db-con is result of with-db-connection."
+  [db-con fn-name fn]
+  (org.sqlite.Function/create (:connection db-con) fn-name 
+    (proxy [org.sqlite.Function] []
+    (xFunc [p1 p2]
+      (apply fn [p1 p2])))))
+      
+(jdbc/with-db-connection [db-con db-spec]
+  (register-sqlite-function db-con "sqlregexp" sqlregexp)
+  ; (org.sqlite.Function/create (:connection db-con) "myFunc" my-proxy-fn)
+  (jdbc/query db-con "select sqlregexp('ab', 'adhaskdh ab djk')"))      
+=> SQLException [SQLITE_ERROR] SQL error or missing database (clojure.lang.ArityException: Wrong number of args (1) passed to: user$register-sqlite-function$fn)  org.sqlite.DB.newSQLException (DB.java:383)
+
+(jdbc/with-db-connection [db-con db-spec]
+  (register-sqlite-function db-con "sqlregexp" sqlregexp))
+  ; (org.sqlite.Function/create (:connection db-con) "myFunc" my-proxy-fn)
+  ; (jdbc/query db-con "select sqlregexp('ab', 'adhaskdh ab djk')"))      
+=> wel ok, zit dus in de sql aanroep.  
+  
+(jdbc/with-db-connection [db-con db-spec]
+  (register-sqlite-function db-con "sqlregexp" sqlregexp)
+  (jdbc/query db-con "select 123 abc"))      
+-> wel ok dus.
+
+(jdbc/with-db-connection [db-con db-spec]
+  (register-sqlite-function db-con "sqlregexp" sqlregexp)
+  (jdbc/query db-con "select sqlregexp22('ab', 'adhaskdh ab djk')"))      
+=> SQLException [SQLITE_ERROR] SQL error or missing database (no such function: sqlregexp22)  org.sqlite.DB.newSQLException (DB.java:383)
+-> dus wel andere melding.
+
+  (defn proxy-fn []
+  (proxy [org.sqlite.Function] []
+    (xFunc []
+      (println "myFunc called!"))))
+      
+  (proxy [org.sqlite.Function] []
+    (xFunc [p1 p2]
+      (apply fn [p1 p2])))
+
+; mss ook xFunc [& params]
+;    (apply fn params)
+      
+(let [fn sqlregexp]
+  (apply fn "ab" "adjhad ab aldja "))
+
+(let [fn sqlregexp]
+  (apply fn ["ab" "adjhad ab aldja "]))
+  
+  
+* Dan eerst zonder register-sql-function, direct aanroepen.
+; eerst met orig my-proxy-fn
+(jdbc/with-db-connection [db-con db-spec]
+  (org.sqlite.Function/create (:connection db-con) "sqlregexp" my-proxy-fn)
+  (jdbc/query db-con "select sqlregexp() col"))
+myFunc called!
+({:col nil})
+
+dan my-proxy-fn inlinen:
+
+(jdbc/with-db-connection [db-con db-spec]
+  (org.sqlite.Function/create (:connection db-con) "sqlregexp" 
+    (proxy [org.sqlite.Function] []
+      (xFunc []
+        (println "myFunc called!"))))
+  (jdbc/query db-con "select sqlregexp() col"))
+=> ook goed.
+
+dan vervangen door call naar sqlregexp met eigen params:
+(jdbc/with-db-connection [db-con db-spec]
+  (org.sqlite.Function/create (:connection db-con) "sqlregexp" 
+    (proxy [org.sqlite.Function] []
+      (xFunc []
+        (sqlregexp "ab" "adkahd ab ad;;"))))
+  (jdbc/query db-con "select sqlregexp() col"))
+
+=> ({:col nil})
+-> da's niet goed, had 'ab' verwacht.
+
+Zie http://priede.bf.lu.lv/ftp/pub/DatuBazes/SQLite/SqliteJDBC/api/org/sqlite/Function.html
+heb value_text() en result() nodig om params te lezen en result te zetten.
+Wel vraag hoe je result aanroept, is een method ob dit Function object, is een this beschikbaar?
+
+(jdbc/with-db-connection [db-con db-spec]
+  (org.sqlite.Function/create (:connection db-con) "sqlregexp" 
+    (proxy [org.sqlite.Function] []
+      (xFunc []
+        (result (sqlregexp "ab" "adkahd ab ad;;")))))
+  (jdbc/query db-con "select sqlregexp() col"))
+=> result kan 'ie niet vinden, wel logisch. Iets met this/self doen? Eerst docs bekijken?
+Met reify wel een 'this' object, maar met proxy dus niet.
+
+Even met this proberen:
+
+(jdbc/with-db-connection [db-con db-spec]
+  (org.sqlite.Function/create (:connection db-con) "sqlregexp" 
+    (proxy [org.sqlite.Function] []
+      (xFunc []
+        (.result this (sqlregexp "ab" "adkahd ab ad;;")))))
+  (jdbc/query db-con "select sqlregexp() col"))
+
+SQLException [SQLITE_ERROR] SQL error or missing database (java.lang.IllegalArgumentException: 
+No matching method found: result for class 
+user.proxy$org.sqlite.Function$0)  org.sqlite.DB.newSQLException (DB.java:383)
+
+Zonder query:
+(jdbc/with-db-connection [db-con db-spec]
+  (org.sqlite.Function/create (:connection db-con) "sqlregexp" 
+    (proxy [org.sqlite.Function] []
+      (xFunc []
+        (.result this (sqlregexp "ab" "adkahd ab ad;;"))))))
+=> nil, geen foutmelding.
+
+(jdbc/with-db-connection [db-con db-spec]
+  (org.sqlite.Function/create (:connection db-con) "sqlregexp" 
+    (proxy [org.sqlite.Function] []
+      (xFunc []
+        (proxy-super result (sqlregexp "ab" "adkahd ab ad;;")))))
+  (jdbc/query db-con "select sqlregexp() col"))        
+
+SQLException [SQLITE_ERROR] SQL error or missing database (java.lang.IllegalArgumentException: 
+No matching method found: result for class 
+user.proxy$org.sqlite.Function$0)  org.sqlite.DB.newSQLException (DB.java:383)
+=> wel raar, zelfde foutmelding by proxy-super als met .result this.
+
+FINAL POINTS ABOUT PROXY
+Clojure’s proxy capabilities are truly dynamic, allowing you to create fully stubbed
+proxies using either construct-proxy , get-proxy-class, or init-proxy . In both
+cases, a partially to fully realized proxy will be constructed, allowing programmatic
+customization using update-proxy and arbitrary mixin maps
+
+dus andere functies:
+construct-proxy
+get-proxy-class
+init-proxy
+
+(def function-proxy (proxy [org.sqlite.Function] []
+      (xFunc []
+        (proxy-super result (sqlregexp "ab" "adkahd ab ad;;")))))
+
+(.xFunc function-proxy)        
+user=> (.xFunc function-proxy)
+
+IllegalArgumentException No matching method found: result for class user.proxy$org.sqlite.Function$0  clojure.lang.Reflector.invokeMatchingMethod (Reflector.java:53)
+
+=> dus al dezelfde melding zonder SQL echt te gebruiken.
+
+simpeler:
+(def function-proxy (proxy [org.sqlite.Function] []
+      (xFunc []
+        (proxy-super result "res-ab"))))
+=> zelfde melding bij aanroep vervolgens.
+
+Each method fn takes an additional implicit
+  first arg, which is bound to 'this. Note that while method fns can
+  be provided to override protected methods, they have no other access
+  to protected members, nor to super, as these capabilities cannot be
+  proxied.
+=> is dit mijn probleem, want de result en param functies zijn allemaal protected?
+
+bv wel de toString aanroepen?
+
+(def function-proxy (proxy [org.sqlite.Function] []
+      (xFunc []
+        (proxy-super toString))))
+(.xFunc function-proxy)     
+=> geen foutmelding, dan met this:
+
+(def function-proxy (proxy [org.sqlite.Function] []
+      (xFunc []
+        (.toString this))))
+(.xFunc function-proxy)     
+=> ok
+
+(def function-proxy (proxy [org.sqlite.Function] []
+      (xFunc []
+        (.toString2 this))))
+(.xFunc function-proxy)     
+IllegalArgumentException No matching field found: toString2 for class user.proxy$org.sqlite.Function$0  clojure.lang.Reflector.getInstanceField (Reflector.java:271)
+
+(def function-proxy (proxy [org.sqlite.Function] []
+      (xFunc []
+        (proxy-super toString2 "abc"))))
+(.xFunc function-proxy)     
+IllegalArgumentException No matching method found: toString2 for class user.proxy$org.sqlite.Function$0  clojure.lang.Reflector.invokeMatchingMethod (Reflector.java:53)
+=> dus hetzelfde soort melding.
+
+protected lijkt het probleem te zijn, is er een manier dit te valideren?
+
+Kies een andere java class met zowel public als protected methods. Maak deze evt zelf, maar vast ook wel
+wat te vinden, even helemaal los van jdbc/sqlite.
+
+* String: niet, want final en geen abstract methods.
+
+Wat je wilt: subclass van Function en meteen instantieren.
+
+Function implementeert niet een interface, dus moet wel een subclass maken.
+
+http://www.deepbluelambda.org/programming/clojure/generate-your-class-and-proxy-it-too
+-> deze lijkt wel goed, heeft het over probleem met reify en deftype, dat ze alleen Interfaces aankunnen.
+
+gen-class met :exposes-methods 
+
+[2014-05-29 21:20:28] bezig met gen-class en AOT compilation. Eerst heel simpel.
+Moet (in discatalog dir) subdir target/classes aanmaken, is waarde van *compile-path*
+In target/classes/some/ heb je vervolgens een aantal class files, obv some/Example.clj
+
+user=> (.toString (some.Example.))
+
+CompilerException java.lang.ClassNotFoundException: some.Example, compiling:(NO_SOURCE_PATH:1:12) 
+
+jammer, mss eerst require doen?
+
+(require 'some.Example)
+
+user=> (require 'some.Example)
+nil
+user=> (.toString (some.Example.))
+
+CompilerException java.lang.ClassNotFoundException: some.Example, compiling:(NO_SOURCE_PATH:1:12) 
+
+Opties:
+* geheel in een clj-file stoppen en met lein-exec aanroepen.
+* src-file weg, kijken of (require) dan nog werkt.
+* echt lein project maken: eerst een goed situatie, van hieruit werken.
+* nog verder googlen.
+
+Verse repl, source weg, require doen
+====================================
+$ lein repl
+nREPL server started on port 45595 on host 127.0.0.1
+REPL-y 0.3.0
+Clojure 1.5.1
+    Docs: (doc function-name-here)
+          (find-doc "part-of-name-here")
+  Source: (source function-name-here)
+ Javadoc: (javadoc java-object-or-class-here)
+    Exit: Control+D or (exit) or (quit)
+ Results: Stored in vars *1, *2, *3, an exception in *e
+
+user=> (require 'some.Example)
+nil
+user=> (require 'some.Example2)
+
+FileNotFoundException Could not locate some/Example2__init.class or some/Example2.clj on classpath:   clojure.lang.RT.load (RT.java:443)
+
+user=> (some.Example.)
+#<Example Hello, World!>
+
+(.toString (some.Example.))
+
+user=> (.toString (some.Example.))
+"Hello, World!"
+
+=> ok, dit werkt dus wel.
+
+Zelfde, nieuwe repl, maar source is er wel:
+classes zijn ook echt nieuwer dan de source:
+
+$ ls -l target/classes/some/
+total 24
+-rw-rw-r-- 1 nico nico 1771 May 29 21:25 Example.class
+-rw-rw-r-- 1 nico nico 1327 May 29 21:19 Example$fn__2361.class
+-rw-rw-r-- 1 nico nico 1327 May 29 21:25 Example$fn__2374.class
+-rw-rw-r-- 1 nico nico 2827 May 29 21:25 Example__init.class
+-rw-rw-r-- 1 nico nico 1509 May 29 21:25 Example$loading__4910__auto__.class
+-rw-rw-r-- 1 nico nico  560 May 29 21:25 Example$_toString.class
+Thu May 29 - 21:37:22
+nico@nico-MS-7760:1542:121:~/nicoprj/systemtools/diskcatalog
+$ ls -l some/Example.clj 
+-rw-rw-r-- 1 nico nico 80 May 29 21:13 some/Example.clj
+
+Deze werkt nu ook, dus mogelijk was repl te veel in de war. Er is nog hoop dus.
+
+Stel in deze repl de source aanpassen en compilere en opnieuw requiren, dan de nieuwe?
+
+user=> (compile 'some.Example)
+some.Example
+user=> (require 'some.Example)
+nil
+user=> (.toString (some.Example.))
+"Hello, World version 2!"
+
+=> ook goed dus.
+
+de UDF weer
+===========
+* some/UDF.clj gemaakt.
+
+(compile 'some.UDF)
+CompilerException java.lang.ClassNotFoundException: org.sqlite.Function, compiling:(some/UDF.clj:1:1) 
+
+keuze:
+* de require etc in de source file erbij.
+* de require los doen.
+
+Eerst los, als het werkt in de file erbij.
+
+(use '[leiningen.exec :only  (deps)])
+(deps '[[org.clojure/java.jdbc "0.3.3"]
+        [org.xerial/sqlite-jdbc "3.7.2"]]) ; 3.7.2 lijkt nog wel de nieuwste ([2014-05-03 22:39:14])
+
+(compile 'some.UDF)
+some.UDF
+
+user=> (.toString (some.UDF.))
+"Hello, World version 2!"
+
+user=> (.xFunc (some.UDF.))
+
+AbstractMethodError org.sqlite.Function.xFunc()V  some.UDF.xFunc (:-1)
+
+-> deze mogelijk omdat ik -xFunc moet definieren, alsnog.
+
+user=> (.xFunc (some.UDF.))
+
+ArityException Wrong number of args (1) passed to: UDF$-xFunc  clojure.lang.AFn.throwArity (AFn.java:437)
+
+=> dus wel een andere melding.
+-> deze moet ook een this object krijgen.
+
+user=> (.xFunc (some.UDF.))
+nil
+-> dus dus geen foutmelding, maar ook geen resultaat. Maar daar was result juist voor.
+
+Eerst met 
+
+(defn -xFunc [this]
+  (.result this "abc"))
+
+user=> (compile 'some.UDF)
+some.UDF
+user=> (.xFunc (some.UDF.))
+
+IllegalArgumentException No matching method found: result for class some.UDF  clojure.lang.Reflector.invokeMatchingMethod (Reflector.java:53)
+-> dus compileert wel, maar toch foutmelding.
+
+Ik override result niet, dus exposes is mss ook niet nodig.
+
+No matching method found: result for class some.UDF  
+
+[2014-05-29 22:04:44] toch weer dat changes niet gezien lijken te worden na compile/require, dus repl overnieuw.
+
+user=> (.toString (some.UDF.))
+"some.UDF@67cea89c"
+-> dat is iig de default, definieer toString nu niet zelf.
+
+user=> (.result (some.UDF.) "some")
+niet gevonden, mogelijk omdat 'ie abstract is.
+
+user=> (.xFunc (some.UDF.))
+
+IllegalArgumentException No matching method found: result for class some.UDF  clojure.lang.Reflector.invokeMatchingMethod (Reflector.java:53)
+
+kan exposes methods gebruiken en dan zelf resultSuper aanroepen:
+
+user=> (.xFunc (some.UDF.))
+
+SQLException no context, not allowed to read value  org.sqlite.Function.checkContext (Function.java:159)
+
+Dit is toch veelbelovend, deze dus weer in de goede context zetten.
+
+(def db-spec (db-spec-path db-spec-sqlite "~/projecten/diskcatalog/bigfiles.db"))
+
+oud met proxy:
+(jdbc/with-db-connection [db-con db-spec]
+  (org.sqlite.Function/create (:connection db-con) "sqlregexp" 
+    (proxy [org.sqlite.Function] []
+      (xFunc []
+        (proxy-super result (sqlregexp "ab" "adkahd ab ad;;")))))
+  (jdbc/query db-con "select sqlregexp() col"))        
+
+nieuw met gen-class:
+(jdbc/with-db-connection [db-con db-spec]
+  (org.sqlite.Function/create (:connection db-con) "sqlregexp"
+    (some.UDF.))
+  (jdbc/query db-con "select sqlregexp() col"))        
+
+user=> (jdbc/with-db-connection [db-con db-spec]
+  #_=>   (org.sqlite.Function/create (:connection db-con) "sqlregexp"
+  #_=>     (some.UDF.))
+  #_=>   (jdbc/query db-con "select sqlregexp() col"))
+({:col "abc"})
+
+=> zowaar, het wordt nog wel eens wat! [2014-05-29 22:17:58] 
+de result functie heeft gewerkt zo.
+
+(jdbc/with-db-connection [db-con db-spec]
+  (org.sqlite.Function/create (:connection db-con) "sqlregexp"
+    (some.UDF.))
+  (println (jdbc/query db-con "select sqlregexp() col")))        
+
+
+Opties:
+* verder met regexp functie.
+* kijken of dit aan te roepen is vanuit lein-exec.
+  - er vanuit gaan dat compile al gebeurd is.
+  - deze maar eerst doen, toch een risico.
+  
+vanuit lein-exec een UDF aanroepen
+==================================
+* test-udf.clj aanmaken.
+* zowaar, werkt meteen!
+
+De take aways van dit alles:
+* omdat je met een subclass van een abstracte class met protected methods werkt, moet je gen-class gebruiken.
+* deze gen-class moet je met AOT doen.
+* Hiervoor moet je target/classes dir aanmaken.
+* expose-methods gebruiken, ook al override je niet zelf de result-method. Deze zorgt ervoor dat result als resultSuper te gebruiken is, 
+  blijkbaar ook alle varianten.
+* Je hebt with-db-connection nodig: je definieert de functie op deze connection, vervolgens deze gebruiken.
+  Als je db-spec bij vervolg-queries gebruikt, doet 'ie het niet, functie niet gevonden.
+* een connection-pool zou mss ook werken, dan ofwel 1 connectie, of op alle connecties een check doen en zonodig
+  de UDF erin zetten.
+
+* https://kotka.de/blog/2010/02/gen-class_how_it_works_and_how_to_use_it.html - leuke voorbeelden, maar compile
+en require niet genoemd, toch echt wel nodig.
+* http://tech.puredanger.com/2011/08/12/subclassing-in-clojure/ - ook leuk.
+* http://www.deepbluelambda.org/programming/clojure/generate-your-class-and-proxy-it-too
+* http://blog.jayfields.com/2011/12/clojure-java-interop.html - wat simpeler, hiermee begonnen.
+
+Iets anders:
+* http://corfield.org/blog/post.cfm/clojure-and-log4j - logging kan/moet ook nog beter.
+
+[2014-05-29 22:25:47] rest lijkt dan goed te doen, mooi iets voor morgen, het is weer de hoogste tijd.
+
+[2014-05-30 10:36:10] weer begonnen. Eerst wat over args printen:
+sqlregexp(123, 'qyz') col
+$ ./test-udf.clj 
+#args:  2
+type of arg1:  3
+({:col abc})
+
+Vraag of arg-count bij 0 of 1 begint.
+
+123 door string vervangen, kijken of het uitmaakt.
+$ ./test-udf.clj 
+#args:  2
+type of arg1:  3
+({:col abc})
+
+Niet dus, dan type van het 2e element aanpassen, doe maar een float:
+
+sqlregexp('123a', 76.12):
+$ ./test-udf.clj 
+#args:  2
+type of arg1:  2
+({:col abc})
+Dan dus wel, dus index-base is 0. Nu beide printen.
+
+$ ./test-udf.clj 
+#args:  2
+type of arg0:  3
+type of arg1:  2
+({:col abc})
+
+Dus type 3 is string, type 2 is een float. Wat is een int? Idd type 1.
+
+protected  byte[]	value_blob(int arg) 
+           Called by xFunc to access the value of an argument.
+protected  int	value_bytes(int arg) 
+           Called by xFunc to access the value of an argument.
+protected  double	value_double(int arg) 
+           Called by xFunc to access the value of an argument.
+protected  int	value_int(int arg) 
+           Called by xFunc to access the value of an argument.
+protected  long	value_long(int arg) 
+           Called by xFunc to access the value of an argument.
+protected  java.lang.String	value_text(int arg) 
+           Called by xFunc to access the value of an argument.
+
+Long heb je ook nog.
+kleiner: 123 => type 1
+2^16 = 65536 => type 1, 655360 => type 1
+2^32 = 4294967296 => type 1, 42949672960 => type 1
+2^64   = 18446744073709551616 => type 2
+groter = 184467440737095516160 => type 2
+
+iig 2 params van type string nodig, anders error.
+
+
+Stappen:
+* Eerst in huidige namespace/file: zorg dat het werkt. -> done
+* Dan naar andere namespace, evt zonder path, of mss lib/RegExpUDF  -> done
+* mss: generieke functie die AOT compile-t, zodat de rest dynamisch kan blijven? Waarsch lastig.
+  - mss is de UDF constructor te gebruiken, dat je hier een functie aan meegeeft. Mss ook iets met params te doen.
+  - maar mss moet je ook eerst even laten liggen en gebruiken, kijken hoe het bevalt.
+  - ook in een package of zo zetten, zodat het automatisch beschikbaar is bij (load-file 'def-libs.clj')
+* vanuit een clean repl te compileren? -> deels, wel load-file nodig. Dingen in SqlRegExp.clj zetten werkt niet goed.
+
+Note:
+(require 'SqlRegExp) niet nodig in script, maar toch wel netjes. Als deze er niet is, is het beter duidelijk
+dat er iets mis is en waar.
+
+==================================================
+
+  
+TODO:
+* kijken of reify ook werkt -> niet dus, alleen interfaces.
+* myFunc met jdbc/query aanroepen.
+
+* dit alles voor regexp functie met params dus
+* aanroep als std functie.
+* aanroep met REGEXP operator (vgl LIKE). -> werkt zowaar ook.
+* Clojure functie waarmee dit alles gewrapped kan worden? Evt een Macro. -> later.
+
+
