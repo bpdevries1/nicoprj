@@ -8,6 +8,9 @@
 # quote hash-marks
 \#*\#
 
+# Clojure AOT compilation
+**/target
+
 .Rhistory
 *.tcl.1
 perftools/iptools/hosts
