@@ -36,7 +36,8 @@ delay 5
 
 
 :outlookclosed
-tclsh backup-files.tcl -settingsdir "~/.backup2nas/laptop2nas" -t \\192.168.178.200\public\backups\YmorLaptop -paths paths.txt -r results.txt -p -ignoreregexps ignoreregexps-programs.txt
+rem tclsh backup-files.tcl -settingsdir "~/.backup2nas/laptop2nas" -t \\192.168.178.200\public\backups\YmorLaptop -paths paths.txt -r results.txt -p -ignoreregexps ignoreregexps-programs.txt
+c:\develop\tcl86\bin\tclsh86.exe backup-files.tcl -settingsdir "~/.backup2nas/laptop2nas" -t \\192.168.178.200\public\backups\YmorLaptop -paths paths.txt -r results.txt -p -ignoreregexps ignoreregexps-programs.txt
 
 rem 16-1-2011 even een pauze inzetten, even kijken of het goed gaat. Evt later alleen een pauze als het fout gaat.
 rem 7-1-2014 pauze nu even niet meer.
