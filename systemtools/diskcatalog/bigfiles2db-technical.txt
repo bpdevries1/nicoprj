@@ -1,3 +1,9 @@
+Todo
+====
+* delete-removed.clj - verwijder records uit DB waar de files niet meer bestaan in het file-systeem.
+* (defaction) ipv (defn), vgl actionproc in Tcl voor tcp-ip philips dingen. Mogelijk een macro.
+* migrations verhaal mss, vgl Tcl, maar mss ook wel een standaardlib voor.
+
 Issues
 ======
 * go-loop wordt vertaald naar threads, dan context kwijt, zoals jdbc/with-connection.
@@ -9,7 +15,7 @@ Issues
     - eerst zo laten, mss performant genoeg. Op zich wel beter om elke message in eigen transactie af te handelen.
   - google: niets gevonden behalve hetzelfde als eerder: lijkt niet zo nuttig.
   - jdbc/insert-records of do-commands uitvoeren met db-spec als parameter? Dus niet in with-connection scope?
-
+  
 JDBC versie
 ===========
 $ lein try org.clojure/java.jdbc

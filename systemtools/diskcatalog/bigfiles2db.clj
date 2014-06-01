@@ -59,16 +59,18 @@
 (defn big-files
   "Determine big files in directory recursively. Treshold in bytes"
   [root-dir treshold]
-  (let [cal-format (java.text.SimpleDateFormat. "yyyy-MM-dd hh:mm:ss")]
+  (let [cal-format (java.text.SimpleDateFormat. "yyyy-MM-dd hh:mm:ss")
+        computer (computername)]
     (->> (find-files-nolink root-dir #".*")
          (filter #(> (fs/size %) treshold))
          (filter #(fs/file? %))
-         (filter #(not (fs/link? %))
+         (filter #(not (fs/link? %)))
          (map #(hash-map :fullpath (str %)
                          :folder (fs/parent %)
                          :filename (fs/base-name %)
                          :filesize (fs/size %)
-                         :ts_cet (.format cal-format (fs/mod-time %))))))))
+                         :computer computer
+                         :ts_cet (.format cal-format (fs/mod-time %)))))))
   
 ; this one doesn't work in a script: script exits before this task even starts.
 ; so either do the producing in the main thread or have some way to wait for everything to finish.
@@ -107,7 +109,13 @@
             [:folder "varchar"]
             [:filename "varchar"]
             [:filesize "integer"]
-            [:ts_cet "varchar"])))
+            [:ts_cet "varchar"]
+            [:md5 "varchar"]
+            [:goal "varchar"]
+            [:importance "varchar"]
+            [:computer "varchar"]
+            [:srcbak "varchar"]
+            [:action "varchar"])))
     db-spec))
 
 (def required-opts #{:root})
@@ -125,7 +133,7 @@
                   :default false :flag true]
             ["-t" "--treshold" "Treshold for big files in bytes" 
                   :default 10e6 :parse-fn #(Float. %)]
-            ["-db" "--database" "Database path" :default "~/projecten/diskusage/bigfiles.db"]
+            ["-db" "--database" "Database path" :default "~/projecten/diskcatalog/bigfiles.db"]
             ["-d" "--deletedb" "Delete DB before reading"
                   :default false :flag true]
             ["-r" "--root" "Root directory to find big files in"])]
