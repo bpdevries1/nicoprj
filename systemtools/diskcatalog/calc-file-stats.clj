@@ -2,9 +2,12 @@
 
 ; calc-file-stats.clj - Calculate statistics about contents of file table.
 
+; @todo also count how many results the check-queries give, eg double files.
+
 (load-file "../../clojure/lib/def-libs.clj") 
 (load-file "lib-diskcat.clj")
 
+; @todo remove this function, is also in create-tables.clj
 (defn create-stats-table!
   "Create stats table iff it does not exist yet"
   [db-spec]
