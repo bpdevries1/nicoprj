@@ -1,4 +1,4 @@
-#!/home/nico/bin/tclsh
+#!/home/nico/bin/tclsh86
 
 package require ndv ; # logging
 package require cmdline 
@@ -148,6 +148,10 @@ proc set_params {} {
     [split [read_file [file join $params(settingsdir) $params(ignoreregexps)]] "\n"] {([string trim $el] != "") && ![regexp {^#} $el]}] 
   set lst_paths [::struct::list filterfor el \
     [split [read_file [file join $params(settingsdir) $params(paths)]] "\n"] {[string trim $el] != ""}] 
+  # ignore path-lines starting with #
+  # breakpoint
+  set lst_paths [listc {$el} el <- $lst_paths {![regexp {^#} $el]}]
+  
   if {$params(w)} {
     set time_treshold [expr [clock seconds] - (7 * 24 * 60 * 60)] 
   } elseif {$params(p)} {
@@ -224,6 +228,11 @@ proc backup_path {path target tempext time_treshold reclevel max_level_check} {
   }
   set totalfiles 0
   set totalbytes 0.0
+  if {[file isfile $path]} {
+    lassign [handle_file $path $target $tempext $time_treshold] nfiles nbytes
+    incr totalfiles $nfiles
+    set totalbytes [expr $totalbytes + $nbytes]
+  }
   foreach filepattern {* .*} {
     foreach filename [glob -nocomplain -directory $path -type f $filepattern] {
       lassign [handle_file $filename $target $tempext $time_treshold] nfiles nbytes
@@ -366,6 +375,8 @@ proc backup_file {filename target tempext} {
   global log fres
   $log debug "backing up: $filename"
   set target_path [det_target_path $filename $target]
+  #puts "$filename => $target_path" ; # ook tijdelijk.
+  #breakpoint ; # om deze te tonen
   set target_dir [file dirname $target_path]
   # acties op target path pas bij echt kopieren, handle_stashed 
   try_eval {
@@ -382,7 +393,9 @@ proc backup_file {filename target tempext} {
     set filesize 0
     set filesize [file size $filename]
     set temp_target "$target_path$tempext"
-    file copy $filename $temp_target ; # force niet nodig hier.
+    # 06-06-2014 vorige keer mss niet gelukt om backup te verwijderen en hierna rename van temp->backup.
+    # 06-06-2014 volgende keer moet het dan opnieuw.
+    file copy -force $filename $temp_target ; # 06-06-2014 force toch nodig hier.
     file delete $target_path
     file rename $temp_target $target_path
     # set target datetime to same as source
