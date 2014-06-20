@@ -1,0 +1,17 @@
+Sourcedep - History
+
+26-3-2006
+----------
+* output nu in apart stuk in XML. Deze bij maken Outputter object initialiseren.
+* Keuze wel/niet met call-labels
+* Outputter(s) en traveller(s) scheiden qua classes.
+* Warnings opnemen voor files die niet worden gebruikt in een plot.
+* Root-callers van een file printen bij files die niet worden gebruikt in een plot.
+
+
+25-3-2006
+---------
+* Bepaalde files (perflib.tcl) worden veel gesourced, niet echt zinvol in de plaat, dus weglaten
+* Als files niet bestaan, maar er wordt wel naar verwezen, dan met stippellijnen.
+* vanuit Ruby dot aanroepen, niet zoals tcl een batchfile maken die dat doet.
+* Ene build.xml vanuit andere aanroepen, niet met source, maar ant(call)

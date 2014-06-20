@@ -1,0 +1,4 @@
+rem set WEBDIENSTEN_HOME=d:\projecten\belastingdienst\cruiseperf\webdiensten
+ruby sourcedep.rb sourcedep-webdiensten.xml
+
+

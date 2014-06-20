@@ -1,0 +1,67 @@
+TODO:
+
+Huidig:
+* verband tussen action, traveller en outputter helder krijgen, zowel in ruby-files als
+  in de XML. Het is nu eigenlijk allemaal 1-op-1-op-1. in source al redelijk aangepast dat
+  vanuit action niet meer outputter wordt benaderd, maar alles via traveller. Nog oplossing
+  kiezen in de XML (hoe te declareren).
+
+Html/compleet
+* Stel in HTML stel je size in van de image: hoe ziet het er dan uit en gaat het nog
+  goed met de image map? => gaat niet goed, zier er niet uit, en imagemap klopt ook niet meer.
+* In de .dot file (of cmdline) de size instellen?
+* Timen verschillende onderdelen. Logger inbouwen? => inlezen kost verreweg de meeste tijd.
+  2 dingen: meer outputters zal weinig kosten, anderzijds toch zinvol de 'parsetree' ergens
+  op te slaan (yaml?, xml?)
+* image map: lukt wel, maar resultaat moet hierna in een html geplakt worden.
+* Elke file krijgt een URL; bij voorkeur uniek, maar wel steeds dezelfde voor dezelfde file,
+  zodat 't in verschillende runs niet steeds anders is.
+* index.html met alle files, maar ook lijst met overzichten (in PNG met imagemap).
+* per file een html met referenties.
+* Nog kijken of image/html info bij de DepFile moet, of in een ander object. Laatste lijkt
+  beter.
+
+Divers:
+* Nog eens naar SVG output kijken. (of iets anders schaalbaars).
+* Log4ruby inbouwen.
+* Ook ruby-lezer maken, en deze tool op zichzelf loslaten.
+* Naast basedirs ook template/glob-pattern opnemen.
+* in/out files opnemen.
+* Ant filesets beter inbouwen, met include en exclude. Dan wel kijken of iemand anders hier
+  al wat voor gemaakt heeft.
+
+Specifiek perf
+* Niet alleen cruise-dir, maar ook de rel50 dir opnemen als basedir.
+
+Maken dot/png:
+* Analyseren sources (en evt runnen) enerzijds en maken output anderzijds zijn behoorlijk
+  verschillende dingen. Misschien is een xml als tussenformaat toch handig.
+* Labels nu rechts naast de lijnen, niet zo mooi. Hiervoor op zoek naar andere tools, maar 
+  toch lastig. Alternatief: def een tussenobject (kan sowieso handig zijn voor in/uitgaande
+  files) met een label in het object en het object zelf evt zonder randen.
+* Labels op de lijnen: gebruik annotated file uit dot, zorg dat zwaartepunt van lijn en label
+  overeenkomen, en laat alsnog plotten, schijnt zo te kunnen... => wel lastig, je kunt dan 
+  overlap krijgen...
+
+Uitgangspunt:
+* Voorlopig alleen aangeven dat er een relatie is, input/output mogelijk nog lastig.
+* Main class zo klein mogelijk houden.
+
+Periodiek/opschonen
+* check op _old en verwijder, zo heten ongebruikte methods.
+
+Later/moeilijker
+* Uit tcl cmdline param afleiden of het input of output is.
+* Tijdens run info bijhouden, bv door batchfile door andere batchfile te laten uitvoeren en te loggen,
+  of ook door ant/cc log te analyseren.
+* Voorlopig alleen werkend maken. Wel componenten te herkennen, waar ik flexibiliteit wil.
+
+Later/voorlopig niet zo belangrijk:
+* Evt vanaf een startfile maximaal (bv) 5 levels diep, dan wel aangeven dat er meer is, en evt
+  met imagemaps de koppelingen doen.
+
+  
+Andere tools:
+* Unflatten, kan handig zijn als graph erg breed wordt (nu al wat last van)
+* sccmap: om automatisch te verdelen in componenten, met nieuwe graph die componenten verdeelt.
+* dot2gxl: GXL is andere tool, 'much richer'

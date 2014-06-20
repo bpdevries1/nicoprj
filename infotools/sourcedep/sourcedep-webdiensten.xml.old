@@ -1,0 +1,9 @@
+<sourcedep>
+	<basedirs>
+		<basedir>d:\projecten\belastingdienst\cruiseperf\webdiensten\cruise</basedir>
+		<basedir>d:\projecten\belastingdienst\cruiseperf\webdiensten\rel50</basedir>
+	</basedirs>
+	<startfiles>
+		<startfile>build-cc.xml</startfile>
+	</startfiles>
+</sourcedep>

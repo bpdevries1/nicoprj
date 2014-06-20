@@ -1,0 +1,131 @@
+<!-- edited with XMLSPY v5 rel. 4 U (http://www.xmlspy.com) by Belastingdienst/Centrum voor ICT (Belastingdienst/Centrum voor ICT) -->
+<!-- Delegating build script, used by cruisecontrol to build perftest-webdiensten. -->
+
+<project name="perftest-webdiensten" default="runtestoncemode" basedir=".">
+
+  <property environment="env"/>
+	<property name="work.dir" value="${env.CRUISEWORK_DIR}"/>
+	<property name="project.dir" value="${env.PROJECT_DIR}"/>
+
+	<property name="defaultsuite.once" value="suite-test-multiinzienaangiftegedrag-tao"/>
+
+	<target name="clear">
+		<!-- delete old stuff, old subdirs -->
+		<delete
+		   dir="${work.dir}/publish"
+		   failonerror="false"
+		/>
+		<mkdir dir="${work.dir}/publish"/>
+	</target>
+
+	<target name="runtestprodmode" depends="clear">
+		<ant dir="checkout" antfile="build-suite.xml" target="testsuite">
+			<property name="suite" value="${testsuite}"/>
+		</ant> 
+	</target>
+
+	<target name="runtestoncemode">
+		<echo message="Running tests in once mode"/>
+
+		<!-- kijk of once.txt bestaat (wordt in build-once.bat aangemaakt, en verwijder dit
+		     bestand vervolgens zodat build echt maar een keer wordt uitgevoerd -->
+		<waitfor maxwait="100000" maxwaitunit="hour" checkevery="1" checkeveryunit="hour">
+			<available file="once.txt"/>
+		</waitfor>
+
+		<delete file="once.txt"/>
+		
+		<antcall target="clear"/>
+
+<!--
+		<condition property="suite1" value="${testsuite}" else="${defaultsuite.once}">
+			<and>
+	  		<isset property="testsuite"/>
+	  		<not>
+					<equals arg1="${testsuite}" arg2=""/>
+	  		</not>
+	  		<not>
+					<equals arg1="${testsuite}" arg2="${suite}"/>
+	  		</not>
+	  	</and>
+		</condition>
+-->
+
+<!-- testsuite nu ook altijd meegeven -->
+		<ant dir="checkout" antfile="build-suite.xml" target="testsuite">
+<!--
+			<property name="suite" value="${suite1}"/>
+-->
+			<property name="suite" value="${testsuite}"/>
+		</ant>
+
+	</target>
+
+	<target name="combine">
+		<echo message="combining client and server logs"/>
+
+		<!-- kijk of once.txt bestaat (wordt in build-combine.bat aangemaakt, en verwijder dit
+		     bestand vervolgens zodat build echt maar een keer wordt uitgevoerd -->
+		<waitfor maxwait="100000" maxwaitunit="hour" checkevery="1" checkeveryunit="hour">
+			<available file="once.txt"/>
+		</waitfor>
+
+		<delete file="once.txt"/>
+
+		<ant dir="checkout" antfile="build-suite.xml" target="combinelogs">
+			<property name="suite" value="${testsuite}"/>
+		</ant>
+
+	</target>
+
+	<target name="clean" description="delete temporary (generated) files">
+		<delete includeEmptyDirs="true">
+			<fileset dir=".">
+				<include name="_cruise_once.bat"/>
+				<include name="config.xml"/>
+				<include name="cruisecontrol.log"/>
+<!--
+	.ser wordt (waarsch) gebruikt om build.nr bij te houden...
+				<include name="perftest-webdiensten.ser"/>
+-->
+				<include name="testsuites-temp.xml"/>
+				<include name="**/$pfebk/*"/>
+				<include name="**/$pfebk"/>
+			</fileset>
+		</delete>
+
+		<ant dir="checkout" antfile="build-suite.xml" target="clean"/>
+
+		<!-- ook specifieke project-dir doen -->
+		<delete includeEmptyDirs="true">
+			<fileset dir="${project.dir}">
+				<include name="_cruise_once.bat"/>
+				<include name="config.xml"/>
+				<include name="cruisecontrol.log"/>
+				<include name="testsuites-temp.xml"/>
+				<include name="**/$pfebk/*"/>
+				<include name="**/$pfebk"/>
+			</fileset>
+		</delete>
+
+	</target>
+
+	<target name="dist" description="distribute sources in zip for installation elsewhere">
+		<mkdir dir="${basedir}/dist"/>
+
+		<delete file="${basedir}/dist/sourcedep.zip"/>
+		
+	  <zip destfile="${basedir}/dist/sourcedep.zip">
+	    <zipfileset dir="." >
+				<exclude name="dist/**"/>
+				<exclude name="**/_archive/**"/>
+				<exclude name="**/_archief/**"/>
+				<exclude name="**/$pfebk/**"/>
+				<exclude name="**/publish/**"/>
+				<exclude name="*.zip"/>
+	    </zipfileset>
+	  </zip>
+
+	</target>
+
+</project>
