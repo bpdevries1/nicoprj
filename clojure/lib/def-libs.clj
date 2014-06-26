@@ -107,8 +107,15 @@
   [& args]
   (let [argsmap (merge {:level :info} (apply hash-map args))]
     (logcfg/set-loggers! 
-      (str *ns*) {:name "console" :level (:level argsmap) :pattern "[%-5p] %m%n"}
+      (str *ns*) {:name "console" :level (:level argsmap) :pattern "[%d{HH:mm:ss,SSS}] [%-5p] %m%n"}
       (str *ns*) {:name "file" :level (:level argsmap) :pattern "[%d] [%-5p] %m%n" 
                   :out (logfile-name (first *command-line-args*))})))
 
+(defn file-lines
+  "Read lines from files; ignore empty lines and lines starting with #"
+  [path]
+  (-<> (slurp path)
+       (str/split <> #"\r?\n")
+       (filter #(not (re-find #"^#" %)) <>)   ; ignore lines starting with #
+       (filter #(not (re-find #"^$" %)) <>))) ; ignore empty lines
 
