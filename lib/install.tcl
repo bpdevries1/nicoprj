@@ -19,32 +19,25 @@ proc main {} {
   global package_name package_version
   
   set lib_root [file dirname [info library]]
-  
   set lib_install [file join $lib_root "$package_name-$package_version"]
-  
+  install_to_dir $lib_install
+
+  # 9-6-2014 also to dropbox
+  install_to_dir [file join [get_dropbox_dir] install tcl lib]  
+}
+
+proc install_to_dir {lib_install} {
   copy_dir $lib_install .
   copy_dir $lib_install db
   copy_dir $lib_install js *
-  
-  if {0} {
-    file mkdir $lib_install
-    foreach filename [glob *.tcl] {
-      puts "copy $filename => $lib_install"
-      file copy -force $filename $lib_install
-    }
-    
-    # todo recursive maken, db subdir nu even handmatig.
-    file mkdir [file join $lib_install db]
-    foreach filename [glob db/*.tcl] {
-      puts "copy $filename => $lib_install/db"
-      file copy -force $filename [file join $lib_install db]
-    }
-    
-    file mkdir [file join $lib_install js]
-    foreach filename [glob js/*.tcl] {
-      puts "copy $filename => $lib_install/js"
-      file copy -force $filename [file join $lib_install js]
-    }
+}
+
+proc get_dropbox_dir {} {
+  global tcl_platform
+  if {$tcl_platform(platform) == "unix"} {
+    file normalize [file join ~ Dropbox]  
+  } else {
+    return "c:/nico/Dropbox" 
   }
 }
 
