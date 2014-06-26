@@ -46,9 +46,14 @@
                  (>! finish-chan :done))))
     in))
 
+; @todo check if ts_cet is really a cet time, maybe ts/standard-time-zone is needed
 (defn big-files
   "Determine big files in directory recursively. Treshold in bytes"
   [root-dir treshold]
+  ; @todo hh:mm:ss results in 12hour clock, need to do HH for 24 hour clock.
+  ; cannot do now, as old and new contents may conflict, files will not be determined as the same.
+  ; also check if ts_cet is really CET time.
+  ; and maybe add a field ts_utc. (compare keynote).
   (let [cal-format (java.text.SimpleDateFormat. "yyyy-MM-dd hh:mm:ss")
         computer (computername)]
     (->> (find-files-nolink root-dir #".*")

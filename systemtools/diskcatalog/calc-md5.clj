@@ -4,6 +4,8 @@
 
 (load-file "../../clojure/lib/def-libs.clj")
 
+(set-log4j! :level :info)
+
 (deps '[[digest "1.4.4"]])
 (require 'digest)
 
@@ -18,7 +20,6 @@
       (digest/md5 (fs/file linux-path))
       (catch java.io.IOException e (.getMessage e)))))
 
-; @todo log in ander format, maar niet triviaal.
 (defn calc-md5!
   "Calculate MD5 sum for files where md5 field is null"
   [db-spec]

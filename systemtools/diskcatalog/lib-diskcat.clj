@@ -5,7 +5,8 @@
 (defn to-linux-path 
   "Convert laptop/windows path like c:\\bieb to /media/laptop/bieb"
   [path]
-  (if-let [[_ part] (re-find #"^c:\\(.+)$" path)] 
+  (if-let [[_ part] (re-find #"^c:.(.*)$" path)] 
     (str "/media/laptop/" (clojure.string/replace part "\\" "/"))
     path))
+
 

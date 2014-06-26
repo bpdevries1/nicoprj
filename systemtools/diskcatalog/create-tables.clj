@@ -21,8 +21,7 @@
 (defn create-tables
   "Create tables if not exist yet"
   [db-spec opts]
-  (create-table db-spec :file
-    [:id "integer primary key"]
+  (let [file-db-spec [[:id "integer primary key"]
     [:fullpath "varchar"]
     [:folder "varchar"]
     [:filename "varchar"]
@@ -33,10 +32,15 @@
     [:importance "varchar"]
     [:computer "varchar"]
     [:srcbak "varchar"]
-    [:action "varchar"])
+    [:action "varchar"]]]
+    (apply create-table db-spec :file file-db-spec)
+    (apply create-table db-spec :file_deleted file-db-spec))
   (jdbc/db-do-commands db-spec
     "create index if not exists ix_file_1 on file (filesize)"
-    "create index if not exists ix_file_2 on file (filename)")
+    "create index if not exists ix_file_2 on file (filename)"
+    "create index if not exists ix_file_deleted_1 on file_deleted (filesize)"
+    "create index if not exists ix_file_deleted_2 on file_deleted (filename)")
+  
   (create-table db-spec :stats 
     [:id "integer primary key"]
     [:ts_cet "TEXT DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now', 'localtime'))"]
@@ -48,12 +52,23 @@
     [:naction "integer"]
     [:notes "varchar"])
   (create-table db-spec :action
-    [:id "integer primary key"]
+    [:id "integer primary key"] ; 9-6-2014 blijkbaar hierdoor ook een auto-gen veld.
     [:ts_cet "TEXT DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now', 'localtime'))"]
     [:action "varchar"]
-    [:fullpath_orig "varchar"]
+    [:fullpath_action "varchar"]
     [:fullpath_other "varchar"]
-    [:notes "varchar"]))
+    [:notes "varchar"])
+  (create-table db-spec :srcbak
+    [:id "integer primary key"]
+    [:ts_cet "TEXT DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now', 'localtime'))"]
+    [:fullpath_src "varchar"]
+    [:fullpath_bak "varchar"]
+    [:ts_cet_src "varchar"]
+    [:ts_cet_bak "varchar"]
+    [:filesize_src "integer"]
+    [:filesize_bak "integer"]
+    [:md5_src "varchar"]
+    [:md5_bak "varchar"]))
 
 (defn main [args]
   (when-let [opts (my-cli args #{:database}
