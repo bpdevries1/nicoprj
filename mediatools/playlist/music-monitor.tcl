@@ -74,10 +74,17 @@ proc mark_played {path} {
     set lst_ids [det_ids $db $conn $path]
   }
   if {$lst_ids == {}} {
-    $log warn "Not found in DB: $path" 
+    $log warn "Not found in DB: $path"
+    add_to_logfile $path
   } else {
     ::ndv::music_random_update $db [list [list [lindex $lst_ids 0] "" 0]] "played" "-tablemain generic -tableplayed played"
   }          
+}
+
+proc add_to_logfile {path} {
+  set f [open "/home/nico/log/music-played.log" a]
+  puts $f "Played: [clock format [clock seconds] -format "\[%Y-%m-%d %H:%M:%S\]"] $path"
+  close $f
 }
 
 # evt onderstaande gebruiken, 2x na elkaar, kijk of position anders is.
@@ -85,7 +92,6 @@ proc mark_played {path} {
 # GetStatus
 # qdbus --literal org.kde.amarok /Player GetStatus
 # [Argument: (iiii) 1, 0, 0, 0] -> paused, allemaal 0 is playing.
-
 proc det_playing {} {
   try_eval {  
     set res [exec qdbus --literal org.kde.amarok /Player GetStatus]

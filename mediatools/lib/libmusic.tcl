@@ -32,7 +32,8 @@ proc det_path_in_db {fs_path} {
   } elseif {[regexp {^(media.*)$} $fs_path z path]} {
     set result $path   
   } else {
-    error "Could not determine relative path from: $fs_path"
+    # error "Could not determine relative path from: $fs_path"
+    set result "<not found>"
   }
   return $result
 }
