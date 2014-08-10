@@ -37,5 +37,7 @@
     (let [db-spec (db-spec-path db-spec-sqlite (:database opts))]
        (calc-md5! db-spec))))
 
-(main *command-line-args*)
+(when (is-cmdline?)
+  (main *command-line-args*))
+
 

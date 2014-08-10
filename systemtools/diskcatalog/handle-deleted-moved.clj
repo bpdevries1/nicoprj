@@ -13,26 +13,6 @@
   (let [my-format (tf/formatter "yyyy-MM-dd--HH-mm-ss" (t/default-time-zone))]
     (fs/file (fs/expand-home projectdir) (str "moved-deleted-files-handled-" (tf/unparse my-format (t/now)) ".txt"))))
 
-(defn delete-db-really! 
-  "Delete files in path from DB and move to file_deleted"
-  [db-con path]
-  (jdbc/execute! db-con ["insert into file_deleted select * from file where fullpath like ?" (str path "%")])
-  (jdbc/delete! db-con :file ["fullpath like ?" (str path "%")]))
-
-(defn delete-path-db-really!
-  "Delete file/dir-with-contents both from filesystem and DB"
-  [db-con path]
-  (when (not (nil? path))
-    (let [path-fs (to-linux-path path)]
-      (log/info "Really delete path: " path-fs)
-      (when (fs/exists? path-fs)
-        (if (fs/directory? path-fs)
-          (fs/delete-dir path-fs)
-          (fs/delete path-fs)))
-      (delete-db-really! db-con path))))
-
-; @todo test this fn!
-; @todo also move backup files where applicable.
 (defn move-db-really!
   "Move file in DB too, since it has moved in file-system.
    path-to ends with a /"
@@ -47,13 +27,11 @@
     (jdbc/execute! db-con 
       ["update file
         set fullpath = ? || substr(fullpath, ?),
-            folder = ? || substr(folder, ?),
-            action = 'just-renamed'
+            folder = ? || substr(folder, ?)
         where fullpath like ?"
         path-to-no-slash offset path-to-no-slash offset (str path-from "%")])))
 
 ; @note using fs/file both path-to with or without trailing / will work.
-; @todo maybe return a str instead of File object.
 (defn det-moved-to-path
   "Determine new file/dir location after move action"
   [path-from path-to]
@@ -67,7 +45,6 @@
   (when (re-find #"^/media/nas/install/" (str src-path))
     (let [backup-root "/media/nico/Iomega HDD/backups/nas"
           skip-src ""]
-      ; don't use file (join), unless first / from src-path is removed.
       (str backup-root (subs (str src-path) (count skip-src)))))) 
 
 (defn move-backup-path-db-really! 

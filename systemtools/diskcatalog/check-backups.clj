@@ -1,38 +1,12 @@
 #!/bin/bash lein-exec
 
+;{[(
 ; check-backups.clj - check if every file has a backup and there are no orphan backups (without source)
 
 (load-file "../../clojure/lib/def-libs.clj") 
 (load-file "lib-diskcat.clj")
 
 (set-log4j! :level :debug)
-
-(defn file-lines
-  "Read lines from files; ignore empty lines and lines starting with #"
-  [path]
-  (-<> (slurp path)
-       (str/split <> #"\r?\n")
-       (filter #(not (re-find #"^#" %)) <>)   ; ignore lines starting with #
-       (filter #(not (re-find #"^$" %)) <>)))
-
-; a path in paths is one of the following:
-; <just-path>
-; <path> <tab> <level>
-; remove the <tab> and <level> here.
-(defn read-paths
-  "Read paths from paths-file"
-  [paths-file]
-  (->> paths-file
-       file-lines
-       (map #(first (str/split % #"\t")))
-       (map to-linux-path)
-       vec))
-  
-(defn read-ignores
-  "Read ignore regexps from ignore-file"
-  [ignore-file]
-  ; (vec (map re-pattern (file-lines ignore-file)))
-  (->> ignore-file file-lines (map re-pattern) vec))
 
 (defn det-backup-path
   "Return path of backup file based on source-path and backup-root"
@@ -45,58 +19,50 @@
   "Return true if file should be ignored based on list of regexp's in ignores"
   [path ignores]
   (some #(re-find % path) ignores))
-  
-(defn check-make-backup-path-old
-  "Check backups for one path"
-  [db-con path ignores target-path]
-  (log/debug "Check-make-backup-path: " path)
-  (log-exprs path ignores target-path)
-  (let [sql (str "select * from file fs
-                  where fullpath like '" path "%'
-                  and not exists (
-                    select 1
-                    from file ft
-                    where ft.fullpath = '" target-path "' || fs.fullpath
-                  )")]
-    (doseq [{:keys [fullpath]} (jdbc/query db-con sql)]
-      (when (not (ignore-file? fullpath ignores))
-        (let [path2 (det-backup-path fullpath target-path)
-              notes (if (fs/exists? path2)
-                      (str "No backup found in DB for: " fullpath " => " path2) 
-                      (str "No backup found in DB and file system for: " fullpath " => " path2))
-              action (if (fs/exists? path2) "run-bigfiles2db" "backup-file")]
-          (log/warn notes)
-          (jdbc/insert! db-con :action {:action action :notes notes 
-            :fullpath_action fullpath :fullpath_other path2}))))))
 
+; @todo target-path should become (path-remove-slash target-path), but then check adding of subst etc.
+; @todo incremental version of this one, only add new files?
 (defn fill-srcbak
   "Fill srcbak table for one path"
   [db-con path ignores target-path skip-src]
   (log/debug "fill-srcbak: " path)
   (log-exprs path ignores target-path skip-src)
   (jdbc/execute! db-con 
-    ["insert into srcbak (fullpath_src, fullpath_bak, ts_cet_src, ts_cet_bak, 
+    ["insert into srcbak (id_src, id_bak, fullpath_src, fullpath_bak, ts_cet_src, ts_cet_bak, 
                           filesize_src, filesize_bak, md5_src, md5_bak)
-      select fs.fullpath, ft.fullpath, fs.ts_cet, ft.ts_cet, fs.filesize, ft.filesize, fs.md5, ft.md5
+      select fs.id, ft.id, fs.fullpath, ft.fullpath, fs.ts_cet, ft.ts_cet, 
+             fs.filesize, ft.filesize, fs.md5, ft.md5
       from file fs, file ft
-      where fs.fullpath like ? || '%'
+      where fs.fullpath like ?
       and ft.fullpath = ? || substr(fs.fullpath, ? + 1)" 
-     path target-path (count skip-src)]))
-
-(defn fill-srcbak-old
-  "Fill srcbak table for one path"
-  [db-con path ignores target-path]
-  (log/debug "fill-srcbak: " path)
-  (jdbc/execute! db-con 
-    ["insert into srcbak (fullpath_src, fullpath_bak, ts_cet_src, ts_cet_bak, 
-                          filesize_src, filesize_bak, md5_src, md5_bak)
-      select fs.fullpath, ft.fullpath, fs.ts_cet, ft.ts_cet, fs.filesize, ft.filesize, fs.md5, ft.md5
-      from file fs, file ft
-      where fs.fullpath like ? || '%'
-      and ft.fullpath like ? || '%'
-      and ft.fullpath = ? || fs.fullpath" path (det-backup-path path target-path) target-path]))
+     (path-add-perc path) target-path (count skip-src)]))
 
 (defn check-backup-src 
+  "Check backups from a source perspective: target does not exist."
+  [db-con path ignores target-path skip-src]
+  (let [sql "select id, fullpath, status from file_with_status
+             where fullpath like ?
+             and status is null
+             and not fullpath in (
+               select sb.fullpath_src
+               from srcbak sb
+               where sb.fullpath_src like ?
+             )"
+        path_like (path-add-perc path)]
+    (doseq [{:keys [id fullpath status]} (jdbc/query db-con [sql path_like path_like])]
+      (when (not (ignore-file? fullpath ignores))
+        ; ignore type A: only src, but in ignore-list, so ok.
+        ; here handle type D: only src, but do expect a backup.
+        (let [path2 (det-backup-path fullpath target-path skip-src)
+              [new-status notes action] 
+                (if (fs/exists? path2)
+                  ["no-backup-db" (str "No backup found in DB for: " fullpath " -> " path2 " => run-bigfiles2db") "run-bigfiles2db"]
+                  ["no-backup-db-fs" (str "No backup found in DB and file system for: " fullpath " -> " path2 " => backup-file") "backup-file"])]
+          (log/warn notes)
+          (update-file-status-log-info! db-con id fullpath status new-status notes 
+            "check-backups" "backup-path" path2))))))
+
+(defn check-backup-src-old
   "Check backups from a source perspective: target does not exist."
   [db-con path ignores target-path skip-src]
   (let [sql "select fullpath from file fs
@@ -106,7 +72,7 @@
                from srcbak sb
                where sb.fullpath_src like ?
              )"
-        path_like (str path "%")]
+        path_like (path-add-perc path)]
     (doseq [{:keys [fullpath]} (jdbc/query db-con [sql path_like path_like])]
       (when (not (ignore-file? fullpath ignores))
         ; ignore type A: only src, but in ignore-list, so ok.
@@ -119,52 +85,75 @@
           (log/warn notes)
           (jdbc/insert! db-con :action {:action action :notes notes 
             :fullpath_action fullpath :fullpath_other path2}))))))
-  
+ 
 (defn check-backup-both
   "Check backups from both perspectives: target does exist."
   [db-con path ignores target-path]
   (log/info "Check backup both for path: " path)
-  (let [sql "select * from srcbak
-             where fullpath_src like ?"
-        path_like (str path "%")]
-    (doseq [{:keys [fullpath_src fullpath_bak ts_cet_src ts_cet_bak filesize_src filesize_bak md5_src md5_bak]} 
+  (let [sql "select * from srcbak sb
+               left join filestatus fs on fs.file_id = sb.id_src
+             where sb.fullpath_src like ?
+             and fs.status is null"
+        path_like (path-add-perc path)]
+    (doseq [{:keys [id_src id_bak fullpath_src fullpath_bak ts_cet_src ts_cet_bak 
+                    filesize_src filesize_bak md5_src md5_bak]} 
                 (jdbc/query db-con [sql path_like])]
       ; (log/info "Check backup both: " fullpath_src)                
       (if (ignore-file? fullpath_src ignores)
         (let [notes (str "Unjust backup of " fullpath_src ", remove backup file")]
           (log/warn notes)
-          (jdbc/insert! db-con :action {:action "remove-backup" :notes notes 
-            ; of orig = bak, other = src => orig moet je hier deleten.
-            :fullpath_action fullpath_bak :fullpath_other fullpath_src}))
+          ; @todo? determine old-status (both from source and backup?)
+          (update-file-status-log-info! db-con id_src fullpath_src :unknown "has-unjust-backup" notes 
+            "check-backups" "backup-path" fullpath_bak)
+          (update-file-status-log-info! db-con id_bak fullpath_bak :unknown "unjust backup" notes 
+            "check-backups" "source-path" fullpath_src))
+          ;(jdbc/insert! db-con :action {:action "remove-backup" :notes notes 
+          ;  ; of orig = bak, other = src => orig moet je hier deleten.
+          ;  :fullpath_action fullpath_bak :fullpath_other fullpath_src}))
       ; else: ok, there's a backup, check ts, size and md5
         (if (and (= filesize_src filesize_bak) (= md5_src md5_bak))
           (if (= ts_cet_src ts_cet_bak)
             nil ; ok: backup is recent backup.
-            (jdbc/insert! db-con :action {:action "touch-backup" :notes "Backup is same as src, ts's differ"
-              :fullpath_action fullpath_src :fullpath_other fullpath_bak}))
+            (let [new-status "backup=src,ts-differ"
+                  notes "Backup is same as src, ts's differ"]
+              (update-file-status-log-info! db-con id_src fullpath_src :unknown new-status 
+                notes "check-backups" "backup-path" fullpath_bak)
+              (update-file-status-log-info! db-con id_bak fullpath_bak :unknown new-status 
+                notes "check-backups" "source-path" fullpath_src)))
+            ;(jdbc/insert! db-con :action {:action "touch-backup" :notes "Backup is same as src, ts's differ"
+            ;  :fullpath_action fullpath_src :fullpath_other fullpath_bak}))
           (let [[action notes] (cond 
             (or (= "" (str md5_src)) (= "" (str md5_bak))) ["do-md5" "MD5 is empty, do calculation"]
             :else ["backup-file" (str "Backup is old, do again. md5_bak=" md5_bak ".")])]
-            (jdbc/insert! db-con :action  {:action action :notes notes
-              :fullpath_action fullpath_src :fullpath_other fullpath_bak})))))))
+            (update-file-status-log-info! db-con id_src fullpath_src :unknown action 
+              notes "check-backups" "backup-path" fullpath_bak)
+            (update-file-status-log-info! db-con id_bak fullpath_bak :unknown action 
+              notes "check-backups" "source-path" fullpath_src)))))))
+            ;(jdbc/insert! db-con :action  {:action action :notes notes
+            ;  :fullpath_action fullpath_src :fullpath_other fullpath_bak})))))))
         
 (defn check-backup-target 
   "Check backups from backup perspectives: src does exist."
   [db-con target-path]
   (log/info "Check backup target for path: " target-path)
-  (let [sql "select fullpath from file fs
+  (let [sql "select id, fullpath, status from file_with_status fs
              where fullpath like ?
+             and status is null
              and not fullpath in (
                select sb.fullpath_bak
                from srcbak sb
                where sb.fullpath_bak like ?
              )"
-        path_like (str target-path "%")]
-    (doseq [{:keys [fullpath]} (jdbc/query db-con [sql path_like path_like])]
+        path_like (path-add-perc target-path)]
+    (doseq [{:keys [id fullpath status]} (jdbc/query db-con [sql path_like path_like])]
       (let [notes (str "No source file found for: " fullpath)]
         (log/info notes)
-        (jdbc/insert! db-con :action {:action "delete-file" :notes notes 
-          :fullpath_action fullpath})))))
+        (update-file-status-log-info! db-con id fullpath status "no-source" 
+              notes 
+              "check-backups" nil nil)))))
+        
+        ;(jdbc/insert! db-con :action {:action "delete-file" :notes notes 
+        ;  :fullpath_action fullpath})))))
 
 (defn check-backups
   "Check if backups have been done completely and there are no orphan backups (without source)"
@@ -175,9 +164,10 @@
       "delete from action"))
   (doseq [[backupname {:keys [paths-file ignore-file target-path skip-src]}] (seq backup-defs)]
     (log-exprs paths-file ignore-file target-path)
-    (let [paths (read-paths paths-file)
-          ignores (read-ignores ignore-file)]
-      (log-exprs paths ignores)
+    (let [cache-dir (fs/file (fs/expand-home (:projectdir opts)) ".backupdef-cache" backupname)
+          paths ((make-cacheable read-paths cache-dir) paths-file)
+          ignores ((make-cacheable read-ignores cache-dir) ignore-file)]
+      (log-exprs cache-dir paths ignores)
       (doseq [path paths] 
         (fill-srcbak db-con path ignores target-path skip-src)
         (check-backup-src db-con path ignores target-path skip-src)
@@ -199,5 +189,7 @@
          (org.sqlite.Function/create (:connection db-con) "regexp" (SqlRegExp.))
          (check-backups db-con backup-defs opts)))))
 
-(main *command-line-args*)
+(when (is-cmdline?)
+  (main *command-line-args*))
 
+;)]}

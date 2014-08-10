@@ -15,6 +15,7 @@
       (not-empty (fs/glob (fs/file root) "*")))
     (seq filesystems)))
 
+; @deprecated - use delete-db-really! or delete-path-db-really! 
 (defn delete-removed! 
   "Delete records from DB where corresponding files no longer exists in file system."
   [db-con opts]
