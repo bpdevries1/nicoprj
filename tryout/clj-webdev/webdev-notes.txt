@@ -54,6 +54,19 @@ The reason seems to be that LightTable expects this version of tools.reader, but
 
 lein deps tree
 
+JavaScript doet het niet met liberator-service
+==============================================
+* home nu wel te zien, /users te doen, en /add-user deels ook.
+* Maar het lijkt door de client JS niet aangeroepen te worden.
+* Opties:
+  - zelf debuggen, bv met console() regels.
+  - project source code bekijken op https://github.com/yogthos/
+* Wel uitgekomen:
+  - met name de <script> tag niet afgesloten met '>', hierdoor ook unbalanced.
+  - <ul> en <li> expliciet afsluiten met </ul>, dus niet <ul/> gebruiken.
+  - errorhandler krijgt een xhr param.
+  -> nog fout: melding blijft staan op lege post.
+  
 Database connecties
 ===================
 * Nu nog db als map gedefinieerd, dus nog niet de connectie.
