@@ -62,6 +62,11 @@
       (do (println (.getMessage e)) 
           (println specs))))) ; also returns nil
   
+(defn is-cmdline?
+  "Return true is script is called directly (not load-file) from command line"
+  []
+  (= (fs/base-name *file*) (fs/base-name (first *command-line-args*))))
+
 (defmacro pr-syms
   "Print a sequence of symbol names with their values"
   [& symbols]
@@ -98,7 +103,7 @@
 (defn logfile-name
   "Determine logfile based on script file name"
   [script-name]
-  (let [dt (tf/unparse (tf/formatter "yyyy-MM-dd--hh-mm-ss" (t/default-time-zone)) (t/now))]
+  (let [dt (tf/unparse (tf/formatter "yyyy-MM-dd--HH-mm-ss" (t/default-time-zone)) (t/now))]
     (str (fs/file (fs/parent script-name) (str (fs/name script-name) "-" dt ".log")))))
 
 ; @todo maybe some options to have a logfile, always same name or not.
@@ -108,7 +113,7 @@
   (let [argsmap (merge {:level :info} (apply hash-map args))]
     (logcfg/set-loggers! 
       (str *ns*) {:name "console" :level (:level argsmap) :pattern "[%d{HH:mm:ss,SSS}] [%-5p] %m%n"}
-      (str *ns*) {:name "file" :level (:level argsmap) :pattern "[%d] [%-5p] %m%n" 
+      (str *ns*) {:name "file" :level (:level argsmap) :pattern "[%d{YYYY-MM-dd HH:mm:ss,SSS}] [%-5p] %m%n"
                   :out (logfile-name (first *command-line-args*))})))
 
 (defn file-lines
