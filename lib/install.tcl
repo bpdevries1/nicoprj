@@ -18,12 +18,14 @@ set package_version 0.1.1
 proc main {} {
   global package_name package_version
   
+  # 9-6-2014 also to dropbox
+  # 22-8-2014 first to dropbox, otherwise output might be confusing.
+  install_to_dir [file join [get_dropbox_dir] install tcl lib]  
+
   set lib_root [file dirname [info library]]
   set lib_install [file join $lib_root "$package_name-$package_version"]
   install_to_dir $lib_install
 
-  # 9-6-2014 also to dropbox
-  install_to_dir [file join [get_dropbox_dir] install tcl lib]  
 }
 
 proc install_to_dir {lib_install} {

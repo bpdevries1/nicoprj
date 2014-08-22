@@ -76,7 +76,8 @@ namespace eval ::ndv {
 		private variable filename
 		private variable f_log
 	
-		private constructor {} {
+		# 22-8-2014 NdV public is needed for Tcl8.6.1/Itcl4.0b7.
+		public constructor {} {
 			set name ""
 			set log_level critical
 				set filename ""
