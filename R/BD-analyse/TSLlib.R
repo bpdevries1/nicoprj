@@ -34,11 +34,11 @@ det.connstring.LT = function(testnr, fase = "") {
   } else {
     testnr.fase = concat(testnr, "-", fase)    
   }
-  paste0("Driver=SQL Server;Server=AXZTSTW001;Database=LoadTest2010T", testnr.fase, ";Trusted_Connection=yes;")
+  concat("Driver=SQL Server;Server=AXZTSTW001;Database=LoadTest2010T", testnr.fase, ";Trusted_Connection=yes;")
 }
 
 det.outdir = function(testnr) {
-  paste0("G:\\Testware\\_Results\\Test ", testnr, "\\Analyse")  
+  concat("G:\\Testware\\_Results\\Test ", testnr, "\\Analyse")  
 }
 
 make.logger = function(filename) {
@@ -117,7 +117,7 @@ write.tsv = function(ftsv, part, name, value) {
   writeLines(paste(part, name, value, sep="\t"), ftsv)
 }
 
-qplot.dt = function(x, y, title = NULL, colour = NULL, shape = colour, ...) {
+qplot.dt.old = function(x, y, title = NULL, colour = NULL, shape = colour, ...) {
   qplot(x, y, ...) +
     labs(title = title) +
     scale_x_datetime(labels = date_format("%Y-%m-%d\n%H:%M"))
@@ -139,6 +139,8 @@ log.df = function(log, df, msg = NULL) {
   } else {
     log(msg)
   }
+  log("column names:")
+  log(names(df))
   log(summary(df))
   log("head:")
   log(head(df))
@@ -246,8 +248,11 @@ qplot.dt = function(x, y, data, colour=NULL, facets=NULL, filename, ...) {
   }
   height = det.height(colours = data[[colourname]], facets = data[[facetvars[1]]])
   filename = eval(mf$filename, parent.frame())
+  #print("before ggsave")
   ggsave(filename, plot=p, width=12, height=height, dpi=100)
-  p
+  #print("after ggsave")
+  # don't return p, to supress warnings.
+  # p 
 }  
 
 # TODO ook splitsen op camel-Case.

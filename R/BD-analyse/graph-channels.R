@@ -1,45 +1,8 @@
 setwd("G:\\Testware\\Scripts\\Analyse-R")
 source("TSLlib.R")
 load.def.libs()
+source("graph-channels-lib.R")
 
-define.channel.groups = function() {
-  channel.group.defs <<- NULL
-  add.channel.group("Huur-KOT-In",     "
-      and (ChannelName like '%Huur%' or ChannelName like '%KinderOpvang%')
-      and Channelname like '%ChannelIn%'")
-  add.channel.group("Huur-KOT-Zorg-BT-In",     "
-      and (ChannelName like '%Huur%' or ChannelName like '%KinderOpvang%' or ChannelName like '%Zorg%' or ChannelName like '%Betalen%')
-      and Channelname like '%ChannelIn%'")
-  add.channel.group("ChannelInZorg",     "
-      and Channelname = 'ChannelInZorg'")
-  add.channel.group("ChannelOutTsb",     "
-      and Channelname = 'ChannelOutTsb'")
-  add.channel.group("Zorg-BT-In",     "
-      and (ChannelName like '%Zorg%' or ChannelName like '%Betalen%')
-      and Channelname like '%ChannelIn%'")  
-  add.channel.group("Huur-KOT-Zorg-BT-Awir-In",     "
-      and (ChannelName like '%Huur%' or ChannelName like '%KinderOpvang%' or ChannelName like '%Zorg%' or ChannelName like '%Betalen%' or ChannelName like '%Awir%')
-      and Channelname like '%ChannelIn%'")
-  add.channel.group("Zorg-BT-Awir",     "
-      and ChannelName in ('ChannelInFormeelBeschikkenZorgQueue', 'ChannelInZorg', 'ChannelInBetalenToeslagen', 'ChannelInAwir', 'ChannelOutTsb')")
-
-  add.channel.group("SC-In",     "
-      and (ChannelName like '%ParkeerPlaatsDocOne%' or ChannelName like '%TodoLijstBeschikkingNietVerstuurd%')
-      and Channelname like '%ChannelIn%'")
-  
-#  -- Indexeren:
-#  -- and ChannelName in ('ChannelInAwir', 'ChannelInHuur', 'ChannelInZorg', 'ChannelInKinderopvang', 'ChannelInKindgebondenBudget', 'ChannelInFrsProcesVerwerkenMelding', 'ChannelInWerkvoorraadIndexeringItem', 'ChannelOutAwir')
-#  -- and ChannelName not in ('ChannelInFrsProcesVerwerkenMelding', 'ChannelInWerkvoorraadIndexeringItem')
-# -- HL en VD 1:
-#  -- and (ChannelName in ('ChannelInAwir', 'ChannelInHuur', 'ChannelInZorg', 'ChannelInKinderopvang', 'ChannelInKindgebondenBudget', 'ChannelInFrsProcesVerwerkenMelding', 'ChannelInWerkvoorraadIndexeringItem')
-#            --   or ChannelName like '%FormeelBeschikken%'
-#            --   or ChannelName like '%Herberekenen%'
-#           --   or ChannelName like '%VrijgaveDraagkracht%'
-#            --   or ChannelName like '%WFMStarterSet%'
-#            --   or ChannelName like '%Worklistitem%'
-#            -- )
-
-}
 
 main = function() {
   options(warn=-1)
@@ -47,23 +10,81 @@ main = function() {
   testnr = commandArgs()[6]
   runid = commandArgs()[7]
   channel.group = commandArgs()[8]
-  write(concat("testnr: ", testnr, ", runid:", runid, ", channels: ", channel.group), "")
-  #print(testnr)
-  #print(runid)
-  #print(channel.group)
+  # write(concat("testnr: ", testnr, ", runid:", runid, ", channels: ", channel.group), "")
   connstring = det.connstring.PT(testnr)
   outdir = det.outdir(testnr)
-  #print(connstring)
-  #print(outdir)
   con = odbcDriverConnect(connection=connstring)
   graph.dc(con, outdir, channel.group, runid, "2014-01-01 00:00", "2016-01-01 00:00")
-  # graph.dc(con, outdir, channel.group, runid, "2014-10-11 19:00", "2014-10-16 09:00")
   # graph.queuecount(con, outdir=outdir, testnr, "2014-01-01 00:00", "2016-01-01 00:00")
   # graph.dc1(con, outdir=outdir, "ChannelInHuur", runid)
   odbcClose(con)
   #w = warnings()
   #last.warning = NULL
 }
+
+test = function() {
+  testnr = "452"
+  runid = "1"
+  chgroup = "diff1000"
+  part = chgroup
+  connstring = det.connstring.PT(testnr)
+  outdir = det.outdir(testnr)
+  con = odbcDriverConnect(connection=connstring)
+  start = "2014-09-16 00:00"
+  end = "2016-09-16 23:00"
+  npoints = 60
+  width = 12
+  # graph.dc(con, outdir, channel.group, runid, "2014-01-01 00:00", "2016-01-01 00:00")
+  # odbcClose(con)
+  df2 = sqldf("select * from df where ChannelName = 'ChannelInvalidMessageKlantbeeld'")
+  df3 = df.add.dt(sqldf(concat("select min(ts) ts from df2 where nelts != ", df2$nelts[1])))
+  df4 = df.add.dt(sqldf(concat("select max(ts) ts from df2 where nelts != ", df2$nelts[length(df2$nelts)])))
+  ts.diff = as.double(df4$ts_psx - df3$ts_psx, units="secs")  
+  nps = abs(df2$nelts[1] - df2$nelts[length(df2$nelts)]) / ts.diff
+  # df4$ts_psx - df3$ts_psx
+
+  # pre: df is gevuld: alle counts voor alle channels.
+  
+  # deze zowel voor DB tabel als CSV
+  df.aggr = calc.aggr.count(df)
+  df.aggr$min_ts_psx = as.POSIXct(strptime(df.aggr$min_ts, format="%Y-%m-%d %H:%M:%S"))
+  df.aggr$min_ts_psx2 = as.POSIXct(df.aggr$min_ts)
+  str(df$min_ts)
+  str(df3)
+  df.table = det.df.tablename(runid, chgroup, "count")
+
+  # sqlSave(con, df.aggr, df.table, rownames=FALSE, test=TRUE)
+  sqlQuery(con, concat("drop table ", df.table))
+
+  # varTypes = c(timestamp="datetime")
+  varTypes = c(min_ts="datetime", max_ts="datetime", active_min_ts="datetime", active_max_ts="datetime")
+  
+  
+  sqlSave(con, df.aggr, df.table, rownames=FALSE, varTypes=varTypes)
+  
+  write.csv(df.aggr, file = concat(outdir, "\\", df.table, ".csv"), row.names = FALSE)
+  
+  # library(xlsx)
+  
+  xlsFile <- odbcConnectExcel2007(concat(outdir, "\\", "Test.xlsx"), readOnly = FALSE)
+  sqlSave(xlsFile,newdat, append=FALSE)
+  odbcCloseAll()
+  
+  # typeInfo, varTypes, sqlSave, RODBC, R
+  
+  # post: df.aggr is gevuld met per channel:
+  # - min, max, avg, first, last.
+  # - min_ts, max_ts
+  # - active_min_ts, active_max_ts
+  # - active_nps
+ 
+  df2.aggr = calc.aggr.count(df2)
+}
+
+
+
+
+
 
 # voor testen/debuggen:
 if (FALSE) {
@@ -75,16 +96,19 @@ if (FALSE) {
   npoints = 60
   width = 12
   runid = "1"
+  odbcClose(con)
+  
+  
 }
 
 graph.dc = function(con, outdir=".", part, runid, start, end, npoints = 60, width = 12) {
-  dir.create(outdir, recursive=TRUE)
+  dir.create(outdir, recursive=TRUE, showWarnings=FALSE)
   log = make.logger(paste0(outdir, "/analyse-log.txt"))
   log("Start of analysis")
   # @todo named query parameters.
   diff = regmatches(part, regexec("^diff(\\d+)$", part))[[1]][2]
   if (is.na(diff)) {
-    query = channel.query.part(part, runid, start, end)
+    query = channel.query.chgroup(part, runid, start, end)
   } else {
     query = channel.query.diff(diff, runid, start, end)
   }
@@ -116,94 +140,6 @@ graph.dc = function(con, outdir=".", part, runid, start, end, npoints = 60, widt
   
 }
 
-channel.query.part = function(part, runid, start, end) {
-  concat("SELECT 
-    [DatabaseName]
-    ,[ChannelName]
-    ,[CollectTimeStamp] ts
-    ,[NumberOfMessagesReadSinceLastTime] nread
-    ,[NumberOfMessagesAddedSinceLastTime] nadded
-    ,[NumberOfElements] nelts
-    FROM [dbo].[ToeslagenDataCollector]
-    where 1=1 ", det.channel.group(part), "
-    and [CollectTimeStamp] between '", start, "' and '", end, "'
-    and RunId = ", runid, "
-    -- and [NumberOfElements] > 0
-    -- soms grote outliers
-    -- and [NumberOfMessagesReadSinceLastTime] < 1000
-    order by collecttimestamp")
-}
-
-channel.query.diff = function(ndiff, runid, start, end) {
-  concat("WITH dbch (runid, servername, databasename, channelname, mincount, maxcount) as (
-      select runid, servername, databasename, channelname, min(numberofelements), max(numberofelements)
-      from dbo.ToeslagenDataCollector
-      where CollectTimeStamp between '", start, "' and '", end, "'
-      and runid = ", runid, "
-      group by runid, servername, databasename, channelname
-    ),
-    dbchsel (runid, servername, databasename, channelname, mincount, maxcount) as (
-      select * from dbch
-      where abs(mincount-maxcount) > ", ndiff, " 
-    )
-    SELECT tdc.DatabaseName, tdc.ChannelName, tdc.CollectTimeStamp ts, tdc.NumberOfMessagesReadSinceLastTime nread
-          ,tdc.NumberOfMessagesAddedSinceLastTime nadded, tdc.NumberOfElements nelts
-    FROM dbo.ToeslagenDataCollector tdc
-      join dbchsel s on tdc.databasename = s.databasename and tdc.channelname = s.channelname
-    where 1=1 
-    and tdc.CollectTimeStamp between '", start, "' and '", end, "'
-    and tdc.RunId = ", runid, "
-    -- and tdc.NumberOfElements > 0
-    -- soms grote outliers
-    -- and [NumberOfMessagesReadSinceLastTime] < 1000
-    order by tdc.collecttimestamp")
-}
-
-det.graphname = function(outdir, runid, part, title) {
-  concat(outdir, "\\", runid, "-", part, "-", title, ".png")
-}
-
-graph.dc.counts = function(dfaggr, outdir, runid, part, width, log) {
-  qplot.dt(ts_cut,nelts,data=dfaggr,colour=ChannelName, ylab="#messages", 
-           filename=det.graphname(outdir, runid, part, "channels-nmessages"))
-  qplot.dt(ts_cut,nelts,data=dfaggr,colour=ChannelName, ylab="#messages", facets = DatabaseName~.,
-           filename=det.graphname(outdir, runid, part, "channels-nmessages-facet-db"))
-  qplot.dt(ts_cut,nelts,data=dfaggr,colour=ChannelName, ylab="#messages", facets = ChannelName~.,
-           filename=det.graphname(outdir, runid, part, "channels-nmessages-facet-channel"))
-}
-
-graph.dc.speed = function(dfaggr, outdir, runid, part, width, log) {
-  # g = guide_legend("Channel", ncol = 4)
-  g = guide_legend("Channel", ncol = 2)
-  
-  # @todo copy/paste code opschonen.
-  
-  # dfaggr_nread = sqldf("select * from dfaggr where nread is not null")
-  # dfaggr_nread = subset(dfaggr, !is.na(nread))
-  dfaggr_nread = na.omit(dfaggr)
-  log.df(log, dfaggr_nread, "dfaggr with nread is not null")
-
-  qplot.dt(ts_cut,nread,data=dfaggr_nread,colour=ChannelName, ylab="read/sec",
-           filename=det.graphname(outdir, runid, part, "channels-read"))
-    
-  log("before qplot nread facet")
-  qplot.dt(ts_cut,nread,data=dfaggr_nread,colour=ChannelName, ylab="read/sec", facets=DatabaseName ~ .,
-           filename=det.graphname(outdir, runid, part, "channels-read-facet-db"))
-
-  qplot.dt(ts_cut,nread,data=dfaggr_nread,colour=ChannelName, ylab="read/sec", facets=ChannelName ~ .,
-           filename=det.graphname(outdir, runid, part, "channels-read-facet-channel"))
-
-  # graph met facet per channel (dus niet te veel) en zowel nadded als nread plot
-  df.ar = sqldf("select ts_cut, ChannelName, nread nps, 'nread' direction
-                 from dfaggr_nread
-                 union
-                 select ts_cut, ChannelName, nadded nps, 'nadded' direction
-                 from dfaggr_nread")
-
-  qplot.dt(ts_cut,nps,data=df.ar,colour=direction, ylab="#msg/sec", facets=ChannelName~.,
-           filename=det.graphname(outdir, runid, part, "channels-read-added-facet-channel"))
-  
-}
 
 # kleine grafiek maken, om in (HTML) report op te nemen.
 graph.dc1 = function(con, outdir=outdir, channel, runid, npoints = 30, width = 5) {
@@ -246,14 +182,6 @@ graph.dc1 = function(con, outdir=outdir, channel, runid, npoints = 30, width = 5
   ggsave(paste0(outdir, "\\", runid, "-", channel, "-channels-read.png"), width=3, height=1, dpi=100)
   
   
-}
-
-add.channel.group = function(group, sql.part) {
-  channel.group.defs[[group]] <<- sql.part
-}
-
-det.channel.group = function(group) {
-  channel.group.defs[[group]]
 }
 
 graph.queuecount = function(con, outdir=".", testnr, start, end, npoints = 60, width = 12) {

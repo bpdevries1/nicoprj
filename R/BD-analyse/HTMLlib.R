@@ -20,6 +20,9 @@ html.header = function(fo, title, heading1=TRUE) {
   background:#eeeee0;
   white-space: nowrap;
   }
+  table.details td.count {
+  text-align: right;
+  }
   h1 {
   margin: 0px 0px 5px; font: 165% verdana,arial,helvetica
   }
@@ -59,29 +62,48 @@ html.footer = function(fo) {
   flush(fo)
 }
 
+html.hr = function(fo) {
+  writeLines("<hr align=\"left\" width=\"100%\" size=\"1\">", fo)
+}
+
+html.get.heading = function(level, text) {
+  concat("<h", level, ">", text, "</h", level, ">")
+}
+
+html.heading = function(fo, level, text) {
+  writeLines(html.get.heading(level, text), fo)
+}
+
+html.get.img = function(img_ref, extra="") {
+  concat("<img src=\"", img_ref, "\"", extra, "/>")
+}
+
+html.img = function(fo, img_ref, ...) {
+  writeLines(html.get.img(img_ref, ...), fo)
+}
+
+####################
+# table functions  #
+####################
 html.td = function(str) {
-  concat("<td>",str,"</td>")
+  # experiment: gebruik ' voor 1000-sep.
+  if (grepl("^-?[0-9.,']+$", str)) {
+    concat("<td class='count'>",str,"</td>")  
+  } else {
+    concat("<td>",str,"</td>")
+  }
+}
+
+html.th = function(str) {
+  concat("<th>",str,"</th>")
 }
 
 html.table.row = function(...) {
-  print("html.table.row: start")
-  c1 = as.vector(c(...))
-  print(c1)
-  print(str(c1))
-  print(length(c1))
-  print("html.table.row: end")
-  concat("<tr>", concat.list(sapply(c(...), html.td, USE.NAMES=FALSE)), 
+  concat("<tr>", concat(sapply(list(...), html.td, USE.NAMES=FALSE), collapse="\n"), 
          "</tr>")
 }
 
-html.table = function(df) {
-  df2 = ddply(df, .(y), function(dfp) {
-    c(tr = html.table.row(dfp$y, dfp$fac))
-  })
-  concat("<table>", concat.list(df2$tr), "</table>")
+html.table.header.row = function(...) {
+  concat("<tr>", concat(sapply(list(...), html.th, USE.NAMES=FALSE), collapse="\n"), 
+         "</tr>")
 }
-
-concat.list = function(l) {
-  Reduce(function(res, str) {concat(res, str)}, l)
-}
-
