@@ -117,15 +117,6 @@ write.tsv = function(ftsv, part, name, value) {
   writeLines(paste(part, name, value, sep="\t"), ftsv)
 }
 
-qplot.dt.old = function(x, y, title = NULL, colour = NULL, shape = colour, ...) {
-  qplot(x, y, ...) +
-    labs(title = title) +
-    scale_x_datetime(labels = date_format("%Y-%m-%d\n%H:%M"))
-}
-
-
-
-
 query.with.log = function(con, query, log) {
   log(query)  
   df = sqlQuery(con, query)
@@ -217,8 +208,11 @@ det.height.log = function(height.min=5, height.max=20, height.base=3.4, height.p
 }
 
 qplot.dt = function(x, y, data, colour=NULL, facets=NULL, filename, ...) {
+  print("qplot.dt: start")
+  a=1
   mf <- match.call()
   mf[[1]] <- as.name("qplot")
+  print(x=(a=a+1))
   if (missing(colour)) {
     colour = NULL
     has.colour = FALSE
@@ -227,12 +221,15 @@ qplot.dt = function(x, y, data, colour=NULL, facets=NULL, filename, ...) {
     has.colour = TRUE
     mf$shape = mf$colour
   }
+  print(x=(a=a+1))
   p <- eval(mf, parent.frame())
+  print(x=(a=a+1))
   p = p +
     scale_x_datetime(labels = date_format("%Y-%m-%d\n%H:%M")) +
     # always a time axis in this function, so don't show the axis name:
     xlab(NULL) + 
     scale_y_continuous(labels = comma)
+  print(x=(a=a+1))
   if (has.colour) {    
     g = guide_legend(colourname, ncol = 2)
     p = p + scale_colour_discrete(name=colourname) +
@@ -241,19 +238,54 @@ qplot.dt = function(x, y, data, colour=NULL, facets=NULL, filename, ...) {
       theme(legend.position="bottom") +
       theme(legend.direction="horizontal")
   }
+  print(x=(a=a+1))
   facetvars <- all.vars(facets)
   facetvars <- facetvars[facetvars != "."]
   if (!is.na(facetvars[1])) {
     p = p + facet_grid(facets, scales='free_y', labeller=label_wrap_gen3(width=25))
   }
+  print(x=(a=a+1))
   height = det.height(colours = data[[colourname]], facets = data[[facetvars[1]]])
+  print(x=(a=a+1))
   filename = eval(mf$filename, parent.frame())
-  #print("before ggsave")
+  print(x=(a=a+1))
+  print("before ggsave")
+  print(filename)
+  print(height)
   ggsave(filename, plot=p, width=12, height=height, dpi=100)
-  #print("after ggsave")
+  print("after ggsave")
   # don't return p, to supress warnings.
   # p 
 }  
+
+if (FALSE) {
+  qplot.dt.ff(ts_cut,nelts,data=dfaggr,colour=ChannelName, ylab="#messages", file.facets = "DatabaseName",
+              filename.prefix=det.graphname.ff(outdir, runid, part, "channels-nmessages-ff-db"))
+  data = dfaggr
+  file.facets = "DatabaseName"
+  filename.prefix=det.graphname.ff(outdir, runid, part, "channels-nmessages-ff-db-")
+  
+  lfn = daply(data, file.facets, function(dft) {
+    # @todo replace DatabaseName
+    filename = paste0(filename.prefix, dft$DatabaseName[1], ".png")
+    qplot.dt(ts_cut, nelts, data=dft, colour=ChannelName, ylab="#messages", filename=filename)
+    filename
+  })
+  
+}
+
+qplot.dt.ff = function(x, y, data, colour=NULL, facets=NULL, file.facets, filename.prefix, ...) {
+  mf <- match.call()
+  mf[[1]] <- as.name("qplot.dt")
+  ddply(data, file.facets, function(dft) {
+    mf$data = dft
+    mf$filename = paste0(filename.prefix, dft[1,file.facets], ".png")
+    mf$filename.prefix = NULL
+    mf$file.facets = NULL
+    eval(mf, parent.frame())
+    data.frame(filename=mf$filename)
+  })
+}
 
 # TODO ook splitsen op camel-Case.
 label_wrap_gen3 <- function(width = 100) {

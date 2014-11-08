@@ -33,6 +33,10 @@ test = function() {
   connstring = det.connstring.PT(testnr)
   outdir = det.outdir(testnr)
   con = odbcDriverConnect(connection=connstring)
+  start="2010-01-01"
+  end="2099-12-31"
+  part = chgroup
+  width = 12
   make.report(con, outdir, testnr, runid, chgroup)
   odbcClose(con)
 }
@@ -71,30 +75,62 @@ write.graph.html = function(fo, con, outdir, runid, chgroup, log, start, end) {
   print("before calc.df.aggregate")
   dfaggr = calc.df.aggregate(df, log=log)
   print("before graph.dc.counts")
+  # zowel counts in een enkele graph (graph.dc.counts) als ook een graph per database (graph.dc.counts.ff)
   graph.dc.counts(dfaggr, outdir, runid, chgroup, 12, log)
-  
+  dfdb = graph.dc.counts.ff(dfaggr, outdir, runid, chgroup, 12, log)
+  log("after graph.dc.counts.ff, now logging dfdb:")  
+  log.df(log, dfdb, "file.facets:")
+  # print(summary(dfdb))
   # several graphs created. For now only include facet-db variant.
-  html.heading(fo, 2, "Channel message counts")
-  html.img(fo, det.graphname.rel(runid, chgroup, "channels-nmessages-facet-db"))
-  
+  html.heading(fo, 2, "Channel message counts (graph per DB)")
+  # html.img(fo, det.graphname.rel(runid, chgroup, "channels-nmessages-facet-db"))
   print("before calc.summary.count")
   dfs = calc.summary.count(df)
-  print("before write.html.table.count")
-  write.html.table.count(fo, dfs)
+  d_ply(dfdb, .(DatabaseName), function(dft) {
+    html.heading(fo, 3, concat("Database: ", dft$DatabaseName))
+    html.img(fo, dft$filename)
+    writeLines("<br/>", fo)
+    dfs.db = subset(dfs, DatabaseName == dft$DatabaseName)
+    print("before write.html.table.count")
+    write.html.table.count(fo, dfs.db)
+  })
+  
   print("before write.sql.table")
   write.sql.table(con, dfs, runid, chgroup, "count")
   write.csv.table(outdir, dfs, runid, chgroup, "count")
-  
+
+  html.heading(fo, 2, "Channel message read speeds (graph per DB)")
   graph.dc.speed(dfaggr, outdir, runid, chgroup, 12, log)
-  html.heading(fo, 2, "Channel message speed per DB")
-  html.img(fo, det.graphname.rel(runid, chgroup, "channels-read-facet-db"))
-  html.heading(fo, 2, "Channel message added/read per channel")
-  html.img(fo, det.graphname.rel(runid, chgroup, "channels-read-added-facet-channel"))
+  dfdb = graph.dc.speed.ff(dfaggr, outdir, runid, chgroup, 12, log)
   print("before calc.summary.speed")
   dfs = calc.summary.speed(df)
-  print("before write.html.table.speed")
-  write.html.table.speed(fo, dfs)
-  print("after write.html.table.speed")
+  d_ply(dfdb, .(DatabaseName), function(dft) {
+    html.heading(fo, 3, concat("Database: ", dft$DatabaseName))
+    html.img(fo, dft$filename)
+    writeLines("<br/>", fo)
+    dfs.db = subset(dfs, DatabaseName == dft$DatabaseName)
+    print("before write.html.table.count")
+    write.html.table.speed(fo, dfs.db)
+  })
+  
+  html.heading(fo, 2, "Channel message speed (added/read) per DB")
+  #html.img(fo, det.graphname.rel(runid, chgroup, "channels-read-facet-db"))
+  
+  dfdb = graph.dc.speed.ff2(dfaggr, outdir, runid, chgroup, 12, log)
+  d_ply(dfdb, .(DatabaseName), function(dft) {
+    html.heading(fo, 3, concat("Database: ", dft$DatabaseName))
+    html.img(fo, dft$filename)
+    writeLines("<br/>", fo)
+    dfs.db = subset(dfs, DatabaseName == dft$DatabaseName)
+    print("before write.html.table.count")
+    write.html.table.speed(fo, dfs.db)
+  })
+  
+  #html.heading(fo, 2, "Channel message added/read per channel")
+  #html.img(fo, det.graphname.rel(runid, chgroup, "channels-read-added-facet-channel"))
+  #print("before write.html.table.speed")
+  #write.html.table.speed(fo, dfs)
+  #print("after write.html.table.speed")
   write.sql.table(con, dfs, runid, chgroup, "speed")
   write.csv.table(outdir, dfs, runid, chgroup, "speed")
 }

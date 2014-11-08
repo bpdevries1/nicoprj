@@ -47,6 +47,16 @@ graph.dc.counts = function(dfaggr, outdir, runid, part, width, log) {
            filename=det.graphname(outdir, runid, part, "channels-nmessages-facet-channel"))
 }
 
+graph.dc.counts.ff = function(dfaggr, outdir, runid, part, width, log) {
+  # note mss filename.prefix eerst bepalen.
+  dfdb = qplot.dt.ff(ts_cut,nelts,data=dfaggr,colour=ChannelName, ylab="#messages", file.facets = "DatabaseName",
+           filename.prefix=det.graphname.ff(outdir, runid, part, "channels-nmessages-ff-db-"))
+  #log("after qplot.dt.ff")
+  #log.df(log, df, "dfdb, result of qplot.dt.ff")
+  dfdb
+}
+
+
 graph.dc.speed = function(dfaggr, outdir, runid, part, width, log) {
   # g = guide_legend("Channel", ncol = 2)
   
@@ -70,6 +80,36 @@ graph.dc.speed = function(dfaggr, outdir, runid, part, width, log) {
   qplot.dt(ts_cut,nps,data=df.ar,colour=direction, ylab="#msg/sec", facets=ChannelName~.,
            filename=det.graphname(outdir, runid, part, "channels-read-added-facet-channel"))
 }
+
+graph.dc.speed.ff = function(dfaggr, outdir, runid, part, width, log) {
+  # g = guide_legend("Channel", ncol = 2)
+  
+  dfaggr_nread = na.omit(dfaggr)
+  log.df(log, dfaggr_nread, "dfaggr with nread is not null")
+  
+  dfdb = qplot.dt.ff(ts_cut,nread,data=dfaggr_nread,colour=ChannelName, ylab="read/sec", 
+                     file.facets = "DatabaseName",
+           filename.prefix=det.graphname.ff(outdir, runid, part, "channels-read-ff-db-"))
+
+  dfdb
+}
+
+graph.dc.speed.ff2 = function(dfaggr, outdir, runid, part, width, log) {
+  # g = guide_legend("Channel", ncol = 2)
+  
+  dfaggr_nread = na.omit(dfaggr)
+  df.ar = sqldf("select ts_cut, DatabaseName, ChannelName, nread nps, 'nread' direction
+                 from dfaggr_nread
+                 union
+                 select ts_cut, DatabaseName, ChannelName, nadded nps, 'nadded' direction
+                 from dfaggr_nread")
+  
+  dfdb = qplot.dt.ff(ts_cut,nps,data=df.ar,colour=direction, ylab="#msg/sec", facets=ChannelName~.,
+                     file.facets = "DatabaseName",
+                     filename.prefix=det.graphname.ff(outdir, runid, part, "channels-read-added-ff-db-"))
+  dfdb
+}
+
 
 # @note meting-channels zijn niet boeiend (toch?)
 channel.query.diff = function(ndiff, runid, start, end) {
@@ -127,6 +167,11 @@ det.channel.group = function(group) {
 det.graphname = function(outdir, runid, part, title) {
   concat(outdir, "\\", runid, "-", part, "-", title, ".png")
 }
+
+det.graphname.ff = function(outdir, runid, part, title) {
+  concat(outdir, "\\", runid, "-", part, "-", title)
+}
+
 
 det.df.tablename = function(runid, chgroup, type="count") {
   concat("tdc_summary_", runid, "_", chgroup, "_", type)
