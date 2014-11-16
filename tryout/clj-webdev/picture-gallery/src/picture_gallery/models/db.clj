@@ -1,5 +1,7 @@
 (ns picture-gallery.models.db
   (:require [clojure.java.jdbc :as sql]
+            [korma.db :refer [defdb transaction]]
+            [korma.core :refer :all]
             [environ.core :refer [env]]))
 
 (def db
@@ -8,45 +10,45 @@
    :user (env :db-user)
    :password (env :db-pass)})
 
-(defmacro with-db [f & body]
-  `(sql/with-connection ~db (~f ~@body)))
+(defdb korma-db db)
+
+(defentity users)
+
+(defentity images)
+
+;; (defmacro with-db2 [f & body]
+;;   `(sql/with-connection ~db (~f ~@body)))
 
 (defn create-user [user]
-  (with-db sql/insert-record :users user))
+  (insert users (values user)))
 
 (defn get-user [id]
-  (with-db sql/with-query-results
-      res ["select * from users where id = ?" id] (first res)))
+  (first (select users
+                 (where {:id id})
+                 (limit 1))))
+
+(defn delete-user [id]
+  (delete users (where {:id id})))
 
 (defn add-image [userid name]
-  (println "Adding image to db for user:" userid " with name:" name)
-  (with-db
-    sql/transaction
-    (if (sql/with-query-results
-          res
-          ["select userid from images where userid = ? and name = ?" userid name]
-          (empty? res))
-      (sql/insert-record :images {:userid userid :name name})
-      (throw
-       (Exception. "you have already uploaded an image with the same name")))))
+  (transaction
+   (if (empty? (select images
+                       (where {:userid userid :name name})
+                       (limit 1)))
+     (insert images (values {:userid userid :name name}))
+     (throw
+      (Exception. "you have already uploaded an image with the same name")))))
 
 (defn images-by-user [userid]
-  (with-db
-    sql/with-query-results
-    res ["select * from images where userid = ?" userid] (doall res)))
-
-(defn get-gallery-previews []
-  (with-db
-    sql/with-query-results
-    res
-    ["select * from
-       (select *, row_number() over (partition by userid) as row_number from images)
-       as rows where row_number = 1"]
-    (doall res)))
+  (select images (where {:userid userid})))
 
 (defn delete-image [userid name]
-  (with-db
-    sql/delete-rows :images ["userid=? and name=?" userid name]))
+  (delete images (where {:userid userid :name name})))
 
-(defn delete-user [userid]
-  (with-db sql/delete-rows :users ["id=?" userid]))
+(defn get-gallery-previews []
+  (exec-raw
+    ["select * from
+       (select *, row_number() over (partition by userid) as row_number from images)
+       as rows where row_number = 1" []]
+    :results))
+
