@@ -1,0 +1,9 @@
+C:\nico\nicoprj\tryout\C-sharp\HelloWorld\HelloWorld\bin\Debug\HelloWorld.exe.config
+C:\nico\nicoprj\tryout\C-sharp\HelloWorld\HelloWorld\bin\Debug\HelloWorld.exe
+C:\nico\nicoprj\tryout\C-sharp\HelloWorld\HelloWorld\bin\Debug\HelloWorld.pdb
+C:\nico\nicoprj\tryout\C-sharp\HelloWorld\HelloWorld\obj\Debug\HelloWorld.csprojResolveAssemblyReference.cache
+C:\nico\nicoprj\tryout\C-sharp\HelloWorld\HelloWorld\obj\Debug\HelloWorld.frmMain.resources
+C:\nico\nicoprj\tryout\C-sharp\HelloWorld\HelloWorld\obj\Debug\HelloWorld.Properties.Resources.resources
+C:\nico\nicoprj\tryout\C-sharp\HelloWorld\HelloWorld\obj\Debug\HelloWorld.csproj.GenerateResource.Cache
+C:\nico\nicoprj\tryout\C-sharp\HelloWorld\HelloWorld\obj\Debug\HelloWorld.exe
+C:\nico\nicoprj\tryout\C-sharp\HelloWorld\HelloWorld\obj\Debug\HelloWorld.pdb

@@ -1,0 +1,6 @@
+C:\nico\nicoprj\tryout\C-sharp\HelloWorld\cmdline1\bin\Debug\cmdline1.exe.config
+C:\nico\nicoprj\tryout\C-sharp\HelloWorld\cmdline1\bin\Debug\cmdline1.exe
+C:\nico\nicoprj\tryout\C-sharp\HelloWorld\cmdline1\bin\Debug\cmdline1.pdb
+C:\nico\nicoprj\tryout\C-sharp\HelloWorld\cmdline1\obj\Debug\cmdline1.exe
+C:\nico\nicoprj\tryout\C-sharp\HelloWorld\cmdline1\obj\Debug\cmdline1.pdb
+C:\nico\nicoprj\tryout\C-sharp\HelloWorld\cmdline1\obj\Debug\cmdline1.csprojResolveAssemblyReference.cache
