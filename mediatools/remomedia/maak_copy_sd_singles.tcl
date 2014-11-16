@@ -21,7 +21,7 @@ proc main {argc argv} {
 	$log info "Starting"
 
   set options {
-    {drv.arg "/media/nico/PHILIPS" "USB Drive to copy music files to (on linux machine)"}
+    {drv.arg "/media/nico/C850-82F9" "USB Drive to copy music files to (on linux machine)"}
     {bat.arg "/media/nas/copy-sd.sh" "Batch/shell file to create"}
     {groupname.arg "Singles-car" "Group name to use"}
     {np "Don't mark selected files as played in database (for testing)"}
