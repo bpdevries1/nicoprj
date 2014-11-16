@@ -76,7 +76,7 @@ namespace eval ::ndv {
     
     public method write_header {title {heading1 1}} {
         puts $channel "<html>
-  <head><title>$title</title>
+  <head><meta charset=\"UTF-8\"><title>$title</title>
   <style type=\"text/css\">
           body {
             font:normal 68% verdana,arial,helvetica;
