@@ -17,10 +17,14 @@ proc main {argc argv} {
 	}
   check_params $argc $argv
   set search_strings [string tolower $argv]
-  search_files $env(MEDIA_COMPLETE) $search_strings
-  puts "====================="
-  search_files $env(MEDIA_NEW) $search_strings
-  search_files [file join $env(MEDIA_TEMP) music] $search_strings
+  set fres [open "show-results.txt" w]
+  set last_idx 0
+  set last_idx [search_files $env(MEDIA_COMPLETE) $search_strings $last_idx $fres]
+  puts $fres "====================="
+  set last_idx [search_files $env(MEDIA_NEW) $search_strings $last_idx $fres]
+  set last_idx [search_files [file join $env(MEDIA_TEMP) music] $search_strings $last_idx $fres]
+  close $fres
+  puts [read_file "show-results.txt"]
 }
 
 proc check_params {argc argv} {
@@ -34,7 +38,7 @@ proc check_params {argc argv} {
 # @pre search_string is lowercase.
 # @note toon items als alle search_strings gevonden. Descend naar sub-dir als minimaal 1 gevonden.
 # @note doel hiervan is zoeken van album-namen binnen artiest directories.
-proc search_files {dir search_strings} {
+proc search_files {dir search_strings last_idx fres} {
   set lst [lsort [glob -nocomplain -directory $dir *]]
   foreach el $lst {
     set search_found_all 1
@@ -50,17 +54,43 @@ proc search_files {dir search_strings} {
       # puts "\[[format %6.0f [det_size_kb $el]]k\] $el"
       # puts "\[[format %7s [commify [det_size_kb $el]]]k\] $el"
       # puts "\[[format %6.0f [det_size_kb $el]]k\] $el"
-      
-      puts "\[[format %7s [commify [format %.0f [det_size_kb $el]]]]k\] $el"
-      
-      
+      # only increase index if it's a directory
+      if {[is_music_directory $el]} {
+        incr last_idx
+        puts $fres "$last_idx => \[[format %7s [commify [format %.0f [det_size_kb $el]]]]k\] $el"        
+      } else {
+        if {[is_music_file $el] && ![is_trash $el]} {
+          puts $fres "\[[format %7s [commify [format %.0f [det_size_kb $el]]]]k\] $el"
+        }
+      }
     }
     if {$search_found_one} {
       if {[file isdirectory $el]} {
-        search_files $el $search_strings 
+        set last_idx [search_files $el $search_strings $last_idx $fres]
       }
     }
   }
+  return $last_idx
+}
+
+proc is_music_directory {filename} {
+  if {[is_trash $filename]} {
+    return 0
+  }
+  if {[file isdirectory $filename]} {
+    foreach el [glob -nocomplain -directory $filename -type f *] {
+      if {[is_music_file $el]} {
+        return 1
+      }
+    }
+    return 0
+  } else {
+    return 0
+  }
+}
+
+proc is_trash {filename} {
+  regexp {/_trash/} $filename
 }
 
 # determine size in kilobytes of a file or a whole directory including subdirectories.
@@ -87,10 +117,10 @@ proc det_size_kb {path} {
 # Returns:
 #   number with commas in the appropriate place
 #
-
 proc commify {num {sep ,}} {
     while {[regsub {^([-+]?\d+)(\d\d\d)} $num "\\1$sep\\2" num]} {}
     return $num
 }
 
 main $argc $argv
+
