@@ -92,13 +92,25 @@ proc make_album_playlist {lst filename} {
 
 proc puts_album {f gen_id db_path} {
   # kijk op filesystem zelf, niet in DB.
+  # puts "db_path: $db_path"
   set path [det_linux_path $db_path]
+  puts "path: $path"
   set lst [glob -nocomplain -directory $path -type f *]
-  set lst [lsort [::struct::list filter $lst is_music_file]]
-  foreach el $lst {
+  set lst2 [lsort [::struct::list filter $lst is_music_file]]
+  foreach el $lst2 {
     puts $f $el 
   }
-  
+  if {$lst2 == {}} {
+    if {[file exists $path]} {
+      puts "No music files found in dir. Other files:"
+      puts $lst
+    } else {
+      puts "Directory does not exist in file system. Rerun sync-music-db"
+    }
+  } else {
+    puts "At least one music file"
+    
+  }
 }
 
 proc det_linux_path {db_path} {

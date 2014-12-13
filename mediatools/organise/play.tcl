@@ -16,8 +16,8 @@ proc main {argv} {
 	    # puts "env.$key = $env($key)" 
 	  }
 	}
-  if {[:# $argv] != 1} {
-    puts stderr "syntax: $argv0 <idx>"
+  if {[:# $argv] < 1} {
+    puts stderr "syntax: $argv0 <idx> \[<track-idx>\]"
   }
   set idx [:0 $argv]
   set filenames [det_filenames $idx]
@@ -25,7 +25,7 @@ proc main {argv} {
     puts stderr "Index $idx not found in last search results (show-results.txt)"
     exit
   }
-  play_random $filenames
+  play_random $filenames [:1 $argv]
 }
 
 proc det_filenames {idx} {
@@ -40,7 +40,7 @@ proc det_filenames {idx} {
         while {$cnt && ![eof $f]} {
           gets $f line
           if {[regexp {^\[[0-9 ,]+k\] (.+)$} $line z pathname]} {
-            if {[is_musicfile $pathname]} {
+            if {[is_music_file $pathname]} {
               lappend res $pathname
             } else {
               # other type of file, ignore.              
@@ -58,19 +58,24 @@ proc det_filenames {idx} {
   return $res
 }
 
-proc play_random {lst_files} {
+proc play_random {lst_files {track_idx ""}} {
   puts "Choose one of the following:"
   foreach el $lst_files {
     puts $el    
   }
-  set file [random_list $lst_files]
-  puts "playing file: $file"
+  if {$track_idx != ""} {
+    set file [lindex $lst_files $track_idx-1]
+  } else {
+    set file [random_list $lst_files]  
+  }
+  
+  puts "\n*** playing file: $file\n"; # 
   # met -q optie?
   exec -ignorestderr mpg321 $file
 }
 
 # library function
-proc is_musicfile {filename} {
+proc is_musicfile_old {filename} {
   set ext [string tolower [file extension $filename]]
   if {[lsearch -exact {.mp3 .wma .mp4 .m4a .mpc .ogg .wav} $ext] > -1} {
     return 1

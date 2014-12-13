@@ -85,7 +85,10 @@ proc handle_filesystem {dir artist_id} {
     upsert_musicfile $filename $artist_id $album_id lst_dir_db
   }
   if {[llength $lst_dir_db] > 0} {
-    $log warn "db list not empty yet: $lst_dir_db, probably old items in DB." 
+    $log warn "db list not empty yet: $lst_dir_db, probably old items in DB. Remove them"
+    foreach el $lst_dir_db {
+      remove_db_record $el
+    }
   }
   
   # subdirs
