@@ -1,7 +1,7 @@
 
 proc is_music_file {pathname} {
 	set ext [string tolower [file extension $pathname]]
-	if {[lsearch -exact {.mp3 .wma .mp4 .m4a .mpc .ogg .wav} $ext] > -1} {
+	if {[lsearch -exact {.flac .mp3 .wma .mp4 .m4a .mpc .ogg .wav} $ext] > -1} {
 		return 1
 	} else {
 		return 0

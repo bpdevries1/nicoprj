@@ -90,7 +90,7 @@
 
 (defn serve-file [user-id file-name]
   (info "serve file (log): " file-name)
-  (println "serve-file: " file-name)
+;  (println "serve-file: " file-name)
   (file-response (str galleries File/separator user-id File/separator file-name)))
 
 (defn delete-image [userid name]

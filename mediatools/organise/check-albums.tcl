@@ -141,13 +141,15 @@ itcl::class CAlbumsChecker {
 	private method filter_subdirs {lst} {
 		set result {}
 		foreach el $lst {
-			if {[regexp {Covers$} $el]} {
-				# deze uitfilteren
-			} elseif {[regexp {Lyrics$} $el]} {
-				# deze ook uitfilteren
-			} else {
-				lappend result $el
-			}
+      set ignore 0
+      foreach re {Covers$ Lyrics$ art} {
+        if {[regexp -nocase $re $el]} {
+          set ignore 1
+        }
+      }
+      if {!$ignore} {
+        lappend result $el
+      }
 		}
 		return $result
 	}
