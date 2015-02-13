@@ -234,12 +234,27 @@ proc backup_path {path target tempext time_treshold reclevel max_level_check} {
     set totalbytes [expr $totalbytes + $nbytes]
   }
   foreach filepattern {* .*} {
-    foreach filename [glob -nocomplain -directory $path -type f $filepattern] {
+    # TODO try_eval omheen zetten.
+    try_eval {
+      set filenames {}
+      set filenames [glob -nocomplain -directory $path -type f $filepattern]
+    } {
+      $log warn "Could not read directory files: $path"
+    }
+    foreach filename $filenames {
       lassign [handle_file $filename $target $tempext $time_treshold] nfiles nbytes
       incr totalfiles $nfiles
       set totalbytes [expr $totalbytes + $nbytes] 
     }
-    foreach dirname [glob -nocomplain -directory $path -type d $filepattern] {
+    # TODO try_eval omheen zetten.
+    try_eval {
+      set dirnames {}
+      # TODO klopt het dat dit hier ook filepattern moet zijn, en niet gewoon *
+      set dirnames [glob -nocomplain -directory $path -type d $filepattern]
+    } {
+      $log warn "Could not read directory subdirs: $path"
+    }
+    foreach dirname $dirnames {
       set tail [file tail $dirname]
       if {($tail == ".") || ($tail == "..")} {
         continue
@@ -259,45 +274,6 @@ proc new_max_level_check {max_level_check dirname time_treshold} {
   } else {
     return "" ; # new file, checks are of. 
   }
-}
-
-# @todo ga eerst uit van windows
-# @note backup all files within path, not just less than 7 days old.
-# @note if a copy fails, notify with log.
-# @note files will be puth in [file join $target [drive $path] $path
-proc backup_path_old {path target tempext time_treshold reclevel} {
-  global log fres 
-  # $log debug "Backup up $path => $target"
-  if {[ignore_file $path]} {
-    return [list 0 0] 
-  }
-  if {$reclevel <= 3} {
-    # log only if not ignored.
-    $log info "Checking $path"
-  }
-  set target_path [det_target_path $path $target]
-  if {[ignore_file $target_path 1]} {
-    return [list 0 0] 
-  }
-  set totalfiles 0
-  set totalbytes 0.0
-  foreach filepattern {* .*} {
-    foreach filename [glob -nocomplain -directory $path -type f $filepattern] {
-      lassign [handle_file $filename $target $tempext $time_treshold] nfiles nbytes
-      incr totalfiles $nfiles
-      set totalbytes [expr $totalbytes + $nbytes] 
-    }
-    foreach dirname [glob -nocomplain -directory $path -type d $filepattern] {
-      set tail [file tail $dirname]
-      if {($tail == ".") || ($tail == "..")} {
-        continue
-      }
-      lassign [backup_path $dirname $target $tempext $time_treshold [expr $reclevel + 1]] nfiles nbytes
-      incr totalfiles $nfiles
-      set totalbytes [expr $totalbytes + $nbytes] 
-    }
-  }
-  list $totalfiles $totalbytes
 }
 
 # @return list of [1, size of file copied in bytes]
