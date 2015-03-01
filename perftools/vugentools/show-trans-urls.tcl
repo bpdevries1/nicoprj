@@ -13,6 +13,7 @@ interp alias {} splitx {} ::textutil::split::splitx
 set DEBUG 0
 
 proc main {argv} {
+  global prj_dir
   lassign $argv prj_dir
   set_default_params
   set report_dir [file join $prj_dir report]
@@ -161,6 +162,63 @@ proc print_params {f} {
   puts $f "* Substituted URL parameters"
   dict for {urlpart param} $urlparams {
     puts $f "** $param = $urlpart"
+    print_param_details $f $urlpart
+  }
+}
+
+# find first .htm file in data subdir where urlpart is found. Then find the request where this .htm is a response of. Print both to the output as org level 3.
+proc print_param_details {f urlpart} {
+  set first_file [find_first_occ $urlpart] ; # returns something like t27.htm
+  set c_file [find_snapshot $first_file] ; # returns somethink like login.c
+  puts $f "*** first found in snapshot: $first_file"
+  puts $f "*** in action/c: $c_file"
+}
+
+proc find_first_occ {urlpart} {
+  set htm_files [find_ordered_htm_files]
+  foreach htm_file $htm_files {
+    set text [read_file $htm_file]
+    if {[string first $urlpart $text] > -1} {
+      return [file tail $htm_file]
+    }
+  }
+  return "<not found in htm file>"
+}
+
+proc find_ordered_htm_files {} {
+  global prj_dir
+  set lst [glob -directory [file join $prj_dir data] *.htm]
+  set nrs {}
+  foreach el $lst {
+    if {[regexp {t(\d+)\.htm} [file tail $el] z nr]} {
+      lappend nrs $nr
+    }
+  }
+  set res {}
+  foreach nr [lsort -integer $nrs] {
+    set htm_file [file join $prj_dir data "t$nr.htm"] 
+    lappend res $htm_file
+    # puts $htm_file
+  }
+  # error "break"
+  return $res
+}
+
+# @param filename "t27.htm"
+# @result login.c
+proc find_snapshot {filename} {
+  global prj_dir
+  if {[regexp {t(\d+)\.htm} $filename z nr]} {
+    set needle "Snapshot=t$nr.inf"
+    foreach filename [lsort [glob -directory $prj_dir "*.c"]] {
+      set text [read_file $filename]
+      if {[string first $needle $text] > -1} {
+        return [file tail $filename]
+      }
+    }
+    return "<not found>"
+  } else {
+    return "<not found>"
   }
 }
 
