@@ -25,6 +25,9 @@
   (POST "/project/:id/issues" [id & params] ;;(3)
     (views/make-issue id params))
 
+  (POST "/search" [& params]
+    (views/issues-by-query (:query params)))
+  
   (GET "/issue/:id" [id]
     (views/issue id))
   (POST "/issue/:id/comments" [id & params]

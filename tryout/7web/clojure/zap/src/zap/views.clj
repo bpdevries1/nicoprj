@@ -18,8 +18,11 @@
     [:div {:class "navbar navbar-inverse"}
      [:div {:class :navbar-inner}
       [:a {:class :brand :href "/"} "Zap!"]
-      [:form {:class "navbar-form pull-right"}
-       [:input {:type :text :class :search-query :placeholder :Search}]]]]
+      (form-to
+       {:class :form-horizontal}
+       [:post "/search"]
+       (text-field :query)
+       (submit-button {:class "btn btn-primary"} "Search"))]]
     [:div.container (seq body)]]))
 
 (defn projects []
@@ -77,6 +80,27 @@
             (row (:id iss))
             (row (:title iss))
             (row (:status_name iss))]))]])))
+
+(defn issues-by-query [q]
+  (base-page
+   "Query results - Zap"
+   [:table.table
+    [:thead
+     [:tr
+      [:th.span1 {:scope :col} "#"]
+      [:th.span10 {:scope :col} "Title"]
+      [:th.span1 {:scope :col} "Status"]]]
+    [:tbody
+     (for [iss (models/find-issues q)]
+       ;; NdV: fn should be named 'cell', not 'row'
+       (let [row (fn [& content]
+                   [:td
+                    (into [:a {:href (str "/issue/" (:id iss))}]
+                          content)])]
+         [:tr
+          (row (:id iss))
+          (row (:title iss))
+          (row (:status_name iss))]))]])) 
 
 (defn new-issue [id]
   (let [proj (models/project-by-id id)]
