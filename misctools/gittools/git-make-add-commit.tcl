@@ -5,10 +5,15 @@ package require ndv
 proc main {argv} {
   # eerst alleen nicoprj
   set os [det_os]
-  if {$os == "windows"} {
-    cd "c:/nico/nicoprj"
+  if {[:# $argv] > 0} {
+    lassign $argv dir
+    cd $dir
   } else {
-    cd ~/nicoprj 
+    if {$os == "windows"} {
+      cd "c:/nico/nicoprj"
+    } else {
+      cd ~/nicoprj 
+    }
   }
   set res [exec git status]
   puts "result of git-status:"
@@ -22,11 +27,23 @@ proc main {argv} {
   puts $f "# name of file to exec: $filename"
   close $f
   if {$os == "windows"} {
-    exec c:/util/notepad++/notepad++.exe $filename
+    # exec c:/util/notepad++/notepad++.exe $filename
+    set npp_exe [det_npp_exe]
+    exec $npp_exe $filename
   } else {
     exec -ignorestderr chmod +x $filename
     exec -ignorestderr gedit $filename &
   }
+}
+
+proc det_npp_exe {} {
+  set lst_loc {"c:/util/notepad++/notepad++.exe" "H:\\Disciplines\\Trim\\Testing\\Tooling\\Notepad++Portable\\Notepad++Portable.exe"}
+  foreach loc $lst_loc {
+    if {[file exists $loc]} {
+      return $loc
+    }
+  }
+  return ""
 }
 
 proc det_os {} {
