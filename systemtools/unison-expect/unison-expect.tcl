@@ -3,54 +3,29 @@
 # deze heeft Tcl8.6, mooi.
 
 # goal: answer . to all unison questions about props.
+# all other questions must be answered by user.
 
-# TODO interact mode werkend:
-# ofwel je blijft erin tot het einde.
-# ofwel je kunt (bv met een + weer terug naar automatische verwerking, nu niet echt nodig)
+set LOG_STDOUT 0 ; # log all stuff to stdout? If 0, only log to files.
 
 proc main {argv} {
-
+  # strange things happen with global vars.
+  # global interact_out expect_out
+  
   file delete "expect.log"
   file delete "expect.stdout"
-  # test_array_log
-
   
-  log "Spawning $argv"
   spawn unison $argv
-  log "Spawned $argv"
+
+  set timeout 300 ; # 5 minutes should be enough, even for NAS 1TB.
+  set timeout 60 ; # for testing
   
-  log "Phase 1"
-  # phase 1 - start and finding changes
-  while 1 {
-    log "Expecting line..."
-    expect {
-      eof    {break}
-      "Press return to continue." {log_array "=> sending newline" expect_out; send "\n"}
-      "Reconciling changes" {log_array "Found Reconciling changes => next phase" expect_out; break}
-    }
-  }
-
-  #log "waiting 5 secs"
-  #after 5000
-  #log "waited enough"
-
-  log_array "Phase 2 now" expect_out
-  # phase 2 - interactively handle changes
-
-  # test
-  # send "."
-
-  set timeout 3
-  log_array "Beginning of while" expect_out
+  log "Beginning of while"
   
   set i 0
   set found_eof 0
   while {1} {
-    #log "expect_out:"
-    
-    #log "end of expect_out"
     log "Expecting line... ($i)"
-    # interact +
+
     # don't start a match with a newline, just end with it possibly.
     expect {
       eof    {
@@ -63,53 +38,51 @@ proc main {argv} {
         send "."
       }
       {\? \[\] } {
-        # [] have special meaning in glob patterns as well.
-        log_array "1. Found question mark at the end" expect_out
-        log "sending question mark to get a list of options"
-        send "?"
-        log "Should go into interactive mode now..."
-        set spawn_id $expect_out(spawn_id)
-        log "spawn_id: $spawn_id"
-        log "start of interact"
-        # interact steeds 1 teken. Want hierna zou weer een props regel kunnen komen.
-        interact {
-          -re "." {
-            log_array "User typed 1 key, sending to app" interact_out
-            send $interact_out(0,string)
-            #log "sending y"
-            #send "y"
-            # send -i $spawn_id "y"
-            # TODO als dit niet werkt, dan interact in de expect struct zetten.
-            # lijkt wel iets anders te doen, mogelijk toch in andere scope.
-            
-            # send this character and continue with loop.
-            # cannot do break, this is not a loop.
-            # break ; # needed because stays in a loop.
-            log "Just before interact/return"
-            return ; # does this return from interact, or from main function? YES: from interact only, as expected and wanted.
-          }
-        }
-        log "Just after interact/return" ; # this one is logged, so return works ok.
-        # wil eigenlijk geen break hier, nu nog even wel.
-        # break
+        # question mark at the end
+        log_array "Found a question1" expect_out
+        interact_1key $spawn_id
       }
+      { <-\?-> } {
+        # also question mark
+        log_array "Found a question2" expect_out
+        interact_1key $spawn_id
+      }
+      {  \[f\] } {
+        # question with suggestion
+        log_array "Found a question3 (with suggestion)" expect_out
+        interact_1key $spawn_id
+      }
+      {\[<spc>\] } {
+        # question with suggestion
+        log_array "Found a question4 (with suggestion)" expect_out
+        interact_1key $spawn_id
+      }
+      
+      # could also check for [] at the end, but this could be part of a filename.
       # something else is a whole line: start with newline, everything but a newline, finish with newline.
-      -re "\[^\r\n\]*\r\n" {
-        # log_array "Found something else, so interactive, end with +" expect_out
+      # just look for the CR (\r), newline (\n) is not always given, eg with unison which replacing lines on stdout using \r.
+      -re "\[^\r\n\]*\r" {
         log_array "Found something else, continuing..." expect_out
       }
       timeout {
-        log_array "Timeout, break" expect_out
-        # interact "+"
-        break
+        log_array "Timeout" expect_out
+        # should check user if (s)he wants to wait some more.
+        # break
+        if {[check_continue $spawn_id]} {
+          log "User chooses to wait some more"
+          send_user "<<<Waiting some more>>>"
+        } else {
+          log "User chooses to quit"
+          break
+        }
       }
     }
     incr i
   }
-  # check_question_marks
   if {$found_eof} {
-    log "Found eof, so finished"    
+    # log "Found eof, so finished"    
   } else {
+    send_user "<<<Didn't end correctly, maybe a timeout>>>"
     log "sleeping for 5 seconds..."
     # sleep 5 seconds for now, so unison can process.
     sleep 5;                    
@@ -118,63 +91,63 @@ proc main {argv} {
     expect "*" {log_array "everything" expect_out}
   }
 
-  if {0} {
-    set spawn_id $expect_out(spawn_id)
-    log "spawn_id: $spawn_id"
-    log "start of interact"
-    # interact steeds 1 teken. Want hierna zou weer een props regel kunnen komen.
-    interact {                   
-      -re "." {                  
-        log_array "User typed 1 key, sending to app" interact_out
-        # send $interact_out(0,string)
-        log "sending y"
-        send "y";                
-        # send -i $spawn_id "y"
-        # TODO als dit niet werkt, dan interact in de expect struct zetten.
-
-        # send this character and continue with loop.
-        # cannot do break, this is not a loop.
-        # break ; # needed because stays in a loop.
-        return ; # does this return from interact, or from main function?
-      };          
-    };            
-
-    log "sleeping for 5 seconds..."
-    # sleep 5 seconds for now, so unison can process.
-    sleep 5;                    
-    
-    log "end of interact, getting all text"
-    # 
-    expect "*" {log_array "everything2" expect_out}
-  }  
-  # log "No interactive now, just end"
-  #log "Loop ended, going into interactive mode"
-  #interact +
-  log "script ended"
+  # log "script ended"
 }
 
-proc check_question_marks {} {
-  log "Checking question marks"
-  # test hier of je alsnog een vraagteken vindt.
-  expect {
-    "\\?" {
-      log_array "Found question mark (Glob) somewhere" expect_out
-      # break
+proc interact_1key {spawn_id} {
+  # global interact_out expect_out
+  # [] have special meaning in glob patterns as well.
+  
+  log "sending question mark to get a list of options"
+  send_user "\n  c                     Continue (don't send anything to Unison)\n"
+  send "?"
+  # interact steeds 1 teken. Want hierna zou weer een props regel kunnen komen.
+  # vraag of deze ook een timeout krijgt, zou niet moeten.
+  interact {
+    c {
+      log_array "User typed a c, don't send to app, continue" interact_out
+      send_user "<<<continuing>>>"
+      return
     }
-    -re "\[?\]" {
-      log_array "Found question mark (RE) somewhere" expect_out
-      # break
+    -re "." {
+      log_array "User typed 1 key, sending to app" interact_out
+      send $interact_out(0,string)
+      # return from interact
+      return
     }
   }
+  log "end of interact_1key"
+}
 
-  log "end of checking question marks"
+# return 1 if user chooses to continue (waiting), 0 otherwise.
+proc check_continue {spawn_id} {
+  set res 0
+  send_user "\nTimed out waiting, do you want to wait some more? [] "
+  interact {
+    y {
+      log "User typed y"
+      send_user "<<<ok, waiting some more>>>"
+      set res 1
+      return
+    }
+    n {
+      log "User typed n"
+      send_user "<<<ok, quitting>>>"
+      set res 0
+      return
+    }
+  }
+  return $res
 }
 
 proc log {str} {
+  global LOG_STDOUT
   set f [open "expect.log" a]
-  puts $f $str
+  puts $f "\[[clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]\] $str"
   close $f
-  puts "\n***$str***"
+  if {$LOG_STDOUT} {
+    puts "\n***$str***"
+  }
 }
 
 proc log_array {prefix array_name} {
@@ -191,17 +164,6 @@ proc log_array {prefix array_name} {
     puts -nonewline $fs $ar(buffer)
     close $fs
   }
-}
-
-proc send_not {args} {
-  log "send_not: $args"
-}
-
-proc test_array_log {} {
-  set ta(1) 2
-  set ta(2) 42
-  log_array ta
-  exit
 }
 
 main $argv
