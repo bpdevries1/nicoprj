@@ -20,6 +20,8 @@ db.close = function(db) {
   dbDisconnect(db)
 }
 
+
+
 db.query = function(db, query) {
   dbGetQuery(db, query)
 }

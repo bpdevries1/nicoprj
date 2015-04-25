@@ -14,7 +14,7 @@ main = function() {
   connstring = det.connstring.PT(testnr)
   outdir = det.outdir(testnr)
   con = odbcDriverConnect(connection=connstring)
-  graph.dc(con, outdir, channel.group, runid, "2014-01-01 00:00", "2016-01-01 00:00")
+  graph.dc(con, outdir, channel.group, runid, "2010-01-01 00:00", "2016-01-01 00:00")
   # graph.queuecount(con, outdir=outdir, testnr, "2014-01-01 00:00", "2016-01-01 00:00")
   # graph.dc1(con, outdir=outdir, "ChannelInHuur", runid)
   odbcClose(con)

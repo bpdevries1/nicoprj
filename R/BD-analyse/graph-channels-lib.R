@@ -22,6 +22,11 @@ define.channel.groups = function() {
   add.channel.group("SC-In",     "
       and (ChannelName like '%ParkeerPlaatsDocOne%' or ChannelName like '%TodoLijstBeschikkingNietVerstuurd%')
       and Channelname like '%ChannelIn%'")
+
+  add.channel.group("DCAAgent",     "
+      and (ChannelName like '%DCAAgent%' or ChannelName like '%WFM%' or ChannelName like '%Worklist%')
+      and Channelname like '%ChannelIn%'")
+
   
   #  -- Indexeren:
   #  -- and ChannelName in ('ChannelInAwir', 'ChannelInHuur', 'ChannelInZorg', 'ChannelInKinderopvang', 'ChannelInKindgebondenBudget', 'ChannelInFrsProcesVerwerkenMelding', 'ChannelInWerkvoorraadIndexeringItem', 'ChannelOutAwir')
