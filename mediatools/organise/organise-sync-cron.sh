@@ -7,4 +7,4 @@ cd /home/nico/nicoprj/mediatools/organise
 /home/nico/bin/unison -auto -batch films-rpi >/dev/null 2>&1
 /home/nico/bin/unison -auto -batch films-temp-rpi >/dev/null 2>&1
 /home/nico/bin/unison -auto -batch cabaret-rpi >/dev/null 2>&1
-
+/home/nico/bin/unison -auto -batch music1-rpi >/dev/null 2>&1

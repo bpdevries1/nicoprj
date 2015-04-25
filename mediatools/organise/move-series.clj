@@ -2,8 +2,8 @@
 
 (load-file "/home/nico/nicoprj/clojure/lib/def-libs.clj") 
 
+;; find-files is recursive, don't want that, so use glob, which isn't recursive.
 (defn det-series [target-root]
-  ; find-files is recursive, don't want that, so use glob, which isn't recursive.
   (->> (fs/glob (io/as-file target-root) "*")
        (filter fs/directory?)
        (map fs/base-name)))
@@ -74,7 +74,7 @@
 
 (defn main []
   (let [target-root "/media/nico/Iomega HDD/media/Series"
-        src-root "/home/nico/media/tijdelijk"
+        src-root "/media/home.old/nico/media/tijdelijk"
         series (det-series target-root)]
     (println (str "Series: " (vec series))) ; vec needed to coerce lazy seq to vector, to print it.
     (handle-dir-root src-root target-root series)
