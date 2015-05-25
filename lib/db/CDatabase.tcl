@@ -1,8 +1,13 @@
-# Main class for database connections to mysql.
+# Main class for database connections to mysql and other databases.
 # @todo separate general with music specific functionality
 package require Itcl
 # package require ndv
 package require Tclx
+
+# changes
+# 24-05-2015 NdV Add support for Postgres
+
+ndv::source_once postgres.tcl
 
 package provide ndv 0.1.1
 
@@ -14,23 +19,11 @@ namespace eval ::ndv {
   }
 
 	namespace export CDatabase
-	#variable MYSQLTCL_LIB  
-  # source [file join $env(CRUISE_DIR) checkout lib perflib.tcl]
-  # source [file join $env(CRUISE_DIR) checkout script database JMSchemaDef.tcl]
-  # source [file join $env(CRUISE_DIR) checkout script database NOSchemaDef.tcl]
-  # source [file join $env(CRUISE_DIR) checkout script database NotesSchemaDef.tcl]
-  # source [file join [file dirname [info script]] ModelSchemaDef.tcl]
   
   # controlled loading of package.
-  if {[catch {package require mysqltcl} msg]} {
-    #set MYSQLTCL_LIB 0
-    # 18-6-2013 NdV don't put error message anymore, is irritating and mysql not used so much anymore.
-    # puts stderr "Failed to load mysqltcl library. Msg = $msg"
-  } else {
-    #set MYSQLTCL_LIB 1
-  }
-  
-  # source [file join $env(CRUISE_DIR) checkout script lib CLogger.tcl]
+  catch {package require mysqltcl}
+  catch {package require tdbc}
+  catch {package require tdbc::postgres}
   
   itcl::class CDatabase {
     private common log
@@ -38,13 +31,24 @@ namespace eval ::ndv {
   
     # common, static things for singleton
     private common instance  ""
-    private common DB_NAME "indmeetmod"
+    # private common DB_NAME "indmeetmod"
   
     # if param new != 0, return a new instance.
     public proc get_database {a_schemadef {new 0}} {
+      $log debug "get_database: start"
+      # breakpoint
       if {($instance == "") || $new} {
-        set instance [uplevel {namespace which [::ndv::CDatabase #auto]}]
+        $log debug "creating new instance"
+        # breakpoint
+        # set instance [uplevel {namespace which [::ndv::CDatabase #auto]}]
+
+        # 2015-05-27 met uplevel in Tcl8.6.1 een core dump: Tcl_AppendStringsToObj called with shared object
+        # dus even zonder uplevel, kijken wat 'ie doet.
+        set instance [namespace which [::ndv::CDatabase #auto]]
+        # set instance [::ndv::CDatabase #auto]
+        $log debug "created instance $instance, now set schemadef"
         $instance set_schemadef $a_schemadef
+        
         $log debug "Returning new database instance"
       } else {
         $log debug "Returning existing database instance"
@@ -57,17 +61,14 @@ namespace eval ::ndv {
     private variable conn
     private variable connected
     private variable schemadef
+
+    # 24-5-2015 NdV hold type of database
+    private variable dbtype
     
     private constructor {} {
       set conn ""
       set connected 0
-    }
-  
-    public method set_modelclass_old {modelclass} {
-      # global MYSQLTCL_LIB
-      #variable MYSQLTCL_LIB
-      set schemadef [uplevel {namespace which [$modelclass #auto]}]
-      set_schemadef $schemadef
+      set dbtype mysql ; # still default
     }
   
     public method set_schemadef {a_schemadef} {
@@ -77,15 +78,39 @@ namespace eval ::ndv {
       # set schemadef [uplevel {namespace which [ModelSchemaDef #auto]}]
       # set schemadef [uplevel {namespace which [$modelclass #auto]}]
       set schemadef $a_schemadef
-      if {[lsearch [package names] mysqltcl] >= 0} {        
-        connect
-      } else {
-        $schemadef set_no_db 1
-      }
+      set_dbtype [$a_schemadef get_dbtype]
+      connect
       $schemadef set_conn $conn
     }
-    
+
     private method connect {} {
+      connect_$dbtype
+    }
+
+    private method connect_postgres {} {
+      puts "connecting to postgres..."
+      # TODO weer terugzetten. Ook regel met pw er weer uit.
+      set conn [tdbc::postgres::connection new -user [$schemadef get_username] -password [$schemadef get_password] -database [$schemadef get_db_name]]
+      # set conn [tdbc::postgres::connection new -user nico -password "13.,polk" -database scheids]
+
+      set connected 1
+    }
+
+    private method connect_mysql {} {
+      $log debug "connecting to mysql"
+      try_eval {
+        set conn [::mysql::connect -host localhost -user [$schemadef get_username] \
+                      -password [$schemadef get_password] -db [$schemadef get_db_name]]
+        set connected 1
+        $log info "Connected to database"
+      } {
+        $log warn "Failed to connect to database: $errorResult"
+        $log warn "schemadef: $schemadef"
+        $schemadef set_no_db 1
+      }
+    }
+    
+    private method connect_old {} {
       $log debug "new connect method, for reconnecting also"
       try_eval {
         set conn [::mysql::connect -host localhost -user [$schemadef get_username] \
@@ -98,8 +123,13 @@ namespace eval ::ndv {
         $schemadef set_no_db 1
       }
     }
+
+    public method set_dbtype {a_dbtype} {
+      set dbtype $a_dbtype      
+    }
     
     # check DB connection and reconnect if needed
+    # @TODO make working for postgres, if needed.
     public method reconnect {} {
       $log debug "reconnect"
       set still_connected 0
@@ -119,7 +149,12 @@ namespace eval ::ndv {
     
     private destructor {
       if {$connected} {
-        ::mysql::close $conn
+        if {$dbtype == "mysql"} {
+          ::mysql::close $conn
+        }
+        if {$dbtype == "postgres"} {
+          $conn close
+        }
       }
       set conn "" 
       set connected 0

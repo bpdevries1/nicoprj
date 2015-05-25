@@ -37,6 +37,8 @@ namespace eval ::ndv {
     protected variable fk_field
   
     protected variable db_name
+    protected variable dbtype
+    
     protected variable username
     protected variable password
     
@@ -49,7 +51,15 @@ namespace eval ::ndv {
     public method get_db_name {} {
       return $db_name
     }
-  
+
+    public method get_dbtype {} {
+      return $dbtype
+    }
+
+    public method set_dbtype {a_dbtype} {
+      set dbtype $a_dbtype
+    }
+    
     public method get_username {} {
       return $username 
     }
@@ -67,31 +77,30 @@ namespace eval ::ndv {
     public method set_no_db {val} {
       $log debug "set_no_db called with val: $val"
       set no_db $val
-      set_classes_no_db
+      set_classes_no_db $val
     }
     
     public method get_no_db {} {
       return $no_db
     }
     
-    private method set_classes_no_db {} {
+    private method set_classes_no_db {val} {
       $log debug "set_classes_no_db called"
       foreach classdef [array names classdefs] {
-        $classdefs($classdef) set_no_db $no_db
+        $classdefs($classdef) set_no_db $val
       }
     }
     
-    public method get_db_name_old {} {
-      # @todo eerst notes2 voor testen, later notes weer.
-      # return "notes_test"
-      # return "notes_test2"
-      return "<abstract>"
-    }
-  
     public method set_conn {a_conn} {
       set conn $a_conn
+      $log debug "set_conn: call define_classes"
+      # return [itcl::code $this abc]
+      # $this define_classes
+      $log debug "set_conn: this: $this"
+      # itcl::code $this define_classes
       define_classes
-      set_classes_no_db
+      $log debug "called define classes with this: $this"
+      set_classes_no_db 0
     }
   
     public method get_conn {} {
@@ -106,7 +115,7 @@ namespace eval ::ndv {
       return $fk_field($fromtable,$totable)
     }
       
-    private method define_classes {} {
+    protected method define_classes {} {
       $log debug "Abstract define_classes"
     }
       
@@ -132,6 +141,9 @@ namespace eval ::ndv {
   
     public method find_objects {class_name args} {
       $log debug "args: $args \[[llength $args]\]"
+      # breakpoint
+      $log debug "classdefs: [array names classdefs] ***"
+      $log debug "this: $this"
       set classdef $classdefs($class_name)
       return [$classdef find_objects $args]
     

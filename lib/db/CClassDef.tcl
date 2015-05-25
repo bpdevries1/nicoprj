@@ -14,20 +14,13 @@ namespace eval ::ndv {
 	namespace export CClassDef
   namespace export CFieldDef
   
-  #source [file join $env(CRUISE_DIR) checkout lib perflib.tcl]
-  #source [file join $env(CRUISE_DIR) checkout script lib CLogger.tcl]
-  
   # @todo (?) ook nog steeds pk en fk defs, voor queries?
   itcl::class CClassDef {
   
     private common log
     set log [::ndv::CLogger::new_logger [file tail [info script]] info]
     # set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
-  
-    # private common logger_name $logger_name
-    # private common NO_DB
-    # set NO_DB 0
-  
+    
     public proc new_classdef {schemadef class_name id_field} {
       set classdef [uplevel {namespace which [::ndv::CClassDef #auto]}]
       $classdef init $schemadef $class_name $id_field
@@ -35,6 +28,7 @@ namespace eval ::ndv {
     }
   
     private variable schemadef
+    private variable dbtype
     private variable conn
     private variable no_db ; # boolean (0/1), true if no database available.
     
@@ -52,6 +46,7 @@ namespace eval ::ndv {
       set table_name $class_name
       set id_field $an_id_field
       set no_db 0
+      set dbtype [$schemadef get_dbtype]
     }
   
     public method set_no_db {val} {
@@ -128,14 +123,25 @@ namespace eval ::ndv {
         set res 1
         set id 1
       } else {
-        set res [::mysql::exec $conn $query]
+        if {$dbtype == "mysql"} {
+          set res [::mysql::exec $conn $query]
+        }
+        if {$dbtype == "postgres"} {
+          set res [pg_query $conn $query]
+          # res zou 1 moeten, 1 row ge-insert?
+        }
       }
       if {$res != 1} {
         error "insert of $class_name did not return 1" 
       }
       
       if {$id == ""} {
-        set id [::mysql::insertid $conn] 
+        if {$dbtype == "mysql"} {
+          set id [::mysql::insertid $conn]   
+        }
+        if {$dbtype == "postgres"} {
+          set id [pg_last_id $conn $table_name]
+        }
       } else {
         # id al bij superclass gezet.
       }
@@ -182,7 +188,12 @@ namespace eval ::ndv {
         # set query "update $table_name $set_clause where $id_field = $id"
         set query "update $table_name $set_clause where $id_field = [$field_defs($id_field) det_value $id]"
         $log debug "updating record in $table_name with id $id: $query"
-        set res [::mysql::exec $conn $query]
+        if {$dbtype == "mysql"} {
+          set res [::mysql::exec $conn $query]          
+        }
+        if {$dbtype == "postgres"} {
+          set res [pg_query $conn $query]
+        }
         if {$res == 1} {
           # ok
         } elseif {$res == 0} {
@@ -224,15 +235,23 @@ namespace eval ::ndv {
         set args [lindex $args 0]
       }
       $log debug "args: $args \[[llength $args]\]" 
-      # set query "select t.$id_field from $table_name t where [det_where_clause $args]"
       set query "select t.$id_field from [det_table_refs] where [det_where_clause $args]"
       $log debug "query: $query"
       # @todo query uitvoeren
       # set result {}
-      
-      set result [::mysql::sel $conn $query -flatlist]
-      # lappend result 23
-      # lappend result 24
+      if {$dbtype == "mysql"} {
+        set result [::mysql::sel $conn $query -flatlist]  
+      }
+      if {$dbtype == "postgres"} {
+        set result [pg_query_flatlist $conn $query]
+      }
+      if {$dbtype == "postgres2"} {
+        set res [pg_query $conn $query]
+        set result {}
+        $res foreach row {
+          lappend result [dict get $row $id_field]
+        }
+      }
       return $result
     }
   
@@ -265,17 +284,28 @@ namespace eval ::ndv {
         }
       }		
     }
-  
+
+    # 2015-05-25 NdV only used for insert, remove id field
     private method det_field_names {} {
       set result [lsort [array names field_defs]]
-      return [join $result ", "]
+      set result2 {}
+      foreach res $result {
+        if {$res != "id"} {
+          lappend result2 $res
+        }
+      }
+      return [join $result2 ", "]
     }
-  
+
+    # 2015-05-25 NdV only used for insert, remove id field
+    # apparently not a problem for MySQL, but for Postgres it is.
     private method det_values {values_name} {
       upvar $values_name values
       set result {}
       foreach field_name [lsort [array names field_defs]] {
-        lappend result [$field_defs($field_name) det_value $values($field_name)]
+        if {$field_name != "id"} {
+          lappend result [$field_defs($field_name) det_value $values($field_name)]  
+        }
       }
       return [join $result ", "]
     }
@@ -324,7 +354,12 @@ namespace eval ::ndv {
   
       set query "delete from $table_name where $id_field = $id"
       $log debug "deleting record in $table_name with id $id: $query"
-      set res [::mysql::exec $conn $query]
+      if {$dbtype == "mysql"} {
+        set res [::mysql::exec $conn $query]  
+      }
+      if {$dbtype == "postgres"} {
+        set res [pg_query $conn $query]
+      }
       if {$res == 1} {
         # ok
       } elseif {$res == 0} {
