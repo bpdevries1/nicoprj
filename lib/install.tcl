@@ -1,4 +1,4 @@
-#!/usr/bin/env tclsh86
+#!/usr/bin/env tclsh861
 
 #!/home/nico/bin/tclsh
 
@@ -13,6 +13,9 @@ set package_version 0.1.1
 
 # 16-1-2010 niet meer doen, gebruik vaste pkgIndex.tcl
 #pkg_mkIndex . *.tcl
+
+# TODO
+# 2015-05-27 NdV install lib in all tcl versions (now just for the interpreter that runs install.tcl)
 
 # lib_root D:/DEVELOP/TCL85/lib/tcl8.5 => D:/DEVELOP/TCL85/lib
 proc main {} {
