@@ -1,16 +1,26 @@
 #!/usr/bin/env tclsh86
 
-# TODO
-# protocol/host vervangen door {host} of evt hostx als er meerdere zijn. Hosts ook 'printen' op het eind.
-# generieke stukken van URL's vervangen door {urlpartx} en ook deze op het eind noemen.
-
 package require textutil::split
 package require Tclx
 package require ndv
+package require csv
 
 interp alias {} splitx {} ::textutil::split::splitx
 
 set DEBUG 0
+
+# TODO
+# - naam dit script aanpassen -> genereert nu ook een script met correlatie web_reg_save_param_regexp's.
+
+# Manual actions
+# - vuser_init
+# - certificate
+# - user list (param)
+# - set log to full
+# - proxy
+
+# CHECK
+# - web_reg_save_param_regexp binnen een concurrent group? Kan fouten geven? Mogelijk ook bij recording opgeven, dat dingen als json als hoofd object worden gezien.
 
 proc main {argv} {
   global prj_dir
@@ -18,12 +28,59 @@ proc main {argv} {
   set_default_params
   set report_dir [file join $prj_dir report]
   file mkdir $report_dir
-  set f [open [file join $report_dir trans-urls.org] w]
-  foreach c_filename [lsort -nocase [glob -directory $prj_dir *.c]] {
-    handle_c_file $f $c_filename
+  file mkdir [file join $prj_dir generated]
+  foreach filename [glob -nocomplain -directory [file join $prj_dir generated] -type f *] {
+    file delete $filename
   }
-  print_params $f
-  close $f 
+  
+  set f [open [file join $report_dir trans-urls.org] w]
+  set file_open 1
+  try_eval {
+	  foreach c_filename [lsort -nocase [glob -directory $prj_dir *.c]] {
+		if {![ignore_file [file tail $c_filename]]} {
+			handle_c_file $f $c_filename
+		}
+	  }
+	  # then replace values with params
+	  foreach c_filename [lsort -nocase [glob -directory $prj_dir *.c]] {
+		if {![ignore_file [file tail $c_filename]]} {
+			replace_values_c_file $f $c_filename
+		}
+	  }
+	  print_params $f
+  } {
+    # when an error occurs, close the output file
+	puts $f "errorresult: $errorResult"
+	puts $f "errorCode: $errorCode"
+	puts $f "errorInfo: $errorInfo"
+	puts $f "An error occured, close the file"
+	close $f
+	set file_open 0
+  }
+  if {$file_open} {
+	close $f 
+  }
+}
+
+proc replace_values_c_file {f c_filename} {
+  global prj_dir urlparams
+  # multiple regexp's can be added to one file, so check first.
+  # this is not the most efficient, but should be fast enough.
+  set gen_name [file join $prj_dir generated [file tail $c_filename]]
+  set text [read_file $c_filename]
+  set fo [open $gen_name w]
+  dict for {urlpart param} $urlparams {
+    regsub -all $urlpart $text "\{$param\}" text
+  }
+  puts $fo $text
+  close $fo
+}
+
+proc ignore_file {c_filename} {
+  if {[file tail $c_filename] == "pre_cci.c"} {
+    return 1
+  }
+  return 0
 }
 
 proc handle_c_file {f c_filename} {
@@ -37,6 +94,8 @@ proc handle_c_file {f c_filename} {
   set lines [lrange $lines 2 end-1]
   set text [join $lines "\n"]
   set stmts [splitx $text {;\n}]
+  
+  # TODO web_urls etc in concurrent actions toch ook behandelen?
   foreach stmt $stmts {
     lassign [parse_stmt $stmt] fnname params
     if {$fnname == "lr_start_transaction"} {
@@ -44,7 +103,7 @@ proc handle_c_file {f c_filename} {
       puts $f "** Transaction: $cur_trans"
     } elseif {$fnname == "lr_end_transaction" } {
       set cur_trans "<none>"
-    } elseif {($fnname == "web_url") || ($fnname == "web_submit_data")} {
+    } elseif {($fnname == "web_url") || ($fnname == "web_submit_data") || ($fnname == "web_custom_request")} {
       if {($cur_trans != "<none>") && !$in_concurrent} {
         lassign $params label url
         if {[ignore_url $url]} {
@@ -82,8 +141,9 @@ proc handle_c_file {f c_filename} {
 proc parse_stmt {stmt} {
   set stmt [remove_comments [string trim $stmt]]
   if {[regexp {^([^\(\)]+)\((.*)\)$} $stmt z fnname strparams]} {
-    # TODO comma's can be part of a string, need to take into account. Use CSV parsing lib?
-    set params [splitx $strparams ","]
+    ## TODO comma's can be part of a string, need to take into account. Use CSV parsing lib?
+    # set params [splitx $strparams ","]
+	set params [csv::split $strparams]
     set paramst {}
     foreach el $params {
       set el2 [string trim $el]
@@ -125,7 +185,7 @@ proc ignore_fncall {fnname} {
 
 # force an error if:
 # first character is a double quote, but last one isn't
-# last character is a double quote, but first one isnt't.
+# last character is a double quote, but first one isn't.
 # @pre str is already trimmed.
 proc check_quotes {str} {
   set firstchar [string range $str 0 0]
@@ -135,11 +195,13 @@ proc check_quotes {str} {
       # ok, both quotes
       # error "just atest"
     } else {
-      error "Quotes not aligned: $str"
+      breakpoint
+	  error "Quotes not aligned: $str"
     }
   } else {
     if {$lastchar == "\""} {
-      error "Quotes not aligned: $str"
+      breakpoint
+	  error "Quotes not aligned: $str"
     } else {
       # ok, both not quotes
     }
@@ -153,7 +215,7 @@ proc set_default_params {} {
   set urlparams [dict create \
 "https://securepat01.rabobank.com/wps/myportal/rcc/dashboard/mydashboard" "dashboard" \
 "https://securepat01.rabobank.com/wps/myportal/rtsec" "rtsec" \
-"https://securepat01.rabobank.com" "secpat"]
+"https://securepat01.rabobank.com" "host"]
   set param_idx 0
 }
 
@@ -162,16 +224,118 @@ proc print_params {f} {
   puts $f "* Substituted URL parameters"
   dict for {urlpart param} $urlparams {
     puts $f "** $param = $urlpart"
-    print_param_details $f $urlpart
+    print_param_details $f $urlpart $param
   }
 }
 
 # find first .htm file in data subdir where urlpart is found. Then find the request where this .htm is a response of. Print both to the output as org level 3.
-proc print_param_details {f urlpart} {
+proc print_param_details {f urlpart param} {
   set first_file [find_first_occ $urlpart] ; # returns something like t27.htm
-  set c_file [find_snapshot $first_file] ; # returns somethink like login.c
+  set c_file [find_snapshot $first_file] ; # returns something like login.c
   puts $f "*** first found in snapshot: $first_file"
   puts $f "*** in action/c: $c_file"
+  if {[regexp {^par\d+$} $param]} {
+    # only for generated params.
+	if {$c_file == "<not found>"} {
+	  puts $f "**** WARNING: generated param, but not found in file"
+	} else {
+	  add_save_param_regexp $f $c_file $first_file $urlpart $param
+	}
+  }
+}
+
+# @param c_file - file to add regexp to (in generated folder)
+# @param first_file - output file (html, json) in data-folder where param was first found
+# @param urlpart - param/text that was found.
+# @param param - name of the parameter, eg p1.
+# @post - c_file in generated dir is updated with a web_reg_save_param_regexp in the right place.
+proc add_save_param_regexp {f c_file first_file urlpart param} {
+  global prj_dir gen_file_idx
+  # multiple regexp's can be added to one file, so check first.
+  # this is not the most efficient, but should be fast enough.
+  set gen_name [file join $prj_dir generated [file tail $c_file]]
+  if {![file exists $gen_name]} {
+    file copy [file join $prj_dir $c_file] $gen_name
+  }
+  
+  set text [read_file [file join $prj_dir data $first_file]]
+  # if {![regexp "(.{5})${urlpart}(.{5})" $text z pre post]} {}
+  if {![regexp "(\[^\\n\]{1,5})${urlpart}(\[^\\n\]{1,5})" $text z pre post]} {
+    error "urlpart ($urlpart) not found in first_file ($first_file)"
+  }
+  # set re "${pre}(\[^/\]+?)${post}"
+  set re [make_regexp $pre $post]
+  set res [regexp -inline -all $re $text]
+  if {$res == {}} {
+    error "text not found again with build RE ($re), urlpart ($urlpart) not found in first_file ($first_file)"
+  }
+  # find match number and put in statement
+  set idx 1
+  set found 0
+  foreach {z m} $res {
+     if {$m == $urlpart} {
+	   # match found
+	   set found 1
+	   break
+	 }
+	 incr idx
+  }
+  if {!$found} {
+    puts $f "**** Matched found for RE, but none are equal to orig text"
+  }
+  
+  # error "text found diff with build RE ($re) is not the same, in first_file ($first_file): urlpart: $urlpart. New part: $part2"
+  # puts $f "**** text found diff with build RE ($re) is not the same, in first_file ($first_file): urlpart: $urlpart. New part: $part2"
+  
+  # part is found again, so build new file.
+  set temp_name "$gen_name.TEMP"
+  set fo [open $temp_name w]
+
+  set text [read_file $gen_name]
+  set lines [split $text "\n"]
+  puts $fo [join [lrange $lines 0 1] "\n"]
+  set lines [lrange $lines 2 end-1]
+  set text [join $lines "\n"]
+  set stmts [splitx $text {;\n}]
+  set stmts2 {}
+  set snapshot_name [det_snapshot_name $first_file]
+  foreach stmt $stmts {
+    if {[string first $snapshot_name $stmt] >= 0} {
+	  lappend stmts2 [det_save_param_regexp $param $re $idx]
+	}
+    lappend stmts2 $stmt
+  } 
+  puts $fo [join $stmts2 ";\n"]
+  close $fo
+  incr gen_file_idx
+  file rename $gen_name "$gen_name.$gen_file_idx"
+  file rename $temp_name $gen_name
+}
+
+# bij maken regexp's:
+# single quote vervangen door . Ook met backslash pakt VuGen het niet.
+# double quote vervangen door \"
+proc make_regexp {pre post} {
+  regsub -all {'} $pre "." pre
+  regsub -all {'} $post "." post
+
+  regsub -all {\"} $pre "\\\"" pre
+  regsub -all {\"} $post "\\\"" post
+
+  set re "${pre}(\[^/\]+?)${post}"
+  return $re
+}
+
+proc det_snapshot_name {first_name} {
+  return "Snapshot=[file rootname $first_name].inf"
+}
+
+proc det_save_param_regexp {param re idx} {
+  return "// Added generated param: $param
+        web_reg_save_param_regexp(\"ParamName=$param\",
+	        \"RegExp=$re\",
+			\"Ordinal=$idx\",
+	        LAST)"
 }
 
 proc find_first_occ {urlpart} {
@@ -187,7 +351,7 @@ proc find_first_occ {urlpart} {
 
 proc find_ordered_htm_files {} {
   global prj_dir
-  set lst [glob -directory [file join $prj_dir data] *.htm]
+  set lst [glob -directory [file join $prj_dir data] *.htm*]
   set nrs {}
   foreach el $lst {
     if {[regexp {t(\d+)\.htm} [file tail $el] z nr]} {
@@ -196,7 +360,8 @@ proc find_ordered_htm_files {} {
   }
   set res {}
   foreach nr [lsort -integer $nrs] {
-    set htm_file [file join $prj_dir data "t$nr.htm"] 
+    # set htm_file [file join $prj_dir data "t$nr.htm"]
+    set htm_file [:0 [glob -directory [file join $prj_dir data] "t$nr.htm*"]]
     lappend res $htm_file
     # puts $htm_file
   }
@@ -211,7 +376,10 @@ proc find_snapshot {filename} {
   if {[regexp {t(\d+)\.htm} $filename z nr]} {
     set needle "Snapshot=t$nr.inf"
     foreach filename [lsort [glob -directory $prj_dir "*.c"]] {
-      set text [read_file $filename]
+      if {[ignore_file [file tail $filename]]} {
+	    continue
+	  }
+	  set text [read_file $filename]
       if {[string first $needle $text] > -1} {
         return [file tail $filename]
       }
@@ -246,7 +414,8 @@ proc handle_url {url} {
       # if {[string length $part] >= $MIN_REPLACE_LEN} {}
       if {[should_replace $part]} {
         incr param_idx
-        set p_name "p$param_idx"
+        # set p_name "p$param_idx"
+		set p_name "par$param_idx"
         dict set urlparams $part $p_name 
         lappend parts2 "\{$p_name\}"
       } else {
