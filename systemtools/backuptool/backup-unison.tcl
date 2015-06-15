@@ -1,18 +1,100 @@
 #!/home/nico/bin/tclsh86
 
 # set nr of hours to less than 3 days, want backup every 3 days.
-set BACKUP_INTERVAL_HOURS 60
+# 27-4-2015 use setting in .prf file.
+# set BACKUP_INTERVAL_HOURS 60
 
 proc main {argv} {
+  if {[unison_running]} {
+    log "WARN: Unison already running, exit."
+    exit 1
+  }
+  set unison_dir "/home/nico/.unison"
+  set projects [det_projects $unison_dir]
+  puts "projects: $projects"
+  # exit
+  # projects is list of: project, freq_hours, prio
+  foreach el [lsort -integer -index 2 $projects] {
+    backup_unison {*}[lrange $el 0 1]
+  }
+}
+
+proc unison_running {} {
+  return 0 ; # TODO aanpassen weer.
+  set ok 0
+  catch {
+    set res [exec ps -ef | grep unison | grep -v grep | grep -v backup-unison.tcl]
+    set ok 1
+  }
+  if {!$ok} {
+    log "ERROR: could not exec ps for unison, exiting"
+    exit 2
+  }
+  if {$res == ""} {
+    # ok
+    return 0
+  } else {
+    log "WARN: unison running, exiting:"
+    log $res
+    return 1
+  }
+}
+
+proc main_old {argv} {
   backup_unison laptop2data3tb
   backup_unison homenico2data3tb
   backup_unison nas2iomega2tb
   backup_unison iomega2homenico
 }
 
+# result (projects) is list of: project, freq_hours, prio
+# only add profile to result (without .prf) iff it has frequency and priority settings
+proc det_projects {unison_dir} {
+  set res {}
+  foreach prf [glob -directory $unison_dir *.prf] {
+    set freq ""
+    set prio ""
+    set f [open $prf r]
+    set txt [read $f]
+    close $f
+    if {[regexp {\n#!frequency_hours *= *(\d+)} $txt z fr]} {
+      set freq $fr
+    }
+    if {[regexp {\n#!priority *= *(\d+)} $txt z pr]} {
+      set prio $pr
+    }
+    if {($prio != "") && ($freq != "")} {
+      lappend res [list [file rootname [file tail $prf]] $freq $prio]
+    } else {
+      log "WARN: No freq/prio found in $prf"
+    }
+  }
+  return $res
+}
+
 # if a succesful backup has been done longer than 3 days ago, try a new one.
 # check unison exit-codes, possibly not all drives are mounted (eg laptop)
-proc backup_unison {prj} {
+proc backup_unison {prj freq_hours} {
+  log "backup_unison: $prj"
+  set last_ok [read_last_ok $prj]
+  if {[too_long_ago $last_ok $freq_hours]} {
+    log "too long ago, start new backup..."
+    set started [now_fmt]
+    set exitcode [do_exec /home/nico/bin/unison -auto -batch $prj >/dev/null 2>@1]
+    if {$exitcode <= 2} {
+      # code 1 en 2 zijn kleine fouten, ook markeren als ok.
+      write_last_ok $prj $started
+    }
+    log "backup finished"
+  } else {
+    log "backup done not too long ago, so nothing to do."
+  }
+  log "backup_unison: $prj finished"
+}
+
+# if a succesful backup has been done longer than 3 days ago, try a new one.
+# check unison exit-codes, possibly not all drives are mounted (eg laptop)
+proc backup_unison_old {prj} {
   log "backup_unison: $prj"
   set last_ok [read_last_ok $prj]
   if {[too_long_ago $last_ok]} {
@@ -67,7 +149,23 @@ proc det_exitcode {options} {
   }
 }
 
-proc too_long_ago {last_ok} {
+proc too_long_ago {last_ok freq_hours} {
+  # global BACKUP_INTERVAL_HOURS
+  if {$last_ok == "<none>"} {
+    return 1 ; # first time, no succesful backups yet, so too_long_ago == 1
+  }
+  set sec_ago [clock scan $last_ok -format "%Y-%m-%d %H:%M:%S"]
+  set sec_now [clock seconds]
+  set hours_diff [expr 1.0*($sec_now - $sec_ago) / 3600]
+  log "hours_diff: $hours_diff"
+  if {$hours_diff > $freq_hours} {
+    return 1
+  } else {
+    return 0
+  }
+}
+
+proc too_long_ago_old {last_ok} {
   global BACKUP_INTERVAL_HOURS
   if {$last_ok == "<none>"} {
     return 1 ; # first time, no succesful backups yet, so too_long_ago == 1
