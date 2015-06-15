@@ -20,6 +20,13 @@ proc pg_query {conn query} {
   # todo read res, transform to list of lists?
 }
 
+proc pg_query_list {conn query} {
+  set res [pg_query $conn $query]
+  set result [$res allrows -as lists]
+  $res close
+  return $result  
+}
+
 proc pg_query_flatlist {conn query} {
   set res [pg_query $conn $query]
   set result {}

@@ -534,7 +534,7 @@ proc lees_tsv {filename callback_proc} {
     set lst_values [split $line "\t"]
     array unset ar_values
     foreach name $lst_names value $lst_values {
-      set ar_values($name) $value 
+      set ar_values($name) [string trim $value]
     }
     {*}$callback_proc $line $lst_names ar_values
   }  
