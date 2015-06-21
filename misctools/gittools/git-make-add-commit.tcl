@@ -6,7 +6,7 @@ proc main {argv} {
   # eerst alleen nicoprj
   set os [det_os]
   if {[:# $argv] > 0} {
-    lassign $argv dir
+    lassign $argv dir msg
     cd $dir
   } else {
     if {$os == "windows"} {
@@ -23,7 +23,7 @@ proc main {argv} {
   fconfigure $f -translation lf
   puts $f "# $filename"
   puts $f "# Adding files to git and commit"
-  set has_changes [puts_changes $f $res]
+  set has_changes [puts_changes $f $res $msg]
   puts $f "# name of file to exec: $filename"
   close $f
   if {$os == "windows"} {
@@ -55,7 +55,7 @@ proc det_os {} {
   }
 }
 
-proc puts_changes {f res} {
+proc puts_changes {f res msg} {
   set has_changes 0
   set in_untracked 0
   set files {}
@@ -111,13 +111,14 @@ proc puts_changes {f res} {
     if {$dir != $prev_dir} {
       if {$prev_dir != "<none>"} {
       
-        puts $f "git commit -m \"Changes for $prev_dir at $dt\""
+        # puts $f "git commit -m \"Changes for $prev_dir at $dt\""
+        puts $f "git commit -m \"$msg\""
       }
     }
     puts $f "git add $file"
     set prev_dir $dir
   }
-  puts $f "git commit -m \"Changes for $prev_dir at $dt\""
+  puts $f "git commit -m \"$msg\""
   return $has_changes
 }
 
