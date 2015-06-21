@@ -24,8 +24,10 @@ proc define_tables {db} {
   $db add_tabledef logblock {id} {logfile_id {linestart int} {lineend int} \
                                       sourcefile {sourceline int} {relmsec real} \
                                       {relframeid int} {internalid int} \
-                                      url blocktype firstline restlines}
-
+                                      url blocktype {proxy int} firstline restlines}
+  $db add_tabledef reqresp {id} {logfile_id sourcefile {sourceline int} {linestart int} {lineend int} \
+    {relmsecfirst real} {relmseclast real} {durationmsec real} {relframeid int} {internalid int} \
+    url {responsecode int} response}
 }
 
 
