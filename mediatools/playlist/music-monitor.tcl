@@ -1,4 +1,6 @@
-#!/home/nico/bin/tclsh
+#!/usr/bin/env tclsh861
+
+# #!/home/nico/bin/tclsh
 
 package require ndv
 package require Tclx
@@ -17,6 +19,7 @@ proc main {argc argv} {
   # global log stderr argv0 SINGLES_ON_SD
 	$log info "Starting"
 
+  # 20-6-2015 np is also really used here, as in maak_album_playlist.tcl etc.
   set options {
     {np "Don't mark selected files as played in database"}
     {wait.arg "5000" "Polling interval in msec"}
@@ -174,21 +177,17 @@ proc db_connect_with_retry {{max_try 3}} {
 # return list: [$db $conn]
 proc db_connect {} {
   global db conn log
-  $log debug "before MusicSchemaDef::new"
-  set schemadef [MusicSchemaDef::new]
-  $log debug "before get_db"
-  # 14-1-2012 param 1=reconnect.
-  set db [::ndv::CDatabase::get_database $schemadef 1]
+  set db [get_db_from_schemadef]
   $log debug "before get_connection"
   set conn [$db get_connection]
-  $log debug "before set names utf8"
-  ::mysql::exec $conn "set names utf8"
+  #$log debug "before set names utf8"
+  #::mysql::exec $conn "set names utf8"
   $log debug "finished"
   # list $db $conn 
 }
 
 proc det_ids {db conn path} { 
-  ::mysql::sel $conn "select generic from musicfile where path = '[$db str_to_db [det_path_in_db $path]]'" -flatlist
+  pg_query_flatlist $conn "select generic from musicfile where path = '[$db str_to_db [det_path_in_db $path]]'"
 }
 
 main $argc $argv

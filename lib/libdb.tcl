@@ -13,7 +13,9 @@ package require TclOO
 # So also tdbc::mysql
 if {$tcl_version >= 8.6} {
   package require tdbc::sqlite3
-  catch {package require tdbc::mysql} ; # mysql not available on (philips) laptop.
+  catch {package require tdbc}
+  catch {package require tdbc::mysql} ; # mysql not available on (philips) laptop.  
+  catch {package require tdbc::postgres}
 } else {
   puts "Don't load sqlite, tcl version too low: $tcl_version"
 }
@@ -30,12 +32,16 @@ oo::class create dbwrapper {
       log debug "connect to: [lindex $args 0]"
       set conn [tdbc::sqlite3::connection new [lindex $args 0]]
       log debug "connected"
+      set dbname [lindex $args 0]
     } else {
       # assume mysql
-      set dbtype "mysql"
-      set conn [tdbc::mysql::connection new {*}$args]
+      # 20-6-2015 NdV assume postgres now, don't have MySQL anymore.
+      #set dbtype "mysql"
+      set dbtype "postgres"
+      #set conn [tdbc::mysql::connection new {*}$args]
+      set conn [tdbc::postgres::connection new {*}$args]
+      set dbname [dict get $args -database]
     }
-    set dbname [lindex $args 0]
   }
   
   # @todo destructor gets called in beginning?
@@ -91,6 +97,7 @@ oo::class create dbwrapper {
   }
   
   # @todo getDBhandle does (probably) not work with MySQL.
+  # @todo also not sure with Postgres
   method exec {query {return_id 0}} {
     my variable conn
     set stmt [$conn prepare $query]
@@ -211,6 +218,11 @@ oo::class create dbwrapper {
       set res [my query "select last_insert_id() last"]
       # log info "Returned id from MySQL: $res"
       return [dict get [lindex $res 0] last]
+    } elseif {$dbtype == "postgres"} {
+      # TODO not sure if this will work, if pg_last_id is available or postgres.tcl should be sourced.
+      set id [pg_last_id $conn $table]
+      # log info "Returned id from MySQL: $res"
+      return $id
     } else {
       # unknown database type, return nothing.
       return

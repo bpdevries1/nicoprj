@@ -1,4 +1,6 @@
-#!/home/nico/bin/tclsh86
+#!/usr/bin/env tclsh861
+
+##!/home/nico/bin/tclsh86
 
 # note: car-player snapt .m4a niet.
 
@@ -6,6 +8,7 @@ package require ndv
 package require Tclx
 
 ::ndv::source_once ../db/MusicSchemaDef.tcl
+::ndv::source_once ../lib/libmusic.tcl
 
 # set SINGLES_ON_SD 150 ; # 1GB?
 
@@ -35,11 +38,12 @@ proc main {argc argv} {
 	set to_drive $ar_argv(drv)
 	set bat_filename $ar_argv(bat)
 
-  set schemadef [MusicSchemaDef::new]
-  set db [::ndv::CDatabase::get_database $schemadef]
+  #set schemadef [MusicSchemaDef::new]
+  #set db [::ndv::CDatabase::get_database $schemadef]
+  set db [get_db_from_schemadef]
   set conn [$db get_connection]
 
-  ::mysql::exec $conn "set names utf8"
+  # ::mysql::exec $conn "set names utf8"
 
   # create_random_view Singles
   # create_random_view "Singles-car"
@@ -51,9 +55,12 @@ proc main {argc argv} {
     $log info "Mark files as played in database"
     # $log warn "NOT: still in testing mode!"
     # 10-01-2014 exec within transaction, otherwise very slow. NOT TESTED YET!
-    ::mysql::exec $conn "start transaction"
-    ::ndv::music_random_update $db $lst "sd-auto" "-tablemain generic -viewmain singles -tableplayed played"
-    ::mysql::exec $conn "commit"
+    #::mysql::exec $conn "start transaction"
+    $db in_trans {
+      ::ndv::music_random_update $db $lst "sd-auto" "-tablemain generic -viewmain singles  -tableplayed played"
+    }
+    
+    #::mysql::exec $conn "commit"
   } else {
     $log info "Don't mark files as played in database" 
   }
@@ -64,7 +71,7 @@ proc main {argc argv} {
 
 proc create_random_view {group_name} {
   global log db conn 
-  catch {::mysql::exec $conn "drop view if exists singles"}
+  catch {pg_query $conn "drop view if exists singles"}
   set query "create view singles (id, path, freq, freq_history, play_count) as
              select g.id, m.path, g.freq, g.freq_history, g.play_count
              from generic g, musicfile m, member mem, mgroup mg
@@ -72,7 +79,7 @@ proc create_random_view {group_name} {
              and mem.generic = g.id
              and mem.mgroup = mg.id
              and mg.name = '$group_name'"
-  ::mysql::exec $conn $query
+  pg_query $conn $query
 }
 
 # @param lst: list of tuples/lists: [id path random]

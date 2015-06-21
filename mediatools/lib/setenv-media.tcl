@@ -10,6 +10,19 @@ set env(MEDIA_COMPLETE) $env(MEDIA_MUSIC)/Albums
 set env(MEDIA_SINGLES) $env(MEDIA_MUSIC)/Singles
 
 # [2013-01-13 13:57:39] add new temp-dir
-set env(MEDIA_TEMP) "/home/nico/media/tijdelijk"
+# 2015-06-20 aangepast, nu een /home/media. Nog wel tijdelijk-dir waar ook andere dingen dan music in staan.
+set env(MEDIA_TEMP) "/home/media/tijdelijk"
 
-
+# 20-6-2015 check of alle dirs bestaan
+foreach k [array names env] {
+  if {[regexp {^MEDIA_} $k]} {
+    if {[file exists $env($k)]} {
+      # ok, path exists
+      # puts "Ok, path exists: $env($k)"
+    } else {
+      puts "ERROR: path does not exist: $env($k)"
+    }
+  } else {
+    # no MEDIA env var, ignore.
+  }
+}

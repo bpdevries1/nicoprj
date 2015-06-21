@@ -5,10 +5,15 @@
 # exec query;
 # result: if insert,update,delete -> return number of rows affected.
 # if select, return resultset object.
+# of course this is tricky
 proc pg_query {conn query} {
   set stmt [$conn prepare $query]
   set res [$stmt execute]
-  if {[regexp -nocase {^(insert)|(update)|(delete)} $query]} {
+  # 2015-06-20 NdV The extra parens are really needed,
+  # otherwise eg delete does not have to be at the start of the query
+  if {[regexp -nocase {^((insert)|(update)|(delete))} $query]} {
+    #puts "pg_query - query is DML, return rows affected"
+    #breakpoint
     set rc [$res rowcount]
     $res close
     $stmt close
@@ -29,6 +34,7 @@ proc pg_query_list {conn query} {
 
 proc pg_query_flatlist {conn query} {
   set res [pg_query $conn $query]
+  # puts "DEBUG - pg_query_flatlist - query res object/fn: $res"
   set result {}
   foreach row [$res allrows -as lists] {
     lappend result {*}$row
