@@ -1,3 +1,5 @@
+#!/usr/bin/env tclsh861
+
 package require ndv
 package require tdbc::sqlite3
 
