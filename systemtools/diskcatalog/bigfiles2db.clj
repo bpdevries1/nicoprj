@@ -77,26 +77,21 @@
    (doseq [out channels]
      (async/close! out))))
 
-;(def db-spec-sqlite {:classname "org.sqlite.JDBC"
-;                     :subprotocol "sqlite"})
-
-;(def required-opts #{:root})
-
 (defn main [args]
   (when-let [opts (my-cli args #{:database}
       ["-h" "--help" "Print this help"
             :default false :flag true]
       ["-t" "--treshold" "Treshold for big files in bytes" 
             :default 10e6 :parse-fn #(Float. %)]
-      ["-db" "--database" "Database path" :default "~/projecten/diskcatalog/bigfiles.db"]
-      ["-d" "--deletedb" "Delete DB before reading"
+      ["-d" "--database" "Database path" :default "~/projecten/diskcatalog/bigfiles.db"]
+      ["-z" "--deletedb" "Delete/zap DB before reading"
             :default false :flag true]
       ["-r" "--root" "Root directory to find big files in"])]
     (let [db-spec (db-spec-path db-spec-sqlite (:database opts))
           finish-chan (async/chan 1)]
        ; @todo kan zijn dat db-con niet goed werkt samen met async threads. Maar even zien.
       (jdbc/with-db-connection [db-con db-spec]
-        (org.sqlite.Function/create (:connection db-con) "regexp" (SqlRegExp.))
+        ;; (org.sqlite.Function/create (:connection db-con) "regexp" (SqlRegExp.))
         (bigfiles-producer opts (database-consumer db-con finish-chan))
         (println (str "Result of reading finish-chan: " (<!! finish-chan)))))))
 

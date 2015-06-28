@@ -3,6 +3,9 @@
 ;{[(
 ; check-backups.clj - check if every file has a backup and there are no orphan backups (without source)
 
+;; 25-6-2015 this script looks less useful now, as backup/sync is done with Unison, so
+;; should always be in sync.
+
 (load-file "../../clojure/lib/def-libs.clj") 
 (load-file "lib-diskcat.clj")
 

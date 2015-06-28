@@ -3,6 +3,7 @@
 ; test-udf.clj
 
 (load-file "../../clojure/lib/def-libs.clj")
+;;(load-file "../../../clojure/lib/def-libs.clj")
 
 (load-file "lib-diskcat.clj")
 
