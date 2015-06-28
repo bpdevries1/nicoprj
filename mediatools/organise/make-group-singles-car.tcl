@@ -144,7 +144,7 @@ proc find_origin_path {filename} {
   }
 }
 
-# lib functions for new tdbc::mysql connection
+# lib functions for new tdbc::mysql or postgres connection
 
 proc det_music_conn_args {} {
   set f [open ~/.config/music/music-settings.json r]
