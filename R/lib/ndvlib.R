@@ -1,6 +1,30 @@
 # ndvlib.R - general R functions to use
 # note: make it a package sometime, but first just source the thing.
 
+# install.packages("gsubfn")
+# sudo apt-get install tcl8.5-dev tk8.5-dev 
+# NOT: install.packages("tcltk"), door apt-get hierboven komt het goed.
+# install.packages("proto")
+# install.packages("gsubfn")
+# install.packages("chron")
+# install.packages("sqldf")
+# install.packages("digest")
+# install.packages("ggplot2", dependencies=TRUE) -> werkt ook niet zo lekker
+# install.packages("gtable")
+# install.packages("plyr")
+# install.packages("stringr")
+# install.packages("reshape2")
+# install.packages("colorspace")
+# install.packages("munsell")
+# install.packages("scales")
+# install.packages("RColorBrewer")
+# install.packages("Formula")
+# install.packages("ggplot2", dependencies=TRUE)
+# install.packages("Hmisc") -> laat maar even zitten, niet nodig nu.
+
+# 28-6-2015 deze bestaat niet meer? Maar nog wel nodig?
+# install.packages("RSQLite.extfuns")
+
 load.def.libs = function() {
   library(RSQLite, quietly=TRUE) ; # quietly: so we have no warnings, and no error output reported by Tcl.
   library(ggplot2, quietly=TRUE) ; # quietly: so we have no warnings, and no error output reported by Tcl.
@@ -10,6 +34,9 @@ load.def.libs = function() {
   library(grid) # for unit, met legends.
   library(scales) # for ticks per hour.
   library(sqldf) # for query-ing dataframes.
+  library(labeling) # for labels
+  # blijkbaar ook RSQLite.extfuns nodig
+  # library(RSQLite.extfuns)
 }
 
 db.open = function(db.name) {
@@ -32,7 +59,7 @@ db.exec = function(db, query) {
 }
 
 # always forget about paste, so use concat as an alias.
-# zou concat = paste0 ook kunnen?
+# zou concat = paste0 ook kunnen? Idd!
 concat = paste0
 #concat = function(...) {
 #  paste0(...)
