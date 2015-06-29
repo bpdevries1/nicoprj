@@ -70,7 +70,9 @@ proc maak_verlof_ovz {hh} {
         }
         
         # output prev date if this is a friday
-        if {[is_friday $prev_date]} {
+        # or if this date is a monday.
+        # if {[is_friday $prev_date]} {}
+        if {[is_monday $date]} {
           incrnum verlof $delta_verlof
           incrnum deeltijd $delta_deeltijd
           make_table_row $hh $prev_date $delta_verlof $verlof $delta_deeltijd $deeltijd $lst_notes
@@ -100,14 +102,19 @@ proc maak_verlof_ovz {hh} {
       # handle date/worktype row
       if {$project == "Deeltijd"} {
         incrnum delta_deeltijd -$hours
-        lappend lst_notes "$date: Deeltijd: $hours"
+        lappend lst_notes "$date: Deeltijd: -$hours"
       } elseif {$project == "Verlof"} {
         incrnum delta_verlof -$hours
-        lappend lst_notes "$date: Verlof: $hours"
+        lappend lst_notes "$date: Verlof: -$hours"
       } elseif {$project == "Feestdag"} {
         lappend lst_notes "$date: Feestdag"
         set werkdag 0
       } else {
+        if {[is_weekend $date]} {
+          incrnum delta_deeltijd $hours
+          set werkdag 0 ; # want niet nog 0.8 uur extra opbouwen.
+          lappend lst_notes "$date: Weekend, Deeltijd: +$hours"
+        }
         # nothing, normal project. 
       }
       
@@ -171,7 +178,7 @@ proc dates_successive {date1 date2} {
   set sec2 [clock scan $date2 -format "%Y-%m-%d"]
   set diff_days [expr ($sec2 - $sec1) / (3600 * 24)]
   # breakpoint
-  if {[is_friday $date1]} {
+  if {[is_monday $date2]} {
     if {$diff_days <= 3} {
       return 1 
     } else {
@@ -189,6 +196,25 @@ proc dates_successive {date1 date2} {
 proc is_friday {date} {
   set dow [clock format [clock scan $date -format "%Y-%m-%d"] -format "%u"]
   if {$dow == 5} {
+    return 1 
+  } else {
+    return 0
+  }
+}
+
+proc is_monday {date} {
+  set dow [clock format [clock scan $date -format "%Y-%m-%d"] -format "%u"]
+  if {$dow == 1} {
+    return 1 
+  } else {
+    return 0
+  }
+}
+
+# sat=6, sun=7
+proc is_weekend {date} {
+  set dow [clock format [clock scan $date -format "%Y-%m-%d"] -format "%u"]
+  if {$dow >= 6} {
     return 1 
   } else {
     return 0
