@@ -1,4 +1,4 @@
-#!/usr/bin/env tclsh
+#!/usr/bin/env tclsh861
 
 # #!/home/nico/bin/tclsh
 
@@ -26,10 +26,17 @@ proc main {argc argv} {
   array set ar_argv [::cmdline::getoptions argv $options $usage]
 
   set schemadef [MusicSchemaDef::new]
+
+  set f [open ~/.config/music/music-settings.json r]
+  set text [read $f]
+  close $f
+  set d [json::json2dict $text]
+  $schemadef set_db_name_user_password [:database $d] [:user $d] [:password $d]
+  
   set db [::ndv::CDatabase::get_database $schemadef]
   set conn [$db get_connection]
 
-  ::mysql::exec $conn "set names utf8"
+  # ::mysql::exec $conn "set names utf8"
 
   create_random_view
   set lst [::ndv::music_random_select $db $ar_argv(n) "-tablemain generic -viewmain albums -tableplayed played"] 
@@ -52,7 +59,7 @@ proc create_random_view {} {
   # catch {::mysql::exec $conn "drop view if exists albums"}
   log debug "Dropping view albums"
   try_eval {
-    ::mysql::exec $conn "drop view if exists albums"
+    pg_query $conn "drop view if exists albums"
   } {
     log_error "drop view albums failed" 
   }
@@ -66,10 +73,10 @@ proc create_random_view {} {
              and mem.mgroup = mg.id
              and mg.name = 'Albums'"
   try_eval {
-    ::mysql::exec $conn $query
+    pg_query $conn $query
   } {
     log_error "create view albums failed"
-    log warn "Possibly the MySQL databases cannot be accessed"
+    log warn "Possibly the database cannot be accessed"
     log warn "Restarting the system might help (as it did on 13-9-2013)"
     exit
   }

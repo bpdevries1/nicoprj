@@ -1,3 +1,4 @@
+::ndv::source_once [file join [file dirname [info script]] .. db MusicSchemaDef.tcl]
 
 proc is_music_file {pathname} {
 	set ext [string tolower [file extension $pathname]]
@@ -38,3 +39,16 @@ proc det_path_in_db {fs_path} {
   return $result
 }
 
+proc get_db_from_schemadef {} {
+  # $log debug "before MusicSchemaDef::new"  
+  set schemadef [MusicSchemaDef::new]
+  set f [open ~/.config/music/music-settings.json r]
+  set text [read $f]
+  close $f
+  set d [json::json2dict $text]
+  $schemadef set_db_name_user_password [:database $d] [:user $d] [:password $d]
+  # $log debug "before get_db"
+  # 14-1-2012 param 1=reconnect.
+  set db [::ndv::CDatabase::get_database $schemadef 1]
+  return $db
+}

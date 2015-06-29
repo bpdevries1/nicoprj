@@ -49,8 +49,7 @@
   (when-let [opts (my-cli args #{:database}
         ["-h" "--help" "Print this help"
               :default false :flag true]
-        ["-p" "--projectdir" "Project directory" :default "~/projecten/diskcatalog"]
-        ["-db" "--database" "Database path" :default "~/projecten/diskcatalog/bigfiles.db"]
+        ["-d" "--database" "Database path" :default "~/projecten/diskcatalog/bigfiles.db"]
         ["-n" "--notes" "Notes" :default "No comment"])]
     (let [db-spec (db-spec-path db-spec-sqlite (:database opts))]
        (calc-file-stats! db-spec opts))))

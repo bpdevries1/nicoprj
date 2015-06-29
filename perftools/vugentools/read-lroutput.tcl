@@ -27,11 +27,38 @@ proc readlogfile {path db} {
 }
 
 proc insert_block {db logfile_id linestart lineend firstline restlines sourcefile sourceline relmsec relframeid internalid url} {
-  $db insert logblock [vars_to_dict logfile_id linestart lineend firstline restlines sourcefile sourceline relmsec relframeid internalid url]
-  # TODO: MOAR!  
+  set blocktype [det_blocktype $firstline]
+  set proxy [det_proxy $blocktype $restlines]
+  $db insert logblock [vars_to_dict logfile_id linestart lineend firstline restlines sourcefile sourceline relmsec relframeid internalid url blocktype proxy]
 }
 
-# sort-of lib-function, but for now still specific. Can't seem to used re_split.
+set block_re_types {
+"request headers" request_headers
+"response headers" response_headers
+"response overhead" response_overhead
+"ENCODED response" encoded_response
+"DECODED response" decoded_response
+}
+
+proc det_blocktype {line} {
+  global block_re_types
+  foreach {re tp} $block_re_types {
+    if {[regexp $re $line]} {
+      return $tp
+    }
+  }
+  return ""
+}
+
+proc det_proxy {blocktype restlines} {
+  if {[regexp {headers} $blocktype]} {
+    return [regexp {Proxy-Connection: } $restlines]
+  } else {
+    return 0
+  }
+}
+
+# sort-of lib-function, but for now still specific. Can't seem to use re_split.
 proc read_blocks {path args} {
   set f [open $path r]
   
@@ -54,7 +81,9 @@ proc read_blocks {path args} {
         incr lineend
       }
     }
-    if {[regexp {^(([^ ]+)\((\d+)\): )?(t=(\d+)ms: )?(.*)$} $line z z sourcefile sourceline z relmsec fline2]} {
+    # in regexp hieronder was $firstline $line, en toch leek het te werken...
+    if {[regexp {^(([^ ]+)\((\d+)\): )?(t=(\d+)ms: )?(.*)$} $firstline z z sourcefile sourceline z relmsec fline2]} {
+      regexp {\[issued at ([^ ]+)\((\d+)\)\]$} $fline2 z sourcefile sourceline ; # regexp only sets var if match occurs.
       set relframeid 0
       set internalid 0
       set url ""
@@ -63,6 +92,8 @@ proc read_blocks {path args} {
       # Resource "https://securepat01.rabobank.com/cras/css/3/style.css" is in the cach
       regexp {"(http.+?)"} $fline2 z url
       {*}$args $linestart $lineend $fline2 [join $restlines "\n"] $sourcefile $sourceline $relmsec $relframeid $internalid $url
+    } else {
+      error "regexp not matched, should not happen: $"
     }
     
 

@@ -1,21 +1,21 @@
-; SqlRegExp.clj
+;; SqlRegExp.clj
 
-; Instructions for compiling (it's tricky):
-; 1. lein repl
-; 2. (load-file "../../clojure/lib/def-libs.clj")
-; 3. (compile 'SqlRegExp)
+;; Instructions for compiling (it's tricky):
+;; 1. lein repl
+;; 2. (load-file "../../clojure/lib/def-libs.clj")
+;; 3. (compile 'SqlRegExp)
 
-; tried some other things, but failed. Possibly using lein complete/project will work as well.
+;; tried some other things, but failed. Possibly using lein complete/project will work as well.
 
-; putting this load-file does compile from a clean repl, but errors while executing.
-; (load-file "../../clojure/lib/def-libs.clj")
+;; putting this load-file does compile from a clean repl, but errors while executing.
+;; (load-file "../../clojure/lib/def-libs.clj")
 
-; org.sqlite.Function is needed.
-; but including stuff below also causes strange errors when compiling:
-;(use '[leiningen.exec :only  (deps)])
-;(deps '[[org.clojure/java.jdbc "0.3.3"]
-;        [org.xerial/sqlite-jdbc "3.7.2"]]) ; 3.7.2 lijkt nog wel de nieuwste ([2014-05-03 22:39:14])
-;(require '[clojure.java.jdbc :as jdbc])
+;; org.sqlite.Function is needed.
+;; but including stuff below also causes strange errors when compiling:
+;;(use '[leiningen.exec :only  (deps)])
+;;(deps '[[org.clojure/java.jdbc "0.3.3"]
+;;        [org.xerial/sqlite-jdbc "3.7.2"]]) ; 3.7.2 lijkt nog wel de nieuwste ([2014-05-03 22:39:14])
+;;(require '[clojure.java.jdbc :as jdbc])
         
 (ns SqlRegExp
   (:gen-class

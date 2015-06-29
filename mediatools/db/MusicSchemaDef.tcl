@@ -31,12 +31,16 @@ itcl::class MusicSchemaDef {
   
 	public constructor {} {
 		set conn ""
+    set db ""
+    set dbtype "postgres"
 		set no_db 0 ; # default is een db beschikbaar.
-		set f [open ~/.ndv/music-settings.json r]
-		set text [read $f]
-		close $f
-		set d [json::json2dict $text]
-		set_db_name_user_password [dict get $d database] [dict get $d user] [dict get $d password]
+    if 0 {
+      set f [open ~/.ndv/music-settings.json r]
+      set text [read $f]
+      close $f
+      set d [json::json2dict $text]
+      set_db_name_user_password [dict get $d database] [dict get $d user] [dict get $d password]
+    }
 	}
 
 	private method define_classes {} {

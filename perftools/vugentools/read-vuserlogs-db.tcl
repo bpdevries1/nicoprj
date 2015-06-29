@@ -1,3 +1,5 @@
+#!/usr/bin/env tclsh861
+
 package require ndv
 package require tdbc::sqlite3
 
@@ -20,9 +22,12 @@ proc readlogfile {logfilepath db} {
   $db in_trans {
 	  while {![eof $fi]} {
       gets $fi line
-      if {[regexp {: \[([0-9 :-]+)\] \[(\d+)\] RetrieveAccounts - user: (\d+), naccts: (\d+), resptime: ([0-9.,]+)} $line z ts_cet msec_cet user naccts resptime]} {
+      if {[regexp {: \[([0-9 :-]+)\] \[(\d+)\] RetrieveAccounts - user: (\d+), naccts: (\d+), resptime: ([0-9.,]+)} $line z ts_cet sec_cet user naccts resptime]} {
         regsub -all {,} $resptime "." resptime
-        $db insert request [vars_to_dict logfile vuserid ts_cet msec_cet user naccts resptime]
+        $db insert retraccts [vars_to_dict logfile vuserid ts_cet sec_cet user naccts resptime]
+      } elseif {[regexp {: \[([0-9 :-]+)\] \[(\d+)\] trans: ([^ ]+) - user: (\d+), resptime: ([0-9.,]+)} $line z ts_cet sec_cet transname user resptime]} {
+        regsub -all {,} $resptime "." resptime
+        $db insert trans [vars_to_dict logfile vuserid ts_cet sec_cet transname user resptime]
       } elseif {[regexp {RetrieveAccounts} $line]} {
         breakpoint
       }
@@ -54,8 +59,17 @@ proc get_results_db {db_name} {
   return $db
 }
 
+if 0 {
+functions.c(278): [2015-06-15 10:28:06] [1434356886] trans: CBW_01_Log_in_page - user: 3002161992, resptime: 1,055	[MsgId: MMSG-17999]
+functions.c(278): [2015-06-15 10:28:14] [1434356894] trans: CBW_02A_CRAS_log_in_OK - user: 3002161992, resptime: 3,183	[MsgId: MMSG-17999]
+functions.c(278): [2015-06-15 10:28:22] [1434356902] trans: CBW_03_Sprocket - user: 3002161992, resptime: 1,821	[MsgId: MMSG-17999]
+
+}
+
 proc define_tables {db} {
-  $db add_tabledef request {id} {logfile {vuserid int} ts_cet {msec_cet int} user {naccts int} {resptime real}}
+  $db add_tabledef retraccts {id} {logfile {vuserid int} ts_cet {sec_cet int} user {naccts int} {resptime real}}
+  # 17-6-2015 NdV transaction is a reserved word in SQLite, so use trans as table name
+  $db add_tabledef trans {id} {logfile {vuserid int} ts_cet {sec_cet int} transname user {resptime real}}
 }
 
 main $argv

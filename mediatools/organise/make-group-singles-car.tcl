@@ -1,4 +1,4 @@
-#!/usr/bin/env tclsh86
+#!/usr/bin/env tclsh861
 
 # cp -r ../../ActiveTcl-8.5/lib/mysqltcl-3.05 . uitgevoerd in ActiveTcl-8.6/lib dir, hierna werkt 
 # package require mysqltcl in Tcl 8.6.
@@ -36,7 +36,7 @@ proc main {argv} {
   # set conn [$db get_db_handle]
   # ::mysql::exec $conn "set names utf8"
   # @note default in tdbc voor mysql zou al utf-8 zijn, dus statement mogelijk helemaal niet nodig...
-  [$db get_conn] evaldirect "set names utf8"
+  # [$db get_conn] evaldirect "set names utf8"
   # log info "done: set names utf8"
   
   remove_group $db "Singles-car"
@@ -64,7 +64,9 @@ proc define_tables {db} {
   $db add_tabledef member {id} {mgroup generic}
   $db prepare_insert_statements
   # binary needed below to have case sensitive search.
-  $db prepare_stmt sel_generic "select generic from musicfile where binary path = :path"
+  # 20-6-2015 binary probably specific for MySQL, so remove for postgres
+  # $db prepare_stmt sel_generic "select generic from musicfile where binary path = :path"
+  $db prepare_stmt sel_generic "select generic from musicfile where path = :path"
 }
 
 proc remove_group {db group_name} {
@@ -142,15 +144,15 @@ proc find_origin_path {filename} {
   }
 }
 
-# lib functions for new tdbc::mysql connection
+# lib functions for new tdbc::mysql or postgres connection
 
 proc det_music_conn_args {} {
-  set f [open ~/.ndv/music-settings.json r]
+  set f [open ~/.config/music/music-settings.json r]
   set text [read $f]
   close $f
   set d [json::json2dict $text]
   # set_db_name_user_password [dict get $d database] [dict get $d user] [dict get $d password]
-  list -db [:database $d] -user [:user $d] -password [:password $d]
+  list -database [:database $d] -user [:user $d] -password [:password $d]
 }
 
 main $argv

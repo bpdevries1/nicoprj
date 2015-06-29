@@ -174,7 +174,32 @@ namespace eval ::ndv {
     public method get_schemadef {} {
       return $schemadef
     }
-  
+
+    # 20-6-2015 did not have in_trans method yet, only had it in the new db
+    # abstraction in libdb.tcl
+    public method in_trans {block} {
+      # TODO do we need to use $self or $this ?
+      exec_query "begin transaction"
+      try_eval {
+        uplevel $block
+      } {
+        log_error "Rolling back transaction and raising error"
+        exec_query "rollback"
+        error "Rolled back transaction"
+      }
+      exec_query "commit"
+    }
+
+    # @todo getDBhandle does (probably) not work with MySQL.
+    public method exec_query {query {return_id 0}} {
+      set stmt [$conn prepare $query]
+      $stmt execute
+      $stmt close
+      if {$return_id} {
+        return [[$conn getDBhandle] last_insert_rowid]   
+      }
+    } 
+    
     # @param class_name: testbuild
     # @param args: -cctimestamp $cctimestamp -label $label -artifacts_dir $artifacts_dir
     public method insert_object {class_name args} {

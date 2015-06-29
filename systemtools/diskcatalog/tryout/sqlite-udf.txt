@@ -527,7 +527,7 @@ $ ls -l some/Example.clj
 
 Deze werkt nu ook, dus mogelijk was repl te veel in de war. Er is nog hoop dus.
 
-Stel in deze repl de source aanpassen en compilere en opnieuw requiren, dan de nieuwe?
+Stel in deze repl de source aanpassen en compileren en opnieuw requiren, dan de nieuwe?
 
 user=> (compile 'some.Example)
 some.Example

@@ -44,7 +44,8 @@ namespace eval ::ndv {
     # set query "select sum(freq), sum(play_count) from musicfile"
     #set query "select sum(freq), sum(play_count) from $ar_opts(tablemain)"
     set query "select sum(freq), sum(play_count) from $ar_opts(viewmain)"
-    set result [::mysql::sel $conn $query -flatlist]
+    # set result [::mysql::sel $conn $query -flatlist]
+    set result [pg_query_flatlist $conn $query]
     set F_sum [lindex $result 0]
     set chosen_sum [lindex $result 1]
     $log debug "F_sum: $F_sum"
@@ -55,12 +56,14 @@ namespace eval ::ndv {
   
     # set query "select id, freq, play_count from musicfile where not lower(path) like '%.m4a'"
     set query "select id, freq, play_count from $ar_opts(viewmain)"
-    set result [::mysql::sel $conn $query -list]
+    # set result [::mysql::sel $conn $query -list]
+    set result [pg_query_list $conn $query]
     set nrecords [llength $result]
     # 31-5-2012 NdV try start transaction/commit to improve speed. This does indeed work!
     # Could also be a different db implementation, like InnoDB, not sure if the one used here is the same as before.
     $log debug "start transaction"
-    ::mysql::exec $conn "start transaction"
+    # ::mysql::exec $conn "start transaction"
+    pg_query $conn "start transaction"
     set i 0
     foreach record $result {
       incr i
@@ -73,7 +76,7 @@ namespace eval ::ndv {
       $db update_object $ar_opts(tablemain) $id -freq_history $freq_history
     }
     # 31-5-2012 NdV ... and also commit.
-    ::mysql::exec $conn "commit"
+    pg_query $conn "commit"
     $log debug "Executed commit (after start transaction)"
   }
 
@@ -93,7 +96,8 @@ namespace eval ::ndv {
     set query "select id, path, freq_history 
                from $ar_opts(viewmain)
                order by freq_history desc, path" 
-    set lst [::mysql::sel $conn $query -list]
+    # set lst [::mysql::sel $conn $query -list]
+    set lst [pg_query_list $conn $query]
     set N [llength $lst]
     log info "#items to choose from: $N"
     set m 0 ; # aantal gekozen records
@@ -140,7 +144,7 @@ namespace eval ::ndv {
     # set query "select sum(freq_history) from musicfile where not lower(path) like '%.m4a'"
     # 1-5-2011 NdV only select sum of items with freq > 0, otherwise pos and neg cancel out.
     set query "select sum(freq_history) from $ar_opts(viewmain) where freq_history > 0"
-    set res [::mysql::sel $conn $query -flatlist]
+    set res [pg_query_flatlist $conn $query]
     return [lindex $res 0]
   }
   
