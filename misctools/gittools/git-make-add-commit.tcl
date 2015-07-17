@@ -1,4 +1,6 @@
-#!/usr/bin/env tclsh86
+#!/usr/bin/env tclsh861
+
+# 2015-07-17 set to unix line endings in emacs (set-buffer-file-coding-system)
 
 package require ndv
 
