@@ -22,20 +22,24 @@
 
 (defn calc-md5!
   "Calculate MD5 sum for files where md5 field is null"
-  [db-spec]
-  (doseq [row (jdbc/query db-spec "select id, fullpath from file where md5 is null")]
+  [db-con all?]
+  (doseq [row (jdbc/query
+               db-con
+               (if all?
+                 "select id, fullpath from file where md5 is null"
+                 "select id, fullpath from file where md5 is null and action='md5'"))]
     (log/info "Calculating MD5 sum for: " (:fullpath row))
-    (jdbc/execute! db-spec ["update file set md5 = ? where id = ?" (file-md5 (:fullpath row)) (:id row)])))
+    (jdbc/execute! db-con ["update file set md5 = ? where id = ?" (file-md5 (:fullpath row)) (:id row)])))
 
 (defn main [args]
-  (when-let [opts (my-cli args #{:database}
-        ["-h" "--help" "Print this help"
-              :default false :flag true]
-        ["-p" "--projectdir" "Project directory" :default "~/projecten/diskcatalog"]
-        ["-db" "--database" "Database path" :default "~/projecten/diskcatalog/bigfiles.db"]
-        ["-r" "--root" "Root directory to find big files in"])]
-    (let [db-spec (db-spec-path db-spec-sqlite (:database opts))]
-       (calc-md5! db-spec))))
+  (when-let [opts (my-cli args #{:dbspec}
+        ["-h" "--help" "Print this help" :default false :flag true]
+        ["-a" "--all" "Calc MD5 for all files (default only when action=md5)"
+         :default false :flag true]                  
+        ["-d" "--dbspec" "Database spec/config/EDN file (postgres)" :default "~/.config/media/media.edn"])]
+    (let [db-spec (db-postgres (fs/expand-home (:dbspec opts)))]
+      (jdbc/with-db-connection [db-con db-spec]
+        (calc-md5! db-con (:all opts))))))
 
 (when (is-cmdline?)
   (main *command-line-args*))

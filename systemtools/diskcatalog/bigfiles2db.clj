@@ -1,6 +1,6 @@
 #!/bin/bash lein-exec
 
-; walk (complete) directory structure, find files bigger than treshold, put in sqlite DB.
+; walk (complete) directory structure, find files bigger than treshold, put in sqlite/postgres DB.
 ; goal: further analysis, de-duplicate where possible.
 ; @todo later: also do on laptops, to find more duplicates.
 ; duplicates are not wrong per se, could be backups.
@@ -10,6 +10,7 @@
 ;       wat voegt async dan toe, behalve leerzame ervaring?
 
 (load-file "../../clojure/lib/def-libs.clj") 
+(load-file "lib-diskcat.clj")
 
 (deps '[[org.clojure/core.async "0.1.278.0-76b25b-alpha"]])
 ; [2014-05-04 14:49:26] onderstaande is huidige op https://github.com/clojure/core.async, maar geeft vage melding ivm memoize.
@@ -19,16 +20,20 @@
 (defn insert-update-file! 
   "Check if the file already exists in database. If not, insert. If so, update"
   [db-con data]
-  (if-let [db-data (first (jdbc/query db-con ["select * from file where fullpath = ?" (:fullpath data)]))]
+  (if-let [db-data
+           (first
+            (jdbc/query db-con
+                        ["select * from file where fullpath = ?" (:fullpath data)]))]
     (when-not (and (= (:filesize data) (:filesize db-data))
                    (= (:ts_cet data) (:ts_cet db-data)))
       (println "Updating file in DB: " (:fullpath data))
-      (jdbc/execute! db-con ["update file set md5=null, ts_cet = ?, filesize = ? where id = ?" 
-                        (:ts_cet data) (:filesize data) (:id db-data)]))
+      (jdbc/execute! db-con
+                     ["update file set md5=null, ts_cet = ?, filesize = ? where id = ?" 
+                      (:ts_cet data) (:filesize data) (:id db-data)]))
     ; else
     (do
       (println "Inserting new file in DB: " (:fullpath data))
-      (jdbc/insert! db-con :file data))))
+      (jdbc/insert! db-con :file (assoc data :goal (det-goal (:fullpath data)))))))
 
 (defn database-consumer
   "Accept files-specs and put them in database"
@@ -60,9 +65,10 @@
          (filter #(> (fs/size %) treshold))
          (filter #(fs/file? %))
          (filter #(not (fs/link? %)))
+         ;; for postgres more explicit conversion to string.
          (map #(hash-map :fullpath (str %)
-                         :folder (fs/parent %)
-                         :filename (fs/base-name %)
+                         :folder (str (fs/parent %))
+                         :filename (str (fs/base-name %))
                          :filesize (fs/size %)
                          :computer computer
                          :ts_cet (.format cal-format (fs/mod-time %)))))))
@@ -78,17 +84,20 @@
      (async/close! out))))
 
 (defn main [args]
-  (when-let [opts (my-cli args #{:database}
+  (when-let [opts (my-cli args #{:dbspec}
       ["-h" "--help" "Print this help"
             :default false :flag true]
       ["-t" "--treshold" "Treshold for big files in bytes" 
             :default 10e6 :parse-fn #(Float. %)]
-      ["-d" "--database" "Database path" :default "~/projecten/diskcatalog/bigfiles.db"]
+      ;; ["-d" "--database" "Database path" :default "~/projecten/diskcatalog/bigfiles.db"]
+      ["-d" "--dbspec" "Database spec/config/EDN file (postgres)" :default "~/.config/media/media.edn"]
+      ["-s" "--pathspecs" "Path specs file" :default "path-specs-books.clj"]
       ["-z" "--deletedb" "Delete/zap DB before reading"
             :default false :flag true]
       ["-r" "--root" "Root directory to find big files in"])]
-    (let [db-spec (db-spec-path db-spec-sqlite (:database opts))
+    (let [db-spec (db-postgres (fs/expand-home (:dbspec opts)))
           finish-chan (async/chan 1)]
+      (load-file (str (fs/file (fs/expand-home (:projectdir opts)) (:pathspecs opts))))
        ; @todo kan zijn dat db-con niet goed werkt samen met async threads. Maar even zien.
       (jdbc/with-db-connection [db-con db-spec]
         ;; (org.sqlite.Function/create (:connection db-con) "regexp" (SqlRegExp.))

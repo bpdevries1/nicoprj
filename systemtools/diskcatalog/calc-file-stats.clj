@@ -8,7 +8,7 @@
 (load-file "lib-diskcat.clj")
 
 ; @todo remove this function, is also in create-tables.clj
-(defn create-stats-table!
+(defn create-stats-table-sqlite-old!
   "Create stats table iff it does not exist yet"
   [db-spec]
   (if (= 0 (count (jdbc/query db-spec "select name from sqlite_master where type='table' and name = 'stats'")))
@@ -35,7 +35,7 @@
 (defn calc-file-stats!
   "Calculate statistics about contents of file table."
   [db-spec opts]
-  (create-stats-table! db-spec)
+  #_(create-stats-table! db-spec)
   (jdbc/insert! db-spec :stats 
     {:nfiles (count-not-null db-spec "fullpath")
      :ngbytes (-> (jdbc/query db-spec "select sum(filesize)/1000000000 ngbytes from file") first :ngbytes)
@@ -43,15 +43,18 @@
      :nimportance (count-not-null db-spec "importance")
      :nsrcbak (count-not-null db-spec "srcbak")
      :naction (count-not-null db-spec "action")
+     :ts_cet (tc/to-sql-time (t/now))
      :notes (:notes opts)}))
   
 (defn main [args]
   (when-let [opts (my-cli args #{:database}
         ["-h" "--help" "Print this help"
               :default false :flag true]
-        ["-d" "--database" "Database path" :default "~/projecten/diskcatalog/bigfiles.db"]
+        ;; ["-d" "--database" "Database path" :default "~/projecten/diskcatalog/bigfiles.db"]
+        ["-d" "--dbspec" "Database spec/config/EDN file (postgres)" :default "~/.config/media/media.edn"]
         ["-n" "--notes" "Notes" :default "No comment"])]
-    (let [db-spec (db-spec-path db-spec-sqlite (:database opts))]
+    (let [db-spec-sqlite (db-spec-path db-spec-sqlite (:database opts))
+          db-spec (db-postgres (fs/expand-home (:dbspec opts)))]
        (calc-file-stats! db-spec opts))))
 
 (main *command-line-args*)

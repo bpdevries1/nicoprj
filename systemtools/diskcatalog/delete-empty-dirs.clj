@@ -6,19 +6,20 @@
 (load-file "lib-diskcat.clj")
 
 (defn delete-empty-dirs!
-  [dir really]
+  [dir really iter]
+  ;; walk function already works recursively.
   (let [empty-subs
-    (->> (fs/walk (fn [root dirs files]
-           (when (and (empty? dirs) (empty? files)) root)) dir)
-         (filter (complement nil?)))]
+        (->> (fs/walk (fn [root dirs files]
+                        (when (and (empty? dirs) (empty? files)) root)) dir)
+             (filter (complement nil?)))]
     (doseq [subdir empty-subs]
       (println "delete empty dir: " subdir)
       (when really
-        (fs/delete subdir)
-        ; @todo should recur on parent only after all subdirs have been handled, with another doseq
-        ; currently some double checks, less efficient.
-        (println "and recur on: " (fs/parent subdir))
-        (delete-empty-dirs! (fs/parent subdir) really)))))
+        (fs/delete subdir)))
+    (when really ; only recur if really deleting, otherwise infinite loop.
+      (when-not (empty? empty-subs)
+        (println "Still have empty subs, so try again, iter = " (+ 1 iter))
+        (recur dir really (+ 1 iter))))))
 
 (defn main [args]
   (when-let [opts (my-cli args #{:dir}
@@ -26,7 +27,7 @@
               :default false :flag true]
         ["-d" "--dir" "Directory"]
         ["-r" "--really" "Really do delete actions. Otherwise dry run" :default false :flag true])]
-     (delete-empty-dirs! (:dir opts) (:really opts))))
+     (delete-empty-dirs! (:dir opts) (:really opts) 1)))
 
 (main *command-line-args*)
 

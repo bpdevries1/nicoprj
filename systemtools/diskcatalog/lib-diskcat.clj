@@ -1,4 +1,6 @@
-; lib-diskcat.clj - library with function for diskcatalog clojure scripts.
+;;; lib-diskcat.clj - library with function for diskcatalog clojure scripts.
+
+;; directory/path functions
 
 ; c:\bieb\ICT-books\(eBook - comp) Introduction To Evolutionary Computing - A.eiben,j.smith (2003).djvu
 ; => /media/laptop/bieb/ICT-books/(eBook - comp) Introduction To Evolutionary Computing - A.eiben,j.smith (2003).djvu
@@ -20,8 +22,33 @@
   (let [path-no-slash (path-remove-slash path)]
     (str path-no-slash "/%")))
 
+(defn path-relative
+  "Determine relative pathname from path relative to root.
+  Return sequence of path elements.
+  @pre path is a descendent of root"
+  [path root]
+  (drop (count (fs/split root)) (fs/split path)))
+
+(defn path-target
+  "Determine target full path based on source full path, source root and target root.
+  Returns a file object"
+  [source-path source-root target-root]
+  (apply fs/file target-root (path-relative source-path source-root)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; determine goal based on fullpath
+(defn det-goal
+  "Determine goal field based on fullpath and global var path-specs"
+  [path]
+  (first             ; just the key
+   (first            ; only first k/v pair of filter result
+    (filter
+     (fn [[goal paths]]
+       (some #(fs/child-of? % path) paths))
+     (seq (get path-specs "goal2"))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; workflow: update filestatus, filelog and fileinfo tables
+;; workflow: update filestatus, filelog and fileinfo tables
 
 (defn get-file-id
   "get file id based on fullpath, nil if not found"

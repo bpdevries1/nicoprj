@@ -62,7 +62,8 @@
   [db-con path-specs backup-defs opts]
   (jdbc/execute! db-con ["update file set computer = ? where computer is null" (computername)])
   (update-spec-path! db-con path-specs)
-  (update-srcbak! db-con backup-defs opts))
+  ;; 29-6-2015 NdV srcbak niet meer doen, nu helemaal door Unison geregeld.
+  #_(update-srcbak! db-con backup-defs opts))
 
 (def path-specs) ; placeholder
 (def backup-defs) ; placeholder
@@ -73,19 +74,17 @@
   (jdbc/query db-spec "SELECT load_extension('/usr/lib/sqlite3/pcre.so')"))
 
 (defn main [args]
-  (when-let [opts (my-cli args #{:database}
-        ["-h" "--help" "Print this help"
-              :default false :flag true]
+  (when-let [opts (my-cli args #{:dbspec}
+        ["-h" "--help" "Print this help" :default false :flag true]
         ["-p" "--projectdir" "Project directory" :default "~/projecten/diskcatalog"]
-        ["-db" "--database" "Database path" :default "~/projecten/diskcatalog/bigfiles.db"])]
-    (let [db-spec (db-spec-path db-spec-sqlite (:database opts))]
-       (load-file (str (fs/file (fs/expand-home (:projectdir opts)) "path-specs.clj")))
-       ;(load-sqlite-extension db-spec)
-       (println path-specs)
-       ;(update-fields! db-spec path-specs))))
-       (jdbc/with-db-connection [db-con db-spec]
-         (org.sqlite.Function/create (:connection db-con) "regexp" (SqlRegExp.))
-         (update-fields! db-con path-specs backup-defs opts)))))
+        ["-s" "--pathspecs" "Path specs file" :default "path-specs-books.clj"]
+        ["-d" "--dbspec" "Database spec/config/EDN file (postgres)" :default "~/.config/media/media.edn"])]
+    (let [db-spec (db-postgres (fs/expand-home (:dbspec opts)))]
+      (load-file (str (fs/file (fs/expand-home (:projectdir opts)) (:pathspecs opts))))
+      (println path-specs)
+      (jdbc/with-db-connection [db-con db-spec]
+        #_(org.sqlite.Function/create (:connection db-con) "regexp" (SqlRegExp.))
+        (update-fields! db-con path-specs backup-defs opts)))))
 
 (when (is-cmdline?)
   (main *command-line-args*))
