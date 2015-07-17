@@ -10,10 +10,12 @@
         [org.slf4j/slf4j-log4j12 "1.7.5"]     ; coupling tools.logging with log4j.
         [log4j/log4j "1.2.16"]                ; in test-log4.clj deze niet, kan het kwaad?
         [clj-logging-config "1.9.10"]
-        [clj-time "0.6.0"]]) 
+        [clj-time "0.8.0"]]) ; was 0.6.0, op 29-6-2015 aangepast.
 
 ; use newest jdbc by defailt, has incompatbile changes from 0.2.3 to 0.3.0.
 (deps '[[org.clojure/java.jdbc "0.3.3"]
+        [postgresql "9.3-1102.jdbc41"]
+        [lobos "1.0.0-beta3"]              ; 16-7-2015 added.
         [org.xerial/sqlite-jdbc "3.7.2"]]) ; 3.7.2 lijkt nog wel de nieuwste ([2014-05-03 22:39:14])
 
 (require '[clojure.java.io :as io] 
@@ -24,10 +26,17 @@
          '[swiss.arrows :refer :all]            ; bij deze refer all wel handig, met -<> operators, wil hier geen namespace voor.
          '[clojure.tools.logging :as log]
          '[clj-logging-config.log4j :as logcfg]
+         '[clojure.edn :as edn]
          '[clj-time.core :as t]
+         '[clj-time.coerce :as tc]
          '[clj-time.format :as tf])
 
 ; 11-05-2014 for now define some extra functions, later put in (ndv?) lib.
+
+(defn load-config
+  "Given a filename, load & return a config file"
+  [filename]
+  (edn/read-string (slurp filename)))
 
 ; see http://rosettacode.org/wiki/Hostname#Clojure 
 (defn computername
@@ -43,6 +52,21 @@
   "Create db-spec based on template and path"
   [db-spec db-path]
   (assoc db-spec :subname (fs/expand-home db-path)))
+
+(defn db-postgres
+  "Create db-spec for postgres based on dbname, user, pw"
+  ([db-name user password]
+     {:classname "org.postgresql.Driver" ; must be in classpath
+      :subprotocol "postgresql"
+      :subname (str "//localhost:5432/"  db-name)
+                                        ; Any additional keys are passed to the driver
+                                        ; as driver-specific properties.
+      :user user
+      :password password})
+  ([dbspec]
+     "Create a postgres db spec using an EDN file"
+     (let [cfg (load-config dbspec)]
+       (db-postgres (:database cfg) (:user cfg) (:password cfg)))))
 
 (defn missing-required?
   "Returns true if opts is missing any of the required-opts"
@@ -123,4 +147,5 @@
        (str/split <> #"\r?\n")
        (filter #(not (re-find #"^#" %)) <>)   ; ignore lines starting with #
        (filter #(not (re-find #"^$" %)) <>))) ; ignore empty lines
+
 
