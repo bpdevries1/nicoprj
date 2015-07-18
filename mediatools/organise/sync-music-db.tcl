@@ -1,3 +1,6 @@
+#!/home/nico/bin/tclsh861
+
+# 18-7-2015 called from root->nico, path is not known to tclsh861, so hardcoded above.
 #!/usr/bin/env tclsh861
 
 # #!/home/nico/bin/tclsh86

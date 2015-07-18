@@ -14,6 +14,7 @@ proc main {argv} {
   puts "projects: $projects"
   # exit
   # projects is list of: project, freq_hours, prio
+  # sort on priority, params: project, freq_hours
   foreach el [lsort -integer -index 2 $projects] {
     backup_unison {*}[lrange $el 0 1]
   }
