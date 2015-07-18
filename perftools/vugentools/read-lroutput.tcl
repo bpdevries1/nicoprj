@@ -123,3 +123,4 @@ proc det_vuserid {logfile} {
 }
 
 main $argv
+
