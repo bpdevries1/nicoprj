@@ -1,3 +1,5 @@
+#!/usr/bin/env tclsh861
+
 # wiki naar tsv toch ook handig, vooral als multiline in een cell.
 proc main {} {
 	set firstline 1

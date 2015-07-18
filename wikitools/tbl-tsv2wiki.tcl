@@ -1,3 +1,5 @@
+#!/usr/bin/env tclsh861
+
 package require Tclx
 
 proc main {} {
