@@ -177,12 +177,12 @@ proc write_last_ok {cmd started} {
 proc last_ok_filename {cmd} {
   global USER
   # return [file join /home/nico .unison "$prj.last_ok"]
-  file join [config_dir $USER] "[replace_special $cmd] .last_ok"
+  file join [config_dir $USER] "[replace_special $cmd].last_ok"
 }
 
 # replace special characters in cmd, so it can be user as a filename base.
 proc replace_special {cmd} {
-  regsub -all {[/ ?:*\{\}]} $cmd "_" cmd
+  regsub -all {[/ ?:*\{\}\\]} $cmd "_" cmd
   return $cmd
 }
 
