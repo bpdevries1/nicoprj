@@ -1,8 +1,4 @@
-#!/home/nico/bin/tclsh86
-
-# set nr of hours to less than 3 days, want backup every 3 days.
-# 27-4-2015 use setting in .prf file.
-# set BACKUP_INTERVAL_HOURS 60
+#!/home/nico/bin/tclsh861
 
 proc main {argv} {
   if {[unison_running]} {
@@ -24,7 +20,7 @@ proc unison_running {} {
   return 0 ; # TODO aanpassen weer.
   set ok 0
   catch {
-    set res [exec ps -ef | grep unison | grep -v grep | grep -v backup-unison.tcl]
+    set res [exec ps -ef | grep \"unison -auto -batch\" | grep -v grep | grep -v backup-unison.tcl]
     set ok 1
   }
   if {!$ok} {
@@ -39,13 +35,6 @@ proc unison_running {} {
     log $res
     return 1
   }
-}
-
-proc main_old {argv} {
-  backup_unison laptop2data3tb
-  backup_unison homenico2data3tb
-  backup_unison nas2iomega2tb
-  backup_unison iomega2homenico
 }
 
 # result (projects) is list of: project, freq_hours, prio
@@ -82,27 +71,6 @@ proc backup_unison {prj freq_hours} {
     log "too long ago, start new backup..."
     set started [now_fmt]
     set exitcode [do_exec /home/nico/bin/unison -auto -batch $prj >/dev/null 2>@1]
-    if {$exitcode <= 2} {
-      # code 1 en 2 zijn kleine fouten, ook markeren als ok.
-      write_last_ok $prj $started
-    }
-    log "backup finished"
-  } else {
-    log "backup done not too long ago, so nothing to do."
-  }
-  log "backup_unison: $prj finished"
-}
-
-# if a succesful backup has been done longer than 3 days ago, try a new one.
-# check unison exit-codes, possibly not all drives are mounted (eg laptop)
-proc backup_unison_old {prj} {
-  log "backup_unison: $prj"
-  set last_ok [read_last_ok $prj]
-  if {[too_long_ago $last_ok]} {
-    log "too long ago, start new backup..."
-    set started [now_fmt]
-    set exitcode [do_exec /home/nico/bin/unison -auto -batch $prj >/dev/null 2>@1]
-    # TODO maybe 1 is also ok enough. 1=skipped, could be because of open processes, like Outlook.
     if {$exitcode <= 2} {
       # code 1 en 2 zijn kleine fouten, ook markeren als ok.
       write_last_ok $prj $started
@@ -160,22 +128,6 @@ proc too_long_ago {last_ok freq_hours} {
   set hours_diff [expr 1.0*($sec_now - $sec_ago) / 3600]
   log "hours_diff: $hours_diff"
   if {$hours_diff > $freq_hours} {
-    return 1
-  } else {
-    return 0
-  }
-}
-
-proc too_long_ago_old {last_ok} {
-  global BACKUP_INTERVAL_HOURS
-  if {$last_ok == "<none>"} {
-    return 1 ; # first time, no succesful backups yet, so too_long_ago == 1
-  }
-  set sec_ago [clock scan $last_ok -format "%Y-%m-%d %H:%M:%S"]
-  set sec_now [clock seconds]
-  set hours_diff [expr 1.0*($sec_now - $sec_ago) / 3600]
-  log "hours_diff: $hours_diff"
-  if {$hours_diff > $BACKUP_INTERVAL_HOURS} {
     return 1
   } else {
     return 0
