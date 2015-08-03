@@ -35,6 +35,8 @@
   [source-path source-root target-root]
   (apply fs/file target-root (path-relative source-path source-root)))
 
+(declare path-specs)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; determine goal based on fullpath
 (defn det-goal

@@ -55,11 +55,12 @@
 (defn big-files
   "Determine big files in directory recursively. Treshold in bytes"
   [root-dir treshold]
-  ; @todo hh:mm:ss results in 12hour clock, need to do HH for 24 hour clock.
-  ; cannot do now, as old and new contents may conflict, files will not be determined as the same.
-  ; also check if ts_cet is really CET time.
-  ; and maybe add a field ts_utc. (compare keynote).
-  (let [cal-format (java.text.SimpleDateFormat. "yyyy-MM-dd hh:mm:ss")
+  ;; @todo hh:mm:ss results in 12hour clock, need to do HH for 24 hour clock.
+  ;; cannot do now, as old and new contents may conflict, files will not be determined as the same.
+  ;; also check if ts_cet is really CET time.
+  ;; and maybe add a field ts_utc. (compare keynote).
+  ;; 2-8-2015 ts format was wrong, should use HH for hours (24h format), not hh (AM/PM is missed then)
+  (let [;; cal-format (java.text.SimpleDateFormat. "yyyy-MM-dd HH:mm:ss")
         computer (computername)]
     (->> (find-files-nolink root-dir #".*")
          (filter #(> (fs/size %) treshold))
@@ -71,7 +72,10 @@
                          :filename (str (fs/base-name %))
                          :filesize (fs/size %)
                          :computer computer
-                         :ts_cet (.format cal-format (fs/mod-time %)))))))
+                         :ts (tc/to-sql-time (fs/mod-time %))
+                         ;; use ts (real timestamp with TZ filed) now, not a varchar here.
+                         ;; :ts_cet (.format cal-format (fs/mod-time %))
+                         )))))
   
 (defn bigfiles-producer
   "Produce messages and deliver them to consumers."
