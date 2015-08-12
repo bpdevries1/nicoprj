@@ -1,14 +1,16 @@
-#!/usr/bin/env tclsh861
-
-# 2015-07-17 set to unix line endings in emacs (set-buffer-file-coding-system)
+#!/usr/bin/env tclsh86
 
 package require ndv
+
+# history
+# 2015-08-11 NdV ook delete uit status halen en git rm maken.
 
 proc main {argv} {
   # eerst alleen nicoprj
   set os [det_os]
+  set commit_msg ""
   if {[:# $argv] > 0} {
-    lassign $argv dir msg
+    lassign $argv dir commit_msg
     cd $dir
   } else {
     if {$os == "windows"} {
@@ -25,7 +27,7 @@ proc main {argv} {
   fconfigure $f -translation lf
   puts $f "# $filename"
   puts $f "# Adding files to git and commit"
-  set has_changes [puts_changes $f $res $msg]
+  set has_changes [puts_changes $f $res $commit_msg]
   puts $f "# name of file to exec: $filename"
   close $f
   if {$os == "windows"} {
@@ -39,7 +41,8 @@ proc main {argv} {
 }
 
 proc det_npp_exe {} {
-  set lst_loc {"c:/util/notepad++/notepad++.exe" "H:\\Disciplines\\Trim\\Testing\\Tooling\\Notepad++Portable\\Notepad++Portable.exe"}
+  # set lst_loc {"c:/util/notepad++/notepad++.exe" "H:\\Disciplines\\Trim\\Testing\\Tooling\\Notepad++Portable\\Notepad++Portable.exe"}
+  set lst_loc {"c:/util/notepad++/notepad++.exe" "C:\\PCC\\Util\\PortableApps\\Notepad++Portable\\app\\notepad++\\notepad++.exe"}
   foreach loc $lst_loc {
     if {[file exists $loc]} {
       return $loc
@@ -57,10 +60,11 @@ proc det_os {} {
   }
 }
 
-proc puts_changes {f res msg} {
+proc puts_changes {f res commit_msg} {
   set has_changes 0
   set in_untracked 0
   set files {}
+  set deleted_files {}
   foreach line [split $res "\n"] {
     # puts "handle line: $line"
     # linux: no # at start of line, maybe dependent on git version.
@@ -69,6 +73,9 @@ proc puts_changes {f res msg} {
       # puts $f "# git add $filename"
       # puts "-> added"
       lappend files $filename
+      set has_changes 1
+    } elseif {[regexp {^#?[ \t]+deleted:[ \t]+(.+)$} $line z filename]} {
+      lappend deleted_files $filename
       set has_changes 1
     } elseif {[regexp {Untracked files:} $line]} {
       set in_untracked 1
@@ -112,15 +119,40 @@ proc puts_changes {f res msg} {
     set dir [file dirname $file]
     if {$dir != $prev_dir} {
       if {$prev_dir != "<none>"} {
-      
-        # puts $f "git commit -m \"Changes for $prev_dir at $dt\""
-        puts $f "git commit -m \"$msg\""
+        # puts $f "# git commit -m \"Changes for $prev_dir at $dt\""
+        # puts $f "# git commit -m \"$commit_msg\""
+        if {$commit_msg != ""} {
+          puts $f "git commit -m \"$commit_msg\""
+        } else {
+          puts $f "# git commit -m \"<fill in>\""
+        }
       }
     }
-    puts $f "git add $file"
+    puts $f "git add \"$file\""
     set prev_dir $dir
   }
-  puts $f "git commit -m \"$msg\""
+  foreach file [lsort $deleted_files] {
+    set dir [file dirname $file]
+    if {$dir != $prev_dir} {
+      if {$prev_dir != "<none>"} {
+        if {$commit_msg != ""} {
+          puts $f "git commit -m \"$commit_msg\""
+        } else {
+          puts $f "# git commit -m \"<fill in>\""
+        }
+      }
+    }
+    puts $f "git rm \"$file\""
+    set prev_dir $dir
+  }
+  
+  # puts $f "# git commit -m \"Changes for $prev_dir at $dt\""
+  if {$commit_msg != ""} {
+    puts $f "git commit -m \"$commit_msg\""
+  } else {
+    puts $f "# git commit -m \"<fill in>\""
+  }
+  
   return $has_changes
 }
 
@@ -135,4 +167,3 @@ proc ignore_file {line} {
 }
 
 main $argv
-
