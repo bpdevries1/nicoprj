@@ -1,9 +1,13 @@
+#!/usr/bin/env wish861
+
 # woordjes.tcl: simpel programma om woordjes te leren
 # syntax: tclsh woordjes.tcl <woordenlijst.txt>
 
-# TODO: optie om aan te geven dat de woorden gewoon op volgorde moeten, is soms nodig...
+# Later: optie om aan te geven dat de woorden gewoon op volgorde moeten, is soms nodig...
+# TODO: titlebar met filename, nu leeg.
 
-puts "de start!"
+# Notes
+# 16-8-2015 reread -> gewoon door Again te klikekn, leest file dan ook opnieuw in.
 
 set SHOWTEXT "Show (space)"
 set CORRECTTEXT "Correct (J)"
@@ -13,31 +17,40 @@ set SHOWKEY "<space>"
 set CORRECTKEY "j"
 set FALSEKEY "n"
 
-# tclX nodig voor random functie
-package require Tclx
-
-#fconfigure stdout -buffering none
-
-#if {$argc != 1} {
-#  puts "syntax: tclsh woordjes.tcl <woordenlijst.txt>"
-#  exit 1
-#}
+## tclX nodig voor random functie
+# package require Tclx
+package require ndv
 
 proc main {argc argv} {
-  maakUI
-  if {$argc == 1} {
-    setTitle [lindex $argv 0]
-    leesWoorden [lindex $argv 0]
-    startLeren
-  } elseif {$argc == 2} {
-    setTitle [lindex $argv 0]
-    if {[lindex $argv 1] == "/reverse"} {
-      leesWoordenReverse [lindex $argv 0]
-    } else {
-      leesWoorden [lindex $argv 0]
-    }
-    startLeren
+  global filename direction
+  
+  set options {
+    {dir.arg "~/projecten/talen/japans" "Directory with words.wrd files"}
+    {file.arg "jap-eng.wrd" "File within dir with words"}
+    {rev "Reverse words"}
   }
+
+  set usage ": [file tail [info script]] \[options] \[file.wrd\]"
+  set dargv [getoptions argv $options $usage]
+  if {[:0 $argv] != ""} {
+    dict set dargv file [:0 $argv]
+  }
+
+  srandom [clock seconds]
+
+  cd [:dir $dargv]
+  set filename [file normalize [file join [:dir $dargv] [:file $dargv]]]
+  maakUI
+
+  setTitle [file tail $filename]
+  if {[:rev $dargv]} {
+    set direction normal
+    leesWoordenReverse $filename
+  } else {
+    set direction reverse
+    leesWoorden $filename
+  }
+  startLeren  
 }
 
 proc maakUI {} {
@@ -50,8 +63,12 @@ proc maakUI {} {
 	# menubutton .filemenu -text Open -command OpenFile
   button .openstdbutton -text Open -command OpenFile
   button .openrevbutton -text "Open reverse" -command OpenFileReverse
-  button .againbutton -text Again -command LearnAgain -state disabled
-  button .revbutton -text Reverse -command LearnReverse -state disabled
+  button .editbutton -text "Edit" -command EditFile
+  # 7-8-2015 again and reverse should be enabled always, if user wants to, (s)he should be able too!
+
+  
+  button .againbutton -text Again -command LearnAgain
+  button .revbutton -text Reverse -command LearnReverse
 
 	frame .wordframe
 	frame .transframe
@@ -79,25 +96,35 @@ proc maakUI {} {
 	pack .translabel -in .transframe -side left -fill none -expand 0
 	pack .trans -in .transframe -side left -expand 1 -fill x -anchor w
 	pack .wordframe .transframe -in .wordsframe -side top -fill x -expand 1
-	pack .openstdbutton .openrevbutton .againbutton .revbutton -in .menuframe -side left
+	pack .openstdbutton .openrevbutton .editbutton .againbutton .revbutton -in .menuframe -side left
 
   pack .rondelabel .ronde .totaallabel .totaal .goedlabel .goed .foutlabel .fout -in .statusframe -side left -fill x -expand 1
 	pack .menuframe .wordsframe .commandframe .statusframe -side top -fill x
 
+  wm geometry . +600+300
 }
 
 proc OpenFile {} {
-  set filenaam [tk_getOpenFile]
-  setTitle $filenaam
-  leesWoorden $filenaam
-  startLeren
+  global filename
+  set fn [tk_getOpenFile]
+  if {[file exists $fn]} {
+    set filename [file normalize  $fn]
+    setTitle [file tail $filename]
+    leesWoorden $filename
+    startLeren
+  }
 }
 
 proc OpenFileReverse {} {
   set filenaam [tk_getOpenFile]
-  setTitle $filenaam
+  setTitle [file tail $filenaam]
   leesWoordenReverse $filenaam
   startLeren
+}
+
+proc EditFile {} {
+  global filename
+  exec /usr/bin/gedit $filename &
 }
 
 proc setTitle filename {
@@ -105,11 +132,23 @@ proc setTitle filename {
 }
 
 proc LearnAgain {} {
+  global filename direction
+  if {$direction == "normal"} {
+    leesWoorden $filename
+  } else {
+    leesWoordenReverse $filename
+  }
   startLeren
 }
 
 proc LearnReverse {} {
+  global direction
   reverseWLijstAlles
+  if {$direction == "normal"} {
+    set direction reverse
+  } else {
+    set direction normal
+  }
   startLeren
 }
 
@@ -126,7 +165,7 @@ proc reverseWLijstAlles {} {
 
 # lees woordenlijst in
 # woordenlijst in een 2D array inlezen
-proc leesWoorden filenaam {
+proc leesWoorden {filenaam} {
   global wlijstalles
 
   set f [open $filenaam r]
@@ -135,7 +174,6 @@ proc leesWoorden filenaam {
     gets $f line
     if {[regexp "^(.*)\t(.*)$" $line z van naar]} {
       lappend wlijstalles [list $van $naar]
-      puts "$van --- $naar"
     }
   }
   close $f
@@ -143,7 +181,7 @@ proc leesWoorden filenaam {
 
 # lees woordenlijst in andersom
 # woordenlijst in een 2D array inlezen
-proc leesWoordenReverse filenaam {
+proc leesWoordenReverse {filenaam} {
   global wlijstalles
 
   set f [open $filenaam r]
@@ -160,8 +198,9 @@ proc leesWoordenReverse filenaam {
 proc startLeren {} {
   global wlijst wlijstalles ronde
 
-  .againbutton configure -state disabled
-  .revbutton configure -state disabled
+  # 7-8-2015 NdV enable buttons always.
+  # .againbutton configure -state disabled
+  # .revbutton configure -state disabled
 
   set ronde 0
   set wlijst $wlijstalles
@@ -186,7 +225,8 @@ proc toonWoord {} {
 
   if {[expr $ngoed + $nfout] < $ntotaal} {
     # nog in huidige ronde
-    set idx [random [llength $wlijst]]
+    # set idx [random [llength $wlijst]]
+    set idx [random_int [llength $wlijst]]
     set huidigElement [lindex $wlijst $idx]
     set wlijst [lreplace $wlijst $idx $idx]
     set word [lindex $huidigElement 0]
@@ -205,7 +245,6 @@ proc toonWoord {} {
     if {[llength $wlijst] > 0} {
       startRonde
     } else {
-      # popup: klaar!
       tk_dialog .dlgKlaar "Finished" "Finished learning the words." {} 0 Ok 
       set word ""
       set trans ""
@@ -214,8 +253,9 @@ proc toonWoord {} {
       bind all $CORRECTKEY ""
       bind all $FALSEKEY ""
 
-     .againbutton configure -state active
-     .revbutton configure -state active
+     # 7-8-2015 NdV always active, so no need to set. 
+     #.againbutton configure -state active
+     #.revbutton configure -state active
 
     }
   }
