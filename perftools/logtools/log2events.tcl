@@ -9,42 +9,83 @@ package require tdbc::sqlite3
 set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 
 proc main {argv} {
-  global log db filename
+  global log db filename seqnr_global
   lassign $argv logfilepath
-  set filename [file tail $logfilepath]
+
   set dbname [file join [file dirname $logfilepath] "odbccalls.db"]
   catch {file delete $dbname} ; # while testing delete the sqlite db first. Not possible if open in SQLiteSpy
   set db [get_db $dbname]
+  $db function timediff
   empty_tables $db
   if {0} {
+    test_select $db
     test_hex $db
     $db close
     exit
   }
+  
+  read_log $logfilepath $db
+
+  fill_calls $db
+  
+  do_checks $db
+
+  $db close
+}
+
+proc test_select {db} {
+  log info "test select:"
+  $db exec "delete from odbccall"
+  $db insert odbccall [dict create callname testje]
+  set res [$db query "select * from odbccall"]
+  puts "res: $res"
+  log info "finished test select"
+}
+
+proc read_log {logfilepath db} {
+  global log filename seqnr_global
+  set filename [file tail $logfilepath]
   set f [open $logfilepath r]
   set lst_lines {}
-  set linenr 0
+  set ts_cet ""
+  set linenr ""
+  set linenr1 0
+  set seqnr_global 0
   # op verschillende niveau's afhandelen
   $db in_trans {
     while {![eof $f]} {
       gets $f line
-      incr linenr
-      if {[regexp {^\[([0-9 :.-]+)\] (.*)$} $line z ts_cet rest]} {
+      incr linenr1
+#      if {[regexp {^\[([0-9 :.-]+)\] (.*)$} $line z ts_cet rest]} {}
+      if {[regexp {^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3})\] (.*)$} $line z ts rest]} {
+        # 17-8-2015 NdV neem alleen het tijdstip van de eerste regel, waar recwin op staat. Anders wil het nog wel eens afwijken.
+        if {[regexp {^recwin} $rest]} {
+          set ts_cet $ts
+          set linenr $linenr1
+        }
         if {$rest == ""} {
           # end of event, handle it.
           handle_event $ts_cet $linenr $lst_lines
           set lst_lines {}
+          set ts_cet ""
+          set linenr ""
         } else {
           lappend lst_lines $rest
         }
+      } elseif {$line == ""} {
+        # ok, empty line
+      } else {
+        log warn "Invalid line: $line"
       }
       
     }
   }
   # mogelijk hier nog wat rest dingen om af te handelen
-  
+  if {$lst_lines != {}} {
+    handle_event $ts_cet $linenr $lst_lines
+  }
   close $f
-  $db close
+
 }
 
 proc empty_tables {db} {
@@ -54,7 +95,7 @@ proc empty_tables {db} {
 }
 
 proc handle_event {ts_cet linenr lst_lines} {
-  global log db filename ar_ctx
+  global log db filename ar_ctx seqnr_global
   set lines [join $lst_lines "\n"]
   # $db insert event [vars_to_dict filename linenr ts_cet enterexit callname HENV HDBC HSTMT query returncode returnstr lines]
   set line1 [:0 $lst_lines]
@@ -62,10 +103,15 @@ proc handle_event {ts_cet linenr lst_lines} {
   set returncode ""
   set returnstr ""
   set enterexit ""
+  set seqnr ""
   if {[regexp {^recwin.*ENTER\s([^\s]+)\s*$} $line1 z callname]} {
     set enterexit "ENTER"
+    incr seqnr_global
+    set seqnr $seqnr_global
   } elseif {[regexp {^recwin.*EXIT\s+([^\s]+)\s+with return code (\d+)(.*)$} $line1 z callname returncode rest]} {
     set enterexit "EXIT"
+    incr seqnr_global
+    set seqnr $seqnr_global
     set returnstr ""
     regexp {\(([^ ]+)\)} $rest z returnstr
   } elseif {[regexp {DIAG} $line1]} {
@@ -89,7 +135,7 @@ proc handle_event {ts_cet linenr lst_lines} {
     #$db insert event [dict merge [vars_to_dict filename linenr ts_cet enterexit callname returncode returnstr lines] $dfull]
     # breakpoint
   }
-  $db insert event [dict merge [vars_to_dict filename linenr ts_cet enterexit callname returncode returnstr lines] $dfull]
+  $db insert event [dict merge [vars_to_dict filename seqnr linenr ts_cet enterexit callname returncode returnstr lines] $dfull]
   if {$enterexit != ""} {
     reset_context_vars $callname $enterexit $d $lst_lines
   }
@@ -102,8 +148,9 @@ proc test_hex {db} {
 }
 
 # return dict
+# init all params to empty string, so in queries null check is not needed.
 proc get_params {lst_lines} {
-  set d [dict create]
+  set d [dict create HENV "" HDBC "" HSTMT "" query ""]
   foreach line $lst_lines {
     if {[regexp {\s+(\S+)\s+(\S+)\s*$} $line z nm val]} {
       if {[lsearch -exact {HENV HDBC HSTMT} $nm] >= 0} {
@@ -237,6 +284,80 @@ proc check_dict {d} {
   }
 }
 
+#$db add_tabledef event {id} {{seqnr int} filename {linenr int} ts_cet enterexit callname HENV HDBC HSTMT query {returncode int} returnstr lines}
+#$db add_tabledef odbccall {id} {filename {seqnr_enter int} {seqnr_exit int} {linenr_enter int} {linenr_exit} ts_cet_enter ts_cet_exit {calltime real} callname HENV HDBC HSTMT query {returncode int} returnstr}
+
+proc fill_calls {db} {
+  log warn "TODO: calltime"
+
+  $db exec "insert into odbccall (filename, seqnr_enter, seqnr_exit,
+            linenr_enter, linenr_exit, ts_cet_enter, ts_cet_exit, callname,
+            HENV, HDBC, HSTMT, query, returncode, returnstr, calltime)
+            select e2.filename, e1.seqnr, e2.seqnr, e1.linenr, e2.linenr,
+            e1.ts_cet, e2.ts_cet, e2.callname, e2.HENV, e2.HDBC, e2.HSTMT, e2.query, e2.returncode, e2.returnstr,
+            timediff(e1.ts_cet, e2.ts_cet)
+            from event e1 join event e2 on e1.seqnr + 1 = e2.seqnr
+            where e1.enterexit = 'ENTER'
+            and e2.enterexit = 'EXIT'
+            and ((e1.HDBC = e2.HDBC) or (e1.callname = 'SQLAllocConnect'))
+            and e1.callname == e2.callname"
+  
+}
+
+proc do_checks {db} {
+  log info "DB/Log consistency check:"
+
+  # check_query $db "select count(*) from event"
+  
+  check_query $db "select count(*)
+from event e1 join event e2 on e1.seqnr + 1 = e2.seqnr
+where e1.enterexit = 'ENTER'
+and e2.enterexit <> 'EXIT'"
+
+  # bij SQLAllocConnect is HDBC pas bij EXIT gevuld.
+  check_query $db "select count(*)
+from event e1 join event e2 on e1.seqnr + 1 = e2.seqnr
+where e1.enterexit = 'ENTER'
+and e2.enterexit = 'EXIT'
+and e1.callname != 'SQLAllocConnect'
+and e1.HDBC <> e2.HDBC"
+
+  check_query $db "select count(*)
+from event e1 join event e2 on e1.seqnr + 1 = e2.seqnr
+where e1.enterexit = 'ENTER'
+and e2.enterexit = 'EXIT'
+and e1.HDBC = e2.HDBC
+and e1.callname != e2.callname"
+
+#  log warn "TODO: check that all events belong to a odbccall"
+
+  check_query $db "select count(*) from event where enterexit = 'ENTER'
+                   and not seqnr in (select seqnr_enter from odbccall)"
+  check_query $db "select count(*) from event where enterexit = 'EXIT'
+                   and not seqnr in (select seqnr_exit from odbccall)"
+  
+}
+
+proc check_query {db query} {
+  # log debug "check_query: $query"
+  set res [$db query $query]
+  if {[llength $res] == 0} {
+    log info "check_query: ok"
+  } else {
+    if {[llength $res] == 1} {
+      if {[dict get [:0 $res] "count(*)"] == 0} {
+        log info "check_query: ok, count==0"
+      } else {
+        log warn $query
+        log warn $res
+      }
+    } else {
+      log warn $query
+      log warn $res
+    }
+  }
+}
+
 proc get_db {db_name} {
   set existing_db [file exists $db_name]
   set db [dbwrapper new $db_name]
@@ -253,13 +374,22 @@ proc get_db {db_name} {
 }
 
 proc define_tables {db} {
-  $db add_tabledef event {id} {filename {linenr int} ts_cet enterexit callname HENV HDBC HSTMT query {returncode int} returnstr lines}
-  $db add_tabledef odbccall {id} {filename {linenr_enter int} {linenr_exit} ts_cet_enter ts_cet_exit {calltime real} callname HENV HDBC HSTMT query {returncode int}}
+  $db add_tabledef event {id} {{seqnr int} filename {linenr int} ts_cet enterexit callname HENV HDBC HSTMT query {returncode int} returnstr lines}
+  $db add_tabledef odbccall {id} {filename {seqnr_enter int} {seqnr_exit int} {linenr_enter int} {linenr_exit} ts_cet_enter ts_cet_exit {calltime real} callname HENV HDBC HSTMT query {returncode int} returnstr}
   
   # later: ook events op hoger niveau, bv alles van een statement.
   
 }
 
+proc timediff {t1 t2} {
+  format %.3f [expr [to_sec $t2] - [to_sec $t1]]
+}
+
+# ts: timestamp including milliseconds
+proc to_sec {ts} {
+  regexp {^([^.]+)(\.\d+)$} $ts z ts_sec msec
+  return "[clock scan $ts_sec -format "%Y-%m-%d %H:%M:%S"]$msec"
+}
 
 main $argv
 
