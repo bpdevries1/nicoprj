@@ -111,6 +111,7 @@
     (cond (= (:action row) "if-temp-delete") 
           (do-action-if-temp-delete db-spec opts row)))
   (doseq [row (jdbc/query db-con "select * from action")]
+    ;; TODO wil eigenlijk delete-action! altijd doen, maar niet als het een onbekende action is.
     (case (:action row)
       "delete" (do (delete-file! db-con (:fullpath_action row) opts)
                    (delete-action! db-con (:id row) opts))
