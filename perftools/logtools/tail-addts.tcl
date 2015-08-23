@@ -1,11 +1,70 @@
 proc main {argv} {
+  global argv0
+  lassign $argv filename freq_msec
+  # 18-8-2015 freq of 1 msec proved to be too much on Rahul's PC, about 30% CPU and apparently a lot slower queries.
+  if {$filename == ""} {
+    puts "syntax: $argv0 logfile.log \[freq_msec\] >logfile-with-ts"
+    exit 1
+  }
+  if {$freq_msec == ""} {
+    set freq_msec 10
+  }
+  set f [file_open $filename]
+  # puts "File open done, f=$f"
+  set prevline "none"
+  # 18-8-2015 NdV using eof does not work here, it basically always returns true.
+  # 20-8-2015 NdV just put msecs now, takes less CPU time, factor 2.5-3 difference. When loading in DB, convert back to timestamps.
+  while {1} {
+    gets $f line
+    if {($line == "") && ($prevline == "")} {
+      after $freq_msec
+    } else {
+      puts "\[[clock milliseconds]\] $line"
+    }
+    set prevline $line
+  }
+}
+
+proc main_orig {argv} {
+  global argv0
+  lassign $argv filename freq_msec
+  # 18-8-2015 freq of 1 msec proved to be too much on Rahul's PC, about 30% CPU and apparently a lot slower queries.
+  if {$filename == ""} {
+    puts "syntax: $argv0 logfile.log \[freq_msec\] >logfile-with-ts"
+    exit 1
+  }
+  if {$freq_msec == ""} {
+    set freq_msec 10
+  }
+  set f [file_open $filename]
+  # puts "File open done, f=$f"
+  set prevline "none"
+  # 18-8-2015 NdV using eof does not work here, it basically always returns true.
+  while {1} {
+    gets $f line
+    if {($line == "") && ($prevline == "")} {
+      # puts "eof, wait a bit"
+      # puts "empty string, wait a bit"
+      after $freq_msec
+    } else {
+      set t [clock milliseconds]
+      set msec [format %03d [expr $t % 1000]]
+      set sec [expr $t / 1000]
+      puts "\[[clock format $sec -format "%Y-%m-%d %H:%M:%S"].$msec\] $line"
+    }
+    set prevline $line
+  }
+}
+
+
+proc main2 {argv} {
   lassign $argv filename
   set f [file_open $filename]
   while {1} {
-    gets $f line
-    if {$line == ""} {
-      after 10
+    if {[eof $f]} {
+      after 1
     } else {
+      gets $f line
       set t [clock milliseconds]
       set msec [format %03d [expr $t % 1000]]
       set sec [expr $t / 1000]
@@ -14,7 +73,7 @@ proc main {argv} {
   }
 }
 
-# open a file for non-blocking reading.
+# open a file for reading.
 # wait until the file is available.
 proc file_open {filename} {
   set done 0
@@ -29,8 +88,6 @@ proc file_open {filename} {
       after 50
     }
   }
-  # not sure if fconfigure is needed and working.
-  #fconfigure $f -blocking 0
   return $f
 }
 

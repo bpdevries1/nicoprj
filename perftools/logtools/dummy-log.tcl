@@ -1,6 +1,8 @@
-proc main {} {
+proc main {argv} {
   global stdout
-  set f [open c:/PCC/SQL-dummy.log w]
+  lassign $argv logfile
+  # set f [open c:/PCC/SQL-dummy.log w]
+  set f [open $logfile w]
   for {set x 0} {$x<20} {incr x} {    
     set msec [expr round(1000*rand())] 
     set ts1 [get_ts]
@@ -8,12 +10,11 @@ proc main {} {
     set ts2 [get_ts]
     set tsd [timediff $ts1 $ts2]
     puts $f "Waited $msec msec ($ts1 => $ts2 (diff=$tsd))"
+    puts $f ""
     flush $f
     puts "Waited $msec msec ($ts1 => $ts2 (diff=$tsd))"
     flush stdout
-
   }
-  
   close $f
 }
 
@@ -32,4 +33,4 @@ proc to_sec {ts} {
   return "[clock scan $ts_sec -format "%Y-%m-%d %H:%M:%S"]$msec"
 }
 
-main
+main $argv
