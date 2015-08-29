@@ -15,7 +15,11 @@ proc main {argv} {
   global USER cron_jobs DO_SLEEP LOGFILE
   set LOGFILE [det_logfile]
   set USER [det_user]  
-  
+  lassign $argv option
+  if {$option == "-n"} {
+    set DO_SLEEP 0
+    puts stderr "Just do actions, don't sleep"
+  }
   set cron_jobs {}
   # TODO make sure we're running with sudo/root, pm-suspend needs this
   if {[is_unix]} {
@@ -39,8 +43,7 @@ proc main {argv} {
 }
 
 proc do_crons {} {
-  # global DO_SLEEP so user may override 
-  global USER cron_jobs DO_SLEEP
+  global USER cron_jobs
   # set user_config [file join /home $USER .config gosleep gosleep.tcl]
   set user_config [file join [config_dir $USER] gosleep.tcl]
   if {![file exists $user_config]} {
