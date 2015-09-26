@@ -1,5 +1,3 @@
-#!/usr/bin/env tclsh861
-
 package require ndv
 package require tdbc::sqlite3
 
@@ -13,6 +11,10 @@ proc main {argv} {
   }
 }
 
+#  $db add_tabledef trans {id} {logfile {vuserid int} ts_cet {sec_cet int} transname user {resptime real} {status int}
+#                   usecase revisit {transid int} transshort searchcrit}
+# functions.c(343): [2015-09-02 05:51:41] [1441165901] trans=CR_UC1_revisit_11_Expand_transactions_DEP, user=u_lpt-rtsec_cr_tso_tso1_000005, resptime=0.156, status=0 [09/02/15 05:51:41]	[MsgId: MMSG-17999]
+# Transaction "CR_UC1_ -> deze wordt niet geparsed.
 proc readlogfile {logfilepath db} {
   puts "Reading: $logfilepath"
   # set ts_cet [clock format [file mtime $logfilepath] -format "%Y-%m-%d %H:%M:%S"]
@@ -28,7 +30,13 @@ proc readlogfile {logfilepath db} {
       } elseif {[regexp {: \[([0-9 :-]+)\] \[(\d+)\] trans: ([^ ]+) - user: (\d+), resptime: ([0-9.,]+)} $line z ts_cet sec_cet transname user resptime]} {
         regsub -all {,} $resptime "." resptime
         $db insert trans [vars_to_dict logfile vuserid ts_cet sec_cet transname user resptime]
+      } elseif {[regexp {: \[([0-9 :-]+)\] \[(\d+)\] trans=([^ ]+), user=([^ ,]+), resptime=([0-9.,]+), status=(\d+)} $line z ts_cet sec_cet transname user resptime status]} {
+        regsub -all {,} $resptime "." resptime
+        lassign [split_transname $transname] usecase revisit transid transshort searchcrit
+        $db insert trans [vars_to_dict logfile vuserid ts_cet sec_cet transname user resptime status usecase revisit transid transshort searchcrit]
       } elseif {[regexp {RetrieveAccounts} $line]} {
+        breakpoint
+      } elseif {[regexp {trans=CR_UC1} $line]} {
         breakpoint
       }
     }
@@ -44,11 +52,22 @@ proc det_vuserid {logfile} {
   }
 }
 
+proc split_transname {transname} {
+ #regexp {^([^ ]{0,5}_UC\d+)_([^ _]+)_(\d+)_([^ ]+?)_([^_]+)$} $transname z usecase revisit transid transshort searchcrit
+
+  if {[regexp {^([^ ]{0,5}_UC\d+)_([^ _]+)_(\d+)_([^ ]+?)_([^ _]+)$} $transname z usecase revisit transid transshort searchcrit]} {
+    list $usecase $revisit $transid $transshort $searchcrit
+  } else {
+    breakpoint
+    list "" "" 0 "" ""
+  }
+}
+
 proc get_results_db {db_name} {
   set existing_db [file exists $db_name]
   set db [dbwrapper new $db_name]
   define_tables $db
-  $db create_tables 0 ; # 0: don't drop tables first. Always do create, eg for new table defs.
+  $db create_tables 1 ; # 0: don't drop tables first. Always do create, eg for new table defs. 1: drop tables first.
   if {!$existing_db} {
     log info "New db: $db_name, create tables"
     # create_indexes $db
@@ -69,7 +88,9 @@ functions.c(278): [2015-06-15 10:28:22] [1434356902] trans: CBW_03_Sprocket - us
 proc define_tables {db} {
   $db add_tabledef retraccts {id} {logfile {vuserid int} ts_cet {sec_cet int} user {naccts int} {resptime real}}
   # 17-6-2015 NdV transaction is a reserved word in SQLite, so use trans as table name
-  $db add_tabledef trans {id} {logfile {vuserid int} ts_cet {sec_cet int} transname user {resptime real}}
+  # $db add_tabledef trans {id} {logfile {vuserid int} ts_cet {sec_cet int} transname user {resptime real}}
+  $db add_tabledef trans {id} {logfile {vuserid int} ts_cet {sec_cet int} transname user {resptime real} {status int}
+                   usecase revisit {transid int} transshort searchcrit}
 }
 
 main $argv
