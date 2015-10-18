@@ -11,6 +11,7 @@ proc main {argv} {
   while {![eof $f]} {
     gets $f line
     if {[regexp {^root = (.+)$} $line z mnt]} {
+      file mkdir $mnt
       set fn [file join $mnt mountpoint.txt]
       puts "Touching: $fn"
       exec touch $fn
