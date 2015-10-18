@@ -3,12 +3,24 @@ source("C:\\PCC\\Nico\\nicoprj\\R\\RABO\\perflib.R")
 source("C:\\PCC\\Nico\\nicoprj\\R\\lib\\HTMLlib.R")
 load.def.libs()
 
+if (false) {
+  source("~/nicoprj/R/lib/ndvlib.R")
+  source("~/nicoprj/R/RABO/perflib.R")
+  source("~/nicoprj/R/lib/HTMLlib.R")
+  load.def.libs()
+  
+}
+
 main = function () {
   # load.def.libs()
   # dir = "C:/PCC/Nico/Projecten/IntelliMatch/odbc-dev-20150818"
   # dir = "C:/PCC/Nico/Projecten/IntelliMatch/odbc-prod"
   dir = "C:/PCC/Nico/Projecten/IntelliMatch/ODBC-DR2"
   # dir = "C:/PCC/Nico/Projecten/IntelliMatch/odbc-dev"
+  
+  dir = "/home/ymor/RABO/IntelliMatch/odbc-prod"
+  dir = "/home/ymor/RABO/IntelliMatch/ODBC-DR1"
+  
   filename = "odbccalls.db"
   make.action.graphs(dir, filename)
   make.report(dir, filename)
@@ -24,10 +36,13 @@ make.action.graphs = function(dir, filename) {
            from odbccall c 
            join odbcquery_do q on c.odbcquery_id = q.odbcquery_id
            join useraction u on u.id = q.start_useraction_id
+                            and u.id = q.end_useraction_id
            where q.query != ''
            and q.start_useraction_id between 1 and 500
            and u.resptime > 2
            and u.description <> ''
+           -- and u.id = 16 -- test
+           -- and c.ts_cet_exit > '2015-10-08 14:27:57'
            and c.callname not in ('SQLAllocStmt', 'SQLFreeStmt', 'SQLBindCol', 'SQLBindParameter', 
              'SQLDescribeCol', 'SQLNumResultCols', 'SQLPrepare', 'SQLRowCount', 'SQLSetParam', 'SQLSetPos', 'SQLSetStmtOption')
            order by 1, q.odbcquery_id"  
@@ -49,6 +64,7 @@ make.action.graphs = function(dir, filename) {
       theme(legend.position="bottom")
     fn.graph = sprintf("useraction-%04d.png", dft$useraction_id[1])
     ggsave(filename=fn.graph, width=12, height=det.height(dft), dpi=100)
+    call.distr.graph(db, dft$useraction_id[1], dft$description[1])
   })
   db.close(db)
 }
@@ -57,6 +73,23 @@ det.height = function(df) {
   nq = length(ddply(df, .(title), function(dft) {c(n=1)})$title)
   2 + 0.20 * nq
   #9
+}
+
+call.distr.graph = function(db, useraction_id, description) {
+  query = sprintf("select calltime from odbccall c join odbcquery_do q on c.odbcquery_id = q.id
+    where start_useraction_id = %d and end_useraction_id = %d
+    -- and 1.0*calltime >= 0.005
+    -- and 1.0*calltime <= 0.1
+    order by 1.0*calltime", useraction_id, useraction_id)
+  print(query)
+  df = db.query(db, query)
+  qplot(df$calltime, binwidth = 0.001,
+        xlab = "Call time (s)", ylab="Count",
+        main = sprintf("%d: %s: call round trip times (sum=%.3f sec)",
+                       useraction_id, description, sum(df$calltime))) +
+    scale_x_continuous(limits=c(0.005, 0.1))
+  fn.graph = sprintf("useraction-call-distr-%04d.png", useraction_id)
+  ggsave(filename=fn.graph, width=12, height=8, dpi=100)  
 }
 
 make.report = function(dir, filename) {
@@ -87,6 +120,11 @@ make.report = function(dir, filename) {
     writeLines("<br/>", fo)
     write.html.table.actionqueries(db, fo, dft$id[1])
     writeLines("<br/>", fo)
+    graph.filename = sprintf("useraction-call-distr-%04d.png", dft$id[1])
+    if (file.exists(graph.filename)) {
+      html.img(fo, graph.filename)  
+    }
+    
   })  
   html.footer(fo)
   close(fo)
