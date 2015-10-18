@@ -110,7 +110,18 @@ html.table.header.row = function(df) {
 # TODO shouldn't have to give idfield as param. table should be handled as-is by ddply behandeld worden, each row becomes a html table row.
 write.html.table = function(fo, df, idfield) {
   df2 = ddply(df, as.quoted(idfield), function(dfp) {
-    dfp1 = dfp[1,] # only need first record of dataframe: per useraction_id only one record exists.
+    dfp1 = dfp[1,] # only need first record of dataframe: per id only one record should exist.
+    c(tr=html.table.row(dfp1))
+  })
+  writeLines(concat("<table cellspacing=\"2\" cellpadding=\"5\" border=\"0\" class=\"details\">", 
+                    html.table.header.row(df),
+                    concat(df2$tr, collapse="\n"), 
+                    "</table>"), fo)
+}
+
+write.html.table.old = function(fo, df, idfield) {
+  df2 = ddply(df, as.quoted(idfield), function(dfp) {
+    dfp1 = dfp[1,] # only need first record of dataframe: per id only one record should exist.
     c(tr=html.table.row(dfp1))
   })
   writeLines(concat("<table cellspacing=\"2\" cellpadding=\"5\" border=\"0\" class=\"details\">", 
@@ -119,6 +130,7 @@ write.html.table = function(fo, df, idfield) {
                     "</table>"), fo)
 }
 
+
 ######################
 # generic formatting #
 ######################
@@ -126,16 +138,10 @@ write.html.table = function(fo, df, idfield) {
 # integer: format with ' a 1000 separator
 # numeric: use sprintf to always have 3 decimals, but no thousand separator.
 f1000 = function(val) {
-  # format(round(val, digits=3), big.mark="'", scientific=FALSE)
-  # print(val)
   valn = as.numeric(val)
-  # format(round(as.numeric(val), digits=3), big.mark="'", scientific=FALSE)
-  # format(round(valn, digits=3), big.mark="'", scientific=FALSE)
   if (is.integer(val)) {
-    # sprintf("%d", val)  
     format(round(valn, digits=3), big.mark="'", scientific=FALSE)
   } else {
     sprintf("%.3f", val)
   }
-  
 }
