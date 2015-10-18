@@ -18,6 +18,7 @@ proc main {argv} {
 proc call_inotify {root sec_timeout} {
   # check both stdout and exitcode?
   # log "exec inotifywait..."
+  log "call_inotify: start"
   set res "<error>"
   catch {set res [exec -ignorestderr inotifywait --csv --timeout $sec_timeout $root]} results options
   set exitcode [det_exitcode $options]
