@@ -1,3 +1,5 @@
+# Library functions for log2events.tcl
+
 proc read_log {logfilepath db} {
   global log filename seqnr_global
   log info "Reading log: $logfilepath"

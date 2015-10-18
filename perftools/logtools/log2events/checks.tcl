@@ -1,3 +1,5 @@
+# Library functions for log2events.tcl
+
 # puts "before proc do_checks"
 
 proc do_checks {db} {

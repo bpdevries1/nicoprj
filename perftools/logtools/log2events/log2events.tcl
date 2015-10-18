@@ -16,7 +16,7 @@ proc main {argv} {
   lassign $argv logfilepath
 
   set dbname [file join [file dirname $logfilepath] "odbccalls.db"]
-  if {0} {
+  if {1} {
     catch {file delete $dbname} ; # while testing delete the sqlite db first. Not possible if open in SQLiteSpy
     set db [get_db $dbname]
     $db function timediff

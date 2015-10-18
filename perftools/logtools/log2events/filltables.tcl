@@ -1,3 +1,5 @@
+# Library functions for log2events.tcl
+
 #$db add_tabledef event {id} {{seqnr int} filename {linenr int} ts_cet enterexit callname HENV HDBC HSTMT query {returncode int} returnstr lines}
 #$db add_tabledef odbccall {id} {filename {seqnr_enter int} {seqnr_exit int} {linenr_enter int} {linenr_exit} ts_cet_enter ts_cet_exit {calltime real} callname HENV HDBC HSTMT query {returncode int} returnstr}
 
@@ -19,6 +21,7 @@ proc fill_calls {db} {
 
 # puts "before proc fill_queries"
 # TODO: deze vooral traag, waarschijnlijk paar indexen toevoegen.
+# 7-10-2015 voor odbc-prod (IM) was deze query 15 minuten bezig.
 proc fill_queries {db} {
   log info "fill_queries - start"
   
@@ -107,11 +110,12 @@ proc fill_useraction {db} {
   $db exec "update useraction
             set resptime = timediff(ts_cet_first, ts_cet_last)"
 
-  $db exec "update useraction set ncalls = (
-              select count(*)
-              from odbccall c
-              join odbcquery_do q on q.odbcquery_id = c.odbcquery_id
-              where q.start_useraction_id = useraction.id)"
+  # deze niet hier uitvoeren, dan ncalls = 0            
+  #$db exec "update useraction set ncalls = (
+  #            select count(*)
+  #            from odbccall c
+  #            join odbcquery_do q on q.odbcquery_id = c.odbcquery_id
+  #            where q.start_useraction_id = useraction.id)"
   
 }
 
@@ -149,6 +153,14 @@ proc fill_odbcquery_do {db} {
 
   # 21-8-2015 breedte van 3 is voorlopig genoeg voor odbcquery_id
   $db exec "update odbcquery_do set title = printf('%03d: %s \[#%d\]', odbcquery_id, substr(query, 1, 20), ncalls)"
+
+  # 7-10-2015 NdV deze als laatste. Bij eerder uitvoeren met 0-en gevuld.  
+  $db exec "update useraction set ncalls = (
+              select count(*)
+              from odbccall c
+              join odbcquery_do q on q.odbcquery_id = c.odbcquery_id
+              where q.start_useraction_id = useraction.id)"
+  
   
   log info "fill_odbcquery_do - finished"
 }
