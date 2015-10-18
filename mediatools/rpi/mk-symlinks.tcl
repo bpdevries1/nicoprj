@@ -1,7 +1,12 @@
 #!/usr/bin/env tclsh
 
 proc main {argv} {
+  global argv0 stderr
   lassign $argv orig_dir link_dir
+  if {$orig_dir == ""} {
+    puts stderr "syntax: $argv0 <orig_dir> <symlinks_dir>"
+    exit 1
+  }
   if {$link_dir == ""} {
     set link_dir .
   }

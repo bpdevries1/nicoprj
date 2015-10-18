@@ -10,20 +10,6 @@ proc main {argv} {
   wrap_delete check_and_delete_wrap
 }
 
-proc main_old {argv} {
-  log "delete-played-symlinks: start"
-  catch {
-    check_and_delete
-  } msg
-  # info errorstack werkt hier niet, mss nieuw in tcl 8.6?
-  # set ies [info errorstack]
-  if {$msg != ""} {
-    log "main catch: result: $msg"
-  }
-  # log "info error stack: $ies"
-  log "delete-played-symlinks: finished"
-}
-
 proc wrap_delete {procname} {
   log "delete-played-symlinks - $procname: start"
   catch {

@@ -35,7 +35,7 @@ proc main {argv} {
 # log to general log file and also a temp file, to handle deleting symlinks after playing.
 proc log {str} {
   global LOGROOT
-  set lognames {"wrapomxplayer.log" "wrapomxplayer-temp.log"}
+  set lognames {"wrapomxplayer.log" "wrapomxplayer-temp.log" "wrapomxplayer-films-move.log"}
   foreach logname $lognames {
     # set f [open [file join $LOGROOT "wrapomxplayer.log"] a]
     set f [open [file join $LOGROOT $logname] a]
