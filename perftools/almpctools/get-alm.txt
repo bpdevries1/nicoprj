@@ -1,0 +1,702 @@
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [info] Opened logfile: get-ALM-PC-tests.tcl.log
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] text100: <?xml version="1.0" encoding="UTF-8" standalone="yes"?><Entity Type="test"><ChildrenCount><Value>0</V
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] root node: Entity
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] #field_nodes: 45
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field estimate-devtime = <empty>
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field vc-checkin-time = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field pc-errors = <?xml version="1.0" encoding="utf-16"?>
+<ErrorsPersistenceModel xmlns:xsi="http:/
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field vc-start-audit-action-id = 2789
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field ver-stamp = 22
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field description = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field dev-comments = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field vc-version-number = <empty>
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field pc-sla-defined = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field template = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field status = Design
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field has-dependencies = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field steps = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field runtime-data = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field check-out-user-name = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field order-id = 6
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field vc-checkin-date = <empty>
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field parent-id = 1016
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field vc-date = <empty>
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field pc-blob = <?xml version="1.0" encoding="utf-16"?>
+<loadTest xmlns:xsi="http://www.w3.org/20
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field owner = vreezenb
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field vc-time = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field base-test-id = <empty>
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field storage-path = 172\167
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field configurations-count = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field id = 172
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field vc-comments = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field name = BigIP_Croydon_90percent_2h
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field has-linkage = N
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field vc-status = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field has-criteria = N
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field vc-checkin-user-name = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field pc-valid = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field creation-time = 2015-10-06
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field last-modified = 2015-10-08 16:53:18
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field attachment = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field subtype-id = PERFORMANCE-TEST
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field vc-end-audit-action-id = 2789
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field pc-total-vusers = 893
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field exec-status = No Run
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field vc-checkin-comments = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field step-param = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field text-sync = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field timeout = <empty>
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field pc-duration = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] pc_errors_node: domNode020BA210
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] pc_errors_text: <?xml version="1.0" encoding="utf-16"?>
+<ErrorsPersistenceModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <GroupsModel />
+  <Invalidities />
+  <ID>172</ID>
+  <Name>BigIP_Croydon_90percent_2h</Name>
+</ErrorsPersistenceModel>
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] handle_pc_errors: start
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] root node: ErrorsPersistenceModel
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] ID: 172, name: BigIP_Croydon_90percent_2h
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] handle_pc_errors: finished
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] handle_pc_blob: start
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] node: domNode02159F08
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] root node: loadTest
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Hosts:
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] id: 1134, name: d-lgams, location: Ymor
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] id: 1135, name: d-lgdbo, location: Ymor
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] id: 1138, name: d-lggro, location: Ymor
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] start mode type: Immediately
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] schedule group name: transact_secure_rcm
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] startup mode: StartAtScenarioBegining
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rampup 12 users every 62 seconds
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] duration: 3600 seconds
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] schedule group name: dotcom
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] startup mode: StartAtScenarioBegining
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rampup 2 users every 78 seconds
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] duration: 3600 seconds
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] schedule group name: rcc_cashbalancingwidget
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] startup mode: StartAtScenarioBegining
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rampup 2 users every 73 seconds
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] duration: 3600 seconds
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] ==========================================
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Groups:
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Name: transact_secure_rcm
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] ScriptUniqueID: 2
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] ScriptName: Transact_secure
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] VUsersNumber: 700
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] CommandLine: -config pat-rcm.config -host secure21pat01.rabobank.com
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] RunTimeSettings: [General]!@##@!XlBridgeTimeout=120!@##@!DefaultRunLogic=default.usp!@##@!Automati
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] RunLogic: [RunLogicEndRoot:vuser_end]!@##@!MercIniTreeFather=RunLogicEndRoot!@##@!Name=vuse
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Hosts:
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] host within group: id: 1134, name: d-lgams, location: Ymor
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] host within group: id: 1135, name: d-lgdbo, location: Ymor
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] host within group: id: 1138, name: d-lggro, location: Ymor
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.MercIniTreeFather = RunLogicEndRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.Name = vuser_end
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.RunLogicObjectKind = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.RunLogicActionType = VuserEnd
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.uniqueId = 16a63f0b_605c_b6be_ba02_d61640d8a6e8
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.MercIniTreeSectionName = vuser_end
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.collapsed = True
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.MercIniTreeFather = RunLogicInitRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.Name = vuser_init
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.RunLogicObjectKind = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.RunLogicActionType = VuserInit
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.uniqueId = ba1533dc_de8a_ccbe_eaf9_4966e384052d
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.MercIniTreeSectionName = vuser_init
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.collapsed = True
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.MercIniTreeFather = RunLogicRunRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.Name = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.RunLogicObjectKind = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.RunLogicActionType = VuserRun
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.uniqueId = b07ac52a_0f88_8f55_749b_20e833a8ea71
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.collapsed = True
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.MercIniTreeSectionName = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot:vuser_errorhandler.MercIniTreeSectionName = vuser_errorhandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot:vuser_errorhandler.RunLogicObjectKind = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot:vuser_errorhandler.Name = vuser_errorhandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot:vuser_errorhandler.MercIniTreeFather = RunLogicErrorHandlerRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot:vuser_errorhandler.RunLogicActionType = VuserErrorHandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.Profile Actions.MercIniTreeSectionName = Profile Actions
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.Profile Actions.Profile Actions name = vuser_init,Action,CacheControl,Login_cert_main,selectuserid,TrSec_RCM,TrSec_Research,Transact_secure,CRAS_TransAct_secure_RITA,CASH_pooling,RITA_blotters,Leeg,CRAS_Transact_secure_Cookie,Engels_naar_NL,Engels_naar_NL_EXTERN,CRAS_Transact_secure_RCM,CRAS_Transact_secure,Logout,CustomThinktime,substring,errorcheck,RWA_Transact_secure,application_version,vuser_end
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.Profile Actions.MercIniTreeFather = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicRandomPaceMin = 860
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.MercIniTreeSectionName = RunLogicRunRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicNumOfIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicPaceConstAfterTime = 2000
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicPaceConstTime = 32000
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.uniqueId = 6c8cc5bc_b1e4_b1fa_3868_cb90ba715ac9
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicActionOrder = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicPaceType = Random
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicObjectKind = Group
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.Name = Run
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicRandomPaceMax = 878
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicAfterPaceMin = 32000
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicRunMode = Sequential
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicActionType = VuserRun
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.MercIniTreeSons = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicAfterPaceMax = 32000
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.MercIniTreeFather = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.RunLogicActionOrder = vuser_end
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.MercIniTreeFather = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.MercIniTreeSons = vuser_end
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.RunLogicNumOfIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.Name = End
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.RunLogicRunMode = Sequential
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.RunLogicObjectKind = Group
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.RunLogicActionType = VuserEnd
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.uniqueId = 112c4e69_807d_7b64_41d3_574882790cbe
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.MercIniTreeSectionName = RunLogicEndRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.RunLogicActionOrder = vuser_errorhandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.MercIniTreeFather = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.MercIniTreeSons = vuser_errorhandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.RunLogicNumOfIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.Name = ErrorHandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.RunLogicRunMode = Sequential
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.RunLogicObjectKind = Group
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.RunLogicActionType = VuserErrorHandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.MercIniTreeSectionName = RunLogicErrorHandlerRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.RunLogicActionOrder = vuser_init
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.MercIniTreeFather = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.MercIniTreeSons = vuser_init
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.RunLogicNumOfIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.Name = Init
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.RunLogicRunMode = Sequential
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.RunLogicObjectKind = Group
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.RunLogicActionType = VuserInit
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.uniqueId = ac2fc9ae_c4fd_1182_9c04_1c14964486f5
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.MercIniTreeSectionName = RunLogicInitRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.XlBridgeTimeout = 120
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.DefaultRunLogic = default.usp
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.AutomaticTransactions = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.automatic_nested_transactions = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.iter_begins_val = random
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.iter_ends_val = fixed
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.ContinueOnError = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.FailTransOnErrorMsg = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.AutomaticTransactionsPerFunc = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.UseThreads = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.Options = RANDOM
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.Factor = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.LimitFlag = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.Limit = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.ThinkTimeRandomLow = 50
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.ThinkTimeRandomHigh = 150
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Iterations.NumOfIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Iterations.IterationPace = IterationASAP
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Iterations.StartEvery = 60
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Iterations.RandomMin = 60
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Iterations.RandomMax = 90
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.LogOptions = LogExtended
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.MsgClassData = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.MsgClassParameters = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.MsgClassFull = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.AutoLog = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.AutoLogBufferSize = 100
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.LogDetail = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.PrintTimeStamp = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.WebRecorderVersion = 10
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SearchForImages = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.StartRecordingGMT = 2012/07/26 07:04:06
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.StartRecordingIsDst = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.NavigatorBrowserLanguage = en-us
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.NavigatorSystemLanguage = nl
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.NavigatorUserLanguage = nl
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ScreenWidth = 1280
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ScreenHeight = 1024
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ScreenAvailWidth = 1280
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ScreenAvailHeight = 994
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UserHomePage = http://meetingpoint.rabonet.com/
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserType = Microsoft Internet Explorer 4.0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.HttpVer = 1.1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.CustomUserAgent = Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; InfoPath.2; .NET4.0C; .NET4.0E)
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ResetContext = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UseCustomAgent = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.KeepAlive = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.EnableChecks = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.AnalogMode = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUseBrowser = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUseProxy = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyHTTPHost = wcg.eu.rabonet.com
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyHTTPSHost = wcg.eu.rabonet.com
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyHTTPPort = 8080
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyHTTPSPort = 8080
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUseSame = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyNoLocal = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyBypass = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUserName = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyPassword = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUseAutoConfigScript = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyAutoConfigScriptURL = http://proxyconfig.rabobank.nl/proxy.pac
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUseProxyServer = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SaveSnapshotResources = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UTF8InputOutput = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserAcceptLanguage = nl
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserAcceptEncoding = gzip
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.RecorderWinCodePage = 1252
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SnapshotOnErrorActive = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SimulateCache = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.CacheAlwaysCheckForNewerPages = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.CacheHtmlPages = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ClearCacheForSimulateNewUser = True
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.GraphHitsPerSecondHttpStatusCodes = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.GraphPagesPerSecond = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.GraphBytesPerSecond = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.WinInetReplay = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.AutoTransFileLine = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.FailNonCriticalItem = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.DisableAED = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserAcceptLanguage_extra_arg_1 = nl
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.HttpErrorsAsWarnings = No
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ConnectTimeout = 120
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ReceiveTimeout = 120
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.KeepAliveTimeout = 60
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ZlibHeadersInCompressedRequestBody = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.DeleteCacheUnreferencedIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.EnableIPCache = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ResourcePageTimeoutIsWarning = No
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ParseHtmlContentType = TEXT
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.PageDownloadTimeout = 120
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.NetBufSize = 36864
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.PrintNTLMLog = No
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.PrintSSLLog = No
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.MaxErrorMatchesAsERRORS = 10
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.MaxSelfMetaRefreshCount = 2
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.AedUtf8Values = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.TreeViewRequestBodyLimit = 2047
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.Retry401ThinkTime = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.DisableNTLM2SS = No
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UseNativeNTLM = No
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.OverrideNTLMCreds = No
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.IntegratedAuthentication = No
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.HeavyKDCLoad = No
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.PrintBufLineLen = 99
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.PrintBufEscape0 = No
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.DomBasedSnapshots = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.CharsetConversionByHTTP = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ReparseWhenMetaChangesCharset = Auto
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.FailOnJavaScriptError = No
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.InitStandadClassForNewWindow = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.IgnoreActedOnDisabled = No
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.OptimizeTimersAtStepEnd = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.DomMaximumTimeout = 5
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.DomMaximumAccumulativeTimeout = 30
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ReestablishSetIntervalAtStepEnd = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.LimitNoNetworkTimersAtStepEnd = 100
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.HistorySupport = Auto
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.MaximumHistorySize = 100
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.DomMemBlockSize = 16384
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UseMemMgrDynamicObjects = Auto
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.JSRuntimeSizeKb = 1024
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.JSStackSizeKb = 32
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UseDataFormatExtensions = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.KeepNonTextMimeTypeForVugen = text/xml;0;text/plain;0;jpg;0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.KeepNonTextMimeType = text/xml;text/plain
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.IgnoreContentCachingTypes = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UseBrowserAgent = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SupportCharset = None
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.IPVersionPolicy = 2
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.WebSyncRetryIntervalMs = 1000
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.WebSyncRetryTimeoutMs = 3000
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.EnableJsForTransport = No
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.JsForTransportRuntimeSize = 51200
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.JsForTransportStackSize = 32
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.Browser_Type = Microsoft Internet Explorer
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserVer = 10.0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserPlatform = Windows
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserLanguageCode = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserUserAgent = Mozilla/5.0 (compatible; MSIE 10.0; Windows; Trident/6.0)
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SimulatePrefetchPrerender = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.HTTPVer = 1.1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.EnableSnapshotsInReplay = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.MaxRedirectionDepth = 10
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.WebSocketCallBackTimerIntervalMS = 500
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.PrefetchPrerenderCallBackTimerIntervalMS = 500
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SPNCNameLookup = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SPNAddNoneDefPort = No
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.LoadChilEngine = No
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.LogEnableResponseLimit = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.LogMaxResponseSize = 100
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ModemSpeed.CustomModemSpeed = 1000
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ModemSpeed.EnableModemSpeed = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ModemSpeed.EnableCustomModemSpeed = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ModemSpeed.ModemSpeed = 14400
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.FILTERS.FilterType = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.FILTERS.ExcludeFiltersInList = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.AED.TempAedFile = NO_APP_AT_AED
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.TruClient.UseSSL2 = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Name: dotcom
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] ScriptUniqueID: 3
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] ScriptName: Dotcom
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] VUsersNumber: 93
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] CommandLine: -host www21pat.gtm.rabobank.com -scripttest 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] RunTimeSettings: [General]!@##@!XlBridgeTimeout=120!@##@!DefaultRunLogic=default.usp!@##@!automati
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] RunLogic: [RunLogicEndRoot:vuser_end]!@##@!MercIniTreeFather=RunLogicEndRoot!@##@!Name=vuse
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Hosts:
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] host within group: id: 1134, name: d-lgams, location: Ymor
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] host within group: id: 1135, name: d-lgdbo, location: Ymor
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] host within group: id: 1138, name: d-lggro, location: Ymor
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.MercIniTreeFather = RunLogicEndRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.Name = vuser_end
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.RunLogicObjectKind = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.RunLogicActionType = VuserEnd
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.uniqueId = eeb823c6_1b02_e87c_1572_339679d8e865
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.collapsed = True
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.MercIniTreeSectionName = vuser_end
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.MercIniTreeFather = RunLogicInitRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.Name = vuser_init
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.RunLogicObjectKind = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.RunLogicActionType = VuserInit
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.uniqueId = be2258f5_fdd1_bb1b_aae1_9011c7951d1f
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.collapsed = True
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.MercIniTreeSectionName = vuser_init
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.MercIniTreeFather = RunLogicRunRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.Name = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.RunLogicObjectKind = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.RunLogicActionType = VuserRun
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.uniqueId = 0fd7e928_1781_2360_b080_6304f8493dd5
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.MercIniTreeSectionName = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.collapsed = True
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot:vuser_errorhandler.MercIniTreeSectionName = vuser_errorhandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot:vuser_errorhandler.RunLogicObjectKind = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot:vuser_errorhandler.Name = vuser_errorhandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot:vuser_errorhandler.MercIniTreeFather = RunLogicErrorHandlerRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot:vuser_errorhandler.RunLogicActionType = VuserErrorHandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.Profile Actions.MercIniTreeSectionName = Profile Actions
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.Profile Actions.Profile Actions name = vuser_init,Action,CacheControl,Flow,Homepage,About_Rabobank,Press,Products_and_services,Investors_relations,Research,FAQ,Careers,Contact,Search,Map,Demo_pages,vuser_end
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.Profile Actions.MercIniTreeFather = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicRandomPaceMin = 110
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.MercIniTreeSectionName = RunLogicRunRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicNumOfIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicPaceConstAfterTime = 60
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicPaceConstTime = 60
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.uniqueId = f5fd95f8_a18c_a70d_3070_b4e274381a6b
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicActionOrder = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicPaceType = Random
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicObjectKind = Group
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.Name = Run
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicRandomPaceMax = 129
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicAfterPaceMin = 60
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicRunMode = Sequential
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicActionType = VuserRun
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.MercIniTreeSons = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicAfterPaceMax = 90
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.MercIniTreeFather = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.RunLogicActionOrder = vuser_errorhandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.MercIniTreeFather = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.MercIniTreeSons = vuser_errorhandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.RunLogicNumOfIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.Name = ErrorHandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.RunLogicRunMode = Sequential
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.RunLogicObjectKind = Group
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.RunLogicActionType = VuserErrorHandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.MercIniTreeSectionName = RunLogicErrorHandlerRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.RunLogicActionOrder = vuser_end
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.MercIniTreeFather = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.MercIniTreeSons = vuser_end
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.RunLogicNumOfIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.Name = End
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.RunLogicRunMode = Sequential
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.RunLogicObjectKind = Group
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.RunLogicActionType = VuserEnd
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.uniqueId = a4fe4e33_8f0b_8f98_fe4d_698fe49a8d80
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.MercIniTreeSectionName = RunLogicEndRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.RunLogicActionOrder = vuser_init
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.MercIniTreeFather = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.MercIniTreeSons = vuser_init
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.RunLogicNumOfIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.Name = Init
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.RunLogicRunMode = Sequential
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.RunLogicObjectKind = Group
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.RunLogicActionType = VuserInit
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.uniqueId = 3a5a60c7_8b2b_488d_493c_82755d75bb3b
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.MercIniTreeSectionName = RunLogicInitRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.XlBridgeTimeout = 120
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.DefaultRunLogic = default.usp
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.automatic_nested_transactions = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.AutomaticTransactions = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.ContinueOnError = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.FailTransOnErrorMsg = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.UseThreads = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.AutomaticTransactionsPerFunc = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.Options = RANDOM
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.Factor = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.LimitFlag = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.Limit = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.ThinkTimeRandomLow = 50
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.ThinkTimeRandomHigh = 150
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Iterations.NumOfIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Iterations.IterationPace = IterationASAP
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Iterations.StartEvery = 60
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Iterations.RandomMin = 60
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Iterations.RandomMax = 90
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.LogOptions = LogExtended
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.MsgClassData = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.MsgClassParameters = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.MsgClassFull = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.LogDetail = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.AutoLog = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.AutoLogBufferSize = 20
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.PrintTimeStamp = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SearchForImages = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.WebRecorderVersion = 10
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.MaxConnections = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.LogFileWriteTraceToFile = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.LogFileWrite = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.StartRecordingGMT = 2015/06/18 10:18:04
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.StartRecordingIsDst = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.NavigatorBrowserLanguage = en-US
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.NavigatorSystemLanguage = en-US
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.NavigatorUserLanguage = nl-NL
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ScreenWidth = 1280
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ScreenHeight = 1024
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ScreenAvailWidth = 1280
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ScreenAvailHeight = 994
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UserHomePage = about:Tabs
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserType = Microsoft Internet Explorer 4.0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.HttpVer = 1.1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.CustomUserAgent = Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; Win64; x64; Trident/7.0; .NET CLR 2.0.50727; SLCC2; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C; .NET4.0E; InfoPath.3; Tablet PC 2.0)
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ResetContext = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UseCustomAgent = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.KeepAlive = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.EnableChecks = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.AnalogMode = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUseBrowser = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUseProxy = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyHTTPHost = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyHTTPSHost = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyHTTPPort = 443
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyHTTPSPort = 443
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUseSame = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyNoLocal = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyBypass = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUserName = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyPassword = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUseAutoConfigScript = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyAutoConfigScriptURL = http://swg-pac.eu.rabonet.com/swg/swg-prod.pac
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUseProxyServer = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SaveSnapshotResources = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UTF8InputOutput = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SupportCharset = None
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserAcceptLanguage = nl-NL
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserAcceptEncoding = gzip, deflate
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.RecorderWinCodePage = 1252
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UseDataFormatExtensions = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.GraphHitsPerSecondHttpStatusCodes = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.GraphPagesPerSecond = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.GraphBytesPerSecond = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.WinInetReplay = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.AutoTransFileLine = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.FailNonCriticalItem = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.DisableAED = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SnapshotOnErrorActive = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.Browser_Type = Microsoft Internet Explorer
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserLanguageCode = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserUserAgent = Mozilla/5.0 (compatible; MSIE 10.0; Windows; Trident/6.0)
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UseBrowserAgent = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.KeepNonTextMimeType = text/xml;text/plain
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.IgnoreContentCachingTypes = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.CacheHtmlPages = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.CacheAlwaysCheckForNewerPages = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SimulateCache = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ClearCacheForSimulateNewUser = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SimulatePrefetchPrerender = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserVer = 10.0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserPlatform = Windows
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SPNCNameLookup = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.EnableIPCache = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.TruClient.UseSSL2 = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Name: rcc_cashbalancingwidget
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] ScriptUniqueID: 7
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] ScriptName: RCC_CashBalancingWidget
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] VUsersNumber: 100
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] CommandLine: -config pat200mix-delete.config -host secure21pat01.rabobank.com
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] RunTimeSettings: [General]!@##@!XlBridgeTimeout=120!@##@!DefaultRunLogic=default.usp!@##@!automati
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] RunLogic: [RunLogicEndRoot:vuser_end]!@##@!MercIniTreeFather=RunLogicEndRoot!@##@!Name=vuse
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Hosts:
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] host within group: id: 1134, name: d-lgams, location: Ymor
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] host within group: id: 1135, name: d-lgdbo, location: Ymor
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] host within group: id: 1138, name: d-lggro, location: Ymor
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.MercIniTreeFather = RunLogicEndRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.Name = vuser_end
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.RunLogicObjectKind = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.RunLogicActionType = VuserEnd
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.uniqueId = dd03d084_5d8c_8772_7dd0_cda793ca55d4
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.collapsed = True
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot:vuser_end.MercIniTreeSectionName = vuser_end
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.MercIniTreeFather = RunLogicInitRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.Name = vuser_init
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.RunLogicObjectKind = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.RunLogicActionType = VuserInit
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.uniqueId = 724cfd30_e279_9a21_4c2f_d6a00debd91e
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.collapsed = True
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot:vuser_init.MercIniTreeSectionName = vuser_init
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.MercIniTreeFather = RunLogicRunRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.Name = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.RunLogicObjectKind = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.RunLogicActionType = VuserRun
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.uniqueId = 727fb81e_f23c_1f11_56a8_5988877d41c7
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.collapsed = True
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot:Action.MercIniTreeSectionName = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot:vuser_errorhandler.MercIniTreeSectionName = vuser_errorhandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot:vuser_errorhandler.RunLogicObjectKind = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot:vuser_errorhandler.Name = vuser_errorhandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot:vuser_errorhandler.RunLogicActionType = VuserErrorHandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot:vuser_errorhandler.MercIniTreeFather = RunLogicErrorHandlerRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.Profile Actions.Profile Actions name = vuser_init,Action,Login_and_Logout,login_extra,login_extra2,sprocket,wijzig_groepen,maak_groep_naam,maak_groep_opslaan_sluiten,wijzig_opslaan,select_other,select_group,verwijder,create_dashboard,_leesmij,Login_cert_main,RCC_Open,LoanWidget_Open,LoanWidget_Show,CBWidget_Open,CBWidget_Show,POWidget_Open,POWidget_Show,CBWidget_Add,Logout,vuser_end
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.Profile Actions.MercIniTreeSectionName = Profile Actions
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.Profile Actions.MercIniTreeFather = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicRandomPaceMin = 130
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.MercIniTreeSectionName = RunLogicRunRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicNumOfIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicPaceConstAfterTime = 32000
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicPaceConstTime = 32000
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.uniqueId = 9b52f6ef_f28d_45a3_5bd3_2a0f84e0287f
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicActionOrder = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicPaceType = Random
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicObjectKind = Group
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.Name = Run
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicRandomPaceMax = 158
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicAfterPaceMin = 32000
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicRunMode = Sequential
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicActionType = VuserRun
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.MercIniTreeSons = Action
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.MercIniTreeFather = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicRunRoot.RunLogicAfterPaceMax = 32000
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.RunLogicActionOrder = vuser_errorhandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.MercIniTreeFather = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.MercIniTreeSons = vuser_errorhandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.RunLogicNumOfIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.Name = ErrorHandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.RunLogicRunMode = Sequential
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.RunLogicObjectKind = Group
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.RunLogicActionType = VuserErrorHandler
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicErrorHandlerRoot.MercIniTreeSectionName = RunLogicErrorHandlerRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.RunLogicActionOrder = vuser_end
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.MercIniTreeFather = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.MercIniTreeSons = vuser_end
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.RunLogicNumOfIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.Name = End
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.RunLogicRunMode = Sequential
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.RunLogicObjectKind = Group
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.RunLogicActionType = VuserEnd
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.uniqueId = 0b8658d6_81ef_f966_3096_490dee42bc89
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicEndRoot.MercIniTreeSectionName = RunLogicEndRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.RunLogicActionOrder = vuser_init
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.MercIniTreeFather = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.MercIniTreeSons = vuser_init
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.RunLogicNumOfIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.Name = Init
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.RunLogicRunMode = Sequential
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.RunLogicObjectKind = Group
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.RunLogicActionType = VuserInit
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.uniqueId = 88ade493_7437_d57c_270f_47d540459231
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] runlogic.RunLogicInitRoot.MercIniTreeSectionName = RunLogicInitRoot
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.XlBridgeTimeout = 120
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.DefaultRunLogic = default.usp
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.automatic_nested_transactions = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.AutomaticTransactions = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.iter_begins_val = fixed
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.iter_ends_val = fixed
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.ContinueOnError = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.FailTransOnErrorMsg = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.AutomaticTransactionsPerFunc = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.General.UseThreads = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.Options = RANDOM
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.Factor = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.LimitFlag = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.Limit = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.ThinkTimeRandomLow = 80
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ThinkTime.ThinkTimeRandomHigh = 120
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Iterations.NumOfIterations = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Iterations.IterationPace = IterationASAP
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Iterations.StartEvery = 60
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Iterations.RandomMin = 60
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Iterations.RandomMax = 90
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.LogOptions = LogExtended
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.MsgClassData = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.MsgClassParameters = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.MsgClassFull = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.AutoLog = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.LogDetail = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.AutoLogBufferSize = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.Log.PrintTimeStamp = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SearchForImages = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.WebRecorderVersion = 10
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.MaxConnections = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.LogFileWriteTraceToFile = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.LogFileWrite = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.StartRecordingGMT = 2015/03/02 11:35:35
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.StartRecordingIsDst = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.NavigatorBrowserLanguage = en-US
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.NavigatorSystemLanguage = en-US
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.NavigatorUserLanguage = nl-NL
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ScreenWidth = 1280
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ScreenHeight = 1024
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ScreenAvailWidth = 1280
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ScreenAvailHeight = 984
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UserHomePage = http://meetingpoint.rabonet.com/
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserType = Microsoft Internet Explorer 4.0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.HttpVer = 1.1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.CustomUserAgent = Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; Win64; x64; Trident/7.0; .NET CLR 2.0.50727; SLCC2; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C; .NET4.0E; Tablet PC 2.0)
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ResetContext = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UseCustomAgent = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.KeepAlive = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.EnableChecks = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.AnalogMode = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUseBrowser = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUseProxy = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyHTTPHost = wcg.eu.rabonet.com
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyHTTPSHost = wcg.eu.rabonet.com
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyHTTPPort = 8080
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyHTTPSPort = 8080
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUseSame = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyNoLocal = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyBypass = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUserName = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyPassword = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUseAutoConfigScript = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyAutoConfigScriptURL = http://swg-pac.eu.rabonet.com/swg/swg-prod.pac
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ProxyUseProxyServer = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SaveSnapshotResources = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UTF8InputOutput = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SupportCharset = None
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserAcceptLanguage = nl-NL
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserAcceptEncoding = gzip, deflate
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.RecorderWinCodePage = 1252
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UseDataFormatExtensions = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SnapshotOnErrorActive = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SimulateCache = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.CacheHtmlPages = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.IgnoreContentCachingTypes = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.KeepNonTextMimeType = text/xml;text/plain
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.CacheAlwaysCheckForNewerPages = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.ClearCacheForSimulateNewUser = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.UseBrowserAgent = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.DisableAED = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.GraphHitsPerSecondHttpStatusCodes = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.GraphPagesPerSecond = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.GraphBytesPerSecond = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.WinInetReplay = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.AutoTransFileLine = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.FailNonCriticalItem = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SPNCNameLookup = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.EnableIPCache = Yes
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.Browser_Type = Microsoft Internet Explorer
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserLanguageCode = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserUserAgent = Mozilla/5.0 (compatible; MSIE 10.0; Windows; Trident/6.0)
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.SimulatePrefetchPrerender = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserVer = 10.0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.WEB.BrowserPlatform = Windows
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ModemSpeed.EnableModemSpeed = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ModemSpeed.EnableCustomModemSpeed = 0
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ModemSpeed.ModemSpeed = 128000
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.ModemSpeed.CustomModemSpeed = 1000
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.AED.TempAedFile = NO_APP_AT_AED
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.FILTERS.FilterType = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.FILTERS.ExcludeFiltersInList = 
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] rts.TruClient.UseSSL2 = 1
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] handle_pc_blob: finished
