@@ -15,6 +15,9 @@ proc main {argv} {
   make_move $logfile $move_name
 
   file delete $logfile
+
+  puts "gedit $move_name"
+  exec gedit $move_name &
 }
 
 # elke film maar 1x behandelen.
