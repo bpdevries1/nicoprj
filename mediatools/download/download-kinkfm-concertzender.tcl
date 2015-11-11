@@ -80,7 +80,10 @@ proc download_x {sub outdir_root sec_date {hour none}} {
   }
   if {$to_download} {
     puts "Download: $to_path"
-    exec -ignorestderr curl -o $to_path "http://streams.greenhost.nl/cz/cz/rod/$str_date2-${hour}00.mp3"
+    # example URL: http://streams.greenhost.nl/cz/cz/rod/20151004-2000.mp3
+    set url "http://streams.greenhost.nl/cz/cz/rod/$str_date2-${hour}00.mp3"
+    puts "From url: $url"
+    exec -ignorestderr curl -o $to_path $url
   }
 }
 
