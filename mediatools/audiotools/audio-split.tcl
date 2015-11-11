@@ -12,7 +12,7 @@ proc main {argv} {
   set overlap_size_sec 5
   
   set ndx 0
-  foreach src_file [glob -directory $src_dir -tails *.mp3] {
+  foreach src_file [lsort [glob -directory $src_dir -tails *.mp3]] {
     incr ndx
     split_file $src_dir $src_file $target_prefix $ndx $split_size_sec $overlap_size_sec
     if {$ndx >= 1} {
