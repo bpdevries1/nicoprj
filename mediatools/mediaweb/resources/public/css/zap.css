@@ -1,0 +1,84 @@
+.admin-bar {
+    text-align: right;
+}
+
+.comments {
+    margin-top: 60px;
+}
+
+.comment {
+    padding: 20px 0;
+    border-top: 1px solid #eee;
+}
+
+/*
+  forms in tables get too big.
+*/
+form {
+  margin: 0 0 0px;
+}
+
+.form-actions {
+  padding: 0px 0px 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  background-color: #f5f5f5;
+  border-top: 1px solid #e5e5e5;
+  *zoom: 1;
+}
+
+.input-append,
+.input-prepend {
+  display: inline-block;
+  margin-bottom: 0px;
+  font-size: 0;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.control-group {
+  margin-bottom: 0px;
+}
+
+.form-horizontal .control-group {
+  margin-bottom: 0px;
+  *zoom: 1;
+}
+
+table {
+  max-width: 100%;
+  background-color: transparent;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.table {
+  width: 100%;
+  margin-bottom: 0px;
+}
+
+.table th,
+.table td {
+  padding: 2px;
+  line-height: 20px;
+  text-align: left;
+  vertical-align: top;
+  border-top: 1px solid #dddddd;
+}
+
+.table th {
+  font-weight: bold;
+}
+
+.table thead th {
+  vertical-align: bottom;
+}
+
+.table caption + thead tr:first-child th,
+.table caption + thead tr:first-child td,
+.table colgroup + thead tr:first-child th,
+.table colgroup + thead tr:first-child td,
+.table thead:first-child tr:first-child th,
+.table thead:first-child tr:first-child td {
+  border-top: 0;
+}
