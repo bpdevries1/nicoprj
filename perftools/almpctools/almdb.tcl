@@ -21,6 +21,21 @@ proc define_tables {db} {
   $db add_tabledef testgroup {id} {{tv_id int} {alm_id int} name}
   $db add_tabledef tg_param {id} {{tg_id int} name value}
   $db add_tabledef tg_host {id} {{tg_id int} {alm_id int} name location}
+
+  # test runs
+  $db add_tabledef testruns_file {id} {filename ts_cet {filesize int} domain project}
+  $db add_tabledef testrun {id} {{file_id int} domain project {testid int} {testinstanceid int} postrunaction {timeslotid int} \
+                                     vudsmode {runid int} {duration int} runstate runslastatus}
+  $db add_tabledef testrunresult {id} {{testrun_id int} {alm_id int} name type {runid int} path {filesize int} ts_cet}
+
+  if 0 {
+    alter table testruns_file add domain varchar(40)
+    alter table testruns_file add project varchar(100)
+
+    alter table testrun add domain varchar(40)
+    alter table testrun add project varchar(100)
+  }
+  
 }
 
 proc create_indexes {db} {
@@ -29,7 +44,7 @@ proc create_indexes {db} {
 }
 
 proc delete_table_rows {db} {
-  foreach tablename {tg_host tg_param testgroup tv_param testversion test tests_file} {
+  foreach tablename {tg_host tg_param testgroup tv_param testversion test tests_file testruns_file testrun testrunresult} {
     $db exec "delete from $tablename"
   }
   

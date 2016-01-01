@@ -7,7 +7,7 @@
 # namespaces are not used.
 
 # TODO
-# scenario's zitten in groepen zoals BigIP. Zijn deze ook uit te lezen?
+# scenario's zitten in groepen zoals BigIP. Zijn deze ook uit te lezen? Wel iets van een parent-id te zien.
 
 package require tdbc::sqlite3
 package require Tclx
@@ -69,7 +69,11 @@ proc download_alm {root_dir config} {
   exec -ignorestderr $CURL_BIN -c cookies.txt --data "j_username=[:user $config]&j_password=[:password $config]" "$url/authentication-point/j_spring_security_check"
 
   # then download all tests (scenario's) in a project
-  exec -ignorestderr $CURL_BIN -b cookies.txt -o $filename "$url/rest/domains/[:domain $config]/projects/[:project $config]/tests"
+  # exec -ignorestderr $CURL_BIN -b cookies.txt -o $filename "$url/rest/domains/[:domain $config]/projects/[:project $config]/tests"
+  
+  # 20-10-2015 more than 100 test scenario's, so change paging, for now not too big, 200.
+  # another option is to use: http://SERVER:PORT/qcbin/rest/domains/{domain}/projects/{project}/defects?page-size=10&start-index=31
+  exec -ignorestderr $CURL_BIN -b cookies.txt -o $filename "$url/rest/domains/[:domain $config]/projects/[:project $config]/tests?page-size=200"
   return $filename
 }
 
@@ -261,6 +265,18 @@ proc handle_pc_blob {node db tv_id} {
     
     handle_settings runlogic $runlogic $db $tg_id
     handle_settings rts $rts $db $tg_id
+    
+    # 20-10-2015 NdV check if diagnostics is enabled and also distr. perc.
+    # this is set on a scenario level, not on a group level.
+    
+    # db tv_id
+    set diag_node [$root selectNode "/loadTest/Diagnostics"]
+    # breakpoint
+    foreach nm {IsEnabled DistributionPercentage} {
+      set name "Diagnostics.$nm"
+      set value [get_field_text $diag_node $nm]
+      $db insert tv_param [vars_to_dict tv_id name value]
+    }
   }
 
   # TODO if 1 verwijderen
