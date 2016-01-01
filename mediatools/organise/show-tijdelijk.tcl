@@ -1,6 +1,16 @@
+#!/usr/bin/env tclsh861
+
 #!/home/nico/bin/tclsh
 package require Itcl
 package require Tclx ; # for try_eval
+
+# 5-12-2015 NdV voor source_once?
+package require ndv
+
+package require term
+package require term::ansi::code::attr
+package require term::ansi::send
+term::ansi::send::import
 
 source [file join [file dirname [info script]] .. .. lib CLogger.tcl]
 source [file join [file dirname [info script]] .. lib libmusic.tcl]
@@ -20,11 +30,13 @@ proc main {argc argv} {
   set fres [open "show-results.txt" w]
   set last_idx 0
   set last_idx [search_files $env(MEDIA_COMPLETE) $search_strings $last_idx $fres]
-  puts $fres "====================="
+  # puts $fres "====================="
+  puts_f_stdout_colour $fres red "====================="
   set last_idx [search_files $env(MEDIA_NEW) $search_strings $last_idx $fres]
   set last_idx [search_files [file join $env(MEDIA_TEMP) music] $search_strings $last_idx $fres]
   close $fres
-  puts [read_file "show-results.txt"]
+  # 5-12-2015 put results on stdout directly too, with colours.
+  # puts [read_file "show-results.txt"]
 }
 
 proc check_params {argc argv} {
@@ -57,10 +69,10 @@ proc search_files {dir search_strings last_idx fres} {
       # only increase index if it's a directory
       if {[is_music_directory $el]} {
         incr last_idx
-        puts $fres "$last_idx => \[[format %7s [commify [format %.0f [det_size_kb $el]]]]k\] $el"        
+        puts_f_stdout_colour $fres green "$last_idx => \[[format %7s [commify [format %.0f [det_size_kb $el]]]]k\] $el"        
       } else {
         if {[is_music_file $el] && ![is_trash $el]} {
-          puts $fres "\[[format %7s [commify [format %.0f [det_size_kb $el]]]]k\] $el"
+          puts_f_stdout_colour $fres white "\[[format %7s [commify [format %.0f [det_size_kb $el]]]]k\] $el"
         }
       }
     }
@@ -120,6 +132,20 @@ proc det_size_kb {path} {
 proc commify {num {sep ,}} {
     while {[regsub {^([-+]?\d+)(\d\d\d)} $num "\\1$sep\\2" num]} {}
     return $num
+}
+
+proc puts_f_stdout_colour {f colour str} {
+  puts_colour $colour $str
+  puts $f $str
+}
+
+proc puts_colour {colour str} {
+  send::sda_fg$colour
+  puts $str
+  # 5-12-2015 oude kleur te bewaren?
+  # ::term::ansi::send::sda_reset - alles op orig, wil je dit?
+  # ::term::ansi::send::sda_fgdefault - zet 'em op zwart, wil je niet.
+  send::sda_fgwhite
 }
 
 main $argc $argv

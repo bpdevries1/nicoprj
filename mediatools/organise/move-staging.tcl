@@ -3,10 +3,18 @@ package require Itcl
 package require Tclx ; # for try_eval
 package require ndv
 
+package require term
+package require term::ansi::code::attr
+package require term::ansi::send
+term::ansi::send::import
+
 source [file join [file dirname [info script]] .. .. lib CLogger.tcl]
 source [file join [file dirname [info script]] .. lib libmusic.tcl]
 source [file join [file dirname [info script]] .. .. lib generallib.tcl]
 source [file join [file dirname [info script]] .. lib setenv-media.tcl]
+
+# TODO 4-12-2015
+# Soms mp3's in subdir van hoofddir, bv cd. _trash is dan subdir van deze hoofddir-niet de bedoeling, moet gewoon tijdelijk/music/trash zijn. Even kijken hoe vaak dit voorkomt.
 
 proc main {argv} {
 	global env argv0
@@ -18,11 +26,16 @@ proc main {argv} {
   lassign $argv idx new_name
   set idx [:0 $argv]
   lassign [det_dirname $idx] dirname others
-  if {$dirname == ""} {
-    puts stderr "Index $idx not found in last search results (show-results.txt)"
-    exit
+  if {$idx == 0} {
+    puts "index 0 given, move all to trash"
+    # puts "others: $others"
+  } else {
+    if {$dirname == ""} {
+      puts stderr "Index $idx not found in last search results (show-results.txt)"
+      exit
+    }
+    move_staging $dirname $new_name    
   }
-  move_staging $dirname $new_name
   move_trash $others
 }
 
@@ -55,7 +68,7 @@ proc move_staging {orig_path new_name} {
     set new_name [file tail $orig_path]
   }
   set new_path [file join $staging_dir $new_name]
-  puts "Renaming $orig_path => $new_path"
+  puts_colour green "Renaming $orig_path => $new_path"
   file rename $orig_path $new_path
 }
 
@@ -64,9 +77,18 @@ proc move_trash {others} {
     set trash_dir [file join [file dirname $dirname] "_trash"]
     set dest_dir [file join $trash_dir [file tail $dirname]]
     file mkdir $trash_dir
-    puts "moving dir to trash: $dirname"
+    puts_colour red "moving dir to trash: $dirname"
+    # puts "trash_dir: $trash_dir"
+    # puts "dest_dir: $dest_dir"
     file rename $dirname $dest_dir
   }
+}
+
+proc puts_colour {colour str} {
+  send::sda_fg$colour
+  puts $str
+  # 5-12-2015 oude kleur te bewaren?
+  send::sda_fgwhite
 }
 
 main $argv
