@@ -128,6 +128,7 @@ proc puts_changes {f res commit_msg} {
         }
       }
     }
+    puts $f "# git diff \"$file\""
     puts $f "git add \"$file\""
     set prev_dir $dir
   }
