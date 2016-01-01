@@ -1,0 +1,31 @@
+argv: {C:\PCC\Nico\Testruns\clientreporting\run258\vuserlog.db} usecasen3 trans usecase avg_resptime %.3f
+col_values: CR_UC1 CR_UC2 CR_UC4
+query:
+select t1.trans, printf('%.3f', t1.avg_resptime) CR_UC1, printf('%.3f', t2.avg_resptime) CR_UC2, printf('%.3f', t3.avg_resptime) CR_UC4
+from usecasen3 t1 left join usecasen3 t2 on t1.trans = t2.trans left join usecasen3 t3 on t1.trans = t3.trans
+where 1=1
+and t1.usecase = 'CR_UC1'
+and t2.usecase = 'CR_UC2'
+and t3.usecase = 'CR_UC4'
+
+trans	CR_UC1	CR_UC2	CR_UC4
+All_open_transactions	3.064	3.120	2.266
+Desk_page	0.521	0.383	0.380
+Expand_transactions	0.227	0.235	0.107
+Login	0.628	0.636	0.618
+Logout	0.026	0.022	0.024
+My_overview	1.482	1.514	1.515
+Open_Loginpage	0.050	0.048	0.048
+Open_My_Rabo_Transact	0.691	0.693	0.699
+Open_Treasury	0.558	0.542	0.535
+PDF	2.777	2.802	0.519
+PDF_Individual	0.112	0.107	0.380
+Purple_Bar	1.209	1.245	1.391
+Search_Customer	0.139	0.102	0.116
+Search_Landing	0.625	0.458	0.461
+Search_transaction	17.429	0.540	1.218
+Select_Customer	1.769	1.807	1.306
+Select_transaction	0.882	0.897	0.907
+Select_transaction_individual	0.682	0.726	0.578
+Select_valuation	1.005	1.008	0.905
+XLS	4.962	4.958	0.855
