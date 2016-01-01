@@ -98,6 +98,7 @@ namespace eval ::ndv {
 		
     # @param append: should logfile be appended to, default it is overwritten.
 		public method set_file {a_filename {append 0}} {
+      file mkdir [file dirname $a_filename]
       set filename $a_filename
       if {$append} {
         set f_log [open $filename a]
