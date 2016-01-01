@@ -21,6 +21,8 @@
    :row-type :file,
    :columns [{:name "Filename", :width 10, :form (file-href (:id f) (:filename f))}
              {:name "Folder", :width 10, :form (:folder f)}
+             {:name "Size", :width 10, :form (:filesize f)}
+             {:name "Timestamp", :width 10, :form (:ts f)}
              {:name "Notes", :width 80, :form (:notes f)}]})
 
 (def-page files
@@ -32,6 +34,18 @@
   {:obj-type :file
    :fields [{:label "Filename" :field :filename}
             {:label "Folder" :field :folder}
+            {:label "Fullpath" :field :fullpath}
+            {:label "Filesize" :field :filesize}
+            {:label "Timestamp" :field :ts}
+            {:label "Timestamp CET" :field :ts_cet}
+            {:label "MD5" :field :md5}
+            {:label "Directory ID" :field :directory_id}
+            {:label "RelFile ID" :field :relfile_id}
+            {:label "Goal" :field :goal}
+            {:label "Importance" :field :importance}
+            {:label "Computer" :field :computer}
+            {:label "Srcbak" :field :srcbak}
+            {:label "Action" :field :action}
             {:label "Notes" :field :notes}]})
 
 ;; TODO als je meer dan 1 actie wilt, dan past dit zo niet. Dan mss meerdere submit buttons,

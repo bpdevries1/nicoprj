@@ -20,6 +20,8 @@
    :row-type :book,
    :columns [{:name "Title", :width 10, :form (book-href (:id b) (:title b))}
              {:name "Authors", :width 10, :form (:authors b)}
+             {:name "Pub. date", :width 10, :form (:pubdate b)}
+             {:name "Tags", :width 10, :form (:tags b)}
              {:name "Notes", :width 80, :form (:notes b)}]})
 
 (def-page books
@@ -31,6 +33,14 @@
   {:obj-type :book
    :fields [{:label "Title" :field :title}
             {:label "Authors" :field :authors}
+            {:label "Language" :field :language}
+            {:label "Edition" :field :edition}
+            {:label "#Pages" :field :npages}
+            {:label "Publication date" :field :pubdate}
+            {:label "Publisher" :field :publisher}
+            {:label "ISBN 10" :field :isbn10}
+            {:label "ISBN 13" :field :isbn13}
+            {:label "Tags" :field :tags}
             {:label "Notes" :field :notes}]})
 
 ;; TODO als je meer dan 1 actie wilt, dan past dit zo niet. Dan mss meerdere submit buttons,
