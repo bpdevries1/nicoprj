@@ -90,7 +90,10 @@ proc convert_file {from to deleteorig dryrun} {
     set ok 0
   } else {
     catch {
-      set output [exec -ignorestderr avconv -i $from $totemp]
+      set cmd [list avconv -i $from -strict experimental -qscale 1 -aq 1 $totemp]
+      log info "Executing cmd: $cmd"
+      # set output [exec -ignorestderr avconv -i $from $totemp]
+      set output [exec -ignorestderr {*}$cmd]
       set ok 1
     } res
     $log info "Converted  from: $from (size=[to_mb $fromsize] MB)"
