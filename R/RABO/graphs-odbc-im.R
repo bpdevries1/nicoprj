@@ -14,12 +14,13 @@ if (false) {
 main = function () {
   # load.def.libs()
   # dir = "C:/PCC/Nico/Projecten/IntelliMatch/odbc-dev-20150818"
-  # dir = "C:/PCC/Nico/Projecten/IntelliMatch/odbc-prod"
-  dir = "C:/PCC/Nico/Projecten/IntelliMatch/ODBC-DR2"
+  dir = "C:/PCC/Nico/Projecten/IntelliMatch/odbc-prod2"
+  dir = "C:/PCC/Nico/Projecten/IntelliMatch/odbc-prod"
+  # dir = "C:/PCC/Nico/Projecten/IntelliMatch/ODBC-DR2"
   # dir = "C:/PCC/Nico/Projecten/IntelliMatch/odbc-dev"
   
-  dir = "/home/ymor/RABO/IntelliMatch/odbc-prod"
-  dir = "/home/ymor/RABO/IntelliMatch/ODBC-DR1"
+  #dir = "/home/ymor/RABO/IntelliMatch/odbc-prod"
+  #dir = "/home/ymor/RABO/IntelliMatch/ODBC-DR1"
   
   filename = "odbccalls.db"
   make.action.graphs(dir, filename)
@@ -78,7 +79,7 @@ det.height = function(df) {
 call.distr.graph = function(db, useraction_id, description) {
   query = sprintf("select calltime from odbccall c join odbcquery_do q on c.odbcquery_id = q.id
     where start_useraction_id = %d and end_useraction_id = %d
-    -- and 1.0*calltime >= 0.005
+    -- and 1.0*calltime >= 0.05
     -- and 1.0*calltime <= 0.1
     order by 1.0*calltime", useraction_id, useraction_id)
   print(query)
@@ -86,8 +87,8 @@ call.distr.graph = function(db, useraction_id, description) {
   qplot(df$calltime, binwidth = 0.001,
         xlab = "Call time (s)", ylab="Count",
         main = sprintf("%d: %s: call round trip times (sum=%.3f sec)",
-                       useraction_id, description, sum(df$calltime))) +
-    scale_x_continuous(limits=c(0.005, 0.1))
+                       useraction_id, description, sum(df$calltime))) 
+    #scale_x_continuous(limits=c(0.005, 0.1))
   fn.graph = sprintf("useraction-call-distr-%04d.png", useraction_id)
   ggsave(filename=fn.graph, width=12, height=8, dpi=100)  
 }
