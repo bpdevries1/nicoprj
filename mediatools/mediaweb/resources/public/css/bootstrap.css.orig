@@ -1103,13 +1103,12 @@ input[type="color"],
           border-radius: 4px;
 }
 
-/* 2016-01-01 NdV removed, want more control over text/textarea width.
 input,
 textarea,
 .uneditable-input {
   width: 206px;
 }
-*/
+
 textarea {
   height: auto;
 }
