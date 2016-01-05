@@ -13,6 +13,7 @@
             [mediaweb.endpoint.mediaweb :refer [mediaweb-endpoint]]
             [mediaweb.endpoint.teams :refer [teams]]
             [mediaweb.endpoint.books :refer [books]]
+            [mediaweb.endpoint.actions :refer [actions]]
             [mediaweb.endpoint.files :refer [files]]
             [mediaweb.endpoint.persons :refer [persons]]
             [mediaweb.endpoint.games :refer [games]]
@@ -42,13 +43,14 @@
          :mediaweb (endpoint-component mediaweb-endpoint)
          :books (endpoint-component books)
          :files (endpoint-component files)
+         :actions (endpoint-component actions)
          :teams (endpoint-component teams)
          :persons (endpoint-component persons)
          :games (endpoint-component games))
         (component/system-using
          {:http [:app]
           ;; TODO vraag of deps zo goed zijn, mogelijk mediaweb, teams etc ook afh van db.
-          :app  [:mediaweb :teams :persons :games :books :files]
+          :app  [:mediaweb :teams :persons :games :books :files :actions]
           :mediaweb [:db]}))))
 
 
