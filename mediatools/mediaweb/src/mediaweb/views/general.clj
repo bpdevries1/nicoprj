@@ -25,6 +25,7 @@
      [:div {:class :navbar-inner}
       [:a {:class :brand :href "/books"} "Books"]
       [:a {:class :brand :href "/files"} "Files"]
+      [:a {:class :brand :href "/actions"} "Actions"]
       [:a {:class :brand :href "/admin"} "Admin"]
       (form-to
        {:class :form-horizontal}
@@ -33,11 +34,13 @@
        (submit-button {:class "btn btn-primary"} "Search"))]]
     [:div.container (seq body)]]))
 
+(def book-href (partial object-href "book"))
+(def file-href (partial object-href "file"))
+(def action-href (partial object-href "action"))
+
 ;; TODO remove these 3 after other code (from scheids) does not use it anymore.
 (def persoon-href (partial object-href "persoon"))
 (def team-href (partial object-href "team"))
 (def wedstrijd-href (partial object-href "wedstrijd"))
 
-(def book-href (partial object-href "book"))
-(def file-href (partial object-href "file"))
 

@@ -19,11 +19,11 @@
   {:model-read-fn (fn [_] (mf/all-files)),
    :actions #{:add-get},
    :row-type :file,
-   :columns [{:name "Filename", :width 10, :form (file-href (:id f) (:filename f))}
-             {:name "Folder", :width 10, :form (:folder f)}
-             {:name "Size", :width 10, :form (:filesize f)}
+   :columns [{:name "Filename", :width 15, :form (file-href (:id f) (:filename f))}
+             {:name "Folder", :width 25, :form (:folder f)}
+             {:name "Size", :width 5, :form (:filesize f)}
              {:name "Timestamp", :width 10, :form (:ts f)}
-             {:name "Notes", :width 80, :form (:notes f)}]})
+             {:name "Notes", :width 20, :form (:notes f)}]})
 
 (def-page files
   {:base-page-fn base-page
@@ -32,13 +32,13 @@
 
 (def-object-form file-form file
   {:obj-type :file
-   :fields [{:label "Filename" :field :filename}
-            {:label "Folder" :field :folder}
-            {:label "Fullpath" :field :fullpath}
-            {:label "Filesize" :field :filesize}
+   :fields [{:label "Filename" :field :filename :attrs {:size 40}}
+            {:label "Folder" :field :folder :attrs {:size 80}}
+            {:label "Fullpath" :field :fullpath :attrs {:size 80}}
+            {:label "Filesize" :field :filesize :attrs {:size 10}}
             {:label "Timestamp" :field :ts}
             {:label "Timestamp CET" :field :ts_cet}
-            {:label "MD5" :field :md5}
+            {:label "MD5" :field :md5 :attrs {:size 32}}
             {:label "Directory ID" :field :directory_id}
             {:label "RelFile ID" :field :relfile_id}
             {:label "Goal" :field :goal}
@@ -46,11 +46,12 @@
             {:label "Computer" :field :computer}
             {:label "Srcbak" :field :srcbak}
             {:label "Action" :field :action}
-            {:label "Notes" :field :notes}]})
+            {:label "Notes" :field :notes :ftype text-area :attrs {:rows 5 :cols 80}}]})
 
 ;; TODO als je meer dan 1 actie wilt, dan past dit zo niet. Dan mss meerdere submit buttons,
 ;; maar waarschijnlijk meerdere forms nodig.
 ;; TODO bij deze delete actie mogelijk ook uit het file systeem verwijderen.
+;; TODO obj-part mogelijk hernoemen naar :action
 (def-object-form actions-form file
   {:obj-type :file
    :obj-part :delete
