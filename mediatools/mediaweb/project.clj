@@ -11,11 +11,25 @@
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.1.5"]
                  [ring-jetty-component "0.3.0"]
-                 [korma "0.3.0-RC2"]
+                 ;; [korma "0.3.0-RC2"]
+                 [korma "0.4.2"]
                  [postgresql "9.3-1102.jdbc41"]
                  [hiccup "1.0.2"]
                  [potemkin "0.4.1"]
                  [clj-time "0.8.0"]
+                 
+                 ;; the ones below from batch/lein-exec
+                 [me.raynes/fs "1.4.5"]                ; file system utilities
+                 [org.clojure/tools.cli "0.2.4"]
+                 [swiss-arrows "1.0.0"]
+                 [org.clojure/tools.logging "0.3.0"]
+                 [org.slf4j/slf4j-log4j12 "1.7.5"]     ; coupling tools.logging with log4j.
+                 [log4j/log4j "1.2.16"]                ; in test-log4.clj deze niet, kan het kwaad?
+                 [clj-logging-config "1.9.10"]
+                 ;;[org.clojure/java.jdbc "0.3.3"]
+                 [org.clojure/java.jdbc "0.4.2"]
+
+                 ;; and my own NdV library.
                  [vreeze42/libndv "0.1.0-SNAPSHOT"]]
   :plugins [[lein-environ "1.0.1"]
             [lein-gen "0.2.2"]]
