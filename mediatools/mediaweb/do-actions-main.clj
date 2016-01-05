@@ -175,14 +175,12 @@
                                                          :title title
                                                          :authors author
                                                          :npages (try-parseInt pages)}))
-        ;; TODO bookformat also with select-insert!
-        bookformat-id (insert-id (jdbc/insert! db-con :bookformat {:book_id book-id
-                                                                   :format (path-format path)}))
-        ;; TODO relfile also with select-insert!
-        relfile-id (insert-id (jdbc/insert! db-con :relfile {:bookformat_id bookformat-id
-                                                             :relpath (fs/base-name path)
-                                                             :filename (fs/base-name path)
-                                                             :relfolder ""}))]
+        bookformat-id (insert-id (select-insert! db-con :bookformat {:book_id book-id
+                                                                     :format (path-format path)}))
+        relfile-id (insert-id (select-insert! db-con :relfile {:bookformat_id bookformat-id
+                                                               :relpath (fs/base-name path)
+                                                               :filename (fs/base-name path)
+                                                               :relfolder ""}))]
     (jdbc/update! db-con :file {:relfile_id relfile-id} ["fullpath = ?" path])))
 
 (defn pdfinfo!
