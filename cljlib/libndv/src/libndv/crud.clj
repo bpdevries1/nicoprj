@@ -30,9 +30,9 @@
    Map with named parameters:
    obj-type  - :keyword : required, object type
    redir-type   - :keyword : redirect to this object-type after action
-   preprocess - (Fn [ParamsMap -> ParamsMap]) : optional, to preprocess the given params map. Not implemented yet!
+   pre-fn - (Fn [ParamsMap -> ParamsMap]) : optional, to preprocess the given params map. Not implemented yet!
    model-ns   - "
-  [{:keys [obj-type redir-type preprocess model-ns] :as m}]
+  [{:keys [obj-type redir-type pre-fn model-ns] :as m}]
   (let [obj-type-name ((fnil name "<empty :obj-type") obj-type)
         redir-type-name ((fnil name "<empty :redir-type") redir-type)]
     `(defn ~(symbol (str obj-type-name "-update")) [id## params##]
@@ -48,9 +48,9 @@
    Map with named parameters:
    obj-type  - :keyword : required, object type
    redir-type - :keyword : redirect to this after deleting an object.
-   preprocess - (Fn [ParamsMap -> ParamsMap]) : optional, to preprocess the given params map. Not implemented yet!
+   pre-fn - (Fn [ParamsMap -> ParamsMap]) : optional, to preprocess the given params map. Not implemented yet!
    model-ns   - "
-  [{:keys [obj-type redir-type preprocess model-ns] :as m}]
+  [{:keys [obj-type redir-type pre-fn model-ns] :as m}]
   (let [obj-type-name ((fnil name "<empty :obj-type") obj-type)]
     `(defn ~(symbol (str obj-type-name "-delete")) [id## params##]
        (~(model-fn model-ns obj-type-name "delete") id##)
@@ -63,9 +63,9 @@
    obj-type  - :keyword : required, object type
    redir-update-type - :keyword : redirect to this after updating/inserting an object.
    redir-delete-type - :keyword : redirect to this after deleting an object.
-   preprocess - (Fn [ParamsMap -> ParamsMap]) : optional, to preprocess the given params map. Not implemented yet!
+   pre-fn - (Fn [ParamsMap -> ParamsMap]) : optional, to preprocess the given params map. Not implemented yet!
    model-ns   - "
-  [& {:keys [obj-type redir-update-type redir-delete-type preprocess model-ns] :as m}]
+  [& {:keys [obj-type redir-update-type redir-delete-type pre-fn model-ns] :as m}]
   (pm/unify-gensyms
    `(do
       ~(def-view-crud-update (assoc m :redir-type redir-update-type))
@@ -77,8 +77,9 @@
   "Define model function for inserting objects.
    Returns id of inserted object.
    Map with named parameters:
-   obj-type  - :keyword : required, object type
-   insert-post-fn - (Fn [id -> void]) optional, function to call with id after the main insert."
+   obj-type        - :keyword : required, object type
+    pre-fn         - (Fn [paramsMap -> paramsMap]) optional, to call before insert/update (delete does not have params)
+   insert-post-fn  - (Fn [id -> void]) optional, function to call with id after the main insert."
   [{:keys [obj-type pre-fn insert-post-fn] :as m}]
   (let [obj-type-name ((fnil name "<empty :obj-type") obj-type)]
     `(defn ~(symbol (str obj-type-name "-insert")) [params##]
@@ -92,7 +93,8 @@
 (defn def-model-crud-update
   "Define model function for updating objects.
    Map with named parameters:
-   obj-type  - :keyword : required, object type
+   obj-type       - :keyword : required, object type
+   pre-fn         - (Fn [params -> params]) optional, to call before insert/update (delete does not have params)
    update-post-fn - (Fn [id -> void]) optional, function to call with id after the main update.
                   not implemented yet, not needed yet."
   [{:keys [obj-type pre-fn update-post-fn] :as m}]
