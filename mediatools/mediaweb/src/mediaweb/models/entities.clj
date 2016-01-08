@@ -31,6 +31,12 @@
   (prepare (h/updates-in-fn [:id :directory_id :relfile_id] to-key :filesize to-int
                             [:ts] tc/to-sql-time)))
 
+(defentity relfile
+  (entity-fields :id :bookformat_id :relpath :filename :relfolder :filesize :ts :ts_cet
+                 :md5 :notes)
+  (prepare (h/updates-in-fn [:id :bookformat_id] to-key :filesize to-int
+                            [:ts] tc/to-sql-time)))
+
 (defentity action
   (entity-fields :id :ts_cet :action :fullpath_action :fullpath_other :notes)
   (prepare (h/updates-in-fn [:id] to-key 
