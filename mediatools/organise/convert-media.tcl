@@ -3,18 +3,18 @@
 package require ndv
 package require Tclx
 
-set log [::ndv::CLogger::new_logger [file tail [info script]] info]
-$log set_file "[file tail [info script]].log"
-
 proc main {argc argv} {
   global log warnings
 
+  set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+  # $log set_file "[file tail [info script]].log"
+  $log set_file [file join ~ log "[file tail [info script]]-[cur_time].log"]
 
   set options {
     {dir.arg "<NODEFAULT>" "Root dir to start converting in"}
     {fromext.arg "asf,flv,wmv,mpg,mpeg,ogm,vob,divx,mov,qt,ac3,3gp" "Source extensions to convert"}
     {toext.arg "mkv" "Extension to convert to"}
-    {ignoreext.arg "avi,mp4,mkv,m4v,jpg,png,rar,sub,mp3,ico" "Source extensions to ignore"}
+    {ignoreext.arg "avi,mp4,mkv,m4v,jpg,png,rar,sub,mp3,ico,pdf,epub,lrf,azw3,mobi" "Source extensions to ignore"}
     {minsize.arg "1000000" "Minimum size in bytes of files to convert"}
     {deleteorig "Delete original file"}
     {dryrun "Don't actually convert, just count files and MBytes"}
@@ -29,6 +29,9 @@ proc main {argc argv} {
 
   $log warn "All warnings: [join $warnings "\n"]"
   $log info "Total size converted: [format %.1f  $size] MB"
+  if {[:dryrun $d]} {
+    $log warn "This was a dry run!"
+  }
   $log info "Finished"
 }
 
@@ -36,6 +39,10 @@ proc warn {msg} {
   global log warnings
   $log warn $msg
   lappend warnings $msg
+}
+
+proc cur_time {} {
+  clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"
 }
 
 # @param fromext: list
@@ -90,7 +97,7 @@ proc convert_file {from to deleteorig dryrun} {
     set ok 0
   } else {
     catch {
-      set cmd [list avconv -i $from -strict experimental -qscale 1 -aq 1 $totemp]
+      set cmd [list avconv -i $from -strict experimental -qscale 1 -aq 1 {*}[extra_params $from] $totemp]
       log info "Executing cmd: $cmd"
       # set output [exec -ignorestderr avconv -i $from $totemp]
       set output [exec -ignorestderr {*}$cmd]
@@ -122,6 +129,17 @@ proc convert_file {from to deleteorig dryrun} {
 
   $log debug "Finished: $to"
   return [to_mb $fromsize]
+}
+
+# for some source extension we need extra params, eg -r 22 for VOB files
+# not sure yet if 22 is always the correct value.
+# found this one at: http://redino.net/blog/category/ffmpeg/
+proc extra_params {from} {
+  set ext [string range [string tolower [file extension $from]] 1 end]
+  if {$ext == "vob"} {
+    return [list -r 22]
+  }
+  return {}
 }
 
 proc to_mb {bytes} {
