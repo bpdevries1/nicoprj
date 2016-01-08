@@ -57,15 +57,14 @@
     (println "Dry run, don't move: " source-path))
   :ok)
 
-;; TODO copy nog niet getest.
+;; TODO: copy nog niet getest.
+;; TODO: insert-select ook met korma te doen? Of alleen door data eerst naar client te halen? Hoeft btw niet een probleem te zijn met beperkte sets.
 (defn copy-file-really!
   "Move file both in filesystem and in DB"
   [db-con source-path target-path]
   (println "Copy file: " source-path " => " target-path)
   (fs/copy+ source-path target-path)
   ;; (jdbc/update! db-spec :table {:col1 77 :col2 "456"} ["id = ?" 13]) ;; Update
-  ;; TODO size, ts_cet, md5, computer overnemen uit bron.
-  ;; evt insert-select uitvoeren.
   (jdbc/execute!
    db-con
    ["insert into file (fullpath, folder, filename, goal, filesize,
@@ -83,6 +82,7 @@
                                 :filename (str (fs/base-name target-path))
                                 :goal (det-goal target-path)}))
 
+;; TODO: iets met copy-file! en copy-file-really!, deze structuur komt paar keer voor, moet dus handiger kunnen.
 (defn copy-file!
   "Copy file both in filesystem and in DB"
   [db-con source-path target-path opts]
@@ -124,8 +124,7 @@
   (try (parse-fn s) (catch Exception e)))
 
 (def try-parseInt (partial try-parse #(Integer/parseInt %)))
-
-;; (try-parseInt "12")
+;; TODO: test funcion (try-parseInt "12")
 
 (defn insert-id
   "Return id from result of insert (seq of maps)"
@@ -150,37 +149,37 @@
     records
     (jdbc/insert! db-con table m)))
 
-#_(defn select-insert!
-  "select or insert a record from a table in a database.
-   returns a map of the selected or inserted record, normally containing an :id key.
-   All fields in map m must correspond to the database record to be selected.
-   For now just use title field, with Korma this should be easier than with direct jdbc."
-  [db-con table m]
-  (if-let [rec
-           (seq (jdbc/query db-con
-                            [(str "SELECT * FROM " (name table) " where title = ?")
-                             (:title m)]))]
-    rec
-    (jdbc/insert! db-con table m)))
-
 ;; TODO: copy fields from File to RelFile.
 ;; TODO: creationDate parsing.
-;; TODO: also check for bookformat and relfile if they already exist.
+;; TODO: hele inhoud resultaat naar tags en/of notes? Alles behalve lege tags?
+;; TODO: update ook met Korma, niet in 1 functie 2 libs gebruiken.
+;; TODO: run for alle items in actions table.
+;; TODO: delete actions after running.
 (defn insert-book-format-relfile!
   "Insert records for book, bookformat and relfile for path, update File.RelFile_id.
    Used for single files that are a book-format, like PDF's.
    Iff book with same title/author already exists, use this one."
   [db-con path {:keys [title author pages creationdate] :as m}]
-  (let [book-id (insert-id (select-insert! db-con :book {:pubdate nil ;; TODO creationdate
-                                                         :title title
-                                                         :authors author
-                                                         :npages (try-parseInt pages)}))
-        bookformat-id (insert-id (select-insert! db-con :bookformat {:book_id book-id
-                                                                     :format (path-format path)}))
-        relfile-id (insert-id (select-insert! db-con :relfile {:bookformat_id bookformat-id
-                                                               :relpath (fs/base-name path)
-                                                               :filename (fs/base-name path)
-                                                               :relfolder ""}))]
+  (let [book-id (insert-id
+                 (select-insert! db-con :book
+                                 {:pubdate nil ;; TODO creationdate
+                                  :title title
+                                  :authors author
+                                  :npages (try-parseInt pages)}))
+        bookformat-id (insert-id
+                       (select-insert! db-con :bookformat
+                                       {:book_id book-id
+                                        :format (path-format path)}))
+        file (first (k/select :file
+                              (k/fields :filesize :ts :ts_cet :md5)
+                              (k/where {:fullpath path})))
+        relfile-id (insert-id
+                    (select-insert! db-con :relfile
+                                    (merge file
+                                           {:bookformat_id bookformat-id
+                                            :relpath (fs/base-name path)
+                                            :filename (fs/base-name path)
+                                            :relfolder ""})))]
     (jdbc/update! db-con :file {:relfile_id relfile-id} ["fullpath = ?" path])))
 
 (defn pdfinfo!
@@ -192,7 +191,7 @@
     (if (:really opts)
       (do
         (insert-book-format-relfile! db-con source-path m)
-        :todo)
+        :todo) ;; TODO: replace by :ok when ready.
       (println "Dry run, don't insert records: " source-path))))
 
 ;; end of specific actions
