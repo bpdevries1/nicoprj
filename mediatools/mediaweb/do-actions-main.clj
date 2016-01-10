@@ -118,9 +118,11 @@
   [path]
   (let [res (fs/exec "pdfinfo" path)]
     (when (= (:exit res) 0)
-      (let [m (apply merge (map line->map (str/split (:out res) #"\n")))]
+      (let [m (apply merge (map line->map (str/split (:out res) #"\n")))
+            m2 (merge m {:_res res})]
         (if (= 0 (count (:title m)))
-          (assoc m :title (file-title path)))))))
+          (assoc m2 :title (file-title path))
+          m2)))))
 
 (defn try-parse
   "Try to parse a string s using parse-fn. If it fails, return nil"
@@ -187,7 +189,7 @@
     (do
       (insert table (values m)))))
 
-;; TODO: hele inhoud resultaat naar tags en/of notes? Alles behalve lege tags?
+
 ;; TODO: run for alle items in actions table.
 ;; TODO: delete actions after running.
 ;; TODO: exec within transaction, should be atomic. Include way to test, by failure on 2nd record.
@@ -220,17 +222,28 @@
             (set-fields {:relfile_id relfile-id})
             (where {:fullpath path}))))
 
+(defn update-action!
+  "Update action record with results"
+  [id {:keys [exit out err]}]
+  (update action
+          (set-fields {:exec_ts (t/now)
+                       :exec_output (str  out err)
+                       :exec_status (if (= 0 exit) "ok" "error")})
+          (where {:id id})))
+
 (defn pdfinfo!
-  "Exec pdfinfo on file and create RelFile, BookFormat and Book records"
-  [source-path opts]
-  (let [{:keys [title author] :as m} (get-pdfinfo source-path)]
+  "Exec pdfinfo on file and create RelFile, BookFormat and Book records.
+   Also update action record with results."
+  [{:keys [id fullpath_action]} opts]
+  (let [{:keys [title author _res] :as m} (get-pdfinfo fullpath_action)]
     (println "Found authors and title: " author " - " title)
     (println "Whole map: " m)
     (if (:really opts)
       (do
-        (insert-book-format-relfile! source-path m)
-        :todo) ;; TODO: replace by :ok when ready.
-      (println "Dry run, don't insert records: " source-path))))
+        (insert-book-format-relfile! fullpath_action m)
+        (update-action! id _res) ;; TODO update action op generieke plek? Als alle actions een _res returnen?
+        :keep) ;; TODO: want to keep the action with results, so do not delete!
+      (println "Dry run, don't insert records: " fullpath_action))))
 
 ;; end of specific actions
 
@@ -245,13 +258,13 @@
 (defn do-actions! 
   "do actions based on action field in file and action table"
   [db-con opts]
-  (doseq [row (jdbc/query db-con "select * from action limit 1")]
+  (doseq [row (jdbc/query db-con "select * from action where exec_ts is null limit 1")]
     (if-let [result 
              (case (:action row)
                "delete" (delete-file! db-con (:fullpath_action row) opts)
                "mv" (move-file! db-con (:fullpath_other row) (:fullpath_action row) opts)
                "cp" (copy-file! db-con (:fullpath_other row) (:fullpath_action row) opts)
-               "pdfinfo" (pdfinfo! (:fullpath_action row) opts)
+               "pdfinfo" (pdfinfo! row opts)
                nil)]
       (if (= :ok result)
         (delete-action! db-con (:id row) opts)))))

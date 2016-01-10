@@ -43,9 +43,10 @@
   (prepare (h/updates-in-fn [:id :book_id] to-key)))
 
 (defentity action
-  (entity-fields :id :ts_cet :action :fullpath_action :fullpath_other :notes)
-  (prepare (h/updates-in-fn [:id] to-key 
-                            [:ts_cet] tc/to-sql-time)))
+  (entity-fields :id :file_id :create_ts :exec_ts :exec_output :exec_status
+                 :action :fullpath_action :fullpath_other :notes)
+  (prepare (h/updates-in-fn [:id :file_id] to-key 
+                            [:create_ts :exec_ts] tc/to-sql-time)))
 
 ;; TODO alles hieronder een keertje weg.
 
