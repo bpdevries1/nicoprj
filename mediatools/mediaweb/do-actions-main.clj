@@ -1,8 +1,3 @@
-; delete-unwanted.clj - delete records from DB:
-; - where corresponding files no longer exists in file system, from MD5 calc failure.
-; - temp files, also remove from file system.
-
-;; (load-file "../../clojure/lib/def-libs.clj")
 (load-file "../../clojure/lib/def-libs-p.clj") 
 (load-file "lib-diskcat.clj")
 
@@ -154,11 +149,6 @@
 ;; (try-parse-date-time "Fri Dec 26 14:25:13 2014")
 ;; (parse-date-time "Fri Dec 26 14:25:13 2014")
 
-#_(defn insert-id
-    "Return id from result of insert (seq of maps)"
-    [res]
-    (:id (first res)))
-
 (defn insert-id
   "Return id from result of insert (seq of maps OR single map)"
   [res]
@@ -170,14 +160,6 @@
   "Get format (eg pdf) from path, by removing . from extension of path."
   [path]
   (str/replace (fs/extension path) #"^." ""))
-
-;; zelf even defentity doen hier:
-#_(defentity book
-  (entity-fields :id :title :authors :language :edition :npages
-                   :pubdate :publisher :isbn10 :isbn13
-                   :tags :notes)
-  (prepare (h/updates-in-fn [:id] to-key :npages to-int
-                              [:pubdate] tc/to-sql-time)))
 
 ;; deze versie door table als symbol/value mee te geven, dan geen (symbol (name)) nodig.
 (defn select-insert!
@@ -196,92 +178,14 @@
     ;; maybe unrequire entities.clj
     (do
       (println m)
-      ;; (println (symbol (name table)))
       (println (str table))
-      ;; dan weer even met table
-      #_(insert (symbol (name table)) (values m)) ;; toch weer NPE :-(
-      ;; insert is een macro, dus niet helemaal duidelijk welke param je meegeeft.
-      (insert table (values m)) ;; insert de records, maar fkey fields zijn leeg.
-      
-      
-      
-      )))
+      (insert table (values m)))))
 
-#_(defn select-insert!
-  "select or insert a record from a table in a database.
-   returns a map of the selected or inserted record, normally containing an :id key.
-   All fields in map m must correspond to the database record to be selected.
-   For now just use title field, with Korma this should be easier than with direct jdbc.
-  table - :keyword"
-  [db-con table m]
-  ;; TODO: test with dissoc, should be solved more generically. Either with good datetype for pubdate, or with concept that for select, we only select on certain fields, the natural key.
-  (if-let [records (seq (select (symbol (name table))
-                                  (where (dissoc m :pubdate))))]
-    records
-    ;; maybe unrequire entities.clj
-    (do
-      (println m)
-      (println (symbol (name table)))
-      ;; TODO: remove 'dissoc'
-      ;; TODO: first make it work with jdbc/insert, by calling ->jdbc fn manually.
-      ;; TODO: then use insert, also first with manual conversion, and maybe first without :pubdate, but this also failed before?
-;;      (jdbc/insert! db-con table (dissoc m :pubdate))
-;;      (jdbc/insert! db-con table m)
-      #_(jdbc/insert! db-con table ((h/updates-in-fn [:id] to-key :npages to-int
-                                                   [:pubdate] tc/to-sql-time) m))
-
-      
-      #_(insert (symbol (name table)) (values (dissoc m :pubdate)))
-      #_(insert book (values {:title "Test book"})) ;; deze doet iets
-      #_(insert (symbol (name table)) (values {:title "Test book"})) ;; NPE weer.
-      #_(insert book (values (dissoc m :pubdate))) ;; deze doet iets, goede title, pages
-      #_(insert book (values m)) ;; voert ook goed de pubdate in, kan alleen als defent goed is.
-      ;; maar zonder defent in deze file gaat het weer fout, melding dat book niet gevonden is, geen NPE. Mss toch use ipv require.
-      #_(insert book (values m)) ;; kan book nog steeds niet resolven, verder dus wel goed?
-      #_(insert 'book (values m))  ;; dan weer een NPE, en ook met lokel defent.
-      #_(insert "book" (values m)) ;; weer melding op SQL type, dus dit is een ander "book".
-      ;; eerst korma alleen nog met use, require en k/ weg.
-      ;; dan nog steeds
-      #_(insert book (values m)) ;; deze weer goed met book, bookformat alleen fout, logisch.
-      ;; zelfde zonder local def:
-      #_(insert book (values m)) ;; book niet resolved
-      #_(insert 'book (values m)) ;; dan weer NPE.
-      ;; entities refer all toevoegen
-      #_(insert 'book (values m)) ;; nog NPE
-      #_(insert book (values m)) ;; ok, zonder local def dus!
-      ;; dan weer even met table
-      #_(insert (symbol (name table)) (values m)) ;; toch weer NPE :-(
-      ;; insert is een macro, dus niet helemaal duidelijk welke param je meegeeft.
-      
-      
-      
-      
-      )))
-
-;; deze werkt voor pubdate:
-#_(defn select-insert!
-  "select or insert a record from a table in a database.
-   returns a map of the selected or inserted record, normally containing an :id key.
-   All fields in map m must correspond to the database record to be selected.
-   For now just use title field, with Korma this should be easier than with direct jdbc.
-  table - :keyword"
-  [db-con table m]
-  ;; TODO: test with dissoc, should be solved more generically. Either with good datetype for pubdate, or with concept that for select, we only select on certain fields, the natural key.
-  (if-let [records (seq (select (symbol (name table))
-                                  (where (dissoc m :pubdate))))]
-    records
-    (do
-      (println m)
-      (jdbc/insert! db-con table ((h/updates-in-fn [:id] to-key :npages to-int
-                                                   [:pubdate] tc/to-sql-time) m)))))
-
-;; TODO: creationDate parsing.
 ;; TODO: hele inhoud resultaat naar tags en/of notes? Alles behalve lege tags?
 ;; TODO: update ook met Korma, niet in 1 functie 2 libs gebruiken.
 ;; TODO: run for alle items in actions table.
 ;; TODO: delete actions after running.
 ;; TODO: exec within transaction, should be atomic. Include way to test, by failure on 2nd record.
-;; NOTE: version passing book instead of :book to to insert-select!
 (defn insert-book-format-relfile!
   "Insert records for book, bookformat and relfile for path, update File.RelFile_id.
    Used for single files that are a book-format, like PDF's.
@@ -308,36 +212,6 @@
                                             :filename (fs/base-name path)
                                             :relfolder ""})))]
     (jdbc/update! db-con :file {:relfile_id relfile-id} ["fullpath = ?" path])))
-
-;; orig:
-#_(defn insert-book-format-relfile!
-  "Insert records for book, bookformat and relfile for path, update File.RelFile_id.
-   Used for single files that are a book-format, like PDF's.
-   Iff book with same title/author already exists, use this one."
-  [db-con path {:keys [title author pages creationdate] :as m}]
-  (let [book-id (insert-id
-                 (select-insert! db-con :book
-                                 {:pubdate (try-parse-date-time creationdate)
-                                  :title title
-                                  :authors author
-                                  :npages (try-parseInt pages)}))
-        bookformat-id (insert-id
-                       (select-insert! db-con :bookformat
-                                       {:book_id book-id
-                                        :format (path-format path)}))
-        file (first (select :file
-                              (fields :filesize :ts :ts_cet :md5)
-                              (where {:fullpath path})))
-        relfile-id (insert-id
-                    (select-insert! db-con :relfile
-                                    (merge file
-                                           {:bookformat_id bookformat-id
-                                            :relpath (fs/base-name path)
-                                            :filename (fs/base-name path)
-                                            :relfolder ""})))]
-    (jdbc/update! db-con :file {:relfile_id relfile-id} ["fullpath = ?" path])))
-
-
 
 (defn pdfinfo!
   "Exec pdfinfo on file and create RelFile, BookFormat and Book records"
