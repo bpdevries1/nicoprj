@@ -161,6 +161,15 @@
   [path]
   (str/replace (fs/extension path) #"^." ""))
 
+(defn apply-prepares-where
+  "Apply prepares-fns to the where clause.
+   Standard Korma does not do this, don't know why..."
+  [table m]
+  (if-let [preps (-> table :prepares seq)]
+    (let [prep-fn (apply comp preps)]
+      (prep-fn m))
+    m))
+
 ;; deze versie door table als symbol/value mee te geven, dan geen (symbol (name)) nodig.
 (defn select-insert!
   "select or insert a record from a table in a database.
@@ -169,16 +178,13 @@
    For now just use title field, with Korma this should be easier than with direct jdbc.
   table - :keyword"
   [db-con table m]
-  ;; TODO: test with dissoc, should be solved more generically. Either with good datetype for pubdate, or with concept that for select, we only select on certain fields, the natural key.
-  ;; TODO: maybe can use prepare-fn in table-object on where claus too!
   ;; TODO: this is a kind op upsert, this is possible in Postgres 9.5.
+  (println m)
+  (println (str table))
   (if-let [records (seq (select table
-                                  (where (dissoc m :pubdate))))]
+                                (where (apply-prepares-where table m))))]
     records
-    ;; maybe unrequire entities.clj
     (do
-      (println m)
-      (println (str table))
       (insert table (values m)))))
 
 ;; TODO: hele inhoud resultaat naar tags en/of notes? Alles behalve lege tags?
@@ -192,18 +198,18 @@
    Iff book with same title/author already exists, use this one."
   [db-con path {:keys [title author pages creationdate] :as m}]
   (let [book-id (insert-id
-                 (dbg/logline "book: " (select-insert! db-con book
-                                                       {:pubdate (try-parse-date-time creationdate)
-                                                        :title title
-                                                        :authors author
-                                                        :npages (try-parseInt pages)})))
+                 (select-insert! db-con book
+                                 {:pubdate (try-parse-date-time creationdate)
+                                  :title title
+                                  :authors author
+                                  :npages (try-parseInt pages)}))
         bookformat-id (insert-id
                        (select-insert! db-con bookformat
                                        {:book_id book-id
                                         :format (path-format path)}))
         file (first (select :file
-                              (fields :filesize :ts :ts_cet :md5)
-                              (where {:fullpath path})))
+                            (fields :filesize :ts :ts_cet :md5)
+                            (where {:fullpath path})))
         relfile-id (insert-id
                     (select-insert! db-con relfile
                                     (merge file
