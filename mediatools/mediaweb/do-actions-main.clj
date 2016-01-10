@@ -188,7 +188,6 @@
       (insert table (values m)))))
 
 ;; TODO: hele inhoud resultaat naar tags en/of notes? Alles behalve lege tags?
-;; TODO: update ook met Korma, niet in 1 functie 2 libs gebruiken.
 ;; TODO: run for alle items in actions table.
 ;; TODO: delete actions after running.
 ;; TODO: exec within transaction, should be atomic. Include way to test, by failure on 2nd record.
@@ -207,17 +206,19 @@
                        (select-insert! db-con bookformat
                                        {:book_id book-id
                                         :format (path-format path)}))
-        file (first (select :file
+        file-record (first (select :file
                             (fields :filesize :ts :ts_cet :md5)
                             (where {:fullpath path})))
         relfile-id (insert-id
                     (select-insert! db-con relfile
-                                    (merge file
+                                    (merge file-record
                                            {:bookformat_id bookformat-id
                                             :relpath (fs/base-name path)
                                             :filename (fs/base-name path)
                                             :relfolder ""})))]
-    (jdbc/update! db-con :file {:relfile_id relfile-id} ["fullpath = ?" path])))
+    (update file
+            (set-fields {:relfile_id relfile-id})
+            (where {:fullpath path}))))
 
 (defn pdfinfo!
   "Exec pdfinfo on file and create RelFile, BookFormat and Book records"
