@@ -177,7 +177,7 @@
    All fields in map m must correspond to the database record to be selected.
    For now just use title field, with Korma this should be easier than with direct jdbc.
   table - :keyword"
-  [db-con table m]
+  [table m]
   ;; TODO: this is a kind op upsert, this is possible in Postgres 9.5.
   (println m)
   (println (str table))
@@ -195,22 +195,22 @@
   "Insert records for book, bookformat and relfile for path, update File.RelFile_id.
    Used for single files that are a book-format, like PDF's.
    Iff book with same title/author already exists, use this one."
-  [db-con path {:keys [title author pages creationdate] :as m}]
+  [path {:keys [title author pages creationdate] :as m}]
   (let [book-id (insert-id
-                 (select-insert! db-con book
+                 (select-insert! book
                                  {:pubdate (try-parse-date-time creationdate)
                                   :title title
                                   :authors author
                                   :npages (try-parseInt pages)}))
         bookformat-id (insert-id
-                       (select-insert! db-con bookformat
+                       (select-insert! bookformat
                                        {:book_id book-id
                                         :format (path-format path)}))
         file-record (first (select :file
                             (fields :filesize :ts :ts_cet :md5)
                             (where {:fullpath path})))
         relfile-id (insert-id
-                    (select-insert! db-con relfile
+                    (select-insert! relfile
                                     (merge file-record
                                            {:bookformat_id bookformat-id
                                             :relpath (fs/base-name path)
@@ -222,13 +222,13 @@
 
 (defn pdfinfo!
   "Exec pdfinfo on file and create RelFile, BookFormat and Book records"
-  [db-con source-path opts]
+  [source-path opts]
   (let [{:keys [title author] :as m} (get-pdfinfo source-path)]
     (println "Found authors and title: " author " - " title)
     (println "Whole map: " m)
     (if (:really opts)
       (do
-        (insert-book-format-relfile! db-con source-path m)
+        (insert-book-format-relfile! source-path m)
         :todo) ;; TODO: replace by :ok when ready.
       (println "Dry run, don't insert records: " source-path))))
 
@@ -241,6 +241,7 @@
     (jdbc/delete! db-con :action ["id = ?" id])
     (println "Dry run, don't delete: " id)))
 
+;; TODO: define actions with macro's?
 (defn do-actions! 
   "do actions based on action field in file and action table"
   [db-con opts]
@@ -250,7 +251,7 @@
                "delete" (delete-file! db-con (:fullpath_action row) opts)
                "mv" (move-file! db-con (:fullpath_other row) (:fullpath_action row) opts)
                "cp" (copy-file! db-con (:fullpath_other row) (:fullpath_action row) opts)
-               "pdfinfo" (pdfinfo! db-con (:fullpath_action row) opts)
+               "pdfinfo" (pdfinfo! (:fullpath_action row) opts)
                nil)]
       (if (= :ok result)
         (delete-action! db-con (:id row) opts)))))
