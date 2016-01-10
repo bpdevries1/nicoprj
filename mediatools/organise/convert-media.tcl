@@ -97,7 +97,7 @@ proc convert_file {from to deleteorig dryrun} {
     set ok 0
   } else {
     catch {
-      set cmd [list avconv -i $from -strict experimental -qscale 1 -aq 1 {*}[extra_params $from] $totemp]
+      set cmd [list avconv {*}[extra_params $from] -i $from -strict experimental -qscale 1 -aq 1  $totemp]
       log info "Executing cmd: $cmd"
       # set output [exec -ignorestderr avconv -i $from $totemp]
       set output [exec -ignorestderr {*}$cmd]
