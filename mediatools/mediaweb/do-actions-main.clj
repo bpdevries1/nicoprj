@@ -189,10 +189,7 @@
     (do
       (insert table (values m)))))
 
-
 ;; TODO: run for alle items in actions table.
-;; TODO: delete actions after running.
-;; TODO: exec within transaction, should be atomic. Include way to test, by failure on 2nd record.
 (defn insert-book-format-relfile!
   "Insert records for book, bookformat and relfile for path, update File.RelFile_id.
    Used for single files that are a book-format, like PDF's.
@@ -240,8 +237,9 @@
     (println "Whole map: " m)
     (if (:really opts)
       (do
-        (insert-book-format-relfile! fullpath_action m)
-        (update-action! id _res) ;; TODO update action op generieke plek? Als alle actions een _res returnen?
+        (transaction
+         (insert-book-format-relfile! fullpath_action m)
+         (update-action! id _res)) ;; TODO update action op generieke plek? Als alle actions een _res returnen?
         :keep) ;; TODO: want to keep the action with results, so do not delete!
       (println "Dry run, don't insert records: " fullpath_action))))
 
