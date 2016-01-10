@@ -1,13 +1,7 @@
 (ns libndv.datetime
   (:require [clj-time.core :as t]
             [clj-time.coerce :as tc]
-            [clj-time.format :as tf]
-          ;;  [potemkin.macros :as pm]
-          ;;  [hiccup.page :refer [html5 include-js include-css]]
-          
-          ;;  [hiccup.form :refer [form-to text-field submit-button text-area                                  drop-down hidden-field]]
-         ;;   [ring.util.response :as response]
-            ))
+            [clj-time.format :as tf]))
 
 (def fmtr-wd-date-tz
   (tf/with-zone
