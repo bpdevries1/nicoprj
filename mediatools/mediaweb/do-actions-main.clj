@@ -250,18 +250,20 @@
 
 (defn main [args]
   (when-let [opts (my-cli args #{:dbspec}
-        ["-h" "--help" "Print this help"
-              :default false :flag true]
-        ["-d" "--dbspec" "Database spec/config/EDN file (postgres)" :default "~/.config/media/media.edn"]
-        ["-p" "--projectdir" "Project directory" :default "~/projecten/diskcatalog"]
-        ["-s" "--pathspecs" "Path specs file" :default "path-specs-books.clj"]
-        ["-r" "--really" "Really do delete actions. Otherwise dry run" :default false :flag true])]
+                          ["-h" "--help" "Print this help"
+                           :default false :flag true]
+                          ["-d" "--dbspec" "Database spec/config/EDN file (postgres)"
+                           :default "~/.config/media/media.edn"]
+                          ["-p" "--projectdir" "Project directory"
+                           :default "~/projecten/diskcatalog"]
+                          ["-s" "--pathspecs" "Path specs file"
+                           :default "path-specs-books.clj"]
+                          ["-r" "--really" "Really do delete actions. Otherwise dry run"
+                           :default false :flag true])]
     (let [db-spec (db-postgres (fs/expand-home (:dbspec opts)))]
       (load-file (str (fs/file (fs/expand-home (:projectdir opts)) (:pathspecs opts))))
       (defdb db db-spec)
       (jdbc/with-db-connection [db-con db-spec]
         (do-actions! db-con opts))))
-  ;; (exit)
   (System/exit 0))
-
 
