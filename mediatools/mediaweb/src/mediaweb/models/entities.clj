@@ -16,13 +16,14 @@
 
 ;; TODO naast prepare ook functies andere kant op: automatisch sql-date-time omzetten naar
 ;; clojure date-time.
-
+(println "Before defentity book")
 (defentity book
   (entity-fields :id :title :authors :language :edition :npages
                  :pubdate :publisher :isbn10 :isbn13
                  :tags :notes)
   (prepare (h/updates-in-fn [:id] to-key :npages to-int
                             [:pubdate] tc/to-sql-time)))
+(println "After defentity book")
 
 (defentity file
   (entity-fields :id :fullpath :filename :folder :filesize :ts :ts_cet
@@ -36,6 +37,10 @@
                  :md5 :notes)
   (prepare (h/updates-in-fn [:id :bookformat_id] to-key :filesize to-int
                             [:ts] tc/to-sql-time)))
+
+(defentity bookformat
+  (entity-fields :id :book_id :format :notes)
+  (prepare (h/updates-in-fn [:id :book_id] to-key)))
 
 (defentity action
   (entity-fields :id :ts_cet :action :fullpath_action :fullpath_other :notes)
