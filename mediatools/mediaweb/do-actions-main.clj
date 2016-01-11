@@ -1,6 +1,7 @@
 (load-file "../../clojure/lib/def-libs-p.clj") 
 (load-file "lib-diskcat.clj")
 
+;; TODO: zowel voor Korma als entities namespaces weer require :as gebruiken ipv :refer :all. Kijken of dit werkt, want eerder wat vage dingen gehad.
 ;; TODO: functies verplaatsen naar helper/lib namespaces.
 ;; TODO: query dingen met Korma doen.
 ;; TODO: Meeste dingen naar controller en/of model namespace, zodat je ook vanuit GUI kan aanroepen.
@@ -13,8 +14,7 @@
          '[mediaweb.models.entities :refer :all]
          '[libndv.core :as h]
          '[libndv.coerce :refer [to-float to-int to-key]]
-         '[libndv.debug :as dbg]
-         )
+         '[libndv.debug :as dbg])
 
 (defn delete-file-really!
   "Delete file both from filesystem and DB"
@@ -219,13 +219,28 @@
             (set-fields {:relfile_id relfile-id})
             (where {:fullpath path}))))
 
+(defn replace-0char
+  "Replace a 0 char/byte in s by a space"
+  [s]
+  (clojure.string/replace s (char 0) \space))
+
+;; TODO: exec_error als los veld, naast exec_output
 (defn update-action!
   "Update action record with results"
   [id {:keys [exit out err]}]
+  (dbg/logline "out:" (replace-0char out))
+  (dbg/logline "#86:" (int (nth out 85)))
+  (dbg/logline "#87:" (int (nth out 86)))
+  (dbg/logline "#88:" (int (nth out 87)))
+  (dbg/logline "80-90:" (apply str (drop 80 (take 90 out))))
   (update action
           (set-fields {:exec_ts (t/now)
-                       :exec_output (str  out err)
-                       :exec_status (if (= 0 exit) "ok" "error")})
+                       ;; :exec_output (str  out err)
+                       ;; :exec_output "<TODO>" ;; met deze wel goed.
+                       ;; :exec_output (apply str (take 87 out))
+                       :exec_output (replace-0char out)
+                       :exec_stderr (replace-0char err)
+                       :exec_status (if (= 0 exit) "ok" (str "error:" exit))})
           (where {:id id})))
 
 (defn pdfinfo!
@@ -239,7 +254,10 @@
       (do
         (transaction
          (insert-book-format-relfile! fullpath_action m)
-         (update-action! id _res)) ;; TODO update action op generieke plek? Als alle actions een _res returnen?
+         ;; TODO update action op generieke plek? Als alle actions een _res returnen?
+         (update-action! id _res)
+         ;;(rollback) ;; tijdelijk, tijdens debuggen vage file en update-action.
+         ) 
         :keep) ;; TODO: want to keep the action with results, so do not delete!
       (println "Dry run, don't insert records: " fullpath_action))))
 
