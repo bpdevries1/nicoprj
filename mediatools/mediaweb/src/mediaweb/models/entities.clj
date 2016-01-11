@@ -43,7 +43,7 @@
   (prepare (h/updates-in-fn [:id :book_id] to-key)))
 
 (defentity action
-  (entity-fields :id :file_id :create_ts :exec_ts :exec_output :exec_status
+  (entity-fields :id :file_id :create_ts :exec_ts :exec_output :exec_stderr :exec_status
                  :action :fullpath_action :fullpath_other :notes)
   (prepare (h/updates-in-fn [:id :file_id] to-key 
                             [:create_ts :exec_ts] tc/to-sql-time)))
