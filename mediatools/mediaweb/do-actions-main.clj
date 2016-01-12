@@ -189,7 +189,7 @@
     (do
       (insert table (values m)))))
 
-;; TODO: run for alle items in actions table.
+;; TODO: run for all items in actions table.
 (defn insert-book-format-relfile!
   "Insert records for book, bookformat and relfile for path, update File.RelFile_id.
    Used for single files that are a book-format, like PDF's.
