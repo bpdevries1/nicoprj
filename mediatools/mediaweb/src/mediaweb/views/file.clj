@@ -45,13 +45,12 @@
             {:label "Importance" :field :importance}
             {:label "Computer" :field :computer}
             {:label "Srcbak" :field :srcbak}
-            {:label "Action" :field :action}
             {:label "Notes" :field :notes :ftype text-area :attrs {:rows 5 :cols 80}}]})
 
-;; TODO als je meer dan 1 actie wilt, dan past dit zo niet. Dan mss meerdere submit buttons,
+;; TODO: als je meer dan 1 actie wilt, dan past dit zo niet. Dan mss meerdere submit buttons,
 ;; maar waarschijnlijk meerdere forms nodig.
-;; TODO bij deze delete actie mogelijk ook uit het file systeem verwijderen.
-;; TODO obj-part mogelijk hernoemen naar :action
+;; TODO: bij deze delete actie mogelijk ook uit het file systeem verwijderen.
+;; TODO: obj-part mogelijk hernoemen naar :action
 (def-object-form actions-form file
   {:obj-type :file
    :obj-part :delete
