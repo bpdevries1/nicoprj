@@ -224,20 +224,11 @@
   [s]
   (clojure.string/replace s (char 0) \space))
 
-;; TODO: exec_error als los veld, naast exec_output
 (defn update-action!
   "Update action record with results"
   [id {:keys [exit out err]}]
-  (dbg/logline "out:" (replace-0char out))
-  (dbg/logline "#86:" (int (nth out 85)))
-  (dbg/logline "#87:" (int (nth out 86)))
-  (dbg/logline "#88:" (int (nth out 87)))
-  (dbg/logline "80-90:" (apply str (drop 80 (take 90 out))))
   (update action
           (set-fields {:exec_ts (t/now)
-                       ;; :exec_output (str  out err)
-                       ;; :exec_output "<TODO>" ;; met deze wel goed.
-                       ;; :exec_output (apply str (take 87 out))
                        :exec_output (replace-0char out)
                        :exec_stderr (replace-0char err)
                        :exec_status (if (= 0 exit) "ok" (str "error:" exit))})
@@ -274,7 +265,7 @@
 (defn do-actions! 
   "do actions based on action field in file and action table"
   [db-con opts]
-  (doseq [row (jdbc/query db-con "select * from action where exec_ts is null limit 1")]
+  (doseq [row (jdbc/query db-con "select * from action where exec_ts is null")]
     (if-let [result 
              (case (:action row)
                "delete" (delete-file! db-con (:fullpath_action row) opts)
