@@ -18,10 +18,13 @@
   {:model-read-fn (fn [_] (ma/all-actions)),
    :actions #{:add-get},
    :row-type :action,
-   :columns [{:name "Timestamp", :width 20,
-              :form (action-href (:id a) (format-date-time (:ts_cet a)))}
+   :columns [{:name "Create ts", :width 20,
+              :form (action-href (:id a) (format-date-time (:create_ts a)))}
              {:name "Action", :width 10, :form (:action a)}
              {:name "Full path", :width 30, :form (:fullpath_action a)}
+             {:name "Exec ts", :width 20,
+              :form (format-date-time (:exec_ts a))}
+             {:name "Status" :width 10 :form (:exec_status a)}
              {:name "Notes", :width 40, :form (:notes a)}]})
 
 (def-page actions
@@ -31,10 +34,15 @@
 
 (def-object-form action-form action
   {:obj-type :action
-   :fields [{:label "Timestamp" :field :ts_cet :format-fn format-date-time :attrs {:size 20}}
+   :fields [{:label "Create ts" :field :create_ts :format-fn format-date-time :attrs {:size 20}}
             {:label "Action" :field :action :attrs {:size 15}}
             {:label "Full path" :field :fullpath_action :attrs {:size 60}}
+            (file-href (:file_id action) "go to file")
             {:label "Other path" :field :fullpath_other :attrs {:size 60}}
+            {:label "Exec ts" :field :exec_ts :format-fn format-date-time :attrs {:size 20}}
+            {:label "Status" :field :exec_status :attrs {:size 10}}
+            {:label "Output" :field :exec_output :ftype text-area :attrs {:rows 5 :cols 80}}
+            {:label "Stderr" :field :exec_stderr :ftype text-area :attrs {:rows 5 :cols 80}}
             {:label "Notes" :field :notes :ftype text-area :attrs {:rows 5 :cols 80}}]})
 
 ;; TODO als je meer dan 1 actie wilt, dan past dit zo niet. Dan mss meerdere submit buttons,

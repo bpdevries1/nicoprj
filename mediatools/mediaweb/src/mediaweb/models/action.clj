@@ -12,7 +12,7 @@
 
 ;; TODO hier evt een limit op zetten of paging maken.
 (defn all-actions []
-  (select action (order :ts_cet)))
+  (select action (order :create_ts)))
 
 (defn action-by-id [id]
   (h/map-flatten

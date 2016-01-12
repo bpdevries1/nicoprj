@@ -28,7 +28,7 @@
 (defentity file
   (entity-fields :id :fullpath :filename :folder :filesize :ts :ts_cet
                  :md5 :directory_id :relfile_id 
-                 :goal :importance :computer :srcbak :action)
+                 :goal :importance :computer :srcbak)
   (prepare (h/updates-in-fn [:id :directory_id :relfile_id] to-key :filesize to-int
                             [:ts] tc/to-sql-time)))
 
