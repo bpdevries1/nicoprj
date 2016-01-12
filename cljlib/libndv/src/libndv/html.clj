@@ -88,12 +88,13 @@
   obj-var -
 
   (unnamed) map with keys:
-  obj-type - [Req] type of object as a string, like 'team' or 'persoon'
-  obj-part - optional, string like 'algeemn'
-  fields
-  submit-label
+  obj-type      - [Req] type of object as a string, like 'team' or 'persoon'
+  obj-part      - optional, string like 'algeemn'
+  fields        - is a Seq of [Map or Form]
+  submit-label  - label on submit button.
 
-  fields is a Seq of Map or Form
+  field-as-map  - :label, :field, :format-fn, :attrs, :ftype
+  field-as-form - eg (drop-down :persoon <list> <id>)
 
   Map:
 
