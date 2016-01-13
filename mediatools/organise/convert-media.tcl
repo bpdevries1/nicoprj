@@ -23,6 +23,11 @@ proc main {argc argv} {
   set usage ": [file tail [info script]] \[options] :"
   # set dargv [::cmdline::getoptions argv $options $usage]
   set d [getoptions argv $options $usage]
+  if {[:dir $d] == "<NODEFAULT>"} {
+    $log warn "No dir given, exiting..."
+    exit 1
+  }
+  
   $log info "Starting: [:dir $d] (minsize=[:minsize $d])"
   set warnings {}
   set size [convert_files [:dir $d] [split  [:fromext $d] ","] [:toext $d] [concat [split  [:ignoreext $d] ","] [:toext $d]] [:minsize $d] [:deleteorig $d] [:dryrun $d]]
@@ -114,7 +119,11 @@ proc convert_file {from to deleteorig dryrun} {
       file rename $totemp $to
       if {$deleteorig} {
         $log debug "Deleting orig: $from"
-        file delete $from  
+        if {$dryrun} {
+          $log debug "Dry run, don't delete"
+        } else {
+          file delete $from    
+        }
       } else {
         warn "Keeping orig: $from"
       }
