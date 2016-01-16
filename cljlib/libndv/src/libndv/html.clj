@@ -114,7 +114,7 @@
                ;; use map-defnition of field, suitable for most standard fields.
                (let [{:keys [label field ftype attrs format-fn]} field-form]
                  `(~(or ftype `text-field)
-                   (merge {:type :text :placeholder ~label} ~attrs)
+                   (merge {:type :text :placeholder ~label :title ~label} ~attrs)
                    ~field
                    (~(or format-fn `identity) (~field ~obj-var))))
                ;; else: use customised form, like drop-down.
