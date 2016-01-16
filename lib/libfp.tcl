@@ -104,6 +104,41 @@ proc identity {a} {
   return $a 
 }
 
+# @todo functies om een lambda naar een proc om te zetten en vice versa
+# deze ook functioneel kunnen inzetten, ofwel return value moet direct bruikbaar zijn.
+proc proc_to_lambda {procname} {
+  list args "$procname {*}\$args"
+}
+
+# resultaat van lambda_to_proc mee te geven aan struct::list map en filter bv.
+# eerst even simpel met een counter
+# vb: struct::list map {1 2 3 4} [lambda_to_proc {x {expr $x * 3}}] => {3 6 9 12}
+# vb: struct::list filter {1 2 3 4} [lambda_to_proc {x {expr $x >= 3}}]
+set proc_counter 0
+proc lambda_to_proc_fout {lambda} {
+  global proc_counter
+  incr proc_counter
+  set procname "zzlambda$proc_counter"
+  # proc $procname {*}$lambda ; # combi van args en body
+  lassign $lambda largs lbody
+  # deze werkt wel als er idd expr voor zou moeten staan, maar niet voor andere dingen.
+  # dus bepalen of het moet, of andere lambda_to_proc versie? En deze dan in filter aanroepen.
+  # maar ook bij filter optie om via proc of expr aan te roepen.
+
+  # string is expression?
+  # of eval?
+  
+  proc $procname $largs "expr $lbody"
+  return $procname
+}
+
+proc lambda_to_proc {lambda} {
+  global proc_counter
+  incr proc_counter
+  set procname "zzlambda$proc_counter"
+  proc $procname {*}$lambda ; # combi van args en body
+  return $procname
+}
 
 # @todo maybe a 'proc fn' to create function-objects, lambda's?
 
@@ -111,14 +146,62 @@ proc identity {a} {
 # @note should handle 2 forms:
 # (map var list expression-with-var)
 # (map lambda list), where lambda is {var expr-with-var}
-proc map {args} {
+proc map_old {args} {
   lmap {*}$args
   # note idea is to use cond to test for 2 or 3 arguments: 2 is with lambda, 3 is with var, list, expr
 }
 
+proc map {args} {
+  if {[llength $args] == 2} {
+    lassign $args arg1 arg2
+    if {[info proc $arg1] != {}} {
+      set res {}
+      foreach el $arg2 {
+        lappend res [$arg1 $el]
+      }
+      return $res
+    } else {
+      # assume lambda with 2 elements
+      map [lambda_to_proc $arg1] $arg2
+    }
+  } elseif {[llength $args] == 3} {
+    lassign $args arg1 arg2 arg3
+    map [lambda_to_proc [list $arg1 $arg2]] $arg3
+  } else {
+    error "No 2 or 3 args: $args"
+  }
+}
+
+# filter is vergelijkbaar aan map, toch soort van dubbele code, voorlopig ok.
+proc filter {args} {
+  # puts "filter called: $args"
+  if {[llength $args] == 2} {
+    lassign $args arg1 arg2
+    if {[info proc $arg1] != {}} {
+      # puts "body: [info body $arg1]"
+      set res {}
+      foreach el $arg2 {
+        if {[$arg1 $el]} {
+          lappend res $el
+        }
+      }
+      return $res
+    } else {
+      # assume lambda with 2 elements
+      filter [lambda_to_proc $arg1] $arg2
+    }
+  } elseif {[llength $args] == 3} {
+    lassign $args arg1 arg2 arg3
+    filter [lambda_to_proc [list $arg1 $arg2]] $arg3
+  } else {
+    error "No 2 or 3 args: $args"
+  }
+}
+
+
 # @todo use det_fields in apidata2dashboarddb.tcl as another testcase.
 # @param args: same as lmap: el list statement
-proc filter {args} {
+proc filter_old {args} {
   lassign $args var l cmd
   set res {}
   foreach $var $l bool [lmap {*}$args] {

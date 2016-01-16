@@ -11,10 +11,11 @@ namespace eval ::ndv {
 	         lst_partition partition_all proc_to_lambda lambda_to_proc iden id if_else map mapfor \
 	         filter filterfor iota multimap transpose when_set set_if_empty variables
 
-  interp alias {} map {} ::struct::list map
+  # 16-1-2016 deze std map/filter uit struct::list voldoen niet goed genoeg.
+  # interp alias {} map {} ::struct::list map
   interp alias {} mapfor {} ::struct::list mapfor
   
-  interp alias {} filter {} ::struct::list filter
+  # interp alias {} filter {} ::struct::list filter
   interp alias {} filterfor {} ::struct::list filterfor
   
   interp alias {} iota {} ::struct::list iota
@@ -187,3 +188,4 @@ namespace eval ::ndv {
   }
   
 }
+

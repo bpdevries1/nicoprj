@@ -1,4 +1,4 @@
-#!/usr/bin/env tclsh86
+#!/usr/bin/env tclsh861
 
 #!/home/nico/bin/tclsh
 
