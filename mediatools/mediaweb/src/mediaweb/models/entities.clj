@@ -14,16 +14,24 @@
 (declare costfactor)
 (declare persoon_team)
 
-;; TODO naast prepare ook functies andere kant op: automatisch sql-date-time omzetten naar
-;; clojure date-time.
-(println "Before defentity book")
+;; TODO: naast prepare ook functies andere kant op: automatisch sql-date-time omzetten naar
+;; clojure date-time. Maar dit lijkt niet echt nodig.
+(defentity action
+  (entity-fields :id :file_id :create_ts :exec_ts :exec_output :exec_stderr :exec_status
+                 :action :fullpath_action :fullpath_other :notes)
+  (prepare (h/updates-in-fn [:id :file_id] to-key 
+                            [:create_ts :exec_ts] tc/to-sql-time)))
+
 (defentity book
   (entity-fields :id :title :authors :language :edition :npages
                  :pubdate :publisher :isbn10 :isbn13
                  :tags :notes)
   (prepare (h/updates-in-fn [:id] to-key :npages to-int
                             [:pubdate] tc/to-sql-time)))
-(println "After defentity book")
+
+(defentity bookformat
+  (entity-fields :id :book_id :format :notes)
+  (prepare (h/updates-in-fn [:id :book_id] to-key)))
 
 (defentity file
   (entity-fields :id :fullpath :filename :folder :filesize :ts :ts_cet
@@ -38,15 +46,9 @@
   (prepare (h/updates-in-fn [:id :bookformat_id] to-key :filesize to-int
                             [:ts] tc/to-sql-time)))
 
-(defentity bookformat
-  (entity-fields :id :book_id :format :notes)
-  (prepare (h/updates-in-fn [:id :book_id] to-key)))
 
-(defentity action
-  (entity-fields :id :file_id :create_ts :exec_ts :exec_output :exec_stderr :exec_status
-                 :action :fullpath_action :fullpath_other :notes)
-  (prepare (h/updates-in-fn [:id :file_id] to-key 
-                            [:create_ts :exec_ts] tc/to-sql-time)))
+
+
 
 ;; TODO alles hieronder een keertje weg.
 
