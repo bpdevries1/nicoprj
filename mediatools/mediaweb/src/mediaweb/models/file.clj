@@ -23,3 +23,8 @@
 
 (def-model-crud :obj-type :file)
 
+(defn file-actions [id]
+  (select action
+          (where {:file_id (to-int id)})))
+
+
