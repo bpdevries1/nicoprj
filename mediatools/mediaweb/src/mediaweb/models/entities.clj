@@ -7,12 +7,12 @@
             [libndv.core :as h]
             [libndv.coerce :refer [to-float to-int to-key]]))
 
-(declare scheids)
-(declare persoon)
-(declare afwezig)
-(declare kan_team_fluiten)
-(declare costfactor)
-(declare persoon_team)
+(declare action)
+(declare book)
+(declare bookformat)
+(declare directory)
+(declare file)
+(declare refile)
 
 ;; TODO: naast prepare ook functies andere kant op: automatisch sql-date-time omzetten naar
 ;; clojure date-time. Maar dit lijkt niet echt nodig.
@@ -32,6 +32,12 @@
 (defentity bookformat
   (entity-fields :id :book_id :format :notes)
   (prepare (h/updates-in-fn [:id :book_id] to-key)))
+
+(defentity directory
+  (entity-fields :id :computer :parent_folder :fullpath)
+  (belongs-to directory {:fk :parent_id})
+  (has-many directory {:fk :parent_id})
+  (prepare (h/updates-in-fn [:id :parent_id] to-key)))
 
 (defentity file
   (entity-fields :id :fullpath :filename :folder :filesize :ts :ts_cet
@@ -57,6 +63,13 @@
 ;; opgeven, ook in Tcl zo gedaan. Dan hiermee een prepare functie aanmaken.
 ;; mss ook def's (deels) uit DB structuur te lezen (gebeurt nu ook al), maar has-one etc
 ;; niet 1-op-1 uit f.keys af te leiden.
+(declare scheids)
+(declare persoon)
+(declare afwezig)
+(declare kan_team_fluiten)
+(declare costfactor)
+(declare persoon_team)
+
 (defentity wedstrijd
   (entity-fields :id :team :lokatie :datumtijd :scheids_nodig
                  :opmerkingen :naam :date_inserted :date_checked
