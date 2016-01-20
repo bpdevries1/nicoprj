@@ -16,10 +16,6 @@ proc main {argv} {
   set LOGFILE [det_logfile]
   set USER [det_user]  
   lassign $argv option
-  if {$option == "-n"} {
-    set DO_SLEEP 0
-    puts stderr "Just do actions, don't sleep"
-  }
   set cron_jobs {}
   # TODO make sure we're running with sudo/root, pm-suspend needs this
   if {[is_unix]} {
@@ -34,6 +30,12 @@ proc main {argv} {
   
   # call other jobs (maybe private, put in other dir, read config)
   do_crons
+
+  # 30-8-2015 do_crons may have set DO_SLEEP to 1, -n should override.
+  if {$option == "-n"} {
+    set DO_SLEEP 0
+    puts stderr "Just do actions, don't sleep"
+  }
   
   # go to sleep
   if {$DO_SLEEP} {

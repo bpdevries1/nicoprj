@@ -64,6 +64,10 @@ proc monitor_loop {wait np} {
 
 proc mark_played {path} {
   global log db conn
+  if {$path == ""} {
+    # possible error in determining playing path.
+    return
+  }
   $log debug "Mark as played in database: $path" 
   try_eval {
     # set lst_ids [::mysql::sel $conn "select generic from musicfile where path = '[$db str_to_db [det_path_in_db $path]]'" -flatlist]
@@ -120,11 +124,16 @@ proc det_playing_old {} {
 }
 
 proc det_playing_path {} {
-  set res [exec qdbus org.kde.amarok /Player org.freedesktop.MediaPlayer.GetMetadata]
+  set res ""  
+  try_eval {
+    set res [exec qdbus org.kde.amarok /Player org.freedesktop.MediaPlayer.GetMetadata]  
+  } {}
   if {[regexp {location: ([^\n]+)} $res z url]} {
-    puts "url: $url" 
+    puts "url: $url"
+    url_to_filename $url  
+  } else {
+    return ""
   }
-  url_to_filename $url
 }
 
 proc url_to_filename {url} {

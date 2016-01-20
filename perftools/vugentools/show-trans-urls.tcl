@@ -8,6 +8,10 @@ package require csv
 interp alias {} splitx {} ::textutil::split::splitx
 
 set DEBUG 0
+set parprefix "lwpar"
+
+set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+$log set_file "logs/[file tail [info script]]-[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"].log"
 
 # TODO
 # - naam dit script aanpassen -> genereert nu ook een script met correlatie web_reg_save_param_regexp's.
@@ -36,29 +40,29 @@ proc main {argv} {
   set f [open [file join $report_dir trans-urls.org] w]
   set file_open 1
   try_eval {
-	  foreach c_filename [lsort -nocase [glob -directory $prj_dir *.c]] {
-		if {![ignore_file [file tail $c_filename]]} {
-			handle_c_file $f $c_filename
-		}
-	  }
-	  # then replace values with params
-	  foreach c_filename [lsort -nocase [glob -directory $prj_dir *.c]] {
-		if {![ignore_file [file tail $c_filename]]} {
-			replace_values_c_file $f $c_filename
-		}
-	  }
-	  print_params $f
+    foreach c_filename [lsort -nocase [glob -directory $prj_dir *.c]] {
+      if {![ignore_file [file tail $c_filename]]} {
+          handle_c_file $f $c_filename
+      }
+    }
+    # then replace values with params
+    foreach c_filename [lsort -nocase [glob -directory $prj_dir *.c]] {
+      if {![ignore_file [file tail $c_filename]]} {
+          replace_values_c_file $f $c_filename
+      }
+    }
+    print_params $f
   } {
     # when an error occurs, close the output file
-	puts $f "errorresult: $errorResult"
-	puts $f "errorCode: $errorCode"
-	puts $f "errorInfo: $errorInfo"
-	puts $f "An error occured, close the file"
-	close $f
-	set file_open 0
+    puts $f "errorresult: $errorResult"
+    puts $f "errorCode: $errorCode"
+    puts $f "errorInfo: $errorInfo"
+    puts $f "An error occured, close the file"
+    close $f
+    set file_open 0
   }
   if {$file_open} {
-	close $f 
+    close $f 
   }
 }
 
@@ -85,6 +89,7 @@ proc ignore_file {c_filename} {
 
 proc handle_c_file {f c_filename} {
   global DEBUG
+  log info "handle_c_file: $c_filename"
   puts $f "* [file tail $c_filename]"
   set cur_trans "<none>"
   set in_concurrent 0
@@ -94,7 +99,7 @@ proc handle_c_file {f c_filename} {
   set lines [lrange $lines 2 end-1]
   set text [join $lines "\n"]
   set stmts [splitx $text {;\n}]
-  
+  log debug "#stmts: [:# $stmts]"
   # TODO web_urls etc in concurrent actions toch ook behandelen?
   foreach stmt $stmts {
     lassign [parse_stmt $stmt] fnname params
@@ -104,16 +109,26 @@ proc handle_c_file {f c_filename} {
     } elseif {$fnname == "lr_end_transaction" } {
       set cur_trans "<none>"
     } elseif {($fnname == "web_url") || ($fnname == "web_submit_data") || ($fnname == "web_custom_request")} {
+      # log debug "Function to handle: $fnname (params: $params)"
+      log debug "Function to handle: $fnname"
+      if {[regexp {retrieveLoansClients} $stmt]} {
+        log debug "Function to handle: $fnname (params: $params)"
+      }
+      
       if {($cur_trans != "<none>") && !$in_concurrent} {
         lassign $params label url
         if {[ignore_url $url]} {
           # do nothing. 
+          log debug "ignore_url: $url"
         } else {
-          puts $f "*** $fnname: [handle_label $label]: [handle_url $url]"
-          # puts $f "*** $fnname: [handle_url "$label/"]: [handle_url $url]"  
+          set label2 [handle_label $label]
+          set url2 [handle_url $url]
+          puts $f "*** $fnname: $label2: $url2"
+          log debug "*** $fnname: $label2: $url2"
         }        
       } else {
-        # action outside of a transaction, not important.
+        log debug "outside transaction, not important"
+        log trace $stmt
       }
     } elseif {$fnname == "web_concurrent_start"} {
       set in_concurrent 1
@@ -123,6 +138,7 @@ proc handle_c_file {f c_filename} {
       # ok, do nothing.
     } else {
       puts $f "*** WARNING, unhandled: $fnname"
+      log warn "Unhandled: $fnname"
     }
     if {$DEBUG} {
       # puts $f "Statement:"
@@ -143,7 +159,7 @@ proc parse_stmt {stmt} {
   if {[regexp {^([^\(\)]+)\((.*)\)$} $stmt z fnname strparams]} {
     ## TODO comma's can be part of a string, need to take into account. Use CSV parsing lib?
     # set params [splitx $strparams ","]
-	set params [csv::split $strparams]
+    set params [csv::split $strparams]
     set paramst {}
     foreach el $params {
       set el2 [string trim $el]
@@ -196,12 +212,12 @@ proc check_quotes {str} {
       # error "just atest"
     } else {
       breakpoint
-	  error "Quotes not aligned: $str"
+      error "Quotes not aligned: $str"
     }
   } else {
     if {$lastchar == "\""} {
       breakpoint
-	  error "Quotes not aligned: $str"
+      error "Quotes not aligned: $str"
     } else {
       # ok, both not quotes
     }
@@ -230,17 +246,18 @@ proc print_params {f} {
 
 # find first .htm file in data subdir where urlpart is found. Then find the request where this .htm is a response of. Print both to the output as org level 3.
 proc print_param_details {f urlpart param} {
+  global parprefix
   set first_file [find_first_occ $urlpart] ; # returns something like t27.htm
   set c_file [find_snapshot $first_file] ; # returns something like login.c
   puts $f "*** first found in snapshot: $first_file"
   puts $f "*** in action/c: $c_file"
-  if {[regexp {^par\d+$} $param]} {
+  if {[regexp "^${parprefix}\\d+$" $param]} {
     # only for generated params.
-	if {$c_file == "<not found>"} {
-	  puts $f "**** WARNING: generated param, but not found in file"
-	} else {
-	  add_save_param_regexp $f $c_file $first_file $urlpart $param
-	}
+    if {$c_file == "<not found>"} {
+      puts $f "**** WARNING: generated param, but not found in file"
+    } else {
+      add_save_param_regexp $f $c_file $first_file $urlpart $param
+    }
   }
 }
 
@@ -274,11 +291,11 @@ proc add_save_param_regexp {f c_file first_file urlpart param} {
   set found 0
   foreach {z m} $res {
      if {$m == $urlpart} {
-	   # match found
-	   set found 1
-	   break
-	 }
-	 incr idx
+       # match found
+       set found 1
+       break
+     }
+     incr idx
   }
   if {!$found} {
     puts $f "**** Matched found for RE, but none are equal to orig text"
@@ -301,8 +318,8 @@ proc add_save_param_regexp {f c_file first_file urlpart param} {
   set snapshot_name [det_snapshot_name $first_file]
   foreach stmt $stmts {
     if {[string first $snapshot_name $stmt] >= 0} {
-	  lappend stmts2 [det_save_param_regexp $param $re $idx]
-	}
+      lappend stmts2 [det_save_param_regexp $param $re $idx $urlpart]
+    }
     lappend stmts2 $stmt
   } 
   puts $fo [join $stmts2 ";\n"]
@@ -330,12 +347,12 @@ proc det_snapshot_name {first_name} {
   return "Snapshot=[file rootname $first_name].inf"
 }
 
-proc det_save_param_regexp {param re idx} {
-  return "// Added generated param: $param
+proc det_save_param_regexp {param re idx urlpart} {
+  return "// Added generated param: $param (orig value: $urlpart)
         web_reg_save_param_regexp(\"ParamName=$param\",
-	        \"RegExp=$re\",
-			\"Ordinal=$idx\",
-	        LAST)"
+            \"RegExp=$re\",
+            \"Ordinal=$idx\",
+            LAST)"
 }
 
 proc find_first_occ {urlpart} {
@@ -377,9 +394,9 @@ proc find_snapshot {filename} {
     set needle "Snapshot=t$nr.inf"
     foreach filename [lsort [glob -directory $prj_dir "*.c"]] {
       if {[ignore_file [file tail $filename]]} {
-	    continue
-	  }
-	  set text [read_file $filename]
+        continue
+      }
+      set text [read_file $filename]
       if {[string first $needle $text] > -1} {
         return [file tail $filename]
       }
@@ -391,7 +408,8 @@ proc find_snapshot {filename} {
 }
 
 proc handle_url {url} {
-  global urlparams param_idx
+  global urlparams param_idx parprefix
+  log debug "handle_url: $url"
   # first check if an existing param applies
   if {$param_idx == 3} {
     #breakpoint
@@ -415,7 +433,8 @@ proc handle_url {url} {
       if {[should_replace $part]} {
         incr param_idx
         # set p_name "p$param_idx"
-		set p_name "par$param_idx"
+        # set p_name "par$param_idx"
+        set p_name "$parprefix$param_idx"
         dict set urlparams $part $p_name 
         lappend parts2 "\{$p_name\}"
       } else {
@@ -448,6 +467,13 @@ proc should_replace {part} {
 }
 
 proc ignore_url {url} {
+  set keep_res {secureuat-rabobank-com.rabonet.com }
+  foreach re $keep_res {
+    if {[regexp $re $url]} {
+      return 0
+    }
+  }
+
   set ignore_res {webanalytics microsoft.com rabonet.com cloudfront.net}
   foreach re $ignore_res {
     if {[regexp $re $url]} {

@@ -69,20 +69,75 @@ test cond-2 {cond 2} -body {cond 1} -returnCodes error -result {cond should be c
 
 ## test map ##
 # set fields [map x [:fields $table] {ifp [eq $x "id"] "id integer primary key autoincrement" $x}]
-test map-1 {map 1} {map x {id field1 field2} \
+# test map-1 {map 1} {map x {id field1 field2} \
   {ifp [= $x "id"] "id integer primary key autoincrement" $x}} \
   {{id integer primary key autoincrement} field1 field2}
 
+
+# 16-1-2016 hieronder de voor mij meest handige manieren om map/filter te gebruiken, deze moeten werken dus.
+proc testndv {args} {
+  global testndv_index
+  incr testndv_index
+  test test-$testndv_index test-$testndv_index {*}$args
+}
+
+testndv {cond 0 2 1 42} 42
+# testndv {cond 0 2 1 42} 43
+
+# lambda_to_proc: faalt, f niet gevonden, iets met scoping dus.
+# set f [lambda_to_proc {x {expr $x * 2}}]
+# testndv {$f 12} 24
+
+# in 1 stap, gaat goed.
+testndv {[lambda_to_proc {x {expr $x * 2}}] 12} 24
+
+# 2 params, first is a proc, second a list
+proc plus1 {x} {expr $x + 1}
+testndv {map plus1 {1 2 3}} {2 3 4}
+
+# 3 params, first is a var(list), second a body, 3rd a list
+testndv {map x {expr $x * 2} {1 2 3}} {2 4 6}
+
+# 2 params, first is a lambda (?), second a list.
+testndv {map {x {expr $x * 2}} {1 2 3}} {2 4 6}
+
+# iets met apply/lambda, nu 16-1-2016 wel vaag.
 # @note more tests with lambda, use with apply?  
   
 ## test filter ##
+proc is_ok {x} {regexp {ok} $x}
+testndv {filter is_ok {ok false not_ok yes}} {ok not_ok}
 
+# 3 params, first is a var(list), second a body, 3rd a list
+testndv {filter x {regexp {ok} $x} {ok false not_ok yes}} {ok not_ok}
 
+# 2 params, first is a lambda (?), second a list.
+testndv {filter {x {regexp {ok} $x}} {ok false not_ok yes}} {ok not_ok}
+
+proc is_gt3 {x} {expr $x > 3}
+testndv {is_gt3 2} 0
+testndv {is_gt3 5} 1
+
+testndv {filter is_gt3 {1 2 3 4 5}} {4 5}
+
+testndv {filter x {expr $x >= 3} {1 2 3 4 5}} {3 4 5}
+
+proc > {x y} {expr $x > $y}
+testndv {> 3 4} 0
+testndv {> 4 3} 1
+
+testndv {filter x {> $x 3} {1 2 3 4 5}} {4 5}
+
+#puts "Start with filter \$x > 3"
+#testndv {filter x {$x >= 3} {1 2 3 4 5}} {3 4 5}
+#puts "Finished with filter \$x > 3"
+
+# testndv {filter {x {$x >= 3}} {1 2 3 4 5}} {3 4 5}
 
 ## test fold ##
 
 
-## test curry ##
+## test curry/partial ##
 
 ## test iden ##
 

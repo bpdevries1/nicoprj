@@ -1,16 +1,25 @@
-#!/usr/bin/env tclsh86
+#!/usr/bin/env tclsh861
 
 package require csv
+package require ndv
 
 proc main {argv} {
   # set root "/home/nico/media/tijdelijk"
-  set root "/media/home.old/nico/media/tijdelijk"
+  # set root "/media/home.old/nico/media/tijdelijk"
+  lassign $argv root
+  set root [file normalize $root]
   set sec_timeout 60
   while {1} {
     set res [call_inotify $root $sec_timeout]
-    if {$res == "series"} {
-      sync_series
+    if {[:0 $res] == "change"} {
+      set filename [:1 $res]
+      if {$filename != ""} {
+        handle_change $root $filename  
+      }
     }
+    #if {$res == "series"} {
+    #  sync_series
+    #}
   }
 }
 
@@ -18,6 +27,7 @@ proc main {argv} {
 proc call_inotify {root sec_timeout} {
   # check both stdout and exitcode?
   # log "exec inotifywait..."
+  log "call_inotify: start"
   set res "<error>"
   catch {set res [exec -ignorestderr inotifywait --csv --timeout $sec_timeout $root]} results options
   set exitcode [det_exitcode $options]
@@ -33,28 +43,21 @@ proc call_inotify {root sec_timeout} {
     set l [csv::split $res]
     # log_list $l
     set path [lindex $l 2]
-    # TODO paden bepalen wat generieker.
-    if {[regexp -nocase "grey" $path]} {
-      return "series"
-    } elseif {[regexp -nocase "thrones" $path]} {
-      return "series"
-    } else {
-      return "<something else>"
-    }
-    return "unknown"
+    return [list change $path]
   }
 }
 
-proc sync_series {} {
-  log "==> found SERIES change, call move and sync here"
-  # /home/nico/nicoprj/mediatools/organise/organise-sync-cron.sh
-  # niet bovenstaande, want wil exit-code van move gebruiken om te kijken of unison wel nodig is.
-  # hier eerst alleen series, mss later ook films (in 2015/currentyear etc dir)
-  log "Calling move-series.clj"
-  catch {exec /home/nico/bin/lein exec /home/nico/nicoprj/mediatools/organise/move-series.clj}
-  log "Calling unison series-rpi"
-  catch {exec /home/nico/bin/unison -auto -batch series-rpi}
-  log " Finished move and sync"
+proc handle_change {root filename} {
+  log "File has changed: $filename in $root"
+  # eerst simpel houden: als er een _ in de naam staat, dan een touch van het deel voor
+  # de _
+  if {[regexp {^(.+)_(.+)(.clj)$} $filename z base detail ext]} {
+    set basename [file join $root "$base$ext"]
+    exec touch $basename
+    log "Touched: $basename"
+  } else {
+    log "No _ found, not touching anything"
+  }
 }
 
 proc log_list {l} {
@@ -83,7 +86,7 @@ proc det_exitcode {options} {
 set LOG_STDOUT 1
 proc log {str} {
   global LOG_STDOUT
-  set f [open "/home/nico/log/watch-tijdelijk.log" a]
+  set f [open "/home/nico/log/watch-clojure.log" a]
   puts $f "\[[clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]\] $str"
   close $f
   if {$LOG_STDOUT} {

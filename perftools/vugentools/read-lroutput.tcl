@@ -2,6 +2,9 @@
 package require ndv
 package require tdbc::sqlite3
 
+# read Loadrunner LG logfiles and put in SQLite DB.
+# tables: logblock
+
 ndv::source_once lib_lgoutput.tcl
 
 proc main {argv} {
@@ -123,4 +126,3 @@ proc det_vuserid {logfile} {
 }
 
 main $argv
-

@@ -1,4 +1,4 @@
 rem set bakfile=emailfolders-%_date.xml
-cd c:\nico\nicoprj\outlooktools\outlookmoveruby
-ruby showtodo.rb
+cd c:\PCC\nico\nicoprj\outlooktools\outlookmoveruby
+c:\PCC\util\ruby\bin\ruby.EXE showtodo.rb
 cd -

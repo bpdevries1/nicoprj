@@ -20,8 +20,9 @@ proc define_tables {db} {
   # status: ok of error
   # reason: reden waarom error
   # notes: verdere info.
-  $db add_tabledef user_result {id} {user status reason iteration nacts {R_getaccts real} notes logfilename ts_cet}
-  $db add_tabledef user_naccounts {id} {user nacts filename ts_cet}
+  $db add_tabledef user_result {id} {user status reason {iteration int} {nacts int} {R_getaccts real} notes logfilename ts_cet {linenr int}}
+  $db add_tabledef user_naccounts {id} {user {nacts int} filename ts_cet}
+  $db add_tabledef trans {id} {user {iteration int} transname result line logfilename ts_cet {linenr int}}
 }
 
 

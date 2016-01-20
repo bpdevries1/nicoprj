@@ -1,0 +1,5 @@
+C:\PCC\nico\nicoprj\outlooktools\CopyMail\tcom3.9\pkgIndex.tcl
+C:\PCC\nico\nicoprj\outlooktools\CopyMail\tcom3.9\tcom.dll
+C:\PCC\nico\nicoprj\outlooktools\CopyMail\tcom3.9\tcom.tcl
+C:\PCC\nico\nicoprj\outlooktools\CopyMail\tcom3.9\tcominproc.dll
+C:\PCC\nico\nicoprj\outlooktools\CopyMail\tcom3.9\teapot.txt

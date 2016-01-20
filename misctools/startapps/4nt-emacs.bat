@@ -1,0 +1,1 @@
+detach C:\PCC\util\emacs24.4\bin\emacs.exe

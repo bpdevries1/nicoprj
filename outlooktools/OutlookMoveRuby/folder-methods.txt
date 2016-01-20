@@ -1,0 +1,58 @@
+Outlook Move Ruby
+2015-11-09 10:42:04 [INFO ] [Main] Moving items: start
+Found folder, name = Diversen
+2015-11-09 10:42:04 [INFO ] [Main] #items in Diversen: 303
+2015-11-09 10:42:04 [INFO ] [Main] #items in orig: 303
+Available methods:
+AddRef
+AddToFavorites
+AddToPFFavorites
+AddressBookName
+Application
+Class
+CopyTo
+CurrentView
+CustomViewsOnly
+DefaultItemType
+DefaultMessageClass
+Delete
+Description
+Display
+EntryID
+FolderPath
+Folders
+FullFolderPath
+GetCalendarExporter
+GetCustomIcon
+GetExplorer
+GetIDsOfNames
+GetStorage
+GetTable
+GetTypeInfo
+GetTypeInfoCount
+InAppFolderSyncObject
+Invoke
+IsSharePointFolder
+Items
+MAPIOBJECT
+MoveTo
+Name
+Parent
+PropertyAccessor
+QueryInterface
+Release
+Session
+SetCustomIcon
+ShowAsOutlookAB
+ShowItemCount
+Store
+StoreID
+UnReadItemCount
+UserDefinedProperties
+UserPermissions
+Views
+WebViewAllowNavigation
+WebViewOn
+WebViewURL
+------
+2015-11-09 10:42:04 [INFO ] [Main] Moving items: finished

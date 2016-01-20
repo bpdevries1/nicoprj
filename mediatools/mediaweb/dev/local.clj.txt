@@ -1,0 +1,11 @@
+(ns dev.local)
+
+;; 24-11-2015 need to add namespace decl for clj-refactor?
+
+;; Local REPL configuration
+
+
+;; 24-11-2015 deze geeft compile fout, nog nodig?
+;; (alter-var-root #'config meta-merge {})
+
+;; 24-11-2015 of hele file weg? eerst maar rename naar .txt

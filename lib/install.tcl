@@ -14,16 +14,14 @@ set package_version 0.1.1
 # 16-1-2010 niet meer doen, gebruik vaste pkgIndex.tcl
 #pkg_mkIndex . *.tcl
 
-# TODO
-# 2015-05-27 NdV install lib in all tcl versions (now just for the interpreter that runs install.tcl)
-
 # lib_root D:/DEVELOP/TCL85/lib/tcl8.5 => D:/DEVELOP/TCL85/lib
 proc main {} {
   global package_name package_version
   
   # 9-6-2014 also to dropbox
   # 22-8-2014 first to dropbox, otherwise output might be confusing.
-  install_to_dir [file join [get_dropbox_dir] install tcl lib]  
+  # 26-8-2015 dropbox not available everywhere
+  catch {install_to_dir [file join [get_dropbox_dir] install tcl lib]}
 
   set lib_root [file dirname [info library]]
   set lib_install [file join $lib_root "$package_name-$package_version"]

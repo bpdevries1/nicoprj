@@ -1,7 +1,13 @@
-#!/usr/bin/env tclsh86
+#!/usr/bin/env tclsh861
+
 package require Itcl
 package require Tclx ; # for try_eval
 package require ndv
+
+package require term
+package require term::ansi::code::attr
+package require term::ansi::send
+term::ansi::send::import
 
 source [file join [file dirname [info script]] .. .. lib CLogger.tcl]
 source [file join [file dirname [info script]] .. lib libmusic.tcl]
@@ -69,9 +75,18 @@ proc play_random {lst_files {track_idx ""}} {
     set file [random_list $lst_files]  
   }
   
-  puts "\n*** playing file: $file\n"; # 
+  puts_colour green "\n*** playing file: $file\n"; # 
   # met -q optie?
   exec -ignorestderr mpg321 $file
+}
+
+proc puts_colour {colour str} {
+  send::sda_fg$colour
+  puts $str
+
+  # 5-12-2015 oude kleur te bewaren?
+  send::sda_fgwhite
+  
 }
 
 # library function

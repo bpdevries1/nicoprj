@@ -1,5 +1,5 @@
 # LoggerFactory
-# 14-11-2009 problemen met lo4r, lijkt nu opgelost:
+# 14-11-2009 problemen met log4r, lijkt nu opgelost:
 # met gem list --local lijst gezien, en hier staat log4r nu bij.
 # in irb geprobeerd, werkte eerst niet, maar met eerst een require 'rubygems' werkt het daarna wel.
 # outlookbatch deed het hierna ook weer.
