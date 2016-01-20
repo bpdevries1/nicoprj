@@ -12,7 +12,9 @@
             [mediaweb.component.db :refer [new-database]]
             [mediaweb.endpoint.mediaweb :refer [mediaweb-endpoint]]
             [mediaweb.endpoint.teams :refer [teams]]
+            [mediaweb.endpoint.authors :refer [authors]]
             [mediaweb.endpoint.books :refer [books]]
+            [mediaweb.endpoint.directories :refer [directories]]
             [mediaweb.endpoint.actions :refer [actions]]
             [mediaweb.endpoint.files :refer [files]]
             [mediaweb.endpoint.persons :refer [persons]]
@@ -41,7 +43,9 @@
          :app  (handler-component (:app config))
          :http (jetty-server (:http config))
          :mediaweb (endpoint-component mediaweb-endpoint)
+         :authors (endpoint-component authors)
          :books (endpoint-component books)
+         :directories (endpoint-component directories)
          :files (endpoint-component files)
          :actions (endpoint-component actions)
          :teams (endpoint-component teams)
@@ -50,7 +54,7 @@
         (component/system-using
          {:http [:app]
           ;; TODO vraag of deps zo goed zijn, mogelijk mediaweb, teams etc ook afh van db.
-          :app  [:mediaweb :teams :persons :games :books :files :actions]
+          :app  [:mediaweb :teams :persons :games :authors :books :directories :files :actions]
           :mediaweb [:db]}))))
 
 

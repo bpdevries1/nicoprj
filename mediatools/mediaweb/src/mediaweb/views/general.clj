@@ -23,7 +23,9 @@
    [:body
     [:div {:class "navbar navbar-inverse"}
      [:div {:class :navbar-inner}
+      [:a {:class :brand :href "/authors"} "Authors"]
       [:a {:class :brand :href "/books"} "Books"]
+      [:a {:class :brand :href "/directories"} "Directories"]
       [:a {:class :brand :href "/files"} "Files"]
       [:a {:class :brand :href "/actions"} "Actions"]
       [:a {:class :brand :href "/admin"} "Admin"]
@@ -34,7 +36,9 @@
        (submit-button {:class "btn btn-primary"} "Search"))]]
     [:div.container (seq body)]]))
 
+(def author-href (partial object-href "author"))
 (def book-href (partial object-href "book"))
+(def directory-href (partial object-href "directory"))
 (def file-href (partial object-href "file"))
 (def action-href (partial object-href "action"))
 
