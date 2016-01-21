@@ -31,6 +31,10 @@
    :page-name "Files"
    :page-fn files-form})
 
+(def-object-form directory-form file
+  {:obj-type :file
+   :fields [(directory-href (:directory_id file) (:folder file))]})
+
 (def-object-form file-form file
   {:obj-type :file
    :fields [{:label "Filename" :field :filename :attrs {:size 40}}
@@ -77,7 +81,8 @@
 (def-object-page file
   {:base-page-fn base-page
    :page-name "File"
-   :parts [{:title "General" :part-fn file-form}
+   :parts [{:title "Directory" :part-fn directory-form}
+           {:title "General" :part-fn file-form}
            {:title "File action" :part-fn file-actions-form}
            {:title "Actions" :part-fn gui-actions-form}]
    :model-read-fn mf/file-by-id

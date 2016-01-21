@@ -5,12 +5,14 @@
                         drop-down hidden-field]]
    [ring.util.response :as response]
    [mediaweb.models :as models]
-   [libndv.core :as h]
    [potemkin.macros :as pm]
+
+   [libndv.core :as h]
    [libndv.crud :refer [def-view-crud]]
    [libndv.datetime :refer [format-date-time parse-date-time]]
    [libndv.html :refer [def-object-form def-object-page def-page 
-                                    def-objects-form]]
+                        def-objects-form]]
+   
    [mediaweb.models.directory :as md]
    [mediaweb.views.general :refer :all]))
 
@@ -33,6 +35,28 @@
    :fields [{:label "Fullpath" :field :fullpath :attrs {:size 80}}
             {:label "Computer" :field :computer :attrs {:size 20}}]})
 
+(def-object-form parent-form d
+  {:obj-type :directory
+   :fields [(directory-href (:parent_id d) (:parent_folder d))]})
+
+(def-objects-form subdirs-form dir subdir
+  {:main-type :directory
+   :row-type :directory
+   :model-read-fn md/subdirs
+   :actions #{}
+   ;; TODO: maybe replace fullpath with just the last part, actual name
+   :columns [{:width 100 :name "Name" :form (directory-href (:id subdir) (:fullpath subdir))}]})
+
+(def-objects-form files-form dir f
+  {:main-type :directory
+   :row-type :file
+   :model-read-fn md/files
+   :actions #{}
+   :columns [{:name "Name" :width 55 :form (file-href (:id f) (:filename f))}
+             {:name "Size", :width 5, :form (:filesize f)}
+             {:name "Timestamp", :width 20, :form (format-date-time (:ts f))}
+             {:name "Notes", :width 20, :form (:notes f)}]})
+
 ;; TODO als je meer dan 1 actie wilt, dan past dit zo niet. Dan mss meerdere submit buttons,
 ;; maar waarschijnlijk meerdere forms nodig.
 (def-object-form directory-actions-form directory
@@ -44,6 +68,9 @@
   {:base-page-fn base-page
    :page-name "Directory"
    :parts [{:title "General" :part-fn directory-form}
+           {:title "Parent" :part-fn parent-form}
+           {:title "Subdirs" :part-fn subdirs-form}
+           {:title "Files" :part-fn files-form}
            {:title "Actions" :part-fn directory-actions-form}]
    :model-read-fn md/directory-by-id
    :name-fn :fullpath

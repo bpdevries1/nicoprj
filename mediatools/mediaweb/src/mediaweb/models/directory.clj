@@ -10,18 +10,29 @@
             [libndv.crud :refer [def-model-crud]]
             [mediaweb.models.entities :refer :all]))
 
+(def-model-crud :obj-type :directory)
+
 ;; TODO hier evt een limit op zetten of paging maken.
 (defn all-directories []
   (select directory (order :fullpath)
           (limit 30)
           (offset 0)))
 
+;; map-flatten not needed here
 (defn directory-by-id [id]
+  (first (select directory
+                 (where {:id (to-key id)}))))
+
+#_(defn directory-by-id [id]
   (h/map-flatten
    (first (select directory
                   (where {:id (to-int id)})))))
 
-;; TODO wat doet parse-date-time als 'ie al een datetime als param krijgt?
-(def-model-crud :obj-type :directory
-  :pre-fn (h/updates-in-fn [:ts_cet] parse-date-time))
+(defn subdirs [id]
+  (select directory (order :fullpath)
+          (where {:parent_id (to-key id)})))
+
+(defn files [id]
+  (select file (order :filename)
+          (where {:directory_id (to-key id)})))
 
