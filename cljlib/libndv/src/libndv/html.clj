@@ -156,10 +156,12 @@
   "Define a function <fn-name> to view/edit a table of values
    main-type     - [Req] :keyword (eg :persoon)
    row-type      - [Req] :keyword (eg :persoon-team)
-   model-read-fn - 
+   model-read-fn - (Fn [id -> <List of object-maps>])
    actions       - either nil for all actions :add, :edit, :delete or a set of actions,
                    can also be :add-get
-   columns       - 
+   columns       - List of column-map:
+                   :width w :name n :form f
+                   f - either custom-form or Map :label :field :ftype :attrs :format-fn
    Returns       - (Fn [Obj -> Html-Table])
   "
   [fn-name main-var row-var {:keys [main-type row-type model-read-fn actions columns] :as m}]
