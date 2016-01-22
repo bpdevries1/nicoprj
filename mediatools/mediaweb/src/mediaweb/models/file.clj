@@ -15,11 +15,17 @@
           (limit 30)
           (offset 0)))
 
+;; TODO: hier nu geen flatten in, want later ook refs naar books etc hierbij in een struct.
 (defn file-by-id [id]
+  (first (select file
+                 (where {:id (to-int id)})
+                 (with directory (fields [:id :dir_id] [:fullpath :dir_fullpath])))))
+
+#_(defn file-by-id [id]
   (h/map-flatten
    (first (select file
-                  ;; in where clause to-int is still needed.
-                  (where {:id (to-int id)})))))
+                  (where {:id (to-int id)})
+                  (with directory (fields [:id :dir_id] [:fullpath :dir_fullpath]))))))
 
 (def-model-crud :obj-type :file)
 

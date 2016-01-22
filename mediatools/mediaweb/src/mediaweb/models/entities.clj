@@ -13,6 +13,7 @@
 (declare bookauthor)
 (declare bookformat)
 (declare directory)
+(declare parent-directory)
 (declare file)
 (declare relfile)
 
@@ -52,8 +53,20 @@
   (prepare (h/updates-in-fn [:id :book_id] to-key)))
 
 (defentity directory
+  #_(alias :dir2) ;; dit werkt zo niet, waarsch met alias alleen (table def) bedoelt.
   (entity-fields :id :computer :parent_folder :fullpath)
-  (belongs-to directory {:fk :parent_id})
+  ;; 2016-01-22 removed belongs-to directory, to avoid confusion with has-many.
+  #_(belongs-to directory {:fk :parent_id})
+  (has-many directory {:fk :parent_id})
+  (has-many file {:fk :directory_id})
+  (prepare (h/updates-in-fn [:id :parent_id] to-key)))
+
+;; TODO: should be possible with alias or correct use of with to navigate to either parent or children.
+;; could (def parent-directory directory) work?
+#_(defentity parent-directory
+  (table :directory)
+  (entity-fields :id :computer :parent_folder :fullpath)
+  (belongs-to parent-directory {:fk :parent_id})
   (has-many directory {:fk :parent_id})
   (has-many file {:fk :directory_id})
   (prepare (h/updates-in-fn [:id :parent_id] to-key)))

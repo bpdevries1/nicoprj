@@ -18,15 +18,12 @@
           (limit 30)
           (offset 0)))
 
-;; map-flatten not needed here
 (defn directory-by-id [id]
-  (first (select directory
-                 (where {:id (to-key id)}))))
-
-#_(defn directory-by-id [id]
-  (h/map-flatten
-   (first (select directory
-                  (where {:id (to-int id)})))))
+  (first (select [directory :d]
+                         (fields :d.id :d.fullpath :d.computer
+                                 [:p.id :parent_id] [:p.fullpath :parent_fullpath])
+                         (join [directory :p] (= :p.id :d.parent_id))
+                         (where {:d.id (to-key id)}))))
 
 (defn subdirs [id]
   (select directory (order :fullpath)

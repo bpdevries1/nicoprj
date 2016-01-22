@@ -36,8 +36,9 @@
             {:label "Computer" :field :computer :attrs {:size 20}}]})
 
 (def-object-form parent-form d
-  {:obj-type :directory
-   :fields [(directory-href (:parent_id d) (:parent_folder d))]})
+  {:actions #{}
+   :obj-type :directory
+   :fields [(directory-href (:parent_id d) (:parent_fullpath d))]})
 
 (def-objects-form subdirs-form dir subdir
   {:main-type :directory

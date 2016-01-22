@@ -31,9 +31,12 @@
    :page-name "Files"
    :page-fn files-form})
 
+;; TODO: str file straks weer voor andere objecten erbij gejoined.
 (def-object-form directory-form file
-  {:obj-type :file
-   :fields [(directory-href (:directory_id file) (:folder file))]})
+  {:actions #{}
+   :obj-type :file
+   :fields [(directory-href (:dir_id file) (:dir_fullpath file))
+            #_(str file)]})
 
 (def-object-form file-form file
   {:obj-type :file
@@ -44,8 +47,6 @@
             {:label "Timestamp" :field :ts}
             {:label "Timestamp CET" :field :ts_cet}
             {:label "MD5" :field :md5 :attrs {:size 32}}
-            {:label "Directory ID" :field :directory_id}
-            {:label "RelFile ID" :field :relfile_id}
             {:label "Goal" :field :goal}
             {:label "Importance" :field :importance}
             {:label "Computer" :field :computer}
@@ -63,7 +64,6 @@
    :columns [{:name "Create ts", :width 20,
               :form (action-href (:id a) (format-date-time (:create_ts a)))}
              {:name "Action", :width 10, :form (:action a)}
-             {:name "Full path", :width 30, :form (:fullpath_action a)}
              {:name "Exec ts", :width 20,
               :form (format-date-time (:exec_ts a))}
              {:name "Status" :width 10 :form (:exec_status a)}
@@ -83,7 +83,7 @@
    :page-name "File"
    :parts [{:title "Directory" :part-fn directory-form}
            {:title "General" :part-fn file-form}
-           {:title "File action" :part-fn file-actions-form}
+           {:title "File actions" :part-fn file-actions-form}
            {:title "Actions" :part-fn gui-actions-form}]
    :model-read-fn mf/file-by-id
    :name-fn :filename
