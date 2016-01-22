@@ -6,7 +6,7 @@
    [ring.util.response :as response]
    [mediaweb.models :as models]
    [potemkin.macros :as pm]
-
+   [me.raynes.fs :as fs]
    [libndv.core :as h]
    [libndv.crud :refer [def-view-crud]]
    [libndv.datetime :refer [format-date-time parse-date-time]]
@@ -46,7 +46,7 @@
    :model-read-fn md/subdirs
    :actions #{}
    ;; TODO: maybe replace fullpath with just the last part, actual name
-   :columns [{:width 100 :name "Name" :form (directory-href (:id subdir) (:fullpath subdir))}]})
+   :columns [{:width 100 :name "Name" :form (directory-href (:id subdir) (fs/base-name (:fullpath subdir)))}]})
 
 (def-objects-form files-form dir f
   {:main-type :directory
