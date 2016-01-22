@@ -84,10 +84,11 @@
 
 (defmacro def-object-form
   "Create a function <fn-name> to show a form for (part of) and object.
-  fn-name -
-  obj-var -
+  fn-name       - name of function to def
+  obj-var       - name of var to use in other forms in this def.
 
   (unnamed) map with keys:
+  actions       - :edit and/or :delete in a #{set}. Nil for just :edit
   obj-type      - [Req] type of object as a string, like 'team' or 'persoon'
   obj-part      - optional, string like 'algeemn'
   fields        - is a Seq of [Map or Form]
@@ -100,29 +101,31 @@
 
   Form:
   (hickup) form in which obj-var can be used."
-  [fn-name obj-var {:keys [obj-type obj-part fields submit-label]}]
+  [fn-name obj-var {:keys [actions obj-type obj-part fields submit-label]}]
   (pm/unify-gensyms
-   `(defn ~fn-name [~obj-var]
-      (form-to
-       [:post (str "/" ~(name obj-type) "/" (or (:id ~obj-var) "0")
-                   ~(if obj-part (str  "/" (name obj-part))))]
-       ;; 2 items per fields are needed, flattened, so for cannot be used? concat/for should work.
-       ~@(mapcat 
-          (fn [field-form]
-            (list
-             (if (map? field-form)
-               ;; use map-defnition of field, suitable for most standard fields.
-               (let [{:keys [label field ftype attrs format-fn]} field-form]
-                 `(~(or ftype `text-field)
-                   (merge {:type :text :placeholder ~label :title ~label} ~attrs)
-                   ~field
-                   (~(or format-fn `identity) (~field ~obj-var))))
-               ;; else: use customised form, like drop-down.
-               field-form)
-             [:br])
-            ) fields)
-       (submit-button {:class "btn btn-primary"}
-                      ~(or submit-label "Pas gegevens aan"))))))
+   (let [actions2 (or actions #{:edit})]
+     `(defn ~fn-name [~obj-var]
+        (form-to
+         [:post (str "/" ~(name obj-type) "/" (or (:id ~obj-var) "0")
+                     ~(if obj-part (str  "/" (name obj-part))))]
+         ;; 2 items per fields are needed, flattened, so for cannot be used? concat/for should work.
+         ~@(mapcat 
+            (fn [field-form]
+              (list
+               (if (map? field-form)
+                 ;; use map-defnition of field, suitable for most standard fields.
+                 (let [{:keys [label field ftype attrs format-fn]} field-form]
+                   `(~(or ftype `text-field)
+                     (merge {:type :text :placeholder ~label :title ~label} ~attrs)
+                     ~field
+                     (~(or format-fn `identity) (~field ~obj-var))))
+                 ;; else: use customised form, like drop-down.
+                 field-form)
+               [:br])
+              ) fields)
+         ~(if (:edit actions2)
+            `(submit-button {:class "btn btn-primary"}
+                            ~(or submit-label "Pas gegevens aan"))))))))
 
 ;; 9-12-2015 deze nu niet meer nodig, wel aardig als template als je van een functie/macro de
 ;; params wilt aanpassen.
