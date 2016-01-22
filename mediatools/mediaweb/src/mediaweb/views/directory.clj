@@ -54,8 +54,10 @@
    :model-read-fn md/files
    :actions #{}
    :columns [{:name "Name" :width 55 :form (file-href (:id f) (:filename f))}
-             {:name "Size", :width 5, :attrs {:align :right} :form (format "%,d" (:filesize f))}
-             {:name "Timestamp", :width 20, :attrs {:align :center} :form (format-date-time (:ts f))}
+             {:name "Size", :width 5, :attrs {:align :right}
+              :form (format "%,d" (:filesize f))}
+             {:name "Timestamp", :width 20, :attrs {:align :center}
+              :form (format-date-time (:ts f))}
              {:name "Notes", :width 20, :form (:notes f)}]})
 
 ;; TODO als je meer dan 1 actie wilt, dan past dit zo niet. Dan mss meerdere submit buttons,
