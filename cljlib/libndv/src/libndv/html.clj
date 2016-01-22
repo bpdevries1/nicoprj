@@ -163,8 +163,9 @@
    actions       - either nil for all actions :add, :edit, :delete or a set of actions,
                    can also be :add-get
    columns       - List of column-map:
-                   :width w :name n :form f
+                   :width w :name n :form f :attrs attrs
                    f - either custom-form or Map :label :field :ftype :attrs :format-fn
+                   attrs - for <td>, eg {:align :right}
    Returns       - (Fn [Obj -> Html-Table])
   "
   [fn-name main-var row-var {:keys [main-type row-type model-read-fn actions columns] :as m}]
@@ -175,8 +176,8 @@
                   [:tr
                    (form-to
                     [:post (str "/" ~((fnil name "") row-type) "/" (or (:id ~row-var) 0))]
-                    ~@(for [{:keys [form]} columns]
-                        [:td (if (map? form)
+                    ~@(for [{:keys [attrs form]} columns]
+                        [:td attrs (if (map? form)
                                ;; use map-defnition of field, suitable for most standard fields.
                                (let [{:keys [label field ftype attrs format-fn]} form]
                                  `(~(or ftype `text-field)
