@@ -33,7 +33,8 @@
 (def-object-form directory-form directory
   {:obj-type :directory
    :fields [{:label "Fullpath" :field :fullpath :attrs {:size 80}}
-            {:label "Computer" :field :computer :attrs {:size 20}}]})
+            {:label "Computer" :field :computer :attrs {:size 20}}
+            {:label "Notes" :field :notes :ftype text-area :attrs {:rows 5 :cols 80}}]})
 
 (def-object-form parent-form d
   {:actions #{}

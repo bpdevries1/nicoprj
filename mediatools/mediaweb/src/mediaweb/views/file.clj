@@ -43,9 +43,8 @@
 (def-object-form file-form file
   {:obj-type :file
    :fields [{:label "Filename" :field :filename :attrs {:size 80}}
-            
             {:label "Filesize" :field :filesize :attrs {:size 10 :readonly true}}
-            {:label "Timestamp" :field (comp format-date-time :ts)
+            {:label "Timestamp" :field :ts :format-fn format-date-time
              :attrs {:readonly true}}
             {:label "MD5" :field :md5 :attrs {:size 32 :readonly true}}
             {:label "Goal" :field :goal}

@@ -54,7 +54,7 @@
 
 (defentity directory
   #_(alias :dir2) ;; dit werkt zo niet, waarsch met alias alleen (table def) bedoelt.
-  (entity-fields :id :computer :parent_folder :fullpath)
+  (entity-fields :id :computer :parent_folder :fullpath :notes)
   ;; 2016-01-22 removed belongs-to directory, to avoid confusion with has-many.
   #_(belongs-to directory {:fk :parent_id})
   (has-many directory {:fk :parent_id})
@@ -73,7 +73,7 @@
 
 (defentity file
   (entity-fields :id :fullpath :filename :folder :filesize :ts :ts_cet
-                 :md5 :goal :importance :computer :srcbak)
+                 :md5 :goal :importance :computer :srcbak :notes)
   (has-many action {:fk :file_id})
   (belongs-to directory {:fk :directory_id})
   (belongs-to relfile {:fk :relfile_id})
