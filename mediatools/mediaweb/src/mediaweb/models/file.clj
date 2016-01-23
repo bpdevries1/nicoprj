@@ -7,6 +7,7 @@
             [libndv.core :as h]
             [libndv.coerce :refer [to-int to-key]]
             [libndv.crud :refer [def-model-crud]]
+            [libndv.datetime :refer [parse-date-time]]
             [mediaweb.models.entities :refer :all]))
 
 ;; TODO iets met limit te doen? Of clojure take 20 of zo
@@ -27,7 +28,9 @@
                   (where {:id (to-int id)})
                   (with directory (fields [:id :dir_id] [:fullpath :dir_fullpath]))))))
 
-(def-model-crud :obj-type :file)
+(def-model-crud :obj-type :file
+  :pre-fn (fn [params] (-> params
+                           (h/updates-in [:ts] parse-date-time))))
 
 (defn file-actions [id]
   (select action
