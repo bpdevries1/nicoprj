@@ -10,7 +10,12 @@ proc main {argv} {
   set os [det_os]
   set commit_msg ""
   if {[:# $argv] > 0} {
-    lassign $argv dir commit_msg
+    if {[:# $argv] == 1} {
+      lassign $argv commit_msg
+      set dir "."
+    } else {
+      lassign $argv dir commit_msg      
+    }
     cd $dir
   } else {
     if {$os == "windows"} {
