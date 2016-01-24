@@ -56,7 +56,7 @@
    :actions #{}
    :columns [{:name "Name" :width 55 :form (file-href (:id f) (:filename f))}
              {:name "Size", :width 5, :attrs {:align :right}
-              :form (format "%,d" (:filesize f))}
+              :form (format-filesize (:filesize f))}
              {:name "Timestamp", :width 20, :attrs {:align :center}
               :form (format-date-time (:ts f))}
              {:name "Notes", :width 20, :form (:notes f)}]})

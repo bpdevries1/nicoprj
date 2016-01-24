@@ -47,4 +47,8 @@
 (def team-href (partial object-href "team"))
 (def wedstrijd-href (partial object-href "wedstrijd"))
 
+(defn format-filesize
+  "Format file size with thousand separators"
+  [s]
+  (format "%,d" s))
 

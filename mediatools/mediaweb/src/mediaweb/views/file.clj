@@ -23,6 +23,8 @@
    :columns [{:name "Filename", :width 15, :form (file-href (:id f) (:filename f))}
              {:name "Folder", :width 25, :form (:folder f)}
              {:name "Size", :width 5, :attrs {:align :right}
+              :form (format-filesize (:filesize f))}
+             #_{:name "Size", :width 5, :attrs {:align :right}
               :form (format "%,d" (:filesize f))}
              {:name "Timestamp", :width 20, :attrs {:align :center}
               :form (format-date-time (:ts f))}
@@ -43,7 +45,8 @@
 (def-object-form file-form file
   {:obj-type :file
    :fields [{:label "Filename" :field :filename :attrs {:size 80}}
-            {:label "Filesize" :field :filesize :attrs {:size 10 :readonly true}}
+            {:label "Filesize" :field :filesize :format-fn format-filesize
+             :attrs {:size 10 :readonly true}}
             {:label "Timestamp" :field :ts :format-fn format-date-time
              :attrs {:readonly true}}
             {:label "MD5" :field :md5 :attrs {:size 32 :readonly true}}
