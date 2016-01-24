@@ -25,6 +25,11 @@
              `(if-let [redir-id## (~(or redir-type :none) params2##)]
                 (str "/" redir-id##))))))
 
+(defn remove-readonly
+  "Remove :_READONLY_ keys from m"
+  [m]
+  (select-keys m (remove #(= :_READONLY_ %) (keys m))))
+
 (defn def-view-crud-update
   "Define view function for updating (including new) objects.
    Map with named parameters:
@@ -36,9 +41,11 @@
   (let [obj-type-name ((fnil name "<empty :obj-type") obj-type)
         redir-type-name ((fnil name "<empty :redir-type") redir-type)]
     `(defn ~(symbol (str obj-type-name "-update")) [id## params##]
-       (let [obj-id## (if (nil? (to-key id##))
-                        (~(model-fn model-ns obj-type-name "insert") params##)
-                        (~(model-fn model-ns obj-type-name "update") id## params##))]
+       (println (str params##))
+       (let [params2## (remove-readonly params##)
+             obj-id## (if (nil? (to-key id##))
+                        (~(model-fn model-ns obj-type-name "insert") params2##)
+                        (~(model-fn model-ns obj-type-name "update") id## params2##))]
          (response/redirect-after-post
           (~(redir-url-fn obj-type redir-type) obj-id## params##))))))
 
@@ -101,6 +108,7 @@
   (let [obj-type-name ((fnil name "<empty :obj-type") obj-type)]
     `(defn ~(symbol (str obj-type-name "-update")) [id## params##]
        (let [params2## ~(if pre-fn `(~pre-fn params##) `params##)]
+         (println (str params##))
          (update ~(symbol obj-type-name)
                  (set-fields params2##)
                  (where {:id (to-key id##)})))
