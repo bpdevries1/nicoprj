@@ -16,13 +16,10 @@ proc main {argv} {
 }
 
 proc backup_db {dargv} {
-  # set res [exec mysqldump -u $MUSER -h localhost -p$MPASS scheids | gzip -9 > $filename
-  # set backup_root "/media/nas/backups/databases"
-  # set backup_root "/media/nico/data3tb/backups/databases"
   set backup_root "/media/nico/Iomega HDD/backups/databases/media"
   file mkdir $backup_root
   set filename [file join $backup_root "media-[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"].sql"]
-  set res [exec pg_dump -d scheids -U [:user $dargv] -h localhost -f $filename --blobs --clean --create]
+  set res [exec pg_dump -d media -U [:user $dargv] -h localhost -f $filename --blobs --clean --create]
   log info "Result: $res"
   log info "Backup file: $filename"
 }
