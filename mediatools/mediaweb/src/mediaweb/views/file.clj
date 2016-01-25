@@ -15,7 +15,6 @@
    [mediaweb.models.file :as mf]
    [mediaweb.views.general :refer :all]))
 
-;; TODO file-add functionaliteit maken, had ik nog helemaal niet.
 (def-objects-form files-form files f
   {:model-read-fn (fn [_] (mf/all-files)),
    :actions #{:add-get},
@@ -24,8 +23,6 @@
              {:name "Folder", :width 25, :form (:folder f)}
              {:name "Size", :width 5, :attrs {:align :right}
               :form (format-filesize (:filesize f))}
-             #_{:name "Size", :width 5, :attrs {:align :right}
-              :form (format "%,d" (:filesize f))}
              {:name "Timestamp", :width 20, :attrs {:align :center}
               :form (format-date-time (:ts f))}
              {:name "Notes", :width 20, :form (:notes f)}]})
@@ -39,11 +36,11 @@
 (def-object-form directory-form file
   {:actions #{}
    :obj-type :file
-   :fields [(directory-href (:dir_id file) (:dir_fullpath file))
-            #_(str file)]})
+   :fields [(directory-href (:dir_id file) (:dir_fullpath file))]})
 
 (def-object-form file-form file
   {:obj-type :file
+   :actions #{:edit :delete}
    :fields [{:label "Filename" :field :filename :attrs {:size 80}}
             {:label "Filesize" :field :filesize :format-fn format-filesize
              :attrs {:size 10 :readonly true}}
