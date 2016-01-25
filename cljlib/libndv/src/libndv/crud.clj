@@ -28,28 +28,44 @@
 (defn remove-readonly
   "Remove :_READONLY_ keys from m"
   [m]
-  (select-keys m (remove #(= :_READONLY_ %) (keys m))))
+  (select-keys m (remove #{:_READONLY_} (keys m))))
+
+(defn get-action
+  "Determine action (edit/delete) from runtime form parameters,
+   given with :name :edit or :name :delete.
+   Return vector with 2 items:
+   - :edit or :delete
+   - the map m without :edit and :delete keys."
+  [m]
+  [(first (filter #{:edit :delete} (keys m)))
+   (select-keys m (remove #{:edit :delete} (keys m)))])
 
 (defn def-view-crud-update
-  "Define view function for updating (including new) objects.
+  "Define view function for updating (including new) objects. If delete button is pressed,
+   redirect to delete view function.
    Map with named parameters:
-   obj-type  - :keyword : required, object type
+   obj-type     - :keyword : required, object type
    redir-type   - :keyword : redirect to this object-type after action
-   pre-fn - (Fn [ParamsMap -> ParamsMap]) : optional, to preprocess the given params map. Not implemented yet!
-   model-ns   - "
+   pre-fn       - (Fn [ParamsMap -> ParamsMap]) : optional, to preprocess the given params map. Not implemented yet!
+   model-ns     - namespace with model functions (<object>-insert|update|delete)
+  "
   [{:keys [obj-type redir-type pre-fn model-ns] :as m}]
-  (let [obj-type-name ((fnil name "<empty :obj-type") obj-type)
-        redir-type-name ((fnil name "<empty :redir-type") redir-type)]
-    `(defn ~(symbol (str obj-type-name "-update")) [id## params##]
-       (println (str params##))
-       (let [params2## (remove-readonly params##)
-             obj-id## (if (nil? (to-key id##))
-                        (~(model-fn model-ns obj-type-name "insert") params2##)
-                        (~(model-fn model-ns obj-type-name "update") id## params2##))]
-         (response/redirect-after-post
-          (~(redir-url-fn obj-type redir-type) obj-id## params##))))))
+  (pm/unify-gensyms
+   (let [obj-type-name ((fnil name "<empty :obj-type") obj-type)
+         redir-type-name ((fnil name "<empty :redir-type") redir-type)]
+     `(defn ~(symbol (str obj-type-name "-update")) [id## params##]
+        (println (str "dvcu: " params##))
+        (let [params2## (remove-readonly params##)
+              [action## params3##] (get-action params2##)]
+          (if (= action## :delete)
+            (~(symbol (str obj-type-name "-delete")) id## params3##)
+            (let [obj-id## (if (nil? (to-key id##))
+                             (~(model-fn model-ns obj-type-name "insert") params3##)
+                             (~(model-fn model-ns obj-type-name "update") id## params3##))]
+              (response/redirect-after-post
+               (~(redir-url-fn obj-type redir-type) obj-id## params3##)))))))))
 
-;; delete functie ook met params, voor evt redirect.
+;; delete functie ook met params, voor evt redirect in de params.
 (defn def-view-crud-delete
   "Define view function for updating (including new) objects.
    Map with named parameters:
@@ -75,8 +91,9 @@
   [& {:keys [obj-type redir-update-type redir-delete-type pre-fn model-ns] :as m}]
   (pm/unify-gensyms
    `(do
-      ~(def-view-crud-update (assoc m :redir-type redir-update-type))
-      ~(def-view-crud-delete (assoc m :redir-type redir-delete-type)))))
+      ;; delete is called from update, so define first.
+      ~(def-view-crud-delete (assoc m :redir-type redir-delete-type))
+      ~(def-view-crud-update (assoc m :redir-type redir-update-type)))))
 
 ;; model functions
 ;; TODO replace if-not nil? insert-post-fn with if insert-post-fn, then test with new person and costfactors.
