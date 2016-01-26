@@ -10,7 +10,7 @@
   [model-ns obj-type-name action]
   (ns-resolve model-ns(symbol (str obj-type-name "-" action))))
 
-;; TODO vervang params2## door params##, werkt het dan nog steeds, of dan clash met params## van
+;; TODO: vervang params2## door params##, werkt het dan nog steeds, of dan clash met params## van
 ;; aanroepende functie? => lijkt goed, wordt toch wat onduidelijk, dus maar even op 2 laten staan.
 (defn redir-url-fn
   "Return function to determine redirect url based on obj-type, redir-type, obj-id (possibly new) and params.
