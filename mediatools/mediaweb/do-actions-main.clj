@@ -1,4 +1,5 @@
-(load-file "../../clojure/lib/def-libs-p.clj") 
+;; (load-file "../../clojure/lib/def-libs-p.clj")
+(load-file "../../cljlib/cmdline/def-libs-p.clj")
 (load-file "lib-diskcat.clj")
 
 ;; TODO: zowel voor Korma als entities namespaces weer require :as gebruiken ipv :refer :all. Kijken of dit werkt, want eerder wat vage dingen gehad.
