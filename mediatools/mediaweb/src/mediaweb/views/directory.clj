@@ -32,6 +32,7 @@
 ;; TODO: goede velden.
 (def-object-form directory-form directory
   {:obj-type :directory
+   :actions #{:edit :delete}
    :fields [{:label "Fullpath" :field :fullpath :attrs {:size 80}}
             {:label "Computer" :field :computer :attrs {:size 20}}
             {:label "Notes" :field :notes :ftype text-area :attrs {:rows 5 :cols 80}}]})
@@ -61,9 +62,7 @@
               :form (format-date-time (:ts f))}
              {:name "Notes", :width 20, :form (:notes f)}]})
 
-;; TODO als je meer dan 1 actie wilt, dan past dit zo niet. Dan mss meerdere submit buttons,
-;; maar waarschijnlijk meerdere forms nodig.
-(def-object-form directory-actions-form directory
+#_(def-object-form directory-actions-form directory
   {:obj-type :directory
    :obj-part :delete
    :submit-label "Delete directory"})
@@ -75,7 +74,7 @@
            {:title "Parent" :part-fn parent-form}
            {:title "Subdirs" :part-fn subdirs-form}
            {:title "Files" :part-fn files-form}
-           {:title "Actions" :part-fn directory-actions-form}]
+           #_{:title "Actions" :part-fn directory-actions-form}]
    :model-read-fn md/directory-by-id
    :name-fn :fullpath
    :debug true})

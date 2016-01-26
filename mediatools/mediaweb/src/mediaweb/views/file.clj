@@ -69,11 +69,8 @@
              {:name "Status" :width 10 :form (:exec_status a)}
              {:name "Notes", :width 40, :form (:notes a)}]})
 
-;; TODO: als je meer dan 1 actie wilt, dan past dit zo niet. Dan mss meerdere submit buttons,
-;; maar waarschijnlijk meerdere forms nodig.
-;; TODO: bij deze delete actie mogelijk ook uit het file systeem verwijderen.
-;; TODO: obj-part mogelijk hernoemen naar :action
-(def-object-form gui-actions-form file
+;; TODO: deze even weg, delete nu niet meer nodig in losse form. Verder wel meerdere acties in 1 form te doen, als dat nodig is.
+#_(def-object-form gui-actions-form file
   {:obj-type :file
    :obj-part :delete
    :submit-label "Delete file"})
@@ -84,7 +81,7 @@
    :parts [{:title "Directory" :part-fn directory-form}
            {:title "General" :part-fn file-form}
            {:title "File actions" :part-fn file-actions-form}
-           {:title "Actions" :part-fn gui-actions-form}]
+           #_{:title "Actions" :part-fn gui-actions-form}]
    :model-read-fn mf/file-by-id
    :name-fn :filename
    :debug true})

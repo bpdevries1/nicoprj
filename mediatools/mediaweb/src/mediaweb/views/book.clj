@@ -31,6 +31,7 @@
 
 (def-object-form book-form book
   {:obj-type :book
+   :actions #{:edit :delete}
    :fields [{:label "Title" :field :title :attrs {:size 80}}
             {:label "Authors" :field :authors :attrs {:size 80}}
             {:label "Language" :field :language}
@@ -43,9 +44,7 @@
             {:label "Tags" :field :tags :attrs {:size 40}}
             {:label "Notes" :field :notes :ftype text-area :attrs {:rows 5 :cols 80}}]})
 
-;; TODO als je meer dan 1 actie wilt, dan past dit zo niet. Dan mss meerdere submit buttons,
-;; maar waarschijnlijk meerdere forms nodig.
-(def-object-form actions-form book
+#_(def-object-form actions-form book
   {:obj-type :book
    :obj-part :delete
    :submit-label "Delete book"})
@@ -54,7 +53,7 @@
   {:base-page-fn base-page
    :page-name "Book"
    :parts [{:title "General" :part-fn book-form}
-           {:title "Actions" :part-fn actions-form}]
+           #_{:title "Actions" :part-fn actions-form}]
    :model-read-fn mb/book-by-id
    :name-fn :title
    :debug true})

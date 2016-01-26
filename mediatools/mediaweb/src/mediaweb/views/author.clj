@@ -31,6 +31,7 @@
 ;; TODO: goede velden.
 (def-object-form author-form author
   {:obj-type :author
+   :actions #{:edit :delete}
    :fields [{:label "Full name" :field :fullname :attrs {:size 40}}
             {:label "First name" :field :firstname :attrs {:size 20}}
             {:label "Last name" :field :lastname :attrs {:size 20}}
@@ -38,7 +39,7 @@
 
 ;; TODO als je meer dan 1 actie wilt, dan past dit zo niet. Dan mss meerdere submit buttons,
 ;; maar waarschijnlijk meerdere forms nodig.
-(def-object-form author-actions-form author
+#_(def-object-form author-actions-form author
   {:obj-type :author
    :obj-part :delete
    :submit-label "Delete author"})
@@ -47,7 +48,7 @@
   {:base-page-fn base-page
    :page-name "Author"
    :parts [{:title "General" :part-fn author-form}
-           {:title "Actions" :part-fn author-actions-form}]
+           #_{:title "Actions" :part-fn author-actions-form}]
    :model-read-fn ma/author-by-id
    :name-fn :fullname
    :debug true})

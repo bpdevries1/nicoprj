@@ -34,6 +34,7 @@
 
 (def-object-form action-form action
   {:obj-type :action
+   :actions #{:edit :delete}
    :fields [{:label "Create ts" :field :create_ts :format-fn format-date-time :attrs {:size 20}}
             {:label "Action" :field :action :attrs {:size 15}}
             {:label "Full path" :field :fullpath_action :attrs {:size 60}}
@@ -45,9 +46,7 @@
             {:label "Stderr" :field :exec_stderr :ftype text-area :attrs {:rows 5 :cols 80}}
             {:label "Notes" :field :notes :ftype text-area :attrs {:rows 5 :cols 80}}]})
 
-;; TODO als je meer dan 1 actie wilt, dan past dit zo niet. Dan mss meerdere submit buttons,
-;; maar waarschijnlijk meerdere forms nodig.
-(def-object-form action-actions-form action
+#_(def-object-form action-actions-form action
   {:obj-type :action
    :obj-part :delete
    :submit-label "Delete action"})
@@ -56,7 +55,7 @@
   {:base-page-fn base-page
    :page-name "Action"
    :parts [{:title "General" :part-fn action-form}
-           {:title "Actions" :part-fn action-actions-form}]
+           #_{:title "Actions" :part-fn action-actions-form}]
    :model-read-fn ma/action-by-id
    :name-fn (comp format-date-time :ts_cet)
    :debug true})
