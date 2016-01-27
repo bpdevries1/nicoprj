@@ -8,9 +8,10 @@
                                  drop-down hidden-field]]
             [ring.util.response :as response]
             [clojure.set :refer [intersection]]
-            [clojure.pprint :refer [pprint]]))
+            [clojure.pprint :refer [pprint]]
+            [compojure.core :refer :all]))
 
-;; TODO clean up require list above.
+;; TODO clean up require list above. Refactor-tools?
 
 ;;; helpers for tables
 ;; each arg can either be a function (ifn?) to be applied to item,
@@ -223,4 +224,25 @@
              ;; de if hier is toch nodig, anders velden getoond, maar geen button.
              ~(if (:add actions2) `(row-form## nil))]]])))))
 
+(defmacro def-with-default-routes
+  "Define 4 default routes for an object, and also specific given routes.
+   obj-type   - [String] singular of object type, eg 'file'
+   obj-types  - [String] multiple of object type, eg 'files'
+   view-ns    - [String] namespace of view functions, eg 'mediaweb.views.file'
+   rest       - other route definitions.
+  "
+  [obj-type obj-types view-ns & rest]
+  `(defn ~(symbol obj-types) [config#]
+     (routes
+      (GET ~(str "/" obj-types) []
+           (~(symbol view-ns obj-types)))
+      ;; ~'id used to explicity use 'id' as param name, not gensym one. Compojure needs this
+      ;; to bind to :id.
+      (GET ~(str "/" obj-type "/:id") [~'id]
+           (~(symbol view-ns obj-type) ~'id))
+      (POST ~(str "/" obj-type "/:id") [~'id & ~'params]
+            (~(symbol view-ns (str obj-type "-update")) ~'id ~'params))
+      (POST ~(str "/" obj-type "/:id/delete") [~'id & ~'params]
+            (~(symbol view-ns (str obj-type "-delete")) ~'id ~'params))
+      ~@rest)))
 
