@@ -1,15 +1,13 @@
 (ns mediaweb.endpoint.files
   (:require [compojure.core :refer :all]
-            [mediaweb.views.file :as vf]))
+            ;; TODO: not really sure if the require below is really needed, and if so, if it's
+            ;; only for the example file2 route.
+            ;; test with (reset) is not conclusive.
+            [mediaweb.views.file :as vf]
+            [libndv.html :as h]))
 
-(defn files [config]
-  (routes
-   (GET "/files" []
-        (vf/files))
-   (GET "/file/:id" [id]
-        (vf/file id))
-   (POST "/file/:id" [id & params]
-         (vf/file-update id params))
-   (POST "/file/:id/delete" [id & params]
-         (vf/file-delete id params))))
+;; Included example with extra route including params.
+(h/def-with-default-routes "file" "files" "mediaweb.views.file"
+  (GET "/file2/:id" [id]
+       (mediaweb.views.file/file id)))
 
