@@ -13,10 +13,11 @@
 
 ;; TODO clean up require list above. Refactor-tools?
 
-;;; helpers for tables
-;; each arg can either be a function (ifn?) to be applied to item,
-;; or a string etc to be directly appended.
-(defn tr-tds [item & args]
+(defn tr-tds
+  "helpers for tables.
+   each arg can either be a function (ifn?) to be applied to item,
+   or a string etc to be directly appended."
+  [item & args]
   (apply vector :tr
          (map
           (fn [el]
