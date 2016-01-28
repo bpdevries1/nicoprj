@@ -1,9 +1,12 @@
 (ns libndv.coerce)
 
-;; 28-5-2015 postgres needs real int's in parameters, so convert here.
-(defn to-int [s]
+(defn to-int
+  "Convert string to integer. Empty string will return nil"
+  [s]
   (if (= java.lang.String (type s))
-    (Integer/parseInt s)
+    (if (#{""} s)
+      nil
+      (Integer/parseInt s))
     s))
 
 ;; to-key: like to-int, but convert 0 (zero) to nil, so postgres does not give f.key violation.
