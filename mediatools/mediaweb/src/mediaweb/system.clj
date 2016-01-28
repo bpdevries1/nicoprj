@@ -14,9 +14,11 @@
             [mediaweb.endpoint.teams :refer [teams]]
             [mediaweb.endpoint.authors :refer [authors]]
             [mediaweb.endpoint.books :refer [books]]
+            [mediaweb.endpoint.bookformats :refer [bookformats]]
             [mediaweb.endpoint.directories :refer [directories]]
             [mediaweb.endpoint.actions :refer [actions]]
             [mediaweb.endpoint.files :refer [files]]
+            [mediaweb.endpoint.relfiles :refer [relfiles]]
             [mediaweb.endpoint.persons :refer [persons]]
             [mediaweb.endpoint.games :refer [games]]
             [mediaweb.views :as views]
@@ -45,8 +47,10 @@
          :mediaweb (endpoint-component mediaweb-endpoint)
          :authors (endpoint-component authors)
          :books (endpoint-component books)
+         :bookformats (endpoint-component bookformats)
          :directories (endpoint-component directories)
          :files (endpoint-component files)
+         :relfiles (endpoint-component relfiles)
          :actions (endpoint-component actions)
          :teams (endpoint-component teams)
          :persons (endpoint-component persons)
@@ -54,7 +58,7 @@
         (component/system-using
          {:http [:app]
           ;; TODO vraag of deps zo goed zijn, mogelijk mediaweb, teams etc ook afh van db.
-          :app  [:mediaweb :teams :persons :games :authors :books :directories :files :actions]
+          :app  [:mediaweb :teams :persons :games :authors :books :bookformats
+                 :directories :files :relfiles :actions]
           :mediaweb [:db]}))))
-
 
