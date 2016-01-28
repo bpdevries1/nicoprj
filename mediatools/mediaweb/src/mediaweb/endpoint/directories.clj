@@ -1,10 +1,11 @@
 (ns mediaweb.endpoint.directories
   (:require [compojure.core :refer :all]
-            [mediaweb.views :as views]
-            [mediaweb.views.directory :as vd]))
+            [libndv.html :as h]
+;;            [mediaweb.views :as views]
+;;            [mediaweb.views.directory :as vd]
+            ))
 
-;; TODO: hier een macro voor, voor de default acties? Wel mogelijkheid andere acties toe te voegen.
-(defn directories [config]
+#_(defn directories [config]
   (routes
    (GET "/directories" []
         (vd/directories))
@@ -15,4 +16,5 @@
    (POST "/directory/:id/delete" [id & params]
          (vd/directory-delete id params))))
 
+(h/def-with-default-routes "directory" "directories" "mediaweb.views.directory")
 

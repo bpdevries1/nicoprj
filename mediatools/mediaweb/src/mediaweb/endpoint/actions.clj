@@ -1,9 +1,11 @@
 (ns mediaweb.endpoint.actions
   (:require [compojure.core :refer :all]
-            [mediaweb.views :as views]
-            [mediaweb.views.action :as va]))
+            [libndv.html :as h]
+  ;;          [mediaweb.views :as views]
+  ;;          [mediaweb.views.action :as va]
+            ))
 
-(defn actions [config]
+#_(defn actions [config]
   (routes
    (GET "/actions" []
         (va/actions))
@@ -14,4 +16,5 @@
    (POST "/action/:id/delete" [id & params]
          (va/action-delete id params))))
 
+(h/def-with-default-routes "action" "actions" "mediaweb.views.action")
 
