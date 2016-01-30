@@ -2,7 +2,7 @@
   (:require [compojure.core :refer :all]
             [libndv.html :as h]
 ;;            [mediaweb.views :as views]
-;;            [mediaweb.views.directory :as vd]
+            [mediaweb.views.directory :as vd]
             ))
 
 #_(defn directories [config]

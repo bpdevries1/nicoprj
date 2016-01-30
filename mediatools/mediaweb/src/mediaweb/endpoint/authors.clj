@@ -2,8 +2,7 @@
   (:require [compojure.core :refer :all]
             [libndv.html :as h]
   ;;          [mediaweb.views :as views]
-  ;;          [mediaweb.views.author :as va]
-            ))
+            [mediaweb.views.author :as va]))
 
 #_(defn authors [config]
   (routes
