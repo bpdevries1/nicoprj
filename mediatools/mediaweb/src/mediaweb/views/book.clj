@@ -66,12 +66,28 @@
      :form (format-date-time (:ts rf))}
     {:name "Notes", :width 20, :form (:notes rf)}]})
 
+(def-objects-form files-form b f
+  {:main-type :book
+   :row-type :file
+   :model-read-fn mb/book-files
+   :actions #{:delete}
+   :columns
+   [{:name "Filename", :width 15, :form (file-href (:id f) (:filename f))}
+    {:name "Folder", :width 25, :form (:folder f)}
+    {:name "Size", :width 5, :attrs {:align :right}
+     :form (format-filesize (:filesize f))}
+    {:name "Timestamp", :width 20, :attrs {:align :center}
+     :form (format-date-time (:ts f))}
+    {:name "Notes", :width 20, :form (:notes f)}]})
+
+;; TODO: mss Files hoger neerzetten?
 (def-object-page book
   {:base-page-fn base-page
    :page-name "Book"
    :parts [{:title "General" :part-fn book-form}
            {:title "Formats" :part-fn formats-form}
-           {:title "Rel.files" :part-fn relfiles-form}]
+           {:title "Rel.files" :part-fn relfiles-form}
+           {:title "Files" :part-fn files-form}]
    :model-read-fn mb/book-by-id
    :name-fn :title
    :debug true})
