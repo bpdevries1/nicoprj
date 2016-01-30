@@ -44,7 +44,7 @@
             {:label "Tags" :field :tags :attrs {:size 40}}
             {:label "Notes" :field :notes :ftype text-area :attrs {:rows 5 :cols 80}}]})
 
-(def-objects-form book-formats-form b bf
+(def-objects-form formats-form b bf
   {:main-type :book
    :row-type :bookformat
    :model-read-fn mb/book-formats
@@ -52,12 +52,26 @@
    [{:name "Format" :width 30 :form {:label "Format" :field :format :attrs {:size 20}}}
     {:name "Notes"  :width 50 :form {:label "Notes" :field :notes :attrs {:size 80}}}]})
 
+(def-objects-form relfiles-form b rf
+  {:main-type :book
+   :row-type :relfile
+   :model-read-fn mb/book-relfiles
+   :actions #{:delete}
+   :columns
+   [{:name "Filename", :width 15, :form (relfile-href (:id rf) (:filename rf))}
+    {:name "Rel.Folder", :width 25, :form (:relfolder rf)}
+    {:name "Size", :width 5, :attrs {:align :right}
+     :form (format-filesize (:filesize rf))}
+    {:name "Timestamp", :width 20, :attrs {:align :center}
+     :form (format-date-time (:ts rf))}
+    {:name "Notes", :width 20, :form (:notes rf)}]})
+
 (def-object-page book
   {:base-page-fn base-page
    :page-name "Book"
    :parts [{:title "General" :part-fn book-form}
-           {:title "Formats" :part-fn book-formats-form}
-           #_{:title "Actions" :part-fn actions-form}]
+           {:title "Formats" :part-fn formats-form}
+           {:title "Rel.files" :part-fn relfiles-form}]
    :model-read-fn mb/book-by-id
    :name-fn :title
    :debug true})
