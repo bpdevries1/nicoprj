@@ -40,13 +40,7 @@
                       (where {:book_id (to-key id)})
                       (fields [:id :bfid])))))
 
-#_(defn book-relfiles [id]
-  (select relfile
-          (where {:bookformat_id
-                  (select bookformat
-                          (where {:book_id (to-key id)}))})))
-
-(defn testje
+#_(defn testje
   "Some tests, interactive, should be put in test namespace."
   []
   (book-relfiles 213)
