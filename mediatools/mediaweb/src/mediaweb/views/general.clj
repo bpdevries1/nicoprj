@@ -36,11 +36,13 @@
        (submit-button {:class "btn btn-primary"} "Search"))]]
     [:div.container (seq body)]]))
 
+(def action-href (partial object-href "action"))
 (def author-href (partial object-href "author"))
 (def book-href (partial object-href "book"))
+(def bookformat-href (partial object-href "bookformat"))
 (def directory-href (partial object-href "directory"))
 (def file-href (partial object-href "file"))
-(def action-href (partial object-href "action"))
+(def relfile-href (partial object-href "relfile"))
 
 ;; TODO remove these 3 after other code (from scheids) does not use it anymore.
 (def persoon-href (partial object-href "persoon"))
