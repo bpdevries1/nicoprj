@@ -26,3 +26,55 @@
   (select bookformat
           (where {:book_id (to-key id)})))
 
+(defn book-relfiles [id]
+  (select relfile
+          (with bookformat
+                (where {:book_id (to-key id)}))))
+
+;; geeft meer velden terug dan je wilt, mss geen last van.
+(defn book-files [id]
+  (select file
+          (with relfile
+                (fields [:id :rfid])
+                (with bookformat
+                      (where {:book_id (to-key id)})
+                      (fields [:id :bfid])))))
+
+#_(defn book-relfiles [id]
+  (select relfile
+          (where {:bookformat_id
+                  (select bookformat
+                          (where {:book_id (to-key id)}))})))
+
+(defn testje
+  "Some tests, interactive, should be put in test namespace."
+  []
+  (book-relfiles 213)
+
+  (select book (where {:id 213}))
+
+  ;; (book->)format->relfile
+  ;; book-format gebruiken, dan een map, maar lijkt niet handig, te veel queries.
+  ;; relfile->format (naar boven)
+  ;; sowieso in goede formaat voor presentatie, maar kan ook job zijn van de view, als dat in
+  ;;   macro kan.
+
+  (select bookformat
+          (where {:book_id 213})
+          (with relfile
+                (with file)))
+
+  ;; deze lijkt wel simpeler.
+  (select relfile
+          (with bookformat
+                (where {:book_id 213})))
+
+  ;; ook voor file?
+  (select file
+          (with relfile
+                (fields [:id :rfid])
+                (with bookformat
+                      (where {:book_id 213})
+                      (fields [:id :bfid]))))
+  )
+;; end-of-testje.
