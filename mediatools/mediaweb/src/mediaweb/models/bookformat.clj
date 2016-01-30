@@ -10,11 +10,38 @@
             [libndv.crud :refer [def-model-crud]]
             [mediaweb.models.entities :refer :all]))
 
+(def-model-crud :obj-type :bookformat)
+
 ;; TODO hier evt een limit op zetten of paging maken.
 (defn bookformat-by-id [id]
   (h/map-flatten
    (first (select bookformat
                   (where {:id (to-int id)})))))
 
-(def-model-crud :obj-type :bookformat)
+;; hiermee idd weer alles
+#_(defn bookformat-books [id]
+  (select book
+          (with bookformat
+                (where {:id (to-key id)}))))
+
+(defn bookformat-books [id]
+  (select bookformat
+          (where {:id (to-key id)})
+          (with book
+                (fields [:id :bid]))))
+
+#_(bookformat-books 210)
+
+(defn bookformat-relfiles [id]
+  (select relfile
+          (where {:bookformat_id (to-key id)})))
+
+#_(bookformat-relfiles 210)
+
+(defn bookformat-files [id]
+  (select file
+          (with relfile
+                (where {:bookformat_id (to-key id)}))))
+
+#_(bookformat-files 210)
 
