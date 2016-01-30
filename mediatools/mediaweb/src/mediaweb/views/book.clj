@@ -44,15 +44,19 @@
             {:label "Tags" :field :tags :attrs {:size 40}}
             {:label "Notes" :field :notes :ftype text-area :attrs {:rows 5 :cols 80}}]})
 
-#_(def-object-form actions-form book
-  {:obj-type :book
-   :obj-part :delete
-   :submit-label "Delete book"})
+(def-objects-form book-formats-form b bf
+  {:main-type :book
+   :row-type :bookformat
+   :model-read-fn mb/book-formats
+   :columns
+   [{:name "Format" :width 30 :form {:label "Format" :field :format :attrs {:size 20}}}
+    {:name "Notes"  :width 50 :form {:label "Notes" :field :notes :attrs {:size 80}}}]})
 
 (def-object-page book
   {:base-page-fn base-page
    :page-name "Book"
    :parts [{:title "General" :part-fn book-form}
+           {:title "Formats" :part-fn book-formats-form}
            #_{:title "Actions" :part-fn actions-form}]
    :model-read-fn mb/book-by-id
    :name-fn :title
