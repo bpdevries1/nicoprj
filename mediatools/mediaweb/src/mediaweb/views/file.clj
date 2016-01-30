@@ -69,6 +69,26 @@
              {:name "Status" :width 10 :form (:exec_status a)}
              {:name "Notes", :width 40, :form (:notes a)}]})
 
+(def-objects-form books-form f b
+  {:main-type :file
+   :row-type :book
+   :model-read-fn mf/file-books
+   :actions #{},
+   :columns [{:name "Title", :width 15, :form (book-href (:bid b) (:title b))}
+             {:name "Authors", :width 10, :form (:authors b)}
+             {:name "Pub. date", :width 10, :form (:pubdate b)}
+             {:name "Tags", :width 15, :form (:tags b)}
+             {:name "Notes", :width 40, :form (:notes b)}]})
+
+(def-objects-form bookformats-form f bf
+  {:main-type :file
+   :row-type :bookformat
+   :model-read-fn mf/file-bookformats
+   :actions #{}
+   :columns
+   [{:name "Format" :width 30 :form (bookformat-href (:bfid bf) (:format bf))}
+    {:name "Notes"  :width 50 :form (:notes bf)}]})
+
 (def-objects-form relfiles-form f rf
   {:main-type :file
    :row-type :relfile
@@ -83,26 +103,6 @@
      :form (format-date-time (:ts rf))}
     {:name "Notes", :width 20, :form (:notes rf)}]})
 
-(def-objects-form bookformats-form f bf
-  {:main-type :file
-   :row-type :bookformat
-   :model-read-fn mf/file-bookformats
-   :actions #{}
-   :columns
-   [{:name "Format" :width 30 :form (bookformat-href (:bfid bf) (:format bf))}
-    {:name "Notes"  :width 50 :form (:notes bf)}]})
-
-(def-objects-form books-form f b
-  {:main-type :file
-   :row-type :book
-   :model-read-fn mf/file-books
-   :actions #{},
-   :columns [{:name "Title", :width 15, :form (book-href (:bid b) (:title b))}
-             {:name "Authors", :width 10, :form (:authors b)}
-             {:name "Pub. date", :width 10, :form (:pubdate b)}
-             {:name "Tags", :width 15, :form (:tags b)}
-             {:name "Notes", :width 40, :form (:notes b)}]})
-
 ;; TODO: deze even weg, delete nu niet meer nodig in losse form. Verder wel meerdere acties in 1 form te doen, als dat nodig is.
 #_(def-object-form gui-actions-form file
   {:obj-type :file
@@ -115,9 +115,9 @@
    :parts [{:title "Directory" :part-fn directory-form}
            {:title "General" :part-fn file-form}
            {:title "File actions" :part-fn file-actions-form}
-           {:title "Rel.File" :part-fn relfiles-form}
+           {:title "Books" :part-fn books-form}
            {:title "Formats" :part-fn bookformats-form}
-           {:title "Books" :part-fn books-form}]
+           {:title "Rel.File" :part-fn relfiles-form}]
    :model-read-fn mf/file-by-id
    :name-fn :filename
    :debug true})
