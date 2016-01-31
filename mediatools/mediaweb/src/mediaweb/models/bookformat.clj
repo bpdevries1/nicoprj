@@ -18,35 +18,17 @@
    (first (select bookformat
                   (where {:id (to-int id)})))))
 
-;; hiermee idd weer alles
-#_(defn bookformat-books [id]
-  (select book
-          (with bookformat
-                (where {:id (to-key id)}))))
-
-#_(defn bookformat-books [id]
-  (select bookformat
-          (where {:id (to-key id)})
-          (with book
-                (fields [:id :bid]))))
-
 (defn bookformat-books [id]
   (select book
           (join bookformat (= :bookformat.book_id :book.id))
           (where {:bookformat.id (to-key id)})))
 
-#_(bookformat-books 210)
-
 (defn bookformat-relfiles [id]
   (select relfile
           (where {:bookformat_id (to-key id)})))
-
-#_(bookformat-relfiles 210)
 
 (defn bookformat-files [id]
   (select file
           (with relfile
                 (where {:bookformat_id (to-key id)}))))
-
-#_(bookformat-files 210)
 

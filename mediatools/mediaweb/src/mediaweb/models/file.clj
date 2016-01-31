@@ -25,66 +25,16 @@
                  (where {:id (to-key id)})
                  (with directory (fields [:id :dir_id] [:fullpath :dir_fullpath])))))
 
-;; TODO: deze doet het niet, file wordt niet meegejoined. Wel in entities.clj de relatie beide kanten op gedefinieerd, dus onduidelijk nu. Mss has-one gebruiken.
-#_(defn file-relfiles [id]
-  "Return the relfile that file belongs to, if any"
-  (select relfile
-          (with file
-                (where {:id (to-key id)}))))
-
-#_(select relfile
-        (with file
-              (where {:id 548})))
-
-;; deze nu alleen full select op relfile, geen join met file.
-#_(sql-only (select relfile
-                  (with file
-                        (where {:id 548}))))
-
-#_(sql-only (select file
-                  (where {:id 548})
-                  (with relfile
-                        (fields [:id :rfid] :filename :relfolder :filesize :ts :notes))))
-
-;; TODO: beetje jammer dat ik niet :id kan gebruiken, dit is file id. Tenzij je bij relfile
-;; begint, maar dan rest query weer lastiger?
-#_(defn file-relfiles [id]
-  "Return the relfile that file belongs to, if any"
-    (select file
-            (where {:id (to-key id)})
-            (with relfile
-                  (fields [:id :rfid] :filename :relfolder :filesize :ts :notes))))
-
 (defn file-relfiles [id]
   (select relfile
           (join file (= :file.relfile_id :relfile.id))
           (where {:file.id (to-key id)})))
-
-;; TODO: beetje jammer dat ik niet :id kan gebruiken, dit is file id. Tenzij je bij bookformat
-;; begint, maar dan rest query weer lastiger?
-#_(defn file-bookformats [id]
-  "Return the bookformat that file belongs to, if any"
-  (select file
-          (where {:id (to-key id)})
-          (with relfile
-                (with bookformat
-                      (fields [:id :bfid] :format :notes)))))
 
 (defn file-bookformats [id]
   (select bookformat
           (join relfile (= :bookformat.id :relfile.bookformat_id))
           (join file (= :file.relfile_id :relfile.id))
           (where {:file.id (to-key id)})))
-
-
-#_(defn file-books [id]
-  "Return the book that file belongs to, if any"
-  (select file
-          (where {:id (to-key id)})
-          (with relfile
-                (with bookformat
-                      (with book
-                            (fields [:id :bid] :title :authors :pubdate :tags :notes))))))
 
 (defn file-books [id]
   (select book
