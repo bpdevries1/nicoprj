@@ -48,9 +48,10 @@
   {:main-type :book
    :row-type :bookformat
    :model-read-fn mb/book-formats
+   :actions #{}
    :columns
-   [{:name "Format" :width 30 :form {:label "Format" :field :format :attrs {:size 20}}}
-    {:name "Notes"  :width 50 :form {:label "Notes" :field :notes :attrs {:size 80}}}]})
+   [{:name "Format" :width 30 :form (bookformat-href (:id bf) (:format bf))}
+    {:name "Notes"  :width 50 :form (:notes bf)}]})
 
 (def-objects-form relfiles-form b rf
   {:main-type :book
