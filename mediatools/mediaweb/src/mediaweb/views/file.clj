@@ -74,7 +74,7 @@
    :row-type :book
    :model-read-fn mf/file-books
    :actions #{},
-   :columns [{:name "Title", :width 15, :form (book-href (:bid b) (:title b))}
+   :columns [{:name "Title", :width 15, :form (book-href (:id b) (:title b))}
              {:name "Authors", :width 10, :form (:authors b)}
              {:name "Pub. date", :width 10, :form (:pubdate b)}
              {:name "Tags", :width 15, :form (:tags b)}
@@ -86,7 +86,7 @@
    :model-read-fn mf/file-bookformats
    :actions #{}
    :columns
-   [{:name "Format" :width 30 :form (bookformat-href (:bfid bf) (:format bf))}
+   [{:name "Format" :width 30 :form (bookformat-href (:id bf) (:format bf))}
     {:name "Notes"  :width 50 :form (:notes bf)}]})
 
 (def-objects-form relfiles-form f rf
@@ -95,7 +95,7 @@
    :model-read-fn mf/file-relfiles
    :actions #{:delete}
    :columns
-   [{:name "Filename", :width 15, :form (relfile-href (:rfid rf) (:filename rf))}
+   [{:name "Filename", :width 15, :form (relfile-href (:id rf) (:filename rf))}
     {:name "Rel.Folder", :width 25, :form (:relfolder rf)}
     {:name "Size", :width 5, :attrs {:align :right}
      :form (format-filesize (:filesize rf))}

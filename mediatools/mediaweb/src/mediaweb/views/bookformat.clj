@@ -28,7 +28,7 @@
    :row-type :book
    :model-read-fn mb/bookformat-books
    :actions #{},
-   :columns [{:name "Title", :width 15, :form (book-href (:bid b) (:title b))}
+   :columns [{:name "Title", :width 15, :form (book-href (:id b) (:title b))}
              {:name "Authors", :width 10, :form (:authors b)}
              {:name "Pub. date", :width 10, :form (:pubdate b)}
              {:name "Tags", :width 15, :form (:tags b)}

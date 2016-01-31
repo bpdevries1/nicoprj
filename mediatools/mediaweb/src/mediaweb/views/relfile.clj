@@ -36,7 +36,7 @@
    :row-type :book
    :model-read-fn mr/relfile-books
    :actions #{},
-   :columns [{:name "Title", :width 15, :form (book-href (:bid b) (:title b))}
+   :columns [{:name "Title", :width 15, :form (book-href (:id b) (:title b))}
              {:name "Authors", :width 10, :form (:authors b)}
              {:name "Pub. date", :width 10, :form (:pubdate b)}
              {:name "Tags", :width 15, :form (:tags b)}
@@ -48,7 +48,7 @@
    :model-read-fn mr/relfile-bookformats
    :actions #{}
    :columns
-   [{:name "Format" :width 30 :form (bookformat-href (:bfid bf) (:format bf))}
+   [{:name "Format" :width 30 :form (bookformat-href (:id bf) (:format bf))}
     {:name "Notes"  :width 50 :form (:notes bf)}]})
 
 (def-objects-form files-form rf f

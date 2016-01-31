@@ -48,16 +48,21 @@
 
 ;; TODO: beetje jammer dat ik niet :id kan gebruiken, dit is file id. Tenzij je bij relfile
 ;; begint, maar dan rest query weer lastiger?
-(defn file-relfiles [id]
+#_(defn file-relfiles [id]
   "Return the relfile that file belongs to, if any"
     (select file
             (where {:id (to-key id)})
             (with relfile
                   (fields [:id :rfid] :filename :relfolder :filesize :ts :notes))))
 
+(defn file-relfiles [id]
+  (select relfile
+          (join file (= :file.relfile_id :relfile.id))
+          (where {:file.id (to-key id)})))
+
 ;; TODO: beetje jammer dat ik niet :id kan gebruiken, dit is file id. Tenzij je bij bookformat
 ;; begint, maar dan rest query weer lastiger?
-(defn file-bookformats [id]
+#_(defn file-bookformats [id]
   "Return the bookformat that file belongs to, if any"
   (select file
           (where {:id (to-key id)})
@@ -65,7 +70,14 @@
                 (with bookformat
                       (fields [:id :bfid] :format :notes)))))
 
-(defn file-books [id]
+(defn file-bookformats [id]
+  (select bookformat
+          (join relfile (= :bookformat.id :relfile.bookformat_id))
+          (join file (= :file.relfile_id :relfile.id))
+          (where {:file.id (to-key id)})))
+
+
+#_(defn file-books [id]
   "Return the book that file belongs to, if any"
   (select file
           (where {:id (to-key id)})
@@ -73,6 +85,13 @@
                 (with bookformat
                       (with book
                             (fields [:id :bid] :title :authors :pubdate :tags :notes))))))
+
+(defn file-books [id]
+  (select book
+          (join bookformat (= :bookformat.book_id :book.id))
+          (join relfile (= :relfile.bookformat_id :bookformat.id))
+          (join file (= :file.relfile_id :relfile.id))
+          (where {:file.id (to-key id)})))
 
 (defn file-actions [id]
   (select action

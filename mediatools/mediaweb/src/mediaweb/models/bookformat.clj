@@ -24,11 +24,16 @@
           (with bookformat
                 (where {:id (to-key id)}))))
 
-(defn bookformat-books [id]
+#_(defn bookformat-books [id]
   (select bookformat
           (where {:id (to-key id)})
           (with book
                 (fields [:id :bid]))))
+
+(defn bookformat-books [id]
+  (select book
+          (join bookformat (= :bookformat.book_id :book.id))
+          (where {:bookformat.id (to-key id)})))
 
 #_(bookformat-books 210)
 
