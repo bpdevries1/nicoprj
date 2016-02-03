@@ -42,6 +42,7 @@
   {:obj-type :file
    :actions #{:edit :delete}
    :fields [{:label "Filename" :field :filename :attrs {:size 80}}
+            [:a {:href (str "file://localhost" (:fullpath file))} "Open file (right mouse)"]
             {:label "Filesize" :field :filesize :format-fn format-filesize
              :attrs {:size 10 :readonly true}}
             {:label "Timestamp" :field :ts :format-fn format-date-time
