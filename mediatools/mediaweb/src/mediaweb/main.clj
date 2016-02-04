@@ -1,4 +1,3 @@
-;; ns-decl follows:
 (ns mediaweb.main
   (:gen-class)
   (:require [com.stuartsierra.component :as component]
@@ -6,14 +5,7 @@
             [meta-merge.core :refer [meta-merge]]
             [mediaweb.config :as config]
             [mediaweb.system :refer [new-system]]
-            [mediaweb.views :as views])
-  (:require
-            [mediaweb.views.team :as vt]))
-
-;; lines follow:
-;; test dependencies and namespace refresh:
-;; werkt dus niet, helaas.
-;; (def test42 (vt/team 84))
+            [mediaweb.views :as views]))
 
 (def prod-config
   {:app {:middleware     [[wrap-hide-errors :internal-error]]

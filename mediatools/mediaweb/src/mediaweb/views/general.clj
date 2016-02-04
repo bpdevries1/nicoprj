@@ -44,11 +44,6 @@
 (def file-href (partial object-href "file"))
 (def relfile-href (partial object-href "relfile"))
 
-;; TODO remove these 3 after other code (from scheids) does not use it anymore.
-(def persoon-href (partial object-href "persoon"))
-(def team-href (partial object-href "team"))
-(def wedstrijd-href (partial object-href "wedstrijd"))
-
 (defn format-filesize
   "Format file size with thousand separators"
   [s]

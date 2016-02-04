@@ -11,7 +11,6 @@
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [mediaweb.component.db :refer [new-database]]
             [mediaweb.endpoint.mediaweb :refer [mediaweb-endpoint]]
-            [mediaweb.endpoint.teams :refer [teams]]
             [mediaweb.endpoint.authors :refer [authors]]
             [mediaweb.endpoint.books :refer [books]]
             [mediaweb.endpoint.bookformats :refer [bookformats]]
@@ -19,8 +18,6 @@
             [mediaweb.endpoint.actions :refer [actions]]
             [mediaweb.endpoint.files :refer [files]]
             [mediaweb.endpoint.relfiles :refer [relfiles]]
-            [mediaweb.endpoint.persons :refer [persons]]
-            [mediaweb.endpoint.games :refer [games]]
             [mediaweb.views :as views]
             [clojure.pprint :refer [pprint]]))
 
@@ -51,14 +48,11 @@
          :directories (endpoint-component directories)
          :files (endpoint-component files)
          :relfiles (endpoint-component relfiles)
-         :actions (endpoint-component actions)
-         :teams (endpoint-component teams)
-         :persons (endpoint-component persons)
-         :games (endpoint-component games))
+         :actions (endpoint-component actions))
         (component/system-using
          {:http [:app]
-          ;; TODO vraag of deps zo goed zijn, mogelijk mediaweb, teams etc ook afh van db.
-          :app  [:mediaweb :teams :persons :games :authors :books :bookformats
-                 :directories :files :relfiles :actions]
+          ;; TODO: vraag of deps zo goed zijn, mogelijk mediaweb, books etc ook afh van db.
+          :app [:mediaweb :authors :books :bookformats
+                :directories :files :relfiles :actions]
           :mediaweb [:db]}))))
 
