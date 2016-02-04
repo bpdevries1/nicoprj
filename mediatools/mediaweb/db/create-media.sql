@@ -561,6 +561,78 @@ ALTER SEQUENCE filestatus_id_seq OWNED BY filestatus.id;
 
 
 --
+-- Name: itemgroup; Type: TABLE; Schema: public; Owner: nico; Tablespace: 
+--
+
+CREATE TABLE itemgroup (
+    id integer NOT NULL,
+    name character varying(1023),
+    notes text,
+    tags character varying(1023)
+);
+
+
+ALTER TABLE public.itemgroup OWNER TO nico;
+
+--
+-- Name: itemgroup_id_seq; Type: SEQUENCE; Schema: public; Owner: nico
+--
+
+CREATE SEQUENCE itemgroup_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.itemgroup_id_seq OWNER TO nico;
+
+--
+-- Name: itemgroup_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: nico
+--
+
+ALTER SEQUENCE itemgroup_id_seq OWNED BY itemgroup.id;
+
+
+--
+-- Name: itemgroupquery; Type: TABLE; Schema: public; Owner: nico; Tablespace: 
+--
+
+CREATE TABLE itemgroupquery (
+    id integer NOT NULL,
+    itemgroup_id integer,
+    name character varying(1023),
+    type character varying(40),
+    query text,
+    notes text
+);
+
+
+ALTER TABLE public.itemgroupquery OWNER TO nico;
+
+--
+-- Name: itemgroupquery_id_seq; Type: SEQUENCE; Schema: public; Owner: nico
+--
+
+CREATE SEQUENCE itemgroupquery_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.itemgroupquery_id_seq OWNER TO nico;
+
+--
+-- Name: itemgroupquery_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: nico
+--
+
+ALTER SEQUENCE itemgroupquery_id_seq OWNED BY itemgroupquery.id;
+
+
+--
 -- Name: lobos_migrations; Type: TABLE; Schema: public; Owner: nico; Tablespace: 
 --
 
@@ -570,6 +642,79 @@ CREATE TABLE lobos_migrations (
 
 
 ALTER TABLE public.lobos_migrations OWNER TO nico;
+
+--
+-- Name: member; Type: TABLE; Schema: public; Owner: nico; Tablespace: 
+--
+
+CREATE TABLE member (
+    id integer NOT NULL,
+    itemgroup_id integer,
+    type character varying(40),
+    item_table character varying(40),
+    item_id integer
+);
+
+
+ALTER TABLE public.member OWNER TO nico;
+
+--
+-- Name: member_id_seq; Type: SEQUENCE; Schema: public; Owner: nico
+--
+
+CREATE SEQUENCE member_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.member_id_seq OWNER TO nico;
+
+--
+-- Name: member_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: nico
+--
+
+ALTER SEQUENCE member_id_seq OWNED BY member.id;
+
+
+--
+-- Name: relation; Type: TABLE; Schema: public; Owner: nico; Tablespace: 
+--
+
+CREATE TABLE relation (
+    id integer NOT NULL,
+    from_table character varying(40),
+    from_id integer,
+    to_table character varying(40),
+    to_id integer,
+    type character varying(255)
+);
+
+
+ALTER TABLE public.relation OWNER TO nico;
+
+--
+-- Name: relation_id_seq; Type: SEQUENCE; Schema: public; Owner: nico
+--
+
+CREATE SEQUENCE relation_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.relation_id_seq OWNER TO nico;
+
+--
+-- Name: relation_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: nico
+--
+
+ALTER SEQUENCE relation_id_seq OWNED BY relation.id;
+
 
 --
 -- Name: relfile; Type: TABLE; Schema: public; Owner: nico; Tablespace: 
@@ -696,6 +841,41 @@ ALTER SEQUENCE stats_id_seq OWNED BY stats.id;
 
 
 --
+-- Name: tags; Type: TABLE; Schema: public; Owner: nico; Tablespace: 
+--
+
+CREATE TABLE tags (
+    id integer NOT NULL,
+    item_table character varying(40),
+    item_id integer,
+    tags character varying(1023)
+);
+
+
+ALTER TABLE public.tags OWNER TO nico;
+
+--
+-- Name: tags_id_seq; Type: SEQUENCE; Schema: public; Owner: nico
+--
+
+CREATE SEQUENCE tags_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.tags_id_seq OWNER TO nico;
+
+--
+-- Name: tags_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: nico
+--
+
+ALTER SEQUENCE tags_id_seq OWNED BY tags.id;
+
+
+--
 -- Name: id; Type: DEFAULT; Schema: public; Owner: nico
 --
 
@@ -776,6 +956,34 @@ ALTER TABLE ONLY filestatus ALTER COLUMN id SET DEFAULT nextval('filestatus_id_s
 -- Name: id; Type: DEFAULT; Schema: public; Owner: nico
 --
 
+ALTER TABLE ONLY itemgroup ALTER COLUMN id SET DEFAULT nextval('itemgroup_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: nico
+--
+
+ALTER TABLE ONLY itemgroupquery ALTER COLUMN id SET DEFAULT nextval('itemgroupquery_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: nico
+--
+
+ALTER TABLE ONLY member ALTER COLUMN id SET DEFAULT nextval('member_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: nico
+--
+
+ALTER TABLE ONLY relation ALTER COLUMN id SET DEFAULT nextval('relation_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: nico
+--
+
 ALTER TABLE ONLY relfile ALTER COLUMN id SET DEFAULT nextval('relfile_id_seq'::regclass);
 
 
@@ -791,6 +999,13 @@ ALTER TABLE ONLY srcbak ALTER COLUMN id SET DEFAULT nextval('srcbak_id_seq'::reg
 --
 
 ALTER TABLE ONLY stats ALTER COLUMN id SET DEFAULT nextval('stats_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: nico
+--
+
+ALTER TABLE ONLY tags ALTER COLUMN id SET DEFAULT nextval('tags_id_seq'::regclass);
 
 
 --
@@ -850,6 +1065,30 @@ ALTER TABLE ONLY directory
 
 
 --
+-- Name: itemgroup_primary_key_id; Type: CONSTRAINT; Schema: public; Owner: nico; Tablespace: 
+--
+
+ALTER TABLE ONLY itemgroup
+    ADD CONSTRAINT itemgroup_primary_key_id PRIMARY KEY (id);
+
+
+--
+-- Name: itemgroupquery_primary_key_id; Type: CONSTRAINT; Schema: public; Owner: nico; Tablespace: 
+--
+
+ALTER TABLE ONLY itemgroupquery
+    ADD CONSTRAINT itemgroupquery_primary_key_id PRIMARY KEY (id);
+
+
+--
+-- Name: member_primary_key_id; Type: CONSTRAINT; Schema: public; Owner: nico; Tablespace: 
+--
+
+ALTER TABLE ONLY member
+    ADD CONSTRAINT member_primary_key_id PRIMARY KEY (id);
+
+
+--
 -- Name: pk_action_id; Type: CONSTRAINT; Schema: public; Owner: nico; Tablespace: 
 --
 
@@ -866,11 +1105,27 @@ ALTER TABLE ONLY file
 
 
 --
+-- Name: relation_primary_key_id; Type: CONSTRAINT; Schema: public; Owner: nico; Tablespace: 
+--
+
+ALTER TABLE ONLY relation
+    ADD CONSTRAINT relation_primary_key_id PRIMARY KEY (id);
+
+
+--
 -- Name: relfile_primary_key_id; Type: CONSTRAINT; Schema: public; Owner: nico; Tablespace: 
 --
 
 ALTER TABLE ONLY relfile
     ADD CONSTRAINT relfile_primary_key_id PRIMARY KEY (id);
+
+
+--
+-- Name: tags_primary_key_id; Type: CONSTRAINT; Schema: public; Owner: nico; Tablespace: 
+--
+
+ALTER TABLE ONLY tags
+    ADD CONSTRAINT tags_primary_key_id PRIMARY KEY (id);
 
 
 --
@@ -1010,6 +1265,22 @@ ALTER TABLE ONLY file
 
 ALTER TABLE ONLY action
     ADD CONSTRAINT fk_action_file_id FOREIGN KEY (file_id) REFERENCES file(id) ON UPDATE SET NULL ON DELETE SET NULL;
+
+
+--
+-- Name: itemgroupquery_fkey_itemgroup_id; Type: FK CONSTRAINT; Schema: public; Owner: nico
+--
+
+ALTER TABLE ONLY itemgroupquery
+    ADD CONSTRAINT itemgroupquery_fkey_itemgroup_id FOREIGN KEY (itemgroup_id) REFERENCES itemgroup(id) ON DELETE SET NULL;
+
+
+--
+-- Name: member_fkey_itemgroup_id; Type: FK CONSTRAINT; Schema: public; Owner: nico
+--
+
+ALTER TABLE ONLY member
+    ADD CONSTRAINT member_fkey_itemgroup_id FOREIGN KEY (itemgroup_id) REFERENCES itemgroup(id) ON DELETE SET NULL;
 
 
 --
