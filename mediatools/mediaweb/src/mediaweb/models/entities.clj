@@ -89,3 +89,27 @@
   (prepare (h/updates-in-fn [:id :bookformat_id] to-key :filesize to-int
                             [:ts] tc/to-sql-time)))
 
+;; groups, tags and relations, not specific to one kind of object.
+(declare itemgroupquery)
+(declare member)
+
+(defentity itemgroup
+  (entity-fields :id :name :notes :tags)
+  (has-many itemgroupquery {:fk :itemgroup_id})
+  (has-many member {:fk :itemgroup_id}))
+
+(defentity itemgroupquery
+  (entity-fields :id :name :type :query :notes)
+  (belongs-to itemgroup {:fk :itemgroup_id})
+ )
+
+(defentity member
+  (entity-fields :id :type :item_table :item_id)
+  (belongs-to itemgroup {:fk :itemgroup_id}))
+
+(defentity relation
+  (entity-fields :id :from_table :from_id :to_table :to_id :type))
+
+(defentity tags
+  (entity-fields :id :item_table :item_id :tags))
+
