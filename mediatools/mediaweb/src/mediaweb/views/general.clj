@@ -27,6 +27,7 @@
       [:a {:class :brand :href "/books"} "Books"]
       [:a {:class :brand :href "/directories"} "Directories"]
       [:a {:class :brand :href "/files"} "Files"]
+      [:a {:class :brand :href "/itemgroups"} "Groups"]
       [:a {:class :brand :href "/actions"} "Actions"]
       [:a {:class :brand :href "/admin"} "Admin"]
       (form-to
@@ -43,6 +44,7 @@
 (def directory-href (partial object-href "directory"))
 (def file-href (partial object-href "file"))
 (def relfile-href (partial object-href "relfile"))
+(def itemgroup-href (partial object-href "itemgroup"))
 
 (defn format-filesize
   "Format file size with thousand separators"

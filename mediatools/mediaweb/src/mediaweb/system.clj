@@ -18,6 +18,7 @@
             [mediaweb.endpoint.actions :refer [actions]]
             [mediaweb.endpoint.files :refer [files]]
             [mediaweb.endpoint.relfiles :refer [relfiles]]
+            [mediaweb.endpoint.itemgroups :refer [itemgroups]]
             [mediaweb.views :as views]
             [clojure.pprint :refer [pprint]]))
 
@@ -48,11 +49,12 @@
          :directories (endpoint-component directories)
          :files (endpoint-component files)
          :relfiles (endpoint-component relfiles)
+         :itemgroups (endpoint-component itemgroups)
          :actions (endpoint-component actions))
         (component/system-using
          {:http [:app]
           ;; TODO: vraag of deps zo goed zijn, mogelijk mediaweb, books etc ook afh van db.
           :app [:mediaweb :authors :books :bookformats
-                :directories :files :relfiles :actions]
+                :directories :files :relfiles :actions :itemgroups]
           :mediaweb [:db]}))))
 
