@@ -225,6 +225,9 @@
              ;; de if hier is toch nodig, anders velden getoond, maar geen button.
              ~(if (:add actions2) `(row-form## nil))]]])))))
 
+;; TODO: wil optie om meervoud (bv itemgroupqueries) niet op nemen, als 'ie op nil staat. Maar
+;; dan is name van de endpoint def ook nil. Code gaat waarsch nog wel wijzigen, ook met paginering, dus voorlopig Q&D oplossen door lege functie def in views.
+;; TODO: in def-view-crud geef je namespace wel op als symbol, dus zonder quotes. Kan dus wel!
 (defmacro def-with-default-routes
   "Define 4 default routes for an object, and also specific given routes.
    obj-type   - [String] singular of object type, eg 'file'
