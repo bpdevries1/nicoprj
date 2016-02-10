@@ -11,8 +11,12 @@
             [mediaweb.models.entities :refer :all]))
 
 (def-model-crud :obj-type :itemgroup)
-(def-model-crud :obj-type :itemgroupquery)
-(def-model-crud :obj-type :member)
+
+(def-model-crud :obj-type :itemgroupquery
+  :pre-fn #(h/updates-in % :itemgroup_id to-key))
+
+(def-model-crud :obj-type :member
+  :pre-fn #(h/updates-in % :itemgroup_id to-key))
 
 ;; TODO hier evt een limit op zetten of paging maken.
 (defn all-itemgroups []
@@ -23,4 +27,7 @@
    (first (select itemgroup
                   (where {:id (to-key id)})))))
 
-
+(defn itemgroup-queries [id]
+  (select itemgroupquery
+          (where {:itemgroup_id (to-key id)})
+          (order :type)))

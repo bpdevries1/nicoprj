@@ -45,6 +45,7 @@
 (def file-href (partial object-href "file"))
 (def relfile-href (partial object-href "relfile"))
 (def itemgroup-href (partial object-href "itemgroup"))
+(def itemgroupquery-href (partial object-href "itemgroupquery"))
 
 (defn format-filesize
   "Format file size with thousand separators"
