@@ -16,13 +16,13 @@
   "Return function to determine redirect url based on obj-type, redir-type, obj-id (possibly new) and params.
   if redir-type is nil, return a dummy function, which should not be used.
   Alternative is generate an error, but sometimes not all 3 functions (insert/update/delete) are needed/wanted."
-  [obj-type redir-type]
+  [obj-type redir-type redir-key]
   `(fn [obj-id2## params2##]
      (str "/" ~(name (or redir-type :none))
           ~(if (= obj-type redir-type)
              `(str "/" obj-id2##)
              ;; if redir-id not found in params, just redirect to the type, eg /personen.
-             `(if-let [redir-id## (~(or redir-type :none) params2##)]
+             `(if-let [redir-id## (~(or redir-key :none) params2##)]
                 (str "/" redir-id##))))))
 
 (defn remove-readonly
@@ -46,13 +46,17 @@
    Map with named parameters:
    obj-type     - :keyword : required, object type
    redir-type   - :keyword : redirect to this object-type after action
+   redir-key    - [Opt] :keyword : redrect to this key after deleting an object. If not given, the same as redir-type.  
    pre-fn       - (Fn [ParamsMap -> ParamsMap]) : optional, to preprocess the given params map. Not implemented yet!
    model-ns     - namespace with model functions (<object>-insert|update|delete)
   "
-  [{:keys [obj-type redir-type pre-fn model-ns] :as m}]
+  [{:keys [obj-type redir-type redir-key pre-fn model-ns] :as m}]
   (pm/unify-gensyms
-   (let [obj-type-name ((fnil name "<empty :obj-type") obj-type)
-         redir-type-name ((fnil name "<empty :redir-type") redir-type)]
+   (let [;; obj-type-name ((fnil name "<empty :obj-type") obj-type)
+         obj-type-name (name (or obj-type "<empty>"))
+         ;; redir-type-name ((fnil name "<empty :redir-type") redir-type)
+         redir-type-name (name (or redir-type "<empty>"))
+         redir-key2 (or redir-key redir-type)]
      `(defn ~(symbol (str obj-type-name "-update")) [id## params##]
         (println (str "dvcu: " params##))
         (let [params2## (remove-readonly params##)
@@ -63,37 +67,43 @@
                              (~(model-fn model-ns obj-type-name "insert") params3##)
                              (~(model-fn model-ns obj-type-name "update") id## params3##))]
               (response/redirect-after-post
-               (~(redir-url-fn obj-type redir-type) obj-id## params3##)))))))))
+               (~(redir-url-fn obj-type redir-type redir-key2) obj-id## params3##)))))))))
 
 ;; delete functie ook met params, voor evt redirect in de params.
 (defn def-view-crud-delete
   "Define view function for updating (including new) objects.
    Map with named parameters:
-   obj-type  - :keyword : required, object type
+   obj-type   - :keyword : required, object type
    redir-type - :keyword : redirect to this after deleting an object.
-   pre-fn - (Fn [ParamsMap -> ParamsMap]) : optional, to preprocess the given params map. Not implemented yet!
+   redir-key  - [Opt] :keyword : redrect to this key after deleting an object. If not given, the same as redir-type.
+   pre-fn     - (Fn [ParamsMap -> ParamsMap]) : optional, to preprocess the given params map. Not implemented yet!
    model-ns   - "
-  [{:keys [obj-type redir-type pre-fn model-ns] :as m}]
-  (let [obj-type-name ((fnil name "<empty :obj-type") obj-type)]
+  [{:keys [obj-type redir-type redir-key pre-fn model-ns] :as m}]
+  (let [;; obj-type-name ((fnil name "<empty :obj-type") obj-type)
+        obj-type-name (name (or obj-type "<empty>"))
+        redir-key2 (or redir-key redir-type)]
     `(defn ~(symbol (str obj-type-name "-delete")) [id## params##]
        (~(model-fn model-ns obj-type-name "delete") id##)
        (response/redirect-after-post
-        (~(redir-url-fn obj-type redir-type) id## params##)))))
+        (~(redir-url-fn obj-type redir-type redir-key2) id## params##)))))
 
 (defmacro def-view-crud
   "Define view function for updating (including new) and deleting objects.
    Named parameters:
-   obj-type  - :keyword : required, object type
+   obj-type          - :keyword : required, object type
    redir-update-type - :keyword : redirect to this after updating/inserting an object.
+   redir-update-key  - [Opt] :keyword : redirect to this :key after updating/inserting an object.
    redir-delete-type - :keyword : redirect to this after deleting an object.
-   pre-fn - (Fn [ParamsMap -> ParamsMap]) : optional, to preprocess the given params map. Not implemented yet!
-   model-ns   - "
-  [& {:keys [obj-type redir-update-type redir-delete-type pre-fn model-ns] :as m}]
+   redir-delete-key  - [Opt] :keyword : redirect to this :key after deleting an object. 
+   pre-fn            - (Fn [ParamsMap -> ParamsMap]) : optional, to preprocess the given params map. Not implemented yet!
+   model-ns          - symbol : namespace of the underlying model."
+  [& {:keys [obj-type redir-update-type redir-update-key redir-delete-type redir-delete-key
+             pre-fn model-ns] :as m}]
   (pm/unify-gensyms
    `(do
       ;; delete is called from update, so define first.
-      ~(def-view-crud-delete (assoc m :redir-type redir-delete-type))
-      ~(def-view-crud-update (assoc m :redir-type redir-update-type)))))
+      ~(def-view-crud-delete (assoc m :redir-type redir-delete-type :redir-key redir-delete-key))
+      ~(def-view-crud-update (assoc m :redir-type redir-update-type :redir-key redir-update-key)))))
 
 ;; model functions
 ;; TODO replace if-not nil? insert-post-fn with if insert-post-fn, then test with new person and costfactors.

@@ -1,15 +1,16 @@
 (ns libndv.html
-  (:require [clj-time.core :as t]
-            [clj-time.coerce :as tc]
+  (:require [clj-time.coerce :as tc]
+            [clj-time.core :as t]
             [clj-time.format :as tf]
-            [potemkin.macros :as pm]
-            [hiccup.page :refer [html5 include-js include-css]]
+            [clojure.pprint :refer [pprint]]
+            [clojure.set :as set]
+            [clojure.set :refer [intersection]]
+            [compojure.core :refer :all]
             [hiccup.form :refer [form-to text-field submit-button text-area
                                  drop-down hidden-field]]
-            [ring.util.response :as response]
-            [clojure.set :refer [intersection]]
-            [clojure.pprint :refer [pprint]]
-            [compojure.core :refer :all]))
+            [hiccup.page :refer [html5 include-js include-css]]
+            [potemkin.macros :as pm]
+            [ring.util.response :as response]))
 
 ;; TODO clean up require list above. Refactor-tools?
 
@@ -160,10 +161,13 @@
 ;; maar eerst maar eens meer gebruiken, kijken of het nog anders moet.
 ;; TODO obj-types als :keyword meegeven? Lijkt conceptueel beter.
 ;; niet zozeer een class dat er ook methods aan hangen. Vgl ADT, abstract data type.
-;; TODO alleen een row-form maken als :edit aan staat.
+;; TODO: alleen een row-form maken als :edit aan staat.
+;; TODO: nu let-form voor optional params, zou ook direct in fn-def moeten kunnen. Wel ergens voorbeelden gezien, Korma?
+;; TODO: mogelijk kan main-key ook een set/seq zijn ipv 1 :keyword.
 (defmacro def-objects-form
   "Define a function <fn-name> to view/edit a table of values
    main-type     - [Req] :keyword (eg :persoon)
+   main-key      - [Opt] :keyword (eg :itemgroup_id). If not set, same as main-type.
    row-type      - [Req] :keyword (eg :persoon-team)
    model-read-fn - (Fn [id -> <List of object-maps>])
    actions       - either nil for all actions :add, :edit, :delete or a set of actions,
@@ -174,9 +178,11 @@
                    attrs - for <td>, eg {:align :right}
    Returns       - (Fn [Obj -> Html-Table])
   "
-  [fn-name main-var row-var {:keys [main-type row-type model-read-fn actions columns] :as m}]
+  [fn-name main-var row-var {:keys [main-type main-key row-type
+                                    model-read-fn actions columns] :as m}]
   (pm/unify-gensyms
-   (let [actions2 (or actions #{:add :edit :delete})]
+   (let [actions2 (or actions #{:add :edit :delete})
+         main-key2 (or main-key main-type)]
      `(defn ~fn-name [~main-var]
         (letfn [(row-form## [~row-var]
                   [:tr
@@ -192,7 +198,7 @@
                                    (if ~row-var (~(or format-fn `identity) (~field ~row-var)))))
                                ;; else: use customised form, like drop-down.
                                form)])
-                    (hidden-field ~main-type (:id ~main-var))
+                    (hidden-field ~main-key2 (:id ~main-var))
                     [:td
                      ~(if (:edit actions2)
                         `(if ~row-var
@@ -206,7 +212,7 @@
                          [:td
                           (form-to
                            [:post (str "/" ~(name row-type) "/" (:id ~row-var) "/delete")]
-                           (hidden-field ~main-type (:id ~main-var))
+                           (hidden-field ~main-key2 (:id ~main-var))
                            (submit-button {:class "btn btn-primary"} "Verwijder"))]))])]
           [:div
            ~(if (:add-get actions2)
