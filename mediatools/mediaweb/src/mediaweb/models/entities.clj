@@ -104,7 +104,7 @@
  )
 
 (defentity member
-  (entity-fields :id :type :item_table :item_id)
+  (entity-fields :id :type :item_table :item_id :title)
   (belongs-to itemgroup {:fk :itemgroup_id}))
 
 (defentity relation

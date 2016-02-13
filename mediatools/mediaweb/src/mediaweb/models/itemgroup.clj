@@ -44,7 +44,5 @@
                                      (order :book.title))))
   (logline "members" 
            (select member
-                   (join book (= :member.item_id :book.id))
-                   (fields :book.title)
                    (where {:itemgroup_id (to-key id)})
-                   (order :book.title))))
+                   (order :title))))

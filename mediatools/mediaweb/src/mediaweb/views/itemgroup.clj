@@ -10,7 +10,7 @@
    [libndv.crud :refer [def-view-crud]]
    [libndv.datetime :refer [format-date-time]]
    [libndv.html :refer [def-object-form def-object-page def-page 
-                                    def-objects-form]]
+                        def-objects-form object-href]]
    [mediaweb.models.itemgroup :as mg]
    [mediaweb.views.general :refer :all]))
 
@@ -53,14 +53,19 @@
             {:label "Notes" :field :notes :ftype text-area :attrs {:rows 5 :cols 80}}
             {:label "Tags" :field :tags :attrs {:size 40}}]})
 
+;; TODO: title als editable zou niet nodig moeten zijn. Als je bij een item een title aanpast, moet
+;; je ook alle members meenemen, en mogelijk ook relations.
+;; TODO: of toch dynamisch de title bepalen... Maar mss handig de titles bij member te kunnen aanpassen?
 (def-objects-form members-form g m
   {:main-type :itemgroup
    :main-key :itemgroup_id
    :row-type :member
-   :actions #{}
+   :actions #{:edit :delete}
    :model-read-fn mg/itemgroup-members
-   :columns [{:name "Title" :width 60 :form (book-href (:item_id m) (:title m))}
-             {:name "Type" :width 5 :form (:type m)}]})
+   :columns [{:name "Title" :width 60 :form {:field :title :attrs {:size 100}}}
+             {:name "Item type" :width 5 :form (:item_table m)}
+             {:name "Member type" :width 5 :form (:type m)}
+             {:name "Details" :width 5 :form (object-href (:item_table m) (:item_id m) "To item")}]})
 
 ;; idee is combi van inline edit en springen naar detail page.
 ;; kijken of multiline in tabel een beetje werkt.
