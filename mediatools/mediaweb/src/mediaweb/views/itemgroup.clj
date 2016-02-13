@@ -21,12 +21,16 @@
 
 (def-view-crud :obj-type :itemgroupquery
   :redir-update-type :itemgroup
+  :redir-update-key :itemgroup_id
   :redir-delete-type :itemgroup
+  :redir-delete-key :itemgroup_id
   :model-ns mediaweb.models.itemgroup)
 
 (def-view-crud :obj-type :member
   :redir-update-type :itemgroup
+  :redir-update-key :itemgroup_id
   :redir-delete-type :itemgroup
+  :redir-delete-key :itemgroup_id
   :model-ns mediaweb.models.itemgroup)
 
 (def-objects-form itemgroups-form itemgroups g
@@ -55,7 +59,8 @@
 ;; TODO: main-type naam wellicht iets van column of ref.
 ;; TODO: row-type wordt alleen in url's gebruikt.
 (def-objects-form queries-form g q
-  {:main-type :itemgroup_id
+  {:main-type :itemgroup
+   :main-key :itemgroup_id
    :row-type :itemgroupquery
    :model-read-fn mg/itemgroup-queries
    :columns [{:name "Name" :width 10 :form {:field :name}}
