@@ -8,6 +8,7 @@
             [libndv.core :as h]
             [libndv.coerce :refer [to-int to-key]]
             [libndv.crud :refer [def-model-crud]]
+            [libndv.debug :refer [logline]]
             [mediaweb.models.entities :refer :all]))
 
 (def-model-crud :obj-type :itemgroup)
@@ -31,3 +32,19 @@
   (select itemgroupquery
           (where {:itemgroup_id (to-key id)})
           (order :type)))
+
+;; TODO: flatten? Maar dan wel per element, dus map gebruiken.
+;; TODO: algemeen maken, mss met deel-query die je ook bij tags en relation kunt gebruiken.
+(defn itemgroup-members [id]
+  ;;  (h/map-flatten)
+  (logline "query" (sql-only (select member
+                                     (join book (= :member.item_id :book.id))
+                                     (fields :book.title)
+                                     (where {:itemgroup_id (to-key id)})
+                                     (order :book.title))))
+  (logline "members" 
+           (select member
+                   (join book (= :member.item_id :book.id))
+                   (fields :book.title)
+                   (where {:itemgroup_id (to-key id)})
+                   (order :book.title))))

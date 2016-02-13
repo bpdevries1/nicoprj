@@ -53,6 +53,15 @@
             {:label "Notes" :field :notes :ftype text-area :attrs {:rows 5 :cols 80}}
             {:label "Tags" :field :tags :attrs {:size 40}}]})
 
+(def-objects-form members-form g m
+  {:main-type :itemgroup
+   :main-key :itemgroup_id
+   :row-type :member
+   :actions #{}
+   :model-read-fn mg/itemgroup-members
+   :columns [{:name "Title" :width 60 :form (book-href (:item_id m) (:title m))}
+             {:name "Type" :width 5 :form (:type m)}]})
+
 ;; idee is combi van inline edit en springen naar detail page.
 ;; kijken of multiline in tabel een beetje werkt.
 ;; kijken hoe width en size/cols samen werken.
@@ -76,7 +85,8 @@
 (def-object-page itemgroup
   {:base-page-fn base-page
    :page-name "Group"
-   :parts [{:title "General" :part-fn itemgroup-form}
+   :parts [{:title "Members" :part-fn members-form}
+           {:title "General" :part-fn itemgroup-form}
            {:title "Queries" :part-fn queries-form}]
    :model-read-fn mg/itemgroup-by-id
    :name-fn :name
