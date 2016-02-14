@@ -104,7 +104,7 @@
  )
 
 (defentity member
-  (entity-fields :id :type :item_table :item_id :title)
+  (entity-fields :id :type :item_table :item_id)
   (belongs-to itemgroup {:fk :itemgroup_id}))
 
 (defentity relation
@@ -113,3 +113,26 @@
 (defentity tags
   (entity-fields :id :item_table :item_id :tags))
 
+;; mapping between entities and functions to get title.
+;; fn is from map of record to a string containing title.
+(def title-fns
+  {:action :fullpath_action
+   :author :fullname
+   :book :title
+   :bookformat :format
+   :directory :fullpath
+   :file :fullpath
+   :relfile :relpath})
+
+(defn item-title
+  "determine 'title' of items: sometimes just the title field, sometimes another field or
+   possibly a combination. If definition not found in title-fns, return 'table/id'
+
+  Params:
+  table   - String, table name
+  id      - int, p.key of item in table"
+  [table id]
+  (if-let [f (title-fns (keyword table))]
+    (f (first (select (symbol table)
+                      (where {:id (to-key id)}))))
+    (str table "/" id)))

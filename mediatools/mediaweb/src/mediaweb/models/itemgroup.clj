@@ -19,7 +19,7 @@
 (def-model-crud :obj-type :member
   :pre-fn #(h/updates-in % :itemgroup_id to-key))
 
-;; TODO hier evt een limit op zetten of paging maken.
+;; TODO: hier evt een limit op zetten of paging maken.
 (defn all-itemgroups []
   (select itemgroup (order :name)))
 
@@ -33,16 +33,9 @@
           (where {:itemgroup_id (to-key id)})
           (order :type)))
 
-;; TODO: flatten? Maar dan wel per element, dus map gebruiken.
-;; TODO: algemeen maken, mss met deel-query die je ook bij tags en relation kunt gebruiken.
+;; TODO: nu per item een losse query, gaat in tegen perf principes. Maar zolang het niet te traag is, is het ok.
 (defn itemgroup-members [id]
-  ;;  (h/map-flatten)
-  (logline "query" (sql-only (select member
-                                     (join book (= :member.item_id :book.id))
-                                     (fields :book.title)
-                                     (where {:itemgroup_id (to-key id)})
-                                     (order :book.title))))
-  (logline "members" 
-           (select member
-                   (where {:itemgroup_id (to-key id)})
-                   (order :title))))
+  (->> (select member
+               (where {:itemgroup_id (to-key id)}))
+       (map #(assoc % :title (item-title (:item_table %) (:item_id %))))
+       (sort-by :title)))

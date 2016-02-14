@@ -12,6 +12,7 @@
    [libndv.html :refer [def-object-form def-object-page def-page 
                         def-objects-form object-href]]
    [mediaweb.models.itemgroup :as mg]
+   [mediaweb.models.entities :as ent]
    [mediaweb.views.general :refer :all]))
 
 (def-view-crud :obj-type :itemgroup
@@ -60,18 +61,17 @@
   {:main-type :itemgroup
    :main-key :itemgroup_id
    :row-type :member
-   :actions #{:edit :delete}
+   :actions #{:delete}
    :model-read-fn mg/itemgroup-members
-   :columns [{:name "Title" :width 60 :form {:field :title :attrs {:size 100}}}
+   :columns [{:name "Title" :width 60 :form (object-href
+                                             (:item_table m) (:item_id m)
+                                             (:title m))}
              {:name "Item type" :width 5 :form (:item_table m)}
-             {:name "Member type" :width 5 :form (:type m)}
-             {:name "Details" :width 5 :form (object-href (:item_table m) (:item_id m) "To item")}]})
+             {:name "Member type" :width 5 :form (:type m)}]})
 
 ;; idee is combi van inline edit en springen naar detail page.
 ;; kijken of multiline in tabel een beetje werkt.
 ;; kijken hoe width en size/cols samen werken.
-;; TODO: main-type naam wellicht iets van column of ref.
-;; TODO: row-type wordt alleen in url's gebruikt.
 (def-objects-form queries-form g q
   {:main-type :itemgroup
    :main-key :itemgroup_id
@@ -84,8 +84,6 @@
              {:name "Notes" :width 40
               :form {:field :notes :ftype text-area :attrs {:rows 5 :cols 40}}}
              {:name "Details" :width 10 :form (itemgroupquery-href (:id q) "Details")}]})
-
-;; TODO: items/members opnemen, hier ook main-type/row-type gebeuren.
 
 (def-object-page itemgroup
   {:base-page-fn base-page
@@ -107,5 +105,3 @@
 
 ;; TODO: itemgroupquery waarsch ook losse page, om deze te editen en later ook objecten mee
 ;; te beheren, of toe te voegen. Tenzij je dit doet vanuit het hoofd itemgroup scherm.
-
-
