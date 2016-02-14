@@ -8,6 +8,8 @@
    (GET "/" []
         (vgen/index))
 
+   (POST "/search" [& params]
+         (vgen/search-page params))
    ;; admin
    (GET "/admin" []
         (views/admin))))

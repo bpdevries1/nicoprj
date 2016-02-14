@@ -5,7 +5,8 @@
             [clj-time.coerce :as tc]
             [clj-time.format :as tf]
             [libndv.core :as h]
-            [libndv.coerce :refer [to-float to-int to-key]]))
+            [libndv.coerce :refer [to-float to-int to-key]]
+            [libndv.debug :refer :all]))
 
 (declare action)
 (declare author)
@@ -124,6 +125,8 @@
    :file :fullpath
    :relfile :relpath})
 
+;; TODO: search-fields per table?
+
 (defn item-title
   "determine 'title' of items: sometimes just the title field, sometimes another field or
    possibly a combination. If definition not found in title-fns, return 'table/id'
@@ -136,3 +139,14 @@
     (f (first (select (symbol table)
                       (where {:id (to-key id)}))))
     (str table "/" id)))
+
+;; TODO: search all kinds of objects, in all kinds of fields.
+(defn search-items
+  "Search items based on query string"
+  [query]
+  (->> (select book
+               (where {:title [like (str "%" query "%")]}))
+       (map #(assoc % :title (item-title "book" (:id %))
+                    :item_table "book"))
+       (sort-by :title)))
+

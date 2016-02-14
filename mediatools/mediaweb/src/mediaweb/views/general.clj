@@ -1,12 +1,14 @@
 (ns mediaweb.views.general
-  (:require [hiccup.page :refer [html5 include-js include-css]]
-            [hiccup.form :refer [form-to text-field submit-button text-area
+  (:require [hiccup.form :refer [form-to text-field submit-button text-area
                                  drop-down hidden-field]]
-            [ring.util.response :as response]
-            [mediaweb.models :as models]
-            [potemkin.macros :as pm]
+            [hiccup.page :refer [html5 include-js include-css]]
             [libndv.core :as h]
-            [libndv.html :refer [object-href]]))
+            [libndv.html :refer [object-href]]
+            #_[mediaweb.models :as models]
+            #_[mediaweb.models.itemgroup :as mg]
+            [mediaweb.models.entities :as ent]
+            [potemkin.macros :as pm]
+            [ring.util.response :as response]))
 
 ;; use https://github.com/clojure/core.typed/wiki/Types
 ;; for defining function params and return values.
@@ -52,3 +54,22 @@
   [s]
   (format "%,d" s))
 
+;; TODO: split in page and table-results parts, for selecting items.
+(defn search-page
+  "Search generic, all kinds of objects"
+  [{:keys [query] :as params}]
+  (base-page
+   "Search results"
+   [:h1 "Search results"]
+   (if-let [res (ent/search-items query)]
+     [:table.table
+      [:thead
+       [:tr
+        [:th {:width "85%"} "Item"]
+        [:th {:width "15%"} "Table"]]]
+      [:tbody
+       (for [{:keys [item_table id title]} res]
+         [:tr
+          [:td (object-href item_table id title)]
+          [:td item_table]])]]
+     "Nothing found")))
