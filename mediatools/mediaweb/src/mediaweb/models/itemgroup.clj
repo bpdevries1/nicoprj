@@ -34,6 +34,7 @@
           (order :type)))
 
 ;; TODO: nu per item een losse query, gaat in tegen perf principes. Maar zolang het niet te traag is, is het ok.
+;; TODO: stuk hiervan (map/sort) mss in losse functie, ook voor search en andere dingen.
 (defn itemgroup-members [id]
   (->> (select member
                (where {:itemgroup_id (to-key id)}))
