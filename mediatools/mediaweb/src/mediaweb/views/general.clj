@@ -60,7 +60,7 @@
   [{:keys [query] :as params}]
   (base-page
    "Search results"
-   [:h1 "Search results"]
+   [:h1 (str "Search results [" query "]")]
    (if-let [res (ent/search-items query)]
      [:table.table
       [:thead
