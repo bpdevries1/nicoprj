@@ -1,6 +1,7 @@
 (ns mediaweb.models.entities
   (:use korma.db korma.core)
   (:require [clojure.string :as string]
+            [korma.sql.fns :as sfns]
             [clj-time.core :as t]
             [clj-time.coerce :as tc]
             [clj-time.format :as tf]
@@ -122,10 +123,12 @@
    :book :title
    :bookformat :format
    :directory :fullpath
-   :file :fullpath
+   :file :filename
    :relfile :relpath})
 
-;; TODO: search-fields per table?
+;; TODO: add other tables
+(def search-fields {book [:title :authors :notes :publisher :isbn10 :isbn13 :edition]
+                    file [:fullpath :notes]})
 
 (defn item-title
   "determine 'title' of items: sometimes just the title field, sometimes another field or
@@ -140,13 +143,24 @@
                       (where {:id (to-key id)}))))
     (str table "/" id)))
 
-;; TODO: search all kinds of objects, in all kinds of fields.
+;; Use functions instead of macros here, to dynamically create query.
+(defn search-items-table
+  "Search items in a specific table/entity.
+   Add tablename as field to search results"
+  [ent query]
+  (->> (-> (select* ent)
+           (where* (apply sfns/pred-or
+                          (map #(sfns/pred-like % (str "%" query "%"))
+                               (search-fields ent))))
+           (limit 30)
+           (exec))
+       (map #(assoc % :item_table (:table ent)))))
+
 (defn search-items
   "Search items based on query string"
   [query]
-  (->> (select book
-               (where {:title [like (str "%" query "%")]}))
-       (map #(assoc % :title (item-title "book" (:id %))
-                    :item_table "book"))
+  (->> (mapcat #(search-items-table % query) [book file])
+       (map #(assoc % :title (item-title (:item_table %) (:id %))))
        (sort-by :title)))
+
 
