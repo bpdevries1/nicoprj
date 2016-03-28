@@ -2,15 +2,18 @@
   (:require
    [hiccup.page :refer [html5 include-js include-css]]
    [hiccup.form :refer [form-to text-field submit-button text-area
-                        drop-down hidden-field]]
+                        drop-down hidden-field check-box]]
    [ring.util.response :as response]
-   [mediaweb.models :as models]
-   [libndv.core :as h]
    [potemkin.macros :as pm]
+
+   [libndv.core :as h]
+   [libndv.coerce :refer [to-int to-key]]
    [libndv.crud :refer [def-view-crud]]
    [libndv.datetime :refer [format-date-time]]
    [libndv.html :refer [def-object-form def-object-page def-page 
                         def-objects-form object-href]]
+   
+   [mediaweb.models :as models]
    [mediaweb.models.itemgroup :as mg]
    [mediaweb.models.entities :as ent]
    [mediaweb.views.general :refer :all]))
@@ -47,16 +50,6 @@
    :page-name "Groups"
    :page-fn itemgroups-form})
 
-(def-object-form itemgroup-form itemgroup
-  {:obj-type :itemgroup
-   :actions #{:edit :delete}
-   :fields [{:label "Name" :field :name :attrs {:size 80}}
-            {:label "Notes" :field :notes :ftype text-area :attrs {:rows 5 :cols 80}}
-            {:label "Tags" :field :tags :attrs {:size 40}}]})
-
-;; TODO: title als editable zou niet nodig moeten zijn. Als je bij een item een title aanpast, moet
-;; je ook alle members meenemen, en mogelijk ook relations.
-;; TODO: of toch dynamisch de title bepalen... Maar mss handig de titles bij member te kunnen aanpassen?
 (def-objects-form members-form g m
   {:main-type :itemgroup
    :main-key :itemgroup_id
@@ -68,6 +61,24 @@
                                              (:title m))}
              {:name "Item type" :width 5 :form (:item_table m)}
              {:name "Member type" :width 5 :form (:type m)}]})
+
+(def-object-form query-add-form itemgroup
+  {:obj-type :itemgroup
+   :actions #{:search} ;; kijken of dit werkt.
+   :fields [{:label "Query" :field :query :attrs {:size 80}}]})
+
+(defn members-add-url
+  "Just a URL to a next page to add members"
+  [itemgroup]
+  [:a {:href (str "/itemgroup-add/" (:id itemgroup))} "Add new members"]
+  #_(str "itemgroup: " itemgroup))
+
+(def-object-form itemgroup-form itemgroup
+  {:obj-type :itemgroup
+   :actions #{:edit :delete}
+   :fields [{:label "Name" :field :name :attrs {:size 80}}
+            {:label "Notes" :field :notes :ftype text-area :attrs {:rows 5 :cols 80}}
+            {:label "Tags" :field :tags :attrs {:size 40}}]})
 
 ;; idee is combi van inline edit en springen naar detail page.
 ;; kijken of multiline in tabel een beetje werkt.
@@ -89,6 +100,7 @@
   {:base-page-fn base-page
    :page-name "Group"
    :parts [{:title "Members" :part-fn members-form}
+           {:title "Add members" :part-fn members-add-url}
            {:title "General" :part-fn itemgroup-form}
            {:title "Queries" :part-fn queries-form}]
    :model-read-fn mg/itemgroup-by-id
@@ -102,6 +114,77 @@
 (defn members [])
 (defn itemgroupquery [])
 (defn member [])
+
+(defn itemgroup-add-search-form
+  "Search form for adding itemgroup members"
+  [ig params]
+  (form-to
+   {:class :form-horizontal}
+   [:post (str "/itemgroup-add/" (:id ig))]
+   (text-field {:size 60} :query (:query params))
+   (submit-button {:class "btn btn-primary"} "Search")))
+
+(defn itemgroup-add-items-form
+  "Search results for adding itemgroup members"
+  [ig params]
+  (if (:query params)
+    (if-let [res (seq (ent/search-items (:query params)))]
+      (form-to
+       {:class :form-horizontal}
+       [:post (str "/itemgroup-add-members/" (:id ig))]
+       [:table.table
+        [:thead
+         [:tr
+          [:th {:width "5%"} "Check"]
+          [:th {:width "85%"} "Item"]
+          [:th {:width "15%"} "Table"]]]
+        [:tbody
+         (for [{:keys [item_table id title]} res]
+           [:tr
+            [:td (check-box (str item_table ":" id))]
+            [:td (object-href item_table id title)]
+            [:td item_table]])]]
+       (submit-button {:class "btn btn-primary"} "Add selected"))
+      "Nothing found")
+    "Type a query"))
+
+;; 28-3-2016 spul hieronder om items aan group toe te voegen.
+;; TODO: bij toevoegen checken of item al niet een member is?
+(defn itemgroup-add
+  "Show page to add members to a group, including results of searching items."
+  [id params]
+  (let [ig (mg/itemgroup-by-id id)]
+    (base-page "Add members to group"
+               [:div.row.admin-bar]
+               ;; TODO: add link back to itemgroup, possibly H1.
+               [:h1 (itemgroup-href id (:name ig))]
+               [:table.table
+                [:tbody
+                 [:tr
+                  [:th.span1 "Current items"]
+                  [:td.span10 (members-form ig)]]
+                 [:tr
+                  [:th.span1 "Search"]
+                  [:td.span10 (itemgroup-add-search-form ig params)]]
+                 [:tr
+                  [:th.span1 "Found items"]
+                  [:td.span10 (itemgroup-add-items-form ig params)]]]])))
+
+;; id: 1, params: {"book:53" "true", "file:173" "true"}
+(defn itemgroup-add-members
+  [id params]
+  #_(println (str "id: " id ", params: " params))
+  (doseq [item (keys params)]
+    (do
+      #_(println (str "item: " item))
+      (let [[_ item-table item-id] (first (re-seq #"^([^:]+):(\d+)$" item))]
+        (println(str item-table " => " item-id))
+        (mg/member-insert {:itemgroup_id id
+                           :type "manual"
+                           :item_table item-table
+                           :item_id (to-key item-id)}))))
+  (response/redirect-after-post (str "/itemgroup-add/" id))
+  #_(str "id: " id ", params: " params))
 
 ;; TODO: itemgroupquery waarsch ook losse page, om deze te editen en later ook objecten mee
 ;; te beheren, of toe te voegen. Tenzij je dit doet vanuit het hoofd itemgroup scherm.
