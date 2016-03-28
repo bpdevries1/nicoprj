@@ -144,6 +144,7 @@
     (str table "/" id)))
 
 ;; Use functions instead of macros here, to dynamically create query.
+;; TODO make limit of 30 items configurable.
 (defn search-items-table
   "Search items in a specific table/entity.
    Add tablename as field to search results"
