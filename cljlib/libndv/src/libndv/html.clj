@@ -81,9 +81,9 @@
   (pm/unify-gensyms
    `(defn ~fn-name []
       (~base-page-fn ~page-name
-                 [:div.row.admin-bar] 
-                 [:h1 ~page-name]
-                 (~page-fn nil)))))
+       [:div.row.admin-bar] 
+       [:h1 ~page-name]
+       (~page-fn nil)))))
 
 (defmacro def-object-form
   "Create a function <fn-name> to show a form for (part of) and object.
@@ -156,10 +156,10 @@
                       :name (second %)
                       :form (nth % 2)) columns)))))
 
-;; TODO best een grote macro, in stukken te verdelen? mss delen gelijk met form en table macro's?
+;; TODO: best een grote macro, in stukken te verdelen? mss delen gelijk met form en table macro's?
 ;; mogelijk de letfn er tussenuit, als losse functie. Mss een defmacro-
 ;; maar eerst maar eens meer gebruiken, kijken of het nog anders moet.
-;; TODO obj-types als :keyword meegeven? Lijkt conceptueel beter.
+;; TODO: obj-types als :keyword meegeven? Lijkt conceptueel beter.
 ;; niet zozeer een class dat er ook methods aan hangen. Vgl ADT, abstract data type.
 ;; TODO: alleen een row-form maken als :edit aan staat.
 ;; TODO: nu let-form voor optional params, zou ook direct in fn-def moeten kunnen. Wel ergens voorbeelden gezien, Korma?
