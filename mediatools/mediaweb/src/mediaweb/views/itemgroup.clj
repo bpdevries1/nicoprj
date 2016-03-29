@@ -62,14 +62,14 @@
              {:name "Item type" :width 5 :form (:item_table m)}
              {:name "Member type" :width 5 :form (:type m)}]})
 
-(def-object-form query-add-form itemgroup
+#_(def-object-form query-add-form itemgroup
   {:obj-type :itemgroup
    :actions #{:search} ;; kijken of dit werkt.
    :fields [{:label "Query" :field :query :attrs {:size 80}}]})
 
 (defn members-add-url
   "Just a URL to a next page to add members"
-  [itemgroup]
+  [itemgroup params]
   [:a {:href (str "/itemgroup-add/" (:id itemgroup))} "Add new members"]
   #_(str "itemgroup: " itemgroup))
 
@@ -150,6 +150,7 @@
 
 ;; 28-3-2016 spul hieronder om items aan group toe te voegen.
 ;; TODO: bij toevoegen checken of item al niet een member is?
+;; TODO: dit integreren met main itemgroup page/form.
 (defn itemgroup-add
   "Show page to add members to a group, including results of searching items."
   [id params]
@@ -162,7 +163,7 @@
                 [:tbody
                  [:tr
                   [:th.span1 "Current items"]
-                  [:td.span10 (members-form ig)]]
+                  [:td.span10 (members-form ig params)]]
                  [:tr
                   [:th.span1 "Search"]
                   [:td.span10 (itemgroup-add-search-form ig params)]]
