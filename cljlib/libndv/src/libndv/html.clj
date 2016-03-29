@@ -83,7 +83,7 @@
       (~base-page-fn ~page-name
        [:div.row.admin-bar] 
        [:h1 ~page-name]
-       (~page-fn nil)))))
+       (~page-fn nil nil)))))
 
 ;; params currently not used in default object forms.
 ;; use self defined function (not with this macro) to use params
