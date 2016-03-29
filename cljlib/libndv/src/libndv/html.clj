@@ -43,16 +43,16 @@
   "Create a function <fn-name> to view an object page.
   params in map:
   page-name     - String
-  parts         - {:title String :part-fn (Fn [Object -> Html]}
+  parts         - {:title String :part-fn (Fn [Object, params Map -> Html]}
   model-read-fn - (Fn [id -> Object])
   name-fn       - (Fn [Object -> String])
   debug         - boolean
   
-  Defines       - (Fn [id -> Html])
+  Defines       - (Fn [id, params Map -> Html])
   "
   [fn-name {:keys [base-page-fn page-name parts model-read-fn name-fn debug]}]
   (pm/unify-gensyms
-   `(defn ~fn-name [id#]
+   `(defn ~fn-name [id# params##]
       (let [obj## (~model-read-fn id#)
             page-title# (str (~name-fn obj##) " - " ~page-name)]
         (~base-page-fn
@@ -67,7 +67,7 @@
                ;; van de part-fn call.
                [:tr
                 [:th.span1 title]
-                [:td.span10 `(~part-fn obj##)]])]])))))
+                [:td.span10 `(~part-fn obj## params##)]])]])))))
 
 (defmacro def-page
   "Create a function <fn-name> to view a generic page with header and base-page.
@@ -85,6 +85,9 @@
        [:h1 ~page-name]
        (~page-fn nil)))))
 
+;; params currently not used in default object forms.
+;; use self defined function (not with this macro) to use params
+;; eg. itemgroup/itemgroup-add-search-form
 (defmacro def-object-form
   "Create a function <fn-name> to show a form for (part of) and object.
   fn-name       - name of function to def
@@ -103,15 +106,20 @@
   Map:
 
   Form:
-  (hickup) form in which obj-var can be used."
+  (hickup) form in which obj-var can be used.
+
+  Returns       - (Fn [Obj, paramsMap -> Html-Table])
+  "
   [fn-name obj-var {:keys [actions obj-type obj-part fields submit-label]}]
   (pm/unify-gensyms
    (let [actions2 (or actions #{:edit})]
-     `(defn ~fn-name [~obj-var]
+     `(defn ~fn-name [~obj-var params#]
         [:div
          (form-to
           [:post (str "/" ~(name obj-type) "/" (or (:id ~obj-var) "0")
-                      ~(if obj-part (str  "/" (name obj-part))))]
+                      ~(if obj-part
+                         (str  "/" (name obj-part))
+                         "/update"))]
           ;; 2 items per fields are needed, flattened, so for cannot be used? concat/for should work.
           ~@(mapcat 
              (fn [field-form]
@@ -131,8 +139,7 @@
              `(submit-button {:class "btn btn-primary" :name :edit}
                              ~(or submit-label "Pas gegevens aan")))
           ~(if (:delete actions2)
-             `(submit-button {:class "btn" :name :delete} "Delete")))
-         ]))))
+             `(submit-button {:class "btn" :name :delete} "Delete")))]))))
 
 ;; 9-12-2015 deze nu niet meer nodig, wel aardig als template als je van een functie/macro de
 ;; params wilt aanpassen.
@@ -176,14 +183,14 @@
                    :width w :name n :form f :attrs attrs
                    f - either custom-form or Map :label :field :ftype :attrs :format-fn
                    attrs - for <td>, eg {:align :right}
-   Returns       - (Fn [Obj -> Html-Table])
+   Returns       - (Fn [Obj, paramsMap -> Html-Table])
   "
   [fn-name main-var row-var {:keys [main-type main-key row-type
                                     model-read-fn actions columns] :as m}]
   (pm/unify-gensyms
    (let [actions2 (or actions #{:add :edit :delete})
          main-key2 (or main-key main-type)]
-     `(defn ~fn-name [~main-var]
+     `(defn ~fn-name [~main-var params#]
         (letfn [(row-form## [~row-var]
                   [:tr
                    (form-to
@@ -249,8 +256,16 @@
       ;; ~'id used to explicity use 'id' as param name, not gensym one. Compojure needs this
       ;; to bind to :id.
       (GET ~(str "/" obj-type "/:id") [~'id]
-           (~(symbol view-ns obj-type) ~'id))
+           (~(symbol view-ns obj-type) ~'id nil))
+      ;; orig: POST to /:id updates item
+      #_(POST ~(str "/" obj-type "/:id") [~'id & ~'params]
+              (~(symbol view-ns (str obj-type "-update")) ~'id ~'params))
+      ;; new: POST to /:id can use POST params, but is still a read function.
+      ;; possible to handle state, could be done by cookies, preferably not.
       (POST ~(str "/" obj-type "/:id") [~'id & ~'params]
+            (~(symbol view-ns obj-type) ~'id ~'params))
+      ;; separate /:id/update for a POST update of the object:
+      (POST ~(str "/" obj-type "/:id/update") [~'id & ~'params]
             (~(symbol view-ns (str obj-type "-update")) ~'id ~'params))
       (POST ~(str "/" obj-type "/:id/delete") [~'id & ~'params]
             (~(symbol view-ns (str obj-type "-delete")) ~'id ~'params))
