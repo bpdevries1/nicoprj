@@ -62,12 +62,6 @@
              {:name "Item type" :width 5 :form (:item_table m)}
              {:name "Member type" :width 5 :form (:type m)}]})
 
-#_(defn members-add-url
-  "Just a URL to a next page to add members"
-  [itemgroup params]
-  [:a {:href (str "/itemgroup-add/" (:id itemgroup))} "Add new members"]
-  #_(str "itemgroup: " itemgroup))
-
 (def-object-form itemgroup-form itemgroup
   {:obj-type :itemgroup
    :actions #{:edit :delete}
@@ -90,17 +84,6 @@
              {:name "Notes" :width 25
               :form {:field :notes :ftype text-area :attrs {:rows 5 :cols 25}}}
              {:name "Details" :width 10 :form (itemgroupquery-href (:id q) "Details")}]})
-
-#_(def-object-page itemgroup
-    {:base-page-fn base-page
-     :page-name "Group"
-     :parts [{:title "Members" :part-fn members-form}
-             {:title "Add members" :part-fn members-add-url}
-             {:title "General" :part-fn itemgroup-form}
-             {:title "Queries" :part-fn queries-form}]
-     :model-read-fn mg/itemgroup-by-id
-     :name-fn :name
-     :debug true})
 
 ;; 4 dummy functies omdat ze in endpoint macro gebruikt worden:
 ;; TODO: dus in def-with-default-routes kunnen zeggen dat je alleen update/delete routes wilt.
@@ -173,7 +156,6 @@
    :parts [{:title "Members" :part-fn members-form}
            {:title "Search" :part-fn itemgroup-add-search-form}
            {:title "Found items" :part-fn itemgroup-add-items-form}
-           #_{:title "Add members" :part-fn members-add-url}
            {:title "General" :part-fn itemgroup-form}
            {:title "Queries" :part-fn queries-form}]
    :model-read-fn mg/itemgroup-by-id
@@ -183,7 +165,6 @@
 ;; id: 1, params: {"book:53" "true", "file:173" "true"}
 (defn itemgroup-add-members
   [id params]
-  #_(println (str "id: " id ", params: " params))
   (doseq [item (keys params)]
     (do
       #_(println (str "item: " item))
@@ -193,9 +174,7 @@
                            :type "manual"
                            :item_table item-table
                            :item_id (to-key item-id)}))))
-  #_(response/redirect-after-post (str "/itemgroup-add/" id))
-  (response/redirect-after-post (str "/itemgroup/" id))
-  #_(str "id: " id ", params: " params))
+  (response/redirect-after-post (str "/itemgroup/" id)))
 
 ;; TODO: itemgroupquery waarsch ook losse page, om deze te editen en later ook objecten mee
 ;; te beheren, of toe te voegen. Tenzij je dit doet vanuit het hoofd itemgroup scherm.
