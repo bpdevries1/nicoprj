@@ -62,12 +62,7 @@
              {:name "Item type" :width 5 :form (:item_table m)}
              {:name "Member type" :width 5 :form (:type m)}]})
 
-#_(def-object-form query-add-form itemgroup
-  {:obj-type :itemgroup
-   :actions #{:search} ;; kijken of dit werkt.
-   :fields [{:label "Query" :field :query :attrs {:size 80}}]})
-
-(defn members-add-url
+#_(defn members-add-url
   "Just a URL to a next page to add members"
   [itemgroup params]
   [:a {:href (str "/itemgroup-add/" (:id itemgroup))} "Add new members"]
@@ -90,22 +85,22 @@
    :model-read-fn mg/itemgroup-queries
    :columns [{:name "Name" :width 10 :form {:field :name}}
              {:name "Type" :width 5 :form {:field :type :attrs {:size 10}}}
-             {:name "Query" :width 40
-              :form {:field :query :ftype text-area :attrs {:rows 5 :cols 40}}}
-             {:name "Notes" :width 40
-              :form {:field :notes :ftype text-area :attrs {:rows 5 :cols 40}}}
+             {:name "Query" :width 25
+              :form {:field :query :ftype text-area :attrs {:rows 5 :cols 25}}}
+             {:name "Notes" :width 25
+              :form {:field :notes :ftype text-area :attrs {:rows 5 :cols 25}}}
              {:name "Details" :width 10 :form (itemgroupquery-href (:id q) "Details")}]})
 
-(def-object-page itemgroup
-  {:base-page-fn base-page
-   :page-name "Group"
-   :parts [{:title "Members" :part-fn members-form}
-           {:title "Add members" :part-fn members-add-url}
-           {:title "General" :part-fn itemgroup-form}
-           {:title "Queries" :part-fn queries-form}]
-   :model-read-fn mg/itemgroup-by-id
-   :name-fn :name
-   :debug true})
+#_(def-object-page itemgroup
+    {:base-page-fn base-page
+     :page-name "Group"
+     :parts [{:title "Members" :part-fn members-form}
+             {:title "Add members" :part-fn members-add-url}
+             {:title "General" :part-fn itemgroup-form}
+             {:title "Queries" :part-fn queries-form}]
+     :model-read-fn mg/itemgroup-by-id
+     :name-fn :name
+     :debug true})
 
 ;; 4 dummy functies omdat ze in endpoint macro gebruikt worden:
 ;; TODO: dus in def-with-default-routes kunnen zeggen dat je alleen update/delete routes wilt.
@@ -120,14 +115,14 @@
   [ig params]
   (form-to
    {:class :form-horizontal}
-   [:post (str "/itemgroup-add/" (:id ig))]
+   [:post (str "/itemgroup/" (:id ig))]
    (text-field {:size 60} :query (:query params))
    (submit-button {:class "btn btn-primary"} "Search")))
 
 (defn itemgroup-add-items-form
   "Search results for adding itemgroup members"
   [ig params]
-  (if (:query params)
+  (if (> (count (:query params)) 0)
     (if-let [res (seq (ent/search-items (:query params)))]
       (form-to
        {:class :form-horizontal}
@@ -136,8 +131,8 @@
         [:thead
          [:tr
           [:th {:width "5%"} "Check"]
-          [:th {:width "85%"} "Item"]
-          [:th {:width "15%"} "Table"]]]
+          [:th {:width "65%"} "Title"]
+          [:th {:width "15%"} "Item type"]]]
         [:tbody
          (for [{:keys [item_table id title]} res]
            [:tr
@@ -151,6 +146,7 @@
 ;; 28-3-2016 spul hieronder om items aan group toe te voegen.
 ;; TODO: bij toevoegen checken of item al niet een member is?
 ;; TODO: dit integreren met main itemgroup page/form.
+;; TODO: Deze zou weg mogen.
 (defn itemgroup-add
   "Show page to add members to a group, including results of searching items."
   [id params]
@@ -171,6 +167,19 @@
                   [:th.span1 "Found items"]
                   [:td.span10 (itemgroup-add-items-form ig params)]]]])))
 
+(def-object-page itemgroup
+  {:base-page-fn base-page
+   :page-name "Group"
+   :parts [{:title "Members" :part-fn members-form}
+           {:title "Search" :part-fn itemgroup-add-search-form}
+           {:title "Found items" :part-fn itemgroup-add-items-form}
+           #_{:title "Add members" :part-fn members-add-url}
+           {:title "General" :part-fn itemgroup-form}
+           {:title "Queries" :part-fn queries-form}]
+   :model-read-fn mg/itemgroup-by-id
+   :name-fn :name
+   :debug true})
+
 ;; id: 1, params: {"book:53" "true", "file:173" "true"}
 (defn itemgroup-add-members
   [id params]
@@ -184,7 +193,8 @@
                            :type "manual"
                            :item_table item-table
                            :item_id (to-key item-id)}))))
-  (response/redirect-after-post (str "/itemgroup-add/" id))
+  #_(response/redirect-after-post (str "/itemgroup-add/" id))
+  (response/redirect-after-post (str "/itemgroup/" id))
   #_(str "id: " id ", params: " params))
 
 ;; TODO: itemgroupquery waarsch ook losse page, om deze te editen en later ook objecten mee
