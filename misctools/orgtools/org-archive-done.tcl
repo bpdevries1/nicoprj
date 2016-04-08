@@ -4,15 +4,23 @@
 package require ndv
 
 proc main {argv} {
+  global argv0
+  
   lassign $argv orgfilename
 
+  if {$orgfilename == "-h"} {
+    puts "syntax: $argv0 <orgfilename>"
+    puts "Create -archive and -new files in same dir."
+    puts "Archive will be appended to"
+    puts "Also backup with timestamp will be made"
+    exit 1
+  }
   set archivename [append_filename $orgfilename archive]
   set orgnewname [append_filename $orgfilename new]
-  #puts $orgfilename
-  #puts $orgnewname
-  #puts $archivename
   
   archive_org $orgfilename $orgnewname $archivename
+  set ts [clock format [clock seconds] -format "%Y-%m-%dT%H-%M-%S"]
+  file copy $orgfilename "$orgfilename.$ts"
 }
 
 proc append_filename {filename suffix} {
