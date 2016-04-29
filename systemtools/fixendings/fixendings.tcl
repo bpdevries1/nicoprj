@@ -51,10 +51,13 @@ proc ignore_dir {dir} {
 }
 
 set extensions {
-  unix {.clj .java .js .py .R .rb .sh .sql .tcl .txt .xml ""}
-  dos {.bat .vbs}
-  ignore {.gen .log}
-  bin {.zip}
+  unix {.c .css .clj .cljs .csv .erb .graphml .html .java
+        .js .json .license .md .mustache .py
+        .r .rb .sh .slim .sql .tcl .textile .tsv .txt .xml ""}
+  dos {.ahk .bat .cmd .vbs}
+  ignore {.1 .dependencies .gen .log .mta .old .out .pac .prj .tab .take1 .thuis .wrd}
+  bin {.db .class .dat .doc .docm .docx .dll .eot .exe .ico .jar
+       .jasper .jnilib .jrxml .png .so .svg .ttf .woff .xls .xlsm .xlsx .zip}
 }
 
 proc det_type {filename} {
