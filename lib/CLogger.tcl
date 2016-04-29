@@ -230,5 +230,10 @@ namespace eval ::ndv {
 
 # 27-3-2013 NdV define default logger object.
 # set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
-set log [::ndv::CLogger::new_logger [file tail $argv0] debug]
+# set log [::ndv::CLogger::new_logger [file tail $argv0] debug]
 
+proc set_log_global {level} {
+  global log
+  set log [::ndv::CLogger::new_logger [file tail [info script]] $level]
+  $log set_file "logs/[file tail [info script]]-[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"].log"
+}
