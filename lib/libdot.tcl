@@ -20,9 +20,14 @@ proc write_dot_title {f title} {
   puts $f "  title \[shape=rectangle, label=\"$title\", fontsize=18\];"
 }
 
+proc set_dot_exe {exe} {
+  global DOT_EXE
+  set DOT_EXE $exe
+}
+
 # @todo work for linux
 proc do_dot {dot_file png_file} {
-  global tcl_platform
+  global tcl_platform DOT_EXE
   #global log ar_argv
   #$log info "Making png $png_file from dot $dot_file"
   #exec [file join $ar_argv(dot_dir) dot.exe] -Tpng $dot_file -o $png_file
@@ -33,7 +38,7 @@ proc do_dot {dot_file png_file} {
       log warn "dot: $errorResult" 
     }
   } elseif {$tcl_platform(platform) == "windows"} {
-    set DOT_EXE "c:/util/Graphviz2.28/bin/dot.exe"
+    # set DOT_EXE "c:/util/Graphviz2.28/bin/dot.exe"
     try_eval {
       exec $DOT_EXE -Tpng $dot_file -o $png_file
     } {
