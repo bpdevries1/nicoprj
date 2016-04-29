@@ -28,3 +28,14 @@ namespace eval ::ndv {
     }
   }
 }
+
+proc this_is_main {} {
+  global argv0
+  if {[file tail [info script]] == [file tail $argv0]} {
+    return 1
+  } else {
+    return 0
+  }
+}
+
+
