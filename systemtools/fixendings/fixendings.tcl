@@ -2,7 +2,7 @@
 
 package require ndv
 
-set_log_global debug
+set_log_global info
 
 proc main {argv} {
   lassign $argv root
@@ -28,12 +28,14 @@ proc handle_file {filename} {
   set tp [det_type $filename]
   if {$tp == "unix"} {
     log debug "-> unix: $filename"
-    # exec dos2unix -k $filename
+    exec -ignorestderr dos2unix -k -q $filename
   } elseif {$tp == "dos"} {
     log debug "-> dos: $filename"
-    # exec unix2dos -k $filename
+    exec -ignorestderr unix2dos -k -q $filename
   } elseif {$tp == "bin"} {
     log debug "binary: $filename"
+  } elseif {$tp == "ignore"} {
+    log debug "ignore: $filename"
   } else {
     log warn "Unknown: $filename"
   }
@@ -49,18 +51,22 @@ proc ignore_dir {dir} {
 }
 
 set extensions {
-  unix {.tcl .sql .txt .R .java .clj .py .rb}
-  dos {.bat}
-  ignore {.log}
+  unix {.clj .java .js .py .R .rb .sh .sql .tcl .txt .xml ""}
+  dos {.bat .vbs}
+  ignore {.gen .log}
+  bin {.zip}
 }
 
 proc det_type {filename} {
   global extensions
   set ext [string tolower [file extension $filename]]
   foreach {tp exts} $extensions {
-    if {[lsearch $exts $ext]} {
+    if {[lsearch $exts $ext] >= 0} {
       return $tp
     }
+  }
+  if {[regexp {~$} $ext]} {
+    return ignore
   }
   return unknown
 }
