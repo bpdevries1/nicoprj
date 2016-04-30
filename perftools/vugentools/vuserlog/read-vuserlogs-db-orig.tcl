@@ -158,7 +158,7 @@ proc get_iteration {line iteration} {
   if {[regexp {Ending iteration (\d+)} $line z it]} {
     return ""
   }
-  
+
   if {[regexp {Starting action vuser_end.}	$line]} {
     return "vuser_end"
   }
@@ -189,7 +189,7 @@ proc handle_trans {line db logfile_id vuserid linenr iteration} {
     regsub -all {,} $resptime "." resptime
     $db insert trans [vars_to_dict logfile_id vuserid ts_cet sec_cet transname user resptime linenr iteration]
     return [list $user $ts_cet]
-  } elseif {[regexp {: \[([0-9 :-]+)\] \[(\d+)\] trans=([^ ]+), user=([^ ,]+), resptime=([0-9.,-]+), status=([0-9-]+)} \
+  } elseif {[regexp {: \[([0-9 :-]+)\] \[(\d+)\] trans=([^ ]+), user=([^ ,]+), resptime=([0-9.,]+), status=(\d+)} \
                  $line z ts_cet sec_cet transname user resptime status]} {
     regsub -all {,} $resptime "." resptime
     lassign [split_transname $transname] usecase revisit transid transshort searchcrit
@@ -242,14 +242,10 @@ proc split_transname {transname} {
 #Login_cert_main.c(71): Error -26368: "Text=Uw pas is niet correct" found for web_global_verification ("User:3001412900 pas") (count=1)  	[MsgId: MERR-26368]
 #Login_cert_main.c(71): Error -35049: No match found for the requested parameter "Marktoverzicht". Check whether the requested regular expression exists in the response data  	[MsgId: MERR-35049]
 
-#PDF_Download_UC3.c(16): Continuing after Error -27789: Server "securepat01.rabobank.com" has shut down the connection prematurely  	[MsgId: MERR-27789]
-#PDF_Download_UC3.c(16): Continuing after Error -26366: "Text=%PDF" not found for web_reg_find  	[MsgId: MERR-26366]
-#PDF_Download_UC3.c(16): Continuing after Error -26374: The above "not found" error(s) may be explained by header and body byte counts being 0 and 0, respectively.  	[MsgId: MERR-26374]
-
 proc handle_error {line db logfile logfile_id vuserid linenr iteration ts_cet user} {
   # vullen: user errornr errortype
   # ook: functions.c(427): Error: Previous web_reg_find failed while response bytes > 0: Text=PDF-1.4 [01/19/16 03:18:28] [MsgId: MERR-17999]
-  if {[regexp {^([^ ]+)\((\d+)\): (Continuing after )?Error ?([0-9-]*): (.*)$} $line z srcfile srcline z errornr rest]} {
+  if {[regexp {^([^ ]+)\((\d+)\): Error ?([0-9-]*): (.*)$} $line z srcfile srcline errornr rest]} {
     # set ts_cet "" ; # mss later nog af te leiden.
     lassign [det_error_details $rest] errortype user2 level details
     if {$user2 != ""} {
@@ -402,7 +398,7 @@ proc define_tables {db} {
                    
   # 22-10-2015 NdV ook errors per iteratie, zodat er een hoofd schuldige is aan te wijzen voor het falen.
   $db add_tabledef error_iter {id} {logfile_id logfile script {vuserid int} {iteration int} user errortype}
-  
+
   ssl_define_tables $db
   
 }
