@@ -1,5 +1,7 @@
 #!/usr/bin/env tclsh86
 
+# [2016-03-29 16:37:40] Dit is waarsch nieuwe versie, oude in perftoolset/tools/excel2db.
+
 package require tdbc::sqlite3
 package require Tclx
 package require ndv
@@ -52,7 +54,7 @@ proc handle_dir {dirname db table deletedb} {
 }
 
 proc make_csvs {dirname} {
-  foreach filename [glob -directory $dirname "*.xls*"] {
+  foreach filename [glob -nocomplain -directory $dirname "*.xls*"] {
     excel2csv $filename 
   }
 }

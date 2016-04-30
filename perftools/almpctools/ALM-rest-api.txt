@@ -1,0 +1,777 @@
+
+
+Combitest klein ook eerder gedraaid: RCM? Met 1450 users, dus kan goed.
+
+curl -o test.html http://wsrv3890.rabobank.corp:8080/qcbin
+
+headers:
+Authorization: Basic ABCDE123
+
+http://wsrv3890.rabobank.corp:8080/qcbin/start_a.jsp
+
+curl -o test.html --header "Authorization: Basic ABCDE123" http://wsrv3890.rabobank.corp:8080/qcbin
+
+echo vreezenb:VreezeNB | base64
+
+$ echo vreezenb:VreezeNB | base64
+dnJlZXplbmI6VnJlZXplTkIK
+Mon Sep 28 - 15:15:52
+
+curl -L -o test.html --header "Authorization: Basic dnJlZXplbmI6VnJlZXplTkIK" http://wsrv3890.rabobank.corp:8080/qcbin
+
+
+GET /LoadTest/rest/authentication-point/authenticate
+
+curl -o test.html --header "Authorization: Basic dnJlZXplbmI6VnJlZXplTkIK" http://wsrv3890.rabobank.corp:8080/LoadTest/rest/authentication-point/authenticate
+
+
+Opties:
+* Java voorbeeld compileren en runnen.
+
+
+sb.append("rest/domains/"+this.almDomain+"/projects/"+this.almProject+"/");
+
+http://wsrv3890.rabobank.corp:8080/rest/domains/RI/projects/Ri_Shared_environment/
+
+Peter Paul?
+Of Andre Luyer
+
+curl -o test2.html http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/
+-> auth failed, dus beter.
+
+
+
+curl -o test3.html --header "Authorization: Basic dnJlZXplbmI6VnJlZXplTkIK" http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/
+
+
+?login-form-required=y
+
+
+ HP Application Lifecycle Management
+Not Found
+Exception Id: qccore.general-error 
+
+
+
+    Launch http://wsrv3890.rabobank.corp:8080/qcbin/rest/is-authenticated in your browser – returns 401 if the authentication is failed.
+	-> deze geeft een XML met username (in firefox)
+	
+    Launch http://wsrv3890.rabobank.corp:8080/qcbin/rest/is-authenticated?login-form-required=y – Provide required information
+-> idem
+
+
+met curl:
+
+curl -o test4.xml http://wsrv3890.rabobank.corp:8080/qcbin/rest/is-authenticated?login-form-required=y
+
+	
+in browser:
+http://wsrv3890.rabobank.corp:8080/qcbin/rest	
+
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/
+-> geeft een lijst!
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/
+-> geeft ook een lijst
+
+<Project Name="Ri_Shared_environment"/>
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/defects
+-> geeft lege lijst.
+
+dan vraag welke dingen je op kunt vragen.
+
+/LoadTest/rest/domains/{domainName}/projects/{projectName}/runs/{runID}/analyze
+
+/LoadTest/rest/domains/{domainName}/projects/{projectName}/runs/{runID}/analyze
+
+/LoadTest/rest/domains/{domainName}/projects/{projectName}/runs/{runID}/analyze
+
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/runs
+geeft al bruikbare resultaten, maar niet de tekst 'clientreporting'. Dus wel alle sub-downloads ook doen.
+-> in downloads neergezet.
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/runs/266
+-> ook resultaat, laatste clientreporting testrun. Hierin clientreporting wel te vinden.
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/runs/266/online/summary
+TODO: meer details van een run, mogelijk zips downloaden?
+
+TODO: details van testplan: instellingen om te checken.
+/LoadTest/rest/domains/{domainName}/projects/{projectName}/tests/{ID}/Groups
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests
+hierin o.a.:  <Name>Clientreporting_single_user_it</Name>
+ofwel test scenario's.
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests/1
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests/1/Groups
+-> 404
+
+Groups/{name}/RTS
+The run-time settings of a group in a test.
+
+RTS=run time settings
+
+Clientreporting_normal_load_endurance
+
+
+  <ID>157</ID>
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests/157
+-> ook resultaat.
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests/157/Groups -> 404
+  
+in pc-blob wel dingen te vinden over groups. Alle details lijken hier ook wel in te staan.
+bv @!RunLogicRandomPaceMin=370!
+
+/LoadTest/rest/domains/{domainName}/projects/{projectName}/tests/{ID}/validity
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests/157/validity
+-> 404.
+
+Via browser dus info op te halen. Nog wel vraag hoe met script/curl te doen.
+
+Opties:
+* Ofwel via header param.
+* Ofwel kijken welke POST actie wordt gedaan. Dan cookies opslaan en bij volgende request meegeven.
+* Evt met VuGen (JMeter) opnemen.
+
+Stappen om te recorden:
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/is-authenticated?login-form-required=y
+
+dan authenticate met vreezenb ingevuld.
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/runs
+
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/runs/266
+
+curl -o test10.html --header "Authorization: Basic dnJlZXplbmI6VnJlZXplTkIK" http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/authenticate
+
+
+met curl:
+POST doen, en post params
+
+curl --data "param1=value1&param2=value2" https://example.com/resource.cgi
+
+curl -o test11.xml --data "j_username=vreezenb&j_password=VreezeNB" http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/authenticate
+
+7-10-2015, take 2
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/is-authenticated?login-form-required=y
+
+		
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests
+
+id 171 is BigIP 90%
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests/171
+
+Hierbinnen een pc-blob, is embedded XML.
+Ook een aantal standaardvelden, zoals timestamps create en update.
+
+save-as test171 gedaan, automatisch .xml
+
+in de blob zijn wel de groups te vinden, maar ook met losse request?
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests/171/Groups
+niet gevonden, en ../groups ook niet.
+
+Todo:
+* parsen van de results.
+* ophalen results: 
+  - VuGen/mdrv -> werkt, maar vrij veel overhead.
+  - curl -> normaal gezien het lichtst, maar werkt nog niet.
+  - jmeter.
+  - Tcl+libs?
+  
+Curl:
+Het inloggen moet iig iets teruggeven.
+in vugen meteen een post, 
+
+
+
+
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests/171/Groups/{name}/RTS
+
+POST /qcbin/authentication-point/j_spring_security_check HTTP/1.1\r\n
+
+Action.c(29): t=2458ms: 39-byte request body for "http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/j_spring_security_check" (RelFrameId=1, Internal ID=1)
+Action.c(29):     j_username=vreezenb&j_password=VreezeNB
+
+Bij eerste een redirect terug.
+
+curl -o test1.xml --data "j_username=vreezenb&j_password=VreezeNB" http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/j_spring_security_check
+
+header wegschrijven, want is 302:
+curl -i --data "j_username=vreezenb&j_password=VreezeNB" http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/j_spring_security_check
+
+ok:
+
+HTTP/1.1 302 Found
+Set-Cookie: LWSSO_COOKIE_KEY=PEKsTIcmXcXVuC-Ws5Rcvihue6lrE6VCC47kME2oCA4FPxY8FojRUFZ2Bb2kIBS6mr87lZ6hvUkRRvlAAr6P-S32mSurT3GslaO4T0b8MGBMLo0vn2bzVApPkHqR6DUlsuJ2DgJ26Ei7yIm0Lrm-ZwppPF1xLcZpY40ouZ-RHjb0Zlg8WiBXTq7iaTm8wJfoaQkwkf60OzgPhrhwg64dEEceyd6CBhhLBKfv8EVZqEkFOP7PN6nTwylcjZMX45EN6ZBLcTnUpE32ayFqQmKxz-fWiIG1dly0qjO7jyfrAPVHxOc2hxzKDTKkLuEtx6Czj1cT4POYi25E-8cDiKdZig..;Path=/;HTTPOnly
+Set-Cookie: QCSession=MzAzMjc0ODtNRE1DY0RVYnRrK3BTZUJqQ0V1a1ZBKio7UkVTVCBjbGllbnQ7IDsg;Path=/;HttpOnly
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Set-Cookie: ALM_USER=b127d6bb0e4d5c3489bb5c45273f502d1c9de3253da3ceecb8ab6cca0965434f;Path=/
+Set-Cookie: XSRF-TOKEN=ac14b3e51d55c17c62bf676cfafb67cf925b4698fc4d2c2b80a18eca83265bf0;Path=/
+Location: http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/authenticate
+Content-Length: 0
+Server: Jetty(9.1.4.v20140401)
+
+en later met -L de redirect automatisch?
+
+curl -L -o test1.xml --data "j_username=vreezenb&j_password=VreezeNB" http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/j_spring_security_check
+
+$ cat test1.xml
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>Error 401 An Authentication object was not found in the SecurityContext</title>
+</head>
+<body><h2>HTTP ERROR 401</h2>
+<p>Problem accessing /qcbin/authentication-point/authenticate. Reason:
+<pre>    An Authentication object was not found in the SecurityContext</pre></p><hr><i><small>Powered by Jetty://</small></i><hr/>
+
+</body>
+</html>
+
+=> niet goed dus, vraag of cookies worden meegegeven. Ofwel dit is een optie, ofwel meer debug logging doen.
+
+Redirects uitzetten in VuGen werkt ook!
+
+
+curl -v -L -o test1.xml --data "j_username=vreezenb&j_password=VreezeNB" http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/j_spring_security_check
+
+Bij redirect lijken cookies al niet meegestuurd te worden.
+
+Sowieso ook cookies opslaan, bij volgende request meegeven.
+
+curl --trace trace.out -L -o test1.xml --data "j_username=vreezenb&j_password=VreezeNB" http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/j_spring_security_check
+
+met cookies:
+curl -c cookies.txt --data "j_username=vreezenb&j_password=VreezeNB" http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/j_spring_security_check
+curl -b cookies.txt -o test171.xml http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests/171
+=> dit lukt!
+
+curl -c cookies.txt --data "j_username=vreezenb&j_password=VreezeNB" http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/j_spring_security_check
+curl -b cookies.txt -o tests.xml http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests
+
+curl -b cookies.txt -o test172.xml http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests/172
+
+Hoe opslaan DB?
+
+tabel: response
+doel: volledige respons van 1 request. Meerdere keren te checken, ook of het veranderd is.
+kolommen: url, filename, soort (test), id (171), datum-tijd.
+
+
+tabel: test (test definitie, met groepen)
+tabel: testgroep (groep van vusers, die 1 script uitvoeren)
+
+
+wat wil je weten/checken:
+schedule per group: rampup, runtime, wanneer starten?
+cmdline per group: -config etc.
+runtime (F4) params: run logic (welke actions), pacing, log, think time, additional attributes, misc, 
+  browser (cache, non-html, new user), proxy.
+  
+  
+blob los bewaren en echte XML van maken:
+Alle & aanpassen, eerst even handmatig.
+&lt;
+&gt;
+&quot;
+
+Scheduler/data is nog een embedded XML, deze ook uitpakken en los.
+Deze is dubbel, dus eerst &amp; door & vervangen.
+&quot; komt er dan niet in voor.
+
+in blob nog specific XML, maar lijkt niet zo zinvol.
+
+scheduler data is goed leesbaar, zowel rampup, groep als runtime, alles in seconden.
+
+Idee om data in te lezen in DB, en vervolgens als HTML te presenteren. Evt deze HTML dan ook te sync-en.
+
+<StartAtScenarioBegining />
+-> ofwel hier staat een typo in!
+
+cmdline ook te vinden.
+
+name van de test op hoofd niveau, in Field name="name"
+
+script -> in blob/group, heb je name en scriptname.
+run logic (welke actions) -> ok, in run logic.
+pacing -> ok, in run logic (ook in RTS, maar niet goed!)
+log -> ok, los kopje, maar niet helemaal duidelijk wat alles betekent.
+think time -> ok, los kopje
+additional attributes, 
+misc (continue on error) -> ok, op hoofdniveau in blob.
+browser (cache, non-html, new user), 
+proxy -> ProxyUseProxy=0
+
+
+
+Tcl XML lib? wel eerder gebruikt, dacht ik.
+
+Total users ook op hoofdniveau.
+
+
+In Blob staat de name ook nog een keer.
+
+Eerst per group al een <HasRTS>, ofwel RunTimeSettings.
+
+gevonden in blob:
+vusers
+specifieke lg (d-lgams), wel vrij diep genest
+
+RunTimeSettings en RunLogic in een wat vage text-structuur. Soort inifile, met [section] en waarden omgeven door !@##@!, dus 
+!@##@!name=value1!@##@!name2=value2!@##@!
+
+Dit met regexp-split te doen?
+
+RunLogic eerst, mogelijk simpeler.
+
+Hier idd de actions in genoemd.
+Maar ook pacing settings: type, min en max.
+ook waarden voor niet gekozen setting, deze dus ignoren.
+
+RunLogicPaceType=Random -> dit zou het altijd moeten zijn.
+Maar soms bij single user/it test ook wel immediately.
+
+In runtime settings ook iteration-pacing, maar deze overruled door settings in RunLogic!
+
+
+Log:
+[Log]
+  LogOptions=LogExtended
+  MsgClassData=1
+  MsgClassParameters=1
+  MsgClassFull=0
+  AutoLog=1
+  AutoLogBufferSize=100
+  LogDetail=1
+  PrintTimeStamp=0
+  
+[Web]
+  SimulateCache=1
+  CacheAlwaysCheckForNewerPages=Yes
+  CacheHtmlPages=Yes
+  ClearCacheForSimulateNewUser=True
+  HttpErrorsAsWarnings=No
+  ConnectTimeout=120
+  ReceiveTimeout=120
+  KeepAliveTimeout=60
+  PageDownloadTimeout=120
+  MaxRedirectionDepth=10
+
+-> niet helemaal duidelijk, ook niet of de waarden wel goed zijn.
+
+Optie is om setting (tijdelijk) aan te passen en opnieuw te laden, dan wel voor de 2h versie, niet de echte die je wilt gebruiken.
+
+Notes:
+* XML zoveel mogelijk 1-op-1 in de database, hier facts as-is in, zo weinig mogelijk interpretatie.
+* Mapping van velden naar UI componenten ook in DB en te editten. Hier ook bijzetten of ze in output/check moeten zitten.
+* Obv data een html met settings maken.
+* Een test-id met datum is een 'object' met settings die je wilt checken.
+* Dingen om te checken:
+  - of een versie van een scenario nog gelijk is aan een baseline, verschillen anders duidelijk aangeven.
+  - scenario met een ander scenario, maar dan meteen al verschillen met aantal groepen/hosts: is dus lastig.
+  - valideren tegen een soort van template aan: staat proxy bv altijd uit, staat embedded-objects aan?
+  - valideren tegen code: bouw (tcl) code die dingen checkt. Lijst lastiger te bouwen en te onderhouden, ook voor anderen.
+* checks eerst basic, en bij fouten nieuwe checks inbouwen, zodat het niet weer gebeurt.
+* Per check-tijdstip alle files downloaden in een dir.  
+  
+        
+Doelen:
+* Valideren of de scenario settings kloppen.
+  - wat is kloppen: overeenkomen met settings in loadmodel/excel.
+  - aantal standaard settings op de goede waarde: bv proxy, download-embedded.
+  
+Planning:
+* Eerste html - page per test: 1-2 uur.
+  - kolom per group.
+* Checks - wat onduidelijk nog.
+  - check per waarde definieren, in html rood als fout.
+  - Als je 2 versies vergelijkt, dan per groep 2 versies om verschillen zo dicht mogelijk bij elkaar te hebben.
+  
+  
+Done:
+* Testen/files/XML binnenhalen - 1 uur.
+* DB def + inlezen - 1 a 2 uur.
+  
+  
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field owner = vreezenb
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field id = 172
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field name = BigIP_Croydon_90percent_2h
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field creation-time = 2015-10-06
+[2015-10-13 13:43:45] [get-ALM-PC-tests.tcl] [debug] Field last-modified = 2015-10-08 16:53:18
+
+Bouwen:
+* lijkt dat niet van alle testen de details in de hoofd tests.xml te vinden zijn. Evt check hierop en dan wel de sub-xml-file downloaden.
+
+Downloaden
+curl -c cookies.txt --data "j_username=vreezenb&j_password=VreezeNB" http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/j_spring_security_check
+curl -b cookies.txt -o tests.xml http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests
+
+
+pacing -> ok, in run logic (ook in RTS, maar niet goed!)
+
+
+
+Test results:
+curl -c cookies.txt --data "j_username=vreezenb&j_password=VreezeNB" http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/j_spring_security_check
+curl -b cookies.txt -o runs366.xml http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/runs/366
+
+curl -b cookies.txt -o runs366-data.zip http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/runs/366/data
+curl -b cookies.txt -o runs366-results.xml http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/runs/366/results
+=> deze idd ook not found.
+
+http://wsrv3890.rabobank.corp:8080/qcbin/loadtest%5C
+
+Vanuit Webclient van ALM/PC. wellicht ook te scripten.
+
+http://wsrv3889.rabobank.corp/Loadtest/PCWEB/Dialogs/DownloadResult.aspx?resultID=2775
+http://wsrv3889.rabobank.corp/LoadTest/Services/NotificationsService.asmx/GetUserData
+http://wsrv3889.rabobank.corp/Loadtest/Services/DashboardService.asmx/SetSelectedRun
+
+http://wsrv3889.rabobank.corp/Loadtest/PCWEB/Dialogs/DownloadResult.aspx?resultID=2799
+-> lijkt ook te werken.
+
+ook met curl te doen?
+
+
+<html><head><title>Object moved</title></head><body>
+<h2>Object moved to <a href="/LoadTest/General/Login.aspx?ReturnUrl=%2fLoadtest%2fPCWEB%2fDialogs%2fDownloadResult.aspx%3fresultID%3d2799&amp;resultID=2799">here</a>.</h2>
+</body></html>
+
+
+curl -c cookies.txt --data "j_username=vreezenb&j_password=VreezeNB" http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/j_spring_security_check
+curl -L -b cookies.txt -o result2799.zip http://wsrv3889.rabobank.corp/Loadtest/PCWEB/Dialogs/DownloadResult.aspx?resultID=2799
+-> niet goed, naar login page.
+
+
+
+/LoadTest/General/Login.aspx?ReturnUrl=%2fLoadtest%2fPCWEB%2fDialogs%2fDownloadResult.aspx%3fresultID%3d2799&amp;resultID=2799
+
+
+/Loadtest/PCWEB/Dialogs/DownloadResult.aspx?resultID=2799&resultID=2799
+
+
+http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/j_spring_security_check
+http://wsrv3889.rabobank.corp/Loadtest/PCWEB/Dialogs/DownloadResult.aspx?resultID=2799
+
+Is ook een andere server, poort is anders.
+
+Was hier net ook op ingelogd, nu dus niet.
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/runs/366/results
+
+http://wsrv3890.rabobank.corp/qcbin/authentication-point/j_spring_security_check
+
+
+
+http://wsrv3889.rabobank.corp/LoadTest/General/Login.aspx
+http://wsrv3889.rabobank.corp/Loadtest/PCWEB/Dialogs/DownloadResult.aspx?resultID=2799
+
+=> Werkt, na user/pw en project select.
+
+en zonder project? Nee, is wel nodig.
+
+VuGen script opgenomen, lijkt vrij complex. Veel (#42) correlatie, viewstates ook. En nog niet eens alles gecorreleerd, zie bv EVENTVALIDATION.
+
+Scripts ophalen is ook nog een ding. Checken of lokale versie klopt met ALM versie.
+
+Redirecting in VuGen bekijken.
+
+
+=======================
+20-10-2015
+
+
+Runs: totalResults = 240.
+
+<Entities TotalResults="154">
+=> maar hier dus ook maar 100 opgehaald.
+
+REST_API_MAX
+
+Check downloads dir.
+
+REST_API_DEFAULT_PAGE_SIZE
+	
+The number of entities per page returned by default with each GET operation on a collection using the REST API 
+  (unless the API consumer specifies a different page size for retrieval).
+
+The default is 100 entities.
+
+=> per page, dus je zou zeggen dat je volgende page ook moet kunnen ophalen. En ook hoeveel je er dan wilt hebben per page.
+
+http://update.external.hp.com/qualitycenter/alm115/DocsOnTap/Basic/Content/Admin/sa_configuration_parameters_optional.htm
+Uitleg over settings, mogelijk om aan de server kant in te stellen.
+
+20-10-2015 tests
+
+http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/j_spring_security_check
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests
+
+
+
+The client can indicate the number of entities to return in each page using the query parameter page-size="n". For example:
+/qcbin/rest/domains/{domain}/projects/{project}/tests?page-size=20
+
+The client indicates the position of the next entity to retrieve with the query parameter start-index.
+
+The following URL gets the third page of a query that has 10 entities per page:
+http://SERVER:PORT/qcbin/rest/domains/{domain}/projects/{project}/defects?page-size=10&start-index=31
+
+std met 100:
+<Value>RCC_CashBalanceWidget_single_user_iteration</Value>
+<Field Name="id"><Value>57</Value></Field>
+
+dan idd andere als laatste:
+
+<Field Name="id"><Value>181</Value></Field>
+
+testen in eigen script.
+
+
+BigIP Croydon 68% => net op diagnostics gezet.
+=> geen verschil in DB te vinden.
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests/175
+
+
+Diagnostics nu ook toegevoegd, wel specifiek alleen enabled en percentage (std op 10, is ook max)
+
+http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/j_spring_security_check
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/runs/373
+
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/runs/373/attachments
+-> geen error, wel 0 results.
+
+bij 372 ook geen results, hierbij is analysis wel klaar.
+
+372 heeft Results.zip met id 2820
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/runs/372/attachments/Results.zip
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/runs/372/attachments/2820
+
+beide functionele foutmelding: query wordt wel gesnapt, maar geeft geen resultaat.
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/runs/372/results/2820
+
+
+
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests/175
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests/175/validity
+=> not found qccore.general-error.
+
+doc 12.20 stond weinig in, 12.50 lijkt hetzelfde, ook al is de size anders.
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/scripts
+-> no
+
+
+/qcbin/rest/domains/ /projects/ /runs/ /results
+
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests/175
+
+http://wsrv3890.rabobank.corp/qcbin/rest/domains/RI/projects/Ri_Shared_environment/tests/175
+
+http://wsrv3890.rabobank.corp:8080/loadtest/rest/domains/RI/projects/Ri_Shared_environment/tests/175
+http://wsrv3890.rabobank.corp:8080/Loadtest/rest/domains/RI/projects/Ri_Shared_environment/tests/175
+
+Opties:
+vragen intern
+vragen HP
+
+RuntimeOperations/RunStart.aspx?pcRunID=1133102&qcRunID=373
+
+zowel qc als pc id's dus.
+
+In de docs beginnen URLs steeds met /LoadTest/rest/domains.
+
+
+28-10-2015 nog even naar runs en attachments kijken, iets van sizes te achterhalen?
+
+http://wsrv3890.rabobank.corp:8080/qcbin/authentication-point/j_spring_security_check
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/runs/381
+
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/results/2872
+http://wsrv3890.rabobank.corp:8080/qcbin/rest/domains/RI/projects/Ri_Shared_environment/results/2872/logical-storage
+
+
+Op port 80, nieuwe authenticate via CURL:
+
+$ echo vreezenb:VreezeNB | base64
+dnJlZXplbmI6VnJlZXplTkIK
+
+
+curl -L -o test.html --header "Authorization: Basic dnJlZXplbmI6VnJlZXplTkIK" http://wsrv3890.rabobank.corp:8080/qcbin
+
+curl -o test.html --header "Authorization: Basic dnJlZXplbmI6VnJlZXplTkIK" http://wsrv3889.rabobank.corp/loadtest/rest/authentication-point/authenticate
+
+$ echo dnJlZXplbmI6VnJlZXplTkIK | base64 -d
+vreezenb:VreezeNB
+
+$ echo dnJlZXplbmI6VnJlZXplTK | base64 -d
+vreezenb:VreezeLbase64: invalid input
+=> dus paar karakters weg, operation failed als response msg.
+
+Authorization: Basic <encoded user:password>
+
+$ curl --header "Authorizaddtion: Basic dnJlZXplbmI6VnJlZXplTkIK" http://wsrv38
+89.rabobank.corp/loadtest/rest/authentication-point/authenticate
+<Exception xmlns="http://www.hp.com/PC/REST/API">
+  <ExceptionMessage>Authentication information is missing from request header.</ExceptionMessage>
+  <ErrorCode>1101</ErrorCode>
+</Exception>
+
+
+$ curl --header "Authorization: Ba42sic dnJlZXplbmI6VnJlZXplTkIK" http://wsrv38
+89.rabobank.corp/loadtest/rest/authentication-point/authenticate
+<Exception xmlns="http://www.hp.com/PC/REST/API">
+  <ExceptionMessage>Exception of type 'HP.PC.API.Model.Exceptions.InvalidAuthenticationDataException' was thrown.</ExceptionMessage>
+  <ErrorCode>1100</ErrorCode>
+</Exception>
+=> zelfde melding dus als bij 'goede'
+
+opties:
+* hele basic weg.
+* basic ook encoden.
+
+hele basic weg:
+$ curl --header "Authorization: dnJlZXplbmI6VnJlZXplTkIK" http://wsrv3889.rabob
+ank.corp/loadtest/rest/authentication-point/authenticate
+<Exception xmlns="http://www.hp.com/PC/REST/API">
+  <ExceptionMessage>Operation failed.</ExceptionMessage>
+  <ErrorCode>1001</ErrorCode>
+</Exception>
+=> dan wordt syntax niet begrepen.
+
+
+echo vreezenb:VreezeNB | base64
+
+$ echo "dnJlZXplbmI6VnJlZXplTkIK" | base64 -d
+vreezenb:VreezeNB
+
+echo ***`echo "dnJlZXplbmI6VnJlZXplTkIK" | base64 -d`***
+
+$ echo ***`echo "dnJlZXplbmI6VnJlZXplTkIK" | base64 -d`***
+***vreezenb:VreezeNB***
+
+fout pw invoeren:
+
+$ echo vreezenb:Vreeze42NB | base64
+dnJlZXplbmI6VnJlZXplNDJOQgo=
+
+curl --header "Authorization: Basic dnJlZXplbmI6VnJlZXplNDJOQgo=" http://wsrv3889.rabobank.corp/loadtest/rest/authentication-point/authenticate
+
+<Exception xmlns="http://www.hp.com/PC/REST/API">
+  <ExceptionMessage>Exception of type 'HP.PC.API.Model.Exceptions.InvalidAuthenticationDataException' was thrown.</ExceptionMessage>
+  <ErrorCode>1100</ErrorCode>
+</Exception>
+
+=> zelfde melding dus als met het goede pw.
+
+* basic ook encoden.
+
+echo Basic: vreezenb:VreezeNB | base64
+QmFzaWM6IHZyZWV6ZW5iOlZyZWV6ZU5CCg==
+
+curl --header "Authorization: QmFzaWM6IHZyZWV6ZW5iOlZyZWV6ZU5CCg==" http://wsrv3889.rabobank.corp/loadtest/rest/authentication-point/authenticate
+<Exception xmlns="http://www.hp.com/PC/REST/API">
+  <ExceptionMessage>Authentication information is missing from request header.</ExceptionMessage>
+  <ErrorCode>1101</ErrorCode>
+</Exception>
+
+dus dan syntax niet begrepen.
+
+Opties:
+* Recording maken.
+* andere docs en voorbeelden nog eens kijken.
+
+In voorbeeld:
+			con = prepareHttpConnection(authPoint, "GET");
+
+		  byte[] authenticationBytes = (this.almUser + ":" + this.almPassword).getBytes("UTF-8");
+		  String encodedAuthentication = "Basic " + Base64Converter.encode(authenticationBytes);
+      con.setRequestProperty("Authorization", encodedAuthentication);
+	  
+Dus vraag of het wel UTF-8 is.
+
+Via files proberen.
+
+$ cat pw.txt | base64
+dnJlZXplbmI6VnJlZXplTkI=
+
+orig:
+dnJlZXplbmI6VnJlZXplTkIK  
+
+dus toch net anders.
+
+ofwel de nieuwe:
+
+curl --header "Authorization: Basic dnJlZXplbmI6VnJlZXplTkI=" http://wsrv3889.rabobank.corp/loadtest/rest/authentication-point/authenticate
+
+=> geen foutmelding, dus mogelijk goed!
+
+dan met cookies save en use:
+
+curl -c cookies.txt --header "Authorization: Basic dnJlZXplbmI6VnJlZXplTkI=" http://wsrv3889.rabobank.corp/loadtest/rest/authentication-point/authenticate
+curl -b cookies.txt -o test175.xml http://wsrv3889.rabobank.corp/loadtest/rest/domains/RI/projects/Ri_Shared_environment/Tests/175
+
+=> ok! dan nog een zip:
+
+curl -c cookies.txt --header "Authorization: Basic dnJlZXplbmI6VnJlZXplTkI=" http://wsrv3889.rabobank.corp/loadtest/rest/authentication-point/authenticate
+curl -b cookies.txt -o run381.zip http://wsrv3889.rabobank.corp/loadtest/rest/domains/RI/projects/Ri_Shared_environment/Runs/381/Results/2871/data
+=> ook goed!
+
+maar string in file is dus anders dan op cmdline. Zou iets met newline kunnen zijn.
+
+dnJlZXplbmI6VnJlZXplTkI=
+
+orig:
+dnJlZXplbmI6VnJlZXplTkIK  
+
+echo dnJlZXplbmI6VnJlZXplTkIK | base64 -d
+echo dnJlZXplbmI6VnJlZXplTkI= | base64 -d
+
+$ echo dnJlZXplbmI6VnJlZXplTkIK | base64 -d
+vreezenb:VreezeNB
+Wed Oct 28 - 12:52:05
+vreezen@UTCD108162:479:53:/c/PCC/Nico/aaa/REST-API
+$ echo dnJlZXplbmI6VnJlZXplTkI= | base64 -d
+vreezenb:VreezeNBWed Oct 28 - 12:52:05
+vreezen@UTCD108162:480:54:/c/PCC/Nico/aaa/REST-API
+
+Dus het is idd de newline, die ik er eerst ook bij had ge-encode-d.
+
+Hiermee zijn alle resultaten dus te downloaden.
+
+Wil wel zowel de XML als de attachments bewaren, voor elke run een dir.
+
+Bestaande script voor test-scenario's aanpassen op deze nieuwe API.
+=> niet triviaal, XML is behoorlijk anders, mogelijk wel simpeler. Zie nu geen embedded XML meer.
+Maar mogelijk ook minder data, minder Runtime settings bv, en cmdline ook niet te zien.
+mss RTS alleen maar dingen die anders zijn dan zoals in het script staat, maar cmdline moet je sowieso hebben. Mss een sub/detail call?
+
+
+
+
+
+
+

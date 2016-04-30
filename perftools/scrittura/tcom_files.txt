@@ -1,0 +1,5 @@
+C:\pcc\nico\nicoprj\perftools\scrittura\tcom3.9\pkgIndex.tcl
+C:\pcc\nico\nicoprj\perftools\scrittura\tcom3.9\tcom.dll
+C:\pcc\nico\nicoprj\perftools\scrittura\tcom3.9\tcom.tcl
+C:\pcc\nico\nicoprj\perftools\scrittura\tcom3.9\tcominproc.dll
+C:\pcc\nico\nicoprj\perftools\scrittura\tcom3.9\teapot.txt

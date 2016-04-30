@@ -1,8 +1,12 @@
 # losse main-file om dynamisch aan te kunnen passen
+package require ndv
+package require tcom
+
+ndv::source_once lib-copy.tcl
 
 file mkdir [file join [file dirname [info script]] log]
 set time [clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"]
-set logname [file join [file dirname [info script]] log "movemail-$time.log"]
+set logname [file join [file dirname [info script]] log "copymail-$time.log"]
 
 set debug 1
 
@@ -28,20 +32,22 @@ proc main {argv} {
   # handle_folder_name $namespace $src_folder $target_folder
    
   # load_test $namespace $src_folder $target_folder  $attachments_dir $mails_per_sec $runtime_sec $rampup_sec $max_pacing_msec $mail_types
-  load_test $namespace $src_folder $target_folder  $attachments_dir $mails_per_sec $runtime_sec $rampup_sec $mail_types
+  load_test $namespace $src_folder $target_folders $attachments_dir $mails_per_sec $runtime_sec $rampup_sec $mail_types
   
   # test_stuff
   log info "Moving items: finished"
 }
 
-proc load_test {namespace src_folder target_folder  attachments_dir mails_per_sec runtime_sec rampup_sec mail_types} {
+proc load_test {namespace src_folder target_folders attachments_dir mails_per_sec runtime_sec rampup_sec mail_types} {
 	set fl_source [find_folder_path $namespace $src_folder]
-	set fl_target [find_folder_path $namespace $target_folder]
+	# set fl_target [find_folder_path $namespace $target_folder]
 	
 	# src_mails - list of (cumulative frequency%, frequency, subject, msg com object)
 	set src_mails [det_src_mails $fl_source $mail_types]
 	log debug "src_mails: $src_mails"
-	
+
+  set target_obj_folders [det_target_obj_folders $target_folders $namespace]
+  
 	# test_choose_mails $src_mails
 	
 	set start_test_sec [clock seconds]
@@ -49,7 +55,8 @@ proc load_test {namespace src_folder target_folder  attachments_dir mails_per_se
 	while {[clock seconds] < $end_test_sec} {
 		set start_it_msec [clock milliseconds]
 		set elapsed_start_sec [expr [clock seconds] - $start_test_sec]
-		set subj [copy_random_msg $src_mails $fl_target $attachments_dir]
+		# set subj [copy_random_msg $src_mails $fl_target $attachments_dir]
+    set subj [copy_random_msg $src_mails $target_obj_folders $attachments_dir]
 		incr msg_counts($subj)
 		set end_it_msec [clock milliseconds]
 		# set wait_msec [expr round((1000.0 * $pacing_sec) - ($end_it_msec - $start_it_msec))]
@@ -62,7 +69,8 @@ proc load_test {namespace src_folder target_folder  attachments_dir mails_per_se
 	}
 	set totalcount 0
 	foreach subj [lsort [array names msg_counts]] {
-	  log info "Subject: $subj, count: $msg_counts($subj)"
+	  # log info "Subject: $subj, count: $msg_counts($subj)"
+    log info "#$msg_counts($subj) - $subj"
 	  incr totalcount $msg_counts($subj)
 	}
 	log info "Total messages sent: $totalcount"
@@ -71,52 +79,17 @@ proc load_test {namespace src_folder target_folder  attachments_dir mails_per_se
 	log info "#msg/min: [format %.3f [expr 60.0*$nps]]"
 }
 
-proc det_wait_msec {rampup_sec mails_per_sec elapsed_start_sec start_it_msec end_it_msec} {
-	if {$elapsed_start_sec < $rampup_sec} {
-		#T = huidige tijd in sec, tijd bij de start van het mail aanmaken.
-		#X = doel tps
-		#R = ramup periode in seconden
-		set discr [expr (1.0*$elapsed_start_sec*$mails_per_sec)**2 + (4.0*$mails_per_sec*$rampup_sec)]
-		set pacing_msec [expr round(1000.0 * (-$elapsed_start_sec*$mails_per_sec + sqrt($discr)) / (2.0*$mails_per_sec))]
-		#discr = (TX)^2 + 4XR
-		#pacing = (-TX + sqrt(discr)) / (2X)
-	} else {
-		set curr_mails_per_sec $mails_per_sec
-		set pacing_msec [expr round(1000.0 / $curr_mails_per_sec)]
-	}
-	log debug "current pacing msec: $pacing_msec"
-	if {$pacing_msec == "Inf"} {
-	  breakpoint
-	}
-	#if {$pacing_msec > $max_pacing_msec} {
-	#  set pacing_msec $max_pacing_msec
-	#}
-	set wait_msec [expr $pacing_msec - ($end_it_msec - $start_it_msec)]
-	log debug "time used to copy mail: [expr ($end_it_msec - $start_it_msec)]"
-	log debug "current wait msec: $wait_msec"
-	return $wait_msec
-}
-
-proc det_wait_msec_old {rampup_sec mails_per_sec elapsed_sec start_it_msec end_it_msec max_pacing_msec} {
-	if {$elapsed_sec < $rampup_sec} {
-		set curr_mails_per_sec [expr 1.0*$mails_per_sec * (1.0*$elapsed_sec / $rampup_sec)]
-	} else {
-		set curr_mails_per_sec $mails_per_sec
-	}
-	if {$curr_mails_per_sec < [expr 1000.0/$max_pacing_msec]} {
-	  set pacing_msec $max_pacing_msec
-	} else {
-      set pacing_msec [expr round(1000.0 / $curr_mails_per_sec)]
-	}
-	log debug "current pacing msec: $pacing_msec"
-	if {$pacing_msec == "Inf"} {
-	  breakpoint
-	}
-	#if {$pacing_msec > $max_pacing_msec} {
-	#  set pacing_msec $max_pacing_msec
-	#}
-	set wait_msec [expr $pacing_msec - ($end_it_msec - $start_it_msec)]
-	return $wait_msec
+# return dict - key = msg_type (mail/fax), value = list of target folders as outlook COM objects.
+proc det_target_obj_folders {target_folders namespace} {
+  set d [dict create]
+  foreach {msg_type lst} $target_folders {
+    set lst_folder_objects {}
+    foreach path $lst {
+      lappend lst_folder_objects [find_folder_path $namespace $path]
+    }
+    dict set d $msg_type $lst_folder_objects
+  }
+  return $d
 }
 
 proc det_src_mails {fl_source mail_types} {
@@ -127,9 +100,9 @@ proc det_src_mails {fl_source mail_types} {
   log debug "sum_freq: $sum_freq"
   set res {}
   set cum_freq 0.0
-  foreach {subject freq} $mail_types {
+  foreach {subject freq msg_type} $mail_types {
     set cum_freq [expr $cum_freq + (1.0 * $freq / $sum_freq)]
-	lappend res [list $cum_freq $freq $subject [dict get $mails $subject]]
+    lappend res [list $cum_freq $freq $subject [dict get $mails $subject] $msg_type]
   }
   log debug "Cumulative sum (should be 1.00): $cum_freq"
   return $res
@@ -143,31 +116,36 @@ proc get_mails {fl} {
 	return $d
 }
 
-proc det_sum_freq {mail_types} {
-  set sum 0.0
-  foreach {_ freq} $mail_types {
-    set sum [expr $sum + $freq]
-  }
-  return $sum
-}
-
-proc copy_random_msg {src_mails fl_target attachments_dir} {
+proc copy_random_msg {src_mails target_obj_folders attachments_dir} {
 	log debug "copy_random_msg - start"
-	set mail [choose_random_mail $src_mails]
+	# set mail [choose_random_mail $src_mails]
+  lassign [choose_random_mail $src_mails] mail msg_type
+  set fl_target [choose_random_target $msg_type $target_obj_folders]
 	log debug "mail chosen"
-	copy_item $mail $fl_target $attachments_dir
+	copy_item $mail $msg_type $fl_target $attachments_dir
 	set subj [$mail Subject]
 	log debug "copy_random_msg - end"
-	return $subj
+  return $subj
 }
 
-proc copy_item {mail fl_target attachments_dir} {
+proc choose_random_target {msg_type target_obj_folders} {
+  set lst_folders [dict get $target_obj_folders $msg_type]
+  set rnd [expr rand()]
+  set len [llength $lst_folders]
+  lindex $lst_folders [expr round(floor($rnd * $len))]  
+}
+
+# msg_type - mail or fax. With fax, special handling for setting subject.
+# fl_target - chosen random target directory for mail type.
+proc copy_item {mail msg_type fl_target attachments_dir} {
 	log debug "copy_item - start"
 	set msg2 [$mail Copy]
 	log debug "mail copied"
 	# TODO subject en attachment name unique
 	set ts [current_time_for_subject]
-	set subject "Perftest-$ts-[$mail Subject]"
+	# set subject "Perftest-$ts-[$mail Subject]"
+  set subject [det_subject [$mail Subject] $ts $msg_type]
+  
 	$msg2 Subject $subject
 	log debug "Mail subject set"
 	# ga bij attachments uit van orig mail, verandert niet. Haal bij doel-mail eerst alle attachments weg.
@@ -220,6 +198,19 @@ proc copy_item {mail fl_target attachments_dir} {
 	log debug "copy_item - end"
 }
 
+# set subject
+# orig for fax: Fax sent (3p) to '+31307124088' @+31307124088
+proc det_subject {orig_subject ts msg_type} {
+  if {$msg_type == "fax"} {
+    # special handling
+    # vraag of het nodig is, Fax sent staat in subject en blijft er ook in staan.
+    return "$orig_subject-Perftest-$ts"
+  } else {
+    # return "Perftest-$ts-$orig_subject"
+    return "Perftest-$ts-$orig_subject"    
+  }
+}
+
 proc det_att_filename {attachments_dir subject idx att} {
   set rootname [file rootname $subject]
   # set extension [file extension $subject]
@@ -241,8 +232,8 @@ proc choose_random_mail {src_mails} {
   set rnd [expr rand()]
   foreach item $src_mails {
     if {$rnd < [lindex $item 0]} {
-	  return [lindex $item 3]
-	}
+      return [list [lindex $item 3] [lindex $item 4]]
+    }
   }
 }
 
@@ -361,4 +352,4 @@ proc test_choose_mails {src_mails} {
 
 main $argv
 
-file copy -force $logname [file join [file dirname [info script]] log "movemail-last.log"]
+file copy -force $logname [file join [file dirname [info script]] log "copymail-last.log"]

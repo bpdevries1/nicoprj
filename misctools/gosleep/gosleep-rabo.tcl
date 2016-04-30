@@ -9,12 +9,16 @@ set UNISON_BINARY {c:\PCC\Util\Unison\Unison-2.40.102-Text.exe}
 # TODO mss toch periodiek uitvoeren, niet elke dag?
 
 proc main {} {
-  if 0 {
+  if 1 {
+	  zip_projects
 	  unison -auto projecten2h
 	  unison -auto -batch backup2g
 	  unison -auto -batch vugen2h
+	  zip_vugens
+	  zip_alm_dbs
   }
-  zip_projects
+  zip_notes_org
+  cleanup
 }
 
 proc unison {args} {
@@ -43,20 +47,107 @@ proc zip_project {dir zipfile} {
   global env
   # file mkdir [file dirname $zipfile]
   cd $dir
-  # C:/PCC/Util/cygwin/lib/p7zip/7z.exe" a -tzip -p1234test $zipfile *"
-  # C:\PCC\Util\cygwin\lib\p7zip\7z.exe
-  # exec {C:\PCC\Util\cygwin\lib\p7zip\7z.exe}
-  # cygwin1.dll => set PATH=%PATH%;c:\PCC\Util\cygwin\bin
   set old_path $env(PATH)
   set env(PATH) {c:\PCC\Util\cygwin\bin}
-  # breakpoint
   puts "current dir: [pwd]"
-  # zonder exe/dll's. -x[r[-|0]]]{@listfile|!wildcard}: eXclude filenames
-  # -x!*.exe -x!*.dll
-  # 7z a -tzip archive.zip *.txt -x!temp.*
+  file delete $zipfile
   exec "C:/PCC/Util/cygwin/lib/p7zip/7z.exe" a -tzip -p1234test $zipfile * -xr!*.exe -xr!*.dll -xr!*.log -xr!*.xls
-  # evt in een mail zetten?
   set env(PATH) $old_path
+}
+
+proc zip_vugens {} {
+  exec {c:\pcc\util\tcl86\bin\tclsh86.exe} {C:\PCC\Nico\nicoprj\perftools\vugentools\vugenclean.tcl} {c:\PCC\Nico\VuGen}
+  zip_vugen Dotcom
+  zip_vugen RCC_CashBalancingWidget
+  zip_vugen RCC_LoansWidget
+  zip_vugen Transact_secure
+}
+
+# moet wel zonder .git, of leuk om erbij te hebben? hangt van grootte af.
+# similar to zip_project, but possibly with other exclusions.
+proc zip_vugen {script} {
+  global env
+
+  set zipfile [file join /c/PCC/Nico/zips $script.zip]
+  set dir [file join {c:\PCC\Nico\VuGen} $script]
+
+  file delete $zipfile
+  
+  # file mkdir [file dirname $zipfile]
+  cd $dir
+  set old_path $env(PATH)
+  set env(PATH) {c:\PCC\Util\cygwin\bin}
+  puts "current dir: [pwd]"
+  exec "C:/PCC/Util/cygwin/lib/p7zip/7z.exe" a -r- -tzip -p1234test $zipfile * -xr!*.exe -xr!*.dll -xr!*.log -xr!*.xls
+  set env(PATH) $old_path
+}
+
+proc zip_alm_dbs {} {
+  zip_alm_db almpc.db
+  zip_alm_db almpc-scen.db
+}
+
+proc zip_alm_db {dbname} {
+  global env
+
+  set zipfile [file join /c/PCC/Nico/zips $dbname.zip]
+  set path [file join {c:\PCC\Nico\ALMData} $dbname]
+  set dir [file dirname $path]
+  file delete $zipfile
+  
+  # file mkdir [file dirname $zipfile]
+  cd $dir
+  set old_path $env(PATH)
+  set env(PATH) {c:\PCC\Util\cygwin\bin}
+  puts "current dir: [pwd]"
+  exec "C:/PCC/Util/cygwin/lib/p7zip/7z.exe" a -tzip -p1234test $zipfile $dbname
+  set env(PATH) $old_path
+}
+
+proc zip_notes_org {} {
+  global env
+
+  # set zipfile [file join /c/PCC/Nico/zips notes-org.zip]
+  set ziproot /c/PCC/Nico/zips
+  # set path [file join {c:\PCC\Nico\ALMData} $dbname]
+  set paths {c:/PCC/Nico/Notes c:/PCC/Nico/org}
+  # set paths {/c/PCC/Nico/Notes /c/PCC/Nico/org}
+  
+  set old_path $env(PATH)
+  set env(PATH) {c:\PCC\Util\cygwin\bin}
+  
+  foreach path $paths {
+	  cd $path
+	  set zipfile "$ziproot/[file tail $path]"
+	  file delete $zipfile
+	  puts "current dir: [pwd]"
+	  # exec "C:/PCC/Util/cygwin/lib/p7zip/7z.exe" a -tzip -p1234test -r- $zipfile *
+	  # [2016-02-01 10:28:13] TODO deze nog met subdirs, niet triviaal om dit uit te schakelen.
+	  exec "C:/PCC/Util/cygwin/lib/p7zip/7z.exe" a -tzip -p1234test -r- $zipfile ./*
+  }
+  set env(PATH) $old_path
+  
+  # file mkdir [file dirname $zipfile]
+}
+
+# clean up temp dirs etc.
+proc cleanup {} {
+  puts "Cleaning up temp dirs..."
+  cleanup_dir {c:\users\vreezen\AppData\Local\Temp}
+  puts "Finished cleaning up."
+}
+
+# recursively called.
+proc cleanup_dir {dir} {
+	foreach subdir [glob -nocomplain -directory $dir -type d *] {
+		cleanup_dir $subdir
+		# delete may fail, because no rights or locked file, or files in dir.
+		catch {file delete $subdir}
+	}
+	foreach filename [glob -nocomplain -directory $dir -type f *] {
+		# delete may fail, because no rights or locked file.
+		catch {file delete $filename}
+	}
 }
 
 main

@@ -1,0 +1,18 @@
+Datamodel
+* Test heeft naam en ID, waarbij ID de echte p.key is.
+* Test heeft TestVersie: met datum, zodat je changes kunt bijhouden.
+* Alle settings onder TestVersie.
+  - paar velden, zoals last-modified, zie onder.
+* Een TestVersie heeft meerdere groepen (scripts)
+* Een TestVersie heeft meerdere hosts (of onder groep)
+* Een groep heeft meerdere hosts: ref naar host of gewoon hier onder?
+(* een groep heeft schedule en andere settings, maar horen feitelijk bij de groep.)
+* een groep heeft een hele rits name/value pairs. Je kunt kiezen om een aantal in vaste velden in de groep neer te zetten, zoals aantal users en rampup.
+
+In een plaatje:
+
+tests_file -> test -> testversion ------> testgroup -----------------> tg_host
+                       \-> tv_param (nm/val)  \-> tg_param (nm/val)
+
+        
+testen horen ook bij een omgeving en een project. Dus RI en Ri_Shared_environment.        

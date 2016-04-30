@@ -1,0 +1,14 @@
+digraph G {
+		rankdir = TB
+/*
+		size="40,40";
+		ratio=fill;
+		node [fontname=Arial,fontsize=20];
+		edge [fontname=Arial,fontsize=16];
+*/
+    
+  title [shape=rectangle, label="Test GraphViz", fontsize=18];
+  _Node_1 [label="Node 1",color="blue"];
+  _Node_2 [label="Node 2",color="blue"];
+  _Node_1 -> _Node_2 [color="red",label="edgelabel"];
+}

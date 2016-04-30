@@ -13,6 +13,9 @@ set really 1
 
 proc main {argv} {
   lassign $argv main_dir
+  set f [open [file join c:/PCC vugenclean.out] w]
+  puts $f "Called vugenclean.tcl with $main_dir"
+  close $f
   clean_dir $main_dir
 }
 
@@ -50,16 +53,18 @@ proc delete_path {pathname} {
   puts "Deleting: $pathname"
   if {[file isdirectory $pathname]} {
 	  if {$really} {
-      # force nodig, dir is mogelijk niet leeg of heeft subdirs.
-      file delete -force $pathname  
+		# force nodig, dir is mogelijk niet leeg of heeft subdirs.
+		# [2016-03-22 09:49:05] NdV dir possibly locked/open; ignore.
+		catch {file delete -force $pathname}
 	  } else {
-      puts "Dry run: $pathname"
+		puts "Dry run: $pathname"
 	  }
   } else {
 	  if {$really} {
-      file delete $pathname  
+		# [2016-03-22 09:49:05] NdV dir possibly locked/open; ignore.
+		catch {file delete $pathname}
 	  } else {
-      puts "Dry run: $pathname"
+		puts "Dry run: $pathname"
 	  }
   
   }

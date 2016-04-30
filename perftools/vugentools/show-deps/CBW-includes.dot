@@ -1,0 +1,39 @@
+digraph G {
+		rankdir = TB
+/*
+		size="40,40";
+		ratio=fill;
+		node [fontname=Arial,fontsize=20];
+		edge [fontname=Arial,fontsize=16];
+*/
+    
+  _Main [label="Main"];
+  _functions_c [label="functions.c"];
+  _globals_h [label="globals.h"];
+  _globals_specific_h [label="globals_specific.h"];
+  _Main -> _globals_h [];
+  _vuser_init_c [label="vuser_init.c"];
+  _Main -> _vuser_init_c [];
+  _Action_c [label="Action.c"];
+  _Main -> _Action_c [];
+  _vuser_end_c [label="vuser_end.c"];
+  _Main -> _vuser_end_c [];
+  _vugen_h [label="vugen.h"];
+  _functions_c -> _vugen_h [];
+  _lrun_h [label="lrun.h"];
+  _globals_h -> _lrun_h [];
+  _web_api_h [label="web_api.h"];
+  _globals_h -> _web_api_h [];
+  _lrw_custom_body_h [label="lrw_custom_body.h"];
+  _globals_h -> _lrw_custom_body_h [];
+  _globals_h -> _functions_c [];
+  _configfile_c [label="configfile.c"];
+  _globals_h -> _configfile_c [];
+  _globals_h -> _globals_specific_h [];
+  _dynatrace_c [label="dynatrace.c"];
+  _globals_specific_h -> _dynatrace_c [];
+  _rcc_functions_c [label="rcc_functions.c"];
+  _globals_specific_h -> _rcc_functions_c [];
+  _cbw_functions_c [label="cbw_functions.c"];
+  _globals_specific_h -> _cbw_functions_c [];
+}

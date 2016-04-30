@@ -38,6 +38,13 @@ start c:\PCC\util\4nt\4nt.exe /c start-typeperf.bat
 rem AHK shortcuts, first only F8 for timestamp insertion.
 start c:\PCC\Nico\AHK-Demo\demo\send-timestamp.exe
 
+rem activitylog
+c:\PCC\util\4nt\4nt.exe /c C:\pcc\nico\nicoprj\misctools\activitylog\start-activitylog-rabo.bat
+
+rem utils folder met shortcuts
+start explorer C:\Users\vreezen\Desktop\utils
+
+
 goto end
 
 :end
