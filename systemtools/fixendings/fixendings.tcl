@@ -6,12 +6,12 @@ set_log_global info
 
 proc main {argv} {
   lassign $argv root
-  handle_dir $root 0
+  handle_dir [file normalize $root] 0
 }
 
 proc handle_dir {dir level} {
   log debug "handle_dir: $dir"
-  if {$level > 10} {
+  if {$level > 30} {
     exit
   }
   foreach subdir [glob -nocomplain -directory $dir -type d *] {
@@ -55,7 +55,8 @@ set extensions {
         .js .json .license .md .mustache .py
         .r .rb .sh .slim .sql .tcl .textile .tsv .txt .xml ""}
   dos {.ahk .bat .cmd .vbs}
-  ignore {.1 .dependencies .gen .log .mta .old .out .pac .prj .tab .take1 .thuis .wrd}
+  ignore {.1 .dependencies .gen .log .mta .old .orig .out
+         .pac .prj .tab .take1 .thuis .wrd}
   bin {.db .class .dat .doc .docm .docx .dll .eot .exe .ico .jar
        .jasper .jnilib .jrxml .png .so .svg .ttf .woff .xls .xlsm .xlsx .zip}
 }
