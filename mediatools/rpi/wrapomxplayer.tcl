@@ -39,7 +39,7 @@ proc log {str} {
   foreach logname $lognames {
     # set f [open [file join $LOGROOT "wrapomxplayer.log"] a]
     set f [open [file join $LOGROOT $logname] a]
-    set ts [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
+    set ts [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S %z"]
     puts $f "\[$ts\] $str"
     close $f
   }
