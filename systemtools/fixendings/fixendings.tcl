@@ -51,28 +51,33 @@ proc handle_file {fr filename} {
 }
 
 # maybe hidden files auto ignored?
+
+set dir_ignores {.git bin node_modules obj target}
+
 proc ignore_dir {dir} {
-  if {[file tail $dir] == ".git"} {
-    log warn ".git dir given to ignore_dir: $dir"
+  global dir_ignores
+  if {[lsearch $dir_ignores [file tail $dir]] >= 0} {
     return 1
   }
   return 0
 }
 
-
-
 set extensions {
   unix {.awk .c .can .cron .css .clj .cljs .csv .dot .erb .graphml .groovy
-    .hsql .htm .html .java .jmx
-    .js .json .license .lqn .lqnprop .lqntmp .m .markdown .md .mdl .mm
-    .mustache .mysql .org .p .params .pl .plot .properties .py .restart
-    .r .rb .sh .showinfo .slim .sql .sudo .tcl .textile .tsv .txt .wiki
+    .hs .hsql .htm .html .java .jmx
+    .js .json .license .lqn .lqnprop .lqntmp .m .markdown .md .mdl .mf .mm
+    .mustache .mysql .opts .org .p .params .pl .plot .properties .py .restart
+    .r .rb .rd .sh .showinfo .slim .sql .sudo .tcl .textile .tsv .txt .types .wiki
     .xml .xmlinc .xmlpart .xmltmp .xsl ""}
-  dos {.ahk .aspx .bat .cf .cmd .ini .vbs}
-  ignore {.$$$ .1 .dependencies .gen .log .mta .old .orig .oud .out
-         .pac .prj .profile .tab .take1 .template .thuis .wrd}
-  bin {.db .class .dat .doc .docm .docx .dll .emf .eot .exe .fig .flo .ico .jar
-    .jasper .jnilib .jrxml .pdf .png .ps .so .svg .trace .ttf
+  dos {.ahk .aspx .bat .cf .cmd .cs .ini .vbs}
+  ignore {.$$$ .1 .bak .config .dependencies .gen
+    .http .log .mta .old .orig .oud .out
+    .pac .patch .php .prj .profile .rss .settings
+    .tab .take1 .template .thuis .wrd}
+  bin {.csproj .db .class .dat .doc .docm .docx .dll .emf .eot .exe
+    .fig .flo .gif .gz .hi .ico .jar
+    .jasper .jnilib .jpg .jpeg .jrxml .nxd .nxj .o .pdf .png .ps .resx
+    .sln .so .suo .svg .sq3 .tar .tgz .trace .ttf
     .woff .xls .xlsm .xlsx .war .zip}
 }
 
@@ -106,7 +111,9 @@ proc add_rename {fr filename} {
     return
   }
   if {[det_type $newname] != "unknown"} {
-    puts $fr "git mv \"$filename\" \"$newname\""  
+    puts $fr "git mv \"$filename\" \"$newname\""
+    # if git mv fails, do default mv (eg file not in git)
+    puts $fr "mv \"$filename\" \"$newname\""
   } else {
     puts $fr "# Unknown new ext, returning: $filename"
   }
