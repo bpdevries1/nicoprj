@@ -1,3 +1,4 @@
+-- line changed locally at home.
 IF OBJECT_ID('dbo.aggr_tdc') IS NOT NULL BEGIN DROP TABLE dbo.aggr_tdc END
 
 create table dbo.aggr_tdc (
