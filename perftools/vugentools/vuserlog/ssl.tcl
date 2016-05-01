@@ -372,37 +372,52 @@ and b.linenr_end + 1 = c.linenr_end"
 proc do_checks {db} {
   log info "Doing checks..."
   set have_warnings 0
-  set res [$db query "select * from bio_block where not id in (select bio_block_id from conn_bio_block)"]
-  if {[:# $res] > 0} {
-    log warn "BIO blocks without corresponding conn_block:"
-    log warn $res
-    set have_warnings 1
-  }
-  set res [$db query "select * from conn_block where not id in (select conn_block_id from conn_bio_block)"]
-  if {[:# $res] > 0} {
-    log warn "Conn blocks without corresponding BIO block:"
-    log warn $res
-    set have_warnings 1    
-  }
+  do_check "BIO blocks without corresponding conn_block" \
+      "select * from bio_block where not id in (select bio_block_id from conn_bio_block)"
+  do_check "Conn blocks without corresponding BIO block" \
+      "select * from conn_block where not id in (select conn_block_id from conn_bio_block)"
   # in theorie ook nog kijken of dingen niet dubbel voorkomen, alleen kan bij deze niet.
   
+  # even een om te testen
+  # do_check "testje" "select * from conn_block where id = 1"
+  
   if {$have_warnings} {
-    log warn "Some warnings, do investigate!"
+    log warn "**************************************"
+    log warn "*** Some warnings, do investigate! ***"
+    log warn "**************************************"
   } else {
     log info "Everything seems fine."
   }
 }
 
+proc do_check {msg sql} {
+  upvar have_warnings have_warnings
+  upvar db db
+  set res [$db query $sql]
+  if {[:# $res] > 0} {
+    log warn "$msg:"
+    log warn $res
+    log warn "--------"
+    set have_warnings 1    
+  }
+}
+
 # TODO: source and sourceline: # Login_cert_main.c(81): [SSL:] Handsh
 proc ssl_define_tables {db} {
-  $db add_tabledef bio_entry {id} {logfile_id vuserid iteration linenr_start linenr_end entry functype address socket_fd call result}
+  # iteration can be 'vuser_end', so not an integer.
+  # TODO: $db set_default_type nothing|as_same
+  #       as_same: als een veld geen datatype heeft, en eerdere def met dezelfde naam wel, neem deze dan over. Dan bv maar 1x bij linenr_start integer op te geven.
+  # evt dan ook een def_datatype <col> <datatype> opnemen, zodat je dit vantevoren kunt
+  # doen, evt ook met regexp's.
+  $db add_tabledef bio_entry {id} {logfile_id {vuserid integer} iteration {linenr_start integer} {linenr_end integer} entry functype address socket_fd call result}
   # TODO: andere dingen in SSL line
-  $db add_tabledef ssl_entry {id} {logfile_id vuserid iteration linenr_start linenr_end entry functype domain_port ssl ctx sess_address sess_id socket conn_nr}
-  $db add_tabledef func_entry {id} {logfile_id vuserid iteration linenr_start linenr_end entry functype ts_msec url domain_port ip_port conn_nr nreqs relframe_id internal_id conn_msec http_code}
+  $db add_tabledef ssl_entry {id} {logfile_id {vuserid integer} iteration {linenr_start integer} {linenr_end integer} entry functype domain_port ssl ctx sess_address sess_id socket {conn_nr integer}}
+  $db add_tabledef func_entry {id} {logfile_id {vuserid integer} iteration {linenr_start integer} {linenr_end integer} entry functype {ts_msec integer} url domain_port ip_port {conn_nr integer} {nreqs integer} {relframe_id integer} {internal_id integer} {conn_msec integer} http_code}
 
-  $db add_tabledef bio_block {id} {logfile_id vuserid iteration_start iteration_end linenr_start linenr_end address socket_fd}
-  $db add_tabledef conn_block {id} {logfile_id vuserid iteration_start iteration_end linenr_start linenr_end ts_msec_start ts_msec_end ts_msec_diff conn_nr conn_msec domain_port ip_port nreqs}
-  $db add_tabledef req_block {id} {logfile_id vuserid iteration_start iteration_end linenr_start linenr_end ts_msec_start ts_msec_end ts_msec_diff url domain_port nentries http_code}
+  $db add_tabledef bio_block {id} {logfile_id {vuserid integer} iteration_start iteration_end {linenr_start integer} {linenr_end integer} address socket_fd}
+  $db add_tabledef conn_block {id} {logfile_id {vuserid integer} iteration_start iteration_end {linenr_start integer} {linenr_end integer} {ts_msec_start integer} {ts_msec_end integer} {ts_msec_diff integer} {conn_nr integer} {conn_msec integer} domain_port ip_port {nreqs integer}}
+  $db add_tabledef req_block {id} {logfile_id {vuserid integer} iteration_start iteration_end {linenr_start integer} {linenr_end integer} {ts_msec_start integer} {ts_msec_end integer} {ts_msec_diff integer} url domain_port nentries http_code}
+  
 }
 
 # library functions:
@@ -425,14 +440,6 @@ proc dict_set_if_empty {d_name key val {check 1}} {
     }
   }
 }
-
-proc dict_set_if_empty_old {d_name key val} {
-  upvar $d_name d
-  if {[dict_get $d $key] == ""} {
-    dict set d $key $val
-  }
-}
-
 
 proc setvars {lst val} {
   foreach el $lst {
