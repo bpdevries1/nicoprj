@@ -2,6 +2,10 @@
 
 # Build tool, mainly for VuGen scripts and libraries
 
+# TODO:
+# Build tool: bv bij functions.c wel nieuwe spul in repo zetten met put, maar ook benieuwd of andere projecten nog andere changes hebben. Eerder ook met nycsync gewerkt, zou hier ook een oplossing kunnen zijn. Alleen lijkt het dan weer beter iets als git te gebruiken.
+# Neig nu wel naar de nycsync oplossing: bij zowel git als unison met config files toch nog omslachtig. Met Unison wel dezelfde functionaliteit: geen versiebeheer, alleen maar kijken waar iets is gewijzigd. Met git zou het gecompliceerd worden, want dan 2 masters mogelijk, heb ook al git voor het gewone versie beheer van het script, dat is dus geen optie.
+
 package require term
 package require term::ansi::code::attr
 package require term::ansi::send
