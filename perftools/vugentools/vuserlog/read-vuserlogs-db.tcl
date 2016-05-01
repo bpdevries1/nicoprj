@@ -1,3 +1,5 @@
+#!/usr/bin/env tclsh861
+
 package require ndv
 package require tdbc::sqlite3
 
@@ -28,13 +30,17 @@ proc main {argv} {
     delete_database $dbname
   }
   set db [get_results_db $dbname]
+  set nread 0
   foreach logfile [glob -nocomplain -directory $logdir *.log] {
     readlogfile $logfile $db
+    incr nread
   }
   # [2016-02-08 10:55:16] NdV kan ook van Vugen log zijn: output.txt.
   foreach logfile [glob -nocomplain -directory $logdir *.txt] {
     readlogfile $logfile $db
+    incr nread
   }
+  log info "Read $nread logfile(s)"
 }
 
 #  $db add_tabledef trans {id} {logfile {vuserid int} ts_cet {sec_cet int} transname user {resptime real} {status int}
@@ -427,7 +433,7 @@ proc delete_database {dbname} {
 
 if {[this_is_main]} {
   log info "This is main, so call main proc"
-  # main $argv  
+  main $argv  
 } else {
   log info "This is not main, don't call main proc"
 }
