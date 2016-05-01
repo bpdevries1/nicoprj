@@ -33,11 +33,28 @@ proc vars_to_dict {args} {
   set res {}
   foreach arg $args {
     upvar $arg val
+    if {![info exists val]} {
+      error "no var: $arg, cannot read value"
+    }
     # puts "$arg = $val"
     lappend res $arg $val
   }
   return $res
 }
+
+# 1-5-2016 deze waarsch niet nodig, vorige wel ok.
+proc vars_to_dict_alternative {args} {
+  set res {}
+  foreach arg $args {
+    upvar $arg val
+    # puts "$arg = $val"
+    if {[catch {lappend res $arg $val}]} {
+      error "no var: $arg, cannot read value"
+    }
+  }
+  return $res
+}
+
 
 # @param dct dictionary object
 # @result var-names with values in calling stackframe based on dct.
