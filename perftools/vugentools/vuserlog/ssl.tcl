@@ -7,8 +7,9 @@ proc handle_ssl_start {db logfile_id vuserid iteration} {
   set linenr_start -1
   set linenr_end -1
   
-  handle_bio_block_bof $db $logfile_id $vuserid $iteration
-  handle_func_block_bof $db $logfile_id $vuserid $iteration
+  handle_block_bio_bof $db $logfile_id $vuserid $iteration
+  handle_block_func_bof $db $logfile_id $vuserid $iteration
+  handle_block_ssl_bof $db $logfile_id $vuserid $iteration
 }
 
 proc handle_ssl_line {db logfile_id vuserid iteration line linenr} {
@@ -34,8 +35,13 @@ proc handle_ssl_line {db logfile_id vuserid iteration line linenr} {
 proc handle_ssl_end {db logfile_id vuserid iteration} {
   global entry_type lines linenr_start linenr_end
   handle_entry_${entry_type} $db $logfile_id $vuserid $iteration $linenr_start $linenr_end $lines
-  handle_bio_block_eof $db $logfile_id $vuserid $iteration
-  handle_func_block_eof $db $logfile_id $vuserid $iteration
+  handle_block_bio_eof $db $logfile_id $vuserid $iteration
+  handle_block_func_eof $db $logfile_id $vuserid $iteration
+  handle_block_ssl_eof $db $logfile_id $vuserid $iteration
+}
+
+# called when all files have been read.
+proc handle_ssl_final_end {db} {
   create_extra_tables $db
   sql_checks $db
 }
@@ -58,7 +64,17 @@ proc line_type {line} {
       }
     } elseif {[regexp {\[SSL:\]} $rest]} {
       # Login_cert_main.c(81): [SSL:] Handshake complete, ...
-      return "ssl"
+      #RCC_Open.c(231): [SSL:] Received callback about handshake completion, connection=securepat01.rabobank.com:443, SSL=02E40610, ctx=02E31280, not reused, session address=02E4E988, ID (length 32): B1C73633E1EBB93F8DAB080255A0E2A7997A957F151803F01500741187BDFB68  	[MsgId: MMSG-26000]
+      #RCC_Open.c(231): [SSL:] Freeing the global SSL session in a callback, connection=securepat01.rabobank.com:443, session address=02E3E2D0, ID (length 32): FC05F66BF1D20F5B601C611957E81C4B22BA520914749BCBF9038FB1B79D2601  	[MsgId: MMSG-26000]
+      #RCC_Open.c(231): [SSL:] Established a global SSL session in a callback  	[MsgId: MMSG-26000]
+      # gezien bovenstaande kun je established niet met vorige regel koppelen.
+      if {[regexp {Established a global SSL session} $rest]} {
+        # houd deze bij de vorige, daarin staat meer info.
+        # return "cont"
+        return "ssl"
+      } else {
+        return "ssl"  
+      }
     } else {
       if {$src != ""} {
         return "func"  
@@ -75,7 +91,6 @@ proc line_type {line} {
     return "cont"
   }
 }
-
 
 proc handle_entry_start {db logfile_id vuserid iteration linenr_start linenr_end lines} {
   log debug "Before first line, do nothing"
@@ -100,12 +115,12 @@ proc handle_entry_bio {db logfile_id vuserid iteration linenr_start linenr_end l
     # BIO[02E3B560]:read(616,3628) - socket fd=616
   $db insert bio_entry [vars_to_dict logfile_id vuserid iteration linenr_start linenr_end entry functype address socket_fd call result]
 
-  handle_bio_block $db $logfile_id $vuserid $iteration $linenr_start $linenr_end $functype $address $socket_fd
+  handle_block_bio $db $logfile_id $vuserid $iteration $linenr_start $linenr_end $functype $address $socket_fd
 }
 
 # bio_info: dict: key=address, val=dict: linenr_start, socket_fd
 # $db add_tabledef bio_block {id} {logfile_id vuserid iteration linenr_start linenr_end address socket_fd}
-proc handle_bio_block {db logfile_id vuserid iteration linenr_start linenr_end functype address socket_fd} {
+proc handle_block_bio {db logfile_id vuserid iteration linenr_start linenr_end functype address socket_fd} {
   global bio_info
   if {$functype == "free"} {
     set d [dict get $bio_info $address]
@@ -124,12 +139,12 @@ proc handle_bio_block {db logfile_id vuserid iteration linenr_start linenr_end f
   }
 }
 
-proc handle_bio_block_bof {db logfile_id vuserid iteration} {
+proc handle_block_bio_bof {db logfile_id vuserid iteration} {
   global bio_info
   set bio_info [dict create]
 }
 
-proc handle_bio_block_eof {db logfile_id vuserid iteration} {
+proc handle_block_bio_eof {db logfile_id vuserid iteration} {
   global bio_info
   set keys [dict keys $bio_info]
   if {$keys != {}} {
@@ -154,7 +169,92 @@ proc handle_entry_ssl {db logfile_id vuserid iteration linenr_start linenr_end l
   regexp {session id: \(length \d+\): ([0-9A-F]+)} $entry z sess_id
   regexp {socket=([A-Fa-f0-9]+) \[(\d+)\]} $entry z socket conn_nr
   
-  $db insert ssl_entry [vars_to_dict logfile_id vuserid iteration linenr_start linenr_end entry functype domain_port ssl ctx sess_address sess_id socket conn_nr]
+  $db insert ssl_entry [vars_to_dict logfile_id vuserid iteration \
+                            linenr_start linenr_end entry functype domain_port ssl \
+                            ctx sess_address sess_id socket conn_nr]
+
+  handle_block_ssl $db $logfile_id $vuserid $iteration $linenr_start $linenr_end \
+      $functype $domain_port $ssl $ctx $sess_address $sess_id
+}
+
+proc handle_block_ssl_bof {db logfile_id vuserid iteration} {
+  global ssl_session
+  set ssl_session [dict create]
+}
+
+# kan zijn dat er nog ssl sessie info is die niet bij een global sessie hoort.
+# dit ook in DB.
+proc handle_block_ssl_eof {db logfile_id vuserid iteration} {
+  global ssl_session
+  set sess_ids [dict keys $ssl_session]
+  foreach sess_id $sess_ids {
+    set d [dict_get $ssl_session $sess_id]
+    # dict_to_vars $d
+#    set sess_addresses [:sess_addresses $d]
+#    set ssls [:ssls $d]
+#    set ctxs [:ctxs $d]
+#    set domain_ports [:domain_ports $d]
+#    set estab_global_linenrs [:estab_global_linenrs $d]
+#    set linenr_start [:linenr_start $d]
+#    set iteration_start [:iteration_start $d]
+#    set iteration_end $iteration
+    # set isglobal 0
+    #   set estab_global_linenrs [:estab_global_linenrs $d]
+    dict set d isglobal 0
+    dict set d logfile_id $logfile_id
+    dict set d sess_id $sess_id
+    $db insert ssl_session $d
+    if 0 {
+      $db insert ssl_session [vars_to_dict logfile_id linenr_start linenr_end \
+                                  iteration_start iteration_end sess_id \
+                                  sess_addresses ssls ctxs domain_ports \
+                                  estab_global_linenrs isglobal]
+      
+    }
+    dict unset ssl_session $sess_id
+  }
+}
+
+# TODO:
+# als je 'established' line ziet, staat hier niets bij. Je zou dan paar regels max
+# terug kunnen kijken of je bepaald type entry (functype) ziet met sess_id en bij
+# dan de global_linenrs kunnen aanvullen.
+proc handle_block_ssl {db logfile_id vuserid iteration linenr_start linenr_end
+                       functype domain_port ssl ctx sess_address sess_id} {
+  global ssl_session
+  if {$sess_id == ""} {
+    return
+  }
+  # TODO: mss hier ook wel net zo gemakkelijk $d meegeven aan $db insert, ipv vars_to_dict
+  set d [dict_get $ssl_session $sess_id]
+  dict_set_if_empty d iteration_start $iteration 0
+  dict_set_if_empty d linenr_start $linenr_start 0
+  set sess_addresses [dict_lappend d sess_addresses $sess_address]
+  set ssls [dict_lappend d ssls $ssl]
+  set ctxs [dict_lappend d ctxs $ctx]
+  set domain_ports [dict_lappend d domain_ports $domain_port]
+  if {$functype == "established_global_ssl"} {
+    dict_lappend d estab_global_linenrs $linenr_end
+  }
+  if {$functype == "freeing_global_ssl"} {
+    # gegevens ophalen, in DB en vergeten.
+    set linenr_start [:linenr_start $d]
+    set iteration_start [:iteration_start $d]
+    set iteration_end $iteration
+    set isglobal 1
+    set estab_global_linenrs [:estab_global_linenrs $d]
+    $db insert ssl_session [vars_to_dict logfile_id linenr_start linenr_end \
+                                iteration_start iteration_end sess_id \
+                                sess_addresses ssls ctxs domain_ports \
+                                estab_global_linenrs isglobal]
+    dict unset ssl_session $sess_id
+  } else {
+    # gegevens aanvullen, maar doe je altijd al, hierboven.
+    # deze 2 voor als dit geen global session blijkt te zijn.
+    dict set d linenr_end $linenr_end
+    dict set d iteration_end $iteration
+    dict set ssl_session $sess_id $d
+  }
 }
 
 proc handle_entry_func {db logfile_id vuserid iteration linenr_start linenr_end lines} {
@@ -203,13 +303,17 @@ proc handle_entry_func {db logfile_id vuserid iteration linenr_start linenr_end 
   if {($domain_port != "") && ![regexp {:} $domain_port]} {
     set domain_port "$domain_port:443"
   }
-  $db insert func_entry [vars_to_dict logfile_id vuserid iteration linenr_start linenr_end entry functype ts_msec url \
-                             domain_port ip_port conn_nr nreqs relframe_id internal_id  conn_msec http_code]
-  handle_func_block $db $logfile_id $vuserid $iteration $linenr_start $linenr_end $ts_msec $functype $conn_nr $conn_msec \
+  $db insert func_entry [vars_to_dict logfile_id vuserid iteration linenr_start \
+                         linenr_end entry functype ts_msec url \
+                         domain_port ip_port conn_nr nreqs relframe_id \
+                         internal_id  conn_msec http_code]
+
+  handle_block_func $db $logfile_id $vuserid $iteration $linenr_start $linenr_end \
+      $ts_msec $functype $conn_nr $conn_msec \
       $domain_port $ip_port $nreqs $url $http_code
 }
 
-proc handle_func_block {db logfile_id vuserid iteration linenr_start linenr_end ts_msec functype conn_nr conn_msec domain_port ip_port nreqs url http_code} {
+proc handle_block_func {db logfile_id vuserid iteration linenr_start linenr_end ts_msec functype conn_nr conn_msec domain_port ip_port nreqs url http_code} {
   global conn_info req_info
 
   if {$conn_nr != ""} {
@@ -268,13 +372,13 @@ proc handle_func_block {db logfile_id vuserid iteration linenr_start linenr_end 
   }
 }
 
-proc handle_func_block_bof {db logfile_id vuserid iteration} {
+proc handle_block_func_bof {db logfile_id vuserid iteration} {
   global conn_info req_info
   set conn_info [dict create]
   set req_info [dict create]
 }
 
-proc handle_func_block_eof {db logfile_id vuserid iteration} {
+proc handle_block_func_eof {db logfile_id vuserid iteration} {
   global conn_info req_info
   set keys [dict keys $conn_info]
   if {$keys != {}} {
@@ -334,8 +438,11 @@ set functypes {
   "Received callback about handshake completion" cb_handshake_completion
   "certificate error" cert_error
   "Handshake complete" handshake_complete
-  "Considering establishing the above as a new global SSL session" consider_global_ssl
+
+  "Established checken voor considering, deze staan in dezelfde entry" __dummy__
   "Established a global SSL session" established_global_ssl
+  "Considering establishing the above as a new global SSL session" consider_global_ssl
+  
   "Successful attempt to establish the reuse of the global SSL session" success_establish_reuse_global_ssl
   "Freeing the global SSL session in a callback" freeing_global_ssl
   "Connection information" conn_info
@@ -364,16 +471,18 @@ proc create_extra_tables {db} {
   log info "Creating extra tables..."
   
   $db exec "drop table if exists conn_bio_block"
-  $db exec "create table conn_bio_block (bio_block_id, conn_block_id, reason)"
+  $db exec "create table conn_bio_block (logfile_id, bio_block_id, conn_block_id, bio_linenr_end, conn_linenr_end, domain_port, ip_port, reason)"
   $db exec "insert into conn_bio_block
-select b.id, c.id, 'linenr_end 1 diff'
+select b.logfile_id, b.id, c.id, b.linenr_end, c.linenr_end,
+c.domain_port, c.ip_port, 'linenr_end 1 diff'
 from bio_block b, conn_block c
 where b.logfile_id = c.logfile_id
 and b.linenr_end + 1 = c.linenr_end"
 
   $db exec "drop table if exists newssl_entry"
   $db exec "create table newssl_entry as select * from ssl_entry where conn_nr <> ''"
-  
+
+  # TODO: hier mss iteration ook bij.
   $db exec "drop table if exists newssl_conn_block"
   $db exec "create table newssl_conn_block as
 select s.logfile_id, s.linenr_start newssl_linenr, s.conn_nr, c.linenr_start, c.linenr_end, s.id newssl_entry_id, c.id conn_block_id,
@@ -384,20 +493,35 @@ and s.functype = 'new_ssl'
 and s.logfile_id = c.logfile_id
 and s.linenr_start between c.linenr_start and c.linenr_end
 and s.conn_nr = c.conn_nr"
-  
+
+  # lokaties waar sess_address en sess_id voorkomen, hier is overlap.
+  $db exec "drop table if exists sess_addr_id"
+  $db exec "create table sess_addr_id as
+  select count(*) cnt, logfile_id, sess_address, sess_id, min(linenr_start) min_linenr, max(linenr_end) max_linenr, min(iteration) min_iteration, max(iteration) max_iteration
+  from ssl_entry
+  where sess_address <> ''
+  and sess_id <> ''
+  group by 2,3,4
+  order by 2,5"
+
+  # lokaties waar sess_address en sess_id voorkomen in global setting, geen overlap?
+  $db exec "drop table if exists global_sess_addr_id"
+  $db exec "create table global_sess_addr_id as
+  select count(*) cnt, logfile_id, sess_address, sess_id, min(linenr_start) min_linenr, max(linenr_end) max_linenr, min(iteration) min_iteration, max(iteration) max_iteration
+  from ssl_entry
+  where sess_address <> ''
+  and sess_id <> ''
+  and entry like '%global%'
+  group by 2,3,4
+  order by 2,5"
   
 }
+
+
 
 proc sql_checks {db} {
   log info "Doing checks..."
   set have_warnings 0
-  if 0 {
-    check_exists "BIO blocks without corresponding conn_block" \
-        bio_block id conn_bio_block bio_block_id
-    check_exists "Conn blocks without corresponding BIO block" \
-        conn_block id conn_bio_block conn_block_id
-    
-  }
   check_exists bio_block id conn_bio_block bio_block_id
   check_exists conn_block id conn_bio_block conn_block_id
   # in theorie ook nog kijken of dingen niet dubbel voorkomen, alleen kan bij deze niet.
@@ -406,9 +530,19 @@ proc sql_checks {db} {
   # check_exists conn_block id ssl_entry conn_nr
   check_exists newssl_entry id newssl_conn_block newssl_entry_id
   check_exists conn_block id newssl_conn_block conn_block_id
-  
+  check_doubles newssl_conn_block newssl_entry_id
+  check_doubles newssl_conn_block conn_block_id
+
+  # TODO: waarsch wel checken op verschillende logfiles, daar kunnen dubbele wel voorkomen, en mss ook al met meerdere/veel iteraties.
+  check_doubles sess_addr_id {logfile_id sess_address}
+  check_doubles sess_addr_id {logfile_id sess_id}
+
+  check_doubles global_sess_addr_id {logfile_id sess_address}
+  check_doubles global_sess_addr_id {logfile_id sess_id}
+
   # even een om te testen
   # do_check "testje" "select * from conn_block where id = 1"
+  # check_doubles conn_block conn_nr
   
   if {$have_warnings} {
     log warn "**************************************"
@@ -426,6 +560,15 @@ proc check_exists {tbl1 col1 tbl2 col2} {
   # sql_check $msg "select * from $tbl1 where not $col1 in (select $col2 from $tbl2)"
   sql_check "Entries in $tbl1 without corresponding ($col1->$col2) entry in $tbl2" \
       "select * from $tbl1 where $col1 <> '' and not $col1 in (select $col2 from $tbl2)"
+}
+
+# check if combination of columns in table occurs more than once.
+proc check_doubles {tbl cols} {
+  upvar have_warnings have_warnings
+  upvar db db
+  set cols [join $cols ", "]
+  sql_check "Double entries in $tbl (cols: $cols)" \
+      "select count(*), $cols from $tbl group by $cols having count(*) > 1"
 }
 
 proc sql_check {msg sql} {
@@ -449,14 +592,20 @@ proc ssl_define_tables {db} {
   #       as_same: als een veld geen datatype heeft, en eerdere def met dezelfde naam wel, neem deze dan over. Dan bv maar 1x bij linenr_start integer op te geven.
   # evt dan ook een def_datatype <col> <datatype> opnemen, zodat je dit vantevoren kunt
   # doen, evt ook met regexp's.
-  $db add_tabledef bio_entry {id} {logfile_id {vuserid integer} iteration {linenr_start integer} {linenr_end integer} entry functype address socket_fd call result}
+  $db add_tabledef bio_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_start integer} {linenr_end integer} entry functype address socket_fd call result}
   # TODO: andere dingen in SSL line
-  $db add_tabledef ssl_entry {id} {logfile_id {vuserid integer} iteration {linenr_start integer} {linenr_end integer} entry functype domain_port ssl ctx sess_address sess_id socket {conn_nr integer}}
-  $db add_tabledef func_entry {id} {logfile_id {vuserid integer} iteration {linenr_start integer} {linenr_end integer} entry functype {ts_msec integer} url domain_port ip_port {conn_nr integer} {nreqs integer} {relframe_id integer} {internal_id integer} {conn_msec integer} http_code}
+  $db add_tabledef ssl_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_start integer} {linenr_end integer} entry functype domain_port ssl ctx sess_address sess_id socket {conn_nr integer}}
+  $db add_tabledef func_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_start integer} {linenr_end integer} entry functype {ts_msec integer} url domain_port ip_port {conn_nr integer} {nreqs integer} {relframe_id integer} {internal_id integer} {conn_msec integer} http_code}
 
-  $db add_tabledef bio_block {id} {logfile_id {vuserid integer} iteration_start iteration_end {linenr_start integer} {linenr_end integer} address socket_fd}
-  $db add_tabledef conn_block {id} {logfile_id {vuserid integer} iteration_start iteration_end {linenr_start integer} {linenr_end integer} {ts_msec_start integer} {ts_msec_end integer} {ts_msec_diff integer} {conn_nr integer} {conn_msec integer} domain_port ip_port {nreqs integer}}
-  $db add_tabledef req_block {id} {logfile_id {vuserid integer} iteration_start iteration_end {linenr_start integer} {linenr_end integer} {ts_msec_start integer} {ts_msec_end integer} {ts_msec_diff integer} url domain_port nentries http_code}
+  $db add_tabledef bio_block {id} {logfile_id {vuserid integer} {iteration_start integer} {iteration_end integer} {linenr_start integer} {linenr_end integer} address socket_fd}
+  $db add_tabledef conn_block {id} {logfile_id {vuserid integer} {iteration_start integer} {iteration_end integer} {linenr_start integer} {linenr_end integer} {ts_msec_start integer} {ts_msec_end integer} {ts_msec_diff integer} {conn_nr integer} {conn_msec integer} domain_port ip_port {nreqs integer}}
+  $db add_tabledef req_block {id} {logfile_id {vuserid integer} {iteration_start integer} {iteration_end integer} {linenr_start integer} {linenr_end integer} {ts_msec_start integer} {ts_msec_end integer} {ts_msec_diff integer} url domain_port nentries http_code}
+
+  # einde bij "freeing_global_ssl"
+
+  $db add_tabledef ssl_session {id} {logfile_id {linenr_start int} {linenr_end int}
+    {iteration_start int} {iteration_end int} sess_id
+    sess_addresses ssls ctxs domain_ports estab_global_linenrs {isglobal int}}
   
 }
 
@@ -479,6 +628,16 @@ proc dict_set_if_empty {d_name key val {check 1}} {
       # explicitly set to no check, eg with line numbers.
     }
   }
+}
+
+proc dict_lappend {d_name key val} {
+  upvar $d_name d
+  set vals [dict_get $d $key]
+  if {($val != "") && ([lsearch $vals $val] == -1)} {
+    lappend vals $val
+    dict set d $key $vals
+  }
+  return $vals
 }
 
 proc setvars {lst val} {

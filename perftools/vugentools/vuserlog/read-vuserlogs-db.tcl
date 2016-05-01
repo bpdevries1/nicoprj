@@ -9,6 +9,8 @@ ndv::source_once ssl.tcl
 
 set_log_global debug
 
+set VUSER_END_ITERATION 1000
+
 proc main {argv} {
   set options {
     {dir.arg "" "Directory with vuserlog files"}
@@ -40,6 +42,9 @@ proc main {argv} {
     readlogfile $logfile $db
     incr nread
   }
+
+  handle_ssl_final_end $db
+  
   log info "Read $nread logfile(s)"
 }
 
@@ -147,29 +152,43 @@ proc det_project_runid_script {logfile} {
 #End auto log messages stack.	[MsgId: MMSG-10544]
 #functions.c(334): [2016-02-08 10:11:49] [1454922709] trans=CR_UC1_NewVisit_01_Open_Loginpage_FXF, user=u_lpt-rtsec_cr_tso_tso1_000001, resptime=2.434, status=0, iteration=1 [02/08/16 10:11:49]
 proc get_iteration {line iteration} {
+  global VUSER_END_ITERATION
   if {[regexp {Start auto log messages stack - Iteration (\d+)\.} $line z it]} {
+    check_iteration_max $it
     return $it
   }
   if {[regexp {End auto log messages stack.} $line]} {
+    check_iteration_max $it
     return ""
   }
   if {[regexp {, iteration=(\d+)} $line z it]} {
+    check_iteration_max $it
     return $it
   }
 
   if {[regexp {Starting iteration (\d+)} $line z it]} {
+    check_iteration_max $it
     return $it
   }
 
   if {[regexp {Ending iteration (\d+)} $line z it]} {
+    check_iteration_max $it
     return ""
   }
   
   if {[regexp {Starting action vuser_end.}	$line]} {
-    return "vuser_end"
+    # return "vuser_end"
+    return $VUSER_END_ITERATION
   }
   
   return $iteration ; # keep current iteration nr.
+}
+
+proc check_iteration_max {it} {
+  global VUSER_END_ITERATION
+  if {$it >= $VUSER_END_ITERATION} {
+    error "Read iteration nr >= $VUSER_END_ITERATION, increase this one!"
+  }
 }
 
 proc is_end_iter {line} {
