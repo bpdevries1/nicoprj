@@ -37,7 +37,7 @@ proc handle_ssl_end {db logfile_id vuserid iteration} {
   handle_bio_block_eof $db $logfile_id $vuserid $iteration
   handle_func_block_eof $db $logfile_id $vuserid $iteration
   create_extra_tables $db
-  do_checks $db
+  sql_checks $db
 }
 
 proc line_type {line} {
@@ -359,6 +359,10 @@ proc det_functype {entry} {
 }
 
 proc create_extra_tables {db} {
+  # TODO: maybe create indexes first.
+  
+  log info "Creating extra tables..."
+  
   $db exec "drop table if exists conn_bio_block"
   $db exec "create table conn_bio_block (bio_block_id, conn_block_id, reason)"
   $db exec "insert into conn_bio_block
@@ -366,17 +370,42 @@ select b.id, c.id, 'linenr_end 1 diff'
 from bio_block b, conn_block c
 where b.logfile_id = c.logfile_id
 and b.linenr_end + 1 = c.linenr_end"
- 
+
+  $db exec "drop table if exists newssl_entry"
+  $db exec "create table newssl_entry as select * from ssl_entry where conn_nr <> ''"
+  
+  $db exec "drop table if exists newssl_conn_block"
+  $db exec "create table newssl_conn_block as
+select s.logfile_id, s.linenr_start newssl_linenr, s.conn_nr, c.linenr_start, c.linenr_end, s.id newssl_entry_id, c.id conn_block_id,
+  s.domain_port domain_port, s.ssl ssl, s.ctx ctx, s.socket socket, c.nreqs nreqs
+from newssl_entry s, conn_block c
+where s.conn_nr <> ''
+and s.functype = 'new_ssl'
+and s.logfile_id = c.logfile_id
+and s.linenr_start between c.linenr_start and c.linenr_end
+and s.conn_nr = c.conn_nr"
+  
+  
 }
 
-proc do_checks {db} {
+proc sql_checks {db} {
   log info "Doing checks..."
   set have_warnings 0
-  do_check "BIO blocks without corresponding conn_block" \
-      "select * from bio_block where not id in (select bio_block_id from conn_bio_block)"
-  do_check "Conn blocks without corresponding BIO block" \
-      "select * from conn_block where not id in (select conn_block_id from conn_bio_block)"
+  if 0 {
+    check_exists "BIO blocks without corresponding conn_block" \
+        bio_block id conn_bio_block bio_block_id
+    check_exists "Conn blocks without corresponding BIO block" \
+        conn_block id conn_bio_block conn_block_id
+    
+  }
+  check_exists bio_block id conn_bio_block bio_block_id
+  check_exists conn_block id conn_bio_block conn_block_id
   # in theorie ook nog kijken of dingen niet dubbel voorkomen, alleen kan bij deze niet.
+
+  # testje weer:
+  # check_exists conn_block id ssl_entry conn_nr
+  check_exists newssl_entry id newssl_conn_block newssl_entry_id
+  check_exists conn_block id newssl_conn_block conn_block_id
   
   # even een om te testen
   # do_check "testje" "select * from conn_block where id = 1"
@@ -390,13 +419,24 @@ proc do_checks {db} {
   }
 }
 
-proc do_check {msg sql} {
+# check if tbl1.col1 entries all exist in tbl2.col2
+proc check_exists {tbl1 col1 tbl2 col2} {
+  upvar have_warnings have_warnings
+  upvar db db
+  # sql_check $msg "select * from $tbl1 where not $col1 in (select $col2 from $tbl2)"
+  sql_check "Entries in $tbl1 without corresponding ($col1->$col2) entry in $tbl2" \
+      "select * from $tbl1 where $col1 <> '' and not $col1 in (select $col2 from $tbl2)"
+}
+
+proc sql_check {msg sql} {
   upvar have_warnings have_warnings
   upvar db db
   set res [$db query $sql]
   if {[:# $res] > 0} {
     log warn "$msg:"
-    log warn $res
+    # log warn $res
+    log warn "sql: $sql"
+    log warn "#records: [:# $res]"
     log warn "--------"
     set have_warnings 1    
   }
