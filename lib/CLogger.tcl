@@ -105,7 +105,7 @@ namespace eval ::ndv {
       } else {
         set f_log [open $filename w]
       }
-      log_intern "Opened logfile: $filename" info
+      log_intern "Opened logfile: $filename" debug
     }
 
     public method close_file {} {
