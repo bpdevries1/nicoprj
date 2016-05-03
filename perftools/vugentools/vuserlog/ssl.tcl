@@ -1,11 +1,15 @@
 # functions to read SSL specific parts in log db.
 
+# TODO:
+# * Check of logging op always staat; alleen in dit geval de checks op "bio_info keys not empty at the end" uitvoeren.
+#   voor nu 3-5-2016 check uitgezet.
 proc handle_ssl_start {db logfile_id vuserid iteration} {
-  global entry_type lines linenr_start linenr_end
+  global entry_type lines linenr_start linenr_end log_always
   set entry_type "start"
   set lines {}
   set linenr_start -1
   set linenr_end -1
+  set log_always 0
   
   handle_block_bio_bof $db $logfile_id $vuserid $iteration
   handle_block_func_bof $db $logfile_id $vuserid $iteration
@@ -13,10 +17,15 @@ proc handle_ssl_start {db logfile_id vuserid iteration} {
 }
 
 proc handle_ssl_line {db logfile_id vuserid iteration line linenr} {
-  global entry_type lines linenr_start linenr_end
+  global entry_type lines linenr_start linenr_end log_always
   if {$line == "BIO\[02EAE778\]:Free - socket"} {
     log info "Free without src/line found"
     # breakpoint
+  }
+  if {[regexp {Virtual User Script started at} $line]} {
+    # TODO: log_always weer zetten, nu 3-5-2016 fouten op run597.
+    #set log_always 1
+    #log debug "set log_always to 1"
   }
   set tp [line_type $line]
   if {$tp == "cont"} {
@@ -88,6 +97,7 @@ proc line_type {line} {
       }
     }
   } else {
+    # hier zou je nooit moeten komen, eerste regexp moet alles opvangen.
     return "cont"
   }
 }
@@ -121,14 +131,22 @@ proc handle_entry_bio {db logfile_id vuserid iteration linenr_start linenr_end l
 # bio_info: dict: key=address, val=dict: linenr_start, socket_fd
 # $db add_tabledef bio_block {id} {logfile_id vuserid iteration linenr_start linenr_end address socket_fd}
 proc handle_block_bio {db logfile_id vuserid iteration linenr_start linenr_end functype address socket_fd} {
-  global bio_info
+  global bio_info log_always
   if {$functype == "free"} {
-    set d [dict get $bio_info $address]
-    set linenr_start [dict get $d linenr_start]
-    set socket_fd [dict get $d socket_fd]
-    set iteration_start [dict get $d iteration_start]
-    set iteration_end $iteration
-    $db insert bio_block [vars_to_dict logfile_id vuserid iteration_start iteration_end linenr_start linenr_end address socket_fd]
+    set d [dict_get $bio_info $address]
+    if {$d == {}} {
+      if {$log_always} {
+        error "Did not find $address in bio_info"        
+      } else {
+        # nothing, ignore.
+      }
+    } else {
+      set linenr_start [dict get $d linenr_start]
+      set socket_fd [dict get $d socket_fd]
+      set iteration_start [dict get $d iteration_start]
+      set iteration_end $iteration
+      $db insert bio_block [vars_to_dict logfile_id vuserid iteration_start iteration_end linenr_start linenr_end address socket_fd]
+    }
     dict unset bio_info $address
   } else {
     set d [dict_get $bio_info $address]
@@ -145,11 +163,13 @@ proc handle_block_bio_bof {db logfile_id vuserid iteration} {
 }
 
 proc handle_block_bio_eof {db logfile_id vuserid iteration} {
-  global bio_info
+  global bio_info log_always
   set keys [dict keys $bio_info]
   if {$keys != {}} {
-    log error "bio_info keys not empty at the end: (logfile_id=$logfile_id) $keys"
-    error "bio_info keys not empty at the end: (logfile_id=$logfile_id) $keys"
+    if {$log_always} {
+      log error "bio_info keys not empty at the end: (logfile_id=$logfile_id) $keys"
+      error "bio_info keys not empty at the end: (logfile_id=$logfile_id) $keys"
+    }
   }
 }
 
@@ -314,25 +334,32 @@ proc handle_entry_func {db logfile_id vuserid iteration linenr_start linenr_end 
 }
 
 proc handle_block_func {db logfile_id vuserid iteration linenr_start linenr_end ts_msec functype conn_nr conn_msec domain_port ip_port nreqs url http_code} {
-  global conn_info req_info
+  global conn_info req_info log_always
 
   if {$conn_nr != ""} {
     set d [dict_get $conn_info $conn_nr]    
     if {$functype == "closed_conn"} {
       if {$d == {}} {
-        log warn "Empty dict for closed_conn: logfile_id = $logfile_id, linenr=$linenr_start, conn_nr=$conn_nr"
-        error "Stop now"
+        if {$log_always} {
+          log warn "Empty dict for closed_conn: logfile_id = $logfile_id, linenr=$linenr_start, conn_nr=$conn_nr"
+          error "Stop now"
+        }
+      } else {
+        set linenr_start [:linenr_start $d]
+        set iteration_start [:iteration_start $d]
+        set iteration_end $iteration
+        set conn_msec [:conn_msec $d]
+        set domain_port [:domain_port $d]
+        set ip_port [:ip_port $d]
+        set ts_msec_end $ts_msec
+        set ts_msec_start [:ts_msec_start $d]
+        if {$ts_msec_start == ""} {
+          set ts_msec_diff ""
+        } else {
+          set ts_msec_diff [expr $ts_msec_end - $ts_msec_start]  
+        }
+        $db insert conn_block [vars_to_dict logfile_id vuserid iteration_start iteration_end linenr_start linenr_end ts_msec_start ts_msec_end ts_msec_diff conn_nr conn_msec domain_port ip_port nreqs]
       }
-      set linenr_start [:linenr_start $d]
-      set iteration_start [:iteration_start $d]
-      set iteration_end $iteration
-      set conn_msec [:conn_msec $d]
-      set domain_port [:domain_port $d]
-      set ip_port [:ip_port $d]
-      set ts_msec_end $ts_msec
-      set ts_msec_start [:ts_msec_start $d]
-      set ts_msec_diff [expr $ts_msec_end - $ts_msec_start]
-      $db insert conn_block [vars_to_dict logfile_id vuserid iteration_start iteration_end linenr_start linenr_end ts_msec_start ts_msec_end ts_msec_diff conn_nr conn_msec domain_port ip_port nreqs]
       dict unset conn_info $conn_nr
     } else {
       dict_set_if_empty d iteration_start $iteration 0
@@ -356,7 +383,11 @@ proc handle_block_func {db logfile_id vuserid iteration linenr_start linenr_end 
       set nentries [:nentries $d]
       set ts_msec_end $ts_msec
       set ts_msec_start [:ts_msec_start $d]
-      set ts_msec_diff [expr $ts_msec_end - $ts_msec_start]
+      if {$ts_msec_start == ""} {
+        set ts_msec_diff ""
+      } else {
+        set ts_msec_diff [expr $ts_msec_end - $ts_msec_start]   
+      }
       set http_code [:http_code $d]
       $db insert req_block [vars_to_dict logfile_id vuserid iteration_start iteration_end linenr_start linenr_end ts_msec_start ts_msec_end ts_msec_diff url domain_port nentries http_code]
       dict unset req_info $url
@@ -379,16 +410,18 @@ proc handle_block_func_bof {db logfile_id vuserid iteration} {
 }
 
 proc handle_block_func_eof {db logfile_id vuserid iteration} {
-  global conn_info req_info
+  global conn_info req_info log_always
   set keys [dict keys $conn_info]
-  if {$keys != {}} {
-    log error "conn_info keys not empty at the end: (logfile_id=$logfile_id) $keys"
-    error "conn_info keys not empty at the end: (logfile_id=$logfile_id) $keys"
-  }
-  set keys [dict keys $req_info]
-  if {$keys != {}} {
-    log error "req_info keys not empty at the end: (logfile_id=$logfile_id) $keys"
-    error "req_info keys not empty at the end: (logfile_id=$logfile_id) $keys"
+  if {$log_always} {
+    if {$keys != {}} {
+      log error "conn_info keys not empty at the end: (logfile_id=$logfile_id) $keys"
+      error "conn_info keys not empty at the end: (logfile_id=$logfile_id) $keys"
+    }
+    set keys [dict keys $req_info]
+    if {$keys != {}} {
+      log error "req_info keys not empty at the end: (logfile_id=$logfile_id) $keys"
+      error "req_info keys not empty at the end: (logfile_id=$logfile_id) $keys"
+    }
   }
 }
 
@@ -613,6 +646,7 @@ proc ssl_define_tables {db} {
 
 # check if new val is different form old var, but both not empty: this could be an error!
 proc dict_set_if_empty {d_name key val {check 1}} {
+  global log_always  
   upvar $d_name d
   set old_val [dict_get $d $key]
   if {$old_val == ""} {
@@ -623,7 +657,11 @@ proc dict_set_if_empty {d_name key val {check 1}} {
     # ok, just keep old val.
   } else {
     if {$check} {
-      error "old val ($old_val) differs from new val ($val), key=$key, dict=$d"  
+      if {$log_always} {
+        error "old val ($old_val) differs from new val ($val), key=$key, dict=$d"    
+      } else {
+        # bij niet log_always een incomplete log, dan niets van te zeggen.
+      }
     } else {
       # explicitly set to no check, eg with line numbers.
     }

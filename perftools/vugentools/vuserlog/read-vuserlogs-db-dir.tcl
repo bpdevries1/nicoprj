@@ -17,7 +17,7 @@ proc main {argv} {
 
   set logdir [:dir $dargv]
   # lassign $argv logdir
-  puts "logdir: $logdir"
+  log debug "logdir: $logdir"
 
   foreach subdir [glob -directory $logdir -type d *] {
     set dbname "$subdir.db"
@@ -26,7 +26,7 @@ proc main {argv} {
       file delete $dbname
       read_logfile_dir $subdir $dbname
     } else {
-      log info "DB already exists, so ignore: $subdir"
+      log debug "DB already exists, so ignore: $subdir"
     }
   }
 }

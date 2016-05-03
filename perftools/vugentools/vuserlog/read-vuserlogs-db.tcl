@@ -7,7 +7,7 @@ ndv::source_once ssl.tcl
 # TODO:
 # [2016-02-08 11:13:55] Bug - when logfile contains 0-bytes (eg in Vugen output.txt with log webregfind for PDF/XLS), the script sees this as EOF and misses transactions and errors.
 
-set_log_global debug
+set_log_global info
 
 set VUSER_END_ITERATION 1000
 
@@ -118,7 +118,8 @@ proc readlogfile {logfile db} {
       }
 		  set error [handle_error $line $db [file tail $logfile] $logfile_id $vuserid $linenr $iteration $ts_cet $user]
 		  set error_iter [update_error_iter $error_iter $error]
-      handle_ssl_line $db $logfile_id $vuserid $iteration $line $linenr
+      # TODO: deze weer aanzetten. Zorgt 3-5-2016 voor out-of-memory, waarsch een dict die je vrij moet geven.
+      # handle_ssl_line $db $logfile_id $vuserid $iteration $line $linenr
     }
 	  log info "Last line number: $linenr"
     
@@ -158,7 +159,6 @@ proc get_iteration {line iteration} {
     return $it
   }
   if {[regexp {End auto log messages stack.} $line]} {
-    check_iteration_max $it
     return ""
   }
   if {[regexp {, iteration=(\d+)} $line z it]} {
@@ -451,9 +451,9 @@ proc delete_database {dbname} {
 }
 
 if {[this_is_main]} {
-  log info "This is main, so call main proc"
+  log debug "This is main, so call main proc"
   main $argv  
 } else {
-  log info "This is not main, don't call main proc"
+  log debug "This is not main, don't call main proc"
 }
 
