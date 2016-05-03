@@ -9,38 +9,43 @@ set UNISON_BINARY {c:\PCC\Util\Unison\Unison-2.40.102-Text.exe}
 # TODO mss toch periodiek uitvoeren, niet elke dag?
 
 proc main {} {
-  zip_projects
-  if 1 {
-	  unison -auto projecten2h
-	  unison -auto -batch backup2g
-	  unison -auto -batch vugen2h
-	  zip_vugens
-	  zip_alm_dbs
-	  zip_notes_org
-	  cleanup
+  unzip_projects
+}
+
+proc unzip_projects {} {
+  unzip_project {c:\PCC\nico\.staging\nicoprj} /c/PCC/nicoprj.zip
+  unzip_project {c:\PCC\nico\.staging\perftoolset\tools} /c/PCC/perftoolset-tools.zip
+  # unzip_project {c:\PCC\nico\.staging\nicoprj} c:/PCC/nicoprj.zip
+  # unzip_project {c:\PCC\nico\.staging\perftoolset\tools} c:/PCC/perftoolset-tools.zip
+}
+
+proc unzip_project {dir zipfile} {
+  global env
+  # TODO check op existence, vertaal cygwin pad naar windows pad.
+  set zipfile_win [det_win_file $zipfile]
+  if {![file exists $zipfile_win]} {
+	puts "zipfile does not exist: $zipfile"
+	return
   }
+  # file mkdir [file dirname $zipfile]
+  file delete -force $dir
+  file mkdir $dir
+  cd $dir
+  set old_path $env(PATH)
+  set env(PATH) {c:\PCC\Util\cygwin\bin}
+  puts "current dir: [pwd]"
+  
+  exec "C:/PCC/Util/cygwin/lib/p7zip/7z.exe" x -tzip -p1234test $zipfile
+  file delete $zipfile_win
+  set env(PATH) $old_path
 }
 
-proc unison {args} {
-  global UNISON_BINARY stdout
-  catch {
-    # stdout net als stderr gewoon doorsturen naar de console, niet als result opvangen.
-    # exec -ignorestderr $UNISON_BINARY {*}$args 1>@2
-    # set f [open unison.out w]
-    # exec -ignorestderr $UNISON_BINARY {*}$args >&@ $f
-    exec -ignorestderr $UNISON_BINARY {*}$args >&@ stdout
-    # close $f
-  } res
-  puts "res: $res"
-}
-
-#nicoprj - 293MB, best veel.
-#perftoolset - 43.3MB
-#perftoolset/tools - 17.8 MB, moet kunnen, zeker gezipt.
-
-proc zip_projects {} {
-  zip_project {c:\PCC\nico\nicoprj} /c/PCC/Nico/zips/nicoprj.zip
-  zip_project {c:\PCC\nico\perftoolset\tools} /c/PCC/Nico/zips/perftoolset-tools.zip
+proc det_win_file {cygwin_file} {
+	if {[regexp {^/c/(.*)$} $cygwin_file z rest]} {
+		return "c:/$rest"
+	} else {
+		error "Cannot convert to windows name: $cygwin_file"
+	}
 }
 
 proc zip_project {dir zipfile} {
