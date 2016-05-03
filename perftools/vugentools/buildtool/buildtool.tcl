@@ -13,7 +13,7 @@ term::ansi::send::import
 
 package require ndv
 
-ndv::source_once configs.tcl
+ndv::source_once configs.tcl lr_params.tcl
 
 # deze mogelijk  nog dynamisch, of in config file.
 set lr_include_dir {C:\Program Files (x86)\HP\LoadRunner\include}
@@ -423,6 +423,7 @@ proc task_test {args} {
   task_libs {*}$args
   task_check {*}$args
   task_check_configs {*}$args
+  task_check_lr_params {*}$args
 }
 
 proc task_check {args} {
