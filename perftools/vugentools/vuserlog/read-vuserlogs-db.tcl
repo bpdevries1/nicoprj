@@ -15,6 +15,7 @@ proc main {argv} {
   set options {
     {dir.arg "" "Directory with vuserlog files"}
     {db.arg "auto" "SQLite DB location (auto=create in dir)"}
+    {ssl "Read SSL data provided log is 'always'"}
     {deletedb "Delete DB before reading"}
   }
   set usage ": [file tail [info script]] \[options] :"
@@ -23,6 +24,7 @@ proc main {argv} {
   set logdir [:dir $dargv]
   # lassign $argv logdir
   puts "logdir: $logdir"
+  set ssl [:ssl $dargv]
   if {[:db $dargv] == "auto"} {
     set dbname [file join $logdir "vuserlog.db"]
   } else {
@@ -31,29 +33,51 @@ proc main {argv} {
   if {[:deletedb $dargv]} {
     delete_database $dbname
   }
-  set db [get_results_db $dbname]
+
+  read_logfile_dir $logdir $dbname $ssl
+}
+
+proc read_logfile_dir {logdir dbname ssl} {
+  set db [get_results_db $dbname $ssl]
+  $db insert readstatus [dict create ts [now] status "starting"]
   set nread 0
+
+  set db [get_results_db $dbname $ssl]
   foreach logfile [glob -nocomplain -directory $logdir *.log] {
-    readlogfile $logfile $db
+    readlogfile $logfile $db $ssl
     incr nread
+    if {$nread >= 105} {
+      #log warn "100 read, quitting for now."
+      #exit
+    }
   }
   # [2016-02-08 10:55:16] NdV kan ook van Vugen log zijn: output.txt.
   foreach logfile [glob -nocomplain -directory $logdir *.txt] {
-    readlogfile $logfile $db
+    readlogfile $logfile $db $ssl
     incr nread
   }
 
-  handle_ssl_final_end $db
+  if {$ssl} {
+    handle_ssl_final_end $db
+  }
+
+  $db insert readstatus [dict create ts [now] status "complete"]
+  $db close
   
-  log info "Read $nread logfile(s)"
+  log info "Read $nread logfile(s) in $logdir"
 }
+
+
 
 #  $db add_tabledef trans {id} {logfile {vuserid int} ts_cet {sec_cet int} transname user {resptime real} {status int}
 #                   usecase revisit {transid int} transshort searchcrit}
 # functions.c(343): [2015-09-02 05:51:41] [1441165901] trans=CR_UC1_revisit_11_Expand_transactions_DEP, user=u_lpt-rtsec_cr_tso_tso1_000005, resptime=0.156, status=0 [09/02/15 05:51:41]	[MsgId: MMSG-17999]
 # Transaction "CR_UC1_ -> deze wordt niet geparsed.
-proc readlogfile {logfile db} {
+proc readlogfile {logfile db ssl} {
   log info "Reading: $logfile"
+  if {[is_logfile_read $db $logfile]} {
+    return
+  }
   set ts_cet [clock format [file mtime $logfile] -format "%Y-%m-%d %H:%M:%S"]
   # set logfile [file tail $logfilepath]
   set vuserid [det_vuserid $logfile]
@@ -64,18 +88,14 @@ proc readlogfile {logfile db} {
   set filesize [file size $logfile]
   lassign [det_project_runid_script $logfile] project runid script
   
-  #log info "Net voor nieuwe insert logfile"
-  # breakpoint
   
-  set logfile_id [$db insert logfile [vars_to_dict logfile dirname ts_cet filesize runid project script]]
-  
-  #log info "ending now"
-  #exit
-  
-  # TODO 22-10-2015 NdV niet tevreden over error bepaling per iteratie. Met prev_iteration is altijd lastig.
+  # TODO: 22-10-2015 NdV niet tevreden over error bepaling per iteratie. Met prev_iteration is altijd lastig.
   # liever functioneel oplossen, soort merge, en ook prio van errors bepalen, met pas > timeout > rest.
   set fi [open $logfile r]
   $db in_trans {
+    # insert logfile within trans; if something fails, this will be rolled back.
+    set logfile_id [$db insert logfile [vars_to_dict logfile dirname ts_cet \
+                                            filesize runid project script]]
     set linenr 0
     set prev_iteration ""  
     set iteration ""
@@ -85,18 +105,12 @@ proc readlogfile {logfile db} {
     handle_ssl_start $db $logfile_id $vuserid $iteration
 	  while {[gets $fi line] >= 0} {
 		  incr linenr
-
 		  set iteration [get_iteration $line $iteration]
-      if {$iteration == ""} {
-        #log debug "iteration is empty, reset user and ts_cet, linenr=$linenr, line=$line"
-        #set user ""
-        #set ts_cet ""
-      }
       
 		  # possibly handle previous error_iteration
+      # TODO: dit stukje kan in losse functie, evt met error_iteration en prev_iteration als var params.
 		  if {[is_start_iter $line]} {
         # 22-10-2015 bij elk stukje log krijg je een end, dus ook kijken of de iteratie nu anders is dan de vorige.
-        # #   $db add_tabledef error_iter {id} {logfile_id logfile {vuserid int} {iteration int} user errortype}
         if {$iteration != $prev_iteration} {
           if {$prev_iteration != ""} {
             insert_error_iter $db $logfile_id [file tail $logfile] $vuserid $prev_iteration $error_iter
@@ -108,6 +122,8 @@ proc readlogfile {logfile db} {
 		  
 		  handle_retraccts $line $db $logfile_id $vuserid $linenr $iteration
 		  lassign [handle_trans $line $db $logfile_id $vuserid $linenr $iteration] user2 ts_cet2
+
+      # TODO: wat wil ik met user2/ts_cet2, vast goede reden? 
       if {$user2 != ""} {
         log debug "Setting user: $user2"
         set user $user2
@@ -119,17 +135,27 @@ proc readlogfile {logfile db} {
 		  set error [handle_error $line $db [file tail $logfile] $logfile_id $vuserid $linenr $iteration $ts_cet $user]
 		  set error_iter [update_error_iter $error_iter $error]
       # TODO: deze weer aanzetten. Zorgt 3-5-2016 voor out-of-memory, waarsch een dict die je vrij moet geven.
-      # handle_ssl_line $db $logfile_id $vuserid $iteration $line $linenr
+      if {$ssl} {
+        handle_ssl_line $db $logfile_id $vuserid $iteration $line $linenr  
+      }
     }
 	  log info "Last line number: $linenr"
     
-    insert_error_iter $db $logfile_id [file tail $logfile] $vuserid $prev_iteration $error_iter
+    insert_error_iter $db $logfile_id [file tail $logfile] $vuserid $prev_iteration \
+        $error_iter
   }
   if {![eof $fi]} {
-    log warn "Not EOF yet for $logfile, linenr=$linenr"
+    log warn "Not EOF yet for $logfile, linenr=$linenr, possibly a 0-byte."
   }
-  handle_ssl_end $db $logfile_id $vuserid $iteration
+  if {$ssl} {
+    handle_ssl_end $db $logfile_id $vuserid $iteration  
+  }
   close $fi
+}
+
+proc is_logfile_read {db logfile} {
+  # if query returns 1 record, return 1=true, otherwise 0=false.
+  :# [$db query "select 1 from logfile where logfile='$logfile'"]
 }
 
 proc det_project_runid_script {logfile} {
@@ -391,11 +417,11 @@ proc det_script {logfile} {
 }
 
 # deze mogelijk in libdb:
-proc get_results_db {db_name} {
+proc get_results_db {db_name ssl} {
   #breakpoint
   set existing_db [file exists $db_name]
   set db [dbwrapper new $db_name]
-  define_tables $db
+  define_tables $db $ssl
   $db create_tables 0 ; # 0: don't drop tables first. Always do create, eg for new table defs. 1: drop tables first.
   if {!$existing_db} {
     log info "New db: $db_name, create tables"
@@ -408,28 +434,33 @@ proc get_results_db {db_name} {
   return $db
 }
 
-if 0 {
-functions.c(278): [2015-06-15 10:28:06] [1434356886] trans: CBW_01_Log_in_page - user: 3002161992, resptime: 1,055	[MsgId: MMSG-17999]
-functions.c(278): [2015-06-15 10:28:14] [1434356894] trans: CBW_02A_CRAS_log_in_OK - user: 3002161992, resptime: 3,183	[MsgId: MMSG-17999]
-functions.c(278): [2015-06-15 10:28:22] [1434356902] trans: CBW_03_Sprocket - user: 3002161992, resptime: 1,821	[MsgId: MMSG-17999]
+proc define_tables {db ssl} {
+  $db add_tabledef readstatus {id} {ts status}
+  
+  $db add_tabledef logfile {id} {logfile dirname ts_cet {filesize int} \
+                                     {runid int} project script}
 
-}
-
-proc define_tables {db} {
-  $db add_tabledef logfile {id} {logfile dirname ts_cet {filesize int} {runid int} project script}
-
-  $db add_tabledef retraccts {id} {logfile_id {vuserid int} {linenr int} ts_cet {sec_cet int} user {naccts int} {resptime real}}
+  $db add_tabledef retraccts {id} {logfile_id {vuserid int} {linenr int} \
+                                       ts_cet {sec_cet int} user {naccts int} \
+                                       {resptime real}}
   # 17-6-2015 NdV transaction is a reserved word in SQLite, so use trans as table name
   # $db add_tabledef trans {id} {logfile {vuserid int} ts_cet {sec_cet int} transname user {resptime real}}
-  $db add_tabledef trans {id} {logfile_id {vuserid int} {linenr int} ts_cet {sec_cet int} transname user {resptime real} {status int}
-                   {iteration int} usecase revisit {transid int} transshort searchcrit}
-  $db add_tabledef error {id} {logfile_id logfile {vuserid int} {linenr int} {iteration int} srcfile {srcline int} ts_cet user errornr errortype details line}
+  $db add_tabledef trans {id} {logfile_id {vuserid int} {linenr int} ts_cet \
+                                   {sec_cet int} transname user {resptime real} \
+                                   {status int} {iteration int} usecase revisit \
+                                   {transid int} transshort searchcrit}
+  
+  $db add_tabledef error {id} {logfile_id logfile {vuserid int} {linenr int} \
+                                   {iteration int} srcfile {srcline int} ts_cet \
+                                   user errornr errortype details line}
                    
   # 22-10-2015 NdV ook errors per iteratie, zodat er een hoofd schuldige is aan te wijzen voor het falen.
-  $db add_tabledef error_iter {id} {logfile_id logfile script {vuserid int} {iteration int} user errortype}
-  
-  ssl_define_tables $db
-  
+  $db add_tabledef error_iter {id} {logfile_id logfile script {vuserid int} \
+                                        {iteration int} user errortype}
+
+  if {$ssl} {
+    ssl_define_tables $db  
+  }
 }
 
 proc delete_database {dbname} {
