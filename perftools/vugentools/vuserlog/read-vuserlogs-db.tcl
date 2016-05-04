@@ -7,7 +7,7 @@ ndv::source_once ssl.tcl
 # TODO:
 # [2016-02-08 11:13:55] Bug - when logfile contains 0-bytes (eg in Vugen output.txt with log webregfind for PDF/XLS), the script sees this as EOF and misses transactions and errors.
 
-set_log_global info
+set_log_global perf
 
 set VUSER_END_ITERATION 1000
 
@@ -43,18 +43,19 @@ proc read_logfile_dir {logdir dbname ssl} {
   set nread 0
 
   set db [get_results_db $dbname $ssl]
-  foreach logfile [glob -nocomplain -directory $logdir *.log] {
+  set logfiles [concat [glob -nocomplain -directory $logdir *.log] \
+                    [glob -nocomplain -directory $logdir *.txt]]
+  set pg [CProgressCalculator::new_instance]
+  $pg set_items_total [:# $logfiles]
+  $pg start
+  foreach logfile $logfiles {
     readlogfile $logfile $db $ssl
     incr nread
+    $pg at_item $nread
     if {$nread >= 105} {
       #log warn "100 read, quitting for now."
       #exit
     }
-  }
-  # [2016-02-08 10:55:16] NdV kan ook van Vugen log zijn: output.txt.
-  foreach logfile [glob -nocomplain -directory $logdir *.txt] {
-    readlogfile $logfile $db $ssl
-    incr nread
   }
 
   if {$ssl} {

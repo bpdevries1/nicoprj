@@ -2,7 +2,7 @@
 
 package require ndv
 
-set_log_global info
+set_log_global perf
 
 source read-vuserlogs-db.tcl
 
