@@ -45,3 +45,5 @@ source [file join [file dirname [info script]] libfp.tcl]
 # 26-01-2014 added listc - list comprehensions
 source [file join [file dirname [info script]] listc.tcl]
 
+# 4-5-2016 have had CPRogresscalculator for a long time, but not included
+source [file join [file dirname [info script]] CProgressCalculator.tcl]
