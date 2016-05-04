@@ -596,3 +596,9 @@ proc det_hostname {} {
   }
   error "Cannot determine HOSTNAME from environment (env)"
 }
+
+#### datetime functions ####
+proc now {args} {
+  # for now, the timestamp as can be inserted in sqlite
+  clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S %z"
+}
