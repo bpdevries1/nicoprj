@@ -3,8 +3,9 @@
 # History
 # 2013-03-15 NdV removed global/common logfile, now only log instance logfiles.
 
-# @todo
+# TODO:
 # * use info stacklevel to also log the calling procedure.
+# * option to log in milli/microseconds.
 
 package require Itcl
 
@@ -203,11 +204,22 @@ namespace eval ::ndv {
 # set log [::ndv::CLogger::new_logger [file tail $argv0] debug]
 
 proc set_log_global {level {options {}}} {
-  global log
+  global log tcl_platform
   if {[:showfilename $options] == 0} {
     set log [::ndv::CLogger::new_logger "" $level]
   } else {
     set log [::ndv::CLogger::new_logger [file tail [info script]] $level]  
   }
-  $log set_file "logs/[file tail [info script]]-[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"].log"
+  set logfile_name "logs/[file tail [info script]]-[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"].log"
+  $log set_file $logfile_name
+  
+  # create symlink, maybe also do in set_file.
+  if {$tcl_platform(platform) == "unix"} {
+    set symlink_name "logs/[file tail [info script]]-latest.log"
+    file delete $symlink_name
+    puts stderr "point $symlink_name -> $logfile_name"
+    file link -symbolic $symlink_name [file tail $logfile_name]
+  } else {
+    # check: voor windows nu ook mogelijk? of nog steeds alleen voor dirs?
+  }
 }
