@@ -176,7 +176,12 @@ namespace eval ::ndv {
 				} 
         # set str_log "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$name\] \[$level\] $str" 
         # 24-12-2013 changed date format to standard, also used within SQLite.
-        set str_log "\[[clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]\] \[$name\] \[$level\] $str" 
+        if {$name == ""} {
+          set brackets_name ""
+        } else {
+          set brackets_name "\[$name\] "
+        }
+        set str_log "\[[clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S %z"]\] $brackets_name\[$level\] $str" 
         puts stderr $str_log
 				flush stderr ; # could be that stderr is redirected.
         if {$f_log != -1} {
@@ -189,41 +194,6 @@ namespace eval ::ndv {
 			}
 		}
 
-		public method log_intern_old {str {level critical} {pref_stacklevel -2}} {
-			global stderr
-			# puts stderr "int_level($level) = $int_level($level) ; log_level = $log_level"
-			if {$int_level($level) <= $log_level} {
-				# puts stderr "info level: [info level]"
-				set stacklevel [::info level]
-				if {$stacklevel > 1} {
-					# puts stderr "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$service\] \[$level\] $str *** \[[info level -1]\]"
-					# puts stderr "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$name\] \[$level\] $str *** \[[::info level $pref_stacklevel]\]"
-						set str_log "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$name\] \[$level\] $str" 
-						if {$f_log != -1} {
-								puts $f_log $str_log
-						} else {
-								puts stderr $str_log
-                #if {$logfile != ""} {
-                #  puts $logfile $str_log 
-                #}
-						}
-				} else {
-						set str_log "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$name\] \[$level\] $str" 
-						if {$f_log != -1} {
-								puts $f_log $str_log
-						} else {
-								puts stderr $str_log
-                #if {$logfile != ""} {
-                #  puts $logfile $str_log 
-                #}
-						}
-				}
-				flush stderr
-        #if {$logfile != ""} {
-        #  flush $logfile 
-        #}
-			}
-		}		
 		
 	}
 }
@@ -232,8 +202,12 @@ namespace eval ::ndv {
 # set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 # set log [::ndv::CLogger::new_logger [file tail $argv0] debug]
 
-proc set_log_global {level} {
+proc set_log_global {level {options {}}} {
   global log
-  set log [::ndv::CLogger::new_logger [file tail [info script]] $level]
+  if {[:showfilename $options] == 0} {
+    set log [::ndv::CLogger::new_logger "" $level]
+  } else {
+    set log [::ndv::CLogger::new_logger [file tail [info script]] $level]  
+  }
   $log set_file "logs/[file tail [info script]]-[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"].log"
 }
