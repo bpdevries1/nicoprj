@@ -31,7 +31,8 @@ proc breakpoint_show {current {show_params 1}} {
   if {$current > 0} {
     set info [info level $current]
     set proc [lindex $info 0]
-    set proc_args [uplevel #$current "info args $proc"]
+    set proc_args "<?>"
+    catch {set proc_args [uplevel #$current "info args $proc"]}
     puts stderr "$current: Namespace [uplevel #$current {namespace current}] Procedure $proc $proc_args"
     set index 0
     if {$show_params} {
