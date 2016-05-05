@@ -47,6 +47,7 @@ itcl::class CProgressCalculator {
 	}
 
 	public method at_item {item_current} {
+    log perf "At item: $item_current/$items_total"
 		if {$item_current > $items_total} {
 			log warn "Current item > total items: $item_current > $items_total"
 			return
