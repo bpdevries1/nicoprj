@@ -3,11 +3,13 @@
 package require ndv
 package require tdbc::sqlite3
 
-ndv::source_once ssl.tcl
+ndv::source_once ssl.tcl pubsub.tcl
+
 # TODO:
 # [2016-02-08 11:13:55] Bug - when logfile contains 0-bytes (eg in Vugen output.txt with log webregfind for PDF/XLS), the script sees this as EOF and misses transactions and errors.
 
-set_log_global perf
+# set_log_global perf {showfilename 0}
+set_log_global debug {showfilename 0}
 
 set VUSER_END_ITERATION 1000
 
@@ -38,10 +40,12 @@ proc main {argv} {
 }
 
 proc read_logfile_dir {logdir dbname ssl} {
+  global pubsub
+  # TODO mss pubsub nog eerder zetten als je read-vuserlogs-dir.tcl gebruikt.
+  set pubsub [PubSub new]
   set db [get_results_db $dbname $ssl]
   $db insert readstatus [dict create ts [now] status "starting"]
   set nread 0
-
   set db [get_results_db $dbname $ssl]
   set logfiles [concat [glob -nocomplain -directory $logdir *.log] \
                     [glob -nocomplain -directory $logdir *.txt]]
@@ -59,12 +63,13 @@ proc read_logfile_dir {logdir dbname ssl} {
   }
 
   if {$ssl} {
-    handle_ssl_final_end $db
+    handle_ssl_global_end $db
   }
-
+  log info "handle_ssl_final_end finished, setting readstatus"
   $db insert readstatus [dict create ts [now] status "complete"]
+  log info "set readstatus, closing DB"
   $db close
-  
+  log info "closed DB"
   log info "Read $nread logfile(s) in $logdir"
 }
 
@@ -144,13 +149,13 @@ proc readlogfile {logfile db ssl} {
     
     insert_error_iter $db $logfile_id [file tail $logfile] $vuserid $prev_iteration \
         $error_iter
-  }
-  if {![eof $fi]} {
-    log warn "Not EOF yet for $logfile, linenr=$linenr, possibly a 0-byte."
-  }
-  if {$ssl} {
-    handle_ssl_end $db $logfile_id $vuserid $iteration  
-  }
+    if {![eof $fi]} {
+      log warn "Not EOF yet for $logfile, linenr=$linenr, possibly a 0-byte."
+    }
+    if {$ssl} {
+      handle_ssl_end $db $logfile_id $vuserid $iteration  
+    }
+  };                            # end of $db in_trans
   close $fi
 }
 
@@ -180,35 +185,41 @@ proc det_project_runid_script {logfile} {
 #End auto log messages stack.	[MsgId: MMSG-10544]
 #functions.c(334): [2016-02-08 10:11:49] [1454922709] trans=CR_UC1_NewVisit_01_Open_Loginpage_FXF, user=u_lpt-rtsec_cr_tso_tso1_000001, resptime=2.434, status=0, iteration=1 [02/08/16 10:11:49]
 proc get_iteration {line iteration} {
-  global VUSER_END_ITERATION
+  global VUSER_END_ITERATION pubsub
+  set new_it "unchanged"
+  
   if {[regexp {Start auto log messages stack - Iteration (\d+)\.} $line z it]} {
     check_iteration_max $it
-    return $it
+    set new_it $it
   }
   if {[regexp {End auto log messages stack.} $line]} {
-    return ""
+    set new_it ""
   }
   if {[regexp {, iteration=(\d+)} $line z it]} {
     check_iteration_max $it
-    return $it
+    set new_it $it
   }
 
   if {[regexp {Starting iteration (\d+)} $line z it]} {
     check_iteration_max $it
-    return $it
+    set new_it $it
   }
 
   if {[regexp {Ending iteration (\d+)} $line z it]} {
     check_iteration_max $it
-    return ""
+    set new_it $it
   }
   
   if {[regexp {Starting action vuser_end.}	$line]} {
     # return "vuser_end"
-    return $VUSER_END_ITERATION
+    set new_it $VUSER_END_ITERATION
   }
-  
-  return $iteration ; # keep current iteration nr.
+
+  if {($new_it != "unchanged") && ($iteration != $new_it)} {
+    set iteration $new_it
+    $pubsub pub iteration $iteration
+  }
+  return $iteration
 }
 
 proc check_iteration_max {it} {
@@ -419,10 +430,16 @@ proc det_script {logfile} {
 
 # deze mogelijk in libdb:
 proc get_results_db {db_name ssl} {
+  global pubsub
   #breakpoint
   set existing_db [file exists $db_name]
   set db [dbwrapper new $db_name]
   define_tables $db $ssl
+  if {$ssl} {
+    # TODO: deze eigenlijk op zelfde niveau als waar je handle_ssl_global_end aanroept.
+    # maar wat lastig omdat table defs hier moeten.
+    handle_ssl_global_start $db $pubsub
+  }
   $db create_tables 0 ; # 0: don't drop tables first. Always do create, eg for new table defs. 1: drop tables first.
   if {!$existing_db} {
     log info "New db: $db_name, create tables"

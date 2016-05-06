@@ -1,15 +1,41 @@
 # functions to read SSL specific parts in log db.
 
+
+ndv::source_once ssl_session_conn.tcl
+
+proc handle_ssl_global_start {db pubsub} {
+  global ssl_session_conn
+  set ssl_session_conn [ssl_session_conn new $db]
+  $pubsub add_listener iteration $ssl_session_conn
+}
+
+# called when all files have been read.
+proc handle_ssl_global_end {db} {
+  global ssl_session_conn
+  $ssl_session_conn destroy
+  create_extra_tables $db
+  sql_checks $db
+}
+
 # TODO:
 # * Check of logging op always staat; alleen in dit geval de checks op "bio_info keys not empty at the end" uitvoeren.
 #   voor nu 3-5-2016 check uitgezet.
 proc handle_ssl_start {db logfile_id vuserid iteration} {
-  global entry_type lines linenr_start linenr_end log_always
+  global entry_type lines linenr_start linenr_end log_always \
+      bio_info ssl_session conn_info req_info \
+      ssl_session_conn
   set entry_type "start"
   set lines {}
   set linenr_start -1
   set linenr_end -1
   set log_always 0
+
+  set bio_info [dict create]
+  set ssl_session [dict create]
+  set conn_info [dict create]
+  set req_info [dict create]
+
+  $ssl_session_conn bof $logfile_id $vuserid $iteration
   
   handle_block_bio_bof $db $logfile_id $vuserid $iteration
   handle_block_func_bof $db $logfile_id $vuserid $iteration
@@ -17,15 +43,10 @@ proc handle_ssl_start {db logfile_id vuserid iteration} {
 }
 
 proc handle_ssl_line {db logfile_id vuserid iteration line linenr} {
-  global entry_type lines linenr_start linenr_end log_always
-  if {$line == "BIO\[02EAE778\]:Free - socket"} {
-    log info "Free without src/line found"
-    # breakpoint
-  }
+  global entry_type lines linenr_start linenr_end log_always ssl_session_conn
   if {[regexp {Virtual User Script started at} $line]} {
-    # TODO: log_always weer zetten, nu 3-5-2016 fouten op run597.
-    #set log_always 1
-    #log debug "set log_always to 1"
+    set log_always 1
+    log debug "set log_always to 1"
   }
   set tp [line_type $line]
   if {$tp == "cont"} {
@@ -37,22 +58,27 @@ proc handle_ssl_line {db logfile_id vuserid iteration line linenr} {
     set lines [list $line]
     set linenr_start $linenr
     set linenr_end $linenr
+    $ssl_session_conn entry $entry_type $iteration $linenr_start $linenr_end $lines
   }
 }
 
 # called when end-of-file reached.
 proc handle_ssl_end {db logfile_id vuserid iteration} {
-  global entry_type lines linenr_start linenr_end
+  global entry_type lines linenr_start linenr_end \
+      bio_info ssl_session conn_info req_info ssl_session_conn
   handle_entry_${entry_type} $db $logfile_id $vuserid $iteration $linenr_start $linenr_end $lines
   handle_block_bio_eof $db $logfile_id $vuserid $iteration
   handle_block_func_eof $db $logfile_id $vuserid $iteration
   handle_block_ssl_eof $db $logfile_id $vuserid $iteration
-}
 
-# called when all files have been read.
-proc handle_ssl_final_end {db} {
-  create_extra_tables $db
-  sql_checks $db
+  $ssl_session_conn eof $logfile_id $iteration
+  # $ssl_session_conn destroy
+  
+  unset lines
+  unset bio_info
+  unset ssl_session
+  unset conn_info
+  unset req_info
 }
 
 proc line_type {line} {
@@ -110,7 +136,7 @@ proc handle_entry_bio {db logfile_id vuserid iteration linenr_start linenr_end l
   log debug "handle_entry_bio ($linenr_start -> $linenr_end): [join $lines "\n"]"
   set entry [join $lines "\n"]
   setvars {address call socket_fd result} ""
-  set functype [det_functype $entry]
+  set functype [det_functype $entry functypes_bio]
   if {[regexp {return} $entry]} {
     set functype "${functype}_return"
   }
@@ -132,6 +158,7 @@ proc handle_entry_bio {db logfile_id vuserid iteration linenr_start linenr_end l
 # $db add_tabledef bio_block {id} {logfile_id vuserid iteration linenr_start linenr_end address socket_fd}
 proc handle_block_bio {db logfile_id vuserid iteration linenr_start linenr_end functype address socket_fd} {
   global bio_info log_always
+  # cond_breakpoint {$linenr_start == 6176}
   if {$functype == "free"} {
     set d [dict_get $bio_info $address]
     if {$d == {}} {
@@ -157,6 +184,13 @@ proc handle_block_bio {db logfile_id vuserid iteration linenr_start linenr_end f
   }
 }
 
+proc cond_breakpoint {exp} {
+  set res [uplevel 1 [list expr $exp]]
+  if {$res} {
+    breakpoint
+  }
+}
+
 proc handle_block_bio_bof {db logfile_id vuserid iteration} {
   global bio_info
   set bio_info [dict create]
@@ -166,8 +200,11 @@ proc handle_block_bio_eof {db logfile_id vuserid iteration} {
   global bio_info log_always
   set keys [dict keys $bio_info]
   if {$keys != {}} {
+    log warn "bio_info keys not empty at the end: (logfile_id=$logfile_id) $keys"
+    foreach key $keys {
+      log warn "bio_info($key) -> [dict get $bio_info $key]"
+    }
     if {$log_always} {
-      log error "bio_info keys not empty at the end: (logfile_id=$logfile_id) $keys"
       error "bio_info keys not empty at the end: (logfile_id=$logfile_id) $keys"
     }
   }
@@ -179,7 +216,7 @@ proc handle_entry_ssl {db logfile_id vuserid iteration linenr_start linenr_end l
   # Login_cert_main.c(81): [SSL:] Received callback about handshake completion, connection=securepat01.rabobank.com:443, SSL=02E54F78, ctx=02E31280, not reused, session address=02E55F58, ID (length 32): B1C73633E1EBBF558DAB080255A0E0A744DF4114C8BDD7F31500741187BDFB6E  	[MsgId: MMSG-26000]
   # Login_cert_main.c(81): [SSL:] New SSL, socket=03135208 [0], connection=securepat01.rabobank.com:443, SSL=0315ADE0, ctx=03151280, not reused, no session  	[MsgId: MMSG-26000]
   setvars {domain_port ssl ctx sess_address sess_id socket conn_nr} ""
-  set functype [det_functype $entry]
+  set functype [det_functype $entry functypes_ssl]
   regexp {, connection=([^, ]+),} $entry z domain_port
   regexp {SSL=([0-9A-F]+)} $entry z ssl
   regexp {ctx=([0-9A-F]+)} $entry z ctx
@@ -248,7 +285,7 @@ proc handle_block_ssl {db logfile_id vuserid iteration linenr_start linenr_end
   # TODO: mss hier ook wel net zo gemakkelijk $d meegeven aan $db insert, ipv vars_to_dict
   set d [dict_get $ssl_session $sess_id]
   dict_set_if_empty d iteration_start $iteration 0
-  dict_set_if_empty d linenr_start $linenr_start 0
+  dict_set_if_empty d min_linenr $linenr_start 0
   set sess_addresses [dict_lappend d sess_addresses $sess_address]
   set ssls [dict_lappend d ssls $ssl]
   set ctxs [dict_lappend d ctxs $ctx]
@@ -258,12 +295,13 @@ proc handle_block_ssl {db logfile_id vuserid iteration linenr_start linenr_end
   }
   if {$functype == "freeing_global_ssl"} {
     # gegevens ophalen, in DB en vergeten.
-    set linenr_start [:linenr_start $d]
+    set min_linenr [:min_linenr $d]
+    set max_linenr $linenr_end
     set iteration_start [:iteration_start $d]
     set iteration_end $iteration
     set isglobal 1
     set estab_global_linenrs [:estab_global_linenrs $d]
-    $db insert ssl_session [vars_to_dict logfile_id linenr_start linenr_end \
+    $db insert ssl_session [vars_to_dict logfile_id min_linenr max_linenr \
                                 iteration_start iteration_end sess_id \
                                 sess_addresses ssls ctxs domain_ports \
                                 estab_global_linenrs isglobal]
@@ -271,7 +309,7 @@ proc handle_block_ssl {db logfile_id vuserid iteration linenr_start linenr_end
   } else {
     # gegevens aanvullen, maar doe je altijd al, hierboven.
     # deze 2 voor als dit geen global session blijkt te zijn.
-    dict set d linenr_end $linenr_end
+    dict set d max_linenr $linenr_end
     dict set d iteration_end $iteration
     dict set ssl_session $sess_id $d
   }
@@ -287,7 +325,7 @@ proc handle_entry_func {db logfile_id vuserid iteration linenr_start linenr_end 
   #Login_cert_main.c(81): t=15869ms: Connecting [0] to host 85.119.19.235:443  	[MsgId: MMSG-26000]
   #Login_cert_main.c(81): t=15875ms: Connected socket [0] from 185.31.145.210:9570 to 85.119.19.235:443 in 6 ms  	[MsgId: MMSG-26000]
   setvars {functype ts_msec url domain_port ip_port conn_nr nreqs relframe_id internal_id conn_msec http_code} ""
-  set functype [det_functype $entry]
+  set functype [det_functype $entry functypes_func]
   # RCC_Open.c(90): t=9904ms: Request done
   regexp {t=(\d+)ms: } $entry z ts_msec
 
@@ -425,7 +463,7 @@ proc handle_block_func_eof {db logfile_id vuserid iteration} {
   }
 }
 
-set functypes {
+set functypes_func {
   "Closed connection" closed_conn
   "Closing connection" closing_conn
   "Already connected" already_conn
@@ -445,8 +483,8 @@ set functypes {
   "Connecting" connecting
   "Re-negotiating https connection" renegotiating_https_conn
   "web_set_option" web_set_option
-  web_add_header web_add_header
-  web_reg_find web_reg_find
+  "web_add_header" web_add_header
+  "web_reg_find" web_reg_find
   "No match found for the requested parameter" no_match_found
   "Saving Parameter" saving_parameter
   "web_set_certificate_ex" web_set_certificate_ex
@@ -462,35 +500,61 @@ set functypes {
   "Request.*failed" req_failed
   "Transaction.*Fail" trans_failed
 
-  "vuser_init\.c" vuser_init_c
-  "functions\.c" functions_c
-  "configfile\.c" configfile_c
-  "dynatrace\.c" dynatrace_c
+  "=== NOT SURE ABOUT ONES BELOW, naming source files ===" not_sure
+  "QQvuser_init\.c" vuser_init_c
+  "QQfunctions\.c" functions_c
+  "QQconfigfile\.c" configfile_c
+  "QQdynatrace\.c" dynatrace_c
+  
+  "Successful attempt to establish the reuse of the global SSL session" success_establish_reuse_global_ssl
+  
+  "Freeing the global SSL session in a callback" freeing_global_ssl
+  "Connection information" conn_info
+  
+  "error" error  
+}
+
+set functypes_ssl {
+  "Closed connection" closed_conn
+  "Closing connection" closing_conn
+  "Already connected" already_conn
+  "Request done" req_done
+  "SSL protocol error" ssl_protocol_error
+  "Connected socket" connected_socket
+  "Connecting" connecting
+  "Re-negotiating https connection" renegotiating_https_conn
+  "web_set_option" web_set_option
+  "web_set_certificate_ex" web_set_certificate_ex
+  "ssl_handle_status encounter error" ssl_handle_status_error
   
   "New SSL" new_ssl
   "Received callback about handshake completion" cb_handshake_completion
   "certificate error" cert_error
   "Handshake complete" handshake_complete
 
-  "Established checken voor considering, deze staan in dezelfde entry" __dummy__
+  "=== Established checken voor considering, deze staan in dezelfde entry ===" __dummy__
   "Established a global SSL session" established_global_ssl
   "Considering establishing the above as a new global SSL session" consider_global_ssl
   
   "Successful attempt to establish the reuse of the global SSL session" success_establish_reuse_global_ssl
   "Freeing the global SSL session in a callback" freeing_global_ssl
   "Connection information" conn_info
-  
-  write write
-  read read
-  ctrl ctrl
-  "Free - socket" free
 
   "error" error  
 }
 
-proc det_functype {entry} {
-  global functypes
-  foreach {re ft} $functypes {
+set functypes_bio {
+  write write
+  read read
+  ctrl ctrl
+  "Free - socket" free
+  "Free - Overlapped IO filter" free
+}
+
+proc det_functype {entry functypes_name} {
+  # global functypes
+  global $functypes_name
+  foreach {re ft} [set $functypes_name] {
     if {[regexp $re $entry]} {
       return $ft
     }
@@ -504,9 +568,10 @@ proc create_extra_tables {db} {
   log info "Creating extra tables..."
   
   $db exec "drop table if exists conn_bio_block"
-  $db exec "create table conn_bio_block (logfile_id, bio_block_id, conn_block_id, bio_linenr_end, conn_linenr_end, domain_port, ip_port, reason)"
+  $db exec "create table conn_bio_block (logfile_id, bio_block_id, conn_block_id, bio_linenr_start, bio_linenr_end, conn_linenr_start, conn_linenr_end, domain_port, ip_port, reason)"
   $db exec "insert into conn_bio_block
-select b.logfile_id, b.id, c.id, b.linenr_end, c.linenr_end,
+select b.logfile_id, b.id, c.id, b.linenr_start, b.linenr_end,
+c.linenr_start, c.linenr_end,
 c.domain_port, c.ip_port, 'linenr_end 1 diff'
 from bio_block b, conn_block c
 where b.logfile_id = c.logfile_id
@@ -518,7 +583,7 @@ and b.linenr_end + 1 = c.linenr_end"
   # TODO: hier mss iteration ook bij.
   $db exec "drop table if exists newssl_conn_block"
   $db exec "create table newssl_conn_block as
-select s.logfile_id, s.linenr_start newssl_linenr, s.conn_nr, c.linenr_start, c.linenr_end, s.id newssl_entry_id, c.id conn_block_id,
+select s.logfile_id, s.iteration newssl_iteration, s.linenr_start newssl_linenr, s.conn_nr, c.linenr_start, c.linenr_end, s.id newssl_entry_id, c.id conn_block_id,
   s.domain_port domain_port, s.ssl ssl, s.ctx ctx, s.socket socket, c.nreqs nreqs
 from newssl_entry s, conn_block c
 where s.conn_nr <> ''
@@ -566,13 +631,25 @@ proc sql_checks {db} {
   check_doubles newssl_conn_block newssl_entry_id
   check_doubles newssl_conn_block conn_block_id
 
-  # TODO: waarsch wel checken op verschillende logfiles, daar kunnen dubbele wel voorkomen, en mss ook al met meerdere/veel iteraties.
-  check_doubles sess_addr_id {logfile_id sess_address}
+  # 5-5-2016 this one does occur, so check overlapping, should not occur.
+  # check_doubles sess_addr_id {logfile_id sess_address}
+  check_overlap sess_addr_id {logfile_id sess_address} sess_id
+
+  # 5-5-2016 The same sess_id with different addresses has not occurred yet.
   check_doubles sess_addr_id {logfile_id sess_id}
 
-  check_doubles global_sess_addr_id {logfile_id sess_address}
+  # 5-5-2016 for global sessions the same as all sessions
+  # check_doubles global_sess_addr_id {logfile_id sess_address}
+  check_overlap global_sess_addr_id {logfile_id sess_address} sess_id
+  
   check_doubles global_sess_addr_id {logfile_id sess_id}
 
+  # checks op ssl_session: hier kleine overlap (2 regels) mogelijk: bij melding van nieuwe sessie
+  # moet oude nog snel worden afgesloten.
+  # deze is geldig voor run 599 met nconc=1, zegt dus nog niets over algemeen.
+  # maar eerst deze goed begrijpen.
+  check_overlap ssl_session logfile_id id 2
+  
   # even een om te testen
   # do_check "testje" "select * from conn_block where id = 1"
   # check_doubles conn_block conn_nr
@@ -602,6 +679,21 @@ proc check_doubles {tbl cols} {
   set cols [join $cols ", "]
   sql_check "Double entries in $tbl (cols: $cols)" \
       "select count(*), $cols from $tbl group by $cols having count(*) > 1"
+}
+
+proc sql_equal_col {col} {
+  return "t1.$col = t2.$col"
+}
+
+proc check_overlap {tbl same_cols diff_col {allowed_overlap 0}} {
+  upvar have_warnings have_warnings
+  upvar db db
+  sql_check "Overlapping items in $tbl (cols: $same_cols, diff: $diff_col)" \
+      "select *
+  from $tbl t1, $tbl t2
+  where [join [map sql_equal_col $same_cols] " and "]
+  and t1.$diff_col <> t2.$diff_col
+  and t1.min_linenr+$allowed_overlap between t2.min_linenr and t2.max_linenr"
 }
 
 proc sql_check {msg sql} {
@@ -636,7 +728,7 @@ proc ssl_define_tables {db} {
 
   # einde bij "freeing_global_ssl"
 
-  $db add_tabledef ssl_session {id} {logfile_id {linenr_start int} {linenr_end int}
+  $db add_tabledef ssl_session {id} {logfile_id {min_linenr int} {max_linenr int}
     {iteration_start int} {iteration_end int} sess_id
     sess_addresses ssls ctxs domain_ports estab_global_linenrs {isglobal int}}
   
@@ -668,6 +760,8 @@ proc dict_set_if_empty {d_name key val {check 1}} {
   }
 }
 
+# ones below look generic enough to put in ndv lib.
+
 proc dict_lappend {d_name key val} {
   upvar $d_name d
   set vals [dict_get $d $key]
@@ -682,6 +776,66 @@ proc setvars {lst val} {
   foreach el $lst {
     upvar $el $el
     set $el $val
+  }
+}
+
+# merge dicts as in dict merge, but don't let later values replace older ones, but lappend those.
+proc dict_merge_append_old {d1 d2 args} {
+  # first combine d1 and d2
+  set res [dict create]
+  dict for {k v} $d1 {
+    if {[dict exists $d2 $k]} {
+      dict set res $k [concat $v [dict get $d2 $k]]
+    } else {
+      dict set res $k $v
+    }
+  }
+  dict for {k v} $d2 {
+    if {[dict exists $d1 $k]} {
+      # nothing, already done
+    } else {
+      dict set res $k $v
+    }
+  }
+  # if args != {}, combine result of d1/d2 with the rest
+  if {$args != {}} {
+    # tail call, oh well.
+    dict_merge_append $res {*}$args
+  } else {
+    return $res
+  }
+}
+
+proc dict_merge_append {d1 d2 args} {
+  # soort curry/partial dit:
+  dict_merge_fn concat $d1 $d2 {*}$args
+}
+
+# merge dicts as in dict merge, but don't let later values replace older ones, but apply fn to values
+proc dict_merge_fn {fn d1 d2 args} {
+  # first combine d1 and d2
+  set res [dict create]
+  dict for {k v} $d1 {
+    if {[dict exists $d2 $k]} {
+      # dict set res $k [concat $v [dict get $d2 $k]]
+      dict set res $k [$fn $v [dict get $d2 $k]]
+    } else {
+      dict set res $k $v
+    }
+  }
+  dict for {k v} $d2 {
+    if {[dict exists $d1 $k]} {
+      # nothing, already done
+    } else {
+      dict set res $k $v
+    }
+  }
+  # if args != {}, combine result of d1/d2 with the rest
+  if {$args != {}} {
+    # tail call, oh well.
+    dict_merge_fn $fn $res {*}$args
+  } else {
+    return $res
   }
 }
 
