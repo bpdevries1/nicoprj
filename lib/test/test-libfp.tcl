@@ -82,6 +82,21 @@ proc testndv {args} {
   test test-$testndv_index test-$testndv_index {*}$args
 }
 
+# test eq-1 {equals 1} {= 1 1} 1
+testndv {= 1 1} 1
+testndv {!= 1 1} 0
+testndv {!= {a 1} {a 2}} 1
+
+testndv {and 1 1} 1
+testndv {and 1 0} 0
+testndv {and {1==1} {1==2}} 0
+testndv {and {1==1} {2==2}} 1
+
+testndv {or 0 1} 1
+testndv {or 0 0 0} 0
+testndv {or {1==0} {1==1}} 1
+testndv {or {0==1} {1==0}} 0
+
 testndv {cond 0 2 1 42} 42
 # testndv {cond 0 2 1 42} 43
 

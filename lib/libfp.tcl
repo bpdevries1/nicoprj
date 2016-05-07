@@ -26,6 +26,34 @@ proc = {a b} {
   }
 }
 
+proc != {a b} {
+  expr ![= $a $b]
+}
+
+proc and {exp1 args} {
+  if {[uplevel 1 [list expr $exp1]]} {
+    if {$args != {}} {
+      and {*}$args  
+    } else {
+      return 1
+    }
+  } else {
+    return 0
+  }
+}
+
+proc or {exp1 args} {
+  if {[uplevel 1 [list expr $exp1]]} {
+    return 1
+  } else {
+    if {$args != {}} {
+      or {*}$args  
+    } else {
+      return 0
+    }
+  }
+}
+
 # this is the if from clojure, don't want to override the std Tcl def.
 # @todo handle expressions as first argument? Or should have been evaluated before?
 # how to handle nil or empty list?
