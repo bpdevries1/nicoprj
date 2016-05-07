@@ -8,7 +8,8 @@
 package require tcltest
 namespace import -force ::tcltest::*
 
-source ../libfp.tcl
+# source ../libfp.tcl
+source [file join [file dirname [info script]] .. libfp.tcl]
 
 ## test easy, basic functions
 # test add-1 {simple addition} {add 3 4} 7
@@ -100,6 +101,21 @@ testndv {map x {expr $x * 2} {1 2 3}} {2 4 6}
 
 # 2 params, first is a lambda (?), second a list.
 testndv {map {x {expr $x * 2}} {1 2 3}} {2 4 6}
+
+# 7-5-2016 map in combi with fn/lambda_to_proc
+testndv {map [fn x {expr $x * 2}] {1 2 3}} {2 4 6}
+
+proc * {args} {
+  set res 1
+  foreach arg $args {
+    set res [expr $res * $arg]
+  }
+  return $res
+}
+
+testndv {* 1 2 3} 6
+
+testndv {map [fn x {* $x 2}] {1 2 3}} {2 4 6}
 
 # iets met apply/lambda, nu 16-1-2016 wel vaag.
 # @note more tests with lambda, use with apply?  

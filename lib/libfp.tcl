@@ -140,6 +140,11 @@ proc lambda_to_proc {lambda} {
   return $procname
 }
 
+# anonymous function
+proc fn {params body} {
+  lambda_to_proc [list $params $body]
+}
+
 # @todo maybe a 'proc fn' to create function-objects, lambda's?
 
 # @todo handle more than one map-var, for traversing more than one map at the same time?
