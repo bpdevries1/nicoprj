@@ -30,7 +30,8 @@ proc != {a b} {
   expr ![= $a $b]
 }
 
-proc and {exp1 args} {
+# deze leuk bedacht, recursief, maar uplevel zou dan ook mee moeten.
+proc and_old {exp1 args} {
   if {[uplevel 1 [list expr $exp1]]} {
     if {$args != {}} {
       and {*}$args  
@@ -42,16 +43,22 @@ proc and {exp1 args} {
   }
 }
 
-proc or {exp1 args} {
-  if {[uplevel 1 [list expr $exp1]]} {
-    return 1
-  } else {
-    if {$args != {}} {
-      or {*}$args  
-    } else {
+proc and {args} {
+  foreach exp $args {
+    if {![uplevel 1 [list expr $exp]]} {
       return 0
     }
   }
+  return 1
+}
+
+proc or {args} {
+  foreach exp $args {
+    if {[uplevel 1 [list expr $exp]]} {
+      return 1
+    }
+  }
+  return 0
 }
 
 # this is the if from clojure, don't want to override the std Tcl def.

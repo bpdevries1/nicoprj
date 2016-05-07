@@ -92,6 +92,10 @@ testndv {and 1 0} 0
 testndv {and {1==1} {1==2}} 0
 testndv {and {1==1} {2==2}} 1
 
+# set s1 1; set s2 2
+testndv {set s1 1; set s2 2; and {$s1 != {}} {$s2 != {}} {$s1 != $s2}} 1
+testndv {set s1 1; set s2 2; and [!= $s1 {}] [!= $s2 {}] [!= $s1 $s2]} 1
+
 testndv {or 0 1} 1
 testndv {or 0 0 0} 0
 testndv {or {1==0} {1==1}} 1
