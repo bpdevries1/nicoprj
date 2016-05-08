@@ -34,7 +34,7 @@ oo::class create ssl_session_conn {
   method define_tables {} {
     $db add_tabledef ssl_conn_block {id} {logfile_id {min_linenr int} {max_linenr int}
       {iteration_start int} {iteration_end int} sess_id
-      sess_address ssl ctx domain_port {isglobal int} functype_first functype_last reason_end}
+      sess_address ssl ctx domain_port conn_nr {isglobal int} functype_first functype_last reason_insert {ssl_session_id int} {conn_block_id id}}
   }
   
   method bof {plogfile_id pvuserid piteration} {
@@ -48,7 +48,7 @@ oo::class create ssl_session_conn {
       error "logfile_id at eof ($plogfile_id) differs from bof ($logfile_id)"
     }
     dict for {k v} $ssl_info {
-      my insert_ssl $v
+      my insert_ssl $v "eof"
     }
   }
 
@@ -80,7 +80,7 @@ oo::class create ssl_session_conn {
       if {$dssl != {}} {
         # blijkbaar nog een oude, deze wegschrijven en verwijderen.
         log warn "oo:newssl entry ($linenr_start, [:ssl $dentry]) while already know this ssl: insert and start anew"
-        my insert_ssl $dssl
+        my insert_ssl $dssl "newssl functype; have old one with same ssl: #$linenr_end"
       }
       my init_dssl $dentry $linenr_start $linenr_end
     } else {
@@ -93,8 +93,10 @@ oo::class create ssl_session_conn {
       }
       if {[my sess_id_filled_diff $dentry $dssl]} {
         log debug "oo:new session id: insert old and start anew"
-        my insert_ssl $dssl
-        my init_dssl $dentry $linenr_start $linenr_end          
+        set conn_nr [:conn_nr $dssl]
+        # breakpoint
+        my insert_ssl $dssl "changed sess_id in dssl: #$linenr_end"
+        my init_dssl $dentry $linenr_start $linenr_end $conn_nr
       } else {
         log debug "oo:appending info: $dssl with $dentry"
         set dssl2 [dict_merge_fn union $dssl $dentry]
@@ -141,7 +143,8 @@ oo::class create ssl_session_conn {
   }
 
   # pre dentry/ssl has a value, sess_id might have a value.
-  method init_dssl {dentry linenr_start linenr_end} {
+  # with changed session within a ssl/conn, transfer conn_nr to the next
+  method init_dssl {dentry linenr_start linenr_end {conn_nr ""}} {
     set dssl $dentry
     dict set dssl min_linenr $linenr_start
     dict set dssl max_linenr $linenr_end
@@ -151,27 +154,46 @@ oo::class create ssl_session_conn {
     dict set dssl logfile_id $logfile_id
     dict set dssl functype_first [:functype $dentry]
     dict set dssl functype_last [:functype $dentry]
+    if {$conn_nr != ""} {
+      dict set dssl conn_nr $conn_nr      
+    }
     my dict_set_ssl_info [:ssl $dentry] $dssl
     my connect_sess_ssl [:sess_id $dssl] [:ssl $dssl]
     return $dssl
   }
 
   # TODO: ? ook linenr waarop deze 2 dingen gekoppeld worden?
+  # TODO: evt oude connectie deleten.
   method connect_sess_ssl {sess_id ssl} {
     if {($sess_id != "") && ($ssl != "")} {
+      my disconnect_sess_ssl [:sess_id [dict_get ssl_info $ssl]] $ssl 
       dict set sess_info $sess_id [union [dict_get $sess_info $sess_id] $ssl]
+    }
+  }
+
+  method disconnect_sess_ssl {sess_id ssl} {
+    if {($sess_id != "") && ($ssl != "")} {
+      set lssl [dict_get $sess_info $sess_id]
+      lremove lssl $ssl
+      if {$lssl == {}} {
+        dict unset sess_info $sess_id
+      } else {
+        dict set sess_info $sess_id $lssl
+      }
     }
   }
   
   # write ssl record to db, remove from 'global' list
-  method insert_ssl {dssl} {
+  method insert_ssl {dssl reason} {
     log debug "inserting ssl_conn_block: $dssl"
+    dict set dssl reason_insert $reason
     # cond_breakpoint {[:max_linenr $dssl] == 876}
     my assert_dssl $dssl
     # dict set dssl logfile_id $logfile_id
     # dict set dssl iteration_end $iteration
     $db insert ssl_conn_block $dssl
     dict unset ssl_info [:ssl $dssl]
+    my disconnect_sess_ssl [:sess_id $dssl] [:ssl $dssl]
   }
 
   method assert_dssl {dssl} {
@@ -190,8 +212,9 @@ oo::class create ssl_session_conn {
   method free_global_ssl {dentry linenr_end} {
     set sess_id [:sess_id $dentry]
     if {[dict_get $sess_info $sess_id] == {}} {
-      log error "$sess_id does not occur in sess_info."
-      breakpoint
+      # dit kan nu voorkomen, als door nieuwe sessie de oude al is afgesloten; deze dan ignore.
+      # log error "$sess_id does not occur in sess_info."
+      # breakpoint
     }
     foreach ssl [dict_get $sess_info $sess_id] {
       set dssl [dict get $ssl_info $ssl]
@@ -200,7 +223,8 @@ oo::class create ssl_session_conn {
       # dat ze uiterlijk op dit linenr zijn afgesloten.
       #dict set dssl max_linenr $linenr_end
       #dict set dssl iteration_end $iteration
-      my insert_ssl $dssl
+      cond_breakpoint {$sess_id != [:sess_id $dssl]}
+      my insert_ssl $dssl "free_global_ssl: #$linenr_end"
     }
     dict unset sess_info $sess_id
   }

@@ -1,5 +1,9 @@
 # functions to read SSL specific parts in log db.
 
+# TODO: (global)
+# alles aan elkaar koppelen: ssl_session, conn_block, ssl_conn_block, bio_block, req_block.
+# alle (relevante?) entries moeten hier dan ergens bijhoren.
+
 
 ndv::source_once ssl_session_conn.tcl
 
@@ -844,3 +848,9 @@ proc dict_merge_fn {fn d1 d2 args} {
   }
 }
 
+# 8-5-2016 from tclhelp
+proc lremove {listVariable value} {
+  upvar 1 $listVariable var
+  set idx [lsearch -exact $var $value]
+  set var [lreplace $var $idx $idx]
+}
