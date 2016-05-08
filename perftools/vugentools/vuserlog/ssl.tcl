@@ -693,6 +693,21 @@ and s.conn_nr = c.conn_nr"
 
   # 8-5-2016 req done not now: not always close to bio block.
 
+  # 8-5-2016 then req/bio on block level
+  # $db add_tabledef req_bio_block {id} {logfile_id iteration_start iteration_end url bio_address req_block_id bio_block_id req_min_linenr req_max_linenr bio_min_linenr bio_max_linenr}
+  $db exec "insert into req_bio_block (logfile_id, iteration_start, iteration_end, url, bio_address, req_block_id, bio_block_id, req_min_linenr, req_max_linenr, bio_min_linenr, bio_max_linenr)
+select rbe.logfile_id, rbe.iteration, rbe.iteration, rbe.url, rbe.bio_address, rb.id, bb.id, rb.linenr_start, rb.linenr_end, bb.linenr_start, bb.linenr_end
+from req_bio_entry rbe, req_block rb, bio_block bb
+where rbe.reason = 'req/bio directly after'
+and rbe.logfile_id = rb.logfile_id
+and rbe.url = rb.url
+and rbe.iteration = rb.iteration_start
+and rbe.req_linenr_start = rb.linenr_start
+and rbe.logfile_id = bb.logfile_id
+and rbe.bio_address = bb.address
+and rbe.iteration = bb.iteration_start
+and rbe.bio_linenr_start between bb.linenr_start and bb.linenr_end"
+  
 }
 
 proc sql_update_reason {tbl col check_col msg} {
@@ -825,12 +840,16 @@ proc ssl_define_tables {db} {
   # evt dan ook een def_datatype <col> <datatype> opnemen, zodat je dit vantevoren kunt
   # doen, evt ook met regexp's.
   $db add_tabledef bio_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_start integer} {linenr_end integer} entry functype address socket_fd call result}
+  
   # TODO: andere dingen in SSL line
   $db add_tabledef ssl_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_start integer} {linenr_end integer} entry functype domain_port ssl ctx sess_address sess_id socket {conn_nr integer}}
+  
   $db add_tabledef func_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_start integer} {linenr_end integer} entry functype {ts_msec integer} url domain_port ip_port {conn_nr integer} {nreqs integer} {relframe_id integer} {internal_id integer} {conn_msec integer} http_code}
 
   $db add_tabledef bio_block {id} {logfile_id {vuserid integer} {iteration_start integer} {iteration_end integer} {linenr_start integer} {linenr_end integer} address socket_fd}
+  
   $db add_tabledef conn_block {id} {logfile_id {vuserid integer} {iteration_start integer} {iteration_end integer} {linenr_start integer} {linenr_end integer} {ts_msec_start integer} {ts_msec_end integer} {ts_msec_diff integer} {conn_nr integer} {conn_msec integer} domain_port ip_port {nreqs integer}}
+  
   $db add_tabledef req_block {id} {logfile_id {vuserid integer} {iteration_start integer} {iteration_end integer} {linenr_start integer} {linenr_end integer} {ts_msec_start integer} {ts_msec_end integer} {ts_msec_diff integer} url domain_port nentries http_code}
 
   # einde bij "freeing_global_ssl"
@@ -840,5 +859,7 @@ proc ssl_define_tables {db} {
     sess_addresses ssls ctxs domain_ports estab_global_linenrs {isglobal int}}
 
   $db add_tabledef req_bio_entry {id} {logfile_id iteration url bio_address req_id bio_id req_linenr_start req_linenr_end bio_linenr_start bio_linenr_end reason}
+
+  $db add_tabledef req_bio_block {id} {logfile_id iteration_start iteration_end url bio_address req_block_id bio_block_id req_min_linenr req_max_linenr bio_min_linenr bio_max_linenr}
 }
 
