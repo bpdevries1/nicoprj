@@ -842,29 +842,3 @@ proc ssl_define_tables {db} {
   $db add_tabledef req_bio_entry {id} {logfile_id iteration url bio_address req_id bio_id req_linenr_start req_linenr_end bio_linenr_start bio_linenr_end reason}
 }
 
-# library functions:
-
-# check if new val is different form old var, but both not empty: this could be an error!
-proc dict_set_if_empty {d_name key val {check 1}} {
-  global log_always  
-  upvar $d_name d
-  set old_val [dict_get $d $key]
-  if {$old_val == ""} {
-    dict set d $key $val
-  } elseif {$old_val == $val} {
-    # ok, still the same
-  } elseif {$val == ""} {
-    # ok, just keep old val.
-  } else {
-    if {$check} {
-      if {$log_always} {
-        error "old val ($old_val) differs from new val ($val), key=$key, dict=$d"    
-      } else {
-        # bij niet log_always een incomplete log, dan niets van te zeggen.
-      }
-    } else {
-      # explicitly set to no check, eg with line numbers.
-    }
-  }
-}
-
