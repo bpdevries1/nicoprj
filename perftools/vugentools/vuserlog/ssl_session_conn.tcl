@@ -247,69 +247,6 @@ oo::class create ssl_session_conn {
     
   }
 
-  method entry_old {entry_type linenr_start linenr_end lines} {
-    if {$entry_type != "ssl"} {return}
-    log debug "oo:handling entry: $entry_type"
-    set entry [join $lines "\n"]
-    set functype [my det_functype $entry]
-    set dentry [my det_entry_dict $entry]
-    log debug "oo:dentry: $dentry"
-    set ssl [:ssl $dentry]
-    set dssl [dict_get $ssl_info $ssl]
-    if {$functype == "new_ssl"} {
-      log debug "oo:handling newssl"
-      # niet huidige afbreken, kunnen parallel zijn.
-      # wel nieuwe maken voor in dict
-      if {$dssl != {}} {
-        # blijkbaar nog een oude, deze wegschrijven en verwijderen.
-        log warn "oo:newssl entry ($linenr_start, $ssl) while already know this ssl: insert and start anew"
-        my insert_ssl $dssl
-      }
-      my init_dssl $dentry $linenr_start $linenr_end
-    } elseif {$functype == "freeing_global_ssl"} {
-      my free_global_ssl $dentry
-    } else {
-      # zou al in dict te vinden moeten zijn
-      if {$dssl == {}} {
-        if {$ssl != ""} {
-          # toch weer warning?
-          log error "oo:got non-newssl entry, but cannot find info ($linenr_start, $ssl) -> ignore"
-          log error "expect this one to be already in dssl, since it's not a newssl entry"
-          breakpoint
-        } else {
-          # should do something with all [SSL:] lines, possibly explicitly ignore.
-          log warn "oo: no ssl field in line: ignore: entry"
-          # breakpoint
-          # no ssl field in line, ignore for now.
-        }
-      } else {
-        # dssl found, check sess_id
-        set apnd 0
-        if {[:sess_id $dssl] == ""} {
-           set apnd 1
-        } elseif {[:sess_id $dentry] == ""} {
-          set apnd 1
-        } elseif {[:sess_id $dentry] == [:sess_id $dssl]} {
-          set apnd 1
-        } else {
-          # new/other session_id: insert this one and start a new one.
-          log debug "oo:new session id: insert old and start anew"
-          my insert_ssl $dssl
-          my init_dssl $dentry $linenr_start $linenr_end          
-        }
-        if {$apnd} {
-          log debug "oo:appending info: $dssl with $dentry"
-          # ok, add session info to current record
-          # set dssl [dict_merge_append $dssl $dentry]
-          set dssl [dict_merge_fn union $dssl $dentry]
-          # also set last linenr etc.
-          dict set dssl max_linenr $linenr_end
-          dict set ssl_info $ssl $dssl
-          my connect_sess_ssl [:sess_id $dssl] [:ssl $dssl]
-        }
-      }
-    }
-  }
 
   if 0 {
     TODO:
