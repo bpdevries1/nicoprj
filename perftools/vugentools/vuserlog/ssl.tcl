@@ -622,10 +622,58 @@ and s.conn_nr = c.conn_nr"
   and entry like '%global%'
   group by 2,3,4
   order by 2,5"
+
+  # vullen fkeys in ssl_conn_block
+  $db exec "update ssl_conn_block
+  set ssl_session_id = (
+    select s.id
+    from ssl_session s
+    where s.logfile_id = ssl_conn_block.logfile_id
+    and s.sess_id = ssl_conn_block.sess_id
+    and ssl_conn_block.min_linenr between s.min_linenr and s.max_linenr
+  )
+  where ssl_session_id is null"
   
+  sql_update_reason ssl_conn_block ssl_session_reason ssl_session_id "within ssl_session"
+  #$db exec "update ssl_conn_block
+  #set ssl_session_reason = 'within ssl_session'
+  #where ssl_session_reason is null
+  #and ssl_session_id is not null"
+
+  $db exec "update ssl_conn_block
+  set ssl_session_id = (
+    select s.id
+    from ssl_session s
+    where s.logfile_id = ssl_conn_block.logfile_id
+    and s.sess_id = ssl_conn_block.sess_id
+    and s.iteration_start = ssl_conn_block.iteration_start
+    and ssl_conn_block.min_linenr <= s.min_linenr
+  )
+  where ssl_session_id is null"
+  sql_update_reason ssl_conn_block ssl_session_reason ssl_session_id \
+      "before ssl_session, same iteration"
+  #$db exec "update ssl_conn_block
+  #set ssl_session_reason = 'before ssl_session, same iteration'
+  #where ssl_session_reason is null
+  #and ssl_session_id is not null"
+  
+  $db exec "update ssl_conn_block
+  set conn_block_id = (
+    select cb.id
+    from conn_block cb
+    where cb.logfile_id = ssl_conn_block.logfile_id
+    and cb.conn_nr = ssl_conn_block.conn_nr
+    and ssl_conn_block.min_linenr between cb.linenr_start and cb.linenr_end
+  )"
 }
 
-
+proc sql_update_reason {tbl col check_col msg} {
+  upvar db db
+  $db exec "update $tbl
+  set $col = '$msg'
+  where $col is null
+  and $check_col is not null"
+}
 
 proc sql_checks {db} {
   log info "Doing checks..."
@@ -662,13 +710,18 @@ proc sql_checks {db} {
 
   # 7-5-2016 deze even voor nconc=1, dan mag er 0 overlap zijn.
   check_overlap ssl_conn_block logfile_id id
+
+  # sql_check "conn_nr empty" "select * from ssl_conn_block where conn_nr = '' or conn_nr is null"
+  check_filled ssl_conn_block conn_nr
+  check_filled ssl_conn_block ssl_session_id
+  check_filled ssl_conn_block conn_block_id
   
   if {$have_warnings} {
     log warn "**************************************"
     log warn "*** Some warnings, do investigate! ***"
     log warn "**************************************"
   } else {
-    log info "Everything seems fine."
+    log info "*** Everything seems fine. ***"
   }
 }
 
@@ -679,6 +732,14 @@ proc check_exists {tbl1 col1 tbl2 col2} {
   # sql_check $msg "select * from $tbl1 where not $col1 in (select $col2 from $tbl2)"
   sql_check "Entries in $tbl1 without corresponding ($col1->$col2) entry in $tbl2" \
       "select * from $tbl1 where $col1 <> '' and not $col1 in (select $col2 from $tbl2)"
+}
+
+# check if all records in tbl have col filled (not null, not empty string)
+proc check_filled {tbl col} {
+  upvar have_warnings have_warnings
+  upvar db db
+  sql_check "Empty $col in $tbl" \
+      "select * from $tbl where $col is null or $col = ''"
 }
 
 # check if combination of columns in table occurs more than once.

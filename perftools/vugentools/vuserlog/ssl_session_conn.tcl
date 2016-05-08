@@ -34,7 +34,7 @@ oo::class create ssl_session_conn {
   method define_tables {} {
     $db add_tabledef ssl_conn_block {id} {logfile_id {min_linenr int} {max_linenr int}
       {iteration_start int} {iteration_end int} sess_id
-      sess_address ssl ctx domain_port conn_nr {isglobal int} functype_first functype_last reason_insert {ssl_session_id int} {conn_block_id id}}
+      sess_address ssl ctx domain_port conn_nr {isglobal int} functype_first functype_last reason_insert {ssl_session_id int} ssl_session_reason {conn_block_id id}}
   }
   
   method bof {plogfile_id pvuserid piteration} {
