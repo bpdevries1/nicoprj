@@ -671,7 +671,7 @@ and s.conn_nr = c.conn_nr"
   $db exec "insert into req_bio_entry (logfile_id, iteration, url, bio_address,
   req_id, bio_id, 
   req_linenr_start, req_linenr_end, bio_linenr_start, bio_linenr_end, reason)
-  select r.logfile_id, r.iteration, r.url, b.address, r.id, b.id, r.liennr_start, r.linenr_end,
+  select r.logfile_id, r.iteration, r.url, b.address, r.id, b.id, r.linenr_start, r.linenr_end,
          b.linenr_start, b.linenr_end, 'req/bio directly after'
   from func_entry r, bio_entry b
   where r.logfile_id = b.logfile_id
@@ -683,7 +683,7 @@ and s.conn_nr = c.conn_nr"
   $db exec "insert into req_bio_entry (logfile_id, iteration, url, bio_address,
   req_id, bio_id, 
   req_linenr_start, req_linenr_end, bio_linenr_start, bio_linenr_end, reason)
-  select r.logfile_id, r.iteration, r.url, b.address, r.id, b.id, r.liennr_start, r.linenr_end,
+  select r.logfile_id, r.iteration, r.url, b.address, r.id, b.id, r.linenr_start, r.linenr_end,
          b.linenr_start, b.linenr_end, 'resp/bio directly after'
   from func_entry r, bio_entry b
   where r.logfile_id = b.logfile_id
@@ -744,6 +744,10 @@ proc sql_checks {db} {
   check_filled ssl_conn_block conn_nr
   check_filled ssl_conn_block ssl_session_id
   check_filled ssl_conn_block conn_block_id
+
+  # req_bio_entry checks
+  check_exists func_entry id req_bio_entry req_id "and functype='req_headers'"
+  check_exists func_entry id req_bio_entry req_id "and functype='resp_headers'"
   
   if {$have_warnings} {
     log warn "**************************************"
@@ -755,12 +759,17 @@ proc sql_checks {db} {
 }
 
 # check if tbl1.col1 entries all exist in tbl2.col2
-proc check_exists {tbl1 col1 tbl2 col2} {
+proc check_exists {tbl1 col1 tbl2 col2 {tbl1_filter ""}} {
   upvar have_warnings have_warnings
   upvar db db
+  if {$tbl1_filter != ""} {
+    set filter " ($tbl1_filter)"
+  } else {
+    set filter ""
+  }
   # sql_check $msg "select * from $tbl1 where not $col1 in (select $col2 from $tbl2)"
-  sql_check "Entries in $tbl1 without corresponding ($col1->$col2) entry in $tbl2" \
-      "select * from $tbl1 where $col1 <> '' and not $col1 in (select $col2 from $tbl2)"
+  sql_check "Entries in $tbl1 without corresponding ($col1->$col2) entry in $tbl2$filter" \
+      "select * from $tbl1 where $col1 <> '' $tbl1_filter and not $col1 in (select $col2 from $tbl2)"
 }
 
 # check if all records in tbl have col filled (not null, not empty string)
