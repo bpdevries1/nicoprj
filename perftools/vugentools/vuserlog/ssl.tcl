@@ -665,6 +665,35 @@ and s.conn_nr = c.conn_nr"
     and cb.conn_nr = ssl_conn_block.conn_nr
     and ssl_conn_block.min_linenr between cb.linenr_start and cb.linenr_end
   )"
+
+  # connect request and bio, first on entry level
+  # $db add_tabledef req_bio_entry {id} {logfile_id req_id bio_id req_linenr_start req_linenr_end bio_linenr_start bio_linenr_end reason}
+  $db exec "insert into req_bio_entry (logfile_id, iteration, url, bio_address,
+  req_id, bio_id, 
+  req_linenr_start, req_linenr_end, bio_linenr_start, bio_linenr_end, reason)
+  select r.logfile_id, r.iteration, r.url, b.address, r.id, b.id, r.liennr_start, r.linenr_end,
+         b.linenr_start, b.linenr_end, 'req/bio directly after'
+  from func_entry r, bio_entry b
+  where r.logfile_id = b.logfile_id
+  and r.iteration = b.iteration
+  and r.functype = 'req_headers'
+  and b.functype = 'write_return'
+  and r.linenr_end + 1 = b.linenr_start"
+
+  $db exec "insert into req_bio_entry (logfile_id, iteration, url, bio_address,
+  req_id, bio_id, 
+  req_linenr_start, req_linenr_end, bio_linenr_start, bio_linenr_end, reason)
+  select r.logfile_id, r.iteration, r.url, b.address, r.id, b.id, r.liennr_start, r.linenr_end,
+         b.linenr_start, b.linenr_end, 'resp/bio directly after'
+  from func_entry r, bio_entry b
+  where r.logfile_id = b.logfile_id
+  and r.iteration = b.iteration
+  and r.functype = 'resp_headers'
+  and b.functype = 'read_return'
+  and b.linenr_end + 1 = r.linenr_start"
+
+  # 8-5-2016 req done not now: not always close to bio block.
+
 }
 
 proc sql_update_reason {tbl col check_col msg} {
@@ -801,7 +830,8 @@ proc ssl_define_tables {db} {
   $db add_tabledef ssl_session {id} {logfile_id {min_linenr int} {max_linenr int}
     {iteration_start int} {iteration_end int} sess_id
     sess_addresses ssls ctxs domain_ports estab_global_linenrs {isglobal int}}
-  
+
+  $db add_tabledef req_bio_entry {id} {logfile_id iteration url bio_address req_id bio_id req_linenr_start req_linenr_end bio_linenr_start bio_linenr_end reason}
 }
 
 # library functions:
