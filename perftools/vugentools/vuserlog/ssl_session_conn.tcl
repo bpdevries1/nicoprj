@@ -33,7 +33,7 @@ oo::class create ssl_session_conn {
   # TODO: fkeys naar ssl_session en conn_block later nog. Of op natuurlijke sleutels?
   method define_tables {} {
     $db add_tabledef ssl_conn_block {id} {logfile_id {linenr_min int} {linenr_max int}
-      {iteration_start int} {iteration_end int} sess_id
+      {iteration_min int} {iteration_max int} sess_id
       sess_address ssl ctx domain_port conn_nr {isglobal int} functype_first functype_last reason_insert {ssl_session_id int} ssl_session_reason {conn_block_id id}}
   }
   
@@ -101,7 +101,7 @@ oo::class create ssl_session_conn {
         log debug "oo:appending info: $dssl with $dentry"
         set dssl2 [dict_merge_fn union $dssl $dentry]
         dict set dssl2 linenr_max $linenr_max
-        dict set dssl2 iteration_end $iteration
+        dict set dssl2 iteration_max $iteration
         dict set dssl2 functype_last [:functype $dentry]
         my dict_set_ssl_info [:ssl $dssl2] $dssl2
         my connect_sess_ssl [:sess_id $dssl2] [:ssl $dssl2]
@@ -148,8 +148,8 @@ oo::class create ssl_session_conn {
     set dssl $dentry
     dict set dssl linenr_min $linenr_min
     dict set dssl linenr_max $linenr_max
-    dict set dssl iteration_start $iteration
-    dict set dssl iteration_end $iteration
+    dict set dssl iteration_min $iteration
+    dict set dssl iteration_max $iteration
     dict set dssl isglobal 0
     dict set dssl logfile_id $logfile_id
     dict set dssl functype_first [:functype $dentry]
@@ -190,7 +190,7 @@ oo::class create ssl_session_conn {
     # cond_breakpoint {[:linenr_max $dssl] == 876}
     my assert_dssl $dssl
     # dict set dssl logfile_id $logfile_id
-    # dict set dssl iteration_end $iteration
+    # dict set dssl iteration_max $iteration
     $db insert ssl_conn_block $dssl
     dict unset ssl_info [:ssl $dssl]
     my disconnect_sess_ssl [:sess_id $dssl] [:ssl $dssl]
@@ -200,7 +200,7 @@ oo::class create ssl_session_conn {
     if {[:# [:sess_id $dssl]] > 1} {
       error "More than one sess_id in dssl: $dssl"
     }
-    foreach k {:linenr_min :logfile_id :iteration_end} {
+    foreach k {:linenr_min :logfile_id :iteration_max} {
       if {[$k $dssl] == ""} {
         log error "$k not set in dssl: $dssl"
         breakpoint
@@ -219,10 +219,10 @@ oo::class create ssl_session_conn {
     foreach ssl [dict_get $sess_info $sess_id] {
       set dssl [dict get $ssl_info $ssl]
       dict set dssl isglobal 1
-      # 7-5-2016 linenr_max en iteration_end op oude waarden laten, weet alleen zeker
+      # 7-5-2016 linenr_max en iteration_max op oude waarden laten, weet alleen zeker
       # dat ze uiterlijk op dit linenr zijn afgesloten.
       #dict set dssl linenr_max $linenr_max
-      #dict set dssl iteration_end $iteration
+      #dict set dssl iteration_max $iteration
       cond_breakpoint {$sess_id != [:sess_id $dssl]}
       my insert_ssl $dssl "free_global_ssl: #$linenr_max"
     }
