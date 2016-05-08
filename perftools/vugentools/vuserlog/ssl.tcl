@@ -24,13 +24,13 @@ proc handle_ssl_global_end {db} {
 # * Check of logging op always staat; alleen in dit geval de checks op "bio_info keys not empty at the end" uitvoeren.
 #   voor nu 3-5-2016 check uitgezet.
 proc handle_ssl_start {db logfile_id vuserid iteration} {
-  global entry_type lines linenr_start linenr_end log_always \
+  global entry_type lines linenr_min linenr_max log_always \
       bio_info ssl_session conn_info req_info \
       ssl_session_conn
   set entry_type "start"
   set lines {}
-  set linenr_start -1
-  set linenr_end -1
+  set linenr_min -1
+  set linenr_max -1
   set log_always 0
 
   set bio_info [dict create]
@@ -46,7 +46,7 @@ proc handle_ssl_start {db logfile_id vuserid iteration} {
 }
 
 proc handle_ssl_line {db logfile_id vuserid iteration line linenr} {
-  global entry_type lines linenr_start linenr_end log_always ssl_session_conn
+  global entry_type lines linenr_min linenr_max log_always ssl_session_conn
   if {[regexp {Virtual User Script started at} $line]} {
     set log_always 1
     log debug "set log_always to 1"
@@ -54,24 +54,24 @@ proc handle_ssl_line {db logfile_id vuserid iteration line linenr} {
   set tp [line_type $line]
   if {$tp == "cont"} {
     lappend lines $line
-    set linenr_end $linenr
+    set linenr_max $linenr
   } else {
-    handle_entry_${entry_type} $db $logfile_id $vuserid $iteration $linenr_start $linenr_end $lines
+    handle_entry_${entry_type} $db $logfile_id $vuserid $iteration $linenr_min $linenr_max $lines
     set entry_type $tp
     set lines [list $line]
-    set linenr_start $linenr
-    set linenr_end $linenr
-    # $ssl_session_conn entry $entry_type $iteration $linenr_start $linenr_end $lines
-    $ssl_session_conn entry $entry_type $linenr_start $linenr_end $lines
+    set linenr_min $linenr
+    set linenr_max $linenr
+    # $ssl_session_conn entry $entry_type $iteration $linenr_min $linenr_max $lines
+    $ssl_session_conn entry $entry_type $linenr_min $linenr_max $lines
     
   }
 }
 
 # called when end-of-file reached.
 proc handle_ssl_end {db logfile_id vuserid iteration} {
-  global entry_type lines linenr_start linenr_end \
+  global entry_type lines linenr_min linenr_max \
       bio_info ssl_session conn_info req_info ssl_session_conn
-  handle_entry_${entry_type} $db $logfile_id $vuserid $iteration $linenr_start $linenr_end $lines
+  handle_entry_${entry_type} $db $logfile_id $vuserid $iteration $linenr_min $linenr_max $lines
   handle_block_bio_eof $db $logfile_id $vuserid $iteration
   handle_block_func_eof $db $logfile_id $vuserid $iteration
   handle_block_ssl_eof $db $logfile_id $vuserid $iteration
@@ -133,12 +133,12 @@ proc line_type {line} {
   }
 }
 
-proc handle_entry_start {db logfile_id vuserid iteration linenr_start linenr_end lines} {
+proc handle_entry_start {db logfile_id vuserid iteration linenr_min linenr_max lines} {
   log debug "Before first line, do nothing"
 }
 
-proc handle_entry_bio {db logfile_id vuserid iteration linenr_start linenr_end lines} {
-  log debug "handle_entry_bio ($linenr_start -> $linenr_end): [join $lines "\n"]"
+proc handle_entry_bio {db logfile_id vuserid iteration linenr_min linenr_max lines} {
+  log debug "handle_entry_bio ($linenr_min -> $linenr_max): [join $lines "\n"]"
   set entry [join $lines "\n"]
   setvars {address call socket_fd result} ""
   set functype [det_functype $entry functypes_bio]
@@ -154,16 +154,16 @@ proc handle_entry_bio {db logfile_id vuserid iteration linenr_start linenr_end l
   regexp {socket fd=(\S+)} $call z socket_fd
   
     # BIO[02E3B560]:read(616,3628) - socket fd=616
-  $db insert bio_entry [vars_to_dict logfile_id vuserid iteration linenr_start linenr_end entry functype address socket_fd call result]
+  $db insert bio_entry [vars_to_dict logfile_id vuserid iteration linenr_min linenr_max entry functype address socket_fd call result]
 
-  handle_block_bio $db $logfile_id $vuserid $iteration $linenr_start $linenr_end $functype $address $socket_fd
+  handle_block_bio $db $logfile_id $vuserid $iteration $linenr_min $linenr_max $functype $address $socket_fd
 }
 
-# bio_info: dict: key=address, val=dict: linenr_start, socket_fd
-# $db add_tabledef bio_block {id} {logfile_id vuserid iteration linenr_start linenr_end address socket_fd}
-proc handle_block_bio {db logfile_id vuserid iteration linenr_start linenr_end functype address socket_fd} {
+# bio_info: dict: key=address, val=dict: linenr_min, socket_fd
+# $db add_tabledef bio_block {id} {logfile_id vuserid iteration linenr_min linenr_max address socket_fd}
+proc handle_block_bio {db logfile_id vuserid iteration linenr_min linenr_max functype address socket_fd} {
   global bio_info log_always
-  # cond_breakpoint {$linenr_start == 6176}
+  # cond_breakpoint {$linenr_min == 6176}
   if {$functype == "free"} {
     set d [dict_get $bio_info $address]
     if {$d == {}} {
@@ -173,17 +173,17 @@ proc handle_block_bio {db logfile_id vuserid iteration linenr_start linenr_end f
         # nothing, ignore.
       }
     } else {
-      set linenr_start [dict get $d linenr_start]
+      set linenr_min [dict get $d linenr_min]
       set socket_fd [dict get $d socket_fd]
       set iteration_start [dict get $d iteration_start]
       set iteration_end $iteration
-      $db insert bio_block [vars_to_dict logfile_id vuserid iteration_start iteration_end linenr_start linenr_end address socket_fd]
+      $db insert bio_block [vars_to_dict logfile_id vuserid iteration_start iteration_end linenr_min linenr_max address socket_fd]
     }
     dict unset bio_info $address
   } else {
     set d [dict_get $bio_info $address]
     dict_set_if_empty d iteration_start $iteration 0
-    dict_set_if_empty d linenr_start $linenr_start 0
+    dict_set_if_empty d linenr_min $linenr_min 0
     dict_set_if_empty d socket_fd $socket_fd
     dict set bio_info $address $d
   }
@@ -219,8 +219,8 @@ proc handle_block_bio_eof {db logfile_id vuserid iteration} {
   }
 }
 
-proc handle_entry_ssl {db logfile_id vuserid iteration linenr_start linenr_end lines} {
-  log debug "handle_entry_ssl ($linenr_start -> $linenr_end): [join $lines "\n"]"
+proc handle_entry_ssl {db logfile_id vuserid iteration linenr_min linenr_max lines} {
+  log debug "handle_entry_ssl ($linenr_min -> $linenr_max): [join $lines "\n"]"
   set entry [join $lines "\n"]
   # Login_cert_main.c(81): [SSL:] Received callback about handshake completion, connection=securepat01.rabobank.com:443, SSL=02E54F78, ctx=02E31280, not reused, session address=02E55F58, ID (length 32): B1C73633E1EBBF558DAB080255A0E0A744DF4114C8BDD7F31500741187BDFB6E  	[MsgId: MMSG-26000]
   # Login_cert_main.c(81): [SSL:] New SSL, socket=03135208 [0], connection=securepat01.rabobank.com:443, SSL=0315ADE0, ctx=03151280, not reused, no session  	[MsgId: MMSG-26000]
@@ -236,10 +236,10 @@ proc handle_entry_ssl {db logfile_id vuserid iteration linenr_start linenr_end l
   regexp {socket=([A-Fa-f0-9]+) \[(\d+)\]} $entry z socket conn_nr
   
   $db insert ssl_entry [vars_to_dict logfile_id vuserid iteration \
-                            linenr_start linenr_end entry functype domain_port ssl \
+                            linenr_min linenr_max entry functype domain_port ssl \
                             ctx sess_address sess_id socket conn_nr]
 
-  handle_block_ssl $db $logfile_id $vuserid $iteration $linenr_start $linenr_end \
+  handle_block_ssl $db $logfile_id $vuserid $iteration $linenr_min $linenr_max \
       $functype $domain_port $ssl $ctx $sess_address $sess_id
 }
 
@@ -261,7 +261,7 @@ proc handle_block_ssl_eof {db logfile_id vuserid iteration} {
 #    set ctxs [:ctxs $d]
 #    set domain_ports [:domain_ports $d]
 #    set estab_global_linenrs [:estab_global_linenrs $d]
-#    set linenr_start [:linenr_start $d]
+#    set linenr_min [:linenr_min $d]
 #    set iteration_start [:iteration_start $d]
 #    set iteration_end $iteration
     # set isglobal 0
@@ -271,7 +271,7 @@ proc handle_block_ssl_eof {db logfile_id vuserid iteration} {
     dict set d sess_id $sess_id
     $db insert ssl_session $d
     if 0 {
-      $db insert ssl_session [vars_to_dict logfile_id linenr_start linenr_end \
+      $db insert ssl_session [vars_to_dict logfile_id linenr_min linenr_max \
                                   iteration_start iteration_end sess_id \
                                   sess_addresses ssls ctxs domain_ports \
                                   estab_global_linenrs isglobal]
@@ -285,7 +285,7 @@ proc handle_block_ssl_eof {db logfile_id vuserid iteration} {
 # als je 'established' line ziet, staat hier niets bij. Je zou dan paar regels max
 # terug kunnen kijken of je bepaald type entry (functype) ziet met sess_id en bij
 # dan de global_linenrs kunnen aanvullen.
-proc handle_block_ssl {db logfile_id vuserid iteration linenr_start linenr_end
+proc handle_block_ssl {db logfile_id vuserid iteration linenr_min linenr_max
                        functype domain_port ssl ctx sess_address sess_id} {
   global ssl_session
   if {$sess_id == ""} {
@@ -294,23 +294,23 @@ proc handle_block_ssl {db logfile_id vuserid iteration linenr_start linenr_end
   # TODO: mss hier ook wel net zo gemakkelijk $d meegeven aan $db insert, ipv vars_to_dict
   set d [dict_get $ssl_session $sess_id]
   dict_set_if_empty d iteration_start $iteration 0
-  dict_set_if_empty d min_linenr $linenr_start 0
+  dict_set_if_empty d linenr_min $linenr_min 0
   set sess_addresses [dict_lappend d sess_addresses $sess_address]
   set ssls [dict_lappend d ssls $ssl]
   set ctxs [dict_lappend d ctxs $ctx]
   set domain_ports [dict_lappend d domain_ports $domain_port]
   if {$functype == "established_global_ssl"} {
-    dict_lappend d estab_global_linenrs $linenr_end
+    dict_lappend d estab_global_linenrs $linenr_max
   }
   if {$functype == "freeing_global_ssl"} {
     # gegevens ophalen, in DB en vergeten.
-    set min_linenr [:min_linenr $d]
-    set max_linenr $linenr_end
+    set linenr_min [:linenr_min $d]
+    set linenr_max $linenr_max
     set iteration_start [:iteration_start $d]
     set iteration_end $iteration
     set isglobal 1
     set estab_global_linenrs [:estab_global_linenrs $d]
-    $db insert ssl_session [vars_to_dict logfile_id min_linenr max_linenr \
+    $db insert ssl_session [vars_to_dict logfile_id linenr_min linenr_max \
                                 iteration_start iteration_end sess_id \
                                 sess_addresses ssls ctxs domain_ports \
                                 estab_global_linenrs isglobal]
@@ -318,14 +318,14 @@ proc handle_block_ssl {db logfile_id vuserid iteration linenr_start linenr_end
   } else {
     # gegevens aanvullen, maar doe je altijd al, hierboven.
     # deze 2 voor als dit geen global session blijkt te zijn.
-    dict set d max_linenr $linenr_end
+    dict set d linenr_max $linenr_max
     dict set d iteration_end $iteration
     dict set ssl_session $sess_id $d
   }
 }
 
-proc handle_entry_func {db logfile_id vuserid iteration linenr_start linenr_end lines} {
-  log debug "handle_entry_func ($linenr_start -> $linenr_end): [join $lines "\n"]"
+proc handle_entry_func {db logfile_id vuserid iteration linenr_min linenr_max lines} {
+  log debug "handle_entry_func ($linenr_min -> $linenr_max): [join $lines "\n"]"
   set entry [join $lines "\n"]
   # Login_cert_main.c(81): t=8108ms: Already connected [1] to securepat01.rabobank.com:443  	[MsgId: MMSG-26000]
   # Logout.c(11): t=15974ms: Closed connection [5] to securepat01.rabobank.com:443 after completing 4 requests  	[MsgId: MMSG-26000]
@@ -370,17 +370,17 @@ proc handle_entry_func {db logfile_id vuserid iteration linenr_start linenr_end 
   if {($domain_port != "") && ![regexp {:} $domain_port]} {
     set domain_port "$domain_port:443"
   }
-  $db insert func_entry [vars_to_dict logfile_id vuserid iteration linenr_start \
-                         linenr_end entry functype ts_msec url \
+  $db insert func_entry [vars_to_dict logfile_id vuserid iteration linenr_min \
+                         linenr_max entry functype ts_msec url \
                          domain_port ip_port conn_nr nreqs relframe_id \
                          internal_id  conn_msec http_code]
 
-  handle_block_func $db $logfile_id $vuserid $iteration $linenr_start $linenr_end \
+  handle_block_func $db $logfile_id $vuserid $iteration $linenr_min $linenr_max \
       $ts_msec $functype $conn_nr $conn_msec \
       $domain_port $ip_port $nreqs $url $http_code
 }
 
-proc handle_block_func {db logfile_id vuserid iteration linenr_start linenr_end ts_msec functype conn_nr conn_msec domain_port ip_port nreqs url http_code} {
+proc handle_block_func {db logfile_id vuserid iteration linenr_min linenr_max ts_msec functype conn_nr conn_msec domain_port ip_port nreqs url http_code} {
   global conn_info req_info log_always
 
   if {$conn_nr != ""} {
@@ -388,11 +388,11 @@ proc handle_block_func {db logfile_id vuserid iteration linenr_start linenr_end 
     if {$functype == "closed_conn"} {
       if {$d == {}} {
         if {$log_always} {
-          log warn "Empty dict for closed_conn: logfile_id = $logfile_id, linenr=$linenr_start, conn_nr=$conn_nr"
+          log warn "Empty dict for closed_conn: logfile_id = $logfile_id, linenr=$linenr_min, conn_nr=$conn_nr"
           error "Stop now"
         }
       } else {
-        set linenr_start [:linenr_start $d]
+        set linenr_min [:linenr_min $d]
         set iteration_start [:iteration_start $d]
         set iteration_end $iteration
         set conn_msec [:conn_msec $d]
@@ -405,12 +405,12 @@ proc handle_block_func {db logfile_id vuserid iteration linenr_start linenr_end 
         } else {
           set ts_msec_diff [expr $ts_msec_end - $ts_msec_start]  
         }
-        $db insert conn_block [vars_to_dict logfile_id vuserid iteration_start iteration_end linenr_start linenr_end ts_msec_start ts_msec_end ts_msec_diff conn_nr conn_msec domain_port ip_port nreqs]
+        $db insert conn_block [vars_to_dict logfile_id vuserid iteration_start iteration_end linenr_min linenr_max ts_msec_start ts_msec_end ts_msec_diff conn_nr conn_msec domain_port ip_port nreqs]
       }
       dict unset conn_info $conn_nr
     } else {
       dict_set_if_empty d iteration_start $iteration 0
-      dict_set_if_empty d linenr_start $linenr_start 0
+      dict_set_if_empty d linenr_min $linenr_min 0
       dict_set_if_empty d ts_msec_start $ts_msec 0
       dict_set_if_empty d conn_msec $conn_msec
       dict_set_if_empty d domain_port $domain_port
@@ -419,12 +419,12 @@ proc handle_block_func {db logfile_id vuserid iteration linenr_start linenr_end 
       dict set conn_info $conn_nr $d
     }
   } elseif {$url != ""} {
-    #   $db add_tabledef req_block {id} {logfile_id vuserid iteration_start iteration_end linenr_start linenr_end url domain_port nentries}
+    #   $db add_tabledef req_block {id} {logfile_id vuserid iteration_start iteration_end linenr_min linenr_max url domain_port nentries}
     set d [dict_get $req_info $url]
     dict incr d nentries
     dict_set_if_empty d http_code $http_code    
     if {$functype == "req_done"} {
-      set linenr_start [:linenr_start $d]
+      set linenr_min [:linenr_min $d]
       set iteration_start [:iteration_start $d]
       set iteration_end $iteration
       set nentries [:nentries $d]
@@ -436,11 +436,11 @@ proc handle_block_func {db logfile_id vuserid iteration linenr_start linenr_end 
         set ts_msec_diff [expr $ts_msec_end - $ts_msec_start]   
       }
       set http_code [:http_code $d]
-      $db insert req_block [vars_to_dict logfile_id vuserid iteration_start iteration_end linenr_start linenr_end ts_msec_start ts_msec_end ts_msec_diff url domain_port nentries http_code]
+      $db insert req_block [vars_to_dict logfile_id vuserid iteration_start iteration_end linenr_min linenr_max ts_msec_start ts_msec_end ts_msec_diff url domain_port nentries http_code]
       dict unset req_info $url
     } else {
       dict_set_if_empty d iteration_start $iteration 0
-      dict_set_if_empty d linenr_start $linenr_start 0
+      dict_set_if_empty d linenr_min $linenr_min 0
       dict_set_if_empty d ts_msec_start $ts_msec 0
       dict set req_info $url $d
     }
@@ -577,14 +577,14 @@ proc create_extra_tables {db} {
   log info "Creating extra tables..."
   
   $db exec "drop table if exists conn_bio_block"
-  $db exec "create table conn_bio_block (logfile_id, bio_block_id, conn_block_id, bio_linenr_start, bio_linenr_end, conn_linenr_start, conn_linenr_end, domain_port, ip_port, reason)"
+  $db exec "create table conn_bio_block (logfile_id, bio_block_id, conn_block_id, bio_linenr_min, bio_linenr_max, conn_linenr_min, conn_linenr_max, domain_port, ip_port, reason)"
   $db exec "insert into conn_bio_block
-select b.logfile_id, b.id, c.id, b.linenr_start, b.linenr_end,
-c.linenr_start, c.linenr_end,
-c.domain_port, c.ip_port, 'linenr_end 1 diff'
+select b.logfile_id, b.id, c.id, b.linenr_min, b.linenr_max,
+c.linenr_min, c.linenr_max,
+c.domain_port, c.ip_port, 'linenr_max 1 diff'
 from bio_block b, conn_block c
 where b.logfile_id = c.logfile_id
-and b.linenr_end + 1 = c.linenr_end"
+and b.linenr_max + 1 = c.linenr_max"
 
   $db exec "drop table if exists newssl_entry"
   $db exec "create table newssl_entry as select * from ssl_entry where conn_nr <> ''"
@@ -592,19 +592,19 @@ and b.linenr_end + 1 = c.linenr_end"
   # TODO: hier mss iteration ook bij.
   $db exec "drop table if exists newssl_conn_block"
   $db exec "create table newssl_conn_block as
-select s.logfile_id, s.iteration newssl_iteration, s.linenr_start newssl_linenr, s.conn_nr, c.linenr_start, c.linenr_end, s.id newssl_entry_id, c.id conn_block_id,
+select s.logfile_id, s.iteration newssl_iteration, s.linenr_min newssl_linenr, s.conn_nr, c.linenr_min, c.linenr_max, s.id newssl_entry_id, c.id conn_block_id,
   s.domain_port domain_port, s.ssl ssl, s.ctx ctx, s.socket socket, c.nreqs nreqs
 from newssl_entry s, conn_block c
 where s.conn_nr <> ''
 and s.functype = 'new_ssl'
 and s.logfile_id = c.logfile_id
-and s.linenr_start between c.linenr_start and c.linenr_end
+and s.linenr_min between c.linenr_min and c.linenr_max
 and s.conn_nr = c.conn_nr"
 
   # lokaties waar sess_address en sess_id voorkomen, hier is overlap.
   $db exec "drop table if exists sess_addr_id"
   $db exec "create table sess_addr_id as
-  select count(*) cnt, logfile_id, sess_address, sess_id, min(linenr_start) min_linenr, max(linenr_end) max_linenr, min(iteration) min_iteration, max(iteration) max_iteration
+  select count(*) cnt, logfile_id, sess_address, sess_id, min(linenr_min) linenr_min, max(linenr_max) linenr_max, min(iteration) min_iteration, max(iteration) max_iteration
   from ssl_entry
   where sess_address <> ''
   and sess_id <> ''
@@ -614,7 +614,7 @@ and s.conn_nr = c.conn_nr"
   # lokaties waar sess_address en sess_id voorkomen in global setting, geen overlap?
   $db exec "drop table if exists global_sess_addr_id"
   $db exec "create table global_sess_addr_id as
-  select count(*) cnt, logfile_id, sess_address, sess_id, min(linenr_start) min_linenr, max(linenr_end) max_linenr, min(iteration) min_iteration, max(iteration) max_iteration
+  select count(*) cnt, logfile_id, sess_address, sess_id, min(linenr_min) linenr_min, max(linenr_max) linenr_max, min(iteration) min_iteration, max(iteration) max_iteration
   from ssl_entry
   where sess_address <> ''
   and sess_id <> ''
@@ -629,7 +629,7 @@ and s.conn_nr = c.conn_nr"
     from ssl_session s
     where s.logfile_id = ssl_conn_block.logfile_id
     and s.sess_id = ssl_conn_block.sess_id
-    and ssl_conn_block.min_linenr between s.min_linenr and s.max_linenr
+    and ssl_conn_block.linenr_min between s.linenr_min and s.linenr_max
   )
   where ssl_session_id is null"
   
@@ -646,7 +646,7 @@ and s.conn_nr = c.conn_nr"
     where s.logfile_id = ssl_conn_block.logfile_id
     and s.sess_id = ssl_conn_block.sess_id
     and s.iteration_start = ssl_conn_block.iteration_start
-    and ssl_conn_block.min_linenr <= s.min_linenr
+    and ssl_conn_block.linenr_min <= s.linenr_min
   )
   where ssl_session_id is null"
   sql_update_reason ssl_conn_block ssl_session_reason ssl_session_id \
@@ -662,51 +662,51 @@ and s.conn_nr = c.conn_nr"
     from conn_block cb
     where cb.logfile_id = ssl_conn_block.logfile_id
     and cb.conn_nr = ssl_conn_block.conn_nr
-    and ssl_conn_block.min_linenr between cb.linenr_start and cb.linenr_end
+    and ssl_conn_block.linenr_min between cb.linenr_min and cb.linenr_max
   )"
 
   # connect request and bio, first on entry level
-  # $db add_tabledef req_bio_entry {id} {logfile_id req_id bio_id req_linenr_start req_linenr_end bio_linenr_start bio_linenr_end reason}
+  # $db add_tabledef req_bio_entry {id} {logfile_id req_id bio_id req_linenr_min req_linenr_max bio_linenr_min bio_linenr_max reason}
   $db exec "insert into req_bio_entry (logfile_id, iteration, url, bio_address,
   req_id, bio_id, 
-  req_linenr_start, req_linenr_end, bio_linenr_start, bio_linenr_end, reason)
-  select r.logfile_id, r.iteration, r.url, b.address, r.id, b.id, r.linenr_start, r.linenr_end,
-         b.linenr_start, b.linenr_end, 'req/bio directly after'
+  req_linenr_min, req_linenr_max, bio_linenr_min, bio_linenr_max, reason)
+  select r.logfile_id, r.iteration, r.url, b.address, r.id, b.id, r.linenr_min, r.linenr_max,
+         b.linenr_min, b.linenr_max, 'req/bio directly after'
   from func_entry r, bio_entry b
   where r.logfile_id = b.logfile_id
   and r.iteration = b.iteration
   and r.functype = 'req_headers'
   and b.functype = 'write_return'
-  and r.linenr_end + 1 = b.linenr_start"
+  and r.linenr_max + 1 = b.linenr_min"
 
   $db exec "insert into req_bio_entry (logfile_id, iteration, url, bio_address,
   req_id, bio_id, 
-  req_linenr_start, req_linenr_end, bio_linenr_start, bio_linenr_end, reason)
-  select r.logfile_id, r.iteration, r.url, b.address, r.id, b.id, r.linenr_start, r.linenr_end,
-         b.linenr_start, b.linenr_end, 'resp/bio directly after'
+  req_linenr_min, req_linenr_max, bio_linenr_min, bio_linenr_max, reason)
+  select r.logfile_id, r.iteration, r.url, b.address, r.id, b.id, r.linenr_min, r.linenr_max,
+         b.linenr_min, b.linenr_max, 'resp/bio directly after'
   from func_entry r, bio_entry b
   where r.logfile_id = b.logfile_id
   and r.iteration = b.iteration
   and r.functype = 'resp_headers'
   and b.functype = 'read_return'
-  and b.linenr_end + 1 = r.linenr_start"
+  and b.linenr_max + 1 = r.linenr_min"
 
   # 8-5-2016 req done not now: not always close to bio block.
 
   # 8-5-2016 then req/bio on block level
-  # $db add_tabledef req_bio_block {id} {logfile_id iteration_start iteration_end url bio_address req_block_id bio_block_id req_min_linenr req_max_linenr bio_min_linenr bio_max_linenr}
-  $db exec "insert into req_bio_block (logfile_id, iteration_start, iteration_end, url, bio_address, req_block_id, bio_block_id, req_min_linenr, req_max_linenr, bio_min_linenr, bio_max_linenr)
-select rbe.logfile_id, rbe.iteration, rbe.iteration, rbe.url, rbe.bio_address, rb.id, bb.id, rb.linenr_start, rb.linenr_end, bb.linenr_start, bb.linenr_end
+  # $db add_tabledef req_bio_block {id} {logfile_id iteration_start iteration_end url bio_address req_block_id bio_block_id req_linenr_min req_linenr_max bio_linenr_min bio_linenr_max}
+  $db exec "insert into req_bio_block (logfile_id, iteration_start, iteration_end, url, bio_address, req_block_id, bio_block_id, req_linenr_min, req_linenr_max, bio_linenr_min, bio_linenr_max)
+select rbe.logfile_id, rbe.iteration, rbe.iteration, rbe.url, rbe.bio_address, rb.id, bb.id, rb.linenr_min, rb.linenr_max, bb.linenr_min, bb.linenr_max
 from req_bio_entry rbe, req_block rb, bio_block bb
 where rbe.reason = 'req/bio directly after'
 and rbe.logfile_id = rb.logfile_id
 and rbe.url = rb.url
 and rbe.iteration = rb.iteration_start
-and rbe.req_linenr_start = rb.linenr_start
+and rbe.req_linenr_min = rb.linenr_min
 and rbe.logfile_id = bb.logfile_id
 and rbe.bio_address = bb.address
 and rbe.iteration = bb.iteration_start
-and rbe.bio_linenr_start between bb.linenr_start and bb.linenr_end"
+and rbe.bio_linenr_min between bb.linenr_min and bb.linenr_max"
   
 }
 
@@ -815,7 +815,7 @@ proc check_overlap {tbl same_cols diff_col {allowed_overlap 0}} {
   from $tbl t1, $tbl t2
   where [join [map sql_equal_col $same_cols] " and "]
   and t1.$diff_col <> t2.$diff_col
-  and t1.min_linenr+$allowed_overlap between t2.min_linenr and t2.max_linenr"
+  and t1.linenr_min+$allowed_overlap between t2.linenr_min and t2.linenr_max"
 }
 
 proc sql_check {msg sql} {
@@ -836,30 +836,30 @@ proc sql_check {msg sql} {
 proc ssl_define_tables {db} {
   # iteration can be 'vuser_end', so not an integer.
   # TODO: $db set_default_type nothing|as_same
-  #       as_same: als een veld geen datatype heeft, en eerdere def met dezelfde naam wel, neem deze dan over. Dan bv maar 1x bij linenr_start integer op te geven.
+  #       as_same: als een veld geen datatype heeft, en eerdere def met dezelfde naam wel, neem deze dan over. Dan bv maar 1x bij linenr_min integer op te geven.
   # evt dan ook een def_datatype <col> <datatype> opnemen, zodat je dit vantevoren kunt
   # doen, evt ook met regexp's.
-  $db add_tabledef bio_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_start integer} {linenr_end integer} entry functype address socket_fd call result}
+  $db add_tabledef bio_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_min integer} {linenr_max integer} entry functype address socket_fd call result}
   
   # TODO: andere dingen in SSL line
-  $db add_tabledef ssl_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_start integer} {linenr_end integer} entry functype domain_port ssl ctx sess_address sess_id socket {conn_nr integer}}
+  $db add_tabledef ssl_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_min integer} {linenr_max integer} entry functype domain_port ssl ctx sess_address sess_id socket {conn_nr integer}}
   
-  $db add_tabledef func_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_start integer} {linenr_end integer} entry functype {ts_msec integer} url domain_port ip_port {conn_nr integer} {nreqs integer} {relframe_id integer} {internal_id integer} {conn_msec integer} http_code}
+  $db add_tabledef func_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_min integer} {linenr_max integer} entry functype {ts_msec integer} url domain_port ip_port {conn_nr integer} {nreqs integer} {relframe_id integer} {internal_id integer} {conn_msec integer} http_code}
 
-  $db add_tabledef bio_block {id} {logfile_id {vuserid integer} {iteration_start integer} {iteration_end integer} {linenr_start integer} {linenr_end integer} address socket_fd}
+  $db add_tabledef bio_block {id} {logfile_id {vuserid integer} {iteration_start integer} {iteration_end integer} {linenr_min integer} {linenr_max integer} address socket_fd}
   
-  $db add_tabledef conn_block {id} {logfile_id {vuserid integer} {iteration_start integer} {iteration_end integer} {linenr_start integer} {linenr_end integer} {ts_msec_start integer} {ts_msec_end integer} {ts_msec_diff integer} {conn_nr integer} {conn_msec integer} domain_port ip_port {nreqs integer}}
+  $db add_tabledef conn_block {id} {logfile_id {vuserid integer} {iteration_start integer} {iteration_end integer} {linenr_min integer} {linenr_max integer} {ts_msec_start integer} {ts_msec_end integer} {ts_msec_diff integer} {conn_nr integer} {conn_msec integer} domain_port ip_port {nreqs integer}}
   
-  $db add_tabledef req_block {id} {logfile_id {vuserid integer} {iteration_start integer} {iteration_end integer} {linenr_start integer} {linenr_end integer} {ts_msec_start integer} {ts_msec_end integer} {ts_msec_diff integer} url domain_port nentries http_code}
+  $db add_tabledef req_block {id} {logfile_id {vuserid integer} {iteration_start integer} {iteration_end integer} {linenr_min integer} {linenr_max integer} {ts_msec_start integer} {ts_msec_end integer} {ts_msec_diff integer} url domain_port nentries http_code}
 
   # einde bij "freeing_global_ssl"
 
-  $db add_tabledef ssl_session {id} {logfile_id {min_linenr int} {max_linenr int}
+  $db add_tabledef ssl_session {id} {logfile_id {linenr_min int} {linenr_max int}
     {iteration_start int} {iteration_end int} sess_id
     sess_addresses ssls ctxs domain_ports estab_global_linenrs {isglobal int}}
 
-  $db add_tabledef req_bio_entry {id} {logfile_id iteration url bio_address req_id bio_id req_linenr_start req_linenr_end bio_linenr_start bio_linenr_end reason}
+  $db add_tabledef req_bio_entry {id} {logfile_id iteration url bio_address req_id bio_id req_linenr_min req_linenr_max bio_linenr_min bio_linenr_max reason}
 
-  $db add_tabledef req_bio_block {id} {logfile_id iteration_start iteration_end url bio_address req_block_id bio_block_id req_min_linenr req_max_linenr bio_min_linenr bio_max_linenr}
+  $db add_tabledef req_bio_block {id} {logfile_id iteration_start iteration_end url bio_address req_block_id bio_block_id req_linenr_min req_linenr_max bio_linenr_min bio_linenr_max}
 }
 

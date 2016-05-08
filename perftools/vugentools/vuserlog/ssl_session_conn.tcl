@@ -32,7 +32,7 @@ oo::class create ssl_session_conn {
   
   # TODO: fkeys naar ssl_session en conn_block later nog. Of op natuurlijke sleutels?
   method define_tables {} {
-    $db add_tabledef ssl_conn_block {id} {logfile_id {min_linenr int} {max_linenr int}
+    $db add_tabledef ssl_conn_block {id} {logfile_id {linenr_min int} {linenr_max int}
       {iteration_start int} {iteration_end int} sess_id
       sess_address ssl ctx domain_port conn_nr {isglobal int} functype_first functype_last reason_insert {ssl_session_id int} ssl_session_reason {conn_block_id id}}
   }
@@ -52,24 +52,24 @@ oo::class create ssl_session_conn {
     }
   }
 
-  method entry {entry_type linenr_start linenr_end lines} {
+  method entry {entry_type linenr_min linenr_max lines} {
     if {$entry_type != "ssl"} {return}
-    log debug "oo:handling entry: $entry_type (start: $linenr_start)"
+    log debug "oo:handling entry: $entry_type (start: $linenr_min)"
     set entry [join $lines "\n"]
     # set functype [my det_functype $entry]
     set dentry [my det_entry_dict $entry]
     log debug "oo:dentry: $dentry"
     if {[:ssl $dentry] != ""} {
-      my entry_ssl $dentry $linenr_start $linenr_end
+      my entry_ssl $dentry $linenr_min $linenr_max
     } elseif {[:sess_id $dentry] != ""} {
-      my entry_sess_id $dentry $linenr_start $linenr_end
+      my entry_sess_id $dentry $linenr_min $linenr_max
     } else {
       # ??? nothing ?
     }
   }
 
   # pre: [:ssl $dentry] is filled
-  method entry_ssl {dentry linenr_start linenr_end} {
+  method entry_ssl {dentry linenr_min linenr_max} {
     set dssl [dict_get $ssl_info [:ssl $dentry]]
     set functype [:functype $dentry]
     # keuze: eerst op functype checken, of of dssl leeg is of niet.
@@ -79,28 +79,28 @@ oo::class create ssl_session_conn {
       # wel nieuwe maken voor in dict
       if {$dssl != {}} {
         # blijkbaar nog een oude, deze wegschrijven en verwijderen.
-        log warn "oo:newssl entry ($linenr_start, [:ssl $dentry]) while already know this ssl: insert and start anew"
-        my insert_ssl $dssl "newssl functype; have old one with same ssl: #$linenr_end"
+        log warn "oo:newssl entry ($linenr_min, [:ssl $dentry]) while already know this ssl: insert and start anew"
+        my insert_ssl $dssl "newssl functype; have old one with same ssl: #$linenr_max"
       }
-      my init_dssl $dentry $linenr_start $linenr_end
+      my init_dssl $dentry $linenr_min $linenr_max
     } else {
       # functype wat anders, niet belangrijk?
       # kan ook een cb handshake zijn net nadat sessie is aangepast, en dus free global
       # is geweest: in dit geval is de ssl verdwenen en moet opnieuw opgebouwd.
       # cond_breakpoint {$dssl == {}}
       if {$dssl == {}} {
-        set dssl [my init_dssl $dentry $linenr_start $linenr_end]
+        set dssl [my init_dssl $dentry $linenr_min $linenr_max]
       }
       if {[my sess_id_filled_diff $dentry $dssl]} {
         log debug "oo:new session id: insert old and start anew"
         set conn_nr [:conn_nr $dssl]
         # breakpoint
-        my insert_ssl $dssl "changed sess_id in dssl: #$linenr_end"
-        my init_dssl $dentry $linenr_start $linenr_end $conn_nr
+        my insert_ssl $dssl "changed sess_id in dssl: #$linenr_max"
+        my init_dssl $dentry $linenr_min $linenr_max $conn_nr
       } else {
         log debug "oo:appending info: $dssl with $dentry"
         set dssl2 [dict_merge_fn union $dssl $dentry]
-        dict set dssl2 max_linenr $linenr_end
+        dict set dssl2 linenr_max $linenr_max
         dict set dssl2 iteration_end $iteration
         dict set dssl2 functype_last [:functype $dentry]
         my dict_set_ssl_info [:ssl $dssl2] $dssl2
@@ -121,10 +121,10 @@ oo::class create ssl_session_conn {
   }
   
   # pre: [:ssl $dentry] is not, filled, sess_id is filled.
-  method entry_sess_id {dentry linenr_start linenr_end} {
+  method entry_sess_id {dentry linenr_min linenr_max} {
     set functype [:functype $dentry]
     if {$functype == "freeing_global_ssl"} {
-      my free_global_ssl $dentry $linenr_end
+      my free_global_ssl $dentry $linenr_max
     }
   }
   
@@ -144,10 +144,10 @@ oo::class create ssl_session_conn {
 
   # pre dentry/ssl has a value, sess_id might have a value.
   # with changed session within a ssl/conn, transfer conn_nr to the next
-  method init_dssl {dentry linenr_start linenr_end {conn_nr ""}} {
+  method init_dssl {dentry linenr_min linenr_max {conn_nr ""}} {
     set dssl $dentry
-    dict set dssl min_linenr $linenr_start
-    dict set dssl max_linenr $linenr_end
+    dict set dssl linenr_min $linenr_min
+    dict set dssl linenr_max $linenr_max
     dict set dssl iteration_start $iteration
     dict set dssl iteration_end $iteration
     dict set dssl isglobal 0
@@ -187,7 +187,7 @@ oo::class create ssl_session_conn {
   method insert_ssl {dssl reason} {
     log debug "inserting ssl_conn_block: $dssl"
     dict set dssl reason_insert $reason
-    # cond_breakpoint {[:max_linenr $dssl] == 876}
+    # cond_breakpoint {[:linenr_max $dssl] == 876}
     my assert_dssl $dssl
     # dict set dssl logfile_id $logfile_id
     # dict set dssl iteration_end $iteration
@@ -200,7 +200,7 @@ oo::class create ssl_session_conn {
     if {[:# [:sess_id $dssl]] > 1} {
       error "More than one sess_id in dssl: $dssl"
     }
-    foreach k {:min_linenr :logfile_id :iteration_end} {
+    foreach k {:linenr_min :logfile_id :iteration_end} {
       if {[$k $dssl] == ""} {
         log error "$k not set in dssl: $dssl"
         breakpoint
@@ -209,7 +209,7 @@ oo::class create ssl_session_conn {
     }
   }
 
-  method free_global_ssl {dentry linenr_end} {
+  method free_global_ssl {dentry linenr_max} {
     set sess_id [:sess_id $dentry]
     if {[dict_get $sess_info $sess_id] == {}} {
       # dit kan nu voorkomen, als door nieuwe sessie de oude al is afgesloten; deze dan ignore.
@@ -219,12 +219,12 @@ oo::class create ssl_session_conn {
     foreach ssl [dict_get $sess_info $sess_id] {
       set dssl [dict get $ssl_info $ssl]
       dict set dssl isglobal 1
-      # 7-5-2016 max_linenr en iteration_end op oude waarden laten, weet alleen zeker
+      # 7-5-2016 linenr_max en iteration_end op oude waarden laten, weet alleen zeker
       # dat ze uiterlijk op dit linenr zijn afgesloten.
-      #dict set dssl max_linenr $linenr_end
+      #dict set dssl linenr_max $linenr_max
       #dict set dssl iteration_end $iteration
       cond_breakpoint {$sess_id != [:sess_id $dssl]}
-      my insert_ssl $dssl "free_global_ssl: #$linenr_end"
+      my insert_ssl $dssl "free_global_ssl: #$linenr_max"
     }
     dict unset sess_info $sess_id
   }
