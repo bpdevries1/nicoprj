@@ -789,6 +789,8 @@ proc sql_checks {db} {
        join req_block rb on rb.conn_block_id = cb.id
        group by 1
        having count(*) <> cb.nreqs"
+
+  check_exists req_block id ssl_conn_req_block req_block_id
   
   if {$have_warnings} {
     log warn "**************************************"

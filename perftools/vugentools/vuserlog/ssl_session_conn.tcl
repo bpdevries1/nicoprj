@@ -11,7 +11,6 @@
 # * als een test wordt afgebroken, zijn logs dan incompleet? lijkt dat TCP connecties wel goed worden afgebroken en ook SSL sessies worden gesloten.
 
 # TODO:
-# * Check of #reqs dat ik onder een connectie heb, overeenkomt met wat 'ie zegt.
 # * Al een check of alle reqs bij een ssl_conn_req_block horen?
 # * Horen alle ssl_entry items bij een ssl_session? Is dit belangrijk?
 # * Nu wat dubbele code in deze vs ssl.tcl, vooral herkennen functype. Bv ssl ook OO maken, met nog meer pub/sub gebeuren.
