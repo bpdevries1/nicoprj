@@ -714,6 +714,14 @@ from req_bio_block rbb
 join conn_bio_block cbb on rbb.bio_block_id = cbb.bio_block_id
 join ssl_conn_block scb on cbb.conn_block_id = scb.conn_block_id
 where rbb.req_linenr_min between scb.linenr_min and scb.linenr_max"
+
+  # conn_block_id bij req_block
+  # mss deze dan ook gebruiken bij ssl_conn_req_block?
+  $db exec "update req_block set conn_block_id = (
+  select cbb.conn_block_id
+  from req_bio_block rbb
+  join conn_bio_block cbb on rbb.bio_block_id = cbb.bio_block_id
+  where rbb.req_block_id = req_block.id)"
   
 }
 
@@ -772,6 +780,8 @@ proc sql_checks {db} {
 
   # ssl_conn_req_block checks
   check_doubles ssl_conn_req_block {logfile_id req_block_id}
+
+  check_filled req_block conn_block_id
   
   if {$have_warnings} {
     log warn "**************************************"
@@ -860,7 +870,7 @@ proc ssl_define_tables {db} {
   
   $db add_tabledef conn_block {id} {logfile_id {vuserid integer} {iteration_min integer} {iteration_max integer} {linenr_min integer} {linenr_max integer} {ts_msec_start integer} {ts_msec_end integer} {ts_msec_diff integer} {conn_nr integer} {conn_msec integer} domain_port ip_port {nreqs integer}}
   
-  $db add_tabledef req_block {id} {logfile_id {vuserid integer} {iteration_min integer} {iteration_max integer} {linenr_min integer} {linenr_max integer} {ts_msec_start integer} {ts_msec_end integer} {ts_msec_diff integer} url domain_port nentries http_code}
+  $db add_tabledef req_block {id} {logfile_id {vuserid integer} {iteration_min integer} {iteration_max integer} {linenr_min integer} {linenr_max integer} {ts_msec_start integer} {ts_msec_end integer} {ts_msec_diff integer} url domain_port nentries http_code conn_block_id}
 
   # einde bij "freeing_global_ssl"
 

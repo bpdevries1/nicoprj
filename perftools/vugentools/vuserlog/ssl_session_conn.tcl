@@ -5,9 +5,9 @@
 # * elke TCP connectie kan maar 1 dssl/ssl tegelijk hebben. Dit kan wel dezelfde blijven.
 #   - als een TCP Closed wordt gevonden, kan de bijbehorende dssl dus ge-insert worden.
 
-# Open vragen:
+# TODO: Open vragen:
 # * Is het belangrijk of een sessie global is of niet?
-# * kan de tabel ssl_addr_id weg?
+# * kan de tabel ssl_addr_id weg? Nu nog checks op zitten, kijken of deze afgaan bij andere logfiles.
 # * als een test wordt afgebroken, zijn logs dan incompleet? lijkt dat TCP connecties wel goed worden afgebroken en ook SSL sessies worden gesloten.
 
 # TODO:
