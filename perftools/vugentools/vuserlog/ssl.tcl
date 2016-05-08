@@ -782,6 +782,13 @@ proc sql_checks {db} {
   check_doubles ssl_conn_req_block {logfile_id req_block_id}
 
   check_filled req_block conn_block_id
+
+  sql_check "nreqs in conn_block diffs from counted #reqs" \
+      "select cb.id, count(*)
+       from conn_block cb
+       join req_block rb on rb.conn_block_id = cb.id
+       group by 1
+       having count(*) <> cb.nreqs"
   
   if {$have_warnings} {
     log warn "**************************************"
