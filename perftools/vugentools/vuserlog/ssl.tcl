@@ -58,7 +58,9 @@ proc handle_ssl_line {db logfile_id vuserid iteration line linenr} {
     set lines [list $line]
     set linenr_start $linenr
     set linenr_end $linenr
-    $ssl_session_conn entry $entry_type $iteration $linenr_start $linenr_end $lines
+    # $ssl_session_conn entry $entry_type $iteration $linenr_start $linenr_end $lines
+    $ssl_session_conn entry $entry_type $linenr_start $linenr_end $lines
+    
   }
 }
 
@@ -184,9 +186,13 @@ proc handle_block_bio {db logfile_id vuserid iteration linenr_start linenr_end f
   }
 }
 
-proc cond_breakpoint {exp} {
+proc cond_breakpoint {exp {msg ""}} {
   set res [uplevel 1 [list expr $exp]]
   if {$res} {
+    if {$msg == ""} {
+      set msg "Satisfied: $exp"
+    }
+    log warn $msg
     breakpoint
   }
 }
@@ -649,10 +655,9 @@ proc sql_checks {db} {
   # deze is geldig voor run 599 met nconc=1, zegt dus nog niets over algemeen.
   # maar eerst deze goed begrijpen.
   check_overlap ssl_session logfile_id id 2
-  
-  # even een om te testen
-  # do_check "testje" "select * from conn_block where id = 1"
-  # check_doubles conn_block conn_nr
+
+  # 7-5-2016 deze even voor nconc=1, dan mag er 0 overlap zijn.
+  check_overlap ssl_conn_block logfile_id id
   
   if {$have_warnings} {
     log warn "**************************************"

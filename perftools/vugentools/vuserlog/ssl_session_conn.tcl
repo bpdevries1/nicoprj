@@ -34,7 +34,7 @@ oo::class create ssl_session_conn {
   method define_tables {} {
     $db add_tabledef ssl_conn_block {id} {logfile_id {min_linenr int} {max_linenr int}
       {iteration_start int} {iteration_end int} sess_id
-      sess_address ssl ctx domain_port estab_global_linenrs {isglobal int}}
+      sess_address ssl ctx domain_port {isglobal int} functype_first functype_last reason_end}
   }
   
   method bof {plogfile_id pvuserid piteration} {
@@ -52,72 +52,82 @@ oo::class create ssl_session_conn {
     }
   }
 
-  method entry {entry_type it linenr_start linenr_end lines} {
-    if {$entry_type != "ssl"} {
-      return
-    }
-    log debug "oo:handling entry: $entry_type"
+  method entry {entry_type linenr_start linenr_end lines} {
+    if {$entry_type != "ssl"} {return}
+    log debug "oo:handling entry: $entry_type (start: $linenr_start)"
     set entry [join $lines "\n"]
-    set functype [my det_functype $entry]
-    #lassign [my det_entry_vars $entry] domain_port ssl ctx sess_address \
-    #    sess_id socket conn_nr
+    # set functype [my det_functype $entry]
     set dentry [my det_entry_dict $entry]
     log debug "oo:dentry: $dentry"
-    set ssl [:ssl $dentry]
-    set dssl [dict_get $ssl_info $ssl]
+    if {[:ssl $dentry] != ""} {
+      my entry_ssl $dentry $linenr_start $linenr_end
+    } elseif {[:sess_id $dentry] != ""} {
+      my entry_sess_id $dentry $linenr_start $linenr_end
+    } else {
+      # ??? nothing ?
+    }
+  }
+
+  # pre: [:ssl $dentry] is filled
+  method entry_ssl {dentry linenr_start linenr_end} {
+    set dssl [dict_get $ssl_info [:ssl $dentry]]
+    set functype [:functype $dentry]
+    # keuze: eerst op functype checken, of of dssl leeg is of niet.
     if {$functype == "new_ssl"} {
       log debug "oo:handling newssl"
       # niet huidige afbreken, kunnen parallel zijn.
       # wel nieuwe maken voor in dict
       if {$dssl != {}} {
         # blijkbaar nog een oude, deze wegschrijven en verwijderen.
-        log warn "oo:newssl entry ($linenr_start, $ssl) while already know this ssl: insert and start anew"
+        log warn "oo:newssl entry ($linenr_start, [:ssl $dentry]) while already know this ssl: insert and start anew"
         my insert_ssl $dssl
       }
       my init_dssl $dentry $linenr_start $linenr_end
-    } elseif {$functype == "freeing_global_ssl"} {
-      # TODO: obv session_id kijken of er nog ssl-entries zijn, en deze dan afsluiten.
-      log debug "oo:TODO handle freeing global ssl"
     } else {
-      # zou al in dict te vinden moeten zijn
+      # functype wat anders, niet belangrijk?
+      # kan ook een cb handshake zijn net nadat sessie is aangepast, en dus free global
+      # is geweest: in dit geval is de ssl verdwenen en moet opnieuw opgebouwd.
+      # cond_breakpoint {$dssl == {}}
       if {$dssl == {}} {
-        if {$ssl != ""} {
-          log warn "oo:got non-newssl entry, but cannot find info ($linenr_start, $ssl)"
-        } else {
-          log debug "oo: no ssl field in line: ignore: entry"
-          # no ssl field in line, ignore for now.
-        }
-      } else {
-        # ssl found, check sess_id
-        set apnd 0
-        if {[:sess_id $dssl] == ""} {
-          set apnd 1
-        } elseif {[:sess_id $dentry] == ""} {
-          set apnd 1
-        } elseif {[:sess_id $dentry] == [:sess_id $dssl]} {
-          set apnd 1
-        } else {
-          # new session_id: insert this one and start a new one.
-          log debug "oo:new session id: insert old and start anew"
-          my insert_ssl $dssl
-          my init_dssl $dentry $linenr_start $linenr_end          
-        }
-        if {$apnd} {
-          log debug "oo:appending info: $dssl with $dentry"
-          # ok, add session info to current record
-          # set dssl [dict_merge_append $dssl $dentry]
-          set dssl [dict_merge_fn union $dssl $dentry]
-          # also set last linenr etc.
-          dict set dssl max_linenr $linenr_end
-          dict set ssl_info $ssl $dssl
-        }
+        set dssl [my init_dssl $dentry $linenr_start $linenr_end]
       }
+      if {[my sess_id_filled_diff $dentry $dssl]} {
+        log debug "oo:new session id: insert old and start anew"
+        my insert_ssl $dssl
+        my init_dssl $dentry $linenr_start $linenr_end          
+      } else {
+        log debug "oo:appending info: $dssl with $dentry"
+        set dssl2 [dict_merge_fn union $dssl $dentry]
+        dict set dssl2 max_linenr $linenr_end
+        dict set dssl2 iteration_end $iteration
+        dict set dssl2 functype_last [:functype $dentry]
+        my dict_set_ssl_info [:ssl $dssl2] $dssl2
+        my connect_sess_ssl [:sess_id $dssl2] [:ssl $dssl2]
+      }
+    }
+  }
+
+  method dict_set_ssl_info {ssl dssl} {
+    my assert_dssl $dssl
+    dict set ssl_info $ssl $dssl
+  }
+  
+  method sess_id_filled_diff {d1 d2} {
+    set s1 [:sess_id $d1]
+    set s2 [:sess_id $d2]
+    and {$s1 != {}} {$s2 != {}} {$s1 != $s2}
+  }
+  
+  # pre: [:ssl $dentry] is not, filled, sess_id is filled.
+  method entry_sess_id {dentry linenr_start linenr_end} {
+    set functype [:functype $dentry]
+    if {$functype == "freeing_global_ssl"} {
+      my free_global_ssl $dentry $linenr_end
     }
   }
   
   method det_entry_dict {entry} {
     # TODO: deze regexp's nu overgenomen uit handle_entry_ssl, dus dubbel.
-    # TODO: check for isglobal?
     setvars {domain_port ssl ctx sess_address sess_id socket conn_nr} ""
     regexp {, connection=([^, ]+),} $entry z domain_port
     regexp {SSL=([0-9A-F]+)} $entry z ssl
@@ -126,26 +136,40 @@ oo::class create ssl_session_conn {
     regexp {ID \(length \d+\): ([0-9A-F]+)} $entry z sess_id
     regexp {session id: \(length \d+\): ([0-9A-F]+)} $entry z sess_id
     regexp {socket=([A-Fa-f0-9]+) \[(\d+)\]} $entry z socket conn_nr
-    # list $domain_port $ssl $ctx $sess_address $sess_id $socket $conn_nr
-    vars_to_dict domain_port ssl ctx sess_address sess_id socket conn_nr
+    set functype [my det_functype $entry]
+    vars_to_dict functype domain_port ssl ctx sess_address sess_id socket conn_nr
   }
 
+  # pre dentry/ssl has a value, sess_id might have a value.
   method init_dssl {dentry linenr_start linenr_end} {
     set dssl $dentry
     dict set dssl min_linenr $linenr_start
     dict set dssl max_linenr $linenr_end
     dict set dssl iteration_start $iteration
     dict set dssl iteration_end $iteration
-    dict set ssl_info [:ssl $dentry] $dssl    
+    dict set dssl isglobal 0
+    dict set dssl logfile_id $logfile_id
+    dict set dssl functype_first [:functype $dentry]
+    dict set dssl functype_last [:functype $dentry]
+    my dict_set_ssl_info [:ssl $dentry] $dssl
+    my connect_sess_ssl [:sess_id $dssl] [:ssl $dssl]
     return $dssl
   }
 
+  # TODO: ? ook linenr waarop deze 2 dingen gekoppeld worden?
+  method connect_sess_ssl {sess_id ssl} {
+    if {($sess_id != "") && ($ssl != "")} {
+      dict set sess_info $sess_id [union [dict_get $sess_info $sess_id] $ssl]
+    }
+  }
+  
   # write ssl record to db, remove from 'global' list
   method insert_ssl {dssl} {
     log debug "inserting ssl_conn_block: $dssl"
+    # cond_breakpoint {[:max_linenr $dssl] == 876}
     my assert_dssl $dssl
-    dict set dssl logfile_id $logfile_id
-    dict set dssl iteration_end $iteration
+    # dict set dssl logfile_id $logfile_id
+    # dict set dssl iteration_end $iteration
     $db insert ssl_conn_block $dssl
     dict unset ssl_info [:ssl $dssl]
   }
@@ -154,6 +178,31 @@ oo::class create ssl_session_conn {
     if {[:# [:sess_id $dssl]] > 1} {
       error "More than one sess_id in dssl: $dssl"
     }
+    foreach k {:min_linenr :logfile_id :iteration_end} {
+      if {[$k $dssl] == ""} {
+        log error "$k not set in dssl: $dssl"
+        breakpoint
+        error "$k not set in dssl: $dssl"
+      }
+    }
+  }
+
+  method free_global_ssl {dentry linenr_end} {
+    set sess_id [:sess_id $dentry]
+    if {[dict_get $sess_info $sess_id] == {}} {
+      log error "$sess_id does not occur in sess_info."
+      breakpoint
+    }
+    foreach ssl [dict_get $sess_info $sess_id] {
+      set dssl [dict get $ssl_info $ssl]
+      dict set dssl isglobal 1
+      # 7-5-2016 max_linenr en iteration_end op oude waarden laten, weet alleen zeker
+      # dat ze uiterlijk op dit linenr zijn afgesloten.
+      #dict set dssl max_linenr $linenr_end
+      #dict set dssl iteration_end $iteration
+      my insert_ssl $dssl
+    }
+    dict unset sess_info $sess_id
   }
   
   method define_functypes {} {
@@ -197,4 +246,81 @@ oo::class create ssl_session_conn {
 
     
   }
+
+  method entry_old {entry_type linenr_start linenr_end lines} {
+    if {$entry_type != "ssl"} {return}
+    log debug "oo:handling entry: $entry_type"
+    set entry [join $lines "\n"]
+    set functype [my det_functype $entry]
+    set dentry [my det_entry_dict $entry]
+    log debug "oo:dentry: $dentry"
+    set ssl [:ssl $dentry]
+    set dssl [dict_get $ssl_info $ssl]
+    if {$functype == "new_ssl"} {
+      log debug "oo:handling newssl"
+      # niet huidige afbreken, kunnen parallel zijn.
+      # wel nieuwe maken voor in dict
+      if {$dssl != {}} {
+        # blijkbaar nog een oude, deze wegschrijven en verwijderen.
+        log warn "oo:newssl entry ($linenr_start, $ssl) while already know this ssl: insert and start anew"
+        my insert_ssl $dssl
+      }
+      my init_dssl $dentry $linenr_start $linenr_end
+    } elseif {$functype == "freeing_global_ssl"} {
+      my free_global_ssl $dentry
+    } else {
+      # zou al in dict te vinden moeten zijn
+      if {$dssl == {}} {
+        if {$ssl != ""} {
+          # toch weer warning?
+          log error "oo:got non-newssl entry, but cannot find info ($linenr_start, $ssl) -> ignore"
+          log error "expect this one to be already in dssl, since it's not a newssl entry"
+          breakpoint
+        } else {
+          # should do something with all [SSL:] lines, possibly explicitly ignore.
+          log warn "oo: no ssl field in line: ignore: entry"
+          # breakpoint
+          # no ssl field in line, ignore for now.
+        }
+      } else {
+        # dssl found, check sess_id
+        set apnd 0
+        if {[:sess_id $dssl] == ""} {
+           set apnd 1
+        } elseif {[:sess_id $dentry] == ""} {
+          set apnd 1
+        } elseif {[:sess_id $dentry] == [:sess_id $dssl]} {
+          set apnd 1
+        } else {
+          # new/other session_id: insert this one and start a new one.
+          log debug "oo:new session id: insert old and start anew"
+          my insert_ssl $dssl
+          my init_dssl $dentry $linenr_start $linenr_end          
+        }
+        if {$apnd} {
+          log debug "oo:appending info: $dssl with $dentry"
+          # ok, add session info to current record
+          # set dssl [dict_merge_append $dssl $dentry]
+          set dssl [dict_merge_fn union $dssl $dentry]
+          # also set last linenr etc.
+          dict set dssl max_linenr $linenr_end
+          dict set ssl_info $ssl $dssl
+          my connect_sess_ssl [:sess_id $dssl] [:ssl $dssl]
+        }
+      }
+    }
+  }
+
+  if 0 {
+    TODO:
+    Login_cert_main.c(81): [SSL:] X509 certificate error 19: self signed certificate in certificate chain
+    Login_cert_main.c(81): [SSL:] Established a global SSL session          [MsgId: MMSG-26000]
+    [SSL:] Connection information:
+    Login_cert_main.c(81): [SSL:] Successful attempt to establish the reuse of the global SSL session (SSL_set_session rc=1). session address=08AF8CC0, ID (length 32): B1C73633E1E91A6E8DAB080255A0E0A744DDCA91C8BF21CD15007411878FA9AA       [MsgId: MMSG-26000]
+
+    * Deze entry bestaat uit 1 line, klopt dit?
+    * Kun je deze info aan een ssl-conn koppelen? Aan de huidige bv?
+  }
+  
+  
 }
