@@ -11,7 +11,7 @@
 # * als een test wordt afgebroken, zijn logs dan incompleet? lijkt dat TCP connecties wel goed worden afgebroken en ook SSL sessies worden gesloten.
 
 # TODO:
-# * Al een check of alle reqs bij een ssl_conn_req_block horen?
+# * Bij inlezen alle ssl_entries koppelen aan een ssl_conn_block. (En evt ssl_session)
 # * Horen alle ssl_entry items bij een ssl_session? Is dit belangrijk?
 # * Nu wat dubbele code in deze vs ssl.tcl, vooral herkennen functype. Bv ssl ook OO maken, met nog meer pub/sub gebeuren.
 # * aantal concurrent connections tellen? Zou std op max 6 moeten staan.
@@ -24,7 +24,7 @@ package require Tclx;           # for (set) union.
 
 oo::class create ssl_session_conn {
 
-  # 2 dicts:
+  # 3 dicts (*_info) en wat losse instance vars:
   variable ssl_info sess_info conn_info db logfile_id vuserid iteration functypes
 
   constructor {a_db} {
@@ -50,7 +50,6 @@ oo::class create ssl_session_conn {
     }
   }
   
-  # TODO: fkeys naar ssl_session en conn_block later nog. Of op natuurlijke sleutels?
   method define_tables {} {
     $db add_tabledef ssl_conn_block {id} {logfile_id {linenr_min int} {linenr_max int}
       {iteration_min int} {iteration_max int} sess_id
@@ -121,13 +120,13 @@ oo::class create ssl_session_conn {
       if {[my sess_id_filled_diff $dentry $dssl]} {
         log debug "oo:new session id: insert old and start anew"
         set conn_nr [:conn_nr $dssl]
-        
         my insert_ssl $dssl "changed sess_id in dssl: #$linenr_max" $linenr_max
         my init_dssl $dentry $linenr_min $linenr_max $conn_nr
       } else {
         log debug "oo:appending info: $dssl with $dentry"
         set dssl2 [dict_merge_fn union $dssl $dentry]
         dict set dssl2 linenr_max $linenr_max
+        dict lappend dssl2 entry_linenr_mins $linenr_min
         dict set dssl2 iteration_max $iteration
         dict set dssl2 functype_last [:functype $dentry]
         my dict_set_ssl_info [:ssl $dssl2] $dssl2
@@ -153,7 +152,7 @@ oo::class create ssl_session_conn {
   method entry_sess_id {dentry linenr_min linenr_max} {
     set functype [:functype $dentry]
     if {$functype == "freeing_global_ssl"} {
-      my free_global_ssl $dentry $linenr_max
+      my free_global_ssl $dentry $linenr_min $linenr_max
     }
   }
 
@@ -221,6 +220,7 @@ oo::class create ssl_session_conn {
     set dssl $dentry
     dict set dssl linenr_min $linenr_min
     dict set dssl linenr_max $linenr_max
+    dict set dssl entry_linenr_mins [list $linenr_min]
     dict set dssl iteration_min $iteration
     dict set dssl iteration_max $iteration
     dict set dssl isglobal 0
@@ -296,7 +296,14 @@ oo::class create ssl_session_conn {
     my assert_dssl $dssl
     # dict set dssl logfile_id $logfile_id
     # dict set dssl iteration_max $iteration
-    $db insert ssl_conn_block $dssl
+    set ssl_conn_block_id [$db insert ssl_conn_block $dssl]
+    # TODO: bij alle gekoppelde ssl_entry records het fkey veld ssl_conn_block_id vullen.
+    foreach linenr_min [:entry_linenr_mins $dssl] {
+      $db exec "update ssl_entry set ssl_conn_block_id = $ssl_conn_block_id
+                where ssl_conn_block_id is null
+                and logfile_id = $logfile_id
+                and linenr_min = $linenr_min"
+    }
     dict unset ssl_info [:ssl $dssl]
     my disconnect_sess_ssl [:sess_id $dssl] [:ssl $dssl]
     my disconnect_ssl_conn [:ssl $dssl] [:conn_nr $dssl] $linenr
@@ -315,7 +322,7 @@ oo::class create ssl_session_conn {
     }
   }
 
-  method free_global_ssl {dentry linenr_max} {
+  method free_global_ssl {dentry linenr_min linenr_max} {
     set sess_id [:sess_id $dentry]
     if {[dict_get $sess_info $sess_id] == {}} {
       # dit kan nu voorkomen, als door nieuwe sessie de oude al is afgesloten; deze dan ignore.
@@ -333,6 +340,8 @@ oo::class create ssl_session_conn {
       if {$sess_id != [:sess_id $dssl]} {
         log error "sess_id in dentry differs from sess_id's from connected dssl"
         breakpoint
+      } else {
+        dict lappend dssl entry_linenr_mins $linenr_min
       }
       my insert_ssl $dssl "free_global_ssl: #$linenr_max" $linenr_max
     }

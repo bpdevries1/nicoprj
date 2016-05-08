@@ -871,7 +871,7 @@ proc ssl_define_tables {db} {
   $db add_tabledef bio_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_min integer} {linenr_max integer} entry functype address socket_fd call result}
   
   # TODO: andere dingen in SSL line
-  $db add_tabledef ssl_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_min integer} {linenr_max integer} entry functype domain_port ssl ctx sess_address sess_id socket {conn_nr integer}}
+  $db add_tabledef ssl_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_min integer} {linenr_max integer} entry functype domain_port ssl ctx sess_address sess_id socket {conn_nr integer} ssl_conn_block_id}
   
   $db add_tabledef func_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_min integer} {linenr_max integer} entry functype {ts_msec integer} url domain_port ip_port {conn_nr integer} {nreqs integer} {relframe_id integer} {internal_id integer} {conn_msec integer} http_code}
 
