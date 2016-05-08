@@ -707,6 +707,13 @@ and rbe.logfile_id = bb.logfile_id
 and rbe.bio_address = bb.address
 and rbe.iteration = bb.iteration_min
 and rbe.bio_linenr_min between bb.linenr_min and bb.linenr_max"
+
+  $db exec "insert into ssl_conn_req_block (logfile_id, iteration_min, iteration_max, req_linenr_min, req_linenr_max, scb_linenr_min, scb_linenr_max, ssl_conn_block_id, req_block_id, ssl_session_id, conn_block_id, url, conn_nr, sess_id)
+select rbb.logfile_id, rbb.iteration_min, rbb.iteration_max, rbb.req_linenr_min, rbb.req_linenr_max, scb.linenr_min, scb.linenr_max, scb.id, rbb.req_block_id, scb.ssl_session_id, scb.conn_block_id, rbb.url, scb.conn_nr, scb.sess_id
+from req_bio_block rbb
+join conn_bio_block cbb on rbb.bio_block_id = cbb.bio_block_id
+join ssl_conn_block scb on cbb.conn_block_id = scb.conn_block_id
+where rbb.req_linenr_min between scb.linenr_min and scb.linenr_max"
   
 }
 
@@ -762,6 +769,9 @@ proc sql_checks {db} {
   # req_bio_entry checks
   check_exists func_entry id req_bio_entry req_id "and functype='req_headers'"
   check_exists func_entry id req_bio_entry req_id "and functype='resp_headers'"
+
+  # ssl_conn_req_block checks
+  check_doubles ssl_conn_req_block {logfile_id req_block_id}
   
   if {$have_warnings} {
     log warn "**************************************"
@@ -861,5 +871,7 @@ proc ssl_define_tables {db} {
   $db add_tabledef req_bio_entry {id} {logfile_id iteration url bio_address req_id bio_id req_linenr_min req_linenr_max bio_linenr_min bio_linenr_max reason}
 
   $db add_tabledef req_bio_block {id} {logfile_id iteration_min iteration_max url bio_address req_block_id bio_block_id req_linenr_min req_linenr_max bio_linenr_min bio_linenr_max}
+
+  $db add_tabledef ssl_conn_req_block {id} {logfile_id iteration_min iteration_max req_linenr_min req_linenr_max scb_linenr_min scb_linenr_max ssl_conn_block_id req_block_id ssl_session_id conn_block_id url conn_nr sess_id}
 }
 

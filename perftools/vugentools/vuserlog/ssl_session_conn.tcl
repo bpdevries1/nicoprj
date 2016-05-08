@@ -1,18 +1,39 @@
 # package require TclOO zou nu niet meer nodig moeten zijn.
 # 5-5-2016 TODO: deze sowieso ook op Windows nog testen.
 
+# uitgangspunten/invarianten.
+# * elke TCP connectie kan maar 1 dssl/ssl tegelijk hebben. Dit kan wel dezelfde blijven.
+#   - als een TCP Closed wordt gevonden, kan de bijbehorende dssl dus ge-insert worden.
+
+# Open vragen:
+# * Is het belangrijk of een sessie global is of niet?
+# * kan de tabel ssl_addr_id weg?
+# * als een test wordt afgebroken, zijn logs dan incompleet? lijkt dat TCP connecties wel goed worden afgebroken en ook SSL sessies worden gesloten.
+
+# TODO:
+# * Check of #reqs dat ik onder een connectie heb, overeenkomt met wat 'ie zegt.
+# * Al een check of alle reqs bij een ssl_conn_req_block horen?
+# * Horen alle ssl_entry items bij een ssl_session? Is dit belangrijk?
+# * Nu wat dubbele code in deze vs ssl.tcl, vooral herkennen functype. Bv ssl ook OO maken, met nog meer pub/sub gebeuren.
+# * aantal concurrent connections tellen? Zou std op max 6 moeten staan.
+# * Code opschonen? bij checks op alle niveau's (conn, ssl, sess) nu niet clean.
+#   - invarianten bij deze 3 dicts checken? Deze evt uit kunnen zetten, kost tijd.
+#   - evt samen met debug mode zetten.
+# * Testen met andere logfiles, vooral met nconc>1, en ssl protocol errors.
+
 package require Tclx;           # for (set) union.
 
 oo::class create ssl_session_conn {
 
   # 2 dicts:
-  variable ssl_info sess_info db logfile_id vuserid iteration functypes
+  variable ssl_info sess_info conn_info db logfile_id vuserid iteration functypes
 
   constructor {a_db} {
     set db $a_db
     my define_tables
     set ssl_info [dict create]
     set sess_info [dict create]
+    set conn_info [dict create]
     my define_functypes
     log debug "ssl_session_conn object created"
   }
@@ -48,23 +69,28 @@ oo::class create ssl_session_conn {
       error "logfile_id at eof ($plogfile_id) differs from bof ($logfile_id)"
     }
     dict for {k v} $ssl_info {
-      my insert_ssl $v "eof"
+      my insert_ssl $v "eof" "eof"
     }
   }
 
   method entry {entry_type linenr_min linenr_max lines} {
-    if {$entry_type != "ssl"} {return}
-    log debug "oo:handling entry: $entry_type (start: $linenr_min)"
-    set entry [join $lines "\n"]
-    # set functype [my det_functype $entry]
-    set dentry [my det_entry_dict $entry]
-    log debug "oo:dentry: $dentry"
-    if {[:ssl $dentry] != ""} {
-      my entry_ssl $dentry $linenr_min $linenr_max
-    } elseif {[:sess_id $dentry] != ""} {
-      my entry_sess_id $dentry $linenr_min $linenr_max
-    } else {
-      # ??? nothing ?
+    # if {$entry_type != "ssl"} {return}
+    if {$entry_type == "ssl"} {
+      log debug "oo:handling entry: $entry_type (start: $linenr_min)"
+      set entry [join $lines "\n"]
+      # set functype [my det_functype $entry]
+      set dentry [my det_entry_dict $entry]
+      log debug "oo:dentry: $dentry"
+      if {[:ssl $dentry] != ""} {
+        my entry_ssl $dentry $linenr_min $linenr_max
+      } elseif {[:sess_id $dentry] != ""} {
+        my entry_sess_id $dentry $linenr_min $linenr_max
+      } else {
+        # ??? nothing ?
+      }
+    } elseif {$entry_type == "func"} {
+      # alleen check op end connection?
+      my entry_func $linenr_min $linenr_max $lines
     }
   }
 
@@ -72,6 +98,8 @@ oo::class create ssl_session_conn {
   method entry_ssl {dentry linenr_min linenr_max} {
     set dssl [dict_get $ssl_info [:ssl $dentry]]
     set functype [:functype $dentry]
+    log debug "entry_ssl: start: $linenr_max"
+    # cond_breakpoint {$linenr_max == 810}
     # keuze: eerst op functype checken, of of dssl leeg is of niet.
     if {$functype == "new_ssl"} {
       log debug "oo:handling newssl"
@@ -80,7 +108,7 @@ oo::class create ssl_session_conn {
       if {$dssl != {}} {
         # blijkbaar nog een oude, deze wegschrijven en verwijderen.
         log warn "oo:newssl entry ($linenr_min, [:ssl $dentry]) while already know this ssl: insert and start anew"
-        my insert_ssl $dssl "newssl functype; have old one with same ssl: #$linenr_max"
+        my insert_ssl $dssl "newssl functype; have old one with same ssl: #$linenr_max" $linenr_max
       }
       my init_dssl $dentry $linenr_min $linenr_max
     } else {
@@ -94,8 +122,8 @@ oo::class create ssl_session_conn {
       if {[my sess_id_filled_diff $dentry $dssl]} {
         log debug "oo:new session id: insert old and start anew"
         set conn_nr [:conn_nr $dssl]
-        # breakpoint
-        my insert_ssl $dssl "changed sess_id in dssl: #$linenr_max"
+        
+        my insert_ssl $dssl "changed sess_id in dssl: #$linenr_max" $linenr_max
         my init_dssl $dentry $linenr_min $linenr_max $conn_nr
       } else {
         log debug "oo:appending info: $dssl with $dentry"
@@ -107,6 +135,8 @@ oo::class create ssl_session_conn {
         my connect_sess_ssl [:sess_id $dssl2] [:ssl $dssl2]
       }
     }
+    log debug "entry_ssl: end: $linenr_max"
+    # cond_breakpoint {$linenr_max == 810}
   }
 
   method dict_set_ssl_info {ssl dssl} {
@@ -125,6 +155,50 @@ oo::class create ssl_session_conn {
     set functype [:functype $dentry]
     if {$functype == "freeing_global_ssl"} {
       my free_global_ssl $dentry $linenr_max
+    }
+  }
+
+  method entry_func {linenr_min linenr_max lines} {
+    # check if conn_nr is mentioned:
+    # cond_breakpoint {$linenr_min == 1237}
+    set entry [join $lines "\n"]
+    set conn_nr ""
+    set verb ""
+    regexp {(Connecting) \[(\d+)\] to host (\S+)} $entry z verb conn_nr ip_port
+    regexp {(Connected) socket \[(\d+)\] from .* to (\S+) in (\d+) ms} $entry z verb conn_nr ip_port conn_msec
+    regexp {(Already) connected \[(\d+)\] to (\S+)} $entry z verb conn_nr domain_port
+    regexp {(Closing) connection \[(\d+)\] to server (\S+)} $entry z verb conn_nr domain_port
+    regexp {(Closed) connection \[(\d+)\] to (\S+) after completing (\d+) request} $entry z verb conn_nr domain_port nreqs
+    regexp {Re-negotiating https connection \[(\d+)\] to ([^,]+),} $entry z conn_nr domain_port
+    if {$conn_nr != ""} {
+      log debug "conn:entry_func, conn_nr = $conn_nr"
+      set ssl [dict_get $conn_info $conn_nr]
+      if {$ssl != ""} {
+        set dssl [dict_get $ssl_info $ssl]
+        if {$dssl != {}} {
+          if {$conn_nr != [:conn_nr $dssl]} {
+            log error "conn_nrs differ between entry and found dssl"
+            breakpoint
+          }
+          dict set dssl linenr_max $linenr_max
+          dict set ssl_info $ssl $dssl
+          log debug "conn:set ssl_info($ssl/$conn_nr).linenr_max to $linenr_max"
+          if {$verb == "Closed"} {
+            my insert_ssl $dssl "Closed TCP connection with conn_nr=$conn_nr: #$linenr_max" $linenr_max
+          }
+        } else {
+          log warn "got ssl from conn_info: $ssl, but did not find dssl"
+          breakpoint
+        }
+      } else {
+        # je zou altijd een open ssl moeten hebben hier, behalve in het begin bij connecting/connected.
+        if {$verb == ""} {
+          log warn "ssl for conn_nr=$conn_nr not found"
+          breakpoint
+        } else {
+          # verb set to Connecting or Connected.
+        }
+      }
     }
   }
   
@@ -155,10 +229,11 @@ oo::class create ssl_session_conn {
     dict set dssl functype_first [:functype $dentry]
     dict set dssl functype_last [:functype $dentry]
     if {$conn_nr != ""} {
-      dict set dssl conn_nr $conn_nr      
+      dict set dssl conn_nr $conn_nr
     }
     my dict_set_ssl_info [:ssl $dentry] $dssl
     my connect_sess_ssl [:sess_id $dssl] [:ssl $dssl]
+    my connect_ssl_conn [:ssl $dssl] [:conn_nr $dssl] $linenr_max
     return $dssl
   }
 
@@ -182,9 +257,40 @@ oo::class create ssl_session_conn {
       }
     }
   }
-  
+
+  # TODO: invariant data model checken: ssl_info, conn_info en sess_info?
+  # moet dan kloppen nadat je een entry volledig hebt afgehandeld.
+  method connect_ssl_conn {ssl conn_nr linenr} {
+    # vorige SSLs op dit conn_nr moet je afsluiten/inserten.
+    if {$conn_nr != ""} {
+      foreach old_ssl [dict_get $conn_info $conn_nr] {
+        if {$old_ssl == $ssl} {
+          # same one, do nothing
+          log debug "connect_ssl_conn: called on existing combi: $ssl <-> $conn_nr"
+        } else {
+          log debug "connect_ssl_conn: old ssl found, close: $old_ssl <-> $conn_nr"
+          set dssl [dict_get ssl_info $old_ssl]
+          if {$dssl != {}} {
+            my insert_ssl $dssl "connect_ssl_conn ($ssl,$conn_nr), close old ones." $linenr
+          }
+        }
+      }
+      dict set conn_info $conn_nr $ssl
+    }
+    log debug "conn:connect_ssl_conn: $ssl $conn_nr $linenr. conn_info: $conn_info"
+  }
+
+  method disconnect_ssl_conn {ssl conn_nr linenr} {
+    # TODO: evt checken of de ssl die je verwijdert dezelfde is als die je meekrijgt.
+
+    if {$conn_nr != ""} {
+      dict unset conn_info $conn_nr
+    }
+    log debug "conn:disconnect_ssl_conn: $ssl $conn_nr $linenr. conn_info: $conn_info"
+  }
+
   # write ssl record to db, remove from 'global' list
-  method insert_ssl {dssl reason} {
+  method insert_ssl {dssl reason linenr} {
     log debug "inserting ssl_conn_block: $dssl"
     dict set dssl reason_insert $reason
     # cond_breakpoint {[:linenr_max $dssl] == 876}
@@ -194,6 +300,7 @@ oo::class create ssl_session_conn {
     $db insert ssl_conn_block $dssl
     dict unset ssl_info [:ssl $dssl]
     my disconnect_sess_ssl [:sess_id $dssl] [:ssl $dssl]
+    my disconnect_ssl_conn [:ssl $dssl] [:conn_nr $dssl] $linenr
   }
 
   method assert_dssl {dssl} {
@@ -216,6 +323,7 @@ oo::class create ssl_session_conn {
       # log error "$sess_id does not occur in sess_info."
       # breakpoint
     }
+    # cond_breakpoint {$linenr_max == 811}
     foreach ssl [dict_get $sess_info $sess_id] {
       set dssl [dict get $ssl_info $ssl]
       dict set dssl isglobal 1
@@ -223,8 +331,11 @@ oo::class create ssl_session_conn {
       # dat ze uiterlijk op dit linenr zijn afgesloten.
       #dict set dssl linenr_max $linenr_max
       #dict set dssl iteration_max $iteration
-      cond_breakpoint {$sess_id != [:sess_id $dssl]}
-      my insert_ssl $dssl "free_global_ssl: #$linenr_max"
+      if {$sess_id != [:sess_id $dssl]} {
+        log error "sess_id in dentry differs from sess_id's from connected dssl"
+        breakpoint
+      }
+      my insert_ssl $dssl "free_global_ssl: #$linenr_max" $linenr_max
     }
     dict unset sess_info $sess_id
   }
