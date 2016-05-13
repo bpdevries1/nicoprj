@@ -1,4 +1,4 @@
-# write a logline each minute to see if the PC gets rebooted and an what time.
+# write a logline each minute to see if the PC gets rebooted and at what time.
 proc main {} {
   set f [open "running.txt" a]
   while {1} {
