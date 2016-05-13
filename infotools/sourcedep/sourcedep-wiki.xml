@@ -1,0 +1,70 @@
+<sourcedep>
+	<basedirs>
+		<basedir>C:\vreen00_toolset2\CxR_Toolset\Perf\toolset\cruise\checkout\script\tool\sourcedep\wiki\pages</basedir>
+	</basedirs>
+
+	<travellers>
+		<traveller type="startdown" name="oncetraveller">
+			<ignorefiles>
+				<ignorefile>perflib.tcl</ignorefile>
+			</ignorefiles>
+			<options>
+				<!-- only draw one edge between 2 nodes -->
+				<option name="one_ref_only" value="true"/>
+			</options>
+		</traveller>
+
+		<comment>Just call the outputter for the root node, don't travel</comment>
+		<traveller type="no" name="notraveller"/>
+
+		<traveller type="startdown" name="startfiletraveller">
+			<ignorefiles>
+				<ignorefile>testcases</ignorefile>
+				<ignorefile>testsuites</ignorefile>
+			</ignorefiles>
+			<options>
+				<!-- only draw one edge between 2 nodes -->
+				<option name="one_ref_only" value="true"/>
+			</options>
+		</traveller>
+
+	</travellers>
+	
+	<outputters>
+		<outputter name="graphoutputter" type="dot" outputroot="c:/aaa/sourcedep-wiki">
+			<options>
+				<option name="edgelabels" value="false"/>
+				<option name="edges_as_nodes" value="false"/>
+			</options>
+		</outputter>
+		<outputter name="htmloutputter" type="html" outputroot="c:/aaa/sourcedep-wiki"/>
+
+		<outputter name="starthtmloutputter" type="starthtml" outputroot="c:/aaa/sourcedep-wiki"/>
+
+	</outputters>
+	
+	<actions>
+		<action traveller="oncetraveller" outputter="graphoutputter">
+			<!-- foreach matching file: do a traveller/outputter combi -->
+			<fileset dir="<basedir>">
+				<include name=".*"/>
+			</fileset>
+		</action>
+		<action traveller="notraveller" outputter="htmloutputter">
+			<!-- foreach matching file: do a traveller/outputter combi -->
+			<fileset dir="<basedir>">
+				<include name=".*"/>
+			</fileset>
+		</action>
+		<action traveller="startfiletraveller" outputter="starthtmloutputter">
+			<!-- foreach matching file: do a traveller/outputter combi -->
+			<fileset dir="<basedir>">
+				<include name="CxR-Performance.wiki"/>
+				<include name="Portals-Performance.wiki"/>
+			</fileset>
+		</action>
+		
+	</actions>
+	
+</sourcedep>
+

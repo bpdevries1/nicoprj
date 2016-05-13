@@ -1,0 +1,72 @@
+<sourcedep>
+	<basedirs>
+		<basedir>/home/nico/Ymor/autohotkey/trunk/CAP-ELI/ELI_AHK_E2E_VDI</basedir>
+	</basedirs>
+
+	<travellers>
+		<traveller type="startdown" name="oncetraveller">
+			<ignorefiles>
+				<ignorefile>bak20130319a</ignorefile>
+			</ignorefiles>
+			<options>
+				<!-- only draw one edge between 2 nodes -->
+				<option name="one_ref_only" value="true"/>
+			</options>
+		</traveller>
+
+		<comment>Just call the outputter for the root node, don't travel</comment>
+		<traveller type="no" name="notraveller"/>
+
+		<traveller type="startdown" name="startfiletraveller">
+			<ignorefiles>
+				<ignorefile>bak20130319a</ignorefile>
+				<ignorefile>testsuites</ignorefile>
+			</ignorefiles>
+			<options>
+				<!-- only draw one edge between 2 nodes -->
+				<option name="one_ref_only" value="true"/>
+			</options>
+		</traveller>
+
+	</travellers>
+	
+	<outputters>
+		<outputter name="graphoutputter" type="dot" outputroot="/home/nico/Ymor/autohotkey/trunk/CAP-ELI/callgraph">
+			<options>
+				<option name="edgelabels" value="false"/>
+				<option name="edges_as_nodes" value="false"/>
+			</options>
+		</outputter>
+		<outputter name="htmloutputter" type="html" outputroot="/home/nico/Ymor/autohotkey/trunk/CAP-ELI/callgraph"/>
+
+		<outputter name="starthtmloutputter" type="starthtml" outputroot="/home/nico/Ymor/autohotkey/trunk/CAP-ELI/callgraph"/>
+
+	</outputters>
+	
+	<actions>
+		<action traveller="oncetraveller" outputter="graphoutputter">
+			<!-- foreach matching file: do a traveller/outputter combi -->
+			<fileset dir="&lt;basedir&gt;">
+				<include name=".*"/>
+			</fileset>
+		</action>
+		<action traveller="notraveller" outputter="htmloutputter">
+			<!-- foreach matching file: do a traveller/outputter combi -->
+			<fileset dir="&lt;basedir&gt;">
+				<include name=".*"/>
+			</fileset>
+		</action>
+		<action traveller="startfiletraveller" outputter="starthtmloutputter">
+			<!-- foreach matching file: do a traveller/outputter combi -->
+			<fileset dir="&lt;basedir&gt;">
+				<include name="build-suite.xml"/>
+				<include name="once.bat"/>
+				<include name="prod.bat"/>
+				<include name="ELI_E2E_VDI_dowork.ahk"/>
+			</fileset>
+		</action>
+		
+	</actions>
+	
+</sourcedep>
+

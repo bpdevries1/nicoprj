@@ -1,6 +1,6 @@
 # GnuplotDepFile.rb
 
-require "Depfile.rb"
+require "DepFile.rb"
 
 class GnuplotDepFile < DepFile
 

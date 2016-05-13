@@ -3,7 +3,7 @@
 require "rexml/document"
 include REXML  # so that we don't have to prefix everything with REXML::...
 
-require "Depfile.rb"
+require "DepFile.rb"
 
 class AntDepFile < DepFile
 

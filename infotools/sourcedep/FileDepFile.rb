@@ -2,28 +2,22 @@
 
 require "DepFile.rb"
 
-class TclDepFile < DepFile
+class FileDepFile < DepFile
 
 	def handleLine(line)
 		# puts @filename + ": TclDepFile.handleline: do nothing"
 		if line =~ /^#/
 			# regel begint met #, dus commentaar, dus niets.
-		elsif line =~ /^source ([^$()]+)$/
-			# std gebruik: source filename.tcl
+		elsif line =~ /^uses (.+)$/
 			fname = $1
 			# puts "#{@filename} sources #{fname}"
 			# laatste teken van filename is mogelijk een newline, met chomp verwijderen.
-			addRef fname.chomp, "source"
-		elsif line =~ /^source .+ ([^ ]+)\]$/
-			# gebruik van source [file join abc def.tcl]
-			fname = $1
-			# puts "#{@filename} sources #{fname}"
-			addRef fname, "source"
+			addRef fname.chomp, "uses"
 		end
 	end
 
 	def depFileType
-		"Tcl"
+		"File"
 	end
 
 end

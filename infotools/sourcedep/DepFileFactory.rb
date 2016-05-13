@@ -1,10 +1,13 @@
-# DepFileFactory - Factory for instantiating DepFile objects and decendents.
+# DepFileFactory - Factory for instantiating DepFile objects and descendents.
 
 require "DepFile.rb"
+require "AhkDepFile.rb"
 require "TclDepFile.rb"
 require "BatDepFile.rb"
 require "AntDepFile.rb"
 require "GnuplotDepFile.rb"
+require "WikiDepFile.rb"
+require "FileDepFile.rb"
 
 class DepFileFactory
 
@@ -17,6 +20,8 @@ class DepFileFactory
        
 		klass =
     	case filename.downcase
+      	when /\.ahk$/
+        	AhkDepFile
       	when /\.tcl$/
         	TclDepFile
         when /\.bat$/
@@ -25,6 +30,10 @@ class DepFileFactory
           AntDepFile
         when /\.m$/
           GnuplotDepFile
+        when /\.wiki$/
+          WikiDepFile
+        when /\.file$/
+          FileDepFile
         else
           DepFile
       end

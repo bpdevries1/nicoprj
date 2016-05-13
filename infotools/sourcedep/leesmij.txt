@@ -1,3 +1,3 @@
-sourcedep - ruby prog om afhankelijkheden tussen sources weer te geven. Voornamelijk build.xml, tcl, bat (cruise-perf project) en genereren naar dot graphics.
+Ruby prog om afhankelijkheden tussen sources weer te geven. Voornamelijk build.xml, tcl, bat (cruise-perf project) en genereren naar dot graphics.
 
 NdV, 8-3-2006.

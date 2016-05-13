@@ -17,7 +17,12 @@ class DotOutputter < AbstractOutputter
 		super(elOutput)
 		# @DOT_EXE = 'c:\util\ATT\graphviz\bin\dot.exe'
 		# @DOT_EXE = 'C:\nico\util\graphviz186\bin\dot.exe'
-		@DOT_EXE = 'C:\nico\util\ATT\Graphviz\bin\dot.exe'
+		# @DOT_EXE = 'C:\nico\util\ATT\Graphviz\bin\dot.exe'
+		# @DOT_EXE = 'C:\util\Graphviz2.28\bin\dot.exe'
+		
+		# @todo check if windows or linux, or check if dot binary exists 
+		# @DOT_EXE = 'C:/util/Graphviz2.28/bin/dot.exe'
+		@DOT_EXE = '/usr/bin/dot'
 
 		# @startfilenames = elOutput.elements.to_a("startfiles/startfile").collect{|el| el.text}
 		# @ignorefilenames = elOutput.elements.to_a("ignorefiles/ignorefile").collect{|el| el.text}
@@ -62,7 +67,8 @@ class DotOutputter < AbstractOutputter
 		@dotFile.puts "digraph G {"
 		@dotFile.puts "  rankdir = \"LR\""
 		# 12 inch breed, past dan net niet in de breedte op 15" scherm.
-		@dotFile.puts "  size = \"12,50\""
+		# @dotFile.puts "  size = \"12,50\""
+		@dotFile.puts "  size = \"24,50\""
 		
 		@edgecounter = 0
 	end
@@ -81,7 +87,7 @@ class DotOutputter < AbstractOutputter
 		
 		# fnameMap = get_mapfilename depFile
 		fnameMap = URLLocator.instance.get_map_loc depFile
-		
+		@log.info "Creating png/map files for: #{@fnameDot}, output in #{fnamePng}, exe = #{@DOT_EXE}"
 		system(@DOT_EXE, '-Tpng', '-o', fnamePng, @fnameDot)
 		system(@DOT_EXE, '-Tcmap', '-o', fnameMap, @fnameDot)
 	end

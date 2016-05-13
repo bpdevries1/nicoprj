@@ -1,6 +1,6 @@
 # BatDepFile
 
-require "Depfile.rb"
+require "DepFile.rb"
 
 class BatDepFile < DepFile
 

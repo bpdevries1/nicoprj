@@ -1,5 +1,7 @@
 # sourcedep.rb - Main class for sourcedep project.
 
+$: << File.expand_path(File.dirname(__FILE__))
+
 require "rexml/document"
 include REXML  # so that we don't have to prefix everything with REXML::...
 
@@ -14,7 +16,9 @@ require "DepFileList.rb"
 #require "DepFile.rb"
 #require "DepFileRef.rb"
 require "DepFileFactory.rb"
+puts "Before require OutputterFactory.rb"
 require "OutputterFactory.rb"
+puts "After require OutputterFactory.rb"
 require "TravellerFactory.rb"
 require "ActionFactory.rb"
 require "LoggerFactory.rb"

@@ -2,6 +2,10 @@
 
 require 'singleton'
 
+# require 'rubygems'
+# require_gem 'log4r'
+# gem 'log4r'
+
 require 'log4r'
 include Log4r
 

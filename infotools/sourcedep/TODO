@@ -65,3 +65,21 @@ Andere tools:
 * Unflatten, kan handig zijn als graph erg breed wordt (nu al wat last van)
 * sccmap: om automatisch te verdelen in componenten, met nieuwe graph die componenten verdeelt.
 * dot2gxl: GXL is andere tool, 'much richer'
+
+Functies in files
+=================
+* Voor AHK (CAP EL&I) nodig, callgraph. Vraag of dit gaat passen in huidige opzet.
+
+Waar aanpassingen
+-----------------
+* AhkDepFile: parsen en objecten aanmaken.
+  * lastig: caller is wel aan te maken met filenaam, maar callee niet, niet bekend in welke file deze zit, later pas.
+  * iets met namespace zou je moeten doen, nu niet nodig waarschijnlijk.
+* Alg: objecten nu identified by filename. Bv ook <filename>.<functionname> gaan doen, zou dan uniek moeten blijven
+  in praktische gevallen.
+* DepFileRef is het ref object, wordt opgenomen in beide File objecten.
+* Algemeen idee dat het toch lastig is:
+  - behoorlijk ge-ent op files.
+  - en ook op XML met 'sort-of' 'flexibele' travellers etc, veel 'patterns'
+  - en dus niet DB.
+
