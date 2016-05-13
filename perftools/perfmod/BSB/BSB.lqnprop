@@ -1,0 +1,25 @@
+# properties to fill in CR1.lqntmp
+# names and values are string trimmed.
+# D_KB_cpu    = 0.0190
+# N_WPS         = 1
+# T_per_P tasks per processor. Als dit 1 is, is er maar 1 task-thread op de processor actief, die evt synchroon aan het wachten is.
+# als deze waarde te groot is, bv gelijk aan N, duurt het berekenen heel lang.
+
+# Service demands
+# browser: erg weinig, nu alleen niet de scherm opbouw erbij, want wordt niet door JMeter gedaan.
+D_Cl        = 0.0001
+
+# @todo: eerst getallen in de xml, later hier weer opnemen.
+
+# N_pers: 0 als non-persistent, 1 als wel persistent.
+# nu niet meer relevant, maak 2 aparte taken en bepaal verhouding.
+# N_pers			= 1
+# N_pers			=  0
+
+N_nonpers = @[int(${N} * ${factor_non_pers})]@
+N_pers    = @[${N} - ${N_nonpers}]@
+
+D_msg_non = @[3e-6*${msgsize}*${msgsize}+0.0013*${msgsize}]@
+D_extra = @[0.0003*${msgsize}+0.0001]@
+D_msg_pers = @[${D_msg_non} + ${D_extra}]@
+D_IO_msg_pers = @[0.0021*${msgsize}+0.0036]@

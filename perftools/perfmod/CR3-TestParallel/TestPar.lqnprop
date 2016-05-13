@@ -1,0 +1,30 @@
+# properties to fill in CR1.lqntmp
+# names and values are string trimmed.
+# D_KB_cpu    = 0.0190
+# N_WPS         = 1
+# T_per_P tasks per processor. Als dit 1 is, is er maar 1 task-thread op de processor actief, die evt synchroon aan het wachten is.
+# als deze waarde te groot is, bv gelijk aan N, duurt het berekenen heel lang.
+
+# NT_WP       	= 50
+NT_WP       	= ${N}
+NT_BVR        = 100
+NT_ABS				= 100
+
+# Service demands
+# browser: erg weinig, nu alleen niet de scherm opbouw erbij, want wordt niet door JMeter gedaan.
+D_Br        = 0.0001
+D_WP				= 0.05
+D_BVR				= 0.2
+D_ABS				= 0.3
+
+# netwerk latency
+D_ELcyBVR     = 0.5
+D_ELcyABS     = 0.5
+N_Latency		= 1000
+
+# parallel or serial execution? 1 or 0.
+EXEC_PARALLEL = 1
+
+Call1_entry = EBVR
+Call2_entry = EABS
+# Call2_entry = EBVR

@@ -1,0 +1,3136 @@
+AAA,progname,nmon_aix53
+AAA,command,/usr/local/bin/nmon_aix53 -F nmon.txt -t -s 10 -c 180 
+AAA,version,v11e
+AAA,build,AIX53
+AAA,disks_per_line,150
+AAA,host,olcru141
+AAA,user,root
+AAA,AIX,5.3.0.44
+AAA,ML,04
+AAA,runname,olcru141
+AAA,time,11:36.44
+AAA,date,19-JAN-2007
+AAA,interval,10
+AAA,snapshots,180
+AAA,hardware,Architecture PowerPC Implementation POWER5 64 bit
+AAA,cpus,4,2
+AAA,kernel, HW-type=CHRP=Common H/W Reference Platform Bus=PCI LPAR=Dynamic Multi-Processor 64 bit
+AAA,subversion,"@(#)nmon v11e - AIX53($Id: nmon11.c,v 1.10 2006/04/05 15:18:14 nag Exp $)"
+AAA,note0, Warning - use the UNIX sort command to order this file before loading into a spreadsheet
+AAA,note1, The First Column is simply to get the output sorted in the right order
+AAA,note2, The T0001-T9999 column is a snapshot number. To work out the actual time; see the ZZZ section at the end
+BBBB,0000,name,size(GB),disc attach type
+BBBB,0001,hdisk0,10.22,SCSI
+BBBC,000,hdisk0:
+BBBC,001,LV NAME               LPs   PPs   DISTRIBUTION          MOUNT POINT
+BBBC,002,hd10opt               33    33    00..00..12..00..21    /opt
+BBBC,003,hd1                   16    16    00..00..01..15..00    /home
+BBBC,004,hd3                   38    38    00..00..02..14..22    /tmp
+BBBC,005,hd9var                8     8     00..00..01..00..07    /var
+BBBC,006,hd5                   1     1     01..00..00..00..00    N/A
+BBBC,007,hd2                   158   158   00..00..63..33..62    /usr
+BBBC,008,hd4                   16    16    00..00..01..15..00    /
+BBBC,009,hd8                   1     1     00..00..01..00..00    N/A
+BBBC,010,hd6                   32    32    00..32..00..00..00    N/A
+BBBC,011,lg_dumplv             64    64    00..64..00..00..00    N/A
+BBBC,012,lvvarlog              256   256   127..32..46..51..00   /var/log
+BBBB,0002,hdisk2,10.22,SCSI
+BBBC,013,hdisk2:
+BBBC,014,LV NAME               LPs   PPs   DISTRIBUTION          MOUNT POINT
+BBBC,015,prjloglv              1     1     00..01..00..00..00    N/A
+BBBC,016,prjlv                 638   638   128..127..127..128..128 /prj
+BBBB,0003,hdisk1,10.22,SCSI
+BBBC,017,hdisk1:
+BBBC,018,LV NAME               LPs   PPs   DISTRIBUTION          MOUNT POINT
+BBBC,019,hd10opt               33    33    00..33..00..00..00    /opt
+BBBC,020,hd1                   16    16    00..16..00..00..00    /home
+BBBC,021,hd3                   38    38    00..38..00..00..00    /tmp
+BBBC,022,hd9var                8     8     00..00..08..00..00    /var
+BBBC,023,hd5                   1     1     01..00..00..00..00    N/A
+BBBC,024,hd2                   158   158   53..09..96..00..00    /usr
+BBBC,025,hd4                   16    16    00..00..16..00..00    /
+BBBC,026,hd8                   1     1     00..00..01..00..00    N/A
+BBBC,027,hd6                   32    32    00..32..00..00..00    N/A
+BBBC,028,lvvarlog              256   256   00..00..06..128..122  /var/log
+BBBC,029,hdisk0          00c6c9cd0573cf20                    rootvg          active
+BBBC,030,hdisk1          00c6c9cd0944607a                    rootvg          active
+BBBC,031,hdisk2          00c6c9cd09ad4f2c                    prjvg           active
+CPU_ALL,CPU Total olcru141,User%,Sys%,Wait%,Idle%,Busy,PhysicalCPUs
+CPU01,CPU 1 olcru141,User%,Sys%,Wait%,Idle%
+CPU02,CPU 2 olcru141,User%,Sys%,Wait%,Idle%
+MEM,Memory olcru141,Real Free %,Virtual free %,Real free(MB),Virtual free(MB),Real total(MB),Virtual total(MB)
+MEMNEW,Memory New olcru141,Process%,FScache%,System%,Free%,Pinned%,User%
+MEMUSE,Memory Use olcru141,%numperm,%minperm,%maxperm,minfree,maxfree,numclient,maxclient
+PAGE,Paging olcru141,faults,pgin,pgout,pgsin,pgsout,reclaims,scans,cycles
+PROC,Processes olcru141,Runnable,Swap-in,pswitch,syscall,read,write,fork,exec,sem,msg
+FILE,File I/O olcru141,iget,namei,dirblk,readch,writech,ttyrawch,ttycanch,ttyoutch
+BBBN,000,NetworkName,MTU,Mbits,Name
+BBBN,001,en0,1500,2047,Standard Ethernet Network Interface
+BBBN,002,en1,1500,2047,Standard Ethernet Network Interface
+BBBN,003,lo0,16896,0,Loopback Network Interface
+NET,Network I/O olcru141,en0-read-KB/s,en1-read-KB/s,lo0-read-KB/s,en0-write-KB/s,en1-write-KB/s,lo0-write-KB/s,
+NETPACKET,Network Packets olcru141,en0-reads/s,en1-reads/s,lo0-reads/s,en0-writes/s,en1-writes/s,lo0-writes/s,
+NETERROR,Network Errors olcru141,en0-ierrs,en1-ierrs,lo0-ierrs,en0-oerrs,en1-oerrs,lo0-oerrs,en0-collisions,en1-collisions,lo0-collisions,
+DISKBUSY,Disk %Busy olcru141,hdisk0,hdisk2,hdisk1
+DISKREAD,Disk Read kb/s olcru141,hdisk0,hdisk2,hdisk1
+DISKWRITE,Disk Write kb/s olcru141,hdisk0,hdisk2,hdisk1
+DISKXFER,Disk transfers per second olcru141,hdisk0,hdisk2,hdisk1
+DISKBSIZE,Disk Block Size olcru141,hdisk0,hdisk2,hdisk1
+IOADAPT,Disk Adapter olcru141,vscsi0_read-KB/s,vscsi0_write-KB/s,vscsi0_xfer-tps
+BBBD,000,Disk Adapter Information olcru141
+BBBD,001,Adapter_number,Name,Disks, Description
+BBBD,002,0,"vscsi0",3,"Virtual SCSI Client Adapter"
+JFSFILE,JFS Filespace %Used olcru141,/,/home,/usr,/var,/tmp,/opt,/var/log,/prj
+JFSINODE,JFS Inode %Used olcru141,/,/home,/usr,/var,/tmp,/opt,/var/log,/prj
+TOP,%CPU Utilisation
+TOP,+PID,Time,%CPU,%Usr,%Sys,Threads,Size,ResText,ResData,CharIO,%RAM,Paging,Command,WLMclass
+BBBP,000,emstat
+BBBP,001,emstat,""
+BBBP,002,emstat,"  Alignment  Alignment  Emulation  Emulation"
+BBBP,003,emstat,"  SinceBoot      Delta  SinceBoot      Delta"
+BBBP,004,emstat,"          0          0          0          0"
+BBBP,005,emstat,"          0          0          0          0"
+BBBP,006,no -L
+BBBP,007,no -L,"General Network Parameters"
+BBBP,008,no -L,"n-------------------------------------------------------------------------------"
+BBBP,009,no -L,"NAME                      CUR    DEF    BOOT   MIN    MAX    UNIT           TYPE"
+BBBP,010,no -L,"     DEPENDENCIES"
+BBBP,011,no -L,"n-------------------------------------------------------------------------------"
+BBBP,012,no -L,"extendednetstats          0      0      0      0      1      boolean           R"
+BBBP,013,no -L,"n-------------------------------------------------------------------------------"
+BBBP,014,no -L,"fasttimo                  200    200    200    50     200    millisecond       D"
+BBBP,015,no -L,"n-------------------------------------------------------------------------------"
+BBBP,016,no -L,"inet_stack_size           16     16     16     1      32K-1  kbyte             R"
+BBBP,017,no -L,"n-------------------------------------------------------------------------------"
+BBBP,018,no -L,"nbc_limit                 2720K  2720K  2720K  0      8E-1   kbyte             D"
+BBBP,019,no -L,"     thewall"
+BBBP,020,no -L,"n-------------------------------------------------------------------------------"
+BBBP,021,no -L,"nbc_max_cache             128K   128K   128K   1      8E-1   byte              D"
+BBBP,022,no -L,"     nbc_min_cache"
+BBBP,023,no -L,"n-------------------------------------------------------------------------------"
+BBBP,024,no -L,"nbc_min_cache             1      1      1      1      128K   byte              D"
+BBBP,025,no -L,"     nbc_max_cache"
+BBBP,026,no -L,"n-------------------------------------------------------------------------------"
+BBBP,027,no -L,"nbc_ofile_hashsz          12841  12841  12841  1      999999 segment           D"
+BBBP,028,no -L,"n-------------------------------------------------------------------------------"
+BBBP,029,no -L,"nbc_pseg                  0      0      0      0      2G-1   segment           D"
+BBBP,030,no -L,"n-------------------------------------------------------------------------------"
+BBBP,031,no -L,"nbc_pseg_limit            3200K  3200K  3200K  0      2G-1   kbyte             D"
+BBBP,032,no -L,"n-------------------------------------------------------------------------------"
+BBBP,033,no -L,"ndd_event_name            {all}  {all}  {all}  0      128    string            D"
+BBBP,034,no -L,"n-------------------------------------------------------------------------------"
+BBBP,035,no -L,"ndd_event_tracing         0      0      0      0      8E-1   numeric           D"
+BBBP,036,no -L,"n-------------------------------------------------------------------------------"
+BBBP,037,no -L,"net_buf_size              {all}  {all}  {all}  0      128    string            D"
+BBBP,038,no -L,"n-------------------------------------------------------------------------------"
+BBBP,039,no -L,"net_buf_type              {all}  {all}  {all}  0      128    string            D"
+BBBP,040,no -L,"n-------------------------------------------------------------------------------"
+BBBP,041,no -L,"net_malloc_police         0      0      0      0      8E-1   numeric           D"
+BBBP,042,no -L,"n-------------------------------------------------------------------------------"
+BBBP,043,no -L,"sb_max                    1M     1M     1M     1      8E-1   byte              D"
+BBBP,044,no -L,"n-------------------------------------------------------------------------------"
+BBBP,045,no -L,"send_file_duration        300    300    300    0      8E-1   second            D"
+BBBP,046,no -L,"n-------------------------------------------------------------------------------"
+BBBP,047,no -L,"sockthresh                85     85     85     0      100    %_of_thewall      D"
+BBBP,048,no -L,"n-------------------------------------------------------------------------------"
+BBBP,049,no -L,"sodebug                   0      0      0      0      1      boolean           C"
+BBBP,050,no -L,"n-------------------------------------------------------------------------------"
+BBBP,051,no -L,"sodebug_env               0      0      0      0      1      boolean           C"
+BBBP,052,no -L,"n-------------------------------------------------------------------------------"
+BBBP,053,no -L,"somaxconn                 1K     1K     4098   0      32K-1  numeric           C"
+BBBP,054,no -L,"n-------------------------------------------------------------------------------"
+BBBP,055,no -L,"tcp_inpcb_hashtab_siz     24499  24499  24499  1      999999 numeric           R"
+BBBP,056,no -L,"n-------------------------------------------------------------------------------"
+BBBP,057,no -L,"thewall                   3200K  3200K  3200K  0      1M     kbyte             S"
+BBBP,058,no -L,"n-------------------------------------------------------------------------------"
+BBBP,059,no -L,"udp_inpcb_hashtab_siz     24499  24499  24499  1      83000  numeric           R"
+BBBP,060,no -L,"n-------------------------------------------------------------------------------"
+BBBP,061,no -L,"use_isno                  1      1      1      0      1      boolean           D"
+BBBP,062,no -L,"n-------------------------------------------------------------------------------"
+BBBP,063,no -L,"use_sndbufpool            1      1      1      0      1      boolean           R"
+BBBP,064,no -L,"n-------------------------------------------------------------------------------"
+BBBP,065,no -L,""
+BBBP,066,no -L,"TCP Network Tunable Parameters"
+BBBP,067,no -L,"n-------------------------------------------------------------------------------"
+BBBP,068,no -L,"NAME                      CUR    DEF    BOOT   MIN    MAX    UNIT           TYPE"
+BBBP,069,no -L,"     DEPENDENCIES"
+BBBP,070,no -L,"n-------------------------------------------------------------------------------"
+BBBP,071,no -L,"clean_partial_conns       0      0      1      0      1      boolean           D"
+BBBP,072,no -L,"n-------------------------------------------------------------------------------"
+BBBP,073,no -L,"delayack                  0      0      0      0      3      boolean           D"
+BBBP,074,no -L,"n-------------------------------------------------------------------------------"
+BBBP,075,no -L,"delayackports             {}     {}     {}     0      10     ports_list        D"
+BBBP,076,no -L,"n-------------------------------------------------------------------------------"
+BBBP,077,no -L,"rfc1323                   0      0      0      0      1      boolean           C"
+BBBP,078,no -L,"n-------------------------------------------------------------------------------"
+BBBP,079,no -L,"rfc2414                   1      1      1      0      1      boolean           C"
+BBBP,080,no -L,"n-------------------------------------------------------------------------------"
+BBBP,081,no -L,"rto_high                  64     64     64     2      8E-1   roundtriptime     R"
+BBBP,082,no -L,"     rto_low"
+BBBP,083,no -L,"n-------------------------------------------------------------------------------"
+BBBP,084,no -L,"rto_length                13     13     13     1      64     roundtriptime     R"
+BBBP,085,no -L,"n-------------------------------------------------------------------------------"
+BBBP,086,no -L,"rto_limit                 7      7      7      1      64     roundtriptime     R"
+BBBP,087,no -L,"     rto_high"
+BBBP,088,no -L,"     rto_low"
+BBBP,089,no -L,"n-------------------------------------------------------------------------------"
+BBBP,090,no -L,"rto_low                   1      1      1      1      63     roundtriptime     R"
+BBBP,091,no -L,"     rto_high"
+BBBP,092,no -L,"n-------------------------------------------------------------------------------"
+BBBP,093,no -L,"sack                      0      0      0      0      1      boolean           C"
+BBBP,094,no -L,"n-------------------------------------------------------------------------------"
+BBBP,095,no -L,"tcp_bad_port_limit        0      0      0      0      8E-1   numeric           D"
+BBBP,096,no -L,"n-------------------------------------------------------------------------------"
+BBBP,097,no -L,"tcp_ecn                   0      0      0      0      1      boolean           C"
+BBBP,098,no -L,"n-------------------------------------------------------------------------------"
+BBBP,099,no -L,"tcp_ephemeral_high        64K-1  64K-1  64K-1  32K+1  64K-1  numeric           D"
+BBBP,100,no -L,"     tcp_ephemeral_low"
+BBBP,101,no -L,"n-------------------------------------------------------------------------------"
+BBBP,102,no -L,"tcp_ephemeral_low         32K    32K    32K    1K     65534  numeric           D"
+BBBP,103,no -L,"     tcp_ephemeral_high"
+BBBP,104,no -L,"n-------------------------------------------------------------------------------"
+BBBP,105,no -L,"tcp_finwait2              1200   1200   1200   0      64K-1  halfsecond        D"
+BBBP,106,no -L,"n-------------------------------------------------------------------------------"
+BBBP,107,no -L,"tcp_icmpsecure            0      0      0      0      1      boolean           D"
+BBBP,108,no -L,"n-------------------------------------------------------------------------------"
+BBBP,109,no -L,"tcp_init_window           0      0      0      0      32K-1  byte              C"
+BBBP,110,no -L,"n-------------------------------------------------------------------------------"
+BBBP,111,no -L,"tcp_keepcnt               8      8      8      0      8E-1   numeric           D"
+BBBP,112,no -L,"n-------------------------------------------------------------------------------"
+BBBP,113,no -L,"tcp_keepidle              14400  14400  14400  1      8E-1   halfsecond        C"
+BBBP,114,no -L,"n-------------------------------------------------------------------------------"
+BBBP,115,no -L,"tcp_keepinit              150    150    150    1      8E-1   halfsecond        D"
+BBBP,116,no -L,"n-------------------------------------------------------------------------------"
+BBBP,117,no -L,"tcp_keepintvl             150    150    150    1      32K-1  halfsecond        C"
+BBBP,118,no -L,"n-------------------------------------------------------------------------------"
+BBBP,119,no -L,"tcp_limited_transmit      1      1      1      0      1      boolean           D"
+BBBP,120,no -L,"n-------------------------------------------------------------------------------"
+BBBP,121,no -L,"tcp_maxburst              0      0      0      0      32K-1  numeric           D"
+BBBP,122,no -L,"n-------------------------------------------------------------------------------"
+BBBP,123,no -L,"tcp_mssdflt               1460   1460   1460   1      64K-1  byte              C"
+BBBP,124,no -L,"n-------------------------------------------------------------------------------"
+BBBP,125,no -L,"tcp_nagle_limit           64K-1  64K-1  64K-1  0      64K-1  byte              D"
+BBBP,126,no -L,"n-------------------------------------------------------------------------------"
+BBBP,127,no -L,"tcp_ndebug                100    100    100    0      32K-1  numeric           D"
+BBBP,128,no -L,"n-------------------------------------------------------------------------------"
+BBBP,129,no -L,"tcp_newreno               1      1      1      0      1      boolean           D"
+BBBP,130,no -L,"n-------------------------------------------------------------------------------"
+BBBP,131,no -L,"tcp_nodelayack            0      0      0      0      1      boolean           D"
+BBBP,132,no -L,"n-------------------------------------------------------------------------------"
+BBBP,133,no -L,"tcp_recvspace             16K    16K    32K    4K     8E-1   byte              C"
+BBBP,134,no -L,"     sb_max"
+BBBP,135,no -L,"n-------------------------------------------------------------------------------"
+BBBP,136,no -L,"tcp_sendspace             16K    16K    32K    4K     8E-1   byte              C"
+BBBP,137,no -L,"     sb_max"
+BBBP,138,no -L,"n-------------------------------------------------------------------------------"
+BBBP,139,no -L,"tcp_tcpsecure             0      0      0      0      7      numeric           D"
+BBBP,140,no -L,"n-------------------------------------------------------------------------------"
+BBBP,141,no -L,"tcp_timewait              1      1      1      1      5      15_second         D"
+BBBP,142,no -L,"n-------------------------------------------------------------------------------"
+BBBP,143,no -L,"tcp_ttl                   60     60     60     1      255    0.6_second        C"
+BBBP,144,no -L,"n-------------------------------------------------------------------------------"
+BBBP,145,no -L,"tcprexmtthresh            3      3      3      1      32K-1  numeric           D"
+BBBP,146,no -L,"n-------------------------------------------------------------------------------"
+BBBP,147,no -L,""
+BBBP,148,no -L,"UDP Network Tunable Parameters"
+BBBP,149,no -L,"n-------------------------------------------------------------------------------"
+BBBP,150,no -L,"NAME                      CUR    DEF    BOOT   MIN    MAX    UNIT           TYPE"
+BBBP,151,no -L,"     DEPENDENCIES"
+BBBP,152,no -L,"n-------------------------------------------------------------------------------"
+BBBP,153,no -L,"udp_bad_port_limit        0      0      0      0      8E-1   numeric           D"
+BBBP,154,no -L,"n-------------------------------------------------------------------------------"
+BBBP,155,no -L,"udp_ephemeral_high        64K-1  64K-1  64K-1  32K+1  64K-1  numeric           D"
+BBBP,156,no -L,"     udp_ephemeral_low"
+BBBP,157,no -L,"n-------------------------------------------------------------------------------"
+BBBP,158,no -L,"udp_ephemeral_low         32K    32K    32K    1K     65534  numeric           D"
+BBBP,159,no -L,"     udp_ephemeral_high"
+BBBP,160,no -L,"n-------------------------------------------------------------------------------"
+BBBP,161,no -L,"udp_recvspace             42080  42080  42080  4K     8E-1   byte              C"
+BBBP,162,no -L,"     sb_max"
+BBBP,163,no -L,"n-------------------------------------------------------------------------------"
+BBBP,164,no -L,"udp_sendspace             9K     9K     9K     4K     8E-1   byte              C"
+BBBP,165,no -L,"     sb_max"
+BBBP,166,no -L,"n-------------------------------------------------------------------------------"
+BBBP,167,no -L,"udp_ttl                   30     30     30     1      255    second            C"
+BBBP,168,no -L,"n-------------------------------------------------------------------------------"
+BBBP,169,no -L,"udpcksum                  1      1      1      0      1      boolean           D"
+BBBP,170,no -L,"n-------------------------------------------------------------------------------"
+BBBP,171,no -L,""
+BBBP,172,no -L,"IP Network Tunable Parameters"
+BBBP,173,no -L,"n-------------------------------------------------------------------------------"
+BBBP,174,no -L,"NAME                      CUR    DEF    BOOT   MIN    MAX    UNIT           TYPE"
+BBBP,175,no -L,"     DEPENDENCIES"
+BBBP,176,no -L,"n-------------------------------------------------------------------------------"
+BBBP,177,no -L,"directed_broadcast        0      0      0      0      1      boolean           D"
+BBBP,178,no -L,"n-------------------------------------------------------------------------------"
+BBBP,179,no -L,"ie5_old_multicast_mapping 0      0      0      0      1      boolean           D"
+BBBP,180,no -L,"n-------------------------------------------------------------------------------"
+BBBP,181,no -L,"ip6_defttl                64     64     64     1      255    numeric           D"
+BBBP,182,no -L,"n-------------------------------------------------------------------------------"
+BBBP,183,no -L,"ip6_prune                 1      1      1      1      8E-1   second            D"
+BBBP,184,no -L,"n-------------------------------------------------------------------------------"
+BBBP,185,no -L,"ip6forwarding             0      0      0      0      1      boolean           D"
+BBBP,186,no -L,"n-------------------------------------------------------------------------------"
+BBBP,187,no -L,"ip6srcrouteforward        1      1      0      0      1      boolean           D"
+BBBP,188,no -L,"n-------------------------------------------------------------------------------"
+BBBP,189,no -L,"ip_ifdelete_notify        1      1      1      0      1      boolean           D"
+BBBP,190,no -L,"n-------------------------------------------------------------------------------"
+BBBP,191,no -L,"ip_nfrag                  200    200    200    1      32K-1  byte              D"
+BBBP,192,no -L,"n-------------------------------------------------------------------------------"
+BBBP,193,no -L,"ipforwarding              0      0      0      0      1      boolean           D"
+BBBP,194,no -L,"n-------------------------------------------------------------------------------"
+BBBP,195,no -L,"ipfragttl                 2      2      2      1      255    halfsecond        D"
+BBBP,196,no -L,"n-------------------------------------------------------------------------------"
+BBBP,197,no -L,"ipignoreredirects         0      0      1      0      1      boolean           D"
+BBBP,198,no -L,"n-------------------------------------------------------------------------------"
+BBBP,199,no -L,"ipqmaxlen                 100    100    100    100    8E-1   numeric           R"
+BBBP,200,no -L,"n-------------------------------------------------------------------------------"
+BBBP,201,no -L,"ipsendredirects           1      1      0      0      1      boolean           D"
+BBBP,202,no -L,"n-------------------------------------------------------------------------------"
+BBBP,203,no -L,"ipsrcrouteforward         1      1      0      0      1      boolean           D"
+BBBP,204,no -L,"n-------------------------------------------------------------------------------"
+BBBP,205,no -L,"ipsrcrouterecv            0      0      0      0      1      boolean           D"
+BBBP,206,no -L,"n-------------------------------------------------------------------------------"
+BBBP,207,no -L,"ipsrcroutesend            1      1      0      0      1      boolean           D"
+BBBP,208,no -L,"n-------------------------------------------------------------------------------"
+BBBP,209,no -L,"lo_perf                   1      1      1      0      1      boolean           R"
+BBBP,210,no -L,"n-------------------------------------------------------------------------------"
+BBBP,211,no -L,"maxnip6q                  20     20     20     1      32K-1  numeric           D"
+BBBP,212,no -L,"n-------------------------------------------------------------------------------"
+BBBP,213,no -L,"multi_homed               1      1      1      0      3      boolean           D"
+BBBP,214,no -L,"n-------------------------------------------------------------------------------"
+BBBP,215,no -L,"nonlocsrcroute            0      0      0      0      1      boolean           D"
+BBBP,216,no -L,"n-------------------------------------------------------------------------------"
+BBBP,217,no -L,"subnetsarelocal           1      1      1      0      1      boolean           D"
+BBBP,218,no -L,"n-------------------------------------------------------------------------------"
+BBBP,219,no -L,""
+BBBP,220,no -L,"ARP/NDP Network Tunable Parameters"
+BBBP,221,no -L,"n-------------------------------------------------------------------------------"
+BBBP,222,no -L,"NAME                      CUR    DEF    BOOT   MIN    MAX    UNIT           TYPE"
+BBBP,223,no -L,"     DEPENDENCIES"
+BBBP,224,no -L,"n-------------------------------------------------------------------------------"
+BBBP,225,no -L,"arpqsize                  12     12     12     1      32K-1  numeric           D"
+BBBP,226,no -L,"     tcp_pmtu_discover"
+BBBP,227,no -L,"     udp_pmtu_discover"
+BBBP,228,no -L,"n-------------------------------------------------------------------------------"
+BBBP,229,no -L,"arpt_killc                20     20     20     0      255    minute            D"
+BBBP,230,no -L,"n-------------------------------------------------------------------------------"
+BBBP,231,no -L,"arptab_bsiz               7      7      7      1      32K-1  bucket_size       R"
+BBBP,232,no -L,"n-------------------------------------------------------------------------------"
+BBBP,233,no -L,"arptab_nb                 149    149    149    1      32K-1  buckets           R"
+BBBP,234,no -L,"n-------------------------------------------------------------------------------"
+BBBP,235,no -L,"dgd_packets_lost          3      3      3      1      32K-1  numeric           D"
+BBBP,236,no -L,"n-------------------------------------------------------------------------------"
+BBBP,237,no -L,"dgd_ping_time             5      5      5      1      8E-1   second            D"
+BBBP,238,no -L,"n-------------------------------------------------------------------------------"
+BBBP,239,no -L,"dgd_retry_time            5      5      5      1      32K-1  numeric           D"
+BBBP,240,no -L,"n-------------------------------------------------------------------------------"
+BBBP,241,no -L,"ndp_mmaxtries             3      3      3      0      8E-1   numeric           D"
+BBBP,242,no -L,"n-------------------------------------------------------------------------------"
+BBBP,243,no -L,"ndp_umaxtries             3      3      3      0      8E-1   numeric           D"
+BBBP,244,no -L,"n-------------------------------------------------------------------------------"
+BBBP,245,no -L,"ndpqsize                  50     50     50     1      32K-1  numeric           D"
+BBBP,246,no -L,"n-------------------------------------------------------------------------------"
+BBBP,247,no -L,"ndpt_down                 3      3      3      1      8E-1   halfsecond        D"
+BBBP,248,no -L,"n-------------------------------------------------------------------------------"
+BBBP,249,no -L,"ndpt_keep                 120    120    120    1      8E-1   halfsecond        D"
+BBBP,250,no -L,"n-------------------------------------------------------------------------------"
+BBBP,251,no -L,"ndpt_probe                5      5      5      1      8E-1   halfsecond        D"
+BBBP,252,no -L,"n-------------------------------------------------------------------------------"
+BBBP,253,no -L,"ndpt_reachable            30     30     30     1      8E-1   halfsecond        D"
+BBBP,254,no -L,"n-------------------------------------------------------------------------------"
+BBBP,255,no -L,"ndpt_retrans              1      1      1      1      8E-1   halfsecond        D"
+BBBP,256,no -L,"n-------------------------------------------------------------------------------"
+BBBP,257,no -L,"passive_dgd               0      0      0      0      1      boolean           D"
+BBBP,258,no -L,"n-------------------------------------------------------------------------------"
+BBBP,259,no -L,"rfc1122addrchk            0      0      0      0      1      boolean           D"
+BBBP,260,no -L,"n-------------------------------------------------------------------------------"
+BBBP,261,no -L,""
+BBBP,262,no -L,"Stream Header Tunable Parameters"
+BBBP,263,no -L,"n-------------------------------------------------------------------------------"
+BBBP,264,no -L,"NAME                      CUR    DEF    BOOT   MIN    MAX    UNIT           TYPE"
+BBBP,265,no -L,"     DEPENDENCIES"
+BBBP,266,no -L,"n-------------------------------------------------------------------------------"
+BBBP,267,no -L,"lowthresh                 90     90     90     0      100    %_of_thewall      D"
+BBBP,268,no -L,"n-------------------------------------------------------------------------------"
+BBBP,269,no -L,"medthresh                 95     95     95     0      100    %_of_thewall      D"
+BBBP,270,no -L,"n-------------------------------------------------------------------------------"
+BBBP,271,no -L,"nstrpush                  8      8      8      8      32K-1  numeric           R"
+BBBP,272,no -L,"n-------------------------------------------------------------------------------"
+BBBP,273,no -L,"psebufcalls               20     20     20     20     8E-1   numeric           I"
+BBBP,274,no -L,"n-------------------------------------------------------------------------------"
+BBBP,275,no -L,"psecache                  1      1      1      0      1      boolean           D"
+BBBP,276,no -L,"n-------------------------------------------------------------------------------"
+BBBP,277,no -L,"pseintrstack              24K    24K    24K    12K    8E-1   byte              R"
+BBBP,278,no -L,"n-------------------------------------------------------------------------------"
+BBBP,279,no -L,"psetimers                 20     20     20     20     8E-1   numeric           I"
+BBBP,280,no -L,"n-------------------------------------------------------------------------------"
+BBBP,281,no -L,"strctlsz                  1K     1K     1K     0      32K-1  byte              D"
+BBBP,282,no -L,"n-------------------------------------------------------------------------------"
+BBBP,283,no -L,"strmsgsz                  0      0      0      0      32K-1  byte              D"
+BBBP,284,no -L,"n-------------------------------------------------------------------------------"
+BBBP,285,no -L,"strthresh                 85     85     85     0      100    %_of_thewall      D"
+BBBP,286,no -L,"n-------------------------------------------------------------------------------"
+BBBP,287,no -L,"strturncnt                15     15     15     1      8E-1   numeric           D"
+BBBP,288,no -L,"n-------------------------------------------------------------------------------"
+BBBP,289,no -L,""
+BBBP,290,no -L,"Other Network Tunable Parameters"
+BBBP,291,no -L,"n-------------------------------------------------------------------------------"
+BBBP,292,no -L,"NAME                      CUR    DEF    BOOT   MIN    MAX    UNIT           TYPE"
+BBBP,293,no -L,"     DEPENDENCIES"
+BBBP,294,no -L,"n-------------------------------------------------------------------------------"
+BBBP,295,no -L,"bcastping                 0      0      0      0      1      boolean           D"
+BBBP,296,no -L,"n-------------------------------------------------------------------------------"
+BBBP,297,no -L,"icmp6_errmsg_rate         10     10     10     1      255    msg/second        D"
+BBBP,298,no -L,"n-------------------------------------------------------------------------------"
+BBBP,299,no -L,"icmpaddressmask           0      0      0      0      1      boolean           D"
+BBBP,300,no -L,"n-------------------------------------------------------------------------------"
+BBBP,301,no -L,"ifsize                    256    256    256    8      1K     numeric           R"
+BBBP,302,no -L,"n-------------------------------------------------------------------------------"
+BBBP,303,no -L,"llsleep_timeout           3      3      3      1      8E-1   second            D"
+BBBP,304,no -L,"n-------------------------------------------------------------------------------"
+BBBP,305,no -L,"main_if6                  0      0      0      0      1      boolean           D"
+BBBP,306,no -L,"n-------------------------------------------------------------------------------"
+BBBP,307,no -L,"main_site6                0      0      0      0      1      boolean           D"
+BBBP,308,no -L,"n-------------------------------------------------------------------------------"
+BBBP,309,no -L,"maxttl                    255    255    255    1      255    second            D"
+BBBP,310,no -L,"n-------------------------------------------------------------------------------"
+BBBP,311,no -L,"mpr_policy                1      1      1      1      5      numeric           D"
+BBBP,312,no -L,"n-------------------------------------------------------------------------------"
+BBBP,313,no -L,"pmtu_default_age          10     10     10     0      32K-1  minute            D"
+BBBP,314,no -L,"n-------------------------------------------------------------------------------"
+BBBP,315,no -L,"pmtu_expire               10     10     10     0      32K-1  minute            D"
+BBBP,316,no -L,"n-------------------------------------------------------------------------------"
+BBBP,317,no -L,"pmtu_rediscover_interval  30     30     30     0      32K-1  minute            D"
+BBBP,318,no -L,"n-------------------------------------------------------------------------------"
+BBBP,319,no -L,"route_expire              1      1      1      0      1      boolean           D"
+BBBP,320,no -L,"n-------------------------------------------------------------------------------"
+BBBP,321,no -L,"routerevalidate           0      0      0      0      1      boolean           D"
+BBBP,322,no -L,"n-------------------------------------------------------------------------------"
+BBBP,323,no -L,"site6_index               0      0      0      0      32K-1  numeric           D"
+BBBP,324,no -L,"n-------------------------------------------------------------------------------"
+BBBP,325,no -L,"tcp_pmtu_discover         1      1      0      0      1      boolean           D"
+BBBP,326,no -L,"n-------------------------------------------------------------------------------"
+BBBP,327,no -L,"udp_pmtu_discover         1      1      0      0      1      boolean           D"
+BBBP,328,no -L,"n-------------------------------------------------------------------------------"
+BBBP,329,no -L,""
+BBBP,330,no -L,""
+BBBP,331,no -L,"n/a means parameter not supported by the current platform or kernel"
+BBBP,332,no -L,""
+BBBP,333,no -L,"Parameter types:"
+BBBP,334,no -L,"    S = Static: cannot be changed"
+BBBP,335,no -L,"    D = Dynamic: can be freely changed"
+BBBP,336,no -L,"    B = Bosboot: can only be changed using bosboot and reboot"
+BBBP,337,no -L,"    R = Reboot: can only be changed during reboot"
+BBBP,338,no -L,"    C = Connect: changes are only effective for future socket connections"
+BBBP,339,no -L,"    M = Mount: changes are only effective for future mountings"
+BBBP,340,no -L,"    I = Incremental: can only be incremented"
+BBBP,341,no -L,""
+BBBP,342,no -L,"Value conventions:"
+BBBP,343,no -L,"    K = Kilo: 2^10       G = Giga: 2^30       P = Peta: 2^50      "
+BBBP,344,no -L,"    M = Mega: 2^20       T = Tera: 2^40       E = Exa: 2^60       "
+BBBP,345,mpstat -d
+BBBP,346,mpstat -d,""
+BBBP,347,mpstat -d,"System configuration: lcpu=2 ent=0.5 "
+BBBP,348,mpstat -d,""
+BBBP,349,mpstat -d,"cpu     cs    ics  bound     rq   push S3pull  S3grd  S0rd  S1rd  S2rd  S3rd  S4rd  S5rd   ilcs   vlcs"
+BBBP,350,mpstat -d,"  0 375913742 78948616      1      1      0      0      0  99.6   0.4   0.0   0.0   0.0   0.0 705940 161671149"
+BBBP,351,mpstat -d,"  1 15892518 6055258      0      0      0      0      0  88.5  11.5   0.0   0.0   0.0   0.0 194571 145341735"
+BBBP,352,mpstat -d,"ALL 391806260 85003874      1      1      0      0      0  99.2   0.8   0.0   0.0   0.0   0.0 900511 307012884"
+BBBP,353,lparstat -i
+BBBP,354,lparstat -i,"Node Name                                  : olcru141"
+BBBP,355,lparstat -i,"Partition Name                             : olcru141"
+BBBP,356,lparstat -i,"Partition Number                           : 10"
+BBBP,357,lparstat -i,"Type                                       : Shared-SMT"
+BBBP,358,lparstat -i,"Mode                                       : Capped"
+BBBP,359,lparstat -i,"Entitled Capacity                          : 0.50"
+BBBP,360,lparstat -i,"Partition Group-ID                         : 32778"
+BBBP,361,lparstat -i,"Shared Pool ID                             : 0"
+BBBP,362,lparstat -i,"Online Virtual CPUs                        : 1"
+BBBP,363,lparstat -i,"Maximum Virtual CPUs                       : 2"
+BBBP,364,lparstat -i,"Minimum Virtual CPUs                       : 1"
+BBBP,365,lparstat -i,"Online Memory                              : 6400 MB"
+BBBP,366,lparstat -i,"Maximum Memory                             : 8448 MB"
+BBBP,367,lparstat -i,"Minimum Memory                             : 4352 MB"
+BBBP,368,lparstat -i,"Variable Capacity Weight                   : 0"
+BBBP,369,lparstat -i,"Minimum Capacity                           : 0.20"
+BBBP,370,lparstat -i,"Maximum Capacity                           : 1.00"
+BBBP,371,lparstat -i,"Capacity Increment                         : 0.01"
+BBBP,372,lparstat -i,"Maximum Physical CPUs in system            : 16"
+BBBP,373,lparstat -i,"Active Physical CPUs in system             : 8"
+BBBP,374,lparstat -i,"Active CPUs in Pool                        : 7"
+BBBP,375,lparstat -i,"Unallocated Capacity                       : 0.00"
+BBBP,376,lparstat -i,"Physical CPU Percentage                    : 50.00%"
+BBBP,377,lparstat -i,"Unallocated Weight                         : 0"
+BBBP,378,lparstat -H
+BBBP,379,lparstat -H,""
+BBBP,380,lparstat -H,"System configuration: type=Shared mode=Capped smt=On lcpu=2 mem=6400 psize=7 ent=0.50 "
+BBBP,381,lparstat -H,""
+BBBP,382,lparstat -H,"           Detailed information on Hypervisor Calls"
+BBBP,383,lparstat -H,""
+BBBP,384,lparstat -H,"Hypervisor        Number of    %Total Time   %Hypervisor   Avg Call    Max Call"
+BBBP,385,lparstat -H,"  Call              Calls         Spent      Time Spent    Time(ns)    Time(ns)"
+BBBP,386,lparstat -H,""
+BBBP,387,lparstat -H,"remove                    2            0.0           9.9        956        1084"
+BBBP,388,lparstat -H,"read                      0            0.0           0.0          1           0"
+BBBP,389,lparstat -H,"nclear_mod                0            0.0           0.0          1           0"
+BBBP,390,lparstat -H,"page_init                 7            0.0          61.6       1700        3406"
+BBBP,391,lparstat -H,"clear_ref                 0            0.0           0.0          1           0"
+BBBP,392,lparstat -H,"protect                   0            0.0           0.0          1           0"
+BBBP,393,lparstat -H,"put_tce                   0            0.0           0.0          1           0"
+BBBP,394,lparstat -H,"xirr                      0            0.0           0.0          1           0"
+BBBP,395,lparstat -H,"eoi                       0            0.0           0.0          1           0"
+BBBP,396,lparstat -H,"ipi                       0            0.0           0.0          1           0"
+BBBP,397,lparstat -H,"cppr                      0            0.0           0.0          1           0"
+BBBP,398,lparstat -H,"asr                       0            0.0           0.0          1           0"
+BBBP,399,lparstat -H,"others                    0            0.0           0.0          1           0"
+BBBP,400,lparstat -H,"enter                     9            0.0          20.0        428         660"
+BBBP,401,lparstat -H,"cede                      0            0.0           0.0          1           0"
+BBBP,402,lparstat -H,"migrate_dma               0            0.0           0.0          1           0"
+BBBP,403,lparstat -H,"put_rtce                  0            0.0           0.0          1           0"
+BBBP,404,lparstat -H,"confer                    0            0.0           0.0          1           0"
+BBBP,405,lparstat -H,"prod                      0            0.0           0.0          1           0"
+BBBP,406,lparstat -H,"get_ppp                   1            0.0           6.4       1236        1236"
+BBBP,407,lparstat -H,"set_ppp                   0            0.0           0.0          1           0"
+BBBP,408,lparstat -H,"purr                      0            0.0           0.0          1           0"
+BBBP,409,lparstat -H,"pic                       1            0.0           2.1        412         412"
+BBBP,410,lparstat -H,"bulk_remove               0            0.0           0.0          1           0"
+BBBP,411,lparstat -H,"send_crq                  0            0.0           0.0          1           0"
+BBBP,412,lparstat -H,"copy_rdma                 0            0.0           0.0          1           0"
+BBBP,413,lparstat -H,"get_tce                   0            0.0           0.0          1           0"
+BBBP,414,lparstat -H,"send_logical_lan          0            0.0           0.0          1           0"
+BBBP,415,lparstat -H,"add_logicl_lan_buf        0            0.0           0.0          1           0"
+BBBP,416,lparstat -H,"n-------------------------------------------------------------------------------"
+BBBP,417,vmo -L
+BBBP,418,vmo -L,"NAME                      CUR    DEF    BOOT   MIN    MAX    UNIT           TYPE"
+BBBP,419,vmo -L,"     DEPENDENCIES"
+BBBP,420,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,421,vmo -L,"cpu_scale_memp            8      8      8      1      64                       B"
+BBBP,422,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,423,vmo -L,"data_stagger_interval     161    161    161    0      4K-1   4KB pages         D"
+BBBP,424,vmo -L,"     lgpg_regions"
+BBBP,425,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,426,vmo -L,"defps                     1      1      1      0      1      boolean           D"
+BBBP,427,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,428,vmo -L,"force_relalias_lite       0      0      0      0      1      boolean           D"
+BBBP,429,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,430,vmo -L,"framesets                 2      2      2      1      10                       B"
+BBBP,431,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,432,vmo -L,"htabscale                 n/a    -1     -1     -4     0                        B"
+BBBP,433,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,434,vmo -L,"kernel_heap_psize         4K     4K     4K     4K     16M    bytes             B"
+BBBP,435,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,436,vmo -L,"large_page_heap_size      0      0      0      0      8E-1   bytes             B"
+BBBP,437,vmo -L,"     lgpg_regions"
+BBBP,438,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,439,vmo -L,"lgpg_regions              0      0      0      0                               D"
+BBBP,440,vmo -L,"     lgpg_size"
+BBBP,441,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,442,vmo -L,"lgpg_size                 0      0      0      0      16M    bytes             D"
+BBBP,443,vmo -L,"     lgpg_regions"
+BBBP,444,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,445,vmo -L,"low_ps_handling           1      1      1      1      2                        D"
+BBBP,446,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,447,vmo -L,"lru_file_repage           1      1      1      0      1      boolean           D"
+BBBP,448,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,449,vmo -L,"lru_poll_interval         10     10     10     0      60000  milliseconds      D"
+BBBP,450,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,451,vmo -L,"lrubucket                 128K   128K   128K   64K           4KB pages         D"
+BBBP,452,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,453,vmo -L,"maxclient%                80     80     40     1      100    % memory          D"
+BBBP,454,vmo -L,"     maxperm%"
+BBBP,455,vmo -L,"     minperm%"
+BBBP,456,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,457,vmo -L,"maxfree                   1088   1088   1088   8      200K   4KB pages         D"
+BBBP,458,vmo -L,"     minfree"
+BBBP,459,vmo -L,"     memory_frames"
+BBBP,460,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,461,vmo -L,"maxperm                   1225K         1225K                                  S"
+BBBP,462,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,463,vmo -L,"maxperm%                  80     80     40     1      100    % memory          D"
+BBBP,464,vmo -L,"     minperm%"
+BBBP,465,vmo -L,"     maxclient%"
+BBBP,466,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,467,vmo -L,"maxpin                    1292K         1292K                                  S"
+BBBP,468,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,469,vmo -L,"maxpin%                   80     80     80     1      99     % memory          D"
+BBBP,470,vmo -L,"     pinnable_frames"
+BBBP,471,vmo -L,"     memory_frames"
+BBBP,472,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,473,vmo -L,"mbuf_heap_psize           64K    0      0      0      16M    bytes             B"
+BBBP,474,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,475,vmo -L,"memory_affinity           1      1      1      0      1      boolean           B"
+BBBP,476,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,477,vmo -L,"memory_frames             1600K         1600K                4KB pages         S"
+BBBP,478,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,479,vmo -L,"memplace_data             2      2      2      1      2                        D"
+BBBP,480,vmo -L,"     memory_affinity"
+BBBP,481,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,482,vmo -L,"memplace_mapped_file      2      2      2      1      2                        D"
+BBBP,483,vmo -L,"     memory_affinity"
+BBBP,484,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,485,vmo -L,"memplace_shm_anonymous    2      2      2      1      2                        D"
+BBBP,486,vmo -L,"     memory_affinity"
+BBBP,487,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,488,vmo -L,"memplace_shm_named        2      2      2      1      2                        D"
+BBBP,489,vmo -L,"     memory_affinity"
+BBBP,490,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,491,vmo -L,"memplace_stack            2      2      2      1      2                        D"
+BBBP,492,vmo -L,"     memory_affinity"
+BBBP,493,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,494,vmo -L,"memplace_text             2      2      2      1      2                        D"
+BBBP,495,vmo -L,"     memory_affinity"
+BBBP,496,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,497,vmo -L,"memplace_unmapped_file    2      2      2      1      2                        D"
+BBBP,498,vmo -L,"     memory_affinity"
+BBBP,499,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,500,vmo -L,"mempools                  5             5                                      d"
+BBBP,501,vmo -L,"     cpu_scale_memp"
+BBBP,502,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,503,vmo -L,"minfree                   960    960    960    8      200K   4KB pages         D"
+BBBP,504,vmo -L,"     maxfree"
+BBBP,505,vmo -L,"     memory_frames"
+BBBP,506,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,507,vmo -L,"minperm                   313675        313675                                 S"
+BBBP,508,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,509,vmo -L,"minperm%                  20     20     15     1      100    % memory          D"
+BBBP,510,vmo -L,"     maxperm%"
+BBBP,511,vmo -L,"     maxclient%"
+BBBP,512,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,513,vmo -L,"nokilluid                 0      0      0      0      4G-1   uid               D"
+BBBP,514,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,515,vmo -L,"npskill                   1K     1K     1K     1      128K-1 4KB pages         D"
+BBBP,516,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,517,vmo -L,"npsrpgmax                 8K     8K     8K     0      128K-1 4KB pages         D"
+BBBP,518,vmo -L,"     npsrpgmin"
+BBBP,519,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,520,vmo -L,"npsrpgmin                 6K     6K     6K     0      128K-1 4KB pages         D"
+BBBP,521,vmo -L,"     npsrpgmax"
+BBBP,522,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,523,vmo -L,"npsscrubmax               8K     8K     8K     0      128K-1 4KB pages         D"
+BBBP,524,vmo -L,"     npsscrubmin"
+BBBP,525,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,526,vmo -L,"npsscrubmin               6K     6K     6K     0      128K-1 4KB pages         D"
+BBBP,527,vmo -L,"     npsscrubmax"
+BBBP,528,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,529,vmo -L,"npswarn                   4K     4K     4K     0      128K-1 4KB pages         D"
+BBBP,530,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,531,vmo -L,"num_spec_dataseg          0      0      0      0                               B"
+BBBP,532,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,533,vmo -L,"numpsblks                 128K          128K                 4KB blocks        S"
+BBBP,534,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,535,vmo -L,"page_steal_method         0      0      0      0      1      boolean           B"
+BBBP,536,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,537,vmo -L,"pagecoloring              n/a    0      0      0      1      boolean           B"
+BBBP,538,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,539,vmo -L,"pinnable_frames           1428K         1428K                4KB pages         S"
+BBBP,540,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,541,vmo -L,"pta_balance_threshold     n/a    1      1      0      99     % pta segment     D"
+BBBP,542,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,543,vmo -L,"relalias_percentage       0      0      0      0      32K-1                    D"
+BBBP,544,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,545,vmo -L,"rpgclean                  0      0      0      0      1      boolean           D"
+BBBP,546,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,547,vmo -L,"rpgcontrol                2      2      2      0      3                        D"
+BBBP,548,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,549,vmo -L,"scrub                     0      0      0      0      1      boolean           D"
+BBBP,550,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,551,vmo -L,"scrubclean                0      0      0      0      1      boolean           D"
+BBBP,552,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,553,vmo -L,"soft_min_lgpgs_vmpool     0      0      0      0      90     %                 D"
+BBBP,554,vmo -L,"     lgpg_regions"
+BBBP,555,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,556,vmo -L,"spec_dataseg_int          512    512    512    0                               B"
+BBBP,557,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,558,vmo -L,"strict_maxclient          1      1      1      0      1      boolean           D"
+BBBP,559,vmo -L,"     strict_maxperm"
+BBBP,560,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,561,vmo -L,"strict_maxperm            0      0      0      0      1      boolean           D"
+BBBP,562,vmo -L,"     strict_maxclient"
+BBBP,563,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,564,vmo -L,"v_pinshm                  0      0      0      0      1      boolean           D"
+BBBP,565,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,566,vmo -L,"vm_modlist_threshold      -1     -1     -1     -2     2G-1                     D"
+BBBP,567,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,568,vmo -L,"vmm_fork_policy           1      1      1      0      1      boolean           D"
+BBBP,569,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,570,vmo -L,"vmm_mpsize_support        1      1      1      0      1      boolean           B"
+BBBP,571,vmo -L,"n-------------------------------------------------------------------------------"
+BBBP,572,vmo -L,""
+BBBP,573,vmo -L,"n/a means parameter not supported by the current platform or kernel"
+BBBP,574,vmo -L,""
+BBBP,575,vmo -L,"Parameter types:"
+BBBP,576,vmo -L,"    S = Static: cannot be changed"
+BBBP,577,vmo -L,"    D = Dynamic: can be freely changed"
+BBBP,578,vmo -L,"    B = Bosboot: can only be changed using bosboot and reboot"
+BBBP,579,vmo -L,"    R = Reboot: can only be changed during reboot"
+BBBP,580,vmo -L,"    C = Connect: changes are only effective for future socket connections"
+BBBP,581,vmo -L,"    M = Mount: changes are only effective for future mountings"
+BBBP,582,vmo -L,"    I = Incremental: can only be incremented"
+BBBP,583,vmo -L,"    d = deprecated: deprecated and cannot be changed"
+BBBP,584,vmo -L,""
+BBBP,585,vmo -L,"Value conventions:"
+BBBP,586,vmo -L,"    K = Kilo: 2^10       G = Giga: 2^30       P = Peta: 2^50      "
+BBBP,587,vmo -L,"    M = Mega: 2^20       T = Tera: 2^40       E = Exa: 2^60       "
+BBBP,588,ioo -L
+BBBP,589,ioo -L,"NAME                      CUR    DEF    BOOT   MIN    MAX    UNIT           TYPE"
+BBBP,590,ioo -L,"     DEPENDENCIES"
+BBBP,591,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,592,ioo -L,"j2_atimeUpdateSymlink     0      0      0      0      1      boolean           D"
+BBBP,593,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,594,ioo -L,"j2_dynamicBufferPreallocation"
+BBBP,595,ioo -L,"                          16     16     16     0      256    16K slabs         D"
+BBBP,596,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,597,ioo -L,"j2_inodeCacheSize         400    400    400    1      1000                     D"
+BBBP,598,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,599,ioo -L,"j2_maxPageReadAhead       128    128    128    0      64K    4KB pages         D"
+BBBP,600,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,601,ioo -L,"j2_maxRandomWrite         0      0      0      0      64K    4KB pages         D"
+BBBP,602,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,603,ioo -L,"j2_maxUsableMaxTransfer   512    512    512    1      4K     pages             M"
+BBBP,604,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,605,ioo -L,"j2_metadataCacheSize      400    400    400    1      1000                     D"
+BBBP,606,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,607,ioo -L,"j2_minPageReadAhead       2      2      2      0      64K    4KB pages         D"
+BBBP,608,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,609,ioo -L,"j2_nBufferPerPagerDevice  512    512    512    0      256K                     M"
+BBBP,610,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,611,ioo -L,"j2_nPagesPerWriteBehindCluster"
+BBBP,612,ioo -L,"                          32     32     32     0      64K                      D"
+BBBP,613,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,614,ioo -L,"j2_nRandomCluster         0      0      0      0      64K    16KB clusters     D"
+BBBP,615,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,616,ioo -L,"j2_nonFatalCrashesSystem  0      0      0      0      1      boolean           D"
+BBBP,617,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,618,ioo -L,"j2_syncModifiedMapped     1      1      1      0      1      boolean           D"
+BBBP,619,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,620,ioo -L,"jfs_clread_enabled        0      0      0      0      1      boolean           D"
+BBBP,621,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,622,ioo -L,"jfs_use_read_lock         1      1      1      0      1      boolean           D"
+BBBP,623,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,624,ioo -L,"lvm_bufcnt                9      9      9      1      64     128KB/buffer      D"
+BBBP,625,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,626,ioo -L,"maxpgahead                8      8      8      0      4K     4KB pages         D"
+BBBP,627,ioo -L,"     minpgahead"
+BBBP,628,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,629,ioo -L,"maxrandwrt                0      0      0      0      512K   4KB pages         D"
+BBBP,630,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,631,ioo -L,"memory_frames             1600K         1600K                4KB pages         S"
+BBBP,632,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,633,ioo -L,"minpgahead                2      2      2      0      4K     4KB pages         D"
+BBBP,634,ioo -L,"     maxpgahead"
+BBBP,635,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,636,ioo -L,"numclust                  1      1      1      0      2G-1   16KB/cluster      D"
+BBBP,637,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,638,ioo -L,"numfsbufs                 196    196    196    1      2G-1                     M"
+BBBP,639,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,640,ioo -L,"pd_npages                 64K    64K    64K    1      512K   4KB pages         D"
+BBBP,641,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,642,ioo -L,"pgahd_scale_thresh        0      0      0      0      1280K  4KB pages         D"
+BBBP,643,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,644,ioo -L,"pv_min_pbuf               512    512    512    512    2G-1                     D"
+BBBP,645,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,646,ioo -L,"sync_release_ilock        0      0      0      0      1      boolean           D"
+BBBP,647,ioo -L,"n-------------------------------------------------------------------------------"
+BBBP,648,ioo -L,""
+BBBP,649,ioo -L,"n/a means parameter not supported by the current platform or kernel"
+BBBP,650,ioo -L,""
+BBBP,651,ioo -L,"Parameter types:"
+BBBP,652,ioo -L,"    S = Static: cannot be changed"
+BBBP,653,ioo -L,"    D = Dynamic: can be freely changed"
+BBBP,654,ioo -L,"    B = Bosboot: can only be changed using bosboot and reboot"
+BBBP,655,ioo -L,"    R = Reboot: can only be changed during reboot"
+BBBP,656,ioo -L,"    C = Connect: changes are only effective for future socket connections"
+BBBP,657,ioo -L,"    M = Mount: changes are only effective for future mountings"
+BBBP,658,ioo -L,"    I = Incremental: can only be incremented"
+BBBP,659,ioo -L,"    d = deprecated: deprecated and cannot be changed"
+BBBP,660,ioo -L,""
+BBBP,661,ioo -L,"Value conventions:"
+BBBP,662,ioo -L,"    K = Kilo: 2^10       G = Giga: 2^30       P = Peta: 2^50      "
+BBBP,663,ioo -L,"    M = Mega: 2^20       T = Tera: 2^40       E = Exa: 2^60       "
+BBBP,664,schedo -L
+BBBP,665,schedo -L,"NAME                      CUR    DEF    BOOT   MIN    MAX    UNIT           TYPE"
+BBBP,666,schedo -L,"     DEPENDENCIES"
+BBBP,667,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,668,schedo -L,"%usDelta                  100    100    100    0      100                      D"
+BBBP,669,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,670,schedo -L,"affinity_lim              7      7      7      0      100    dispatches        D"
+BBBP,671,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,672,schedo -L,"allowMCMmigrate           0      0      0      0      1      boolean           D"
+BBBP,673,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,674,schedo -L,"big_tick_size             1      1      1      1      100    10 ms             D"
+BBBP,675,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,676,schedo -L,"fixed_pri_global          0      0      0      0      1      boolean           D"
+BBBP,677,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,678,schedo -L,"force_grq                 0      0      0      0      1      boolean           D"
+BBBP,679,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,680,schedo -L,"hotlocks_enable           0      0      0      0      1      boolean           D"
+BBBP,681,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,682,schedo -L,"idle_migration_barrier    4      4      4      0      100    sixteenth         D"
+BBBP,683,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,684,schedo -L,"krlock_confer2self        1      1      1      0      1      boolean           D"
+BBBP,685,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,686,schedo -L,"krlock_conferb4alloc      1      0      0      0      1      boolean           D"
+BBBP,687,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,688,schedo -L,"krlock_enable             1      1      1      0      1      boolean           D"
+BBBP,689,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,690,schedo -L,"krlock_spinb4alloc        1      1      1      1      2G-1                     D"
+BBBP,691,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,692,schedo -L,"krlock_spinb4confer       1K     1K     1K     0      2G-1                     D"
+BBBP,693,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,694,schedo -L,"maxspin                   16K    16K    16K    1      4G-1   spins             D"
+BBBP,695,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,696,schedo -L,"n_idle_loop_vlopri        100    100    100    0      976K                     D"
+BBBP,697,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,698,schedo -L,"pacefork                  10     10     10     10     2G-1   clock ticks       D"
+BBBP,699,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,700,schedo -L,"sched_D                   16     16     16     0      32                       D"
+BBBP,701,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,702,schedo -L,"sched_R                   16     16     16     0      32                       D"
+BBBP,703,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,704,schedo -L,"search_globalrq_mload     256    256    256    0      4095M                    D"
+BBBP,705,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,706,schedo -L,"search_smtrunq_mload      256    256    256    0      4095M                    D"
+BBBP,707,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,708,schedo -L,"setnewrq_sidle_mload      384    384    384    0      4095M                    D"
+BBBP,709,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,710,schedo -L,"shed_primrunq_mload       64     64     64     0      4095M                    D"
+BBBP,711,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,712,schedo -L,"sidle_S1runq_mload        64     64     64     0      4095M                    D"
+BBBP,713,schedo -L,"     sidle_S2runq_mload"
+BBBP,714,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,715,schedo -L,"sidle_S2runq_mload        134    134    134    0      4095M                    D"
+BBBP,716,schedo -L,"     sidle_S1runq_mload"
+BBBP,717,schedo -L,"     sidle_S3runq_mload"
+BBBP,718,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,719,schedo -L,"sidle_S3runq_mload        134    134    134    0      4095M                    D"
+BBBP,720,schedo -L,"     sidle_S2runq_mload"
+BBBP,721,schedo -L,"     sidle_S4runq_mload"
+BBBP,722,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,723,schedo -L,"sidle_S4runq_mload        4095M  4095M  4095M  0      4095M                    D"
+BBBP,724,schedo -L,"     sidle_S3runq_mload"
+BBBP,725,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,726,schedo -L,"slock_spinb4confer        1K     1K     1K     0      2G-1                     D"
+BBBP,727,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,728,schedo -L,"smt_snooze_delay          0      0      0      -1     97656K microsecs         D"
+BBBP,729,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,730,schedo -L,"smtrunq_load_diff         2      2      2      1      4095M                    D"
+BBBP,731,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,732,schedo -L,"timeslice                 1      1      1      0      2G-1   clock ticks       D"
+BBBP,733,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,734,schedo -L,"unboost_inflih            1      1      1      0      1      boolean           D"
+BBBP,735,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,736,schedo -L,"v_exempt_secs             2      2      2      0      2G-1   seconds           D"
+BBBP,737,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,738,schedo -L,"v_min_process             2      2      2      0      2G-1   processes         D"
+BBBP,739,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,740,schedo -L,"v_repage_hi               0      0      0      0      2G-1                     D"
+BBBP,741,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,742,schedo -L,"v_repage_proc             4      4      4      0      2G-1                     D"
+BBBP,743,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,744,schedo -L,"v_sec_wait                1      1      1      0      2G-1   seconds           D"
+BBBP,745,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,746,schedo -L,"vpm_xvcpus                0      0      0      -1     2G-1   processors        D"
+BBBP,747,schedo -L,"n-------------------------------------------------------------------------------"
+BBBP,748,schedo -L,""
+BBBP,749,schedo -L,"n/a means parameter not supported by the current platform or kernel"
+BBBP,750,schedo -L,""
+BBBP,751,schedo -L,"Parameter types:"
+BBBP,752,schedo -L,"    S = Static: cannot be changed"
+BBBP,753,schedo -L,"    D = Dynamic: can be freely changed"
+BBBP,754,schedo -L,"    B = Bosboot: can only be changed using bosboot and reboot"
+BBBP,755,schedo -L,"    R = Reboot: can only be changed during reboot"
+BBBP,756,schedo -L,"    C = Connect: changes are only effective for future socket connections"
+BBBP,757,schedo -L,"    M = Mount: changes are only effective for future mountings"
+BBBP,758,schedo -L,"    I = Incremental: can only be incremented"
+BBBP,759,schedo -L,"    d = deprecated: deprecated and cannot be changed"
+BBBP,760,schedo -L,""
+BBBP,761,schedo -L,"Value conventions:"
+BBBP,762,schedo -L,"    K = Kilo: 2^10       G = Giga: 2^30       P = Peta: 2^50      "
+BBBP,763,schedo -L,"    M = Mega: 2^20       T = Tera: 2^40       E = Exa: 2^60       "
+BBBP,764,nfso -L
+BBBP,765,nfso -L,"NAME                      CUR    DEF    BOOT   MIN    MAX    UNIT           TYPE"
+BBBP,766,nfso -L,"     DEPENDENCIES"
+BBBP,767,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,768,nfso -L,"portcheck                 0      0      0      0      1      On/Off            D"
+BBBP,769,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,770,nfso -L,"udpchecksum               1      1      1      0      1      On/Off            D"
+BBBP,771,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,772,nfso -L,"nfs_socketsize            600000 600000 600000 40000  1M     Bytes             D"
+BBBP,773,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,774,nfso -L,"nfs_tcp_socketsize        600000 600000 600000 40000  1M     Bytes             D"
+BBBP,775,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,776,nfso -L,"nfs_setattr_error         0      0      0      0      1      On/Off            D"
+BBBP,777,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,778,nfso -L,"nfs_gather_threshold      4K     4K     4K     512    8K+1   Bytes             D"
+BBBP,779,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,780,nfso -L,"nfs_repeat_messages       0      0      0      0      1      On/Off            D"
+BBBP,781,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,782,nfso -L,"nfs_udp_duplicate_cache_size "
+BBBP,783,nfso -L,"                          5000   5000   5000   5000   100000 Req               I"
+BBBP,784,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,785,nfso -L,"nfs_tcp_duplicate_cache_size "
+BBBP,786,nfso -L,"                          5000   5000   5000   5000   100000 Req               I"
+BBBP,787,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,788,nfso -L,"nfs_server_base_priority  0      0      0      31     125    Pri               D"
+BBBP,789,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,790,nfso -L,"nfs_dynamic_retrans       1      1      1      0      1      On/Off            D"
+BBBP,791,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,792,nfso -L,"nfs_iopace_pages          0      0      0      0      64K-1  Pages             D"
+BBBP,793,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,794,nfso -L,"nfs_max_connections       0      0      0      0      10000  Number            D"
+BBBP,795,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,796,nfso -L,"nfs_max_threads           3891   3891   3891   5      3891   Threads           D"
+BBBP,797,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,798,nfso -L,"nfs_use_reserved_ports    0      0      0      0      1      On/Off            D"
+BBBP,799,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,800,nfso -L,"nfs_device_specific_bufs  1      1      1      0      1      On/Off            D"
+BBBP,801,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,802,nfso -L,"nfs_server_clread         1      1      1      0      1      On/Off            D"
+BBBP,803,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,804,nfso -L,"nfs_rfc1323               0      0      0      0      1      On/Off            D"
+BBBP,805,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,806,nfso -L,"nfs_max_write_size        32K    32K    32K    512    64K    Bytes             D"
+BBBP,807,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,808,nfso -L,"nfs_max_read_size         32K    32K    32K    512    64K    Bytes             D"
+BBBP,809,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,810,nfso -L,"nfs_allow_all_signals     0      0      0      0      1      On/Off            D"
+BBBP,811,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,812,nfso -L,"nfs_v2_pdts               1      1      1      1      8      PDTs              M"
+BBBP,813,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,814,nfso -L,"nfs_v3_pdts               1      1      1      1      8      PDTs              M"
+BBBP,815,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,816,nfso -L,"nfs_v2_vm_bufs            10000  1000   1000   512    50000  Bufs              I"
+BBBP,817,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,818,nfso -L,"nfs_v3_vm_bufs            10000  1000   1000   512    50000  Bufs              I"
+BBBP,819,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,820,nfso -L,"nfs_securenfs_authtimeout 0      0      0      0      60     Seconds           D"
+BBBP,821,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,822,nfso -L,"nfs_v3_server_readdirplus 1      1      1      0      1      On/Off            D"
+BBBP,823,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,824,nfso -L,"lockd_debug_level         -1     0      0      0      10     Level             D"
+BBBP,825,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,826,nfso -L,"statd_debug_level         -1     0      0      0      10     Level             D"
+BBBP,827,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,828,nfso -L,"statd_max_threads         -1     50     50     1      1000   Threads           D"
+BBBP,829,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,830,nfso -L,"nfs_v4_fail_over_timeout  0      0      0      0      3600   Seconds           D"
+BBBP,831,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,832,nfso -L,"utf8_validation           1      1      1      0      1      On/Off            D"
+BBBP,833,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,834,nfso -L,"nfs_v4_pdts               1      1      1      1      8      PDTs              M"
+BBBP,835,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,836,nfso -L,"nfs_v4_vm_bufs            10000  1000   1000   512    50000  Bufs              I"
+BBBP,837,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,838,nfso -L,"server_delegation         1      1      1      0      1      On/Off            D"
+BBBP,839,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,840,nfso -L,"nfs_auto_rbr_trigger      0      0      0      -1     1M     MB                D"
+BBBP,841,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,842,nfso -L,"client_delegation         1      1      1      0      1      On/Off            D"
+BBBP,843,nfso -L,"n-------------------------------------------------------------------------------"
+BBBP,844,nfso -L,""
+BBBP,845,nfso -L,"n/a means parameter not supported by the current platform or kernel"
+BBBP,846,nfso -L,""
+BBBP,847,nfso -L,"Parameter types:"
+BBBP,848,nfso -L,"    S = Static: cannot be changed"
+BBBP,849,nfso -L,"    D = Dynamic: can be freely changed"
+BBBP,850,nfso -L,"    B = Bosboot: can only be changed using bosboot and reboot"
+BBBP,851,nfso -L,"    R = Reboot: can only be changed during reboot"
+BBBP,852,nfso -L,"    C = Connect: changes are only effective for future socket connections"
+BBBP,853,nfso -L,"    M = Mount: changes are only effective for future mountings"
+BBBP,854,nfso -L,"    I = Incremental: can only be incremented"
+BBBP,855,nfso -L,""
+BBBP,856,nfso -L,"Value conventions:"
+BBBP,857,nfso -L,"    K = Kilo: 2^10       G = Giga: 2^30       P = Peta: 2^50      "
+BBBP,858,nfso -L,"    M = Mega: 2^20       T = Tera: 2^40       E = Exa: 2^60       "
+BBBP,859,lsattr -EL sys0
+BBBP,860,lsattr -EL sys0,"SW_dist_intr    false              Enable SW distribution of interrupts              True"
+BBBP,861,lsattr -EL sys0,"autorestart     true               Automatically REBOOT system after a crash         True"
+BBBP,862,lsattr -EL sys0,"boottype        disk               N/A                                               False"
+BBBP,863,lsattr -EL sys0,"capacity_inc    0.01               Processor capacity increment                      False"
+BBBP,864,lsattr -EL sys0,"capped          true               Partition is capped                               False"
+BBBP,865,lsattr -EL sys0,"conslogin       enable             System Console Login                              False"
+BBBP,866,lsattr -EL sys0,"cpuguard        enable             CPU Guard                                         True"
+BBBP,867,lsattr -EL sys0,"dedicated       false              Partition is dedicated                            False"
+BBBP,868,lsattr -EL sys0,"ent_capacity    0.50               Entitled processor capacity                       False"
+BBBP,869,lsattr -EL sys0,"frequency       1056000000         System Bus Frequency                              False"
+BBBP,870,lsattr -EL sys0,"fullcore        true               Enable full CORE dump                             True"
+BBBP,871,lsattr -EL sys0,"fwversion       IBM,SF240_219      Firmware version and revision levels              False"
+BBBP,872,lsattr -EL sys0,"id_to_partition 0X80000A2804D0000A Partition ID                                      False"
+BBBP,873,lsattr -EL sys0,"id_to_system    0X80000A2804D00000 System ID                                         False"
+BBBP,874,lsattr -EL sys0,"iostat          true               Continuously maintain DISK I/O history            True"
+BBBP,875,lsattr -EL sys0,"keylock         normal             State of system keylock at boot time              False"
+BBBP,876,lsattr -EL sys0,"max_capacity    1.00               Maximum potential processor capacity              False"
+BBBP,877,lsattr -EL sys0,"max_logname     9                  Maximum login name length at boot time            True"
+BBBP,878,lsattr -EL sys0,"maxbuf          20                 Maximum number of pages in block I/O BUFFER CACHE True"
+BBBP,879,lsattr -EL sys0,"maxmbuf         0                  Maximum Kbytes of real memory allowed for MBUFS   True"
+BBBP,880,lsattr -EL sys0,"maxpout         0                  HIGH water mark for pending write I/Os per file   True"
+BBBP,881,lsattr -EL sys0,"maxuproc        500                Maximum number of PROCESSES allowed per user      True"
+BBBP,882,lsattr -EL sys0,"min_capacity    0.20               Minimum potential processor capacity              False"
+BBBP,883,lsattr -EL sys0,"minpout         0                  LOW water mark for pending write I/Os per file    True"
+BBBP,884,lsattr -EL sys0,"modelname       IBM,9117-570       Machine name                                      False"
+BBBP,885,lsattr -EL sys0,"ncargs          6                  ARG/ENV list size in 4K byte blocks               True"
+BBBP,886,lsattr -EL sys0,"pre430core      false              Use pre-430 style CORE dump                       True"
+BBBP,887,lsattr -EL sys0,"pre520tune      disable            Pre-520 tuning compatibility mode                 True"
+BBBP,888,lsattr -EL sys0,"realmem         6553600            Amount of usable physical memory in Kbytes        False"
+BBBP,889,lsattr -EL sys0,"rtasversion     1                  Open Firmware RTAS version                        False"
+BBBP,890,lsattr -EL sys0,"sed_config      select             Stack Execution Disable (SED) Mode                True"
+BBBP,891,lsattr -EL sys0,"systemid        IBM,02656C9CD      Hardware system identifier                        False"
+BBBP,892,lsattr -EL sys0,"variable_weight 0                  Variable processor capacity weight                False"
+BBBP,893,ipcs -a
+BBBP,894,ipcs -a,"IPC status from /dev/mem as of Fri Jan 19 11:36:46 NFT 2007"
+BBBP,895,ipcs -a,"T        ID     KEY        MODE       OWNER    GROUP  CREATOR   CGROUP CBYTES  QNUM QBYTES LSPID LRPID   STIME    RTIME    CTIME "
+BBBP,896,ipcs -a,"Message Queues:"
+BBBP,897,ipcs -a,"q         0 0x4107001c -Rrw-rw----     root   printq     root   printq         0         0   4194304      0      0 no-entry no-entry 11:20:29"
+BBBP,898,ipcs -a,"q   5242881 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 438502 475210 11:36:29 11:36:29 11:21:36"
+BBBP,899,ipcs -a,"q   2097156 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304      0      0 no-entry no-entry 11:21:36"
+BBBP,900,ipcs -a,"q   1048582 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 377026 176358 11:21:24 11:21:24 11:21:23"
+BBBP,901,ipcs -a,"q   1048583 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304      0      0 no-entry no-entry 11:21:23"
+BBBP,902,ipcs -a,"q         8 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304      0      0 no-entry no-entry 11:21:23"
+BBBP,903,ipcs -a,"q         9 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 466960 368826 10:17:19 10:17:19 11:21:23"
+BBBP,904,ipcs -a,"q        10 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 299042  98354 14:26:27 14:26:27 11:21:23"
+BBBP,905,ipcs -a,"q        11 0x761b0f71 --rw-rw--w-  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 491602 377026 13:21:27 13:21:27 11:21:23"
+BBBP,906,ipcs -a,"q        12 0x761b0f72 -Rrw-rw--w-  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 286898 381120 11:36:28 11:36:28 11:21:23"
+BBBP,907,ipcs -a,"q        13 0x761b0f77 --rw-rw-r--  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 381120 286898 11:36:28 11:36:28 11:21:23"
+BBBP,908,ipcs -a,"q        14 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304      0      0 no-entry no-entry 11:21:24"
+BBBP,909,ipcs -a,"q        15 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304      0      0 no-entry no-entry 11:21:33"
+BBBP,910,ipcs -a,"q        16 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304      0      0 no-entry no-entry 11:21:33"
+BBBP,911,ipcs -a,"q        17 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 581670 524292 11:21:28 11:21:28 11:21:33"
+BBBP,912,ipcs -a,"q        18 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 581670 520202 11:21:28 11:21:28 11:21:33"
+BBBP,913,ipcs -a,"q        19 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 581670 516098 11:21:28 11:21:28 11:21:33"
+BBBP,914,ipcs -a,"q        20 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304      0      0 no-entry no-entry 11:21:34"
+BBBP,915,ipcs -a,"q        21 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304      0      0 no-entry no-entry 11:21:35"
+BBBP,916,ipcs -a,"q        22 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 643152 291000 11:21:28 11:21:28 11:21:36"
+BBBP,917,ipcs -a,"q        23 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 643152 196816 11:11:28 11:11:28 11:21:36"
+BBBP,918,ipcs -a,"q        24 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304      0      0 no-entry no-entry 11:21:37"
+BBBP,919,ipcs -a,"q        25 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304      0      0 no-entry no-entry 11:21:38"
+BBBP,920,ipcs -a,"q        26 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304      0      0 no-entry no-entry 11:21:38"
+BBBP,921,ipcs -a,"q        27 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 610370 442600 11:21:28 11:21:28 11:21:38"
+BBBP,922,ipcs -a,"q        28 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 610370 454894 11:11:29 11:11:29 11:21:38"
+BBBP,923,ipcs -a,"q        29 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 610370 450794 11:11:29 11:11:29 11:21:38"
+BBBP,924,ipcs -a,"q        30 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304      0      0 no-entry no-entry 11:21:38"
+BBBP,925,ipcs -a,"q        31 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304      0      0 no-entry no-entry 11:21:39"
+BBBP,926,ipcs -a,"q        32 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304      0      0 no-entry no-entry 11:21:39"
+BBBP,927,ipcs -a,"q        33 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 716848 598052 11:21:28 11:21:28 11:21:39"
+BBBP,928,ipcs -a,"q        34 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 716848 577572 11:21:28 11:21:28 11:21:39"
+BBBP,929,ipcs -a,"q        35 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304 716848 573474 11:21:28 11:21:28 11:21:39"
+BBBP,930,ipcs -a,"q        36 0xffffffff -Rrw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01         0         0   4194304      0      0 no-entry no-entry 11:21:40"
+BBBP,931,ipcs -a,"T        ID     KEY        MODE       OWNER    GROUP  CREATOR   CGROUP NATTCH     SEGSZ  CPID  LPID   ATIME    DTIME    CTIME "
+BBBP,932,ipcs -a,"Shared Memory:"
+BBBP,933,ipcs -a,"m   1048576 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01      2 245284864 229544 643152 11:21:28 11:21:28 11:21:24"
+BBBP,934,ipcs -a,"m   1048577 0x761b0f61 --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01     63  22708224 176358 487672 11:36:32 11:36:32 11:21:23"
+BBBP,935,ipcs -a,"m   1048578 0x761b0f74 --rw-rw-rw-  iwpsu01  iwpsg01  iwpsu01  iwpsg01     67 140665792 176358 303300 11:36:44 11:36:44 11:21:22"
+BBBP,936,ipcs -a,"m         3 0x761b1068 --rw-rw----  iwpsu01  iwpsg01  iwpsu01  iwpsg01      1  75497472 286898 286898 11:21:26 no-entry 11:21:26"
+BBBP,937,ipcs -a,"m  10485764 0xffffffff --rw-rw----     root   system     root   system      1      4096 471078 471078 11:36:39 11:36:39 11:27:02"
+BBBP,938,ipcs -a,"m         5 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01      9 268435456 491602 643152 11:36:28 11:36:28 11:21:33"
+BBBP,939,ipcs -a,"m         6 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01     11 805306368 98354 643152 11:36:28 11:36:28 11:21:35"
+BBBP,940,ipcs -a,"m         7 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01     10 268435456 438502 643152 11:36:28 11:36:28 11:21:38"
+BBBP,941,ipcs -a,"m         8 0xffffffff --rw-------  iwpsu01  iwpsg01  iwpsu01  iwpsg01     12 268435456 581670 581670 11:36:28 11:36:28 11:21:39"
+BBBP,942,ipcs -a,"T        ID     KEY        MODE       OWNER    GROUP  CREATOR   CGROUP NSEMS   OTIME    CTIME "
+BBBP,943,ipcs -a,"Semaphores:"
+BBBP,944,ipcs -a,"s   3145728 0x761b0f74 --ra-ra-ra-  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:36:44 11:21:22"
+BBBP,945,ipcs -a,"s         1 0x620001b2 --ra-r--r--     root   system     root   system     1 11:19:55 11:19:55"
+BBBP,946,ipcs -a,"s         2 0xffffffff --ra-ra----  iwpsu01  iwpsg01     root  iwpsg01     1 11:21:23 11:21:23"
+BBBP,947,ipcs -a,"s         3 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:23"
+BBBP,948,ipcs -a,"s         4 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:23"
+BBBP,949,ipcs -a,"s         5 0x761b0f73 --ra-ra-ra-  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:36:28 11:21:23"
+BBBP,950,ipcs -a,"s         6 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:23"
+BBBP,951,ipcs -a,"s         7 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:23"
+BBBP,952,ipcs -a,"s         8 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:24"
+BBBP,953,ipcs -a,"s         9 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:24"
+BBBP,954,ipcs -a,"s        10 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:21:24 11:21:24"
+BBBP,955,ipcs -a,"s        11 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:24"
+BBBP,956,ipcs -a,"s   1048588 0x761b1069 --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:21:26 11:21:26"
+BBBP,957,ipcs -a,"s        13 0xffffffff --ra-ra-ra-  iwpsu01  iwpsg01  iwpsu01  iwpsg01     3 no-entry 11:21:24"
+BBBP,958,ipcs -a,"s   5242894 0x010000fc --ra-------     root  iwpsg01     root  iwpsg01     1 11:24:41 11:24:41"
+BBBP,959,ipcs -a,"s        15 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:36:28 11:21:33"
+BBBP,960,ipcs -a,"s        16 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 13:21:29 11:21:33"
+BBBP,961,ipcs -a,"s        17 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:11:28 11:21:33"
+BBBP,962,ipcs -a,"s        18 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:33"
+BBBP,963,ipcs -a,"s        19 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:33"
+BBBP,964,ipcs -a,"s        20 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:33"
+BBBP,965,ipcs -a,"s        21 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:33"
+BBBP,966,ipcs -a,"s        22 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:33"
+BBBP,967,ipcs -a,"s        23 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:33"
+BBBP,968,ipcs -a,"s        24 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:34"
+BBBP,969,ipcs -a,"s        25 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:57:20 11:21:35"
+BBBP,970,ipcs -a,"s        26 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 13:21:29 11:21:35"
+BBBP,971,ipcs -a,"s        27 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:11:29 11:21:35"
+BBBP,972,ipcs -a,"s        28 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:35"
+BBBP,973,ipcs -a,"s        29 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:35"
+BBBP,974,ipcs -a,"s        30 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:36"
+BBBP,975,ipcs -a,"s        31 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:36"
+BBBP,976,ipcs -a,"s        32 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:36"
+BBBP,977,ipcs -a,"s        33 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:36"
+BBBP,978,ipcs -a,"s        34 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:37"
+BBBP,979,ipcs -a,"s        35 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 12:56:24 11:21:38"
+BBBP,980,ipcs -a,"s        36 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 13:21:30 11:21:38"
+BBBP,981,ipcs -a,"s        37 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:11:29 11:21:38"
+BBBP,982,ipcs -a,"s        38 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:38"
+BBBP,983,ipcs -a,"s        39 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:38"
+BBBP,984,ipcs -a,"s        40 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:38"
+BBBP,985,ipcs -a,"s        41 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:38"
+BBBP,986,ipcs -a,"s        42 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:38"
+BBBP,987,ipcs -a,"s        43 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:38"
+BBBP,988,ipcs -a,"s        44 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:38"
+BBBP,989,ipcs -a,"s        45 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:36:28 11:21:39"
+BBBP,990,ipcs -a,"s        46 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:24:43 11:21:39"
+BBBP,991,ipcs -a,"s        47 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:36:40 11:21:39"
+BBBP,992,ipcs -a,"s        48 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:39"
+BBBP,993,ipcs -a,"s        49 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:39"
+BBBP,994,ipcs -a,"s        50 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:39"
+BBBP,995,ipcs -a,"s        51 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:39"
+BBBP,996,ipcs -a,"s        52 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:39"
+BBBP,997,ipcs -a,"s        53 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1  7:43:57 11:21:39"
+BBBP,998,ipcs -a,"s        54 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 no-entry 11:21:40"
+BBBP,999,ipcs -a,"s   1048631 0xffffffff --ra-------  wpshttp  wpshttp     root   system     1 no-entry 11:21:43"
+BBBP,1000,ipcs -a,"s        56 0xffffffff --ra-------  wpshttp  wpshttp     root   system     1 no-entry 11:21:44"
+BBBP,1001,ipcs -a,"s        57 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 12:56:22 11:24:44"
+BBBP,1002,ipcs -a,"s        58 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:57:17 11:24:52"
+BBBP,1003,ipcs -a,"s 222298172 0xffffffff --ra-ra-ra-  iwpsu01  iwpsg01  iwpsu01  iwpsg01     3 13:21:27 13:21:27"
+BBBP,1004,ipcs -a,"s        61 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:36:28 11:26:27"
+BBBP,1005,ipcs -a,"s        62 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:36:27 11:26:27"
+BBBP,1006,ipcs -a,"s        63 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 16:53:52 11:27:27"
+BBBP,1007,ipcs -a,"s        64 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:36:40 11:27:27"
+BBBP,1008,ipcs -a,"s        65 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 17:21:27 12:36:27"
+BBBP,1009,ipcs -a,"s        66 0xffffffff --ra-ra-ra-  iwpsu01  iwpsg01  iwpsu01  iwpsg01     3 11:21:28 13:21:27"
+BBBP,1010,ipcs -a,"s        68 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:27:27 23:26:28"
+BBBP,1011,ipcs -a,"s        69 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 10:57:27 14:03:27"
+BBBP,1012,ipcs -a,"s        70 0xffffffff --ra-ra----  iwpsu01  iwpsg01  iwpsu01  iwpsg01     1 11:36:28 14:26:27"
+BBBP,1013,lsconf
+BBBP,1014,lsconf,"System Model: IBM,9117-570"
+BBBP,1015,lsconf,"Machine Serial Number: 656C9CD"
+BBBP,1016,lsconf,"Processor Type: PowerPC_POWER5"
+BBBP,1017,lsconf,"Number Of Processors: 1"
+BBBP,1018,lsconf,"Processor Clock Speed: 1900 MHz"
+BBBP,1019,lsconf,"CPU Type: 64-bit"
+BBBP,1020,lsconf,"Kernel Type: 64-bit"
+BBBP,1021,lsconf,"LPAR Info: 10 olcru141"
+BBBP,1022,lsconf,"Memory Size: 6400 MB"
+BBBP,1023,lsconf,"Good Memory Size: 6400 MB"
+BBBP,1024,lsconf,"Platform Firmware level: Not Available"
+BBBP,1025,lsconf,"Firmware Version: IBM,SF240_219"
+BBBP,1026,lsconf,"Console Login: enable"
+BBBP,1027,lsconf,"Auto Restart: true"
+BBBP,1028,lsconf,"Full Core: true"
+BBBP,1029,lsconf," "
+BBBP,1030,lsconf,"Network Information"
+BBBP,1031,lsconf,"	Host Name: olcru141"
+BBBP,1032,lsconf,"	IP Address: 10.73.117.141"
+BBBP,1033,lsconf,"	Sub Netmask: 255.255.255.0"
+BBBP,1034,lsconf,"	Gateway: 10.73.117.254"
+BBBP,1035,lsconf,"	Name Server: 127.0.0.1"
+BBBP,1036,lsconf,"	Domain Name: olo.belastingdienst.nl"
+BBBP,1037,lsconf," "
+BBBP,1038,lsconf,"Paging Space Information"
+BBBP,1039,lsconf,"	Total Paging Space: 512MB"
+BBBP,1040,lsconf,"	Percent Used: 64%"
+BBBP,1041,lsconf," "
+BBBP,1042,lsconf,"Volume Groups Information"
+BBBP,1043,lsconf,"e============================================================================= "
+BBBP,1044,lsconf,"rootvg:"
+BBBP,1045,lsconf,"PV_NAME           PV STATE          TOTAL PPs   FREE PPs    FREE DISTRIBUTION"
+BBBP,1046,lsconf,"hdisk0            active            639         16          00..00..00..00..16"
+BBBP,1047,lsconf,"hdisk1            active            639         80          74..00..00..00..06"
+BBBP,1048,lsconf,"e============================================================================= "
+BBBP,1049,lsconf," "
+BBBP,1050,lsconf,"prjvg:"
+BBBP,1051,lsconf,"PV_NAME           PV STATE          TOTAL PPs   FREE PPs    FREE DISTRIBUTION"
+BBBP,1052,lsconf,"hdisk2            active            639         0           00..00..00..00..00"
+BBBP,1053,lsconf,"e============================================================================= "
+BBBP,1054,lsconf," "
+BBBP,1055,lsconf,"INSTALLED RESOURCE LIST"
+BBBP,1056,lsconf,""
+BBBP,1057,lsconf,"The following resources are installed on the machine."
+BBBP,1058,lsconf,"p/- = Added or deleted from Resource List."
+BBBP,1059,lsconf,"m   = Diagnostic support not available."
+BBBP,1060,lsconf,"	"
+BBBP,1061,lsconf,"  Model Architecture: chrp"
+BBBP,1062,lsconf,"  Model Implementation: Multiple Processor, PCI bus"
+BBBP,1063,lsconf,"	"
+BBBP,1064,lsconf,"p sys0                                                        System Object"
+BBBP,1065,lsconf,"p sysplanar0                                                  System Planar"
+BBBP,1066,lsconf,"m vio0                                                        Virtual I/O Bus"
+BBBP,1067,lsconf,"m ent1             U9117.570.656C9CD-V10-C4-T1                Virtual I/O Ethernet Adapter (l-lan)"
+BBBP,1068,lsconf,"m ent0             U9117.570.656C9CD-V10-C3-T1                Virtual I/O Ethernet Adapter (l-lan)"
+BBBP,1069,lsconf,"m vscsi0           U9117.570.656C9CD-V10-C2-T1                Virtual SCSI Client Adapter"
+BBBP,1070,lsconf,"m hdisk2           U9117.570.656C9CD-V10-C2-T1-L830000000000  Virtual SCSI Disk Drive"
+BBBP,1071,lsconf,"m hdisk1           U9117.570.656C9CD-V10-C2-T1-L820000000000  Virtual SCSI Disk Drive"
+BBBP,1072,lsconf,"m hdisk0           U9117.570.656C9CD-V10-C2-T1-L810000000000  Virtual SCSI Disk Drive"
+BBBP,1073,lsconf,"m vsa0             U9117.570.656C9CD-V10-C0                   LPAR Virtual Serial Adapter"
+BBBP,1074,lsconf,"m vty0             U9117.570.656C9CD-V10-C0-L0                Asynchronous Terminal"
+BBBP,1075,lsconf,"p L2cache0                                                    L2 Cache"
+BBBP,1076,lsconf,"p mem0                                                        Memory"
+BBBP,1077,lsconf,"p proc0                                                       Processor"
+BBBP,1078,lsps -a
+BBBP,1079,lsps -a,"Page Space      Physical Volume   Volume Group    Size %Used Active  Auto  Type"
+BBBP,1080,lsps -a,"hd6             hdisk0            rootvg         512MB    64   yes   yes    lv"
+BBBP,1081,vmstat -v
+BBBP,1082,vmstat -v,"              1638400 memory pages"
+BBBP,1083,vmstat -v,"              1568391 lruable pages"
+BBBP,1084,vmstat -v,"                12243 free pages"
+BBBP,1085,vmstat -v,"                    5 memory pools"
+BBBP,1086,vmstat -v,"               175151 pinned pages"
+BBBP,1087,vmstat -v,"                 80.0 maxpin percentage"
+BBBP,1088,vmstat -v,"                 20.0 minperm percentage"
+BBBP,1089,vmstat -v,"                 80.0 maxperm percentage"
+BBBP,1090,vmstat -v,"                 57.9 numperm percentage"
+BBBP,1091,vmstat -v,"               909018 file pages"
+BBBP,1092,vmstat -v,"                  0.0 compressed percentage"
+BBBP,1093,vmstat -v,"                    0 compressed pages"
+BBBP,1094,vmstat -v,"                 58.1 numclient percentage"
+BBBP,1095,vmstat -v,"                 80.0 maxclient percentage"
+BBBP,1096,vmstat -v,"               911865 client pages"
+BBBP,1097,vmstat -v,"                    0 remote pageouts scheduled"
+BBBP,1098,vmstat -v,"                    0 pending disk I/Os blocked with no pbuf"
+BBBP,1099,vmstat -v,"                23459 paging space I/Os blocked with no psbuf"
+BBBP,1100,vmstat -v,"                 2740 filesystem I/Os blocked with no fsbuf"
+BBBP,1101,vmstat -v,"                    0 client filesystem I/Os blocked with no fsbuf"
+BBBP,1102,vmstat -v,"                    0 external pager filesystem I/Os blocked with no fsbuf"
+BBBP,1103,vmstat -s
+BBBP,1104,vmstat -s,"             57167933 total address trans. faults"
+BBBP,1105,vmstat -s,"              1087152 page ins"
+BBBP,1106,vmstat -s,"               827860 page outs"
+BBBP,1107,vmstat -s,"                14023 paging space page ins"
+BBBP,1108,vmstat -s,"                89642 paging space page outs"
+BBBP,1109,vmstat -s,"                    0 total reclaims"
+BBBP,1110,vmstat -s,"             19232284 zero filled pages faults"
+BBBP,1111,vmstat -s,"                 5349 executable filled pages faults"
+BBBP,1112,vmstat -s,"              3461322 pages examined by clock"
+BBBP,1113,vmstat -s,"                    6 revolutions of the clock hand"
+BBBP,1114,vmstat -s,"               619332 pages freed by the clock"
+BBBP,1115,vmstat -s,"               431012 backtracks"
+BBBP,1116,vmstat -s,"                    0 free frame waits"
+BBBP,1117,vmstat -s,"                    0 extend XPT waits"
+BBBP,1118,vmstat -s,"               140141 pending I/O waits"
+BBBP,1119,vmstat -s,"              1914845 start I/Os"
+BBBP,1120,vmstat -s,"               493655 iodones"
+BBBP,1121,vmstat -s,"            401206010 cpu context switches"
+BBBP,1122,vmstat -s,"             54096608 device interrupts"
+BBBP,1123,vmstat -s,"             21878845 software interrupts"
+BBBP,1124,vmstat -s,"            104712269 decrementer interrupts"
+BBBP,1125,vmstat -s,"                23687 mpc-sent interrupts"
+BBBP,1126,vmstat -s,"                23687 mpc-receive interrupts"
+BBBP,1127,vmstat -s,"               827312 phantom interrupts"
+BBBP,1128,vmstat -s,"                    0 traps"
+BBBP,1129,vmstat -s,"           1008019707 syscalls"
+BBBP,1130,vmstat -i
+BBBP,1131,vmstat -i,"priority level    type   count module(handler)"
+BBBP,1132,vmstat -i,"    0       2   hardware 23687 i_mpc_int_handler(147e578)"
+BBBP,1133,vmstat -i,"    0  589825   hardware     0 /usr/lib/drivers/planar_pal_chrp(3c9d6e8)"
+BBBP,1134,vmstat -i,"    0  655362   hardware 1084399 /usr/lib/drivers/vscsi_initdd(3cc0718)"
+BBBP,1135,vmstat -i,"    1  655360   hardware     4 /usr/lib/drivers/vconsdd(3d648f8)"
+BBBP,1136,vmstat -i,"    3  655363   hardware 49589919 /usr/lib/drivers/vioentdd(3deb0d8)"
+BBBP,1137,vmstat -i,"    3  655364   hardware 4506687 /usr/lib/drivers/vioentdd(3deb0d8)"
+BBBP,1138,nfsstat -m
+BBBP,1139,nfsstat -n
+BBBP,1140,nfsstat -n,""
+BBBP,1141,nfsstat -n,"Server nfs:"
+BBBP,1142,nfsstat -n,"calls      badcalls   public_v2  public_v3  "
+BBBP,1143,nfsstat -n,"0          0          0          0          "
+BBBP,1144,nfsstat -n,"Version 2: (0 calls)"
+BBBP,1145,nfsstat -n,"null       getattr    setattr    root       lookup     readlink   read       "
+BBBP,1146,nfsstat -n,"0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       "
+BBBP,1147,nfsstat -n,"wrcache    write      create     remove     rename     link       symlink    "
+BBBP,1148,nfsstat -n,"0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       "
+BBBP,1149,nfsstat -n,"mkdir      rmdir      readdir    statfs     "
+BBBP,1150,nfsstat -n,"0 0%       0 0%       0 0%       0 0%       "
+BBBP,1151,nfsstat -n,"Version 3: (0 calls)"
+BBBP,1152,nfsstat -n,"null       getattr    setattr    lookup     access     readlink   read       "
+BBBP,1153,nfsstat -n,"0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       "
+BBBP,1154,nfsstat -n,"write      create     mkdir      symlink    mknod      remove     rmdir      "
+BBBP,1155,nfsstat -n,"0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       "
+BBBP,1156,nfsstat -n,"rename     link       readdir    readdir+   fsstat     fsinfo     pathconf   "
+BBBP,1157,nfsstat -n,"0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       "
+BBBP,1158,nfsstat -n,"commit     "
+BBBP,1159,nfsstat -n,"0 0%       "
+BBBP,1160,nfsstat -n,""
+BBBP,1161,nfsstat -n,"Client nfs:"
+BBBP,1162,nfsstat -n,"calls      badcalls   clgets     cltoomany  "
+BBBP,1163,nfsstat -n,"0          0          0          0          "
+BBBP,1164,nfsstat -n,"Version 2: (0 calls)"
+BBBP,1165,nfsstat -n,"null       getattr    setattr    root       lookup     readlink   read       "
+BBBP,1166,nfsstat -n,"0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       "
+BBBP,1167,nfsstat -n,"wrcache    write      create     remove     rename     link       symlink    "
+BBBP,1168,nfsstat -n,"0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       "
+BBBP,1169,nfsstat -n,"mkdir      rmdir      readdir    statfs     "
+BBBP,1170,nfsstat -n,"0 0%       0 0%       0 0%       0 0%       "
+BBBP,1171,nfsstat -n,"Version 3: (0 calls)"
+BBBP,1172,nfsstat -n,"null       getattr    setattr    lookup     access     readlink   read       "
+BBBP,1173,nfsstat -n,"0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       "
+BBBP,1174,nfsstat -n,"write      create     mkdir      symlink    mknod      remove     rmdir      "
+BBBP,1175,nfsstat -n,"0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       "
+BBBP,1176,nfsstat -n,"rename     link       readdir    readdir+   fsstat     fsinfo     pathconf   "
+BBBP,1177,nfsstat -n,"0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       0 0%       "
+BBBP,1178,nfsstat -n,"commit     "
+BBBP,1179,nfsstat -n,"0 0%       "
+BBBP,1180,wlmcntrl -q
+BBBP,1181,wlmcntrl -q,"1495-054 WLM is stopped"
+BBBP,1182,WLMclasses
+BBBP,1183,WLMclasses,"m IBM_PROLOG_BEGIN_TAG "
+BBBP,1184,WLMclasses,"m This is an automatically generated prolog. "
+BBBP,1185,WLMclasses,"m  "
+BBBP,1186,WLMclasses,"m bos530 src/bos/etc/wlm/classes 1.1 "
+BBBP,1187,WLMclasses,"m  "
+BBBP,1188,WLMclasses,"m Licensed Materials - Property of IBM "
+BBBP,1189,WLMclasses,"m  "
+BBBP,1190,WLMclasses,"m (C) COPYRIGHT International Business Machines Corp. 1999 "
+BBBP,1191,WLMclasses,"m All Rights Reserved "
+BBBP,1192,WLMclasses,"m  "
+BBBP,1193,WLMclasses,"m US Government Users Restricted Rights - Use, duplication or "
+BBBP,1194,WLMclasses,"m disclosure restricted by GSA ADP Schedule Contract with IBM Corp. "
+BBBP,1195,WLMclasses,"m  "
+BBBP,1196,WLMclasses,"m IBM_PROLOG_END_TAG "
+BBBP,1197,WLMclasses,"System:"
+BBBP,1198,WLMclasses,""
+BBBP,1199,WLMclasses,"Default:"
+BBBP,1200,WLMrules
+BBBP,1201,WLMrules,"m IBM_PROLOG_BEGIN_TAG "
+BBBP,1202,WLMrules,"m This is an automatically generated prolog. "
+BBBP,1203,WLMrules,"m  "
+BBBP,1204,WLMrules,"m bos530 src/bos/etc/wlm/rules 1.2 "
+BBBP,1205,WLMrules,"m  "
+BBBP,1206,WLMrules,"m Licensed Materials - Property of IBM "
+BBBP,1207,WLMrules,"m  "
+BBBP,1208,WLMrules,"m (C) COPYRIGHT International Business Machines Corp. 1999,2002 "
+BBBP,1209,WLMrules,"m All Rights Reserved "
+BBBP,1210,WLMrules,"m  "
+BBBP,1211,WLMrules,"m US Government Users Restricted Rights - Use, duplication or "
+BBBP,1212,WLMrules,"m disclosure restricted by GSA ADP Schedule Contract with IBM Corp. "
+BBBP,1213,WLMrules,"m  "
+BBBP,1214,WLMrules,"m IBM_PROLOG_END_TAG "
+BBBP,1215,WLMrules,"m class resvd user group application type tag"
+BBBP,1216,WLMrules,"System   -    root   -    -           -   -"
+BBBP,1217,WLMrules,"Default  -    -      -    -           -   -"
+BBBP,1218,WLMlimits
+BBBP,1219,WLMlimits,"m IBM_PROLOG_BEGIN_TAG "
+BBBP,1220,WLMlimits,"m This is an automatically generated prolog. "
+BBBP,1221,WLMlimits,"m  "
+BBBP,1222,WLMlimits,"m bos530 src/bos/etc/wlm/limits 1.2 "
+BBBP,1223,WLMlimits,"m  "
+BBBP,1224,WLMlimits,"m Licensed Materials - Property of IBM "
+BBBP,1225,WLMlimits,"m  "
+BBBP,1226,WLMlimits,"m (C) COPYRIGHT International Business Machines Corp. 1999,2000 "
+BBBP,1227,WLMlimits,"m All Rights Reserved "
+BBBP,1228,WLMlimits,"m  "
+BBBP,1229,WLMlimits,"m US Government Users Restricted Rights - Use, duplication or "
+BBBP,1230,WLMlimits,"m disclosure restricted by GSA ADP Schedule Contract with IBM Corp. "
+BBBP,1231,WLMlimits,"m  "
+BBBP,1232,WLMlimits,"m IBM_PROLOG_END_TAG "
+BBBP,1233,WLMlimits,"System:"
+BBBP,1234,WLMlimits,"	memory = 1%-100%;100%"
+BBBP,1235,WLMshares
+BBBP,1236,WLMshares,"m IBM_PROLOG_BEGIN_TAG "
+BBBP,1237,WLMshares,"m This is an automatically generated prolog. "
+BBBP,1238,WLMshares,"m  "
+BBBP,1239,WLMshares,"m bos530 src/bos/etc/wlm/shares 1.1 "
+BBBP,1240,WLMshares,"m  "
+BBBP,1241,WLMshares,"m Licensed Materials - Property of IBM "
+BBBP,1242,WLMshares,"m  "
+BBBP,1243,WLMshares,"m (C) COPYRIGHT International Business Machines Corp. 1999 "
+BBBP,1244,WLMshares,"m All Rights Reserved "
+BBBP,1245,WLMshares,"m  "
+BBBP,1246,WLMshares,"m US Government Users Restricted Rights - Use, duplication or "
+BBBP,1247,WLMshares,"m disclosure restricted by GSA ADP Schedule Contract with IBM Corp. "
+BBBP,1248,WLMshares,"m  "
+BBBP,1249,WLMshares,"m IBM_PROLOG_END_TAG "
+BBBP,1250,mount
+BBBP,1251,mount,"  node       mounted        mounted over    vfs       date        options      "
+BBBP,1252,mount,"n------- ---------------  ---------------  ------ ------------ --------------- "
+BBBP,1253,mount,"         /dev/hd4         /                jfs2   Jan 15 11:18 rw,log=/dev/hd8 "
+BBBP,1254,mount,"         /dev/hd2         /usr             jfs2   Jan 15 11:18 rw,log=/dev/hd8 "
+BBBP,1255,mount,"         /dev/hd9var      /var             jfs2   Jan 15 11:18 rw,log=/dev/hd8 "
+BBBP,1256,mount,"         /dev/hd3         /tmp             jfs2   Jan 15 11:18 rw,log=/dev/hd8 "
+BBBP,1257,mount,"         /dev/hd1         /home            jfs2   Jan 15 11:19 rw,log=/dev/hd8 "
+BBBP,1258,mount,"         /proc            /proc            procfs Jan 15 11:19 rw              "
+BBBP,1259,mount,"         /dev/hd10opt     /opt             jfs2   Jan 15 11:19 rw,log=/dev/hd8 "
+BBBP,1260,mount,"         /dev/lvvarlog    /var/log         jfs2   Jan 15 11:19 rw,log=/dev/hd8 "
+BBBP,1261,mount,"         /dev/prjlv       /prj             jfs2   Jan 15 11:19 rw,log=/dev/prjloglv"
+BBBP,1262,lsattr -El aio0
+BBBP,1263,lsattr -El aio0,"autoconfig available STATE to be configured at system restart True"
+BBBP,1264,lsattr -El aio0,"fastpath   enable    State of fast path                       True"
+BBBP,1265,lsattr -El aio0,"kprocprio  39        Server PRIORITY                          True"
+BBBP,1266,lsattr -El aio0,"maxreqs    8192      Maximum number of REQUESTS               True"
+BBBP,1267,lsattr -El aio0,"maxservers 40        MAXIMUM number of servers per cpu        True"
+BBBP,1268,lsattr -El aio0,"minservers 10        MINIMUM number of servers                True"
+BBBP,1269,oslevel
+BBBP,1270,oslevel,"5300-04"
+BBBP,1271,oslevel,"5300-03"
+BBBP,1272,oslevel,"5300-02"
+BBBP,1273,oslevel,"5300-01"
+BBBP,1274,oslevel,"5300-00"
+BBBP,1275,ps v
+BBBP,1276,ps v,"    PID    TTY STAT  TIME PGIN  SIZE   RSS   LIM  TSIZ   TRS %CPU %MEM COMMAND"
+BBBP,1277,ps v," 626918        Z     0:00                                              <defunct>"
+BBBP,1278,ps v," 635094  pts/0 A     0:00    0   556   788    xx   191   232  0.0  0.0 -ksh "
+BBBP,1279,ps v," 655522        Z     0:00                                              <defunct>"
+ZZZZ,T0001,11:36:52,19-JAN-2007
+CPU01,T0001,8.0,17.1,5.5,69.5
+CPU02,T0001,2.7,9.4,1.9,86.0
+CPU_ALL,T0001,0.0,0.0,0.0,100.0,,0.00
+BBBL,01,lparno,10
+BBBL,02,lparname,"olcru141"
+BBBL,03,CPU in sys,8
+BBBL,04,Virtual CPU,1
+BBBL,05,Logical CPU,2
+BBBL,06,Pool CPU,7
+BBBL,07,smt threads,2
+BBBL,08,capped,1
+BBBL,09,min Virtual,1
+BBBL,10,max Virtual,2
+BBBL,11,min Logical,1
+BBBL,12,max Logical,4
+BBBL,13,min Capacity,  0.2
+BBBL,14,max Capacity,  1.0
+BBBL,15,Entitled Capacity,  0.5
+BBBL,16,Weight,0
+BBBL,17,min Memory,4352
+BBBL,18,max Memory,8448
+BBBL,19,online Memory,6400
+BBBL,20,Flags, LPARed DRable SMT-bound Shared Capped  
+LPAR,Logical Partition olcru141,PhysicalCPU,virtualCPUs,logicalCPUs,poolCPUs,entitled,weight,PoolIdle,usedAllCPU%,usedPoolCPU%,SharedCPU,Capped,EC_User%,EC_Sys%,EC_Wait%,EC_Idle%,VP_User%,VP_Sys%,VP_Wait%,VP_Idle%
+LPAR,T0001,0.000,1,2,7,0.50,0,0.00,0.00,0.00,1,1,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00
+MEM,T0001,0.8,36.7,48.3,187.8,6400.0,512.0
+MEMNEW,T0001,33.3,55.5,10.5,0.8,10.7,38.3
+MEMUSE,T0001,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0001,6348.7,17.4,0.0,0.2,0.0,0.0,0.0,0.0
+PROC,T0001,3.14,0.00,1372,20102,3396,59,31,40,18,0
+FILE,T0001,0,1857,0,13826726,62968,0,0,0
+NET,T0001,0.5,0.3,0.1,0.2,0.0,0.1,
+NETPACKET,T0001,6.8,5.3,1.7,1.6,0.0,1.7,
+NETERROR,T0001,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0001,1432.9,98.1,46.3
+JFSFILE,T0001,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0001,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0001,13.0,1.0,6.6
+DISKREAD,T0001,1046.7,381.4,4.8
+DISKWRITE,T0001,48.8,0.5,48.8
+DISKXFER,T0001,28.3,4.5,13.3
+DISKBSIZE,T0001,38.8,85.4,4.0
+ZZZZ,T0002,11:37:02,19-JAN-2007
+CPU01,T0002,0.6,1.6,0.1,97.7
+CPU02,T0002,0.2,0.3,0.0,99.5
+CPU_ALL,T0002,2.0,2.2,0.0,95.8,,0.02
+LPAR,T0002,0.029,1,2,7,0.50,0,0.00,0.36,0.42,1,1,2.04,2.15,0.00,1.64,1.02,1.08,0.00,0.82
+MEM,T0002,0.7,36.7,46.6,187.8,6400.0,512.0
+MEMNEW,T0002,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0002,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0002,206.4,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0002,5.21,0.00,1012,2269,56,3,0,1,20,0
+FILE,T0002,0,256,0,126779,1887,0,0,0
+NET,T0002,0.7,0.6,0.0,0.1,0.0,0.0,
+NETPACKET,T0002,10.8,9.4,0.6,1.4,0.0,0.6,
+NETERROR,T0002,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0002,0.0,1.7,0.4
+JFSFILE,T0002,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0002,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0002,0.0,0.0,0.2
+DISKREAD,T0002,0.0,0.0,0.0
+DISKWRITE,T0002,0.9,0.0,0.9
+DISKXFER,T0002,0.2,0.0,0.2
+DISKBSIZE,T0002,4.0,0.0,4.0
+TOP,0557246,T0002,1.04,0.67,0.37,77,1280124,48,1271584,19,77.614,0,java,Unclassified
+TOP,0176362,T0002,0.15,0.07,0.08,1,2564,204,2420,169,0.160,45,nmon_aix53,Unclassified
+ZZZZ,T0003,11:37:12,19-JAN-2007
+CPU01,T0003,1.0,0.2,0.0,98.8
+CPU02,T0003,0.0,0.0,0.0,100.0
+CPU_ALL,T0003,2.0,1.8,0.0,96.2,,0.02
+LPAR,T0003,0.026,1,2,7,0.50,0,0.00,0.33,0.37,1,1,2.00,1.78,0.00,1.43,1.00,0.89,0.00,0.72
+MEM,T0003,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0003,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0003,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0003,93.0,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0003,6.90,0.00,1128,2186,40,1,0,0,18,0
+FILE,T0003,0,183,0,91871,114,0,0,0
+NET,T0003,0.6,0.4,0.3,0.1,0.0,0.3,
+NETPACKET,T0003,7.9,7.0,2.5,1.0,0.0,2.5,
+NETERROR,T0003,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0003,0.0,1.6,0.4
+JFSFILE,T0003,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0003,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0003,0.0,0.0,0.0
+DISKREAD,T0003,0.0,0.0,0.0
+DISKWRITE,T0003,0.8,0.0,0.8
+DISKXFER,T0003,0.2,0.0,0.2
+DISKBSIZE,T0003,4.0,0.0,4.0
+TOP,0557246,T0003,1.12,0.73,0.40,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0004,11:37:22,19-JAN-2007
+CPU01,T0004,1.4,0.4,0.1,98.1
+CPU02,T0004,0.0,1.1,0.0,98.9
+CPU_ALL,T0004,1.9,1.8,0.0,96.3,,0.02
+LPAR,T0004,0.026,1,2,7,0.50,0,0.00,0.32,0.37,1,1,1.89,1.81,0.00,1.47,0.95,0.90,0.00,0.74
+MEM,T0004,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0004,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0004,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0004,90.4,0.0,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0004,6.40,0.00,1097,2134,37,1,0,0,19,0
+FILE,T0004,0,186,0,81868,514,0,0,0
+NET,T0004,0.4,0.3,0.2,0.0,0.0,0.2,
+NETPACKET,T0004,5.9,5.6,2.1,0.4,0.0,2.1,
+NETERROR,T0004,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0004,0.0,2.0,0.5
+JFSFILE,T0004,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0004,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0004,0.1,0.0,0.2
+DISKREAD,T0004,0.0,0.0,0.0
+DISKWRITE,T0004,0.8,0.4,0.8
+DISKXFER,T0004,0.2,0.1,0.2
+DISKBSIZE,T0004,4.0,4.0,4.0
+TOP,0557246,T0004,1.08,0.69,0.38,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0005,11:37:32,19-JAN-2007
+CPU01,T0005,3.1,2.4,0.3,94.2
+CPU02,T0005,0.0,0.0,0.0,100.0
+CPU_ALL,T0005,4.5,3.2,0.0,92.3,,0.04
+LPAR,T0005,0.049,1,2,7,0.50,0,0.00,0.62,0.70,1,1,4.50,3.15,0.00,2.20,2.25,1.58,0.00,1.10
+MEM,T0005,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0005,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0005,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0005,90.7,0.0,3.6,0.0,0.0,0.0,0.0,0.0
+PROC,T0005,5.30,0.00,1209,2302,40,1,0,0,19,0
+FILE,T0005,0,189,0,92076,105,0,0,0
+NET,T0005,0.7,0.5,36.2,0.1,0.0,36.2,
+NETPACKET,T0005,9.7,8.8,149.3,1.0,0.0,149.3,
+NETERROR,T0005,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0005,0.0,172.0,40.1
+JFSFILE,T0005,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0005,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0005,8.4,0.0,10.9
+DISKREAD,T0005,0.0,0.0,0.0
+DISKWRITE,T0005,76.4,19.2,76.4
+DISKXFER,T0005,19.1,1.9,19.1
+DISKBSIZE,T0005,4.0,10.1,4.0
+TOP,0557246,T0005,2.19,1.76,0.43,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+TOP,0155740,T0005,0.47,0.01,0.47,14,508,8,460,0,0.029,0,syncd,Unclassified
+TOP,0466960,T0005,0.30,0.23,0.07,1,5436,48,3992,204,0.247,0,db2sysc,Unclassified
+ZZZZ,T0006,11:37:42,19-JAN-2007
+CPU01,T0006,0.4,0.7,0.1,98.8
+CPU02,T0006,0.0,0.0,0.0,100.0
+CPU_ALL,T0006,1.8,1.9,0.0,96.3,,0.02
+LPAR,T0006,0.026,1,2,7,0.50,0,0.00,0.32,0.37,1,1,1.85,1.87,0.00,1.44,0.92,0.93,0.00,0.72
+MEM,T0006,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0006,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0006,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0006,90.0,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0006,5.40,0.00,1088,2110,37,1,0,0,19,0
+FILE,T0006,0,180,0,81868,122,0,0,0
+NET,T0006,0.4,0.4,0.2,0.0,0.0,0.2,
+NETPACKET,T0006,7.1,6.8,1.3,0.4,0.0,1.3,
+NETERROR,T0006,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0006,0.0,1.6,0.4
+JFSFILE,T0006,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0006,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0006,0.2,0.0,0.2
+DISKREAD,T0006,0.0,0.0,0.0
+DISKWRITE,T0006,0.8,0.0,0.8
+DISKXFER,T0006,0.2,0.0,0.2
+DISKBSIZE,T0006,4.0,0.0,4.0
+TOP,0557246,T0006,1.05,0.68,0.38,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0007,11:37:52,19-JAN-2007
+CPU01,T0007,0.0,0.0,1.0,99.0
+CPU02,T0007,0.0,0.0,0.0,100.0
+CPU_ALL,T0007,2.1,1.9,0.0,96.0,,0.02
+LPAR,T0007,0.028,1,2,7,0.50,0,0.00,0.35,0.40,1,1,2.15,1.88,0.00,1.50,1.07,0.94,0.00,0.75
+MEM,T0007,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0007,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0007,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0007,90.7,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0007,6.90,0.00,1270,2368,40,1,0,0,18,0
+FILE,T0007,0,189,0,92032,105,0,0,0
+NET,T0007,0.5,0.3,0.1,0.1,0.0,0.1,
+NETPACKET,T0007,6.7,5.8,1.8,1.0,0.0,1.8,
+NETERROR,T0007,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0007,0.0,1.6,0.4
+JFSFILE,T0007,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0007,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0007,1.0,0.0,1.0
+DISKREAD,T0007,0.0,0.0,0.0
+DISKWRITE,T0007,0.8,0.0,0.8
+DISKXFER,T0007,0.2,0.0,0.2
+DISKBSIZE,T0007,4.0,0.0,4.0
+TOP,0557246,T0007,1.22,0.78,0.44,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0008,11:38:02,19-JAN-2007
+CPU01,T0008,0.3,1.5,1.1,97.1
+CPU02,T0008,0.0,1.0,0.0,99.0
+CPU_ALL,T0008,1.9,1.8,0.0,96.2,,0.02
+LPAR,T0008,0.026,1,2,7,0.50,0,0.00,0.33,0.37,1,1,1.93,1.85,0.01,1.43,0.96,0.92,0.00,0.72
+MEM,T0008,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0008,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0008,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0008,90.1,0.3,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0008,6.80,0.00,1109,2176,42,1,0,0,19,0
+FILE,T0008,0,190,0,85725,584,0,0,0
+NET,T0008,0.7,0.5,0.3,0.2,0.0,0.3,
+NETPACKET,T0008,10.2,9.0,2.3,1.5,0.0,2.3,
+NETERROR,T0008,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0008,1.2,2.0,0.6
+JFSFILE,T0008,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0008,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0008,1.2,0.0,0.1
+DISKREAD,T0008,1.2,0.0,0.0
+DISKWRITE,T0008,0.8,0.4,0.8
+DISKXFER,T0008,0.3,0.1,0.2
+DISKBSIZE,T0008,6.7,4.0,4.0
+TOP,0557246,T0008,1.14,0.73,0.41,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0009,11:38:12,19-JAN-2007
+CPU01,T0009,1.0,0.2,0.0,98.8
+CPU02,T0009,0.0,0.0,0.0,100.0
+CPU_ALL,T0009,2.0,1.8,0.0,96.3,,0.02
+LPAR,T0009,0.026,1,2,7,0.50,0,0.00,0.32,0.37,1,1,1.97,1.76,0.00,1.39,0.98,0.88,0.00,0.70
+MEM,T0009,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0009,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0009,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0009,89.7,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0009,7.00,0.00,1139,2211,40,1,0,0,19,0
+FILE,T0009,0,183,0,91871,105,0,0,0
+NET,T0009,0.7,0.5,0.3,0.1,0.0,0.3,
+NETPACKET,T0009,9.7,8.8,2.7,1.0,0.0,2.7,
+NETERROR,T0009,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0009,0.0,1.6,0.4
+JFSFILE,T0009,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0009,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0009,0.0,0.0,0.0
+DISKREAD,T0009,0.0,0.0,0.0
+DISKWRITE,T0009,0.8,0.0,0.8
+DISKXFER,T0009,0.2,0.0,0.2
+DISKBSIZE,T0009,4.0,0.0,4.0
+TOP,0557246,T0009,1.11,0.71,0.39,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0010,11:38:22,19-JAN-2007
+CPU01,T0010,1.0,0.2,0.0,98.8
+CPU02,T0010,0.0,0.0,0.0,100.0
+CPU_ALL,T0010,1.9,1.8,0.0,96.3,,0.02
+LPAR,T0010,0.026,1,2,7,0.50,0,0.00,0.32,0.37,1,1,1.91,1.79,0.00,1.41,0.96,0.89,0.00,0.71
+MEM,T0010,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0010,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0010,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0010,89.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0010,5.50,0.00,1157,2201,37,1,0,0,19,0
+FILE,T0010,0,186,0,81868,105,0,0,0
+NET,T0010,0.4,0.3,0.0,0.0,0.0,0.0,
+NETPACKET,T0010,7.3,7.0,0.6,0.4,0.0,0.6,
+NETERROR,T0010,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0010,0.0,1.6,0.4
+JFSFILE,T0010,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0010,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0010,0.0,0.0,0.0
+DISKREAD,T0010,0.0,0.0,0.0
+DISKWRITE,T0010,0.8,0.0,0.8
+DISKXFER,T0010,0.2,0.0,0.2
+DISKBSIZE,T0010,4.0,0.0,4.0
+TOP,0557246,T0010,1.12,0.71,0.41,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0011,11:38:32,19-JAN-2007
+CPU01,T0011,0.3,1.4,0.0,98.3
+CPU02,T0011,0.0,0.0,0.0,100.0
+CPU_ALL,T0011,2.1,2.7,0.0,95.2,,0.03
+LPAR,T0011,0.033,1,2,7,0.50,0,0.00,0.41,0.47,1,1,2.09,2.66,0.00,1.82,1.05,1.33,0.00,0.91
+MEM,T0011,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0011,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0011,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0011,89.5,0.0,0.6,0.0,0.0,0.0,0.0,0.0
+PROC,T0011,5.70,0.00,1155,2212,40,1,0,0,18,0
+FILE,T0011,0,189,0,91871,105,0,0,0
+NET,T0011,0.7,0.5,0.1,0.1,0.0,0.1,
+NETPACKET,T0011,9.7,8.8,1.8,1.0,0.0,1.8,
+NETERROR,T0011,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0011,0.0,24.8,6.0
+JFSFILE,T0011,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0011,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0011,2.0,0.0,2.0
+DISKREAD,T0011,0.0,0.0,0.0
+DISKWRITE,T0011,10.4,4.0,10.4
+DISKXFER,T0011,2.5,1.0,2.5
+DISKBSIZE,T0011,4.2,4.0,4.2
+TOP,0557246,T0011,1.17,0.76,0.41,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+TOP,0155740,T0011,0.41,0.00,0.41,14,508,8,460,0,0.029,0,syncd,Unclassified
+ZZZZ,T0012,11:38:42,19-JAN-2007
+CPU01,T0012,0.1,1.3,0.0,98.6
+CPU02,T0012,0.0,0.0,0.0,100.0
+CPU_ALL,T0012,2.0,1.9,0.0,96.1,,0.02
+LPAR,T0012,0.027,1,2,7,0.50,0,0.00,0.33,0.38,1,1,1.97,1.91,0.00,1.47,0.98,0.96,0.00,0.73
+MEM,T0012,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0012,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0012,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0012,89.5,0.0,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0012,5.50,0.00,1143,2188,37,1,0,0,20,0
+FILE,T0012,0,180,0,81868,522,0,0,0
+NET,T0012,0.4,0.4,0.4,0.0,0.0,0.4,
+NETPACKET,T0012,7.1,6.8,3.0,0.4,0.0,3.0,
+NETERROR,T0012,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0012,0.0,2.0,0.5
+JFSFILE,T0012,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0012,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0012,0.0,0.0,0.0
+DISKREAD,T0012,0.0,0.0,0.0
+DISKWRITE,T0012,0.8,0.4,0.8
+DISKXFER,T0012,0.2,0.1,0.2
+DISKBSIZE,T0012,4.0,4.0,4.0
+TOP,0557246,T0012,1.14,0.74,0.40,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0013,11:38:52,19-JAN-2007
+CPU01,T0013,0.4,1.2,0.0,98.4
+CPU02,T0013,0.0,0.0,0.0,100.0
+CPU_ALL,T0013,1.9,1.8,0.0,96.3,,0.02
+LPAR,T0013,0.025,1,2,7,0.50,0,0.00,0.32,0.36,1,1,1.89,1.77,0.00,1.38,0.95,0.89,0.00,0.69
+MEM,T0013,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0013,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0013,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0013,90.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0013,5.10,0.00,1063,2119,43,1,0,0,18,0
+FILE,T0013,0,190,0,93717,105,0,0,0
+NET,T0013,0.5,0.4,0.1,0.1,0.0,0.1,
+NETPACKET,T0013,6.3,5.4,1.8,1.0,0.0,1.8,
+NETERROR,T0013,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0013,0.0,2.4,0.6
+JFSFILE,T0013,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0013,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0013,0.0,0.0,0.0
+DISKREAD,T0013,0.0,0.0,0.0
+DISKWRITE,T0013,1.2,0.0,1.2
+DISKXFER,T0013,0.3,0.0,0.3
+DISKBSIZE,T0013,4.0,0.0,4.0
+TOP,0557246,T0013,1.05,0.67,0.38,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0014,11:39:02,19-JAN-2007
+CPU01,T0014,1.0,0.1,0.0,98.9
+CPU02,T0014,0.0,0.0,0.0,100.0
+CPU_ALL,T0014,1.9,1.8,0.0,96.2,,0.02
+LPAR,T0014,0.026,1,2,7,0.50,0,0.00,0.33,0.38,1,1,1.92,1.84,0.00,1.51,0.96,0.92,0.00,0.76
+MEM,T0014,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0014,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0014,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0014,89.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0014,5.20,0.00,1134,2168,37,0,0,0,19,0
+FILE,T0014,0,186,0,81868,104,0,0,0
+NET,T0014,0.7,0.6,0.0,0.0,0.0,0.0,
+NETPACKET,T0014,8.9,8.6,0.6,0.3,0.0,0.6,
+NETERROR,T0014,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0014,0.0,1.6,0.4
+JFSFILE,T0014,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0014,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0014,0.0,0.0,0.0
+DISKREAD,T0014,0.0,0.0,0.0
+DISKWRITE,T0014,0.8,0.0,0.8
+DISKXFER,T0014,0.2,0.0,0.2
+DISKBSIZE,T0014,4.0,0.0,4.0
+TOP,0557246,T0014,1.16,0.74,0.41,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0015,11:39:12,19-JAN-2007
+CPU01,T0015,0.1,1.2,0.0,98.7
+CPU02,T0015,0.0,1.0,0.0,99.0
+CPU_ALL,T0015,1.9,1.7,0.0,96.3,,0.02
+LPAR,T0015,0.025,1,2,7,0.50,0,0.00,0.32,0.36,1,1,1.94,1.75,0.00,1.38,0.97,0.87,0.00,0.69
+MEM,T0015,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0015,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0015,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0015,89.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0015,5.20,0.00,1113,2166,40,1,0,0,18,0
+FILE,T0015,0,183,0,91871,105,0,0,0
+NET,T0015,0.6,0.4,0.3,0.1,0.0,0.3,
+NETPACKET,T0015,8.3,7.4,2.5,1.0,0.0,2.5,
+NETERROR,T0015,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0015,0.0,1.6,0.4
+JFSFILE,T0015,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0015,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0015,0.0,0.0,0.0
+DISKREAD,T0015,0.0,0.0,0.0
+DISKWRITE,T0015,0.8,0.0,0.8
+DISKXFER,T0015,0.2,0.0,0.2
+DISKBSIZE,T0015,4.0,0.0,4.0
+TOP,0557246,T0015,1.09,0.70,0.39,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0016,11:39:22,19-JAN-2007
+CPU01,T0016,0.0,1.2,0.0,98.8
+CPU02,T0016,0.0,0.0,0.0,100.0
+CPU_ALL,T0016,1.9,1.8,0.0,96.3,,0.02
+LPAR,T0016,0.025,1,2,7,0.50,0,0.00,0.32,0.36,1,1,1.91,1.77,0.00,1.40,0.96,0.89,0.00,0.70
+MEM,T0016,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0016,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0016,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0016,89.5,0.0,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0016,6.10,0.00,1131,2180,37,1,0,0,20,0
+FILE,T0016,0,186,0,81868,514,0,0,0
+NET,T0016,0.3,0.3,0.2,0.0,0.0,0.2,
+NETPACKET,T0016,6.3,6.0,2.3,0.4,0.0,2.3,
+NETERROR,T0016,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0016,0.0,2.0,0.5
+JFSFILE,T0016,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0016,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0016,0.0,0.0,0.0
+DISKREAD,T0016,0.0,0.0,0.0
+DISKWRITE,T0016,0.8,0.4,0.8
+DISKXFER,T0016,0.2,0.1,0.2
+DISKBSIZE,T0016,4.0,4.0,4.0
+TOP,0557246,T0016,1.11,0.71,0.40,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0017,11:39:32,19-JAN-2007
+CPU01,T0017,0.4,2.7,0.0,96.9
+CPU02,T0017,0.3,1.2,0.0,98.5
+CPU_ALL,T0017,2.5,3.3,0.0,94.2,,0.03
+LPAR,T0017,0.039,1,2,7,0.50,0,0.00,0.48,0.55,1,1,2.53,3.26,0.00,1.94,1.27,1.63,0.00,0.97
+MEM,T0017,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0017,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0017,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0017,94.2,0.0,0.8,0.0,0.0,0.0,0.0,0.0
+PROC,T0017,4.90,0.00,1075,3620,63,1,0,0,52,7
+FILE,T0017,0,454,0,148535,242,0,0,0
+NET,T0017,0.7,0.5,0.1,0.1,0.0,0.1,
+NETPACKET,T0017,9.7,8.8,1.8,1.0,0.0,1.8,
+NETERROR,T0017,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0017,0.0,28.8,7.2
+JFSFILE,T0017,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0017,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0017,1.1,0.1,1.1
+DISKREAD,T0017,0.0,0.0,0.0
+DISKWRITE,T0017,9.2,10.4,9.2
+DISKXFER,T0017,2.3,2.6,2.3
+DISKBSIZE,T0017,4.0,4.0,4.0
+TOP,0557246,T0017,1.06,0.68,0.38,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+TOP,0155740,T0017,0.41,0.00,0.41,14,508,8,460,0,0.029,0,syncd,Unclassified
+TOP,0286898,T0017,0.37,0.19,0.18,7,12452,24,10104,42852,0.618,2,db2fmp,Unclassified
+TOP,0581670,T0017,0.14,0.05,0.10,1,7016,48,5316,210,0.327,1,db2sysc,Unclassified
+ZZZZ,T0018,11:39:42,19-JAN-2007
+CPU01,T0018,0.6,0.6,0.2,98.6
+CPU02,T0018,0.0,0.0,0.0,100.0
+CPU_ALL,T0018,1.8,1.8,0.0,96.4,,0.02
+LPAR,T0018,0.025,1,2,7,0.50,0,0.00,0.31,0.35,1,1,1.75,1.83,0.00,1.34,0.88,0.91,0.00,0.67
+MEM,T0018,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0018,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0018,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0018,89.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0018,5.00,0.00,998,2002,37,1,0,0,18,0
+FILE,T0018,0,180,0,81868,129,0,0,0
+NET,T0018,0.6,0.6,0.2,0.0,0.0,0.2,
+NETPACKET,T0018,9.5,9.2,1.3,0.4,0.0,1.3,
+NETERROR,T0018,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0018,0.0,1.6,0.4
+JFSFILE,T0018,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0018,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0018,0.2,0.0,0.1
+DISKREAD,T0018,0.0,0.0,0.0
+DISKWRITE,T0018,0.8,0.0,0.8
+DISKXFER,T0018,0.2,0.0,0.2
+DISKBSIZE,T0018,4.0,0.0,4.0
+TOP,0557246,T0018,0.98,0.63,0.35,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0019,11:39:52,19-JAN-2007
+CPU01,T0019,1.0,0.1,0.0,98.9
+CPU02,T0019,0.0,0.0,0.0,100.0
+CPU_ALL,T0019,2.0,1.8,0.0,96.1,,0.02
+LPAR,T0019,0.027,1,2,7,0.50,0,0.00,0.33,0.38,1,1,2.02,1.85,0.00,1.47,1.01,0.92,0.00,0.74
+MEM,T0019,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0019,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0019,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0019,90.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0019,6.00,0.00,1155,2230,43,1,0,0,18,0
+FILE,T0019,0,190,0,93717,105,0,0,0
+NET,T0019,0.6,0.4,0.1,0.1,0.0,0.1,
+NETPACKET,T0019,8.7,7.8,2.0,1.0,0.0,2.0,
+NETERROR,T0019,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0019,0.0,1.6,0.4
+JFSFILE,T0019,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0019,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0019,0.0,0.0,0.0
+DISKREAD,T0019,0.0,0.0,0.0
+DISKWRITE,T0019,0.8,0.0,0.8
+DISKXFER,T0019,0.2,0.0,0.2
+DISKBSIZE,T0019,4.0,0.0,4.0
+TOP,0557246,T0019,1.14,0.72,0.41,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0020,11:40:02,19-JAN-2007
+CPU01,T0020,1.2,0.8,0.2,97.8
+CPU02,T0020,0.0,0.0,0.0,100.0
+CPU_ALL,T0020,1.9,1.8,0.0,96.4,,0.02
+LPAR,T0020,0.025,1,2,7,0.50,0,0.00,0.31,0.36,1,1,1.86,1.77,0.00,1.40,0.93,0.89,0.00,0.70
+MEM,T0020,0.7,36.7,46.5,187.8,6400.0,512.0
+MEMNEW,T0020,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0020,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0020,89.6,0.0,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0020,4.80,0.00,1078,2109,37,1,0,0,20,0
+FILE,T0020,0,186,0,81868,514,0,0,0
+NET,T0020,0.5,0.4,0.2,0.0,0.0,0.2,
+NETPACKET,T0020,7.3,7.0,2.1,0.3,0.0,2.1,
+NETERROR,T0020,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0020,0.0,2.0,0.5
+JFSFILE,T0020,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0020,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0020,0.2,0.0,0.1
+DISKREAD,T0020,0.0,0.0,0.0
+DISKWRITE,T0020,0.8,0.4,0.8
+DISKXFER,T0020,0.2,0.1,0.2
+DISKBSIZE,T0020,4.0,4.0,4.0
+TOP,0557246,T0020,1.12,0.73,0.40,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0021,11:40:12,19-JAN-2007
+CPU01,T0021,0.0,0.0,1.0,99.0
+CPU02,T0021,0.0,0.0,0.0,100.0
+CPU_ALL,T0021,2.1,1.8,0.0,96.1,,0.02
+LPAR,T0021,0.027,1,2,7,0.50,0,0.00,0.33,0.38,1,1,2.07,1.81,0.00,1.46,1.04,0.90,0.00,0.73
+MEM,T0021,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0021,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0021,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0021,89.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0021,4.40,0.00,1202,2275,40,1,0,0,18,0
+FILE,T0021,0,183,0,91871,105,0,0,0
+NET,T0021,0.8,0.6,0.3,0.1,0.0,0.3,
+NETPACKET,T0021,10.5,9.6,2.5,1.0,0.0,2.5,
+NETERROR,T0021,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0021,0.0,1.6,0.4
+JFSFILE,T0021,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0021,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0021,1.0,0.0,1.0
+DISKREAD,T0021,0.0,0.0,0.0
+DISKWRITE,T0021,0.8,0.0,0.8
+DISKXFER,T0021,0.2,0.0,0.2
+DISKBSIZE,T0021,4.0,0.0,4.0
+TOP,0557246,T0021,1.17,0.76,0.42,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0022,11:40:22,19-JAN-2007
+CPU01,T0022,0.2,1.2,1.0,97.6
+CPU02,T0022,0.0,0.0,0.0,100.0
+CPU_ALL,T0022,1.9,1.8,0.0,96.4,,0.02
+LPAR,T0022,0.025,1,2,7,0.50,0,0.00,0.31,0.36,1,1,1.87,1.76,0.00,1.38,0.94,0.88,0.00,0.69
+MEM,T0022,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0022,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0022,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0022,89.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0022,4.40,0.00,1115,2150,37,1,0,0,19,0
+FILE,T0022,0,186,0,81868,105,0,0,0
+NET,T0022,0.3,0.2,0.0,0.0,0.0,0.0,
+NETPACKET,T0022,5.5,5.2,0.6,0.4,0.0,0.6,
+NETERROR,T0022,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0022,0.0,1.6,0.4
+JFSFILE,T0022,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0022,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0022,1.0,0.0,0.0
+DISKREAD,T0022,0.0,0.0,0.0
+DISKWRITE,T0022,0.8,0.0,0.8
+DISKXFER,T0022,0.2,0.0,0.2
+DISKBSIZE,T0022,4.0,0.0,4.0
+TOP,0557246,T0022,1.08,0.69,0.40,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0023,11:40:32,19-JAN-2007
+CPU01,T0023,0.3,2.1,0.0,97.6
+CPU02,T0023,0.0,0.0,0.0,100.0
+CPU_ALL,T0023,2.1,2.6,0.0,95.3,,0.03
+LPAR,T0023,0.033,1,2,7,0.50,0,0.00,0.41,0.47,1,1,2.09,2.65,0.00,1.81,1.04,1.32,0.00,0.91
+MEM,T0023,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0023,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0023,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0023,89.5,0.0,0.3,0.0,0.0,0.0,0.0,0.0
+PROC,T0023,4.90,0.00,1173,2239,40,1,0,0,18,0
+FILE,T0023,0,189,0,91871,105,0,0,0
+NET,T0023,0.7,0.5,0.1,0.1,0.0,0.1,
+NETPACKET,T0023,8.9,8.0,2.0,1.0,0.0,2.0,
+NETERROR,T0023,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0023,0.0,22.8,5.7
+JFSFILE,T0023,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0023,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0023,2.2,0.0,2.3
+DISKREAD,T0023,0.0,0.0,0.0
+DISKWRITE,T0023,9.6,3.6,9.6
+DISKXFER,T0023,2.4,0.9,2.4
+DISKBSIZE,T0023,4.0,4.0,4.0
+TOP,0557246,T0023,1.19,0.77,0.42,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+TOP,0155740,T0023,0.41,0.00,0.41,14,508,8,460,0,0.029,0,syncd,Unclassified
+ZZZZ,T0024,11:40:42,19-JAN-2007
+CPU01,T0024,1.0,0.0,0.0,99.0
+CPU02,T0024,0.0,1.0,0.0,99.0
+CPU_ALL,T0024,2.0,1.9,0.0,96.0,,0.02
+LPAR,T0024,0.027,1,2,7,0.50,0,0.00,0.34,0.39,1,1,2.03,1.94,0.00,1.50,1.02,0.97,0.00,0.75
+MEM,T0024,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0024,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0024,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0024,89.5,0.0,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0024,5.70,0.00,1219,2276,37,1,0,0,20,0
+FILE,T0024,0,180,0,81868,522,0,0,0
+NET,T0024,0.7,0.6,0.4,0.0,0.0,0.4,
+NETPACKET,T0024,9.1,8.8,2.8,0.4,0.0,2.8,
+NETERROR,T0024,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0024,0.0,2.0,0.5
+JFSFILE,T0024,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0024,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0024,0.0,0.0,0.0
+DISKREAD,T0024,0.0,0.0,0.0
+DISKWRITE,T0024,0.8,0.4,0.8
+DISKXFER,T0024,0.2,0.1,0.2
+DISKBSIZE,T0024,4.0,4.0,4.0
+TOP,0557246,T0024,1.18,0.76,0.42,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0025,11:40:52,19-JAN-2007
+CPU01,T0025,0.4,0.7,0.2,98.7
+CPU02,T0025,0.0,0.0,0.0,100.0
+CPU_ALL,T0025,1.9,1.8,0.0,96.3,,0.02
+LPAR,T0025,0.025,1,2,7,0.50,0,0.00,0.32,0.36,1,1,1.88,1.79,0.00,1.42,0.94,0.89,0.00,0.71
+MEM,T0025,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0025,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0025,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0025,91.2,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0025,5.60,0.00,1035,2086,43,1,0,0,18,0
+FILE,T0025,0,190,0,93717,105,0,0,0
+NET,T0025,0.4,0.2,0.1,0.1,0.0,0.1,
+NETPACKET,T0025,5.9,5.0,1.8,1.0,0.0,1.8,
+NETERROR,T0025,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0025,0.0,1.6,0.4
+JFSFILE,T0025,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0025,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0025,0.2,0.0,0.2
+DISKREAD,T0025,0.0,0.0,0.0
+DISKWRITE,T0025,0.8,0.0,0.8
+DISKXFER,T0025,0.2,0.0,0.2
+DISKBSIZE,T0025,4.0,0.0,4.0
+TOP,0557246,T0025,1.04,0.66,0.38,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0026,11:41:02,19-JAN-2007
+CPU01,T0026,0.0,0.0,1.0,99.0
+CPU02,T0026,0.0,0.0,0.0,100.0
+CPU_ALL,T0026,2.0,1.8,0.0,96.2,,0.02
+LPAR,T0026,0.027,1,2,7,0.50,0,0.00,0.33,0.38,1,1,2.01,1.82,0.00,1.48,1.00,0.91,0.00,0.74
+MEM,T0026,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0026,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0026,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0026,89.8,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0026,3.80,0.00,1223,2293,37,0,0,0,19,0
+FILE,T0026,0,186,0,81868,104,0,0,0
+NET,T0026,0.5,0.4,0.0,0.0,0.0,0.0,
+NETPACKET,T0026,7.5,7.2,0.6,0.3,0.0,0.6,
+NETERROR,T0026,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0026,0.0,1.6,0.4
+JFSFILE,T0026,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0026,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0026,1.0,0.0,1.0
+DISKREAD,T0026,0.0,0.0,0.0
+DISKWRITE,T0026,0.8,0.0,0.8
+DISKXFER,T0026,0.2,0.0,0.2
+DISKBSIZE,T0026,4.0,0.0,4.0
+TOP,0557246,T0026,1.23,0.79,0.44,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0027,11:41:12,19-JAN-2007
+CPU01,T0027,0.0,1.0,1.0,98.0
+CPU02,T0027,0.0,0.0,0.0,100.0
+CPU_ALL,T0027,2.0,1.8,0.0,96.2,,0.02
+LPAR,T0027,0.026,1,2,7,0.50,0,0.00,0.33,0.37,1,1,2.02,1.79,0.00,1.41,1.01,0.89,0.00,0.71
+MEM,T0027,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0027,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0027,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0027,89.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0027,3.10,0.00,1154,2235,40,1,0,0,18,0
+FILE,T0027,0,183,0,91871,105,0,0,0
+NET,T0027,0.7,0.5,0.3,0.1,0.0,0.3,
+NETPACKET,T0027,9.1,8.2,2.7,1.0,0.0,2.7,
+NETERROR,T0027,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0027,0.0,1.6,0.4
+JFSFILE,T0027,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0027,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0027,1.0,0.0,0.0
+DISKREAD,T0027,0.0,0.0,0.0
+DISKWRITE,T0027,0.8,0.0,0.8
+DISKXFER,T0027,0.2,0.0,0.2
+DISKBSIZE,T0027,4.0,0.0,4.0
+TOP,0557246,T0027,1.14,0.74,0.41,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0028,11:41:22,19-JAN-2007
+CPU01,T0028,0.5,1.5,0.0,98.0
+CPU02,T0028,0.0,0.0,0.0,100.0
+CPU_ALL,T0028,1.8,1.7,0.0,96.4,,0.02
+LPAR,T0028,0.025,1,2,7,0.50,0,0.00,0.31,0.35,1,1,1.84,1.75,0.00,1.38,0.92,0.87,0.00,0.69
+MEM,T0028,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0028,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0028,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0028,89.5,0.0,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0028,3.20,0.00,1087,2118,37,1,0,0,19,0
+FILE,T0028,0,186,0,81868,514,0,0,0
+NET,T0028,0.3,0.2,0.2,0.0,0.0,0.2,
+NETPACKET,T0028,5.7,5.2,2.1,0.4,0.0,2.1,
+NETERROR,T0028,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0028,0.0,2.0,0.5
+JFSFILE,T0028,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0028,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0028,0.0,0.0,0.0
+DISKREAD,T0028,0.0,0.0,0.0
+DISKWRITE,T0028,0.8,0.4,0.8
+DISKXFER,T0028,0.2,0.1,0.2
+DISKBSIZE,T0028,4.0,4.0,4.0
+TOP,0557246,T0028,0.95,0.61,0.35,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0029,11:41:32,19-JAN-2007
+CPU01,T0029,2.0,2.2,0.5,95.3
+CPU02,T0029,1.9,1.5,0.0,96.6
+CPU_ALL,T0029,3.7,3.9,0.0,92.4,,0.04
+LPAR,T0029,0.049,1,2,7,0.50,0,0.00,0.61,0.69,1,1,3.68,3.87,0.01,2.15,1.84,1.94,0.01,1.08
+MEM,T0029,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0029,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0029,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0029,95.3,0.1,20.3,0.1,0.0,0.0,0.0,0.0
+PROC,T0029,5.50,0.00,1141,4361,76,24,0,0,82,9
+FILE,T0029,0,636,0,176163,8001,0,0,0
+NET,T0029,0.6,0.4,0.3,0.1,0.0,0.3,
+NETPACKET,T0029,7.8,7.0,3.5,1.1,0.0,3.5,
+NETERROR,T0029,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0029,0.4,136.8,21.8
+JFSFILE,T0029,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0029,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0029,1.3,0.7,1.3
+DISKREAD,T0029,0.4,0.0,0.0
+DISKWRITE,T0029,9.2,118.4,9.2
+DISKXFER,T0029,2.4,17.1,2.3
+DISKBSIZE,T0029,4.0,6.9,4.0
+TOP,0557246,T0029,1.11,0.72,0.39,77,1280124,48,1271584,18,77.614,0,java,Unclassified
+TOP,0286898,T0029,1.05,0.64,0.41,7,12452,24,10104,71350,0.618,2,db2fmp,Unclassified
+TOP,0155740,T0029,0.45,0.00,0.44,14,508,8,460,0,0.029,0,syncd,Unclassified
+TOP,0643152,T0029,0.18,0.08,0.10,1,6740,48,5460,210,0.336,1,db2sysc,Unclassified
+ZZZZ,T0030,11:41:42,19-JAN-2007
+CPU01,T0030,0.4,1.6,0.0,98.0
+CPU02,T0030,0.1,1.2,0.0,98.7
+CPU_ALL,T0030,1.7,1.8,0.0,96.4,,0.02
+LPAR,T0030,0.025,1,2,7,0.50,0,0.00,0.31,0.35,1,1,1.75,1.82,0.00,1.37,0.87,0.91,0.00,0.69
+MEM,T0030,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0030,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0030,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0030,89.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0030,5.60,0.00,974,1974,37,1,0,0,19,0
+FILE,T0030,0,180,0,81868,130,0,0,0
+NET,T0030,0.6,0.5,0.2,0.0,0.0,0.2,
+NETPACKET,T0030,9.5,9.2,1.5,0.4,0.0,1.5,
+NETERROR,T0030,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0030,0.0,1.6,0.4
+JFSFILE,T0030,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0030,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0030,0.0,0.0,0.0
+DISKREAD,T0030,0.0,0.0,0.0
+DISKWRITE,T0030,0.8,0.0,0.8
+DISKXFER,T0030,0.2,0.0,0.2
+DISKBSIZE,T0030,4.0,0.0,4.0
+TOP,0557246,T0030,0.98,0.64,0.34,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0031,11:41:52,19-JAN-2007
+CPU01,T0031,0.0,1.2,0.0,98.8
+CPU02,T0031,0.1,1.0,0.0,98.9
+CPU_ALL,T0031,2.0,1.9,0.0,96.1,,0.02
+LPAR,T0031,0.027,1,2,7,0.50,0,0.00,0.34,0.39,1,1,2.04,1.87,0.00,1.53,1.02,0.93,0.00,0.76
+MEM,T0031,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0031,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0031,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0031,91.2,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0031,5.50,0.00,1189,2269,43,1,0,0,18,0
+FILE,T0031,0,190,0,93717,105,0,0,0
+NET,T0031,0.5,0.3,0.1,0.1,0.0,0.1,
+NETPACKET,T0031,6.5,5.6,1.8,1.0,0.0,1.8,
+NETERROR,T0031,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0031,0.0,1.6,0.4
+JFSFILE,T0031,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0031,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0031,0.0,0.0,0.0
+DISKREAD,T0031,0.0,0.0,0.0
+DISKWRITE,T0031,0.8,0.0,0.8
+DISKXFER,T0031,0.2,0.0,0.2
+DISKBSIZE,T0031,4.0,0.0,4.0
+TOP,0557246,T0031,1.15,0.73,0.41,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0032,11:42:02,19-JAN-2007
+CPU01,T0032,0.2,1.2,0.0,98.6
+CPU02,T0032,0.0,1.0,0.0,99.0
+CPU_ALL,T0032,1.9,1.8,0.0,96.3,,0.02
+LPAR,T0032,0.026,1,2,7,0.50,0,0.00,0.33,0.37,1,1,1.92,1.83,0.00,1.48,0.96,0.91,0.00,0.74
+MEM,T0032,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0032,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0032,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0032,89.8,0.0,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0032,5.60,0.00,1130,2168,37,1,0,0,20,0
+FILE,T0032,0,186,0,81868,514,0,0,0
+NET,T0032,0.6,0.5,0.2,0.0,0.0,0.2,
+NETPACKET,T0032,9.1,8.8,2.1,0.3,0.0,2.1,
+NETERROR,T0032,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0032,0.0,2.0,0.5
+JFSFILE,T0032,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0032,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0032,0.0,0.0,0.0
+DISKREAD,T0032,0.0,0.0,0.0
+DISKWRITE,T0032,0.8,0.4,0.8
+DISKXFER,T0032,0.2,0.1,0.2
+DISKBSIZE,T0032,4.0,4.0,4.0
+TOP,0557246,T0032,1.17,0.75,0.43,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0033,11:42:12,19-JAN-2007
+CPU01,T0033,0.0,1.5,0.0,98.5
+CPU02,T0033,0.0,0.0,0.0,100.0
+CPU_ALL,T0033,2.0,1.8,0.0,96.2,,0.02
+LPAR,T0033,0.026,1,2,7,0.50,0,0.00,0.33,0.37,1,1,1.99,1.80,0.00,1.42,1.00,0.90,0.00,0.71
+MEM,T0033,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0033,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0033,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0033,89.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0033,5.80,0.00,1137,2205,40,1,0,0,18,0
+FILE,T0033,0,183,0,91871,105,0,0,0
+NET,T0033,0.8,0.6,0.3,0.1,0.0,0.3,
+NETPACKET,T0033,10.5,9.6,2.5,1.0,0.0,2.5,
+NETERROR,T0033,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0033,0.0,1.6,0.4
+JFSFILE,T0033,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0033,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0033,0.0,0.0,0.0
+DISKREAD,T0033,0.0,0.0,0.0
+DISKWRITE,T0033,0.8,0.0,0.8
+DISKXFER,T0033,0.2,0.0,0.2
+DISKBSIZE,T0033,4.0,0.0,4.0
+TOP,0557246,T0033,1.13,0.73,0.40,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0034,11:42:22,19-JAN-2007
+CPU01,T0034,0.2,1.0,0.0,98.8
+CPU02,T0034,0.0,0.0,0.0,100.0
+CPU_ALL,T0034,1.9,1.8,0.0,96.3,,0.02
+LPAR,T0034,0.025,1,2,7,0.50,0,0.00,0.32,0.36,1,1,1.91,1.77,0.00,1.39,0.95,0.88,0.00,0.69
+MEM,T0034,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0034,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0034,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0034,89.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0034,6.50,0.00,1135,2184,37,1,0,0,19,0
+FILE,T0034,0,186,0,81868,105,0,0,0
+NET,T0034,0.4,0.3,0.0,0.0,0.0,0.0,
+NETPACKET,T0034,6.3,6.0,0.8,0.4,0.0,0.8,
+NETERROR,T0034,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0034,0.0,1.6,0.4
+JFSFILE,T0034,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0034,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0034,0.0,0.0,0.0
+DISKREAD,T0034,0.0,0.0,0.0
+DISKWRITE,T0034,0.8,0.0,0.8
+DISKXFER,T0034,0.2,0.0,0.2
+DISKBSIZE,T0034,4.0,0.0,4.0
+TOP,0557246,T0034,1.10,0.70,0.39,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0035,11:42:32,19-JAN-2007
+CPU01,T0035,0.4,3.2,0.0,96.4
+CPU02,T0035,0.0,0.0,0.0,100.0
+CPU_ALL,T0035,2.0,2.6,0.0,95.3,,0.03
+LPAR,T0035,0.032,1,2,7,0.50,0,0.00,0.40,0.46,1,1,2.00,2.65,0.00,1.82,1.00,1.32,0.00,0.91
+MEM,T0035,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0035,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0035,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0035,89.5,0.0,0.4,0.0,0.0,0.0,0.0,0.0
+PROC,T0035,6.50,0.00,1107,2165,40,1,0,0,18,0
+FILE,T0035,0,189,0,91871,105,0,0,0
+NET,T0035,0.7,0.5,0.1,0.1,0.0,0.1,
+NETPACKET,T0035,9.5,8.6,1.8,1.0,0.0,1.8,
+NETERROR,T0035,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0035,0.0,23.6,5.9
+JFSFILE,T0035,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0035,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0035,1.1,0.0,1.1
+DISKREAD,T0035,0.0,0.0,0.0
+DISKWRITE,T0035,9.6,4.4,9.6
+DISKXFER,T0035,2.4,1.1,2.4
+DISKBSIZE,T0035,4.0,4.0,4.0
+TOP,0557246,T0035,1.14,0.73,0.41,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+TOP,0155740,T0035,0.40,0.00,0.40,14,508,8,460,0,0.029,0,syncd,Unclassified
+ZZZZ,T0036,11:42:42,19-JAN-2007
+CPU01,T0036,0.2,1.1,0.0,98.7
+CPU02,T0036,0.0,0.0,0.0,100.0
+CPU_ALL,T0036,1.8,1.8,0.0,96.4,,0.02
+LPAR,T0036,0.025,1,2,7,0.50,0,0.00,0.31,0.36,1,1,1.80,1.84,0.00,1.37,0.90,0.92,0.00,0.69
+MEM,T0036,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0036,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0036,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0036,89.5,0.0,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0036,5.70,0.00,1052,2064,37,1,0,0,20,0
+FILE,T0036,0,180,0,81868,522,0,0,0
+NET,T0036,0.4,0.4,0.4,0.0,0.0,0.4,
+NETPACKET,T0036,7.1,6.8,2.8,0.4,0.0,2.8,
+NETERROR,T0036,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0036,0.0,2.0,0.5
+JFSFILE,T0036,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0036,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0036,0.0,0.0,0.0
+DISKREAD,T0036,0.0,0.0,0.0
+DISKWRITE,T0036,0.8,0.4,0.8
+DISKXFER,T0036,0.2,0.1,0.2
+DISKBSIZE,T0036,4.0,4.0,4.0
+TOP,0557246,T0036,1.01,0.65,0.36,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0037,11:42:52,19-JAN-2007
+CPU01,T0037,0.1,1.2,0.0,98.7
+CPU02,T0037,0.0,0.0,0.0,100.0
+CPU_ALL,T0037,2.0,1.8,0.0,96.2,,0.02
+LPAR,T0037,0.026,1,2,7,0.50,0,0.00,0.33,0.37,1,1,1.97,1.82,0.00,1.42,0.99,0.91,0.00,0.71
+MEM,T0037,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0037,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0037,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0037,90.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0037,6.80,0.00,1139,2220,43,1,0,0,18,0
+FILE,T0037,0,190,0,93717,105,0,0,0
+NET,T0037,0.5,0.3,0.1,0.1,0.0,0.1,
+NETPACKET,T0037,6.7,5.8,2.0,1.0,0.0,2.0,
+NETERROR,T0037,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0037,0.0,1.6,0.4
+JFSFILE,T0037,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0037,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0037,0.0,0.0,0.0
+DISKREAD,T0037,0.0,0.0,0.0
+DISKWRITE,T0037,0.8,0.0,0.8
+DISKXFER,T0037,0.2,0.0,0.2
+DISKBSIZE,T0037,4.0,0.0,4.0
+TOP,0557246,T0037,1.11,0.70,0.41,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0038,11:43:02,19-JAN-2007
+CPU01,T0038,1.0,0.0,0.0,99.0
+CPU02,T0038,0.0,0.0,0.0,100.0
+CPU_ALL,T0038,2.0,1.9,0.0,96.2,,0.02
+LPAR,T0038,0.026,1,2,7,0.50,0,0.00,0.33,0.38,1,1,1.98,1.85,0.00,1.47,0.99,0.93,0.00,0.73
+MEM,T0038,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0038,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0038,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0038,90.0,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0038,5.30,0.00,1140,2210,39,1,0,0,18,0
+FILE,T0038,0,190,0,84040,174,0,0,0
+NET,T0038,0.7,0.6,0.1,0.2,0.0,0.1,
+NETPACKET,T0038,10.4,9.2,0.8,1.3,0.0,0.8,
+NETERROR,T0038,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0038,0.0,1.6,0.4
+JFSFILE,T0038,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0038,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0038,0.0,0.0,0.0
+DISKREAD,T0038,0.0,0.0,0.0
+DISKWRITE,T0038,0.8,0.0,0.8
+DISKXFER,T0038,0.2,0.0,0.2
+DISKBSIZE,T0038,4.0,0.0,4.0
+TOP,0557246,T0038,1.17,0.75,0.42,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0039,11:43:12,19-JAN-2007
+CPU01,T0039,2.3,0.7,0.2,96.9
+CPU02,T0039,0.0,0.0,0.0,100.0
+CPU_ALL,T0039,1.8,1.7,0.0,96.4,,0.02
+LPAR,T0039,0.024,1,2,7,0.50,0,0.00,0.31,0.35,1,1,1.84,1.72,0.00,1.34,0.92,0.86,0.00,0.67
+MEM,T0039,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0039,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0039,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0039,89.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0039,5.20,0.00,1032,2061,40,1,0,0,18,0
+FILE,T0039,0,183,0,91871,105,0,0,0
+NET,T0039,0.6,0.4,0.3,0.1,0.0,0.3,
+NETPACKET,T0039,8.3,7.4,2.5,1.0,0.0,2.5,
+NETERROR,T0039,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0039,0.0,1.6,0.4
+JFSFILE,T0039,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0039,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0039,0.2,0.0,0.1
+DISKREAD,T0039,0.0,0.0,0.0
+DISKWRITE,T0039,0.8,0.0,0.8
+DISKXFER,T0039,0.2,0.0,0.2
+DISKBSIZE,T0039,4.0,0.0,4.0
+TOP,0557246,T0039,1.01,0.65,0.36,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0040,11:43:22,19-JAN-2007
+CPU01,T0040,1.1,0.1,0.0,98.8
+CPU02,T0040,0.0,0.0,0.0,100.0
+CPU_ALL,T0040,1.9,1.8,0.0,96.4,,0.02
+LPAR,T0040,0.025,1,2,7,0.50,0,0.00,0.31,0.36,1,1,1.87,1.75,0.00,1.41,0.94,0.88,0.00,0.70
+MEM,T0040,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0040,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0040,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0040,89.5,0.0,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0040,4.30,0.00,1089,2123,37,1,0,0,20,0
+FILE,T0040,0,186,0,81868,514,0,0,0
+NET,T0040,0.3,0.3,0.2,0.0,0.0,0.2,
+NETPACKET,T0040,5.9,5.6,2.1,0.4,0.0,2.1,
+NETERROR,T0040,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0040,0.0,2.0,0.5
+JFSFILE,T0040,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0040,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0040,0.0,0.0,0.0
+DISKREAD,T0040,0.0,0.0,0.0
+DISKWRITE,T0040,0.8,0.4,0.8
+DISKXFER,T0040,0.2,0.1,0.2
+DISKBSIZE,T0040,4.0,4.0,4.0
+TOP,0557246,T0040,1.07,0.68,0.39,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0041,11:43:32,19-JAN-2007
+CPU01,T0041,1.4,1.9,0.2,96.5
+CPU02,T0041,0.0,0.0,0.0,100.0
+CPU_ALL,T0041,1.9,2.6,0.0,95.6,,0.03
+LPAR,T0041,0.031,1,2,7,0.50,0,0.00,0.39,0.44,1,1,1.85,2.59,0.00,1.75,0.93,1.30,0.00,0.87
+MEM,T0041,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0041,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0041,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0041,89.5,0.0,0.7,0.0,0.0,0.0,0.0,0.0
+PROC,T0041,5.20,0.00,1011,2037,40,1,0,0,18,0
+FILE,T0041,0,189,0,91871,105,0,0,0
+NET,T0041,0.7,0.5,0.1,0.1,0.0,0.1,
+NETPACKET,T0041,9.5,8.6,2.0,1.0,0.0,2.0,
+NETERROR,T0041,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0041,0.0,25.6,6.0
+JFSFILE,T0041,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0041,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0041,2.2,0.1,2.4
+DISKREAD,T0041,0.0,0.0,0.0
+DISKWRITE,T0041,10.8,4.0,10.8
+DISKXFER,T0041,2.5,1.0,2.5
+DISKBSIZE,T0041,4.3,4.0,4.3
+TOP,0557246,T0041,1.03,0.66,0.37,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+TOP,0155740,T0041,0.40,0.00,0.40,14,508,8,460,0,0.029,0,syncd,Unclassified
+ZZZZ,T0042,11:43:42,19-JAN-2007
+CPU01,T0042,0.1,0.3,0.0,99.6
+CPU02,T0042,0.0,0.0,0.0,100.0
+CPU_ALL,T0042,1.9,1.9,0.0,96.2,,0.02
+LPAR,T0042,0.026,1,2,7,0.50,0,0.00,0.33,0.37,1,1,1.89,1.89,0.00,1.45,0.95,0.95,0.00,0.73
+MEM,T0042,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0042,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0042,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0042,89.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0042,4.40,0.00,1113,2145,37,1,0,0,19,0
+FILE,T0042,0,180,0,81868,113,0,0,0
+NET,T0042,0.5,0.4,0.2,0.0,0.0,0.2,
+NETPACKET,T0042,7.9,7.6,1.3,0.4,0.0,1.3,
+NETERROR,T0042,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0042,0.0,1.6,0.4
+JFSFILE,T0042,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0042,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0042,1.0,0.0,0.0
+DISKREAD,T0042,0.0,0.0,0.0
+DISKWRITE,T0042,0.8,0.0,0.8
+DISKXFER,T0042,0.2,0.0,0.2
+DISKBSIZE,T0042,4.0,0.0,4.0
+TOP,0557246,T0042,1.08,0.70,0.39,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0043,11:43:52,19-JAN-2007
+CPU01,T0043,0.4,1.6,0.0,98.0
+CPU02,T0043,0.0,0.0,0.0,100.0
+CPU_ALL,T0043,1.9,1.8,0.0,96.2,,0.02
+LPAR,T0043,0.026,1,2,7,0.50,0,0.00,0.32,0.37,1,1,1.94,1.81,0.00,1.42,0.97,0.90,0.00,0.71
+MEM,T0043,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0043,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0043,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0043,90.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0043,3.10,0.00,1089,2159,43,1,0,0,19,0
+FILE,T0043,0,190,0,93717,105,0,0,0
+NET,T0043,0.6,0.4,0.1,0.1,0.0,0.1,
+NETPACKET,T0043,7.3,6.4,1.8,1.0,0.0,1.8,
+NETERROR,T0043,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0043,0.0,1.6,0.4
+JFSFILE,T0043,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0043,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0043,0.0,0.0,0.0
+DISKREAD,T0043,0.0,0.0,0.0
+DISKWRITE,T0043,0.8,0.0,0.8
+DISKXFER,T0043,0.2,0.0,0.2
+DISKBSIZE,T0043,4.0,0.0,4.0
+TOP,0557246,T0043,1.09,0.69,0.39,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0044,11:44:03,19-JAN-2007
+CPU01,T0044,0.1,1.5,0.0,98.4
+CPU02,T0044,0.0,0.0,0.0,100.0
+CPU_ALL,T0044,1.7,1.6,0.0,96.7,,0.02
+LPAR,T0044,0.023,1,2,7,0.50,0,0.00,0.29,0.33,1,1,1.71,1.63,0.00,1.30,0.85,0.81,0.00,0.65
+MEM,T0044,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0044,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0044,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0044,82.0,0.0,0.3,0.0,0.0,0.0,0.0,0.0
+PROC,T0044,5.91,0.00,1009,1950,34,1,0,0,18,0
+FILE,T0044,0,169,0,74432,840,0,0,0
+NET,T0044,0.5,0.5,0.2,0.0,0.0,0.2,
+NETPACKET,T0044,7.7,7.5,1.9,0.3,0.0,1.9,
+NETERROR,T0044,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0044,0.0,2.2,0.5
+JFSFILE,T0044,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0044,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0044,0.0,0.0,0.0
+DISKREAD,T0044,0.0,0.0,0.0
+DISKWRITE,T0044,0.7,0.7,0.7
+DISKXFER,T0044,0.2,0.2,0.2
+DISKBSIZE,T0044,4.0,4.0,4.0
+TOP,0557246,T0044,1.02,0.66,0.36,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0045,11:44:13,19-JAN-2007
+CPU01,T0045,0.1,1.0,0.0,98.9
+CPU02,T0045,0.1,1.1,0.0,98.8
+CPU_ALL,T0045,2.0,1.8,0.0,96.2,,0.02
+LPAR,T0045,0.026,1,2,7,0.50,0,0.00,0.33,0.38,1,1,1.98,1.81,0.00,1.50,0.99,0.91,0.00,0.75
+MEM,T0045,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0045,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0045,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0045,89.8,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0045,4.40,0.00,1158,2209,40,1,0,0,18,0
+FILE,T0045,0,183,0,91871,105,0,0,0
+NET,T0045,1.0,0.8,0.3,0.1,0.0,0.3,
+NETPACKET,T0045,9.9,9.0,2.7,1.0,0.0,2.7,
+NETERROR,T0045,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0045,0.0,1.6,0.4
+JFSFILE,T0045,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0045,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0045,0.0,0.0,0.0
+DISKREAD,T0045,0.0,0.0,0.0
+DISKWRITE,T0045,0.8,0.0,0.8
+DISKXFER,T0045,0.2,0.0,0.2
+DISKBSIZE,T0045,4.0,0.0,4.0
+TOP,0557246,T0045,1.14,0.73,0.41,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0046,11:44:23,19-JAN-2007
+CPU01,T0046,1.4,0.2,0.0,98.4
+CPU02,T0046,0.0,0.0,0.0,100.0
+CPU_ALL,T0046,1.9,1.8,0.0,96.3,,0.02
+LPAR,T0046,0.025,1,2,7,0.50,0,0.00,0.31,0.36,1,1,1.88,1.77,0.00,1.38,0.94,0.89,0.00,0.69
+MEM,T0046,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0046,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0046,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0046,89.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0046,4.80,0.00,1113,2152,37,1,0,0,19,0
+FILE,T0046,0,186,0,81868,105,0,0,0
+NET,T0046,0.3,0.3,0.0,0.0,0.0,0.0,
+NETPACKET,T0046,6.3,6.0,0.6,0.4,0.0,0.6,
+NETERROR,T0046,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0046,0.0,1.6,0.4
+JFSFILE,T0046,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0046,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0046,0.0,0.0,0.0
+DISKREAD,T0046,0.0,0.0,0.0
+DISKWRITE,T0046,0.8,0.0,0.8
+DISKXFER,T0046,0.2,0.0,0.2
+DISKBSIZE,T0046,4.0,0.0,4.0
+TOP,0557246,T0046,1.09,0.69,0.40,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0047,11:44:33,19-JAN-2007
+CPU01,T0047,0.2,2.3,0.0,97.5
+CPU02,T0047,0.0,0.0,0.0,100.0
+CPU_ALL,T0047,2.0,2.6,0.0,95.4,,0.03
+LPAR,T0047,0.032,1,2,7,0.50,0,0.00,0.40,0.46,1,1,2.01,2.63,0.00,1.81,1.01,1.31,0.00,0.91
+MEM,T0047,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0047,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0047,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0047,89.5,0.0,0.4,0.0,0.0,0.0,0.0,0.0
+PROC,T0047,6.20,0.00,1073,2130,40,1,0,0,19,0
+FILE,T0047,0,189,0,91871,105,0,0,0
+NET,T0047,0.7,0.5,0.1,0.1,0.0,0.1,
+NETPACKET,T0047,9.5,8.6,1.8,1.0,0.0,1.8,
+NETERROR,T0047,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0047,0.0,23.2,5.7
+JFSFILE,T0047,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0047,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0047,1.3,0.0,1.3
+DISKREAD,T0047,0.0,0.0,0.0
+DISKWRITE,T0047,9.6,4.0,9.6
+DISKXFER,T0047,2.4,0.9,2.4
+DISKBSIZE,T0047,4.0,4.4,4.0
+TOP,0557246,T0047,1.12,0.73,0.39,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+TOP,0155740,T0047,0.40,0.00,0.40,14,508,8,460,0,0.029,0,syncd,Unclassified
+ZZZZ,T0048,11:44:43,19-JAN-2007
+CPU01,T0048,0.2,0.1,1.0,98.7
+CPU02,T0048,0.0,0.0,0.0,100.0
+CPU_ALL,T0048,2.0,1.9,0.0,96.1,,0.02
+LPAR,T0048,0.027,1,2,7,0.50,0,0.00,0.34,0.38,1,1,1.98,1.92,0.00,1.48,0.99,0.96,0.00,0.74
+MEM,T0048,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0048,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0048,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0048,89.5,0.0,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0048,5.60,0.00,1156,2202,37,1,0,0,19,0
+FILE,T0048,0,180,0,81868,522,0,0,0
+NET,T0048,0.6,0.5,0.4,0.0,0.0,0.4,
+NETPACKET,T0048,10.7,10.4,3.0,0.4,0.0,3.0,
+NETERROR,T0048,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0048,0.0,2.0,0.5
+JFSFILE,T0048,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0048,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0048,1.0,0.0,1.0
+DISKREAD,T0048,0.0,0.0,0.0
+DISKWRITE,T0048,0.8,0.4,0.8
+DISKXFER,T0048,0.2,0.1,0.2
+DISKBSIZE,T0048,4.0,4.0,4.0
+TOP,0557246,T0048,1.15,0.74,0.40,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0049,11:44:53,19-JAN-2007
+CPU01,T0049,0.2,2.2,0.0,97.6
+CPU02,T0049,0.0,0.0,0.0,100.0
+CPU_ALL,T0049,2.0,1.8,0.0,96.2,,0.02
+LPAR,T0049,0.026,1,2,7,0.50,0,0.00,0.33,0.37,1,1,1.98,1.82,0.00,1.45,0.99,0.91,0.00,0.72
+MEM,T0049,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0049,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0049,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0049,90.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0049,4.50,0.00,1119,2199,43,1,0,0,19,0
+FILE,T0049,0,190,0,93717,105,0,0,0
+NET,T0049,0.5,0.3,0.1,0.1,0.0,0.1,
+NETPACKET,T0049,6.9,6.0,1.8,1.0,0.0,1.8,
+NETERROR,T0049,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0049,0.0,1.6,0.4
+JFSFILE,T0049,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0049,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0049,1.0,0.0,1.0
+DISKREAD,T0049,0.0,0.0,0.0
+DISKWRITE,T0049,0.8,0.0,0.8
+DISKXFER,T0049,0.2,0.0,0.2
+DISKBSIZE,T0049,4.0,0.0,4.0
+TOP,0557246,T0049,1.10,0.70,0.40,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0050,11:45:03,19-JAN-2007
+CPU01,T0050,0.2,1.6,0.0,98.2
+CPU02,T0050,0.0,0.0,0.0,100.0
+CPU_ALL,T0050,1.8,1.8,0.0,96.4,,0.02
+LPAR,T0050,0.025,1,2,7,0.50,0,0.00,0.32,0.36,1,1,1.82,1.82,0.00,1.45,0.91,0.91,0.00,0.73
+MEM,T0050,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0050,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0050,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0050,89.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0050,4.80,0.00,1070,2094,37,0,0,0,18,0
+FILE,T0050,0,186,0,81868,104,0,0,0
+NET,T0050,0.8,0.7,0.0,0.0,0.0,0.0,
+NETPACKET,T0050,13.9,13.6,0.6,0.3,0.0,0.6,
+NETERROR,T0050,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0050,0.0,1.6,0.4
+JFSFILE,T0050,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0050,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0050,0.0,0.0,0.0
+DISKREAD,T0050,0.0,0.0,0.0
+DISKWRITE,T0050,0.8,0.0,0.8
+DISKXFER,T0050,0.2,0.0,0.2
+DISKBSIZE,T0050,4.0,0.0,4.0
+TOP,0557246,T0050,1.10,0.70,0.39,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0051,11:45:13,19-JAN-2007
+CPU01,T0051,0.3,2.4,0.0,97.3
+CPU02,T0051,0.0,0.0,0.0,100.0
+CPU_ALL,T0051,2.0,1.8,0.0,96.3,,0.02
+LPAR,T0051,0.026,1,2,7,0.50,0,0.00,0.32,0.37,1,1,1.97,1.77,0.00,1.38,0.98,0.88,0.00,0.69
+MEM,T0051,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0051,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0051,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0051,89.5,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0051,5.00,0.00,1139,2201,40,1,0,0,19,0
+FILE,T0051,0,183,0,91871,105,0,0,0
+NET,T0051,0.6,0.4,0.3,0.1,0.0,0.3,
+NETPACKET,T0051,7.9,7.0,2.5,1.0,0.0,2.5,
+NETERROR,T0051,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0051,0.0,1.6,0.4
+JFSFILE,T0051,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0051,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0051,0.0,0.0,0.0
+DISKREAD,T0051,0.0,0.0,0.0
+DISKWRITE,T0051,0.8,0.0,0.8
+DISKXFER,T0051,0.2,0.0,0.2
+DISKBSIZE,T0051,4.0,0.0,4.0
+TOP,0557246,T0051,1.11,0.71,0.40,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0052,11:45:23,19-JAN-2007
+CPU01,T0052,1.1,0.6,0.1,98.2
+CPU02,T0052,0.0,0.0,0.0,100.0
+CPU_ALL,T0052,1.8,1.8,0.0,96.4,,0.02
+LPAR,T0052,0.025,1,2,7,0.50,0,0.00,0.31,0.35,1,1,1.83,1.75,0.00,1.36,0.92,0.88,0.00,0.68
+MEM,T0052,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0052,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0052,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0052,89.5,0.0,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0052,4.50,0.00,1082,2115,37,1,0,0,19,0
+FILE,T0052,0,186,0,81868,514,0,0,0
+NET,T0052,0.4,0.3,0.2,0.0,0.0,0.2,
+NETPACKET,T0052,6.5,6.2,2.3,0.4,0.0,2.3,
+NETERROR,T0052,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0052,0.0,2.0,0.5
+JFSFILE,T0052,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0052,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0052,0.0,0.1,0.0
+DISKREAD,T0052,0.0,0.0,0.0
+DISKWRITE,T0052,0.8,0.4,0.8
+DISKXFER,T0052,0.2,0.1,0.2
+DISKBSIZE,T0052,4.0,4.0,4.0
+TOP,0557246,T0052,0.98,0.62,0.36,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0053,11:45:33,19-JAN-2007
+CPU01,T0053,1.9,1.7,0.0,96.4
+CPU02,T0053,1.0,0.1,0.0,98.9
+CPU_ALL,T0053,2.6,3.3,0.0,94.1,,0.03
+LPAR,T0053,0.040,1,2,7,0.50,0,0.00,0.49,0.57,1,1,2.59,3.31,0.00,2.02,1.29,1.65,0.00,1.01
+MEM,T0053,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0053,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0053,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0053,94.3,0.0,0.7,0.0,0.0,0.0,0.0,0.0
+PROC,T0053,5.10,0.00,1111,3683,63,1,0,0,53,7
+FILE,T0053,0,454,0,148535,242,0,0,0
+NET,T0053,1.3,1.2,0.1,0.1,0.0,0.1,
+NETPACKET,T0053,20.5,19.6,1.8,1.0,0.0,1.8,
+NETERROR,T0053,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0053,0.0,28.4,7.1
+JFSFILE,T0053,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0053,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0053,1.1,1.2,1.1
+DISKREAD,T0053,0.0,0.0,0.0
+DISKWRITE,T0053,9.2,10.0,9.2
+DISKXFER,T0053,2.3,2.5,2.3
+DISKBSIZE,T0053,4.0,4.0,4.0
+TOP,0557246,T0053,1.08,0.69,0.39,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+TOP,0286898,T0053,0.38,0.19,0.18,7,12452,24,10104,42852,0.618,2,db2fmp,Unclassified
+TOP,0155740,T0053,0.36,0.00,0.36,14,508,8,460,0,0.029,0,syncd,Unclassified
+TOP,0581670,T0053,0.14,0.05,0.10,1,7016,48,5316,210,0.327,1,db2sysc,Unclassified
+ZZZZ,T0054,11:45:43,19-JAN-2007
+CPU01,T0054,1.3,0.3,0.0,98.4
+CPU02,T0054,0.0,0.0,0.0,100.0
+CPU_ALL,T0054,1.8,1.9,0.0,96.3,,0.02
+LPAR,T0054,0.025,1,2,7,0.50,0,0.00,0.32,0.36,1,1,1.82,1.86,0.00,1.42,0.91,0.93,0.00,0.71
+MEM,T0054,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0054,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0054,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0054,89.7,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0054,5.20,0.00,1039,2057,37,1,0,0,18,0
+FILE,T0054,0,180,0,81868,129,0,0,0
+NET,T0054,0.4,0.4,0.2,0.0,0.0,0.2,
+NETPACKET,T0054,6.9,6.6,1.3,0.4,0.0,1.3,
+NETERROR,T0054,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0054,0.0,1.6,0.4
+JFSFILE,T0054,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0054,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0054,0.0,0.0,0.0
+DISKREAD,T0054,0.0,0.0,0.0
+DISKWRITE,T0054,0.8,0.0,0.8
+DISKXFER,T0054,0.2,0.0,0.2
+DISKBSIZE,T0054,4.0,0.0,4.0
+TOP,0557246,T0054,1.04,0.66,0.38,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+TOP,0155740,T0054,0.11,0.00,0.11,14,508,8,460,0,0.029,0,syncd,Unclassified
+ZZZZ,T0055,11:45:53,19-JAN-2007
+CPU01,T0055,0.0,1.1,0.0,98.9
+CPU02,T0055,0.0,0.0,0.0,100.0
+CPU_ALL,T0055,2.0,1.8,0.0,96.2,,0.02
+LPAR,T0055,0.026,1,2,7,0.50,0,0.00,0.32,0.37,1,1,1.97,1.81,0.00,1.42,0.99,0.90,0.00,0.71
+MEM,T0055,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0055,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0055,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0055,90.7,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0055,6.00,0.00,1148,2223,43,1,0,0,19,0
+FILE,T0055,0,190,0,93717,112,0,0,0
+NET,T0055,0.4,0.3,0.1,0.1,0.0,0.1,
+NETPACKET,T0055,6.5,5.6,2.0,1.0,0.0,2.0,
+NETERROR,T0055,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0055,0.0,1.6,0.4
+JFSFILE,T0055,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0055,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0055,0.0,0.0,0.0
+DISKREAD,T0055,0.0,0.0,0.0
+DISKWRITE,T0055,0.8,0.0,0.8
+DISKXFER,T0055,0.2,0.0,0.2
+DISKBSIZE,T0055,4.0,0.0,4.0
+TOP,0557246,T0055,1.11,0.71,0.40,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0056,11:46:03,19-JAN-2007
+CPU01,T0056,0.2,1.3,0.0,98.5
+CPU02,T0056,0.0,0.0,0.0,100.0
+CPU_ALL,T0056,1.9,1.8,0.0,96.2,,0.02
+LPAR,T0056,0.026,1,2,7,0.50,0,0.00,0.33,0.38,1,1,1.94,1.85,0.00,1.48,0.97,0.92,0.00,0.74
+MEM,T0056,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0056,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0056,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0056,89.7,0.0,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0056,5.10,0.00,1123,2171,37,1,0,0,20,0
+FILE,T0056,0,187,0,81868,514,0,0,0
+NET,T0056,0.8,0.8,0.2,0.0,0.0,0.2,
+NETPACKET,T0056,14.1,13.8,2.1,0.3,0.0,2.1,
+NETERROR,T0056,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0056,0.0,2.0,0.5
+JFSFILE,T0056,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0056,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0056,0.0,0.0,0.0
+DISKREAD,T0056,0.0,0.0,0.0
+DISKWRITE,T0056,0.8,0.4,0.8
+DISKXFER,T0056,0.2,0.1,0.2
+DISKBSIZE,T0056,4.0,4.0,4.0
+TOP,0557246,T0056,1.15,0.74,0.41,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0057,11:46:13,19-JAN-2007
+CPU01,T0057,0.1,1.3,0.0,98.6
+CPU02,T0057,0.0,0.0,0.0,100.0
+CPU_ALL,T0057,2.0,1.8,0.0,96.3,,0.02
+LPAR,T0057,0.025,1,2,7,0.50,0,0.00,0.32,0.36,1,1,1.95,1.75,0.00,1.38,0.98,0.88,0.00,0.69
+MEM,T0057,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0057,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0057,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0057,89.7,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0057,5.10,0.00,1111,2164,40,1,0,0,19,0
+FILE,T0057,0,183,0,91871,105,0,0,0
+NET,T0057,0.6,0.4,0.3,0.1,0.0,0.3,
+NETPACKET,T0057,7.7,6.8,2.5,1.0,0.0,2.5,
+NETERROR,T0057,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0057,0.0,2.4,0.6
+JFSFILE,T0057,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0057,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0057,0.0,0.0,0.0
+DISKREAD,T0057,0.0,0.0,0.0
+DISKWRITE,T0057,1.2,0.0,1.2
+DISKXFER,T0057,0.3,0.0,0.3
+DISKBSIZE,T0057,4.0,0.0,4.0
+TOP,0557246,T0057,1.11,0.71,0.39,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0058,11:46:23,19-JAN-2007
+CPU01,T0058,1.2,0.2,0.0,98.6
+CPU02,T0058,0.0,0.0,0.0,100.0
+CPU_ALL,T0058,1.8,1.7,0.0,96.5,,0.02
+LPAR,T0058,0.024,1,2,7,0.50,0,0.00,0.30,0.34,1,1,1.79,1.71,0.00,1.32,0.89,0.86,0.00,0.66
+MEM,T0058,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0058,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0058,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0058,89.7,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0058,4.00,0.00,1059,2072,37,1,0,0,18,0
+FILE,T0058,0,186,0,81868,105,0,0,0
+NET,T0058,0.3,0.3,0.0,0.0,0.0,0.0,
+NETPACKET,T0058,6.3,6.0,0.6,0.4,0.0,0.6,
+NETERROR,T0058,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0058,0.0,1.6,0.4
+JFSFILE,T0058,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0058,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0058,0.0,0.0,0.0
+DISKREAD,T0058,0.0,0.0,0.0
+DISKWRITE,T0058,0.8,0.0,0.8
+DISKXFER,T0058,0.2,0.0,0.2
+DISKBSIZE,T0058,4.0,0.0,4.0
+TOP,0557246,T0058,1.02,0.65,0.37,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0059,11:46:33,19-JAN-2007
+CPU01,T0059,0.6,3.7,0.2,95.5
+CPU02,T0059,0.0,0.0,0.0,100.0
+CPU_ALL,T0059,2.8,3.3,0.0,93.8,,0.04
+LPAR,T0059,0.041,1,2,7,0.50,0,0.00,0.51,0.58,1,1,2.83,3.34,0.01,1.98,1.41,1.67,0.00,0.99
+MEM,T0059,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0059,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0059,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0059,95.1,0.0,3.3,0.0,0.0,0.0,0.0,0.0
+PROC,T0059,4.90,0.00,1159,3741,63,3,0,0,53,7
+FILE,T0059,0,462,0,148535,1052,0,0,0
+NET,T0059,0.8,0.6,0.3,0.1,0.0,0.3,
+NETPACKET,T0059,11.9,11.0,3.7,1.0,0.0,3.7,
+NETERROR,T0059,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0059,0.0,49.6,12.3
+JFSFILE,T0059,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0059,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0059,1.3,2.4,1.3
+DISKREAD,T0059,0.0,0.0,0.0
+DISKWRITE,T0059,9.2,31.2,9.2
+DISKXFER,T0059,2.3,7.7,2.3
+DISKBSIZE,T0059,4.0,4.1,4.0
+TOP,0557246,T0059,1.13,0.73,0.40,77,1280124,48,1271584,18,77.614,0,java,Unclassified
+TOP,0286898,T0059,0.46,0.26,0.20,7,12452,24,10104,43643,0.618,2,db2fmp,Unclassified
+TOP,0155740,T0059,0.33,0.00,0.33,14,508,8,460,0,0.029,0,syncd,Unclassified
+TOP,0643152,T0059,0.14,0.05,0.09,1,6740,48,5460,210,0.336,1,db2sysc,Unclassified
+ZZZZ,T0060,11:46:43,19-JAN-2007
+CPU01,T0060,0.2,1.5,0.2,98.1
+CPU02,T0060,0.0,0.0,0.0,100.0
+CPU_ALL,T0060,1.9,1.9,0.0,96.2,,0.02
+LPAR,T0060,0.026,1,2,7,0.50,0,0.00,0.33,0.37,1,1,1.88,1.88,0.00,1.44,0.94,0.94,0.00,0.72
+MEM,T0060,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0060,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0060,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0060,90.0,0.0,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0060,5.80,0.00,1080,2104,37,1,0,0,19,0
+FILE,T0060,0,180,0,81868,539,0,0,0
+NET,T0060,0.5,0.5,0.4,0.0,0.0,0.4,
+NETPACKET,T0060,8.3,8.0,2.8,0.4,0.0,2.8,
+NETERROR,T0060,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0060,0.0,2.0,0.5
+JFSFILE,T0060,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0060,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0060,0.2,0.1,0.2
+DISKREAD,T0060,0.0,0.0,0.0
+DISKWRITE,T0060,0.8,0.4,0.8
+DISKXFER,T0060,0.2,0.1,0.2
+DISKBSIZE,T0060,4.0,4.0,4.0
+TOP,0557246,T0060,1.11,0.72,0.39,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+TOP,0155740,T0060,0.15,0.00,0.15,14,508,8,460,0,0.029,0,syncd,Unclassified
+ZZZZ,T0061,11:46:53,19-JAN-2007
+CPU01,T0061,0.0,1.7,0.0,98.3
+CPU02,T0061,0.0,0.0,0.0,100.0
+CPU_ALL,T0061,1.9,1.8,0.0,96.3,,0.02
+LPAR,T0061,0.025,1,2,7,0.50,0,0.00,0.32,0.36,1,1,1.91,1.78,0.00,1.39,0.96,0.89,0.00,0.70
+MEM,T0061,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0061,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0061,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0061,90.7,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0061,5.10,0.00,1071,2143,43,1,0,0,18,0
+FILE,T0061,0,190,0,93717,112,0,0,0
+NET,T0061,0.5,0.3,0.1,0.1,0.0,0.1,
+NETPACKET,T0061,6.9,6.0,1.8,1.0,0.0,1.8,
+NETERROR,T0061,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0061,0.0,1.6,0.4
+JFSFILE,T0061,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0061,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0061,1.0,0.0,1.0
+DISKREAD,T0061,0.0,0.0,0.0
+DISKWRITE,T0061,0.8,0.0,0.8
+DISKXFER,T0061,0.2,0.0,0.2
+DISKBSIZE,T0061,4.0,0.0,4.0
+TOP,0557246,T0061,1.05,0.67,0.38,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0062,11:47:03,19-JAN-2007
+CPU01,T0062,0.2,1.5,0.0,98.3
+CPU02,T0062,0.0,0.0,0.0,100.0
+CPU_ALL,T0062,1.9,1.8,0.0,96.3,,0.02
+LPAR,T0062,0.026,1,2,7,0.50,0,0.00,0.32,0.37,1,1,1.88,1.80,0.00,1.45,0.94,0.90,0.00,0.72
+MEM,T0062,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0062,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0062,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0062,89.7,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0062,3.50,0.00,1104,2147,37,0,0,0,19,0
+FILE,T0062,0,187,0,81868,104,0,0,0
+NET,T0062,0.5,0.5,0.0,0.0,0.0,0.0,
+NETPACKET,T0062,7.7,7.4,0.6,0.3,0.0,0.6,
+NETERROR,T0062,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0062,0.0,1.6,0.4
+JFSFILE,T0062,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0062,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0062,0.0,0.0,0.0
+DISKREAD,T0062,0.0,0.0,0.0
+DISKWRITE,T0062,0.8,0.0,0.8
+DISKXFER,T0062,0.2,0.0,0.2
+DISKBSIZE,T0062,4.0,0.0,4.0
+TOP,0557246,T0062,1.14,0.73,0.41,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0063,11:47:13,19-JAN-2007
+CPU01,T0063,1.6,0.6,0.1,97.7
+CPU02,T0063,0.1,1.0,0.0,98.9
+CPU_ALL,T0063,1.8,1.7,0.0,96.4,,0.02
+LPAR,T0063,0.025,1,2,7,0.50,0,0.00,0.31,0.35,1,1,1.82,1.74,0.00,1.38,0.91,0.87,0.00,0.69
+MEM,T0063,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0063,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0063,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0063,89.7,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0063,5.20,0.00,996,2025,40,1,0,0,19,0
+FILE,T0063,0,183,0,91871,105,0,0,0
+NET,T0063,0.9,0.7,0.3,0.1,0.0,0.3,
+NETPACKET,T0063,13.1,12.2,2.7,1.0,0.0,2.7,
+NETERROR,T0063,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0063,0.0,1.6,0.4
+JFSFILE,T0063,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0063,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0063,0.1,0.0,0.2
+DISKREAD,T0063,0.0,0.0,0.0
+DISKWRITE,T0063,0.8,0.0,0.8
+DISKXFER,T0063,0.2,0.0,0.2
+DISKBSIZE,T0063,4.0,0.0,4.0
+TOP,0557246,T0063,1.01,0.65,0.36,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0064,11:47:23,19-JAN-2007
+CPU01,T0064,0.4,1.3,0.0,98.3
+CPU02,T0064,0.0,0.0,0.0,100.0
+CPU_ALL,T0064,1.9,1.8,0.0,96.3,,0.02
+LPAR,T0064,0.026,1,2,7,0.50,0,0.00,0.32,0.37,1,1,1.94,1.78,0.00,1.40,0.97,0.89,0.00,0.70
+MEM,T0064,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0064,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0064,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0064,89.7,0.0,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0064,6.90,0.00,1153,2198,37,1,0,0,19,0
+FILE,T0064,0,186,0,81868,514,0,0,0
+NET,T0064,0.4,0.3,0.2,0.0,0.0,0.2,
+NETPACKET,T0064,6.1,5.8,2.1,0.4,0.0,2.1,
+NETERROR,T0064,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0064,0.0,2.0,0.5
+JFSFILE,T0064,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0064,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0064,0.0,0.0,0.0
+DISKREAD,T0064,0.0,0.0,0.0
+DISKWRITE,T0064,0.8,0.4,0.8
+DISKXFER,T0064,0.2,0.1,0.2
+DISKBSIZE,T0064,4.0,4.0,4.0
+TOP,0557246,T0064,1.14,0.73,0.41,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0065,11:47:33,19-JAN-2007
+CPU01,T0065,2.4,2.3,0.0,95.3
+CPU02,T0065,1.2,0.2,0.0,98.6
+CPU_ALL,T0065,4.6,3.0,0.0,92.4,,0.04
+LPAR,T0065,0.049,1,2,7,0.50,0,0.00,0.61,0.70,1,1,4.62,2.99,0.00,2.13,2.31,1.49,0.00,1.07
+MEM,T0065,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0065,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0065,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0065,89.7,0.0,0.3,0.0,0.0,0.0,0.0,0.0
+PROC,T0065,5.50,0.00,1179,2297,40,1,0,0,19,0
+FILE,T0065,0,190,0,92076,105,0,0,0
+NET,T0065,0.8,0.6,36.9,0.1,0.0,36.9,
+NETPACKET,T0065,11.1,10.2,151.3,1.0,0.0,151.3,
+NETERROR,T0065,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0065,0.0,22.4,5.6
+JFSFILE,T0065,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0065,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0065,1.3,0.1,1.3
+DISKREAD,T0065,0.0,0.0,0.0
+DISKWRITE,T0065,9.2,4.0,9.2
+DISKXFER,T0065,2.3,1.0,2.3
+DISKBSIZE,T0065,4.0,4.0,4.0
+TOP,0557246,T0065,2.22,1.79,0.43,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+TOP,0155740,T0065,0.39,0.00,0.39,14,508,8,460,0,0.029,0,syncd,Unclassified
+TOP,0466960,T0065,0.30,0.24,0.07,1,5436,48,3992,204,0.247,0,db2sysc,Unclassified
+ZZZZ,T0066,11:47:43,19-JAN-2007
+CPU01,T0066,1.2,0.3,0.0,98.5
+CPU02,T0066,0.0,0.0,0.0,100.0
+CPU_ALL,T0066,1.8,1.8,0.0,96.4,,0.02
+LPAR,T0066,0.025,1,2,7,0.50,0,0.00,0.31,0.35,1,1,1.75,1.82,0.00,1.36,0.88,0.91,0.00,0.68
+MEM,T0066,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0066,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0066,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0066,89.7,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0066,5.40,0.00,959,1961,37,1,0,0,18,0
+FILE,T0066,0,180,0,81868,121,0,0,0
+NET,T0066,0.4,0.3,0.2,0.0,0.0,0.2,
+NETPACKET,T0066,6.3,6.0,1.5,0.4,0.0,1.5,
+NETERROR,T0066,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0066,0.0,1.6,0.4
+JFSFILE,T0066,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0066,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0066,0.0,0.0,0.0
+DISKREAD,T0066,0.0,0.0,0.0
+DISKWRITE,T0066,0.8,0.0,0.8
+DISKXFER,T0066,0.2,0.0,0.2
+DISKBSIZE,T0066,4.0,0.0,4.0
+TOP,0557246,T0066,0.98,0.63,0.35,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0067,11:47:53,19-JAN-2007
+CPU01,T0067,0.3,1.8,0.1,97.8
+CPU02,T0067,0.0,0.0,0.0,100.0
+CPU_ALL,T0067,2.0,1.8,0.0,96.2,,0.02
+LPAR,T0067,0.026,1,2,7,0.50,0,0.00,0.33,0.37,1,1,1.98,1.82,0.00,1.44,0.99,0.91,0.00,0.72
+MEM,T0067,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0067,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0067,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0067,90.7,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0067,6.50,0.00,1149,2215,43,1,0,0,18,0
+FILE,T0067,0,190,0,93717,105,0,0,0
+NET,T0067,0.5,0.3,0.1,0.1,0.0,0.1,
+NETPACKET,T0067,7.7,6.8,1.8,1.0,0.0,1.8,
+NETERROR,T0067,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0067,0.0,2.4,0.6
+JFSFILE,T0067,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0067,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0067,0.2,0.0,0.3
+DISKREAD,T0067,0.0,0.0,0.0
+DISKWRITE,T0067,1.2,0.0,1.2
+DISKXFER,T0067,0.3,0.0,0.3
+DISKBSIZE,T0067,4.0,0.0,4.0
+TOP,0557246,T0067,1.12,0.72,0.40,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0068,11:48:03,19-JAN-2007
+CPU01,T0068,0.2,1.3,0.1,98.4
+CPU02,T0068,0.0,0.0,0.0,100.0
+CPU_ALL,T0068,1.9,1.9,0.0,96.2,,0.02
+LPAR,T0068,0.026,1,2,7,0.50,0,0.00,0.33,0.37,1,1,1.90,1.86,0.00,1.47,0.95,0.93,0.00,0.73
+MEM,T0068,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0068,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0068,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0068,90.1,0.1,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0068,7.20,0.00,1072,2125,39,1,0,0,19,0
+FILE,T0068,0,190,0,84040,584,0,0,0
+NET,T0068,0.8,0.6,0.3,0.2,0.0,0.3,
+NETPACKET,T0068,11.2,10.0,2.3,1.5,0.0,2.3,
+NETERROR,T0068,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0068,0.4,2.0,0.6
+JFSFILE,T0068,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0068,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0068,0.1,0.0,0.0
+DISKREAD,T0068,0.4,0.0,0.0
+DISKWRITE,T0068,0.8,0.4,0.8
+DISKXFER,T0068,0.3,0.1,0.2
+DISKBSIZE,T0068,4.0,4.0,4.0
+TOP,0557246,T0068,1.11,0.71,0.40,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0069,11:48:13,19-JAN-2007
+CPU01,T0069,1.5,1.2,0.0,97.4
+CPU02,T0069,0.0,0.0,0.0,100.0
+CPU_ALL,T0069,1.8,1.7,0.0,96.5,,0.02
+LPAR,T0069,0.024,1,2,7,0.50,0,0.00,0.30,0.34,1,1,1.79,1.71,0.00,1.33,0.90,0.85,0.00,0.66
+MEM,T0069,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0069,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0069,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0069,89.7,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0069,5.60,0.00,963,1991,40,1,0,0,19,0
+FILE,T0069,0,183,0,91871,105,0,0,0
+NET,T0069,0.6,0.5,0.3,0.1,0.0,0.3,
+NETPACKET,T0069,8.7,7.8,2.5,1.0,0.0,2.5,
+NETERROR,T0069,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0069,0.0,1.6,0.4
+JFSFILE,T0069,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0069,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0069,0.0,0.0,0.0
+DISKREAD,T0069,0.0,0.0,0.0
+DISKWRITE,T0069,0.8,0.0,0.8
+DISKXFER,T0069,0.2,0.0,0.2
+DISKBSIZE,T0069,4.0,0.0,4.0
+TOP,0557246,T0069,0.87,0.56,0.31,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0070,11:48:23,19-JAN-2007
+CPU01,T0070,0.3,0.5,0.0,99.2
+CPU02,T0070,0.0,0.0,0.0,100.0
+CPU_ALL,T0070,1.8,1.7,0.0,96.4,,0.02
+LPAR,T0070,0.025,1,2,7,0.50,0,0.00,0.31,0.35,1,1,1.84,1.73,0.00,1.34,0.92,0.86,0.00,0.67
+MEM,T0070,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0070,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0070,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0070,89.7,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0070,6.40,0.00,1093,2127,37,1,0,0,18,0
+FILE,T0070,0,186,0,81868,105,0,0,0
+NET,T0070,0.3,0.3,0.0,0.0,0.0,0.0,
+NETPACKET,T0070,5.7,5.4,0.8,0.4,0.0,0.8,
+NETERROR,T0070,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0070,0.0,1.6,0.4
+JFSFILE,T0070,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0070,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0070,0.0,0.0,0.0
+DISKREAD,T0070,0.0,0.0,0.0
+DISKWRITE,T0070,0.8,0.0,0.8
+DISKXFER,T0070,0.2,0.0,0.2
+DISKBSIZE,T0070,4.0,0.0,4.0
+TOP,0557246,T0070,1.04,0.66,0.38,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0071,11:48:33,19-JAN-2007
+CPU01,T0071,0.3,2.3,0.3,97.1
+CPU02,T0071,0.0,0.0,0.0,100.0
+CPU_ALL,T0071,1.9,2.6,0.0,95.5,,0.03
+LPAR,T0071,0.031,1,2,7,0.50,0,0.00,0.39,0.45,1,1,1.93,2.60,0.00,1.75,0.97,1.30,0.00,0.88
+MEM,T0071,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0071,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0071,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0071,89.7,0.0,0.7,0.0,0.0,0.0,0.0,0.0
+PROC,T0071,4.60,0.00,1064,2106,40,1,0,0,19,0
+FILE,T0071,0,190,0,91871,105,0,0,0
+NET,T0071,0.7,0.5,0.1,0.1,0.0,0.1,
+NETPACKET,T0071,9.7,8.8,1.8,1.0,0.0,1.8,
+NETERROR,T0071,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0071,0.0,25.2,6.0
+JFSFILE,T0071,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0071,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0071,1.4,0.3,1.4
+DISKREAD,T0071,0.0,0.0,0.0
+DISKWRITE,T0071,10.4,4.4,10.4
+DISKXFER,T0071,2.5,1.0,2.5
+DISKBSIZE,T0071,4.2,4.4,4.2
+TOP,0557246,T0071,1.09,0.71,0.39,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0072,11:48:43,19-JAN-2007
+CPU01,T0072,0.4,1.7,0.1,97.8
+CPU02,T0072,0.0,1.0,0.0,99.0
+CPU_ALL,T0072,1.7,1.8,0.0,96.4,,0.02
+LPAR,T0072,0.025,1,2,7,0.50,0,0.00,0.31,0.35,1,1,1.73,1.82,0.00,1.35,0.86,0.91,0.00,0.68
+MEM,T0072,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0072,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0072,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0072,89.7,0.0,0.2,0.0,0.0,0.0,0.0,0.0
+PROC,T0072,4.90,0.00,970,1972,37,1,0,0,19,0
+FILE,T0072,0,180,0,81868,515,0,0,0
+NET,T0072,0.4,0.4,0.4,0.0,0.0,0.4,
+NETPACKET,T0072,7.3,7.0,2.8,0.4,0.0,2.8,
+NETERROR,T0072,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0072,0.0,2.0,0.5
+JFSFILE,T0072,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0072,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0072,0.2,0.0,0.1
+DISKREAD,T0072,0.0,0.0,0.0
+DISKWRITE,T0072,0.8,0.4,0.8
+DISKXFER,T0072,0.2,0.1,0.2
+DISKBSIZE,T0072,4.0,4.0,4.0
+TOP,0557246,T0072,0.98,0.63,0.36,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+TOP,0155740,T0072,0.47,0.00,0.47,14,508,8,460,0,0.029,0,syncd,Unclassified
+ZZZZ,T0073,11:48:53,19-JAN-2007
+CPU01,T0073,1.2,0.5,0.0,98.3
+CPU02,T0073,0.0,1.0,0.0,99.0
+CPU_ALL,T0073,2.0,1.8,0.0,96.2,,0.02
+LPAR,T0073,0.026,1,2,7,0.50,0,0.00,0.33,0.38,1,1,2.02,1.83,0.00,1.44,1.01,0.91,0.00,0.72
+MEM,T0073,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0073,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0073,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0073,90.7,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0073,5.40,0.00,1153,2234,43,1,0,0,19,0
+FILE,T0073,0,189,0,93717,112,0,0,0
+NET,T0073,0.6,0.4,0.1,0.1,0.0,0.1,
+NETPACKET,T0073,6.7,5.8,2.0,1.0,0.0,2.0,
+NETERROR,T0073,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0073,0.0,1.6,0.4
+JFSFILE,T0073,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0073,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0073,0.0,0.0,0.0
+DISKREAD,T0073,0.0,0.0,0.0
+DISKWRITE,T0073,0.8,0.0,0.8
+DISKXFER,T0073,0.2,0.0,0.2
+DISKBSIZE,T0073,4.0,0.0,4.0
+TOP,0557246,T0073,1.12,0.72,0.40,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0074,11:49:03,19-JAN-2007
+CPU01,T0074,0.4,1.7,0.1,97.8
+CPU02,T0074,0.0,0.0,0.0,100.0
+CPU_ALL,T0074,1.8,1.7,0.0,96.5,,0.02
+LPAR,T0074,0.024,1,2,7,0.50,0,0.00,0.30,0.35,1,1,1.76,1.73,0.00,1.37,0.88,0.87,0.00,0.68
+MEM,T0074,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0074,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0074,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0074,90.3,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0074,5.10,0.00,973,1984,37,0,0,0,18,0
+FILE,T0074,0,187,0,81868,104,0,0,0
+NET,T0074,0.6,0.5,0.0,0.0,0.0,0.0,
+NETPACKET,T0074,8.7,8.4,0.6,0.3,0.0,0.6,
+NETERROR,T0074,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0074,0.0,1.6,0.4
+JFSFILE,T0074,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0074,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0074,0.2,0.0,0.2
+DISKREAD,T0074,0.0,0.0,0.0
+DISKWRITE,T0074,0.8,0.0,0.8
+DISKXFER,T0074,0.2,0.0,0.2
+DISKBSIZE,T0074,4.0,0.0,4.0
+TOP,0557246,T0074,1.03,0.67,0.36,77,1280124,48,1271584,0,77.614,0,java,Unclassified
+ZZZZ,T0075,11:49:13,19-JAN-2007
+CPU01,T0075,0.2,1.0,0.0,98.8
+CPU02,T0075,0.0,1.0,0.0,99.0
+CPU_ALL,T0075,2.1,1.9,0.0,96.1,,0.02
+LPAR,T0075,0.027,1,2,7,0.50,0,0.00,0.34,0.39,1,1,2.06,1.87,0.00,1.49,1.03,0.93,0.00,0.74
+MEM,T0075,0.7,36.7,46.4,187.8,6400.0,512.0
+MEMNEW,T0075,33.3,55.5,10.5,0.7,10.7,38.3
+MEMUSE,T0075,55.5,19.1,76.6,960,1088,55.7,76.6
+PAGE,T0075,103.7,0.0,0.1,0.0,0.0,0.0,0.0,0.0
+PROC,T0075,5.70,0.00,1161,2260,45,4,0,0,19,0
+FILE,T0075,0,185,0,93018,173,0,0,0
+NET,T0075,0.8,0.4,0.3,0.3,0.0,0.3,
+NETPACKET,T0075,10.2,7.2,2.5,2.8,0.0,2.5,
+NETERROR,T0075,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+IOADAPT,T0075,0.0,1.6,0.4
+JFSFILE,T0075,5.0,0.2,57.9,7.7,2.4,30.8,1.6,97.8
+JFSINODE,T0075,2.8,0.0,9.6,1.3,0.9,5.7,0.0,60.6
+DISKBUSY,T0075,0.0,0.0,0.0
+DISKREAD,T0075,0.0,0.0,0.0
+DISKWRITE,T0075,0.8,0.0,0.8
+DISKXFER,T0075,0.2,0.0,0.2
+DISKBSIZE,T0075,4.0,0.0,4.0
+TOP,0557246,T0075,1.16,0.75,0.41,77,1280124,48,1271584,0,77.614,0,java,Unclassified

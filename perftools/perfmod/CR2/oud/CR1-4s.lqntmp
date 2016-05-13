@@ -1,0 +1,77 @@
+# pragma even uit
+# # pra gma mva=exact
+G
+"Complexiteits Reductie Plateau 1"
+1.0E-5
+500
+0
+0.9
+-1
+
+P 0
+p PBrowser f m ${N}
+p PHttp f
+p PWPS f m ${N_WPS}
+p PDB f
+p PLDAP f
+p PBSB f m ${N_BSB}
+p PGGHH f m ${N_GGHH}
+-1
+
+T 0
+t TBrKB r EBrKB -1 PBrowser z ${Z} m ${N}
+t THttpKB f EHttpInlog EHttpZoek EHttpSelect -1 PHttp m ${NT_Http}
+t TWPSKB f EWPSInlog EWPSZoek EWPSSelect -1 PWPS m ${NT_WPS}
+t TDBKB f EDBSettings -1 PDB m ${T_per_P}
+t TLDAPKB f ELDAPInlog -1 PLDAP m ${T_per_P}
+t TBSB f EBSBZoek EBSBSlKl EBSBSlInk EBSBSlBer -1 PBSB m ${T_per_P}
+t TBSBnwltc i EBSBnwltcZoek EBSBnwltcSlKl EBSBnwltcSlInk EBSBnwltcSlBer -1 
+t TGGHH f EGGHHZoek EGGHHSlKl EGGHHSlInk EGGHHSlBer -1 PGGHH m ${T_per_P}
+-1
+
+E 0
+s EBrKB ${D_BrKB} -1
+s EHttpInlog ${D_HttpKB} -1
+s EHttpZoek ${D_HttpKB} -1
+s EHttpSelect ${D_HttpKB} -1
+s EWPSInlog ${D_WPSKB} -1
+s EWPSZoek ${D_WPSKB} -1
+s EWPSSelect ${D_WPSKB} -1
+s EDBSettings ${D_DBSettings} -1
+s ELDAPInlog ${D_LDAPInlog} -1
+s EBSBZoek ${D_BSBZoek} -1
+s EGGHHZoek ${D_GGHHZoek} -1
+s EBSBnwltcZoek ${D_BSBnwltc} -1
+s EBSBSlKl ${D_BSBSlKl} -1
+s EGGHHSlKl ${D_GGHHSlKl} -1
+s EBSBnwltcSlKl ${D_BSBnwltc} -1
+s EBSBSlInk ${D_BSBSlInk} -1
+s EGGHHSlInk ${D_GGHHSlInk} -1
+s EBSBnwltcSlInk ${D_BSBnwltc} -1
+s EBSBSlBer ${D_BSBSlBer} -1
+s EGGHHSlBer ${D_GGHHSlBer} -1
+s EBSBnwltcSlBer ${D_BSBnwltc} -1
+# calls: 1 op de 120x inloggen vanuit de browser, rest van de keren gelijkmatig over zoeken en selecteren.
+y EBrKB EHttpInlog 0.008333 -1
+y EBrKB EHttpZoek 0.495833 -1
+y EBrKB EHttpSelect 0.495833 -1
+y EHttpInlog EWPSInlog 1.0 -1
+y EHttpZoek EWPSZoek 1.0 -1
+y EHttpSelect EWPSSelect 1.0 -1
+y EWPSInlog EDBSettings 1.0 -1
+y EWPSInlog ELDAPInlog 1.0 -1
+y EWPSZoek EBSBZoek 1.0 -1
+y EWPSSelect EBSBSlKl 1.0 -1
+y EWPSSelect EBSBSlInk 1.0 -1
+y EWPSSelect EBSBSlBer 1.0 -1
+y EBSBZoek EBSBnwltcZoek 1.0 -1
+y EBSBSlKl EBSBnwltcSlKl 1.0 -1
+y EBSBSlInk EBSBnwltcSlInk 1.0 -1
+y EBSBSlBer EBSBnwltcSlBer 1.0 -1
+y EBSBnwltcZoek EGGHHZoek 1.0 -1
+y EBSBnwltcSlKl EGGHHSlKl 1.0 -1
+y EBSBnwltcSlInk EGGHHSlInk 1.0 -1
+y EBSBnwltcSlBer EGGHHSlBer 1.0 -1
+-1
+
+

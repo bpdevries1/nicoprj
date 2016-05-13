@@ -1,0 +1,27 @@
+# properties to fill in CR2.lqntmp
+# names and values are string trimmed.
+
+# Default Xin = -1 => closed QN
+# op waarde groter dan 0 zetten voor open QN
+Xin         = -1
+
+# #klanten op zich niet bekend, werk met open arrival rate, toch iets zetten.
+# N_Klanten = 5000
+N_Klanten = 1000
+D_Klant = 0.001
+
+N_MW = -1
+# nreqs volgens berekening excel.
+N_reqs = 9
+# D_MW: denktijd van een medewerker, overleg met klant etc, in seconden.
+D_MW = 15
+
+# systeem kenmerken.
+N_Sys = 16
+NT_Sys = 20
+# D_Sys = 1
+D_Sys = 0.1
+
+# N_Latency = 5000
+N_Latency = 1000
+D_Lcy = 3

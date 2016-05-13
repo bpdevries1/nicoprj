@@ -1,0 +1,13 @@
+---------- Layer 1 ----------
+Twbgsql2_client Mult(10)  1     PClient         0   Ewbgsql2_client 
+Twbgsql_client  Mult(10)  1     PClient         0   Ewbgsql_client  
+---------- Layer 2 ----------
+PClient         Mult(100) 1     FCFS
+Twbgsql_cpu     Uni       1     PCPU            0   Ewbgsql2_cpu, Ewbgsql_cpu
+---------- Layer 3 ----------
+Twbgsql_disk1   Uni       1     PDisk1          0   Ewbgsql_disk1   
+PCPU            Uni       1     FCFS
+Twbgsql_disk0   Uni       1     PDisk0          0   Ewbgsql_disk0   
+---------- Layer 4 ----------
+PDisk1          Uni       1     FCFS
+PDisk0          Uni       1     FCFS

@@ -1,0 +1,129 @@
+   <processor name="PGGHH" multiplicity="${N_GGHH}" scheduling="fcfs">
+      <task name="TPersoon" multiplicity="${NT_Persoon}" scheduling="fcfs">
+         <entry name="ERaadpl_Persoon" type="PH1PH2">
+            <entry-phase-activities>
+              <activity name="ERaadpl_Persoon_ph1" phase="1" host-demand-mean="${D_Raadpl_Persoon}">
+                  <synch-call dest="Epersoon" calls-mean="1"/>
+                  <synch-call dest="Erelatie" calls-mean="4"/>
+                  <synch-call dest="Eambtenaren_ind" calls-mean="1"/>
+             </activity>
+            </entry-phase-activities>
+         </entry>
+         <entry name="ERaadpl_Persoon_Hist" type="PH1PH2">
+            <entry-phase-activities>
+              <activity name="ERaadpl_Persoon_Hist_ph1" phase="1" host-demand-mean="${D_Raadpl_Persoon_Hist}">
+                  <synch-call dest="Epersoon" calls-mean="1"/>
+                  <synch-call dest="Erelatie" calls-mean="4"/>
+                  <synch-call dest="Eambtenaren_ind" calls-mean="1"/>
+             </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+      <task name="THuisgenoten" multiplicity="${NT_Huisgenoten}" scheduling="fcfs">
+         <entry name="ERaadpl_Huisgenoten" type="PH1PH2">
+            <entry-phase-activities>
+              <activity name="ERaadpl_Huisgenoten_ph1" phase="1" host-demand-mean="${D_Raadpl_Huisgenoten}">
+                  <synch-call dest="ECollectief" calls-mean="1"/>
+             </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+      <task name="TBDOrg" multiplicity="${NT_BDOrg}" scheduling="fcfs">
+         <entry name="ERaadpl_BDOrg" type="PH1PH2">
+            <entry-phase-activities>
+              <activity name="ERaadpl_BDOrg_ph1" phase="1" host-demand-mean="${D_Raadpl_BDOrg}">
+                  <synch-call dest="EKantoor_geg" calls-mean="1"/>
+             </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+      <task name="TBerichten" multiplicity="${NT_Berichten}" scheduling="fcfs">
+         <entry name="ERaadpl_Berichten_Toez" type="PH1PH2">
+            <entry-phase-activities>
+              <activity name="ERaadpl_Berichten_Toez_ph1" phase="1" host-demand-mean="${D_Raadpl_Berichten_Toez}">
+                  <synch-call dest="Eberichten" calls-mean="20"/>
+                  <synch-call dest="Eaangifte_berichten" calls-mean="1"/>
+             </activity>
+            </entry-phase-activities>
+         </entry>
+         <entry name="ERaadpl_Berichten_Inv" type="PH1PH2">
+            <entry-phase-activities>
+              <activity name="ERaadpl_Berichten_Inv_ph1" phase="1" host-demand-mean="${D_Raadpl_Berichten_Inv}">
+                  <synch-call dest="Eberichten" calls-mean="20"/>
+                  <synch-call dest="Eaangifte_berichten" calls-mean="1"/>
+             </activity>
+            </entry-phase-activities>
+         </entry>
+         <entry name="ERaadpl_Berichten_Uitst" type="PH1PH2">
+            <entry-phase-activities>
+              <activity name="ERaadpl_Berichten_Uitst_ph1" phase="1" host-demand-mean="${D_Raadpl_Berichten_Uitst}">
+                  <synch-call dest="Eberichten" calls-mean="1"/>
+                  <synch-call dest="Eaangifte_berichten" calls-mean="1"/>
+             </activity>
+            </entry-phase-activities>
+         </entry>
+         <entry name="ERaadpl_Berichten_Ontv" type="PH1PH2">
+            <entry-phase-activities>
+              <activity name="ERaadpl_Berichten_Ontv_ph1" phase="1" host-demand-mean="${D_Raadpl_Berichten_Ontv}">
+                  <synch-call dest="Eberichten" calls-mean="70"/>
+                  <synch-call dest="Eaangifte_berichten" calls-mean="1"/>
+             </activity>
+            </entry-phase-activities>
+         </entry>
+         <entry name="ERaadpl_Berichten_Verw" type="PH1PH2">
+            <entry-phase-activities>
+              <activity name="ERaadpl_Berichten_Verw_ph1" phase="1" host-demand-mean="${D_Raadpl_Berichten_Verw}">
+                  <synch-call dest="Eberichten" calls-mean="2"/>
+                  <synch-call dest="Eaangifte_berichten" calls-mean="1"/>
+             </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+      <task name="TZaak" multiplicity="${NT_Zaak}" scheduling="fcfs">
+         <entry name="ERaadpl_Zaak_OntvVerw" type="PH1PH2">
+            <entry-phase-activities>
+              <activity name="ERaadpl_Zaak_OntvVerw_ph1" phase="1" host-demand-mean="${D_Raadpl_Zaak_OntvVerw}">
+                  <synch-call dest="Eproces_stappen" calls-mean="1"/>
+                  <synch-call dest="Eberichten" calls-mean="145"/>
+                  <synch-call dest="Einkomend_bericht" calls-mean="1"/>
+             </activity>
+            </entry-phase-activities>
+         </entry>
+         <entry name="ERaadpl_Zaak_Bezwaar" type="PH1PH2">
+            <entry-phase-activities>
+              <activity name="ERaadpl_Zaak_Bezwaar_ph1" phase="1" host-demand-mean="${D_Raadpl_Zaak_Bezwaar}">
+                  <synch-call dest="Eproces_stappen" calls-mean="1"/>
+                  <synch-call dest="Eberichten" calls-mean="4"/>
+                  <synch-call dest="Einkomend_bericht" calls-mean="1"/>
+             </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+      <task name="THeffingzaak" multiplicity="${NT_Heffingzaak}" scheduling="fcfs">
+         <entry name="ERaadpl_Heffingzaak" type="PH1PH2">
+            <entry-phase-activities>
+              <activity name="ERaadpl_Heffingzaak_ph1" phase="1" host-demand-mean="${D_Raadpl_Heffingzaak}">
+                  <synch-call dest="Edossier_gegevens" calls-mean="1"/>
+             </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+      <task name="TBeweringen" multiplicity="${NT_Beweringen}" scheduling="fcfs">
+         <entry name="ERaadpl_Beweringen" type="PH1PH2">
+            <entry-phase-activities>
+              <activity name="ERaadpl_Beweringen_ph1" phase="1" host-demand-mean="${D_Raadpl_Beweringen}">
+                  <synch-call dest="Ebeweringen_obv_heffingszaak" calls-mean="1"/>
+             </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+      <task name="TPres" multiplicity="${NT_Pres}" scheduling="fcfs">
+         <entry name="ERaadpl_Pres_struct" type="PH1PH2">
+            <entry-phase-activities>
+              <activity name="ERaadpl_Pres_struct_ph1" phase="1" host-demand-mean="${D_Raadpl_Pres_struct}">
+                  <synch-call dest="Epresentatie_structuur" calls-mean="1"/>
+             </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>

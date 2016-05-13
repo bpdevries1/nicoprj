@@ -1,0 +1,33 @@
+G
+"WBG SQL"
+1.0E-5
+50
+0
+0.9
+-1
+
+P 0
+p CPU f
+p Client f m 100
+p Disk0 f
+p Disk1 f
+-1
+
+T 0
+t wbgsql r wbgsql  -1 Client m 5
+t wbgsql_cpu f wbgsql_cpu  -1 CPU
+t wbgsql_disk0 f disk0_wbgsql  -1 Disk0
+t wbgsql_disk1 f wbgsql_disk1  -1 Disk1
+-1
+
+E 0
+s disk0_wbgsql 1.0E-4 -1
+s wbgsql 1.0E-7 -1
+y wbgsql wbgsql_cpu 1.0 -1
+s wbgsql_cpu 0.0049 -1
+y wbgsql_cpu disk0_wbgsql 1.0 -1
+y wbgsql_cpu wbgsql_disk1 1.0 -1
+s wbgsql_disk1 1.0E-4 -1
+-1
+
+

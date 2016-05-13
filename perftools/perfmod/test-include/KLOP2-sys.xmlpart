@@ -1,0 +1,25 @@
+   <processor name="PSys" multiplicity="${N_Sys}" scheduling="fcfs">
+      <task name="TSys" multiplicity="@[${NT_Sys} * ${N_Sys}]@" scheduling="fcfs">
+         <entry name="ESys" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="ESys_ph1" phase="1" host-demand-mean="${D_Sys}">
+                  <synch-call dest="ELcy" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+
+	<!-- vanuit Mainframe tasks netwerk latency aanroepen -->
+   <processor name="PLatency" multiplicity="${N_Latency}" scheduling="fcfs">
+      <task name="TLatency" multiplicity="${N_Latency}" scheduling="fcfs">
+         <entry name="ELcy" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="ELcy_ph1" phase="1" host-demand-mean="${D_Lcy}"/>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+	
+   
+

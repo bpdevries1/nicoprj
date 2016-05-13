@@ -1,0 +1,19 @@
+NT_Browser = 100
+D_Browser = 0.00001
+
+N_Portal = 12
+NT_Portal = 200
+D_Portal = 0.0001 
+
+N_PP5 = 1
+NT_Service = 50
+
+# D_Service nu obv 1 MSU, dus 0.240 * 40 = 9.6 
+# D_Service = 0.240
+D_Service = 9.6
+P5_MSU = 40.0
+
+N_PP1 = 10
+NT_Raakvlak = 200
+D_Raakvlak = 0.001
+

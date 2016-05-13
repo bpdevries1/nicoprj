@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<lqn-model name="CR2" description="Globaal model CR2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:///C:/Program Files/LQN Solvers/lqn.xsd">
+   <solver-params comment="Complexiteits Reductie PoC HPS" conv_val="1e-005" it_limit="500" print_int="10" underrelax_coeff="0.9"/>
+   <processor name="PBrowser" multiplicity="${N}" scheduling="fcfs">
+
+<!-- Uitgangspunten
+     * Bij testclient geen onderscheid in MQ/HTTP en MB/DP.
+		 * Property of BVR wel/niet geraakt wordt.
+		 * Properties voor D van HTTP en MQ variant.
+		 * Keuze DP of MQ wel met aparte tasks, omdat 't op andere hardware zit, dan calls-mean varieren.
+		 * Voor caching ook property: zonder caching is calls-mean gelijk aan 1.0, anders een stuk minder.
+
+-->
+	 
+<!-- open of closed netwerk. -->
+@[${Xin} < 0 ? {
+      <task name="TBr" multiplicity="${N}" scheduling="ref" think-time="${Z}">
+         <entry name="EBr" type="PH1PH2">
+} : {
+      <task name="TBr" multiplicity="${N}" scheduling="fcfs" >
+         <entry name="EBr" type="PH1PH2" open-arrival-rate="${Xin}">
+}
+]@
+            <entry-phase-activities>
+               <activity name="EBr_ph1" phase="1" host-demand-mean="${D_Cl}">
+                  <synch-call dest="ETCHome" calls-mean="0.5"/>
+                  <synch-call dest="ETCReq" calls-mean="0.5"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+	 
+   <processor name="P71" scheduling="fcfs">
+      <task name="TTC" multiplicity="${NT_TC}" scheduling="fcfs">
+         <entry name="ETCHome" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="ETCHome_ph1" phase="1" host-demand-mean="${D_ETCHome}"/>
+            </entry-phase-activities>
+         </entry>
+         <entry name="ETCReq" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="ETCReq_ph1" phase="1" host-demand-mean="${D_ETCReq}">
+                  <synch-call dest="EBSReq" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+      <task name="TBS" multiplicity="${NT_BS}" scheduling="fcfs">
+         <entry name="EBSReq" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EBSReq_ph1" phase="1" host-demand-mean="${D_EBSReq}">
+                  <synch-call dest="EMBReq" calls-mean="${BS_CallMB}"/>
+                  <synch-call dest="EDPReq" calls-mean="${BS_CallDP}"/>
+							 </activity>
+<!--
+               <activity name="EBSReq_ph2" phase="2" host-demand-mean="0.2659">
+							 </activity>
+-->
+							 </entry-phase-activities>
+         </entry>
+      </task>
+
+      <task name="TMB" multiplicity="${NT_MB}" scheduling="fcfs">
+         <entry name="EMBReq" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EMBReq_ph1" phase="1" host-demand-mean="${D_EMBReq}">
+                  <synch-call dest="EASReq" calls-mean="1"/>
+							 </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+
+      <task name="TABSStub" multiplicity="${NT_ABSStub}" scheduling="fcfs">
+         <entry name="EASReq" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EASReq_ph1" phase="1" host-demand-mean="${D_EASReq}"/>
+            </entry-phase-activities>
+         </entry>
+      </task>
+			
+   </processor>
+
+   <processor name="PDP" scheduling="fcfs">
+      <task name="TDP" multiplicity="${NT_DP}" scheduling="fcfs">
+         <entry name="EDPReq" type="PH1PH2">
+            <entry-phase-activities>
+						<!-- Call naar de syslog in phase 2, ofwel asynchroon, reply al gegeven. -->
+               <activity name="EDPReq_ph1" phase="1" host-demand-mean="${D_EDPReq}">
+                  <synch-call dest="EASReq" calls-mean="1"/>
+							 </activity>
+               <activity name="EDPReq_ph2" phase="2" host-demand-mean="0.0001">
+                  <synch-call dest="ESyslog" calls-mean="1"/>
+							 </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+	
+   <processor name="P70" scheduling="fcfs">
+      <task name="TSyslog" multiplicity="${NT_Syslog}" scheduling="fcfs">
+         <entry name="ESyslog" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="ESyslog_ph1" phase="1" host-demand-mean="${D_ESyslog}"/>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+   
+</lqn-model>

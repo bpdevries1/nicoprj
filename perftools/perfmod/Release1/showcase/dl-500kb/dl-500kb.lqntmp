@@ -1,0 +1,39 @@
+G
+"Showcase AIX 141"
+1.0E-5
+500
+0
+0.9
+-1
+
+P 0
+p CPU f
+p Client f m ${N}
+p Disk0 f
+p Disk1 f
+p Netw f
+-1
+
+T 0
+t showcase r showcase  -1 Client z ${Z} m ${N}
+t showcase_cpu f showcase_cpu  -1 CPU m ${N}
+t showcase_disk0 f showcase_disk0  -1 Disk0 m ${N}
+t showcase_disk1 f showcase_disk1  -1 Disk1 m ${N}
+t TSC_nwltc i ESC_nwltc  -1 
+t TSC_netw f ESC_netw  -1 Netw m ${N}
+-1
+
+E 0
+s showcase 1.0E-7 -1
+s showcase_cpu 0.0163 -1
+s showcase_disk0 0.0008 -1
+s showcase_disk1 0.0008 -1
+s ESC_netw 0.1913 -1
+s ESC_nwltc 0.006 -1
+y showcase ESC_nwltc 1.0 -1
+y ESC_nwltc ESC_netw 1.0 -1
+y ESC_netw showcase_cpu 1.0 -1
+y showcase_cpu showcase_disk0 1.0 -1
+y showcase_cpu showcase_disk1 1.0 -1
+-1
+

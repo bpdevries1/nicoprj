@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+<lqn-model name="CR2" description="Globaal model CR2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:///C:/Program Files/LQN Solvers/lqn.xsd">
+   <solver-params comment="Complexiteits Reductie Plateau 2" conv_val="1e-005" it_limit="500" print_int="10" underrelax_coeff="0.9"/>
+   <processor name="PBrowser" multiplicity="${N}" scheduling="fcfs">
+      <task name="TBr" multiplicity="${N}" scheduling="ref" think-time="${Z}">
+         <entry name="EBr" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EBr_ph1" phase="1" host-demand-mean="${D_Cl}">
+                  <synch-call dest="EHttpInlog" calls-mean="0.02"/>
+                  <synch-call dest="EHttpService" calls-mean="0.98"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+   <processor name="PHttp" scheduling="fcfs">
+      <task name="THttp" multiplicity="${NT_Http}" scheduling="fcfs">
+         <entry name="EHttpInlog" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EHttpInlog_ph1" phase="1" host-demand-mean="0.005">
+                  <synch-call dest="EWPSInlog" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+         <entry name="EHttpService" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EHttpService_ph1" phase="1" host-demand-mean="0.005">
+                  <synch-call dest="EWPSService" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+   <processor name="P151" multiplicity="${N_151}" scheduling="fcfs">
+      <task name="TWPS" multiplicity="${NT_WPS}" scheduling="fcfs">
+         <entry name="EWPSInlog" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EWPSInlog_ph1" phase="1" host-demand-mean="${D_WPS_Alg}">
+                  <synch-call dest="EDBSettings" calls-mean="1"/>
+                  <synch-call dest="ELDAPInlog" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+         <entry name="EWPSService" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EWPSService_ph1" phase="1" host-demand-mean="${D_WPS_Alg}">
+                  <synch-call dest="EESBRelatie" calls-mean="${NC_Relatie}"/>
+                  <synch-call dest="EESBBericht" calls-mean="${NC_Bericht}"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+   <processor name="PDB" scheduling="fcfs">
+      <task name="TDB" multiplicity="20" scheduling="fcfs">
+         <entry name="EDBSettings" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EDBSettings_ph1" phase="1" host-demand-mean="0.1"/>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+   <processor name="PLDAP" scheduling="fcfs">
+      <task name="TLDAP" multiplicity="20" scheduling="fcfs">
+         <entry name="ELDAPInlog" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="ELDAPInlog_ph1" phase="1" host-demand-mean="0.2"/>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+   <processor name="P154" multiplicity="${N_154}" scheduling="fcfs">
+      <task name="TESBRelatie" multiplicity="@[${N_154} * ${NT_ESB_Relatie}]@" scheduling="fcfs">
+         <entry name="EESBRelatie" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EESBRelatie_ph1" phase="1" host-demand-mean="${D_ESB_Alg}">
+                  <synch-call dest="EGGHHRelatie" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+      <task name="TESBBericht" multiplicity="@[${N_154} * ${NT_ESB_Bericht}]@" scheduling="fcfs">
+         <entry name="EESBBericht" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EESBBericht_ph1" phase="1" host-demand-mean="${D_ESB_Alg}">
+                  <synch-call dest="EGGHHBericht" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+   <processor name="PTSOT2" multiplicity="${N_TSOT2}" scheduling="fcfs">
+      <task name="TGGHHRelatie" multiplicity="@[${N_TSOT2} * ${NT_GGHH_Relatie}]@" scheduling="fcfs">
+         <entry name="EGGHHRelatie" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EGGHHRelatie_ph1" phase="1" host-demand-mean="${D_GGHH_Alg}">
+                  <synch-call dest="EBVR" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+      <task name="TGGHHBericht" multiplicity="@[${N_TSOT2} * ${NT_GGHH_Bericht}]@" scheduling="fcfs">
+         <entry name="EGGHHBericht" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EGGHHBericht_ph1" phase="1" host-demand-mean="${D_GGHH_Alg}">
+                  <synch-call dest="EBBA" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+
+   <processor name="PTSOT1" multiplicity="${N_TSOT1}" scheduling="fcfs">
+      <task name="TBVR" multiplicity="@[${N_TSOT1} * ${NT_BVR}]@" scheduling="fcfs">
+         <entry name="EBVR" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EBVR_ph1" phase="1" host-demand-mean="${D_BVR}">
+                  <synch-call dest="ELcyRel" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+      <task name="TBBA" multiplicity="@[${N_TSOT1} * ${NT_BBA}]@" scheduling="fcfs">
+         <entry name="EBBA" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EBBA_ph1" phase="1" host-demand-mean="${D_BBA}">
+                  <synch-call dest="ELcyBer" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+
+	<!-- vanuit Mainframe tasks netwerk latency aanroepen -->
+   <processor name="PLatency" multiplicity="${N_Latency}" scheduling="fcfs">
+      <task name="TLatency" multiplicity="${N_Latency}" scheduling="fcfs">
+         <entry name="ELcyBer" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="ELcyBer_ph1" phase="1" host-demand-mean="${D_ELcyBer}"/>
+            </entry-phase-activities>
+         </entry>
+         <entry name="ELcyRel" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="ELcyRel_ph1" phase="1" host-demand-mean="${D_ELcyRel}"/>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+	
+   
+</lqn-model>

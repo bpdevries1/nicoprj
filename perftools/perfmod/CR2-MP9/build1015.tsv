@@ -1,0 +1,29 @@
+001	c:\cruiseresults\artifacts\20070824190103/testrun001-screl2-lab151-300sec-warmup	Bericht	66	0.340	Relatie	353	0.704
+002	c:\cruiseresults\artifacts\20070824190103/testrun002-screl2-lab151-900sec-10thr-Xfixed	Bericht	1478	0.328	Relatie	4227	0.711
+003	c:\cruiseresults\artifacts\20070824190103/testrun003-screl2-lab151-900sec-100thr-Xfixed	Bericht	548	0.324	Relatie	1808	0.684
+004	c:\cruiseresults\artifacts\20070824190103/testrun004-screl2-lab151-900sec-100thr-Xfixed	Bericht	1310	0.331	Relatie	3982	0.771
+005	c:\cruiseresults\artifacts\20070824190103/testrun005-screl2-lab151-900sec-100thr-Xfixed	Bericht	2050	0.384	Relatie	6164	0.879
+006	c:\cruiseresults\artifacts\20070824190103/testrun006-screl2-lab151-900sec-100thr-Xfixed	Bericht	2803	0.661	Relatie	8221	1.718
+007	c:\cruiseresults\artifacts\20070824190103/testrun007-screl2-lab151-900sec-1thr	Bericht	379	0.332	Relatie	999	0.677
+008	c:\cruiseresults\artifacts\20070824190103/testrun008-screl2-lab151-900sec-2thr	Bericht	733	0.324	Relatie	1989	0.666
+009	c:\cruiseresults\artifacts\20070824190103/testrun009-screl2-lab151-900sec-3thr	Bericht	1060	0.315	Relatie	2982	0.671
+010	c:\cruiseresults\artifacts\20070824190103/testrun010-screl2-lab151-900sec-4thr	Bericht	1414	0.308	Relatie	3885	0.672
+011	c:\cruiseresults\artifacts\20070824190103/testrun011-screl2-lab151-900sec-5thr	Bericht	1638	0.320	Relatie	4691	0.695
+012	c:\cruiseresults\artifacts\20070824190103/testrun012-screl2-lab151-900sec-6thr	Bericht	1887	0.326	Relatie	5456	0.704
+013	c:\cruiseresults\artifacts\20070824190103/testrun013-screl2-lab151-900sec-8thr	Bericht	2379	0.339	Relatie	6719	0.740
+014	c:\cruiseresults\artifacts\20070824190103/testrun014-screl2-lab151-900sec-10thr	Bericht	2708	0.362	Relatie	7728	0.788
+015	c:\cruiseresults\artifacts\20070824190103/testrun015-screl2commons-lab151-900sec-10thr	Bericht	2552	0.377	Relatie	7490	0.790
+016	c:\cruiseresults\artifacts\20070824190103/testrun016-screl2-lab151-900sec-10thr-DzoekBSN	Relatie	8366	0.788
+017	c:\cruiseresults\artifacts\20070824190103/testrun017-screl2commons-lab151-900sec-10thr-DzoekBSN	Relatie	8302	0.789
+018	c:\cruiseresults\artifacts\20070824190103/testrun018-screl2-lab151-900sec-10thr-DzoekPC	Relatie	8877	0.825
+019	c:\cruiseresults\artifacts\20070824190103/testrun019-screl2-lab151-900sec-10thr-DselKlant	Bericht	3391	0.398	Relatie	6838	0.796
+020	c:\cruiseresults\artifacts\20070824190103/testrun020-screl2-lab151-900sec-10thr-DselPartner	Bericht	2449	0.389	Relatie	7404	0.797
+021	c:\cruiseresults\artifacts\20070824190103/testrun021-screl2-lab151-900sec-10thr-DselOverig2	Bericht	1332	0.366	Relatie	6721	0.780
+022	c:\cruiseresults\artifacts\20070824190103/testrun022-screl2-lab151-900sec-10thr-DselOverig4	Bericht	1252	0.357	Relatie	8818	0.783
+023	c:\cruiseresults\artifacts\20070824190103/testrun023-screl2-lab151-900sec-1thr-Z1s	Bericht	241	0.335	Relatie	676	0.680
+024	c:\cruiseresults\artifacts\20070824190103/testrun024-screl2-lab151-900sec-5thr-Z1s	Bericht	1150	0.314	Relatie	3282	0.682
+025	c:\cruiseresults\artifacts\20070824190103/testrun025-screl2-lab151-900sec-10thr-Z1s	Bericht	2071	0.339	Relatie	5887	0.756
+026	c:\cruiseresults\artifacts\20070824190103/testrun026-screl2-lab151-900sec-20thr-Z1s	Bericht	3039	0.453	Relatie	8749	1.020
+027	c:\cruiseresults\artifacts\20070824190103/testrun027-screl2-lab151-900sec-50thr-Z1s	Bericht	3508	0.747	Relatie	9780	2.788
+028	c:\cruiseresults\artifacts\20070824190103/testrun028-screl2-lab151-900sec-100thr-Z1s	Bericht	3192	0.786	Relatie	9474	3.272
+029	c:\cruiseresults\artifacts\20070824190103/testrun029-screl2commons-lab151-900sec-100thr-Z1s	Bericht	3065	0.917	Relatie	8920	3.181

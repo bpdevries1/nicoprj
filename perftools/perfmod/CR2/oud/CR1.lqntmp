@@ -1,0 +1,52 @@
+# nu even zonder pragma.
+# # pra gma mva=exact
+G
+"Complexiteits Reductie Plateau 1"
+1.0E-5
+500
+0
+0.9
+-1
+
+P 0
+p PBrowser f m ${N}
+p PHttp f
+p PWPS f m ${N_WPS}
+p PDB f
+p PLDAP f
+p PBSB f
+p PGGHH f
+-1
+
+T 0
+t TBrKB r EBrKB -1 PBrowser z ${Z} m ${N}
+t THttpKB f EHttpKB -1 PHttp m ${NT_Http}
+t TWPSKB f EWPSKB -1 PWPS m ${NT_WPS}
+t TDBKB f EDBSettings -1 PDB m ${T_per_P}
+t TLDAPKB f ELDAPInlog -1 PLDAP m ${T_per_P}
+t TBSB f EBSBZoek -1 PBSB m ${T_per_P}
+t TBSBnwltc i EBSBnwltc  -1 
+t TGGHH f EGGHHZoek -1 PGGHH m ${T_per_P}
+-1
+
+E 0
+s EBrKB ${D_BrKB} -1
+s EHttpKB ${D_HttpKB} -1
+s EWPSKB ${D_WPSKB} -1
+s EDBSettings ${D_DBSettings} -1
+s ELDAPInlog ${D_LDAPInlog} -1
+s EBSBZoek ${D_BSBZoek} -1
+s EGGHHZoek ${D_GGHHZoek} -1
+# s EBSBnwltc 0.1 -1
+s EBSBnwltc ${D_BSBnwltc} -1
+y EBrKB EHttpKB 1.0 -1
+y EHttpKB EWPSKB 1.0 -1
+y EWPSKB EDBSettings 0.008333 -1
+y EWPSKB ELDAPInlog 0.008333 -1
+y EWPSKB EBSBZoek 0.5 -1
+y EBSBZoek EBSBnwltc 1.0 -1
+y EBSBnwltc EGGHHZoek 1.0 -1
+
+-1
+
+

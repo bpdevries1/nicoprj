@@ -1,0 +1,28 @@
+G
+"Showcase AIX 141"
+1.0E-5
+50
+0
+0.9
+-1
+
+P 0
+p CPU f
+p Client f m 500
+-1
+
+T 0
+t showcase r showcase  -1 Client z ${Z} m ${N}
+t showcase_cpu f showcase_cpu EBGCpu -1 CPU m ${N}
+t TBGCl r EBGCl -1 Client z 1 m 1
+-1
+
+E 0
+s showcase 1.0E-7 -1
+s showcase_cpu 0.02 -1
+s EBGCl 1.0E-7 -1
+s EBGCpu 0.05 -1
+y showcase showcase_cpu 1.0 -1
+y EBGCl EBGCpu 1.0 -1
+-1
+

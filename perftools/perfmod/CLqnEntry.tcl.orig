@@ -1,0 +1,81 @@
+package require Itcl
+
+source [file join $env(CRUISE_DIR) checkout lib perflib.tcl]
+source [file join $env(CRUISE_DIR) checkout script lib CLogger.tcl]
+
+# class maar eenmalig definieren
+if {[llength [itcl::find classes CLqnEntry]] > 0} {
+	return
+}
+
+itcl::class CLqnEntry {
+
+	private common log
+	set log [CLogger::new_logger [file tail [info script]] info]
+
+	public proc new_instance {a_name} {
+		set result [uplevel {namespace which [CLqnEntry #auto]}]
+		$result init $a_name
+		return $result
+	}
+
+	private variable name
+	private variable service_demand
+	private variable service_time
+	private variable proc_wait
+	private variable lst_calls
+	
+	public method init {a_name} {
+		set name $a_name
+		set service_demand -1
+		set service_time -1
+		set proc_wait -1
+		set lst_calls {}
+	}
+
+	public method set_service_demand {a_service_demand} {
+		set service_demand $a_service_demand
+	}
+
+	public method set_service_time {a_service_time} {
+		set service_time $a_service_time
+	}
+
+	public method set_proc_wait {a_proc_wait} {
+		set proc_wait $a_proc_wait
+	}
+
+	public method add_call {a_call} {
+		lappend lst_calls $a_call
+	}
+
+	public method get_name {} {
+		return $name
+	}
+	
+	public method get_service_time {} {
+		return $service_time
+	}
+
+	public method get_service_demand {} {
+		return $service_demand
+	}
+		
+	public method get_proc_wait {} {
+		return $proc_wait
+	}
+
+	public method get_calls {} {
+		return $lst_calls
+	}
+
+	public method to_string {} {
+		set str "$name (D=$service_demand; R=$service_time; proc_wait=$proc_wait"
+		foreach call $lst_calls {
+			set str "$str\n  [$call to_string]"
+		}
+		return $str
+	}
+
+}
+	

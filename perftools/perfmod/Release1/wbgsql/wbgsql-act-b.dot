@@ -1,0 +1,23 @@
+digraph G {
+orientation=landscape;size="8,10";
+graph [label="wbgsql-act-b.lqn"]
+p_PCPU[label="PCPU\n fifo "]
+p_PClient[label="PClient\n100 fifo "][peripheries=2]
+p_PDisk0[label="PDisk0\n fifo "]
+p_PDisk1[label="PDisk1\n fifo "]
+node [shape=record]
+t_Twbgsql2_client[shape=record,label="<Ewbgsql2_client> Ewbgsql2_client\nS0.0000001|<Twbgsql2_client> Twbgsql2_client\n10 ref "][peripheries=2]
+t_Twbgsql2_client:Twbgsql2_client -> p_PClient[style=dotted]
+t_Twbgsql_client[shape=record,label="<Ewbgsql_client> Ewbgsql_client\nS0.0000001|<Twbgsql_client> Twbgsql_client\n10 ref "][peripheries=2]
+t_Twbgsql_client:Twbgsql_client -> p_PClient[style=dotted]
+t_Twbgsql_cpu[shape=record,label="<Ewbgsql_cpu> Ewbgsql_cpu\nS0.003|<Ewbgsql2_cpu> Ewbgsql2_cpu\nS0.0019|<Twbgsql_cpu> Twbgsql_cpu\n fifo "]
+t_Twbgsql_cpu:Twbgsql_cpu -> p_PCPU[style=dotted]
+t_Twbgsql_disk0[shape=record,label="<Ewbgsql_disk0> Ewbgsql_disk0\nS0.0001|<Twbgsql_disk0> Twbgsql_disk0\n fifo "]
+t_Twbgsql_disk0:Twbgsql_disk0 -> p_PDisk0[style=dotted]
+t_Twbgsql_disk1[shape=record,label="<Ewbgsql_disk1> Ewbgsql_disk1\nS0.0001|<Twbgsql_disk1> Twbgsql_disk1\n fifo "]
+t_Twbgsql_disk1:Twbgsql_disk1 -> p_PDisk1[style=dotted]
+t_Twbgsql_client:Ewbgsql_client -> t_Twbgsql_cpu:Ewbgsql_cpu[label="1.0"]
+t_Twbgsql_cpu:Ewbgsql2_cpu -> t_Twbgsql_disk1:Ewbgsql_disk1[label="1.0"]
+t_Twbgsql2_client:Ewbgsql2_client -> t_Twbgsql_cpu:Ewbgsql2_cpu[label="1.0"]
+t_Twbgsql_cpu:Ewbgsql_cpu -> t_Twbgsql_disk0:Ewbgsql_disk0[label="1.0"]
+}

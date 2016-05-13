@@ -1,0 +1,8 @@
+# properties to fill in Showcase.lqntmp
+# names and values are string trimmed.
+# KlKoffie is lopen naar de automaat
+D_KlKoffie  = 0.5
+# D_KlLopen   = 30
+# AuKoffie is kiezen koffie + bereiden, waar automaat dus druk mee is.
+D_AuKoffie  = 1
+

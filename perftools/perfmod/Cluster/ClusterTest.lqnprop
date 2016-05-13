@@ -1,0 +1,25 @@
+# properties to fill in CR1.lqntmp
+# names and values are string trimmed.
+# D_KB_cpu    = 0.0190
+# N_WPS         = 1
+# T_per_P tasks per processor. Als dit 1 is, is er maar 1 task-thread op de processor actief, die evt synchroon aan het wachten is.
+# als deze waarde te groot is, bv gelijk aan N, duurt het berekenen heel lang.
+T_per_P       = 3
+NT_Http       = 50
+NT_WPS        = 20
+
+# Service demands
+# browser: erg weinig, nu alleen niet de scherm opbouw erbij, want wordt niet door JMeter gedaan.
+D_BrKB        = 0.00001
+
+# gemeten 0.0478 op de 141; verdeeld over WPSKB en PSP en Http!
+# gemeten op de 149: 0.0197 is dus voor WPS
+# gemeten op de 140: 0.0260 is voor WPS, PSP en Http. Verschil is 0,0063, waarvan PSP het meest.
+# wel PSP en Http zelfde throughput ongeveer. PSP: 0,005 en Http: 0,0013
+D_WPSKB       = 0.1
+D_HttpKB      = 0.00001
+D_PSP					= 0.00001
+# db totaal: 0.0176, evenredig verdelen over settings en ldap inlog: 0.0088
+D_DBSettings  = 0.00001
+D_LDAPInlog   = 0.00001
+

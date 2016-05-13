@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<lqn-model name="CR2" description="Globaal model CR2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:///D:/util/perf/lqn/LQN Solvers/lqn.xsd">
+   <solver-params comment="Complexiteits Reductie Plateau 2" conv_val="1e-005" it_limit="500" print_int="10" underrelax_coeff="0.9"/>
+
+   <processor name="PBP1" multiplicity="${N}" scheduling="fcfs">
+      <task name="TBP1" multiplicity="${N}" scheduling="fcfs" >
+         <entry name="EBP1" type="PH1PH2" open-arrival-rate="0.2">
+            <entry-phase-activities>
+               <activity name="EBP1_ph1" phase="1" host-demand-mean="0.01">
+                  <synch-call dest="ES1" calls-mean="1"/>
+                  <synch-call dest="ES2" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+
+   <processor name="PBP2" multiplicity="${N}" scheduling="fcfs">
+
+<!-- open of closed netwerk. -->
+@[${Xin} < 0 ? {
+      <task name="TBP2" multiplicity="${N}" scheduling="ref" think-time="${Z}">
+         <entry name="EBP2" type="PH1PH2">
+} : {
+      <task name="TBP2" multiplicity="${N}" scheduling="fcfs" >
+         <entry name="EBP2" type="PH1PH2" open-arrival-rate="${Xin}">
+}
+]@
+            <entry-phase-activities>
+               <activity name="EBP2_ph1" phase="1" host-demand-mean="0.01">
+                  <synch-call dest="ES2" calls-mean="1"/>
+                  <synch-call dest="ES3" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+
+   <processor name="PS1" scheduling="fcfs">
+      <task name="TS1" multiplicity="20" scheduling="fcfs">
+         <entry name="ES1" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="ES1_ph1" phase="1" host-demand-mean="0.5">
+                  <synch-call dest="EBS1" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+
+   <processor name="PS2" scheduling="fcfs">
+      <task name="TS2" multiplicity="20" scheduling="fcfs">
+         <entry name="ES2" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="ES2_ph1" phase="1" host-demand-mean="0.1">
+                  <synch-call dest="EBS2" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+
+   <processor name="PS3" scheduling="fcfs">
+      <task name="TS3" multiplicity="20" scheduling="fcfs">
+         <entry name="ES3" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="ES3_ph1" phase="1" host-demand-mean="0.15">
+                  <synch-call dest="EBS2" calls-mean="1"/>
+                  <synch-call dest="EES1" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+
+   <processor name="PBS1" scheduling="fcfs">
+      <task name="TBS1" multiplicity="20" scheduling="fcfs">
+         <entry name="EBS1" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EBS1_ph1" phase="1" host-demand-mean="0.2"/>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+
+   <processor name="PBS2" scheduling="fcfs">
+      <task name="TBS2" multiplicity="20" scheduling="fcfs">
+         <entry name="EBS2" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EBS2_ph1" phase="1" host-demand-mean="0.1"/>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+
+   <processor name="PES1" scheduling="fcfs">
+      <task name="TES1" multiplicity="20" scheduling="fcfs">
+         <entry name="EES1" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EES1_ph1" phase="1" host-demand-mean="0.3"/>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+   
+</lqn-model>

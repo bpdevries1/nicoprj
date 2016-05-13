@@ -1,0 +1,71 @@
+# properties to fill in CR2.lqntmp
+# names and values are string trimmed.
+# D_KB_cpu    = 0.0190
+
+# Aannames inhoud gegevens
+# per postcode wordt maar één BSN gevonden.
+N_BSN         = 1
+
+# multiplicity van processoren, ofwel hoeveel zijn er van elke.
+N_WPS         = 1
+N_GGHH				= 1
+N_BSB					= 1
+N_BVR					= 1
+
+# T_per_P tasks per processor. Als dit 1 is, is er maar 1 task-thread op de processor actief, die evt synchroon aan het wachten is.
+# als deze waarde te groot is, bv gelijk aan N, duurt het berekenen heel lang.
+T_per_P       = 20
+NT_Http       = 100
+NT_WPS        = 100
+NT_BSB				= 100
+NT_GGHH				= 5
+NT_BVR        = 5
+
+# factoren voor model met alle pagina's genoemd
+fct_Inlog					= 0.0063
+fct_ZoekKlantBSN	= 0.4100
+fct_ZoekKlantPC		= 0.0050
+fct_SelectKlant		= 0.4141
+fct_SelectPartner	= 0.0605
+fct_SelectOverig	= 0.0884
+
+# Service demands
+# browser: erg weinig, nu alleen niet de scherm opbouw erbij, want wordt niet door JMeter gedaan.
+D_Cl        = 0.1
+
+D_BrKB        = 0.1
+D_HttpKB      = 0.005
+# D_WPSKB       = 0.02
+D_WPS_Alg      = 0.0377
+D_DBSettings  = 0.1
+D_LDAPInlog   = 0.2
+
+#D_BSBZoek     = 0.002
+#D_BSBSlKl     = 0.002
+#D_BSBSlInk    = 0.002
+#D_BSBSlBer    = 0.002
+#D_BSB_Alg      = 0.2772
+# onderstaande D_BSB_Alg gebaseerd op stellen U_BSB op 100%
+D_BSB_Alg      = 0.2875
+D_BSB_ZoekKlantPC      = 0.4616
+D_BSB_SelectKlant      = 0.2414
+
+D_GGHH_Alg		= 0.0207
+#D_GGHHZoek    = 0.02
+#D_GGHHSlKl    = 0.02
+#D_GGHHSlInk   = 0.02
+#D_GGHHSlBer   = 0.02
+
+# D_tranform uit gegevens Peter Schuler, hier nu meetgegevens opnemen.
+# D_transform		= 0.310
+
+D_BVR					= 0.030
+D_BVR_Alg			= 0.030
+
+# mogelijk nog verschillende berichtgroottes.
+msgsize     = 2
+# @todo @[]@ niet nodig hier in de properties file?
+D_msg       = @[3e-6*${msgsize}*${msgsize}+0.0013*${msgsize}]@
+# @todo: eerst getallen in de xml, later hier weer opnemen.
+# berekening van D_msg moet eigenlijk dus hier.
+

@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<lqn-model name="CR2" description="Globaal model CR2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:///C:/Program Files/LQN Solvers/lqn.xsd">
+   <solver-params comment="Complexiteits Reductie Plateau 2" conv_val="1e-005" it_limit="500" print_int="10" underrelax_coeff="0.9"/>
+
+   <processor name="PKlant" multiplicity="${N_Klanten}" scheduling="fcfs">
+<!-- open of closed netwerk. -->
+@[${Xin} < 0 ? {
+      <task name="TKlant" multiplicity="${N_Klanten}" scheduling="ref" think-time="${Z_Klant}">
+         <entry name="EKlant" type="PH1PH2">
+} : {
+      <task name="TKlant" multiplicity="${N_Klanten}" scheduling="fcfs" >
+         <entry name="EKlant" type="PH1PH2" open-arrival-rate="${Xin}">
+}
+]@
+            <entry-phase-activities>
+               <activity name="EKlant_ph1" phase="1" host-demand-mean="${D_Klant}">
+                  <synch-call dest="EMW" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+   <processor name="PMW" multiplicity="${N_MW}" scheduling="fcfs">
+      <task name="TMW" multiplicity="${N_MW}" scheduling="fcfs">
+         <entry name="EMW" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="EMW_ph1" phase="1" host-demand-mean="@[${N_reqs} * ${D_MW}]@">
+                  <synch-call dest="ESys" calls-mean="${N_reqs}"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+   <processor name="PSys" multiplicity="${N_Sys}" scheduling="fcfs">
+      <task name="TSys" multiplicity="@[${NT_Sys} * ${N_Sys}]@" scheduling="fcfs">
+         <entry name="ESys" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="ESys_ph1" phase="1" host-demand-mean="${D_Sys}">
+                  <synch-call dest="ELcy" calls-mean="1"/>
+               </activity>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+
+	<!-- vanuit Mainframe tasks netwerk latency aanroepen -->
+   <processor name="PLatency" multiplicity="${N_Latency}" scheduling="fcfs">
+      <task name="TLatency" multiplicity="${N_Latency}" scheduling="fcfs">
+         <entry name="ELcy" type="PH1PH2">
+            <entry-phase-activities>
+               <activity name="ELcy_ph1" phase="1" host-demand-mean="${D_Lcy}"/>
+            </entry-phase-activities>
+         </entry>
+      </task>
+   </processor>
+	
+   
+</lqn-model>

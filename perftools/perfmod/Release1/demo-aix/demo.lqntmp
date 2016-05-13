@@ -1,0 +1,32 @@
+G
+"DEMO AIX 141"
+1.0E-5
+50
+0
+0.9
+-1
+
+P 0
+p CPU f
+p Client f m 100
+p Disk0 f
+p Disk1 f
+-1
+
+T 0
+t demo r demo  -1 Client z ${Z} m ${N}
+t demo_cpu f demo_cpu  -1 CPU
+t demo_disk0 f demo_disk0  -1 Disk0
+t demo_disk1 f demo_disk1  -1 Disk1
+-1
+
+E 0
+s demo_disk0 0.0002 -1
+s demo 1.0E-7 -1
+y demo demo_cpu 1.0 -1
+s demo_cpu 0.0345 -1
+y demo_cpu demo_disk0 1.0 -1
+y demo_cpu demo_disk1 1.0 -1
+s demo_disk1 0.0002 -1
+-1
+

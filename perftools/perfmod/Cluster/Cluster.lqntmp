@@ -1,0 +1,54 @@
+# nu even zonder pragma.
+# # pra gma mva=exact
+G
+"Complexiteits Reductie Plateau 1"
+1.0E-5
+500
+0
+0.9
+-1
+
+P 0
+p PBrowser f m ${N}
+p P140 f m 1
+# p P149 f m 1
+p P142 f m 1
+p P149 f m 1
+-1
+
+T 0
+t TBrKB r EBrKB -1 PBrowser z ${Z} m ${N}
+t THttpKB f EHttpKB -1 P140 m ${NT_Http}
+t TWPSKB1 f EWPSKB1 -1 P140 m ${NT_WPS}
+t TWPSKB2 f EWPSKB2 -1 P149 m ${NT_WPS}
+t TPSP f EPSP -1 P140 m ${NT_WPS}
+t TDBKB f EDBSettings -1 P142 m ${T_per_P}
+t TLDAPKB f ELDAPInlog -1 P142 m ${T_per_P}
+-1
+
+E 0
+s EBrKB ${D_BrKB} -1
+s EHttpKB ${D_HttpKB} -1
+s EWPSKB1 ${D_WPSKB} -1
+s EWPSKB2 ${D_WPSKB} -1
+s EDBSettings ${D_DBSettings} -1
+s ELDAPInlog ${D_LDAPInlog} -1
+s EPSP ${D_PSP} -1
+
+y EBrKB EHttpKB 1.0 -1
+y EHttpKB EWPSKB1 0.5 -1
+y EHttpKB EWPSKB2 0.5 -1
+# 5 + 3 * 120 = 365 requests per loop
+# 1 / 365 = 0,00273973: 1 van deze keren inloggen
+# 360 / 365 = 0.98630137: 360 van deze keren PSP benaderen.
+y EWPSKB1 EPSP 0.98630137 -1
+y EWPSKB1 EDBSettings 0.00273973 -1
+y EWPSKB1 ELDAPInlog 0.00273973 -1
+
+y EWPSKB2 EPSP 0.98630137 -1
+y EWPSKB2 EDBSettings 0.00273973 -1
+y EWPSKB2 ELDAPInlog 0.00273973 -1
+
+-1
+
+

@@ -1,0 +1,59 @@
+package require Itcl
+
+source [file join $env(CRUISE_DIR) checkout lib perflib.tcl]
+source [file join $env(CRUISE_DIR) checkout script lib CLogger.tcl]
+
+# class maar eenmalig definieren
+if {[llength [itcl::find classes CLqnCall]] > 0} {
+	return
+}
+
+itcl::class CLqnCall {
+
+	private common log
+	set log [CLogger::new_logger [file tail [info script]] info]
+
+	public proc new_instance {a_from_entry a_to_entry a_n_calls} {
+		set result [uplevel {namespace which [CLqnCall #auto]}]
+		$result init $a_from_entry $a_to_entry $a_n_calls
+		return $result
+	}
+
+	private variable from_entry
+	private variable to_entry
+	private variable n_calls
+	private variable task_wait
+
+	public method init {a_from_entry a_to_entry a_n_calls} {
+		set from_entry $a_from_entry
+		set to_entry $a_to_entry
+		set n_calls $a_n_calls
+		set task_wait 0.0
+	}
+	
+	public method set_task_wait {a_task_wait} {
+		set task_wait $a_task_wait
+	}
+
+	public method get_from_entry {} {
+		return $from_entry
+	}
+
+	public method get_to_entry {} {
+		return $to_entry
+	}
+
+	public method get_n_calls {} {
+		return $n_calls
+	}
+
+	public method get_task_wait {} {
+		return $task_wait
+	}
+
+	public method to_string {} {
+		return "[$from_entry get_name] -> [$to_entry get_name] (n=$n_calls; task_wait=$task_wait)"
+	}
+
+}
+	

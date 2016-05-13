@@ -1,0 +1,25 @@
+#pragma mva=exact
+G
+"Koffie Gastec"
+1.0E-5
+500
+0
+0.9
+-1
+
+P 0
+p Automaat p
+p Klant f m ${N}
+-1
+
+T 0
+t TKlKoffie r EKlKoffie -1 Klant z ${Z} m ${N}
+t TAuKoffie f EAuKoffie -1 Automaat m ${N}
+-1
+
+E 0
+s EKlKoffie ${D_KlKoffie} -1
+s EAuKoffie ${D_AuKoffie} -1
+y EKlKoffie EAuKoffie 1.0 -1
+-1
+

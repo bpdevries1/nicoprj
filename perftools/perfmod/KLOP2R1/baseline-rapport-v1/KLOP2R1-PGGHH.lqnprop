@@ -1,0 +1,79 @@
+# Properties van processor: PGGHH
+N_GGHH = 10
+# Properties van task: TPersoon
+NT_Persoon = 100
+# Properties van entry: ERaadpl_Persoon
+D_Raadpl_Persoon = 0.0001
+# Properties van call: ERaadpl_Persoon -> Epersoon (n=1; task_wait=0.0)
+# Properties van call: ERaadpl_Persoon -> Erelatie (n=4; task_wait=0.0)
+# Properties van call: ERaadpl_Persoon -> Eambtenaren_ind (n=1; task_wait=0.0)
+# Properties van entry: ERaadpl_Persoon_Hist
+D_Raadpl_Persoon_Hist = 0.0001
+# Properties van call: ERaadpl_Persoon_Hist -> Epersoon (n=1; task_wait=0.0)
+# Properties van call: ERaadpl_Persoon_Hist -> Erelatie (n=4; task_wait=0.0)
+# Properties van call: ERaadpl_Persoon_Hist -> Eambtenaren_ind (n=1; task_wait=0.0)
+# Properties van task: THuisgenoten
+NT_Huisgenoten = 100
+# Properties van entry: ERaadpl_Huisgenoten
+D_Raadpl_Huisgenoten = 0.0001
+# Properties van call: ERaadpl_Huisgenoten -> ECollectief (n=1; task_wait=0.0)
+# Properties van task: TBDOrg
+NT_BDOrg = 100
+# Properties van entry: ERaadpl_BDOrg
+D_Raadpl_BDOrg = 0.0001
+# Properties van call: ERaadpl_BDOrg -> EKantoor_geg (n=1; task_wait=0.0)
+# Properties van task: TBerichten
+NT_Berichten = 100
+# Properties van entry: ERaadpl_Berichten_Toez
+D_Raadpl_Berichten_Toez = 0.0001
+# Properties van call: ERaadpl_Berichten_Toez -> Eberichten (n=20; task_wait=0.0)
+# Properties van call: ERaadpl_Berichten_Toez -> Eaangifte_berichten (n=1; task_wait=0.0)
+# Properties van entry: ERaadpl_Berichten_Inv
+D_Raadpl_Berichten_Inv = 0.0001
+# Properties van call: ERaadpl_Berichten_Inv -> Eberichten (n=20; task_wait=0.0)
+# Properties van call: ERaadpl_Berichten_Inv -> Eaangifte_berichten (n=1; task_wait=0.0)
+# Properties van entry: ERaadpl_Berichten_Uitst
+D_Raadpl_Berichten_Uitst = 0.0001
+# Properties van call: ERaadpl_Berichten_Uitst -> Eberichten (n=1; task_wait=0.0)
+# Properties van call: ERaadpl_Berichten_Uitst -> Eaangifte_berichten (n=1; task_wait=0.0)
+# Properties van entry: ERaadpl_Berichten_Ontv
+D_Raadpl_Berichten_Ontv = 0.0001
+# Properties van call: ERaadpl_Berichten_Ontv -> Eberichten (n=70; task_wait=0.0)
+# Properties van call: ERaadpl_Berichten_Ontv -> Eaangifte_berichten (n=1; task_wait=0.0)
+# Properties van entry: ERaadpl_Berichten_Verw
+D_Raadpl_Berichten_Verw = 0.0001
+# Properties van call: ERaadpl_Berichten_Verw -> Eberichten (n=2; task_wait=0.0)
+# Properties van call: ERaadpl_Berichten_Verw -> Eaangifte_berichten (n=1; task_wait=0.0)
+# Properties van task: TZaak
+NT_Zaak = 100
+# Properties van entry: ERaadpl_Zaak_OntvVerw
+D_Raadpl_Zaak_OntvVerw = 0.0001
+# Properties van call: ERaadpl_Zaak_OntvVerw -> Eproces_stappen (n=1; task_wait=0.0)
+# Properties van call: ERaadpl_Zaak_OntvVerw -> Eberichten (n=145; task_wait=0.0)
+# Properties van call: ERaadpl_Zaak_OntvVerw -> Einkomend_bericht (n=1; task_wait=0.0)
+# Properties van entry: ERaadpl_Zaak_Bezwaar
+D_Raadpl_Zaak_Bezwaar = 0.0001
+# Properties van call: ERaadpl_Zaak_Bezwaar -> Eproces_stappen (n=1; task_wait=0.0)
+# Properties van call: ERaadpl_Zaak_Bezwaar -> Eberichten (n=4; task_wait=0.0)
+# Properties van call: ERaadpl_Zaak_Bezwaar -> Einkomend_bericht (n=1; task_wait=0.0)
+# Properties van task: THeffingzaak
+NT_Heffingzaak = 100
+# Properties van entry: ERaadpl_Heffingzaak
+D_Raadpl_Heffingzaak = 0.0001
+# Properties van call: ERaadpl_Heffingzaak -> Edossier_gegevens (n=1; task_wait=0.0)
+# Properties van task: TBeweringen
+NT_Beweringen = 100
+# Properties van entry: ERaadpl_Beweringen
+D_Raadpl_Beweringen = 0.0001
+# Properties van call: ERaadpl_Beweringen -> Ebeweringen_obv_heffingszaak (n=1; task_wait=0.0)
+# Properties van task: TPres
+NT_Pres = 100
+# Properties van entry: ERaadpl_Pres_struct
+D_Raadpl_Pres_struct = 0.0001
+# Properties van call: ERaadpl_Pres_struct -> Epresentatie_structuur (n=1; task_wait=0.0)
+# Properties van task: TInning
+NT_Inning = 100
+# Properties van entry: ERaadPl_Inning_meldingen
+D_RaadPl_Inning_meldingen = 0.0001
+# Properties van call: ERaadPl_Inning_meldingen -> Einning_meldingen (n=1; task_wait=0.0)
+# Properties van call: ERaadPl_Inning_meldingen -> Einning_regels (n=5; task_wait=0.0)

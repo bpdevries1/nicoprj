@@ -1,0 +1,9 @@
+# properties to fill in Showcase.lqntmp
+# names and values are string trimmed.
+D_SC_cpu    = 0.0041
+D_SC_disk   = 0.0001
+D_SC_netw   = 0.0132
+D_SC_nwltc  = 0.006
+# D_BG_cpu nu lager, op 3 CPU's, houd factor 4,75 aan...
+# D_BG_cpu    = 0.04
+D_BG_cpu    = 0.00842

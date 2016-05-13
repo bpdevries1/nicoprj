@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!--lqn-model name="KLOP2" description="Perf model KLOP2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:///C:/Program Files/LQN Solvers/lqn.xsd"-->
+<lqn-model name="KLOP2" description="Perf model KLOP2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:///${LQN_Solver_Home}/lqn.xsd">
+   <solver-params comment="Complexiteits Reductie KLOP2" conv_val="1e-005" it_limit="500" print_int="10" underrelax_coeff="0.9"/>
+
+@[INCLUDE KLOP2R1-PBrowser.xmlinc]@
+@[INCLUDE KLOP2R1-PPortal.xmlinc]@
+@[INCLUDE KLOP2R1-PGGHH.xmlinc]@
+@[INCLUDE KLOP2R1-PMF.xmlinc]@
+</lqn-model>

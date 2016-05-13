@@ -1,0 +1,132 @@
+#FIG 3.2
+Portrait
+Center
+Inches
+Letter
+75.00
+Single
+-2
+# Created By: C:\nico\util\lqn\LQN Solvers\lqn2ps.exe Version 3.10
+# Invoked as: C:\nico\util\lqn\LQN Solvers\lqn2ps.exe -Ofig wbgsql-act-b.lqn
+# WBG SQL
+1200 2
+0 32 #ffa400
+# Task Twbgsql2_client r Ewbgsql2_client -1 PClient
+2 3 0 1 -1 -1 41 0 0  0.000 0 0 -1 0 0 5
+	408 333 333 1083 1458 1083 1533 333 408 333 
+2 3 0 1 -1 -1 40 0 0  0.000 0 0 -1 0 0 5
+	375 300 300 1050 1425 1050 1500 300 375 300 
+# Task Twbgsql2_client r Ewbgsql2_client -1 PClient
+6 150 825 1650 975 
+4 1 -1 5 0 -1 9 0.000 4 150 3000 900 933 Twbgsql2_client {10}\001
+-6
+# Entry Ewbgsql2_client s [1e-007]
+2 1 0 1 -1 -1 39 0 -1  0.000 0 0 -1 0 0 4
+	585 300 540 750 1245 750 1290 300 
+# Entry Ewbgsql2_client s [1e-007]
+6 353 375 1478 675 
+4 1 -1 5 0 -1 9 0.000 4 150 2250 915 492 Ewbgsql2_client\001
+4 1 -1 5 0 -1 9 0.000 4 150 1200 915 642 [1e-007]\001
+-6
+# Call Ewbgsql2_client Ewbgsql2_cpu y (1)
+2 1 0 1 -1 -1 38 0 -1  0.000 0 0 -1 1 0 2
+	2 1 1.0 50 100
+	915 750 1238 1950 
+# Call Ewbgsql2_client Ewbgsql2_cpu y (1)
+6 1044 1575 1269 1725 
+4 1 -1 5 0 -1 9 0.000 4 150 450 1157 1683 (1)\001
+-6
+# Task Twbgsql_client r Ewbgsql_client -1 PClient
+2 3 0 1 -1 -1 41 0 0  0.000 0 0 -1 0 0 5
+	1758 333 1683 1083 2808 1083 2883 333 1758 333 
+2 3 0 1 -1 -1 40 0 0  0.000 0 0 -1 0 0 5
+	1725 300 1650 1050 2775 1050 2850 300 1725 300 
+# Task Twbgsql_client r Ewbgsql_client -1 PClient
+6 1538 825 2963 975 
+4 1 -1 5 0 -1 9 0.000 4 150 2850 2250 933 Twbgsql_client {10}\001
+-6
+# Entry Ewbgsql_client s [1e-007]
+2 1 0 1 -1 -1 39 0 -1  0.000 0 0 -1 0 0 4
+	1935 300 1890 750 2595 750 2640 300 
+# Entry Ewbgsql_client s [1e-007]
+6 1740 375 2790 675 
+4 1 -1 5 0 -1 9 0.000 4 150 2100 2265 492 Ewbgsql_client\001
+4 1 -1 5 0 -1 9 0.000 4 150 1200 2265 642 [1e-007]\001
+-6
+# Call Ewbgsql_client Ewbgsql_cpu y (1)
+2 1 0 1 -1 -1 38 0 -1  0.000 0 0 -1 1 0 2
+	2 1 1.0 50 100
+	2265 750 1943 1950 
+# Call Ewbgsql_client Ewbgsql_cpu y (1)
+6 1911 1575 2136 1725 
+4 1 -1 5 0 -1 9 0.000 4 150 450 2023 1683 (1)\001
+-6
+# Task Twbgsql_cpu n Ewbgsql_cpu Ewbgsql2_cpu -1 PCPU
+2 3 0 1 -1 -1 30 0 0  0.000 0 0 -1 0 0 5
+	908 1950 833 2700 2243 2700 2318 1950 908 1950 
+# Task Twbgsql_cpu n Ewbgsql_cpu Ewbgsql2_cpu -1 PCPU
+6 1163 2475 1988 2625 
+4 1 -1 5 0 -1 9 0.000 4 150 1650 1575 2583 Twbgsql_cpu\001
+-6
+# Entry Ewbgsql2_cpu s [0.0019]
+2 1 0 1 -1 -1 29 0 -1  0.000 0 0 -1 0 0 3
+	863 2400 1568 2400 1613 1950 
+# Entry Ewbgsql2_cpu s [0.0019]
+6 788 2025 1688 2325 
+4 1 -1 5 0 -1 9 0.000 4 150 1800 1238 2142 Ewbgsql2_cpu\001
+4 1 -1 5 0 -1 9 0.000 4 150 1200 1238 2292 [0.0019]\001
+-6
+# Call Ewbgsql2_cpu Ewbgsql_disk1 y (1)
+2 1 0 1 -1 -1 28 0 -1  0.000 0 0 -1 1 0 2
+	2 1 1.0 50 100
+	1238 2400 915 3600 
+# Call Ewbgsql2_cpu Ewbgsql_disk1 y (1)
+6 883 3225 1108 3375 
+4 1 -1 5 0 -1 9 0.000 4 150 450 996 3333 (1)\001
+-6
+# Entry Ewbgsql_cpu s [0.003]
+2 1 0 1 -1 -1 29 0 -1  0.000 0 0 -1 0 0 2
+	1568 2400 2273 2400 
+# Entry Ewbgsql_cpu s [0.003]
+6 1530 2025 2355 2325 
+4 1 -1 5 0 -1 9 0.000 4 150 1650 1943 2142 Ewbgsql_cpu\001
+4 1 -1 5 0 -1 9 0.000 4 150 1050 1943 2292 [0.003]\001
+-6
+# Call Ewbgsql_cpu Ewbgsql_disk0 y (1)
+2 1 0 1 -1 -1 28 0 -1  0.000 0 0 -1 1 0 2
+	2 1 1.0 50 100
+	1943 2400 2265 3600 
+# Call Ewbgsql_cpu Ewbgsql_disk0 y (1)
+6 2072 3225 2297 3375 
+4 1 -1 5 0 -1 9 0.000 4 150 450 2184 3333 (1)\001
+-6
+# Task Twbgsql_disk1 n Ewbgsql_disk1 -1 PDisk1
+2 3 0 1 -1 -1 20 0 0  0.000 0 0 -1 0 0 5
+	375 3600 300 4350 1425 4350 1500 3600 375 3600 
+# Task Twbgsql_disk1 n Ewbgsql_disk1 -1 PDisk1
+6 413 4125 1388 4275 
+4 1 -1 5 0 -1 9 0.000 4 150 1950 900 4233 Twbgsql_disk1\001
+-6
+# Entry Ewbgsql_disk1 s [0.0001]
+2 1 0 1 -1 -1 19 0 -1  0.000 0 0 -1 0 0 4
+	585 3600 540 4050 1245 4050 1290 3600 
+# Entry Ewbgsql_disk1 s [0.0001]
+6 428 3675 1403 3975 
+4 1 -1 5 0 -1 9 0.000 4 150 1950 915 3792 Ewbgsql_disk1\001
+4 1 -1 5 0 -1 9 0.000 4 150 1200 915 3942 [0.0001]\001
+-6
+# Task Twbgsql_disk0 n Ewbgsql_disk0 -1 PDisk0
+2 3 0 1 -1 -1 20 0 0  0.000 0 0 -1 0 0 5
+	1725 3600 1650 4350 2775 4350 2850 3600 1725 3600 
+# Task Twbgsql_disk0 n Ewbgsql_disk0 -1 PDisk0
+6 1763 4125 2738 4275 
+4 1 -1 5 0 -1 9 0.000 4 150 1950 2250 4233 Twbgsql_disk0\001
+-6
+# Entry Ewbgsql_disk0 s [0.0001]
+2 1 0 1 -1 -1 19 0 -1  0.000 0 0 -1 0 0 4
+	1935 3600 1890 4050 2595 4050 2640 3600 
+# Entry Ewbgsql_disk0 s [0.0001]
+6 1778 3675 2753 3975 
+4 1 -1 5 0 -1 9 0.000 4 150 1950 2265 3792 Ewbgsql_disk0\001
+4 1 -1 5 0 -1 9 0.000 4 150 1200 2265 3942 [0.0001]\001
+-6
