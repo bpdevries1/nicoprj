@@ -29,7 +29,7 @@ proc zip_project {dir zipfile} {
 
   # for testing etc no password:
 
-  set ignores {*.exe *.dll *.jar *.log *.out *.xls .git tryout target output logs}
+  set ignores {*~ *.exe *.dll *.jar *.log *.out *.xls .git tryout target output logs}
   set options [map add_xr $ignores]
   
   # set options {-xr!*.exe -xr!*.dll -xr!*.log -xr!*.xls -xr!.git}

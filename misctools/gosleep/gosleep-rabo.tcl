@@ -10,7 +10,8 @@ set UNISON_BINARY {c:\PCC\Util\Unison\Unison-2.40.102-Text.exe}
 
 proc main {} {
   zip_projects
-  if 1 {
+  zip_vugens
+  if 0 {
 	  unison -auto projecten2h
 	  unison -auto -batch backup2g
 	  unison -auto -batch vugen2h
@@ -50,17 +51,25 @@ proc zip_project {dir zipfile} {
   set old_path $env(PATH)
   set env(PATH) {c:\PCC\Util\cygwin\bin}
   puts "current dir: [pwd]"
-  file delete $zipfile
+  
+  file delete [det_win_file $zipfile]
   exec "C:/PCC/Util/cygwin/lib/p7zip/7z.exe" a -tzip -p1234test $zipfile * -xr!*.exe -xr!*.dll -xr!*.log -xr!*.xls
   set env(PATH) $old_path
 }
 
+
 proc zip_vugens {} {
-  exec {c:\pcc\util\tcl86\bin\tclsh86.exe} {C:\PCC\Nico\nicoprj\perftools\vugentools\vugenclean.tcl} {c:\PCC\Nico\VuGen}
-  zip_vugen Dotcom
-  zip_vugen RCC_CashBalancingWidget
-  zip_vugen RCC_LoansWidget
-  zip_vugen Transact_secure
+  # [2016-05-12 17:20:30] niet altijd de clean, want soms juist wel alle info bewaren.
+  # exec {c:\pcc\util\tcl86\bin\tclsh86.exe} {C:\PCC\Nico\nicoprj\perftools\vugentools\vugenclean.tcl} {c:\PCC\Nico\VuGen}
+  zip_vugen ClientReporting
+  zip_vugen clrep-rec-20160512a
+  if 0 {
+	zip_vugen RCC_All
+  }
+  #zip_vugen Dotcom
+  #zip_vugen RCC_CashBalancingWidget
+  #zip_vugen RCC_LoansWidget
+  #zip_vugen Transact_secure
 }
 
 # moet wel zonder .git, of leuk om erbij te hebben? hangt van grootte af.
@@ -71,14 +80,14 @@ proc zip_vugen {script} {
   set zipfile [file join /c/PCC/Nico/zips $script.zip]
   set dir [file join {c:\PCC\Nico\VuGen} $script]
 
-  file delete $zipfile
+  file delete [det_win_file $zipfile]
   
   # file mkdir [file dirname $zipfile]
   cd $dir
   set old_path $env(PATH)
   set env(PATH) {c:\PCC\Util\cygwin\bin}
   puts "current dir: [pwd]"
-  exec "C:/PCC/Util/cygwin/lib/p7zip/7z.exe" a -r- -tzip -p1234test $zipfile * -xr!*.exe -xr!*.dll -xr!*.log -xr!*.xls
+  exec "C:/PCC/Util/cygwin/lib/p7zip/7z.exe" a -r- -tzip -p1234test $zipfile * -xr!*.exe -xr!*.dll -xr!*.log -xr!*.xls -xr!outputs
   set env(PATH) $old_path
 }
 
@@ -148,6 +157,14 @@ proc cleanup_dir {dir} {
 		# delete may fail, because no rights or locked file.
 		catch {file delete $filename}
 	}
+}
+
+proc det_win_file {cygwin_file} {
+        if {[regexp {^/c/(.*)$} $cygwin_file z rest]} {
+             return "c:/$rest"
+        } else {
+             error "Cannot convert to windows name: $cygwin_file"
+        }
 }
 
 main
