@@ -7,12 +7,22 @@ set_log_global info
 proc main {argv} {
   global unknowns
   lassign $argv root
-  set fr [open /tmp/rename-files.sh w]
+  # set fr [open /tmp/rename-files.sh w]
+  set fr [open [file join [temp_dir] rename-files.sh] w]
   set unknowns [dict create]
   handle_dir [file normalize $root] $fr 0
   flush $fr ; # should not be needed.
   close $fr
   log warn "Unknown extensions: [lsort  [dict keys $unknowns]]"
+}
+
+proc temp_dir {} {
+	global tcl_platform
+	if {$tcl_platform(platform) == "windows"} {
+		return "c:/temp"
+	} else {
+		return /tmp
+	}
 }
 
 proc handle_dir {dir fr level} {
@@ -33,12 +43,15 @@ proc handle_dir {dir fr level} {
 proc handle_file {fr filename} {
   global unknowns
   set tp [det_type $filename]
+  # met -k optie blijft mtime al hetzelfde.
+  # set mtime [file mtime $filename]
+  set size [file size $filename]
   if {$tp == "unix"} {
     log debug "-> unix: $filename"
-    exec -ignorestderr dos2unix -k -q $filename
+    exec -ignorestderr [unix_tool_path dos2unix] -k -q $filename
   } elseif {$tp == "dos"} {
     log debug "-> dos: $filename"
-    exec -ignorestderr unix2dos -k -q $filename
+    exec -ignorestderr [unix_tool_path unix2dos] -k -q $filename
   } elseif {$tp == "bin"} {
     log debug "binary: $filename"
   } elseif {$tp == "ignore"} {
@@ -48,6 +61,19 @@ proc handle_file {fr filename} {
     dict set unknowns [string tolower [file extension $filename]] 1
     add_rename $fr $filename
   }
+  set size2 [file size $filename]
+  if {$size != $size2} {
+    log info "Changed: $filename ($size->$size2 bytes)"
+  }
+}
+
+proc unix_tool_path {tool} {
+	global tcl_platform
+	if {$tcl_platform(platform) == "windows"} {
+		return "C:/PCC/Util/cygwin/bin/$tool.exe"
+	} else {
+		return $tool
+	}
 }
 
 # maybe hidden files auto ignored?
