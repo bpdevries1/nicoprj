@@ -157,7 +157,8 @@ proc unknown args {
     if {[string range $procname 0 0] == ":"} {
       if {[string is list $dct]} {    # Only [string is] where -strict has no effect
         if {[expr [llength $dct]&1] == 0} {
-          # actual entry in dict may be with or without ":", check current and make implementation dependent on the result.
+          # actual entry in dict may be with or without ":",
+          # check current and make implementation dependent on the result.
           if {[dict exists $dct $procname]} {
             make_dict_accessor $procname
           } elseif {[dict exists $dct [string range $procname 1 end]]} {
@@ -174,8 +175,10 @@ proc unknown args {
   }
   # breakpoint
   # if the above does not apply, call the original.
-  log warn "WARNING: unknown command: [string range $args 0 100]"
-  log warn "calling original unknown for $args"
+  # [2016-05-15 13:44] don't log any message, orig unknown will handle this, and
+  # ::tk::MessageBox uses the unknown feature.
+  #log warn "WARNING: unknown command: [string range $args 0 100]"
+  #log warn "calling original unknown for $args"
   uplevel 1 [list _original_unknown {*}$args]
 }
 
