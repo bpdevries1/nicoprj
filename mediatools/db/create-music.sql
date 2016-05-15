@@ -81,7 +81,10 @@ CREATE TABLE album (
     path character varying(255) DEFAULT NULL::character varying,
     artist integer,
     name character varying(255) DEFAULT NULL::character varying,
-    notes text
+    notes text,
+    file_exists integer,
+    is_symlink integer,
+    realpath character varying(1023)
 );
 
 
@@ -320,7 +323,9 @@ CREATE TABLE musicfile (
     generic integer,
     album integer,
     artistname character varying(255) DEFAULT NULL::character varying,
-    artist integer
+    artist integer,
+    is_symlink integer,
+    realpath character varying(1023)
 );
 
 
