@@ -84,6 +84,9 @@ itcl::class MusicSchemaDef {
     $classdef add_field_def artist integer
     $classdef add_field_def name string
     $classdef add_field_def notes string
+    $classdef add_field_def file_exists integer 1
+    $classdef add_field_def is_symlink integer
+    $classdef add_field_def realpath string
   }
   
 	private method define_musicfile {} {
@@ -101,6 +104,8 @@ itcl::class MusicSchemaDef {
     $classdef add_field_def generic integer
     $classdef add_field_def album integer
     $classdef add_field_def artist integer
+    $classdef add_field_def is_symlink integer
+    $classdef add_field_def realpath string
 	}
 
 	private method define_played {} {
