@@ -10,8 +10,10 @@ package require struct::list
 ::ndv::source_once [file join [file dirname [info script]] .. db MusicSchemaDef.tcl]
 ::ndv::source_once [file join [file dirname [info script]] .. lib libmusic.tcl]
 
-set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+# set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 # set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+set_log_global info
+
 
 proc main {argc argv} {
   # 14-1-2012 keep db and conn as global, their values can changes with a reconnect.
@@ -70,22 +72,38 @@ proc mark_played {path} {
   }
   $log debug "Mark as played in database: $path" 
   try_eval {
-    # set lst_ids [::mysql::sel $conn "select generic from musicfile where path = '[$db str_to_db [det_path_in_db $path]]'" -flatlist]
-    set lst_ids [det_ids $db $conn $path] 
+    # set lst_generic_ids [::mysql::sel $conn "select generic from musicfile where path = '[$db str_to_db [det_path_in_db $path]]'" -flatlist]
+    set lst_generic_ids [det_generic_ids $db $conn $path] 
   } {
     $log warn "DB error: $errorResult, trying again..."
     # 8-1-2011 possible db connection has timed out after idle, so reconnect
     # lassign [db_connect] db conn
     db_connect_with_retry
     # and try again. If it fails again, something else is wrong.
-    set lst_ids [det_ids $db $conn $path]
+    set lst_generic_ids [det_generic_ids $db $conn $path]
   }
-  if {$lst_ids == {}} {
-    $log warn "Not found in DB: $path"
-    add_to_logfile $path
-  } else {
-    ::ndv::music_random_update $db [list [list [lindex $lst_ids 0] "" 0]] "played" "-tablemain generic -tableplayed played"
-  }          
+
+  if 0 {
+    if {$lst_generic_ids == {}} {
+      $log warn "Not found in DB: $path"
+      add_to_logfile $path
+    } else {
+      ::ndv::music_random_update $db [list [list [lindex $lst_generic_ids 0] "" 0]] "played" "-tablemain generic -tableplayed played"
+    }    
+  }
+
+  if {$lst_generic_ids == {}} {
+    $log warn "Not found in DB: $path, inserting new record"
+    lassign [det_realpath $path] realpath is_symlink    
+    set generic_id [$db insert_object generic -gentype "musicfile" -freq 1.0 -play_count 0]
+    set musicfile_id [$db insert_object musicfile -generic $generic_id \
+                          -realpath $realpath -is_symlink $is_symlink \
+                          -file_exists 1]
+    
+    set lst_generic_ids [list $generic_id]
+  }
+  ::ndv::music_random_update $db [list [list [lindex $lst_generic_ids 0] "" 0]] "played" "-tablemain generic -tableplayed played"
+  
 }
 
 proc add_to_logfile {path} {
@@ -129,7 +147,7 @@ proc det_playing_path {} {
     set res [exec qdbus org.kde.amarok /Player org.freedesktop.MediaPlayer.GetMetadata]  
   } {}
   if {[regexp {location: ([^\n]+)} $res z url]} {
-    puts "url: $url"
+    log debug "url: $url"
     url_to_filename $url  
   } else {
     return ""
@@ -195,8 +213,8 @@ proc db_connect {} {
   # list $db $conn 
 }
 
-proc det_ids {db conn path} { 
-  pg_query_flatlist $conn "select generic from musicfile where path = '[$db str_to_db [det_path_in_db $path]]'"
+proc det_generic_ids {db conn path} { 
+  pg_query_flatlist $conn "select generic from musicfile where path = '[$db str_to_db [det_path_in_db $path]]' or realpath = '[$db str_to_db $path]'"
 }
 
 main $argc $argv
