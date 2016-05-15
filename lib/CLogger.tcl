@@ -34,9 +34,6 @@ namespace eval ::ndv {
 		set int_level(error) 2
 		set int_level(critical) 0
 
-    # global logfile for all CLogger instances.
-    # private common logfile ""
-    
     # 8-1-2010 NdV lijst bijhouden van alle loggers, om in een keer alle loglevels aan te kunnen passen.
     private common lst_loggers {}
     
@@ -52,24 +49,6 @@ namespace eval ::ndv {
       foreach logger $lst_loggers {
         $logger set_log_level $a_log_level 
       }
-    }
-    
-    public proc set_logfile_old {a_logfilename} {
-      if {$logfile != ""} {
-        close_logfile 
-      }
-      #set logfile [open $a_logfilename w]
-      # 29-3-2010 open for appending.
-      set logfile [open $a_logfilename a]
-    }
-    
-    public proc get_logfile_old {} {
-      return $logfile 
-    }
-    
-    public proc close_logfile_old {} {
-      close $logfile
-      set logfle ""
     }
     
 		private variable name
@@ -189,13 +168,8 @@ namespace eval ::ndv {
           puts $f_log $str_log
           flush $f_log
         }
-        #if {$logfile != ""} {
-        #  flush $logfile 
-        #}
 			}
 		}
-
-		
 	}
 }
 
@@ -210,16 +184,30 @@ proc set_log_global {level {options {}}} {
   } else {
     set log [::ndv::CLogger::new_logger [file tail [info script]] $level]  
   }
-  set logfile_name "logs/[file tail [info script]]-[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"].log"
-  $log set_file $logfile_name
+  set append 0
+  if {[:filename $options] != ""} {
+    set logfile_name [:filename $options]
+    if {[:append $options] > 0} {
+      set append 1
+    }
+  } else {
+    set logfile_name "logs/[file tail [info script]]-[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"].log"
+    set append 0
+  }
+  $log set_file $logfile_name $append
   
   # create symlink, maybe also do in set_file.
   if {$tcl_platform(platform) == "unix"} {
-    set symlink_name "logs/[file tail [info script]]-latest.log"
-    file delete $symlink_name
-    puts stderr "point $symlink_name -> $logfile_name"
-    file link -symbolic $symlink_name [file tail $logfile_name]
+    if {[:filename $options] == ""} {
+      set symlink_name "logs/[file tail [info script]]-latest.log"
+      file delete $symlink_name
+      puts stderr "point $symlink_name -> $logfile_name"
+      file link -symbolic $symlink_name [file tail $logfile_name]
+    } else {
+      # fixed logname, no need to make symlink.
+    }
   } else {
     # check: voor windows nu ook mogelijk? of nog steeds alleen voor dirs?
   }
 }
+
