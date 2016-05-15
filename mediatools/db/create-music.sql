@@ -78,7 +78,7 @@ SET default_with_oids = false;
 CREATE TABLE album (
     id integer NOT NULL,
     generic integer,
-    path character varying(255) DEFAULT NULL::character varying,
+    path character varying(1023) DEFAULT NULL::character varying,
     artist integer,
     name character varying(255) DEFAULT NULL::character varying,
     notes text,
@@ -312,7 +312,7 @@ ALTER SEQUENCE mgroup_id_seq OWNED BY mgroup.id;
 
 CREATE TABLE musicfile (
     id integer NOT NULL,
-    path character varying(255) DEFAULT NULL::character varying,
+    path character varying(1023) DEFAULT NULL::character varying,
     file_exists integer,
     trackname character varying(255) DEFAULT NULL::character varying,
     seconds integer,
