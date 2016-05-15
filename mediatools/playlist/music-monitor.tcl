@@ -83,15 +83,6 @@ proc mark_played {path} {
     set lst_generic_ids [det_generic_ids $db $conn $path]
   }
 
-  if 0 {
-    if {$lst_generic_ids == {}} {
-      $log warn "Not found in DB: $path"
-      add_to_logfile $path
-    } else {
-      ::ndv::music_random_update $db [list [list [lindex $lst_generic_ids 0] "" 0]] "played" "-tablemain generic -tableplayed played"
-    }    
-  }
-
   if {$lst_generic_ids == {}} {
     $log warn "Not found in DB: $path, inserting new record"
     lassign [det_realpath $path] realpath is_symlink    
@@ -121,18 +112,6 @@ proc det_playing {} {
   try_eval {  
     set res [exec qdbus --literal org.kde.amarok /Player GetStatus]
     if {[regexp {Argument: \(iiii\) 0, 0, 0, 0} $res]} {
-      return 1 
-    }
-  } {
-    # amarok probably not started (yet).
-  }
-  return 0
-}
-
-proc det_playing_old {} {
-  try_eval {  
-    set res [exec dcop amarok player isPlaying]
-    if {$res == "true"} {
       return 1 
     }
   } {
