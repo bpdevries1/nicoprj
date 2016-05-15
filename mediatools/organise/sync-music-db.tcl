@@ -271,21 +271,7 @@ proc sync_musicfile {filename artist_id album_id lst_dir_db_name} {
           set musicfile_id -2
         } else {
           # TODO: toch eerst check of de realpath mss al bestaat, dan deze gebruiken.
-          
-          set gen_id [$db insert_object generic -gentype "musicfile" -freq 1.0 -play_count 0]
-          set artist_part ""
-          if {$artist_id != -1} {
-            set artist_part "-artist $artist_id"
-          }
-          lassign [det_realpath $filename] realpath is_symlink
-          log debug "Insert new musicfile with $realpath and $is_symlink"
-          set musicfile_id [$db insert_object musicfile -generic $gen_id \
-                                -path $path_in_db -album $album_id {*}$artist_part \
-                                -realpath $realpath -is_symlink $is_symlink]
-          $db insert_object member -mgroup $ar_ids(Musicfiles) -generic $gen_id
-          if {[regexp "/Music/Singles/" $filename]} {
-            $db insert_object member -mgroup $ar_ids(Singles) -generic $gen_id
-          }
+          set musicfile_id [upsert_musicfile $artist_id $album_id $filename]
         }
         # lst_dir_db nu niet aanpassen
       } else {
@@ -304,6 +290,51 @@ proc sync_musicfile {filename artist_id album_id lst_dir_db_name} {
       return [sync_musicfile $filename $artist_id $album_id lst_dir_db]
       # return $musicfile_id      
     }
+  }
+  return $musicfile_id
+}
+
+# @pre filename does not occur as such in db.
+# @return musicfile_id, either a new one or a found one.
+# check if it exists under realpath. If so, update, otherwise, insert.
+proc upsert_musicfile {artist_id album_id filename} {
+  global db conn ar_ids
+  set path_in_db [det_path_in_db $filename]
+  lassign [det_realpath $filename] realpath is_symlink
+
+  set lst_ids [$db find_objects musicfile -realpath $realpath]
+  set query "select id,generic from musicfile where realpath = '[$db str_to_db $realpath]'"
+  log info "query: $query"
+  set res [pg_query_dicts $conn $query]
+
+  if {$artist_id != -1} {
+    set artist_part "-artist $artist_id"
+  } else {
+    set artist_part ""
+  }
+
+  if {[:# $res] > 0} {
+    # found existing musicfile: generic ready should already exist, update fields
+    # in musicfile
+    log debug "res: $res"
+    set musicfile_id [:id [:0 $res]]
+    set generic_id [:generic [:0 $res]]
+    log debug "musicfile_id: $musicfile_id"
+    
+    $db update_object musicfile $musicfile_id {*}$artist_part -album $album_id \
+        -path $path_in_db -file_exists 1
+  } else {
+    # completely new file
+    set generic_id [$db insert_object generic -gentype "musicfile" \
+                        -freq 1.0 -play_count 0]
+    log debug "Insert new musicfile with $realpath and $is_symlink"
+    set musicfile_id [$db insert_object musicfile -generic $generic_id \
+                          -path $path_in_db -album $album_id {*}$artist_part \
+                          -realpath $realpath -is_symlink $is_symlink]
+  }
+  $db insert_object member -mgroup $ar_ids(Musicfiles) -generic $generic_id
+  if {[regexp "/Music/Singles/" $filename]} {
+    $db insert_object member -mgroup $ar_ids(Singles) -generic $generic_id
   }
   return $musicfile_id
 }
