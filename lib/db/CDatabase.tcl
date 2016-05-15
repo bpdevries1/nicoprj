@@ -241,7 +241,6 @@ namespace eval ::ndv {
       regsub -all {'} $str "''" str
       regsub -all {\\} $str {\\\\} str
       return $str
-      
     }
     
   }
