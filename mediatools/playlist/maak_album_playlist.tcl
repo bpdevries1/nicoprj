@@ -11,11 +11,12 @@ package require struct::list
 
 # set SINGLES_ON_SD 150
 
-set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+# set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+set_log_global info
 
 proc main {argc argv} {
   global log db conn stderr argv0 SINGLES_ON_SD
-	$log info "Starting"
+	log info "Starting"
 
   set options {
     {n.arg "5" "Number of albums to select"}
@@ -23,7 +24,7 @@ proc main {argc argv} {
     {np "Don't mark selected files as played in database"}
   }
   set usage ": [file tail [info script]] \[options] :"
-  array set ar_argv [::cmdline::getoptions argv $options $usage]
+  array set ar_argv [getoptions argv $options $usage]
 
   set schemadef [MusicSchemaDef::new]
 
@@ -44,14 +45,14 @@ proc main {argc argv} {
   make_album_playlist $lst $ar_argv(pl)
   
   if {!$ar_argv(np)} {
-    $log info "Mark files as played in database" 
+    log info "Mark files as played in database" 
     ::ndv::music_random_update $db $lst "playlist" "-tablemain generic -viewmain albums -tableplayed played"
   } else {
-    $log info "Don't mark files as played in database" 
+    log info "Don't mark files as played in database" 
   }
   
-  $log info "$ar_argv(pl) created"  
-	$log info "Finished"
+  log debug "$ar_argv(pl) created"  
+	log info "Finished"
 }
 
 proc create_random_view {} {
@@ -71,7 +72,8 @@ proc create_random_view {} {
              where a.generic = g.id
              and mem.generic = g.id
              and mem.mgroup = mg.id
-             and mg.name = 'Albums'"
+             and mg.name = 'Albums'
+             and (a.file_exists is null or a.file_exists = 1)"
   try_eval {
     pg_query $conn $query
   } {
@@ -90,18 +92,19 @@ proc make_album_playlist {lst filename} {
    # fconfigure $f -encoding cp1252
    set lst [lsort -decreasing -real -index 2 $lst] ; # zet in de random order. (index2 = random waarde) 
    foreach el $lst {
-     foreach {gen_id db_path rnd} $el break
-     puts_album $f $gen_id $db_path
+     # foreach {generic_id db_path rnd} $el break
+     lassign $el generic_id db_path rnd
+     puts_album $f $generic_id $db_path
      # puts $f [make_copy_line $path $to_drive $index]
    }
    close $f
 }
 
-proc puts_album {f gen_id db_path} {
+proc puts_album {f generic_id db_path} {
   # kijk op filesystem zelf, niet in DB.
   # puts "db_path: $db_path"
   set path [det_linux_path $db_path]
-  puts "path: $path"
+  log debug "path: $path"
   set lst [glob -nocomplain -directory $path -type f *]
   set lst2 [lsort [::struct::list filter $lst is_music_file]]
   foreach el $lst2 {
@@ -109,15 +112,23 @@ proc puts_album {f gen_id db_path} {
   }
   if {$lst2 == {}} {
     if {[file exists $path]} {
-      puts "No music files found in dir. Other files:"
-      puts $lst
+      log warn "No music files found in dir. Other files:"
+      log warn $lst
     } else {
-      puts "Directory does not exist in file system. Rerun sync-music-db"
+      log warn "Directory $path does not exist in file system. Mark as not existing in DB."
+      mark_exists album $generic_id 0
     }
   } else {
-    puts "At least one music file"
-    
+    log debug "At least one music file"
+    mark_exists album $generic_id 1
   }
+}
+
+proc mark_exists {table generic_id exists} {
+  global db
+  # table is album here.
+  set query "update $table set file_exists = $exists where generic = $generic_id"
+  $db exec_query $query
 }
 
 proc det_linux_path {db_path} {
