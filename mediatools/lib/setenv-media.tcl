@@ -4,7 +4,8 @@
 set env(MEDIA_DRIVE) /media/nas
 set env(MEDIA_MUSIC) $env(MEDIA_DRIVE)/media/Music
 set env(MEDIA_PLAYLISTS) $env(MEDIA_MUSIC)/playlists
-set env(MEDIA_NEW) $env(MEDIA_MUSIC)/tijdelijk
+# [2016-05-15 15:17] deze dir bestaat niet meer, dus ook def weg:
+# set env(MEDIA_NEW) $env(MEDIA_MUSIC)/tijdelijk
 set env(MEDIA_SCRIPTS) /home/nico/nicoprj/mediatools/playlist
 set env(MEDIA_COMPLETE) $env(MEDIA_MUSIC)/Albums
 set env(MEDIA_SINGLES) $env(MEDIA_MUSIC)/Singles
