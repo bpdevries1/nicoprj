@@ -52,3 +52,25 @@ proc get_db_from_schemadef {} {
   set db [::ndv::CDatabase::get_database $schemadef 1]
   return $db
 }
+
+# follow symlinks to determine real, absolute path of param path.
+# if path does not exist, return {path -1}
+# could be that one (or more?) of the parent dirs is a symlink, handle this too.
+proc det_realpath {path} {
+  set parts [file split $path]
+  set curpath {}
+  set is_symlink 0
+  foreach part $parts {
+    set prevpath $curpath
+    set curpath [file join $curpath $part]
+    catch {
+      # set curpath [file link $curpath]
+      set curpath [file join $prevpath [file link $curpath]]
+      set is_symlink 1
+    }
+    if {![file exists $curpath]} {
+      return [list $curpath -1]
+    }
+  }
+  return [list $curpath $is_symlink]
+}
