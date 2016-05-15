@@ -231,27 +231,6 @@ proc upsert_album {dir artist_id} {
   return $album_id
 }
 
-# follow symlinks to determine real, absolute path of param path.
-# if path does not exist, return {path -1}
-# could be that one (or more?) of the parent dirs is a symlink, handle this too.
-proc det_realpath {path} {
-  set parts [file split $path]
-  set curpath {}
-  set is_symlink 0
-  foreach part $parts {
-    set prevpath $curpath
-    set curpath [file join $curpath $part]
-    catch {
-      # set curpath [file link $curpath]
-      set curpath [file join $prevpath [file link $curpath]]
-      set is_symlink 1
-    }
-    if {![file exists $curpath]} {
-      return [list $curpath -1]
-    }
-  }
-  return [list $curpath $is_symlink]
-}
 
 # [2016-05-15 16:38] TODO: deze zou later niet meer nodig moeten zijn, als het bij insert steeds gevuld wordt.
 proc update_realpath {table id path} {
@@ -291,6 +270,8 @@ proc sync_musicfile {filename artist_id album_id lst_dir_db_name} {
           set gen_id -2
           set musicfile_id -2
         } else {
+          # TODO: toch eerst check of de realpath mss al bestaat, dan deze gebruiken.
+          
           set gen_id [$db insert_object generic -gentype "musicfile" -freq 1.0 -play_count 0]
           set artist_part ""
           if {$artist_id != -1} {
@@ -301,14 +282,6 @@ proc sync_musicfile {filename artist_id album_id lst_dir_db_name} {
           set musicfile_id [$db insert_object musicfile -generic $gen_id \
                                 -path $path_in_db -album $album_id {*}$artist_part \
                                 -realpath $realpath -is_symlink $is_symlink]
-          # TODO: remove if 0 below:
-          if 0 {
-            if {$artist_id == -1} {
-              set musicfile_id [$db insert_object musicfile -generic $gen_id -path $path_in_db -album $album_id]
-            } else {
-              set musicfile_id [$db insert_object musicfile -generic $gen_id -path $path_in_db -album $album_id -artist $artist_id]
-            }
-          }
           $db insert_object member -mgroup $ar_ids(Musicfiles) -generic $gen_id
           if {[regexp "/Music/Singles/" $filename]} {
             $db insert_object member -mgroup $ar_ids(Singles) -generic $gen_id
@@ -348,24 +321,6 @@ proc remove_db_record {db_record} {
   } else {
     pg_query $conn $query
   }
-}
-
-proc remove_db_record_old {db_record} {
-  global conn log dryrun
-  lassign $db_record id path generic
-  # TODO check of generic record ook gedelete wordt (bv via cascading delete)
-  # zou wel moeten met deze structuur, waarbij member, musicfile en generic records
-  # tegelijk verwijderd worden.
-  $log debug "remove_db_record: $db_record"
-  foreach {table field} {member generic musicfile generic generic id} { 
-    set query "delete from $table where $field=$generic"
-    $log warn "query: $query"
-    if {!$dryrun} {
-      pg_query $conn $query   
-    } else {
-      $log info "Dryrun, so not deleting: $db_record"
-    }
-  }  
 }
 
 main $argv
