@@ -138,7 +138,8 @@ namespace eval ::ndv {
       set classdef $classdefs($class_name)
       return [$classdef update_object $id $args]
     }
-  
+
+    # @return: list of object ids: 0, 1 or more.
     public method find_objects {class_name args} {
       $log debug "args: $args \[[llength $args]\]"
       # breakpoint
@@ -146,7 +147,6 @@ namespace eval ::ndv {
       $log debug "this: $this"
       set classdef $classdefs($class_name)
       return [$classdef find_objects $args]
-    
     }
   
     # @param class_name: testbuild

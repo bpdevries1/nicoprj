@@ -110,20 +110,6 @@ namespace eval ::ndv {
       }
     }
     
-    private method connect_old {} {
-      $log debug "new connect method, for reconnecting also"
-      try_eval {
-        set conn [::mysql::connect -host localhost -user [$schemadef get_username] \
-          -password [$schemadef get_password] -db [$schemadef get_db_name]]
-        set connected 1
-        $log info "Connected to database"
-      } {
-        $log warn "Failed to connect to database: $errorResult"
-        $log warn "schemadef: $schemadef"
-        $schemadef set_no_db 1
-      }
-    }
-
     public method set_dbtype {a_dbtype} {
       set dbtype $a_dbtype      
     }
