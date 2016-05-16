@@ -1,0 +1,24 @@
+digraph G {
+rankdir = "LR"
+__CProcess__cProcess34 [label="WebSphere_Portal (10.75.99.148:376854)", style=solid];
+__CProcess__cProcess34 -> __CMachine__cProcess41 [label="58983 -> 50000", fontsize=8];
+__CMachine__cProcess41 [label="cmd? (olcru142.olo.belastingdienst.nl:pid?)", style=solid];
+__CProcess__cProcess34 -> __CMachine__cProcess42 [label="33983 -> 389", fontsize=8];
+__CMachine__cProcess42 [label="cmd? (olinfw01.pc.ololab.nl:pid?)", style=solid];
+__CProcess__cProcess34 -> __CMachine__cProcess43 [label="33984 -> 389", fontsize=8];
+__CMachine__cProcess43 [label="cmd? (olinfw01.pc.ololab.nl:pid?)", style=solid];
+__CProcess__cProcess34 -> __CMachine__cProcess44 [label="58985 -> 50000", fontsize=8];
+__CMachine__cProcess44 [label="cmd? (olcru142.olo.belastingdienst.nl:pid?)", style=solid];
+__CProcess__cProcess34 -> __CMachine__cProcess45 [label="33357 -> 50000", fontsize=8];
+__CMachine__cProcess45 [label="cmd? (olcru142.olo.belastingdienst.nl:pid?)", style=solid];
+__CProcess__cProcess4 [label="snmpd (10.75.99.148:110686)", style=solid];
+__CMachine__cProcess38 [label="cmd? (10.75.99.148:pid?)", style=solid];
+__CMachine__cProcess39 [label="cmd? (10.75.99.148:pid?)", style=solid];
+__CMachine__cProcess40 [label="cmd? (10.75.99.148:pid?)", style=solid];
+__CProcess__cProcess11 [label="hostmibd (10.75.99.148:188578)", style=solid];
+__CProcess__cProcess11 -> __CProcess__cProcess4 [label="32769 -> 32768", fontsize=8];
+__CProcess__cProcess12 [label="snmpmibd (10.75.99.148:192706)", style=solid];
+__CProcess__cProcess12 -> __CProcess__cProcess4 [label="32770 -> 32768", fontsize=8];
+__CProcess__cProcess14 [label="aixmibd (10.75.99.148:204996)", style=solid];
+__CProcess__cProcess14 -> __CProcess__cProcess4 [label="32771 -> 32768", fontsize=8];
+}

@@ -1,0 +1,72 @@
+==> {proc main {} { 	set cl1 [Class1 #auto] 	$cl1 main } } *** {proc main {} { 	set cl1 [Class1 #auto] 	$cl1 main }} *** 1 *** 0 *** 
+==> {main } *** main *** 1 *** 0 *** 
+==> {Class1 #auto} *** {Class1 #auto} *** 2 *** 1 *** 
+==> {set cl1 [Class1 #auto]} *** {set cl1 class10} *** 2 *** 1 *** 
+==> {$cl1 main} *** {class10 main} *** 2 *** 1 *** 
+==> {Class3 #auto} *** {Class3 #auto} *** 3 *** 2 *** 
+==> {set cl3 [Class3 #auto]} *** {set cl3 class30} *** 3 *** 2 *** 
+==> Class2::new_instance *** Class2::new_instance *** 3 *** 2 *** 
+==> {$CLASSNAME #auto} *** {Class2 #auto} *** 4 *** 3 *** 
+==> {set res [$CLASSNAME #auto]} *** {set res class20} *** 4 *** 3 *** 
+==> {puts "res: $res"} *** {puts {res: class20}} *** 4 *** 3 *** 
+==> {itcl::code $res} *** {itcl::code class20} *** 4 *** 3 *** 
+==> {set res2 [itcl::code $res]} *** {set res2 {namespace inscope ::Class2 class20}} *** 4 *** 3 *** 
+==> {puts "res2: $res2"} *** {puts {res2: namespace inscope ::Class2 class20}} *** 4 *** 3 *** 
+==> {namespace which $res} *** {namespace which class20} *** 4 *** 3 *** 
+==> {puts "nw: [namespace which $res]"} *** {puts {nw: ::Class2::class20}} *** 4 *** 3 *** 
+==> {return $res2} *** {return {namespace inscope ::Class2 class20}} *** 4 *** 3 *** 
+==> {set ref [Class2::new_instance]} *** {set ref {namespace inscope ::Class2 class20}} *** 3 *** 2 *** 
+==> {$cl3 method1 $ref} *** {class30 method1 {namespace inscope ::Class2 class20}} *** 3 *** 2 *** 
+==> {puts "ref: $ref"} *** {puts {ref: namespace inscope ::Class2 class20}} *** 4 *** 3 *** 
+==> {$ref get_value} *** {::unknown {namespace inscope ::Class2 class20} get_value} *** 5 *** 3 *** 
+==> {variable ::tcl::UnknownPending} *** {variable ::tcl::UnknownPending} *** 6 *** 4 *** 
+==> {global auto_noexec auto_noload env tcl_interactive} *** {global auto_noexec auto_noload env tcl_interactive} *** 6 *** 4 *** 
+==> {lindex $args 0} *** {lindex {{namespace inscope ::Class2 class20} get_value} 0} *** 6 *** 4 *** 
+==> {set cmd [lindex $args 0]} *** {set cmd {namespace inscope ::Class2 class20}} *** 6 *** 4 *** 
+==> {if {[regexp "^:*namespace\[ \t\n\]+inscope" $cmd] && [llength $cmd] == 4} { 	#return -code error "You need an {*}"         set arglist [lrange $args 1 end] 	set ret [catch {uplevel 1 ::$cmd $arglist} result opts] 	dict unset opts -errorinfo 	dict incr opts -level 	return -options $opts $result     }} *** {if {[regexp "^:*namespace\[ \t\n\]+inscope" $cmd] && [llength $cmd] == 4} { 	#return -code error "You need an {*}"         set arglist [lrange $args 1 end] 	set ret [catch {uplevel 1 ::$cmd $arglist} result opts] 	dict unset opts -errorinfo 	dict incr opts -level 	return -options $opts $result     }} *** 6 *** 4 *** 
+==> {regexp "^:*namespace\[ \t\n\]+inscope" $cmd} *** {regexp {^:*namespace[ 	 ]+inscope} {namespace inscope ::Class2 class20}} *** 6 *** 4 *** 
+==> {llength $cmd} *** {llength {namespace inscope ::Class2 class20}} *** 6 *** 4 *** 
+==> {lrange $args 1 end} *** {lrange {{namespace inscope ::Class2 class20} get_value} 1 end} *** 7 *** 4 *** 
+==> {set arglist [lrange $args 1 end]} *** {set arglist get_value} *** 7 *** 4 *** 
+==> {catch {uplevel 1 ::$cmd $arglist} result opts} *** {catch {uplevel 1 ::$cmd $arglist} result opts} *** 7 *** 4 *** 
+==> {uplevel 1 ::$cmd $arglist} *** {uplevel 1 {::namespace inscope ::Class2 class20} get_value} *** 8 *** 4 *** 
+==> {::namespace inscope ::Class2 class20 get_value} *** {::namespace inscope ::Class2 class20 get_value} *** 9 *** 3 *** 
+==> {class20 get_value} *** {class20 get_value} *** 10 *** 4 *** 
+==> {return 4242} *** {return 4242} *** 11 *** 5 *** 
+==> {set ret [catch {uplevel 1 ::$cmd $arglist} result opts]} *** {set ret 0} *** 7 *** 4 *** 
+==> {dict unset opts -errorinfo} *** {dict unset opts -errorinfo} *** 7 *** 4 *** 
+==> {::tcl::dict::unset opts -errorinfo} *** {::tcl::dict::unset opts -errorinfo} *** 8 *** 4 *** 
+==> {dict incr opts -level} *** {dict incr opts -level} *** 7 *** 4 *** 
+==> {::tcl::dict::incr opts -level} *** {::tcl::dict::incr opts -level} *** 8 *** 4 *** 
+==> {return -options $opts $result} *** {return -options {-code 0 -level 1} 4242} *** 7 *** 4 *** 
+==> {puts [$ref get_value]} *** {puts 4242} *** 4 *** 3 *** 
+==> Class2::new_instance2 *** Class2::new_instance2 *** 3 *** 2 *** 
+==> {Class2 #auto} *** {Class2 #auto} *** 4 *** 3 *** 
+==> {itcl::code [Class2 #auto]} *** {itcl::code class21} *** 4 *** 3 *** 
+==> {return [itcl::code [Class2 #auto]]} *** {return {namespace inscope ::Class2 class21}} *** 4 *** 3 *** 
+==> {set ref2 [Class2::new_instance2]} *** {set ref2 {namespace inscope ::Class2 class21}} *** 3 *** 2 *** 
+==> {$cl3 method1 $ref2} *** {class30 method1 {namespace inscope ::Class2 class21}} *** 3 *** 2 *** 
+==> {puts "ref: $ref"} *** {puts {ref: namespace inscope ::Class2 class21}} *** 4 *** 3 *** 
+==> {$ref get_value} *** {::unknown {namespace inscope ::Class2 class21} get_value} *** 5 *** 3 *** 
+==> {variable ::tcl::UnknownPending} *** {variable ::tcl::UnknownPending} *** 6 *** 4 *** 
+==> {global auto_noexec auto_noload env tcl_interactive} *** {global auto_noexec auto_noload env tcl_interactive} *** 6 *** 4 *** 
+==> {lindex $args 0} *** {lindex {{namespace inscope ::Class2 class21} get_value} 0} *** 6 *** 4 *** 
+==> {set cmd [lindex $args 0]} *** {set cmd {namespace inscope ::Class2 class21}} *** 6 *** 4 *** 
+==> {if {[regexp "^:*namespace\[ \t\n\]+inscope" $cmd] && [llength $cmd] == 4} { 	#return -code error "You need an {*}"         set arglist [lrange $args 1 end] 	set ret [catch {uplevel 1 ::$cmd $arglist} result opts] 	dict unset opts -errorinfo 	dict incr opts -level 	return -options $opts $result     }} *** {if {[regexp "^:*namespace\[ \t\n\]+inscope" $cmd] && [llength $cmd] == 4} { 	#return -code error "You need an {*}"         set arglist [lrange $args 1 end] 	set ret [catch {uplevel 1 ::$cmd $arglist} result opts] 	dict unset opts -errorinfo 	dict incr opts -level 	return -options $opts $result     }} *** 6 *** 4 *** 
+==> {regexp "^:*namespace\[ \t\n\]+inscope" $cmd} *** {regexp {^:*namespace[ 	 ]+inscope} {namespace inscope ::Class2 class21}} *** 6 *** 4 *** 
+==> {llength $cmd} *** {llength {namespace inscope ::Class2 class21}} *** 6 *** 4 *** 
+==> {lrange $args 1 end} *** {lrange {{namespace inscope ::Class2 class21} get_value} 1 end} *** 7 *** 4 *** 
+==> {set arglist [lrange $args 1 end]} *** {set arglist get_value} *** 7 *** 4 *** 
+==> {catch {uplevel 1 ::$cmd $arglist} result opts} *** {catch {uplevel 1 ::$cmd $arglist} result opts} *** 7 *** 4 *** 
+==> {uplevel 1 ::$cmd $arglist} *** {uplevel 1 {::namespace inscope ::Class2 class21} get_value} *** 8 *** 4 *** 
+==> {::namespace inscope ::Class2 class21 get_value} *** {::namespace inscope ::Class2 class21 get_value} *** 9 *** 3 *** 
+==> {class21 get_value} *** {class21 get_value} *** 10 *** 4 *** 
+==> {return 4242} *** {return 4242} *** 11 *** 5 *** 
+==> {set ret [catch {uplevel 1 ::$cmd $arglist} result opts]} *** {set ret 0} *** 7 *** 4 *** 
+==> {dict unset opts -errorinfo} *** {dict unset opts -errorinfo} *** 7 *** 4 *** 
+==> {::tcl::dict::unset opts -errorinfo} *** {::tcl::dict::unset opts -errorinfo} *** 8 *** 4 *** 
+==> {dict incr opts -level} *** {dict incr opts -level} *** 7 *** 4 *** 
+==> {::tcl::dict::incr opts -level} *** {::tcl::dict::incr opts -level} *** 8 *** 4 *** 
+==> {return -options $opts $result} *** {return -options {-code 0 -level 1} 4242} *** 7 *** 4 *** 
+==> {puts [$ref get_value]} *** {puts 4242} *** 4 *** 3 *** 
+==> {cmdtrace off } *** {cmdtrace off} *** 1 *** 0 *** 

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!-- 
+
+A Spring Context for ReflectionFacets that already provides 
+support for Java/XML and Groovy facets.
+ 
+-->
+
+<beans>
+
+	<!--                               -->
+	<!--    Acegi-enabled ProfileRepository    -->
+	<!--                               -->
+	<bean id="profileRepository" scope="singleton"
+			class="net.sourceforge.jfacets.acegi.AcegiProfileRepository">
+		<property name="userDetailsService"><ref bean="userDetailsService"/></property>
+	</bean>
+
+    <alias name="wokoUserManager" alias="userDetailsService"/>
+
+    <!--                               -->
+    <!--    Woko user manager : manages users and roles -->
+    <!--                               -->
+    <bean id="wokoUserManager" scope="singleton"
+			class="net.sf.woko.usermgt.WokoUserManager">
+        <property name="persistenceUtil">
+            <ref bean="persistenceUtil"/>
+        </property>
+        <property name="defaultUserName">
+            <value>wuser</value>
+        </property>
+        <property name="defaultUserPassword">
+            <value>wuser</value>
+        </property>
+        <property name="defaultDevName">
+            <value>wdevel</value>
+        </property>
+        <property name="defaultDevPassword">
+            <value>wdevel</value>
+        </property>
+    </bean>
+
+    <!--                                 -->
+	<!--         Facet Managers          -->
+	<!--                                 -->
+
+	<bean id="facetDescriptorManager" scope="singleton"
+			class="net.sourceforge.jfacets.impl.MetaFacetDescriptorManager"
+			init-method="initialize">		
+		<property name="managers">
+			<list>
+				<ref bean="annotatedFacetDescriptorManager"/>
+                <ref bean="xmlFacetDescriptorManager"/>
+                <ref bean="groovyFacetDescriptorManager"/>
+				<ref bean="dbFacetDescriptorManager"/>
+			</list>
+		</property>						
+	</bean>	
+	
+	<bean id="annotatedFacetDescriptorManager" scope="singleton"
+			class="net.sourceforge.jfacets.annotations.AnnotatedFacetDescriptorManager"
+			init-method="initialize">
+		<constructor-arg index="0">
+			<list>
+                <value>net.sf.woko.facets</value>
+              <!--  <value>com.xyz.myapp.facets</value> -->
+			</list>
+		</constructor-arg>
+	</bean>
+	
+	<bean id="xmlFacetDescriptorManager" scope="singleton"
+			class="net.sourceforge.jfacets.impl.FacetDescriptorManager">
+		<constructor-arg index="0"><value>woko-facets.xml</value></constructor-arg>
+	</bean>
+
+    <bean id="groovyFacetDescriptorManager" scope="singleton"
+                class="net.sourceforge.jfacets.groovy.GroovyFacetDescriptorManager"
+                init-method="initialize">
+        <constructor-arg index="0">
+            <list>
+                <value>woko-groovy-facets</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="dbFacetDescriptorManager" scope="singleton"
+			class="net.sf.woko.facets.dynamic.WokoDbFacetsDescriptorManager">
+        <property name="persistenceUtil">
+            <ref bean="persistenceUtil"/>
+        </property>
+    </bean>
+
+	<!--                                 -->
+	<!-- Facet & Facet Context factories -->
+	<!--                                 -->
+	<!-- No additional config is         -->
+	<!-- required here.                  -->
+	<!--                                 -->
+
+    <bean id="facetFactory" scope="singleton"
+            class="net.sourceforge.jfacets.groovy.GroovyFacetFactory">
+        <property name="fallbackFactory"><ref bean="fallbackFacetFactory"/></property>
+    </bean>
+
+    <bean id="fallbackFacetFactory" scope="singleton"
+			class="net.sf.woko.facets.dynamic.WokoDbGroovyFacetFactory">
+	</bean>
+
+    <bean id="facetContextFactory" scope="request"
+            class="net.sourceforge.jfacets.web.WebFacetContextFactory">
+        <constructor-arg index="0"><ref bean="webObjectsHolder"/></constructor-arg>
+    </bean>
+
+    <bean id="webObjectsHolder" scope="request"
+            class="net.sourceforge.jfacets.web.WebObjectsHolder"/>
+	
+	<!--                                    -->
+	<!--          Facet Repository          -->
+	<!--                                    -->
+	<!-- No additional config is required   -->
+	<!-- here.                              -->
+	<!--                                    -->
+
+	<bean id="facetRepository" scope="request" 
+			class="net.sourceforge.jfacets.impl.FacetRepositoryImpl">
+		<constructor-arg index="0"><ref bean="profileRepository"/></constructor-arg>
+		<constructor-arg index="1"><ref bean="facetFactory"/></constructor-arg>
+		<constructor-arg index="2"><ref bean="facetContextFactory"/></constructor-arg>
+		<constructor-arg index="3"><ref bean="facetDescriptorManager"/></constructor-arg>
+	</bean>	
+	
+	<!--                                            -->
+	<!--   filter and  top-level WebFacets bean     -->
+	<!--                                            -->
+	<!-- No additional config is required           -->
+	<!-- here.                                      -->
+	<!--                                            -->
+
+	<bean id="webFacetsFilterBean" scope="request"
+			class="net.sourceforge.jfacets.web.WebFacetsFilterBean">
+		<constructor-arg index="0"><ref bean="webObjectsHolder"/></constructor-arg>
+		<constructor-arg index="1"><ref bean="webFacets"/></constructor-arg>
+	</bean>
+
+	<bean id="webFacets" scope="request" class="net.sourceforge.jfacets.web.WebFacets">
+		<property name="facetRepository"><ref bean="facetRepository"/></property>
+        <property name="fallbackProfileId"><value>ROLE_WOKO_GUEST</value></property>
+<!--       <property name="fallbackProfileId"><value>ROLE_MYAPP_GUEST</value></property> -->
+    </bean>
+
+</beans>

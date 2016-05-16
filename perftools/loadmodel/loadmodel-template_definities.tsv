@@ -1,0 +1,17 @@
+Load Scenario		Script		Transactie		Stap		Object
+								
+Script 1		Transactie 1		Stap 1		Object 1		site.html
+Script 2		Transactie 2		Denktijd 1		Object 2		site.js
+Script 3		Transactie 3		Stap 2		Object 3		site.gif
+Script 4		Transactie 4		Denktijd 2		Object 4		site.css
+Script 5		Pacing		Stap 3		Object 5		site.xml
+Script 6				Denktijd 3		Object 6		
+								
+Synoniemen								
+Productie situatie		Business transactie		Meetbare eenheid		Page(view)		Hit
+Simulatie		(scenario)				URL		Object
+Test		action.c				Gebruikers-handeling		Dialog step
+Mix van scripts		Wordt door vuser uitgevoerd				Request		Redirect
+Workload		Usecase						Include
+		Iteratie						
+		Klikpad						

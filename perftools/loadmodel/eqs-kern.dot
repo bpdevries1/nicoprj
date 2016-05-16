@@ -1,0 +1,33 @@
+digraph G {
+		rankdir = TB
+/*
+		size="40,40";
+		ratio=fill;
+		node [fontname=Arial,fontsize=20];
+		edge [fontname=Arial,fontsize=16];
+*/
+    
+  _Nvu [label="Nvu"];
+  _Nvuprmp [label="Nvuprmp"];
+  _Tpacing [label="Tpacing"];
+  _Trmp [label="Trmp"];
+  _Trmpevery [label="Trmpevery"];
+  _Xscenps [label="Xscenps"];
+
+  _Tpacing___Nvu___Xscenps [label="Tpacing = Nvu / Xscenps",shape="rectangle",color="blue"];
+  _Xscenps -> _Tpacing___Nvu___Xscenps [color="blue"];
+  _Nvu -> _Tpacing___Nvu___Xscenps [color="blue"];
+  _Tpacing___Nvu___Xscenps -> _Tpacing [color="blue"];
+
+  _Trmpevery___Nvuprmp___Tpacing___Nvu [label="Trmpevery = Nvuprmp * Tpacing / Nvu",shape="rectangle",color="blue"];
+  _Nvuprmp -> _Trmpevery___Nvuprmp___Tpacing___Nvu [color="blue"];
+  _Nvu -> _Trmpevery___Nvuprmp___Tpacing___Nvu [color="blue"];
+  _Tpacing -> _Trmpevery___Nvuprmp___Tpacing___Nvu [color="blue"];
+  _Trmpevery___Nvuprmp___Tpacing___Nvu -> _Trmpevery [color="blue"];
+
+  _Trmp___Trmpevery____Nvu___Nvuprmp___1_ [label="Trmp = Trmpevery * (Nvu / Nvuprmp - 1)",shape="rectangle",color="blue"];
+  _Nvuprmp -> _Trmp___Trmpevery____Nvu___Nvuprmp___1_ [color="blue"];
+  _Nvu -> _Trmp___Trmpevery____Nvu___Nvuprmp___1_ [color="blue"];
+  _Trmp___Trmpevery____Nvu___Nvuprmp___1_ -> _Trmp [color="blue"];
+  _Trmpevery -> _Trmp___Trmpevery____Nvu___Nvuprmp___1_ [color="blue"];
+}

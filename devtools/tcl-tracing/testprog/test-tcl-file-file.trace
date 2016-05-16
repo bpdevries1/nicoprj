@@ -1,0 +1,447 @@
+ 1:  source CClasses.tcl
+ 2:    itcl::class ClassB {\n\n	private common CLASSNAME ClassB\n\n	pub...}
+ 3:      auto_import ::itcl::builtin::*
+ 4:        global auto_index
+ 4:        uplevel namespace current
+ 5:          namespace current
+ 4:        set ns ::
+ 4:        auto_qualify ::itcl::builtin::* ::
+ 5:          regsub -all ::+ ::itcl::builtin::* :: cmd
+ 5:          set n 3
+ 5:          if {[string match ::* $cmd]} {\n	if {$n > 1} {\n	    # ( ::foo::bar , * ...}
+ 5:          string match ::* ::itcl::builtin::*
+ 6:            ::tcl::string::match ::* ::itcl::builtin::*
+ 6:            if {$n > 1} {\n	    # ( ::foo::bar , * ) -> ::foo::bar...} else {\n	    # ( ::global , * ) -> global\n	    ...}
+ 7:              list ::itcl::builtin::*
+ 7:              return ::itcl::builtin::*
+ 4:        set patternList ::itcl::builtin::*
+ 4:        auto_load_index
+ 5:          global auto_index auto_oldpath auto_path errorInfo errorCode
+ 5:          if {[info exists auto_oldpath] && ($auto_old...} {\n	return 0\n    }
+ 5:          info exists auto_oldpath
+ 6:            ::tcl::info::exists auto_oldpath
+ 5:          set auto_oldpath {C:/NICO/UTIL/TCL8.5/lib/tcl8.5 C:/NICO/U...}
+ 5:          interp issafe
+ 5:          set issafe 0
+ 5:          for {set i [expr {[llength $auto_path] - 1}]} {$i >= 0} {incr i -1} {\n	set dir [lindex $auto_path $i]\n       ...}
+ 6:            expr {[llength $auto_path] - 1}
+ 6:            llength {C:/NICO/UTIL/TCL8.5/lib/tcl8.5 C:/NICO/U...}
+ 6:            set i 4
+ 6:            lindex {C:/NICO/UTIL/TCL8.5/lib/tcl8.5 C:/NICO/U...} 4
+ 6:            set dir {c:/documents and settings/vreen00/teapot...}
+ 6:            tclx_load_tndxs {c:/documents and settings/vreen00/teapot...}
+ 6:            set f {}
+ 6:            if $issafe {\n	    catch {source [file join $dir tclI...} elseif {[catch {set f [open [file join $dir tclI...} {\n	    continue\n	} else {\n	    set error [catch {\n		set id [gets ...}
+ 6:            catch {set f [open [file join $dir tclIndex]]}
+ 7:              file join {c:/documents and settings/vreen00/teapot...} tclIndex
+ 7:              open {c:/documents and settings/vreen00/teapot...}
+ 7:              continue
+ 6:            incr i -1
+ 6:            lindex {C:/NICO/UTIL/TCL8.5/lib/tcl8.5 C:/NICO/U...} 3
+ 6:            set dir {c:/documents and settings/vreen00/teapot...}
+ 6:            tclx_load_tndxs {c:/documents and settings/vreen00/teapot...}
+ 6:            set f {}
+ 6:            if $issafe {\n	    catch {source [file join $dir tclI...} elseif {[catch {set f [open [file join $dir tclI...} {\n	    continue\n	} else {\n	    set error [catch {\n		set id [gets ...}
+ 6:            catch {set f [open [file join $dir tclIndex]]}
+ 7:              file join {c:/documents and settings/vreen00/teapot...} tclIndex
+ 7:              open {c:/documents and settings/vreen00/teapot...}
+ 7:              continue
+ 6:            incr i -1
+ 6:            lindex {C:/NICO/UTIL/TCL8.5/lib/tcl8.5 C:/NICO/U...} 2
+ 6:            set dir {c:/documents and settings/vreen00/teapot...}
+ 6:            tclx_load_tndxs {c:/documents and settings/vreen00/teapot...}
+ 6:            set f {}
+ 6:            if $issafe {\n	    catch {source [file join $dir tclI...} elseif {[catch {set f [open [file join $dir tclI...} {\n	    continue\n	} else {\n	    set error [catch {\n		set id [gets ...}
+ 6:            catch {set f [open [file join $dir tclIndex]]}
+ 7:              file join {c:/documents and settings/vreen00/teapot...} tclIndex
+ 7:              open {c:/documents and settings/vreen00/teapot...}
+ 7:              continue
+ 6:            incr i -1
+ 6:            lindex {C:/NICO/UTIL/TCL8.5/lib/tcl8.5 C:/NICO/U...} 1
+ 6:            set dir C:/NICO/UTIL/TCL8.5/lib
+ 6:            tclx_load_tndxs C:/NICO/UTIL/TCL8.5/lib
+ 6:            set f {}
+ 6:            if $issafe {\n	    catch {source [file join $dir tclI...} elseif {[catch {set f [open [file join $dir tclI...} {\n	    continue\n	} else {\n	    set error [catch {\n		set id [gets ...}
+ 6:            catch {set f [open [file join $dir tclIndex]]}
+ 7:              file join C:/NICO/UTIL/TCL8.5/lib tclIndex
+ 7:              open C:/NICO/UTIL/TCL8.5/lib/tclIndex
+ 7:              continue
+ 6:            incr i -1
+ 6:            lindex {C:/NICO/UTIL/TCL8.5/lib/tcl8.5 C:/NICO/U...} 0
+ 6:            set dir C:/NICO/UTIL/TCL8.5/lib/tcl8.5
+ 6:            tclx_load_tndxs C:/NICO/UTIL/TCL8.5/lib/tcl8.5
+ 6:            set f {}
+ 6:            if $issafe {\n	    catch {source [file join $dir tclI...} elseif {[catch {set f [open [file join $dir tclI...} {\n	    continue\n	} else {\n	    set error [catch {\n		set id [gets ...}
+ 6:            catch {set f [open [file join $dir tclIndex]]}
+ 7:              file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 tclIndex
+ 7:              open C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tclIndex
+ 7:              set f file941698
+ 7:              catch {\n		set id [gets $f]\n		if {$id == "# Tcl ...} msg
+ 8:                gets file941698
+ 8:                set id {# Tcl autoload index file, version 2.0}
+ 8:                if {$id == "# Tcl autoload index file, versi...} {\n		    eval [read $f]\n		} elseif {$id ==  "# Tcl autoload index file: each...} {\n		    while {[gets $f line] >= 0} {\n			...} else {\n		    error  "[file join $dir tclIndex]...}
+ 9:                  read file941698
+ 9:                  eval {# This file is generated by the "auto_mk...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl
+10:                    set auto_index(auto_reset) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/au...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl
+10:                    set auto_index(tcl_findLibrary) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/au...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl
+10:                    set auto_index(auto_mkindex) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/au...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl
+10:                    set auto_index(auto_mkindex_old) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/au...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl
+10:                    set auto_index(::auto_mkindex_parser::init) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/au...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl
+10:                    set auto_index(::auto_mkindex_parser::cleanu... {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/au...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl
+10:                    set auto_index(::auto_mkindex_parser::mkinde... {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/au...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl
+10:                    set auto_index(::auto_mkindex_parser::hook) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/au...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl
+10:                    set auto_index(::auto_mkindex_parser::slaveh... {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/au...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl
+10:                    set auto_index(::auto_mkindex_parser::comman... {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/au...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl
+10:                    set auto_index(::auto_mkindex_parser::comman... {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/au...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl
+10:                    set auto_index(::auto_mkindex_parser::fullna... {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/au...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.t...
+10:                    set auto_index(history) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/hi...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.t...
+10:                    set auto_index(::tcl::HistAdd) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/hi...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.t...
+10:                    set auto_index(::tcl::HistKeep) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/hi...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.t...
+10:                    set auto_index(::tcl::HistClear) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/hi...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.t...
+10:                    set auto_index(::tcl::HistInfo) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/hi...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.t...
+10:                    set auto_index(::tcl::HistRedo) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/hi...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.t...
+10:                    set auto_index(::tcl::HistIndex) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/hi...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.t...
+10:                    set auto_index(::tcl::HistEvent) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/hi...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.t...
+10:                    set auto_index(::tcl::HistChange) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/hi...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 ldAout.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/ldAout.tc...
+10:                    set auto_index(tclLdAout) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/ld...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 package.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/package.t...
+10:                    set auto_index(pkg_mkIndex) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/pa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 package.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/package.t...
+10:                    set auto_index(tclPkgSetup) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/pa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 package.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/package.t...
+10:                    set auto_index(tclPkgUnknown) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/pa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 package.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/package.t...
+10:                    set auto_index(::tcl::MacOSXPkgUnknown) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/pa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 package.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/package.t...
+10:                    set auto_index(::pkg::create) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/pa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 parray.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/parray.tc...
+10:                    set auto_index(parray) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/pa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::InterpStatics) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::InterpNested) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::interpCreate) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::interpInit) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::CheckInterp) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::interpConfigure) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::InterpCreate) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::InterpSetConfig) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::interpFindInAccessPat... {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::interpAddToAccessPath... {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::InterpInit) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::AddSubDirs) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::interpDelete) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::setLogCmd) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::SyncAccessPath) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::InterpStateName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::IsInterp) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::PathToken) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::PathListName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::VirtualPathListName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::PathNumberName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::StaticsOkName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::NestedOkName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::Toplevel) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::Set) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::Lappend) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::Unset) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::Exists) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::GetAccessPath) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::StaticsOk) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::NestedOk) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::DeleteHookName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::TranslatePath) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::Log) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::CheckFileName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::AliasSource) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::AliasLoad) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::FileInAccessPath) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::Subset) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::AliasSubset) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl
+10:                    set auto_index(::safe::AliasEncoding) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/sa...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 word.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/word.tcl
+10:                    set auto_index(tcl_wordBreakAfter) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/wo...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 word.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/word.tcl
+10:                    set auto_index(tcl_wordBreakBefore) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/wo...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 word.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/word.tcl
+10:                    set auto_index(tcl_endOfWord) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/wo...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 word.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/word.tcl
+10:                    set auto_index(tcl_startOfNextWord) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/wo...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 word.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/word.tcl
+10:                    set auto_index(tcl_startOfPreviousWord) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/wo...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 tm.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl
+10:                    set auto_index(::tcl::tm::add) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 tm.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl
+10:                    set auto_index(::tcl::tm::remove) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 tm.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl
+10:                    set auto_index(::tcl::tm::list) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 tm.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl
+10:                    set auto_index(::tcl::tm::UnknownHandler) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 tm.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl
+10:                    set auto_index(::tcl::tm::roots) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm...}
+12:                        file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 tm.tcl
+11:                      list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl
+10:                    set auto_index(::tcl::tm::path) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm...}
+ 7:              set error 0
+ 7:              if {[string compare $f ""]} {\n		close $f\n	    }
+ 7:              string compare file941698 {}
+ 8:                ::tcl::string::compare file941698 {}
+ 8:                close file941698
+ 7:              if $error {\n		error $msg $errorInfo $errorCode\n	   ...}
+ 6:            incr i -1
+ 5:          return 1
+ 4:        foreach pattern ::itcl::builtin::* {\n        foreach name [array names auto_...}
+ 5:          array names auto_index ::itcl::builtin::*
+ 5:          foreach name {} {\n            if {"" == [info commands $n...}
+ 3:      private common CLASSNAME ClassB
+ 3:      public proc new_instance {} {\n		# return [ClassB #auto]\n		# set res [...}
+ 3:      public proc new_instance2 {} {\n		# return [itcl::code [ClassB #auto]]\n...}
+ 3:      public method get_value {} {\n		return 4242\n	}
+ 2:    itcl::class ClassC {\n	public method method1 {ref} {\n		puts "...}
+ 3:      auto_import ::itcl::builtin::*
+ 4:        global auto_index
+ 4:        uplevel namespace current
+ 5:          namespace current
+ 4:        set ns ::
+ 4:        auto_qualify ::itcl::builtin::* ::
+ 5:          regsub -all ::+ ::itcl::builtin::* :: cmd
+ 5:          set n 3
+ 5:          if {[string match ::* $cmd]} {\n	if {$n > 1} {\n	    # ( ::foo::bar , * ...}
+ 5:          string match ::* ::itcl::builtin::*
+ 6:            ::tcl::string::match ::* ::itcl::builtin::*
+ 6:            if {$n > 1} {\n	    # ( ::foo::bar , * ) -> ::foo::bar...} else {\n	    # ( ::global , * ) -> global\n	    ...}
+ 7:              list ::itcl::builtin::*
+ 7:              return ::itcl::builtin::*
+ 4:        set patternList ::itcl::builtin::*
+ 4:        auto_load_index
+ 5:          global auto_index auto_oldpath auto_path errorInfo errorCode
+ 5:          if {[info exists auto_oldpath] && ($auto_old...} {\n	return 0\n    }
+ 5:          info exists auto_oldpath
+ 6:            ::tcl::info::exists auto_oldpath
+ 6:            return 0
+ 4:        foreach pattern ::itcl::builtin::* {\n        foreach name [array names auto_...}
+ 5:          array names auto_index ::itcl::builtin::*
+ 5:          foreach name {} {\n            if {"" == [info commands $n...}
+ 3:      public method method1 ref {\n		puts "ref: $ref"\n		puts [$ref get_val...}
+ 1:  itcl::class ClassA {\n\n	public method main {} {\n  	set cl3 [C...}
+ 2:    auto_import ::itcl::builtin::*
+ 3:      global auto_index
+ 3:      uplevel namespace current
+ 4:        namespace current
+ 3:      set ns ::
+ 3:      auto_qualify ::itcl::builtin::* ::
+ 4:        regsub -all ::+ ::itcl::builtin::* :: cmd
+ 4:        set n 3
+ 4:        if {[string match ::* $cmd]} {\n	if {$n > 1} {\n	    # ( ::foo::bar , * ...}
+ 4:        string match ::* ::itcl::builtin::*
+ 5:          ::tcl::string::match ::* ::itcl::builtin::*
+ 5:          if {$n > 1} {\n	    # ( ::foo::bar , * ) -> ::foo::bar...} else {\n	    # ( ::global , * ) -> global\n	    ...}
+ 6:            list ::itcl::builtin::*
+ 6:            return ::itcl::builtin::*
+ 3:      set patternList ::itcl::builtin::*
+ 3:      auto_load_index
+ 4:        global auto_index auto_oldpath auto_path errorInfo errorCode
+ 4:        if {[info exists auto_oldpath] && ($auto_old...} {\n	return 0\n    }
+ 4:        info exists auto_oldpath
+ 5:          ::tcl::info::exists auto_oldpath
+ 5:          return 0
+ 3:      foreach pattern ::itcl::builtin::* {\n        foreach name [array names auto_...}
+ 4:        array names auto_index ::itcl::builtin::*
+ 4:        foreach name {} {\n            if {"" == [info commands $n...}
+ 2:    public method main {} {\n  	set cl3 [ClassC #auto]\n\n	  set ref [...}
+ 1:  proc main {} {\n	set cl1 [ClassA #auto]\n	$cl1 main\n}
+ 1:  main
+ 2:    ClassA #auto
+ 2:    set cl1 classA0
+ 2:    classA0 main
+ 3:      ClassC #auto
+ 3:      set cl3 classC0
+ 3:      ClassB::new_instance
+ 4:        ClassB #auto
+ 4:        set res classB0
+ 4:        puts {res: classB0}
+ 4:        itcl::code classB0
+ 4:        set res2 {namespace inscope ::ClassB classB0}
+ 4:        puts {res2: namespace inscope ::ClassB classB0}
+ 4:        namespace which classB0
+ 4:        puts {nw: ::ClassB::classB0}
+ 4:        return {namespace inscope ::ClassB classB0}
+ 3:      set ref {namespace inscope ::ClassB classB0}
+ 3:      classC0 method1 {namespace inscope ::ClassB classB0}
+ 4:        puts {ref: namespace inscope ::ClassB classB0}
+ 5:          ::unknown {namespace inscope ::ClassB classB0} get_value
+ 6:            variable ::tcl::UnknownPending
+ 6:            global auto_noexec auto_noload env tcl_interactive
+ 6:            lindex {{namespace inscope ::ClassB classB0} get...} 0
+ 6:            set cmd {namespace inscope ::ClassB classB0}
+ 6:            if {[regexp "^:*namespace\[ \t\n\]+inscope" ...} {\n	#return -code error "You need an {*}"\n...}
+ 6:            regexp {^:*namespace[ 	\n]+inscope} {namespace inscope ::ClassB classB0}
+ 6:            llength {namespace inscope ::ClassB classB0}
+ 7:              lrange {{namespace inscope ::ClassB classB0} get...} 1 end
+ 7:              set arglist get_value
+ 7:              catch {uplevel 1 ::$cmd $arglist} result opts
+ 8:                uplevel 1 {::namespace inscope ::ClassB classB0} get_value
+ 9:                  ::namespace inscope ::ClassB classB0 get_value
+10:                    classB0 get_value
+11:                      return 4242
+ 7:              set ret 0
+ 7:              dict unset opts -errorinfo
+ 8:                ::tcl::dict::unset opts -errorinfo
+ 7:              dict incr opts -level
+ 8:                ::tcl::dict::incr opts -level
+ 7:              return -options {-code 0 -level 1} 4242
+ 4:        puts 4242
+ 3:      ClassB::new_instance2
+ 4:        uplevel {namespace which [ClassB #auto]}
+ 6:            ClassB #auto
+ 5:          namespace which classB1
+ 4:        return ::ClassA::classB1
+ 3:      set ref2 ::ClassA::classB1
+ 3:      classC0 method1 ::ClassA::classB1
+ 4:        puts {ref: ::ClassA::classB1}
+ 4:        ::ClassA::classB1 get_value
+ 5:          return 4242
+ 4:        puts 4242
+ 3:      info class
+ 3:      puts {class van ClassA: ::ClassA}
+ 1:  cmdtrace off

@@ -1,0 +1,38 @@
+     UID     PID    PPID   C    STIME    TTY  TIME CMD
+    root       1       0   0   Jul 13      -  0:07 /etc/init 
+    root   98414       1   0   Jul 13      -  0:00 /usr/lib/errdemon 
+    root  106596       1   0   Jul 13      - 31:46 /usr/sbin/syncd 60 
+    root  110686  151632   0   Jul 13      -  0:00 /usr/sbin/snmpd 
+    root  147686  151632   0   Jul 13      -  0:00 /usr/sbin/portmap 
+    root  151632       1   0   Jul 13      -  0:00 /usr/sbin/srcmstr 
+    root  159782  151632   0   Jul 13      -  0:00 /usr/sbin/inetd 
+    root  168018       1   0   Jul 13      -  0:00 /usr/ccs/bin/shlap64 
+    root  176310       1   0   Jul 13      -  0:00 /usr/local/sbin/syslog-ng -f /usr/local/etc/syslog-ng.conf 
+    root  184522  151632   0   Jul 13      -  0:36 /usr/sbin/xntpd 
+    root  188578  151632   0   Jul 13      -  0:00 /usr/sbin/hostmibd 
+    root  192706  151632   0   Jul 13      -  0:00 /usr/sbin/snmpmibd 
+    root  200874  151632   0   Jul 13      -  0:00 /usr/sbin/rsct/bin/IBM.HostRMd 
+    root  204996  151632   0   Jul 13      -  0:04 /usr/sbin/aixmibd 
+    root  217258 1650818   0 17:07:54  pts/0  0:00 ps -ef 
+  daemon  221334  151632   0   Jul 13      -  0:00 /usr/sbin/rpc.statd -d 0 -t 50 
+    root  225450  151632   0   Jul 13      -  0:00 /usr/sbin/nimsh -s 
+    root  237752       1   0   Jul 13      -  7:25 /usr/sbin/getty /dev/console 
+    root  250072  151632   0   Jul 13      -  0:30 /usr/sbin/rsct/bin/IBM.CSMAgentRMd 
+    root  262382       1   0   Jul 13      -  0:00 /usr/sbin/uprintfd 
+  nobody  266418       1   0   Jul 13      - 12:56 /opt/freeware/sbin/gmond -p /var/run/gmond.pid 
+    root  270500  151632   0   Jul 13      -  0:00 /usr/sbin/sshd 
+    root  274438  151632   0   Jul 13      -  0:00 /usr/sbin/rsct/bin/IBM.AuditRMd 
+    root  278688  151632   0   Jul 13      -  0:00 /usr/sbin/biod 6 
+    root  282826  151632   0   Jul 13      -  0:54 /usr/sbin/rsct/bin/rmcd -a IBM.LPCommands -r 
+    root  286894  151632   0   Jul 13      -  0:00 /usr/sbin/rpc.lockd -d 0 
+    root  290970  151632   0   Jul 13      -  0:00 /usr/sbin/qdaemon 
+    root  299248  151632   0   Jul 13      -  0:00 /usr/sbin/rsct/bin/IBM.LPRMd 
+    root  303278       1   0   Jul 13      -  0:02 /usr/sbin/cron 
+    root  307358       1   0   Jul 13      -  0:02 /usr/tivoli/tsm/client/ba/bin/dsmcad 
+    root  311452  151632   0   Jul 13      -  0:00 /usr/sbin/rsct/bin/IBM.DRMd 
+    root  319658  151632   0   Jul 13      -  0:00 /usr/sbin/rsct/bin/IBM.ERrmd 
+    root  323748  151632   0   Jul 13      -  0:00 /usr/sbin/rsct/bin/IBM.ServiceRMd 
+    root  376854       1   3   Aug 03      - 32:30 /prj/was/java/bin/java -Xbootclasspath/p:/prj/was/java/jre/lib/ext/ibmorb.jar:/prj/was/java/jre/lib/ext/ibmext.jar -Dwas.status.socket=58948 -classpath /prj/was/profiles/wp_profile/properties:/prj/was/properties:/prj/was/lib/bootstrap.jar:/prj/was/lib/j2ee.jar:/prj/was/lib/lmproxy.jar:/prj/was/lib/urlprotocols.jar -Xms50m -Xmx768m -Dws.ext.dirs=/prj/was/java/lib:/prj/was/profiles/wp_profile/classes:/prj/was/classes:/prj/was/lib:/prj/was/installedChannels:/prj/was/lib/ext:/prj/was/web/help:/prj/was/deploytool/itp/plugins/com.ibm.etools.ejbdeploy/runtime:/prj/wp/shared/ext:/prj/wp/shared/ext/wp.jndi.jar -Dderby.system.home=/prj/was/derby -Dcom.ibm.itp.location=/prj/was/bin -Djava.util.logging.configureByServer=true -Dibm.websphere.preload.classes=true -Duser.install.root=/prj/was/profiles/wp_profile -Dwas.install.root=/prj/was -Djava.util.logging.manager=com.ibm.ws.bootstrap.WsLogManager -Dserver.root=/prj/was/profiles/wp_profile -Dos400.class.path.rawt=2 -Dpzn.root.dir=/prj/was/pzn/config/runtime -Dcom.ibm.ws.cache.CacheConfig.useServerClassLoader=false -Ddummy.wps.jvm.arg.ext=none -Ddb2j.system.home=/prj/wp/cloudscape -Xp128k,64k -Xk40000 -Djava.security.auth.login.config=/prj/was/profiles/wp_profile/properties/wsjaas.conf -Djava.security.policy=/prj/was/profiles/wp_profile/properties/server.policy com.ibm.ws.bootstrap.WSLauncher com.ibm.ws.runtime.WsServer /prj/was/profiles/wp_profile/config olcru148Cell01 olcru148Node01 WebSphere_Portal 
+    root  446574  270500   1 16:58:23      -  0:00 sshd: root@pts/0 
+    root  483568  446574   0 16:58:32  pts/0  0:00 -ksh 
+    root 1650818  483568   0 17:07:53  pts/0  0:00 -ksh 

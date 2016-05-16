@@ -1,0 +1,20 @@
+idField=id
+
+# gebruikt voor oplossen 4.3.5 en 5.7 of 5.8
+
+logfile	testrun_id	testrun	id
+resusage	logfile_id	logfile	id
+resusage	resname_id	resname	id
+task	logfile_id	logfile	id
+task_graph	graph_id	graph	id
+task_graph	task_id	task	id
+
+# andere tabellen met id-velden
+qqq	qqq	task	id
+qqq	qqq	resusage	id
+qqq	qqq	graph	id
+qqq	qqq	task_graph	id
+
+qqq	qqq	test2	test2_id
+qqq	qqq	kenmerk	id
+

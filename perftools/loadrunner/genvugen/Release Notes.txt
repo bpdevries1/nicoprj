@@ -1,0 +1,13 @@
+5-10-2010
+---------
+* Herkennen of preprocess nodig is
+* Alle input files in 1 dir, .c en .aspx hebben dezelfde bron-naam. Deze allemaal afhandelen.
+
+1-10-2010
+---------
+* eerste na de p een hoofdletter
+* eerste regel request.c	web_custom_request("Persoonsgegevens.aspx_2", hier de functienaam uit afleiden.
+* bij leeg of niet vinden toch param.
+* in request.c met // achter regel de oorspronkelijke waarde.
+* aantal keer LB tellen, warning geven.
+* preprocessing: bij input die niet al goed over regels verdeeld is (regels beginnen met & en quotes er al tussen), dan zelf newlines erbij en letten 

@@ -1,0 +1,32 @@
+# @todo 6-10-10 DB connectie rechten worden nog door Lex geregeld.
+# db params Force SLA DB
+sladb=BPRATKSLA
+sladbuser=sql_perf
+sladbpassword=Welkom01
+
+# db params Force DB
+forcedb=BPRATK
+forcedbuser=sql_perf
+forcedbpassword=Welkom01
+
+# Force server logfiles params
+# Op ATK zijn 2 servers, maar er wordt maar 1 gebruikt.
+# Op FAO zijn 2 servers, die wel allebei worden gebruikt: web en tool server.
+nlogs=1
+log_driveletter1=X
+log_unc_root1=\\10.87.0.35\Log
+log_user1=rc1waforce01\sis_mon
+log_password1=jBXzg5
+
+# nog voor oude script (per 6-10-2010 nog niet aangepast)
+log_driveletter=X
+#log_driveletter=X
+log_unc_root=\\10.87.0.35\Log
+log_user=rc1waforce01\sis_mon
+log_password=jBXzg5
+# WebService is leeg in ATK/BPR.
+#log_file_patterns=" "" "Force2JobService/*Force20-Service-log*" "" ""
+log_file_patterns=Force2_BPR/*ASP-log*;Force2_BPR/*RENTELOGIC*;Force2_BPR/*ERROR*log*;ForceService_BPR/*ERROR*log*;ForceService_BPR/*Service-log.txt*
+
+# local root log path: machine hier bij inzetten.
+local_log_root=L:\LSP\Force BPR LSP\force-logs

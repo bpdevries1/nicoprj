@@ -1,0 +1,55 @@
+ggplot interactive
+
+* Kan op manier yeroon.net: via web-interface/ajax. Dan grafiek maken, en via ofwel entry-velden params aanpassen, of misschien ook wel door iets op graph zelf te doen.
+  Iets met HTML5?
+* A first go at ‘manipulate’ in RStudio
+* "playwith"
+* Rggobi weer.
+
+Shortlist
+=========
+* rpanel, specifiek voor ggplot.
+* manipulate: lijkt precies wat ik nodig heb, voorbeeld met ggplot! Wel RStudio nodig?
+
+* Playwith
+
+
+Longlist (op volgorde)
+======================
+* Gwidgets
+* Rggobi
+* RCmdr
+* RGtk
+
+Not-list
+========
+* iplots - niet samen met ggplot, doelen lijken anders.
+* Acinonyx - nieuwe versie van iplots, nog geen docs.
+* RPy2 - R aanroepen vanuit Python: best leuk, maar niet wat ik nu nodig heb.
+
+Playwith
+=========
+playwith tries to work out the structure of a plot, in order to interact with
+it. The built-in features include: navigating the data space, identifying and
+brushing data points, editing and annotating the plot, and saving to a file.
+Interactive controls for parameters (sliders, spinbuttons, combo-boxes, etc) can
+be generated automatically. New tools can also be defined.
+
+playwith werkt iig deels samen met ggplot.
+
+Gwidgets
+========[2011-10-09 16:35:49] 
+http://4dpiecharts.com/2010/10/06/creating-guis-in-r-with-gwidgets/
+* Lijkt wel deels op mijn tcltk probeersel. Werkte wel wat interactief, maar grafiek dan niet meer te zien. Misschien toch in interactive mode starten, maar dan wel file gesourced?
+
+RPanel
+======
+http://stackoverflow.com/questions/2082553/using-ggplot2-and-rpanel-together
+
+
+
+
+Doelen:
+* Zoomen op x-as: eerst als hoofddoel, rest alleen maar afleiding.
+* evt lijnen aan/uit zetten.
+* google: ggplot interactive zoom

@@ -1,0 +1,4 @@
+Queries voor rapportages op conversie (performance) logs.
+Zowel queries als iReport rapportages.
+
+NdV 14-4-2010.

@@ -1,0 +1,67 @@
+l
+
+foreach el $l {
+  lassign $el start end
+  puts $start
+  set s [subst_no_variables [string range $to_subst 0 $start-2]]
+  puts $start
+}
+
+
+#3: set el
+129273 129296
+
+#3: set l
+{13 36} {143 166} {1963 1986} {2027 2050} {3211 3234} {9577 9600} {16524 16547}
+{23660 23683} {30970 30993} {38995 39018} {39065 39088} {39130 39153} {40748 407
+71} {40819 40842} {40882 40905} {44983 45006} {45052 45075} {45117 45140} {45167
+ 45190} {45604 45627} {46802 46825} {46985 47008} {47308 47331} {47774 47797} {4
+8144 48167} {48773 48796} {53178 53201} {53249 53272} {53313 53336} {54057 54080
+} {62344 62367} {62394 62417} {62773 62796} {63402 63425} {63912 63935} {129273
+129296}
+
+vanaf 63910 tot 129271
+
+set tx [string range $to_subst 63910 129271] 
+
+subst_no_variables $tx -> fout: extra characters after close-brace
+
+proc handle_action_call_parse {call} {
+  return "length:[string length $call]"
+}
+
+
+proc handle_action_call_parse {call} {
+  return 1
+}
+
+#3: subst -novariables $tx
+extra characters after close-brace
+
+met bovenstaande meest simpele handle_action_call_parse.
+
+interference tussen {} in Tcl code, en de {} in de tekst van de files.
+hier met clojure ook last van, verwacht 't eigenlijk niet...
+
+regsub -all {\}} $tx "\004" tx2
+
+subst -novariables $tx2
+#3: subst -novariables $tx2
+missing close-brace
+
+regsub -all {\{} $tx2 "\005" tx3
+
+subst -novariables $tx3
+
+
+Opties:
+* Zowel in c-code als in html werken met encoded text, waarin o.a. } zijn vervangen door base-64. Dan ook overal in tekst waar ik dingen zoek, ook alle regexps dan ook zo'n vervanging nodig. Lijkt behoorlijk ingrijpend.
+* Vantevoren in html en eigenlijk ook in .c code de {} vervangen door bv \004 en \005. Dan script uitvoeren, aan einde weer terug. teksten waarin deze code voorkomt, worden dan niet vervangen, of wel, als zowel in html als in .c code hetzelfde gebeurt.
+* Op dit moment kan ik dit script niet behandelen, door deze fout.
+* Met Clojure proberen, evt eerst alleen het stuk dat fout gaat nu.
+* Het gaat hier fout bij checkout/checkin, normaal wordt hier dacht ik geen checkin gedaan, even klikpad checken.
+* Gebruik nu regsub met hierin dan in vervang-string een method-call zetten en deze dan met subst laten uitvoeren. Dit is wel tricky. Beter misschien om de indexen op te vragen, dan de string te vervangen en het resultaat weer terug te zetten. Dan dus geen regsub en subst nodig, alleen regexp en method aanroep. Dan ofwel weer aan elkaar plakken, ofwel string replace gebruiken.
+* regsub/subst is wel leuk code=data achtig, maar dus wel quoting-hell.
+
+
+

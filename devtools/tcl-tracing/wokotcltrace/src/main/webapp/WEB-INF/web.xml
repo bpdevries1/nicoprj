@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+    <display-name>perftoolset</display-name>
+
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <!--  JSTL Resource Bundle
+    <context-param>
+        <param-name>javax.servlet.jsp.jstl.fmt.localizationContext</param-name>
+        <param-value>StripesResources</param-value>
+    </context-param>
+    -->
+
+    <!--
+         Woko debug enabled (comment out to disable debugging)
+      -->
+    <context-param>
+        <param-name>WOKO_DEBUG</param-name>
+        <param-value>YEAH</param-value>
+    </context-param>
+
+    <!-- global exclusions for the Woko filters -->
+    <context-param>
+        <param-name>WOKO_GLOBAL_EXCLUDES</param-name>
+        <param-value>js,css,jpg,jpeg,png,gif</param-value>
+    </context-param>    
+
+    <!--
+       - Location of the XML file that defines the application contexts
+       - Applied by ContextLoaderListener : Woko and Acegi
+       -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            classpath*:applicationContext-woko-jfacets.xml
+            classpath*:applicationContext-woko-acegi.xml
+            classpath*:applicationContext-woko-persistence.xml
+        </param-value>
+    </context-param>
+
+    <!--
+      - Loads the root application context of this web app at startup.
+    -->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <!--
+      - Used for request scoped beans etc
+    -->
+    <listener>
+        <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+    </listener>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!--  hibernate filter (Stripernate)          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+    <filter>
+        <filter-name>HibernateFilter</filter-name>
+        <filter-class>net.sf.woko.persistence.WokoOsivFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>HibernateFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!--              Configuration of the Acegi Filter.                   -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <filter>
+        <filter-name>Acegi Filter Chain Proxy</filter-name>
+        <filter-class>org.acegisecurity.util.FilterToBeanProxy</filter-class>
+        <init-param>
+            <param-name>targetClass</param-name>
+            <param-value>org.acegisecurity.util.FilterChainProxy</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>Acegi Filter Chain Proxy</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!--              Configuration of the Woko user mgt filter              -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <filter>
+        <filter-name>WokoUserMgtFilter</filter-name>
+        <filter-class>net.sf.woko.usermgt.WokoUserMgtFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>WokoUserMgtFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!--              Configuration of the WebFacets Filter.                   -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <filter>
+        <filter-name>WebFacetsFilter</filter-name>
+        <filter-class>net.sourceforge.jfacets.web.WebFacetsFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>WebFacetsFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!--              Configuration of the Stripes Filter.                   -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <filter>
+        <description>
+            Provides essential configuration and request processing services
+            for the Stripes framework.
+        </description>
+        <display-name>Stripes Filter</display-name>
+        <filter-name>StripesFilter</filter-name>
+        <filter-class>net.sourceforge.stripes.controller.StripesFilter</filter-class>
+        <init-param>
+            <param-name>ActionResolver.Class</param-name>
+            <param-value>net.sourceforge.stripes.cleanurls.CleanUrlActionResolver</param-value>
+        </init-param>
+        <init-param>
+            <param-name>ActionResolver.PackageFilters</param-name>
+            <param-value>net.sf.woko.actions.*</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>Configuration.Class</param-name>
+            <param-value>net.sourceforge.stripes.config.RuntimeConfiguration</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>Interceptor.Classes</param-name>
+            <param-value>
+                net.sourceforge.stripes.cleanurls.CleanUrlInterceptor,
+                net.sourceforge.stripes.integration.spring.SpringInterceptor,
+                net.sf.woko.stripes.WokoFatClientInterceptor,
+                net.sourceforge.stripes.controller.BeforeAfterMethodInterceptor
+            </param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>ActionBeanPropertyBinder.Class</param-name>
+            <param-value>net.sf.woko.stripes.HibernatePropertyBinder</param-value>
+        </init-param>
+        <init-param>
+            <param-name>TypeConverterFactory.Class</param-name>
+            <param-value>net.sf.woko.stripes.HibernateTypeConverterFactory</param-value>
+        </init-param>
+        <init-param>
+            <param-name>FormatterFactory.Class</param-name>
+            <param-value>net.sf.woko.stripes.HibernateFormatterFactory</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>LocalePicker.Locales</param-name>
+            <param-value>en_US,fr_FR:UTF-8,de_DE</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>ExceptionHandler.Class</param-name>
+            <param-value>net.sf.woko.stripes.WokoExceptionHandler</param-value>
+        </init-param>
+        
+    </filter>
+
+    <filter-mapping>
+        <filter-name>StripesFilter</filter-name>
+        <url-pattern>*.jsp</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>StripesFilter</filter-name>
+        <servlet-name>StripesDispatcher</servlet-name>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!--         Configuration of the Stripes dispatcher Servlet.            -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <servlet>
+        <servlet-name>StripesDispatcher</servlet-name>
+        <servlet-class>net.sourceforge.stripes.controller.DispatcherServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>StripesDispatcher</servlet-name>
+        <url-pattern>/dispatcher</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StripesDispatcher</servlet-name>
+        <url-pattern>/action/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StripesDispatcher</servlet-name>
+        <url-pattern>*.action</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StripesDispatcher</servlet-name>
+        <url-pattern>/view/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StripesDispatcher</servlet-name>
+        <url-pattern>/command/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StripesDispatcher</servlet-name>
+        <url-pattern>/search/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StripesDispatcher</servlet-name>
+        <url-pattern>/edit/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StripesDispatcher</servlet-name>
+        <url-pattern>/delete/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StripesDispatcher</servlet-name>
+        <url-pattern>/feed/*</url-pattern>
+    </servlet-mapping>
+
+    <error-page>
+        <error-code>500</error-code>
+        <location>/woko/error.jsp</location>
+    </error-page>
+
+</web-app>

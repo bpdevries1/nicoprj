@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+    <bean id="wokoDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost/perftoolset_test?emulateLocators=true"/>
+        <!-- use shutdown=true when running with file db !
+        <property name="url" value="jdbc:hsqldb:file:/tmp/wokodb/wokodb;shutdown=true"/>
+        -->
+        <property name="username" value="perftest"/>
+        <property name="password" value="perftest"/>
+    </bean>
+
+    <bean id="sessionFactory" class="net.sf.woko.persistence.WokoSessionFactoryBean">
+        <property name="dataSource" ref="wokoDataSource"/>
+        <property name="packages">
+            <list>
+                <value>woko.examples.library</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <value>
+                hibernate.hbm2ddl.auto update
+                hibernate.dialect org.hibernate.dialect.MySQLDialect
+            </value>
+        </property>
+    </bean>
+
+    <bean id="primaryKeyConverter" class="net.sf.woko.persistence.PrimaryKeyConverter"/>
+
+    <bean id="hibernateLoader" class="net.sf.woko.persistence.HibernateLoader">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory"/>
+        </property>
+    </bean>
+
+    <bean id="persistenceUtil" class="net.sf.woko.persistence.PersistenceUtil">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory"/>
+        </property>
+        <property name="primaryKeyConverter">
+            <ref bean="primaryKeyConverter"/>
+        </property>
+        <property name="objectLoaders">
+            <list>
+                <ref bean="hibernateLoader"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="compassUtil" class="net.sf.woko.search.CompassUtil"
+          lazy-init="false">
+        <property name="persistenceUtil">
+            <ref bean="persistenceUtil"/>
+        </property>
+        <property name="compass">
+            <ref bean="compass"/>
+        </property>
+    </bean>
+
+    <bean id="compass"
+          class="net.sf.woko.search.WokoLocalCompassBean">
+        <property name="compassSettings">
+            <props>
+<!--		<prop key="compass.engine.connection">jdbc:mysql://localhost/perftoolset_test</prop> -->
+        				<prop key="compass.engine.connection">jdbc://</prop>
+								<prop key="compass.engine.highlighter.default.formatter.simple.pre">&lt;span style='background: yellow;'&gt;</prop>
+                <prop key="compass.engine.highlighter.default.formatter.simple.post">&lt;/span&gt;</prop>
+            </props>
+        </property>
+        <property name="persistenceUtil">
+            <ref bean="persistenceUtil"/>
+        </property>
+        <property name="dataSource">
+            <ref bean="wokoDataSource"/>
+        </property>
+    </bean>
+
+</beans>

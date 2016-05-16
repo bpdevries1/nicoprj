@@ -1,0 +1,1009 @@
+COMMAND       PID   USER   FD   TYPE             DEVICE           SIZE/OFF                NODE NAME
+(unknown)       0   root  cwd   VDIR               10,4                  0 5086728578393964544 / (/dev/hd4)
+init            1   root  cwd   VDIR               10,4                  0 5086728578393964544 / (/dev/hd4)
+init            1   root    0u  VREG               10,4                  0 5086729007890694144 / (/dev/hd4)
+errdemon    98414   root  cwd   VDIR               10,6                  0 5086728625638604800 /var (/dev/hd9var)
+errdemon    98414   root    0                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+errdemon    98414   root    1                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+errdemon    98414   root    2                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+errdemon    98414   root    3r  VREG               10,5                  0 5086728655703375872 /usr (/dev/hd2)
+errdemon    98414   root    4r  VCHR                6,1                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/errorctl)
+errdemon    98414   root    5r  VCHR                6,0              0t674 5086728604163768320 / (/dev/hd4) (like character special /dev/error)
+errdemon    98414   root    6u  VREG               10,6                  0 5086729007890694144 /var (/dev/hd9var)
+errdemon    98414   root    7r  VREG               10,6                  0 5086729007890694144 /var (/dev/hd9var)
+errdemon    98414   root    8u  VREG               10,6                  0 5086729007890694144 /var (/dev/hd9var)
+syncd      106596   root  cwd   VDIR               10,4                  0 5086728578393964544 / (/dev/hd4)
+syncd      106596   root    0r  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+syncd      106596   root    1w  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+syncd      106596   root    2w  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+snmpdv3ne  110686   root  cwd   VDIR               10,4                  0 5086729085200105472 / (/dev/hd4)
+snmpdv3ne  110686   root    0u  unix               10,4                0t0 5086729123854811136 /dev/.SRC-unix/SRC7Kufac
+snmpdv3ne  110686   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+snmpdv3ne  110686   root    2w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+snmpdv3ne  110686   root    3u  VREG               10,4                  0 5086729123854811136 / (/dev/hd4)
+snmpdv3ne  110686   root    4r  VREG               10,5                  0 5086729123854811136 /usr (/dev/hd2)
+snmpdv3ne  110686   root    5u  VREG               10,4                  0 5086729123854811136 / (/dev/hd4)
+snmpdv3ne  110686   root    6u  IPv4 0xf100060001370400                0t0                 UDP *:161
+snmpdv3ne  110686   root    7u  IPv4 0xf100060001366390                0t0                 TCP *:32768 (LISTEN)
+snmpdv3ne  110686   root    8u  unix               10,7                0t0 5086729132444745728 /tmp/dpi_socket
+snmpdv3ne  110686   root    9u  IPv4 0xf100060001366b90                0t0                 TCP *:199 (LISTEN)
+snmpdv3ne  110686   root   10u  IPv4 0xf100060001364b90                0t0                 TCP olcru148.olo.belastingdienst.nl:32768->olcru148.olo.belastingdienst.nl:32769 (ESTABLISHED)
+snmpdv3ne  110686   root   11u  IPv4 0xf100060001365b90                0t0                 TCP olcru148.olo.belastingdienst.nl:32768->olcru148.olo.belastingdienst.nl:32770 (ESTABLISHED)
+snmpdv3ne  110686   root   12u  IPv4 0xf100060001362b90                0t0                 TCP olcru148.olo.belastingdienst.nl:32768->olcru148.olo.belastingdienst.nl:32771 (ESTABLISHED)
+portmap    147686   root  cwd   VDIR               10,4                  0 5086729085200105472 / (/dev/hd4)
+portmap    147686   root    0u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+portmap    147686   root    1u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+portmap    147686   root    2u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+portmap    147686   root    3u  VCHR               27,5                0t0                     / (/dev/hd4)
+portmap    147686   root    4u  VCHR               26,6                0t0                     / (/dev/hd4)
+portmap    147686   root    5u  VCHR               26,7                0t0                     / (/dev/hd4)
+srcmstr    151632   root  cwd   VDIR               10,4                  0 5086728578393964544 / (/dev/hd4)
+srcmstr    151632   root    0r  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+srcmstr    151632   root    1w  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+srcmstr    151632   root    2w  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+srcmstr    151632   root    3u  unix               10,4                0t0 5086729068020236288 /dev/SRC
+inetd      159782   root  cwd   VDIR               10,4                  0 5086729085200105472 / (/dev/hd4)
+inetd      159782   root    0u  unix               10,4                0t0 5086729098085007360 /dev/.SRC-unix/SRCw_ufaa
+inetd      159782   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+inetd      159782   root    2w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+inetd      159782   root    3                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+inetd      159782   root    4u  IPv6 0xf100060001368390                0t0                 TCP *:21 (LISTEN)
+inetd      159782   root    5u  IPv6 0xf100060001368b90                0t0                 TCP *:513 (LISTEN)
+inetd      159782   root    6u  IPv6 0xf100060001369390                0t0                 TCP *:514 (LISTEN)
+inetd      159782   root    7u  IPv6 0xf100060001369b90                0t0                 TCP *:512 (LISTEN)
+inetd      159782   root    8                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+inetd      159782   root    9                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+inetd      159782   root   10                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+inetd      159782   root   11                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+inetd      159782   root   12                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+inetd      159782   root   13u  unix               10,4                0t0 5086729098085007360 /dev/.SRC-unix/SRCw_ufaa
+shlap64    168018   root  cwd   VDIR               10,4                  0 5086728578393964544 / (/dev/hd4)
+shlap64    168018   root    0u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+shlap64    168018   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+shlap64    168018   root    2w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+syslog-ng  176310   root  cwd   VDIR               10,4                  0 5086728578393964544 / (/dev/hd4)
+syslog-ng  176310   root    0u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+syslog-ng  176310   root    1u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+syslog-ng  176310   root    2u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+syslog-ng  176310   root    3u  IPv4 0xf10006000123b400                0t0                 UDP *:514
+syslog-ng  176310   root    4u  unix               10,4                0t0 5095710312787607552 /dev/log
+syslog-ng  176310   root    5w  VREG              10,11                  0 5095710175348654080 /var/log (/dev/lvvarlog)
+xntpd      184522   root  cwd   VDIR               10,4                  0 5086729085200105472 / (/dev/hd4)
+xntpd      184522   root    0u  unix               10,4                0t0 5086729110969909248 /dev/.SRC-unix/SRC2Kufab
+xntpd      184522   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+xntpd      184522   root    2u  unix 0xf1000600017ba800                0t0                     ->(none)
+xntpd      184522   root    3                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+xntpd      184522   root    4u  IPv4 0xf100060000b1b800                0t0                 UDP *:123
+xntpd      184522   root    5u  IPv4 0xf10006000137aa00                0t0                 UDP olcru148.olo.belastingdienst.nl:123
+xntpd      184522   root    6u  IPv4 0xf10006000136e000                0t0                 UDP 10.126.99.148:123
+xntpd      184522   root    7u  IPv4 0xf100060001370000                0t0                 UDP localhost:123
+hostmibd6  188578   root  cwd   VDIR               10,4                  0 5086729085200105472 / (/dev/hd4)
+hostmibd6  188578   root    0u  unix               10,4                0t0 5086729136739713024 /dev/.SRC-unix/SRCBKufad
+hostmibd6  188578   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+hostmibd6  188578   root    2w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+hostmibd6  188578   root    3u  IPv4 0xf100060001364390                0t0                 TCP olcru148.olo.belastingdienst.nl:32769->olcru148.olo.belastingdienst.nl:32768 (ESTABLISHED)
+hostmibd6  188578   root    4r  VREG               10,5                  0 5086729136739713024 /usr (/dev/hd2)
+hostmibd6  188578   root    5u  VREG               10,4                  0 5086728591278866432 / (/dev/hd4)
+hostmibd6  188578   root    6u  VREG               10,4                  0 5086728591278866432 / (/dev/hd4)
+hostmibd6  188578   root    7u  VREG               10,5                  0 5086728591278866432 /usr (/dev/hd2)
+hostmibd6  188578   root    8r  VCHR                2,1                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/kmem)
+hostmibd6  188578   root    9u  VREG               10,4                  0 5086728591278866432 / (/dev/hd4)
+hostmibd6  188578   root   10u  VREG               10,5                  0 5086728591278866432 /usr (/dev/hd2)
+snmpmibd6  192706   root  cwd   VDIR               10,4                  0 5086729085200105472 / (/dev/hd4)
+snmpmibd6  192706   root    0u  unix               10,4                0t0 5086729149624614912 /dev/.SRC-unix/SRCG2ufae
+snmpmibd6  192706   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+snmpmibd6  192706   root    2w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+snmpmibd6  192706   root    3r  VCHR                2,1                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/kmem)
+snmpmibd6  192706   root    4u  IPv4 0xf100060001365390                0t0                 TCP olcru148.olo.belastingdienst.nl:32770->olcru148.olo.belastingdienst.nl:32768 (ESTABLISHED)
+snmpmibd6  192706   root    5r  VREG               10,5                  0 5086729149624614912 /usr (/dev/hd2)
+IBM.HostR  200874   root  cwd   VDIR               10,6                  0 5086729312833372160 /var (/dev/hd9var)
+IBM.HostR  200874   root    0u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+IBM.HostR  200874   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+IBM.HostR  200874   root    2w  VREG               10,6                  0 5086729312833372160 /var (/dev/hd9var)
+IBM.HostR  200874   root    3u  unix               10,4                0t0 5086729312833372160 /dev/.SRC-unix/SRCBPufai
+IBM.HostR  200874   root    4ww VREG               10,6                  0 5086729308538404864 /var (/dev/hd9var)
+IBM.HostR  200874   root    5u  unix               10,6                0t0 5086729317128339456 /var/ct/IW/soc/mc/RMIBM.HostRM.0
+IBM.HostR  200874   root    6u  unix 0xf100060001754000             0t4960                     /var/ct/IW/soc/mc/RMIBM.HostRM.0
+IBM.HostR  200874   root    7uW VREG               10,6                  0 5086729321423306752 /var (/dev/hd9var)
+IBM.HostR  200874   root    8uW VREG               10,6                  0 5086729321423306752 /var (/dev/hd9var)
+aixmibd    204996   root  cwd   VDIR               10,4                  0 5086729085200105472 / (/dev/hd4)
+aixmibd    204996   root    0u  unix               10,4                0t0 5086729162509516800 /dev/.SRC-unix/SRCLxufaf
+aixmibd    204996   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+aixmibd    204996   root    2w  VMPC                4,0               0t40 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+aixmibd    204996   root    3r  VREG               10,5                  0 5086729166804484096 /usr (/dev/hd2)
+aixmibd    204996   root    4u  VREG               10,4                  0 5086729007890694144 / (/dev/hd4)
+aixmibd    204996   root    5u  VREG               10,6                  0 5086729179689385984 /var (/dev/hd9var)
+aixmibd    204996   root    6u  VREG               10,4                  0 5086728591278866432 / (/dev/hd4)
+aixmibd    204996   root    7u  VREG               10,4                  0 5086729179689385984 / (/dev/hd4)
+aixmibd    204996   root    8u  VREG               10,4                  0 5086728591278866432 / (/dev/hd4)
+aixmibd    204996   root    9u  VREG               10,5                  0 5086728591278866432 /usr (/dev/hd2)
+aixmibd    204996   root   10u  VREG               10,4                  0 5086728604163768320 / (/dev/hd4)
+aixmibd    204996   root   11r  VCHR                2,1                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/kmem)
+aixmibd    204996   root   12u  IPv4 0xf100060001362390                0t0                 TCP olcru148.olo.belastingdienst.nl:32771->olcru148.olo.belastingdienst.nl:32768 (ESTABLISHED)
+lsof       217256   root  cwd   VDIR               31,2                  0 5086810204247425024 /prj (/dev/prjlv)
+lsof       217256   root    0u  VCHR               19,0             0t2087 5086728956351086592 / (/dev/hd4) (like character special /dev/pts/0)
+lsof       217256   root    1w  VREG               31,2                  0 5095975574262775808 /prj (/dev/prjlv)
+lsof       217256   root    2u  VCHR               19,0             0t2087 5086728956351086592 / (/dev/hd4) (like character special /dev/pts/0)
+lsof       217256   root    3r  VCHR                2,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/mem)
+lsof       217256   root    4r  VCHR                2,1 0xf1000714500a1dd0 5086728604163768320 / (/dev/hd4) (like character special /dev/kmem)
+rpc.statd  221334 daemon  cwd   VDIR               10,4                  0 5086729085200105472 / (/dev/hd4)
+rpc.statd  221334 daemon    0r  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+rpc.statd  221334 daemon    1w  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+rpc.statd  221334 daemon    2w  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+rpc.statd  221334 daemon    3u  VCHR               26,8                0t0                     / (/dev/hd4)
+rpc.statd  221334 daemon    4u  VCHR               27,9                0t0                     / (/dev/hd4)
+rpc.statd  221334 daemon    5r  FIFO 0xf100010029b4d490                  0                     
+rpc.statd  221334 daemon    6w  FIFO 0xf100010029b4d490                  0                     
+nimsh      225450   root  cwd   VDIR               10,5                  0 5086729179689385984 /usr (/dev/hd2)
+nimsh      225450   root    0r  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+nimsh      225450   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+nimsh      225450   root    2w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+nimsh      225450   root    3w  VREG               10,6                  0 5086729179689385984 /var (/dev/hd9var)
+nimsh      225450   root    4u  IPv4 0xf100060001700390                0t0                 TCP *:3901 (LISTEN)
+getty      237752   root  cwd   VDIR               10,4                  0 5086728578393964544 / (/dev/hd4)
+getty      237752   root    0                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+getty      237752   root    1u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+getty      237752   root    2u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+getty      237752   root    3u  VREG               10,5                  0 5086728591278866432 /usr (/dev/hd2)
+getty      237752   root    4u  VREG               10,4                  0 5086728591278866432 / (/dev/hd4)
+getty      237752   root    5u  VREG               10,5                  0 5086728591278866432 /usr (/dev/hd2)
+IBM.CSMAg  250072   root  cwd   VDIR               10,6                  0 5086729308538404864 /var (/dev/hd9var)
+IBM.CSMAg  250072   root    0u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+IBM.CSMAg  250072   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+IBM.CSMAg  250072   root    2w  VREG               10,6                  0 5086729317128339456 /var (/dev/hd9var)
+IBM.CSMAg  250072   root    3u  unix               10,4                0t0 5086729317128339456 /dev/.SRC-unix/SRCCXufaj
+IBM.CSMAg  250072   root    4ww VREG               10,6                  0 5086729308538404864 /var (/dev/hd9var)
+IBM.CSMAg  250072   root    5u  unix               10,6                0t0 5086729321423306752 /var/ct/IW/soc/mc/RMIBM.CSMAgentRM.0
+IBM.CSMAg  250072   root    6u  unix 0xf100060001754400             0t2520                     /var/ct/IW/soc/mc/RMIBM.CSMAgentRM.0
+IBM.CSMAg  250072   root    7uW VREG               10,6                  0 5086729321423306752 /var (/dev/hd9var)
+IBM.CSMAg  250072   root    8uW VREG               10,6                  0 5086729321423306752 /var (/dev/hd9var)
+uprintfd   262382   root  cwd   VDIR               10,4                  0 5086728578393964544 / (/dev/hd4)
+uprintfd   262382   root    0u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+uprintfd   262382   root    1u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+uprintfd   262382   root    2u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+gmond      266418 nobody  cwd   VDIR               10,4                  0 5086728578393964544 / (/dev/hd4)
+gmond      266418 nobody    0r  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+gmond      266418 nobody    1w  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+gmond      266418 nobody    2w  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+gmond      266418 nobody    3u  IPv4 0xf100060001755800                0t0                 UDP *:8649
+gmond      266418 nobody    4u  IPv4 0xf100060001746390                0t0                 TCP *:8649 (LISTEN)
+gmond      266418 nobody    5u  IPv4 0xf10006000136b200         0t11143648                 UDP olcru148.olo.belastingdienst.nl:32929->olcru121.olo.belastingdienst.nl:8649
+sshd       270500   root  cwd   VDIR               10,4                  0 5086728578393964544 / (/dev/hd4)
+sshd       270500   root    0r  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+sshd       270500   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+sshd       270500   root    2w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+sshd       270500   root    3u  IPv4 0xf100060000296390                0t0                 TCP *:22 (LISTEN)
+IBM.Audit  274438   root  cwd   VDIR               10,6                  0 5086729321423306752 /var (/dev/hd9var)
+IBM.Audit  274438   root    0u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+IBM.Audit  274438   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+IBM.Audit  274438   root    2w  VREG               10,6                  0 5086729330013241344 /var (/dev/hd9var)
+IBM.Audit  274438   root    3u  unix               10,4                0t0 5086729325718274048 /dev/.SRC-unix/SRCHgufam
+IBM.Audit  274438   root    4ww VREG               10,6                  0 5086729308538404864 /var (/dev/hd9var)
+IBM.Audit  274438   root    5u  unix               10,6                0t0 5086729330013241344 /var/ct/IW/soc/mc/RMIBM.AuditRM.0
+IBM.Audit  274438   root    6uW VREG               10,6                  0 5086729330013241344 /var (/dev/hd9var)
+IBM.Audit  274438   root    7u  unix 0xf100060001758c00             0t2192                     /var/ct/IW/soc/mc/RMIBM.AuditRM.0
+IBM.Audit  274438   root    8uW VREG               10,6                  0 5086729330013241344 /var (/dev/hd9var)
+IBM.Audit  274438   root    9uW VREG               10,6                  0 5086729330013241344 /var (/dev/hd9var)
+IBM.Audit  274438   root   10uW VREG               10,6                  0 5086729330013241344 /var (/dev/hd9var)
+IBM.Audit  274438   root   11u  VREG               10,6                  0 5086729330013241344 /var (/dev/hd9var)
+biod       278688   root  cwd   VDIR               10,4                  0 5086729085200105472 / (/dev/hd4)
+biod       278688   root    0r  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+biod       278688   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+biod       278688   root    2w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+rmcd       282826   root  cwd   VDIR               10,6                  0 5086729291358535680 /var (/dev/hd9var)
+rmcd       282826   root    0u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+rmcd       282826   root    1w  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+rmcd       282826   root    2w  VREG               10,6                  0 5086729291358535680 /var (/dev/hd9var)
+rmcd       282826   root    3u  IPv4 0xf100060001749600                0t0                 UDP *:657
+rmcd       282826   root    4u  IPv4 0xf100060001363200                0t0                 UDP *:*
+rmcd       282826   root    5u  unix               10,4                0t0 5086729278473633792 /dev/.SRC-unix/SRCy5ufag
+rmcd       282826   root    6wW VREG               10,6                  0 5086729295653502976 /var (/dev/hd9var)
+rmcd       282826   root    7r  FIFO 0xf100010029b4d6d0                  0                     
+rmcd       282826   root    8w  FIFO 0xf100010029b4d6d0                  0                     
+rmcd       282826   root    9r  FIFO 0xf100010029b4d610                  0                     
+rmcd       282826   root   10w  FIFO 0xf100010029b4d610                  0                     
+rmcd       282826   root   11r  VDIR               10,5                  0 5086729295653502976 /usr (/dev/hd2)
+rmcd       282826   root   12uW VREG               10,6                  0 5086729304243437568 /var (/dev/hd9var)
+rmcd       282826   root   13uW VREG               10,6                  0 5086729304243437568 /var (/dev/hd9var)
+rmcd       282826   root   14u  unix               10,6                0t0 5086729308538404864 /var/ct/IW/soc/mc/clsrv
+rmcd       282826   root   15u  IPv4 0xf100060001747b90                0t0                 TCP *:657 (LISTEN)
+rmcd       282826   root   16u  unix               10,6                0t0 5086729308538404864 /var/ct/IW/soc/mc/rmsrv
+rmcd       282826   root   17u  unix 0xf100060001706800              0t208                     ->0xf10006000174b400
+rmcd       282826   root   18u  unix 0xf10006000170b000             0t7904                     ->0xf100060001754000
+rmcd       282826   root   19u  unix 0xf10006000174b800            0t47312                     ->0xf100060001718000
+rmcd       282826   root   20u  unix 0xf10006000170b400             0t3640                     ->0xf100060001754400
+rmcd       282826   root   21u  unix 0xf100060001754800             0t3936                     ->0xf100060001707400
+rmcd       282826   root   22                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+rmcd       282826   root   23u  unix 0xf100060001717c00             0t2800                     /var/ct/IW/soc/mc/clsrv
+rmcd       282826   root   24u  unix 0xf10006000170b800             0t3944                     ->0xf100060001758c00
+rmcd       282826   root   25u  unix 0xf100060001750400             0t1704                     ->0xf100060001703000
+rmcd       282826   root   26u  unix 0xf10006000175d400             0t1800                     /var/ct/IW/soc/mc/clsrv
+rpc.lockd  286894   root  cwd   VDIR               10,4                  0 5086728578393964544 / (/dev/hd4)
+rpc.lockd  286894   root  rtd   VDIR               10,4                  0 5086728578393964544 / (/dev/hd4)
+rpc.lockd  286894   root    0r  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+rpc.lockd  286894   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+rpc.lockd  286894   root    2w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+qdaemon    290970   root  cwd   VDIR               10,6                  0 5086729231228993536 /var (/dev/hd9var)
+qdaemon    290970   root    0r  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+qdaemon    290970   root    1w  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+qdaemon    290970   root    2w  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+IBM.LPRMd  299248   root  cwd   VDIR               10,6                  0 5086729467452194816 /var (/dev/hd9var)
+IBM.LPRMd  299248   root    0u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+IBM.LPRMd  299248   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+IBM.LPRMd  299248   root    2w  VREG               10,6                  0 5086729467452194816 /var (/dev/hd9var)
+IBM.LPRMd  299248   root    3u  unix               10,4                0t0 5086729467452194816 /dev/.SRC-unix/SRC4Sufan
+IBM.LPRMd  299248   root    4ww VREG               10,6                  0 5086729308538404864 /var (/dev/hd9var)
+IBM.LPRMd  299248   root    5u  unix               10,6                0t0 5086729467452194816 /var/ct/IW/soc/mc/RMIBM.LPRM.0
+IBM.LPRMd  299248   root    6u  unix 0xf100060001703000             0t1300                     /var/ct/IW/soc/mc/RMIBM.LPRM.0
+IBM.LPRMd  299248   root    7uW VREG               10,6                  0 5086729467452194816 /var (/dev/hd9var)
+IBM.LPRMd  299248   root    8uW VREG               10,6                  0 5086729467452194816 /var (/dev/hd9var)
+IBM.LPRMd  299248   root    9u  VREG               10,6                  0 5086729467452194816 /var (/dev/hd9var)
+IBM.LPRMd  299248   root   10u  unix               10,7             0t1032 5086729467452194816 /tmp/.ct_mc_299248_sec490f02034697b1803b299d50
+cron       303278   root  cwd   VDIR               10,6                  0 5086729205459189760 /var (/dev/hd9var)
+cron       303278   root    0r  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+cron       303278   root    1w  VREG               10,6                  0 5086729205459189760 /var (/dev/hd9var)
+cron       303278   root    2w  VREG               10,6                  0 5086729205459189760 /var (/dev/hd9var)
+cron       303278   root    3r  VDIR               10,5                  0 5086728582688931840 /usr (/dev/hd2)
+cron       303278   root    4r  VDIR               10,5                  0 5086728582688931840 /usr (/dev/hd2)
+cron       303278   root    5r  VDIR               10,5                  0 5086728582688931840 /usr (/dev/hd2)
+cron       303278   root    6r  VDIR               10,5                  0 5086728582688931840 /usr (/dev/hd2)
+cron       303278   root    7r  VDIR               10,5                  0 5086728582688931840 /usr (/dev/hd2)
+cron       303278   root    8r  VDIR               10,4                  0 5086728578393964544 / (/dev/hd4)
+cron       303278   root    9r  VDIR               10,7                  0 5086728634228539392 /tmp (/dev/hd3)
+cron       303278   root   10r  VDIR               10,6                  0 5086728625638604800 /var (/dev/hd9var)
+cron       303278   root   11u  FIFO               10,6                  0 5086729205459189760 /var (/dev/hd9var)
+cron       303278   root   12r  VREG               10,5                  0 5086729205459189760 /usr (/dev/hd2)
+dsmcad     307358   root  cwd   VDIR               10,4                  0 5086728578393964544 / (/dev/hd4)
+dsmcad     307358   root    0r  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+dsmcad     307358   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+dsmcad     307358   root    2w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+dsmcad     307358   root    3r  VREG               10,5                  0 5086729269883699200 /usr (/dev/hd2)
+dsmcad     307358   root    4w  VREG               10,6                  0 5086729269883699200 /var (/dev/hd9var)
+dsmcad     307358   root    5w  VREG               10,6                  0 5086729274178666496 /var (/dev/hd9var)
+dsmcad     307358   root    6u  IPv4 0xf100060001745390                0t0                 TCP *:32774 (LISTEN)
+IBM.DRMd   311452   root  cwd   VDIR               10,6                  0 5086729321423306752 /var (/dev/hd9var)
+IBM.DRMd   311452   root    0u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+IBM.DRMd   311452   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+IBM.DRMd   311452   root    2w  VREG               10,6                  0 5086729325718274048 /var (/dev/hd9var)
+IBM.DRMd   311452   root    3u  unix               10,4                0t0 5086729321423306752 /dev/.SRC-unix/SRCF0ufal
+IBM.DRMd   311452   root    4ww VREG               10,6                  0 5086729308538404864 /var (/dev/hd9var)
+IBM.DRMd   311452   root    5uW VREG               10,6                  0 5086729325718274048 /var (/dev/hd9var)
+IBM.DRMd   311452   root    6u  unix               10,6                0t0 5086729325718274048 /var/ct/IW/soc/mc/RMIBM.DRM.0
+IBM.DRMd   311452   root    7u  unix 0xf100060001707400             0t2368                     /var/ct/IW/soc/mc/RMIBM.DRM.0
+IBM.DRMd   311452   root    8uW VREG               10,6                  0 5086729325718274048 /var (/dev/hd9var)
+IBM.DRMd   311452   root    9uW VREG               10,6                  0 5086729325718274048 /var (/dev/hd9var)
+IBM.ERrmd  319658   root  cwd   VDIR               10,6                  0 5086729308538404864 /var (/dev/hd9var)
+IBM.ERrmd  319658   root    0u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+IBM.ERrmd  319658   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+IBM.ERrmd  319658   root    2w  VREG               10,6                  0 5086729312833372160 /var (/dev/hd9var)
+IBM.ERrmd  319658   root    3u  unix               10,4                0t0 5086729312833372160 /dev/.SRC-unix/SRCBoufah
+IBM.ERrmd  319658   root    4ww VREG               10,6                  0 5086729308538404864 /var (/dev/hd9var)
+IBM.ERrmd  319658   root    5u  unix               10,6                0t0 5086729317128339456 /var/ct/IW/soc/mc/RMIBM.ERRM.0
+IBM.ERrmd  319658   root    6u  unix 0xf10006000174b400              0t208                     /var/ct/IW/soc/mc/RMIBM.ERRM.0
+IBM.ERrmd  319658   root    7uW VREG               10,6                  0 5086729317128339456 /var (/dev/hd9var)
+IBM.ERrmd  319658   root    8uW VREG               10,6                  0 5086729317128339456 /var (/dev/hd9var)
+IBM.ERrmd  319658   root    9uW VREG               10,6                  0 5086729317128339456 /var (/dev/hd9var)
+IBM.ERrmd  319658   root   10uW VREG               10,6                  0 5086729321423306752 /var (/dev/hd9var)
+IBM.ERrmd  319658   root   11uW VREG               10,6                  0 5086729321423306752 /var (/dev/hd9var)
+IBM.ERrmd  319658   root   12uW VREG               10,6                  0 5086729321423306752 /var (/dev/hd9var)
+IBM.ERrmd  319658   root   13u  unix               10,7             0t2032 5086729321423306752 /tmp/.ct_mc_319658_sec4e0aa14697b15e19abb9e3
+IBM.Servi  323748   root  cwd   VDIR               10,6                  0 5086729308538404864 /var (/dev/hd9var)
+IBM.Servi  323748   root    0u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+IBM.Servi  323748   root    1w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+IBM.Servi  323748   root    2w  VREG               10,6                  0 5086729321423306752 /var (/dev/hd9var)
+IBM.Servi  323748   root    3u  unix               10,4                0t0 5086729321423306752 /dev/.SRC-unix/SRCEDufak
+IBM.Servi  323748   root    4ww VREG               10,6                  0 5086729308538404864 /var (/dev/hd9var)
+IBM.Servi  323748   root    5u  unix               10,6                0t0 5086729321423306752 /var/ct/IW/soc/mc/RMIBM.ServiceRM.0
+IBM.Servi  323748   root    6u  unix 0xf100060001718000            0t35516                     /var/ct/IW/soc/mc/RMIBM.ServiceRM.0
+IBM.Servi  323748   root    7uW VREG               10,6                  0 5086729321423306752 /var (/dev/hd9var)
+IBM.Servi  323748   root    8uW VREG               10,6                  0 5086729325718274048 /var (/dev/hd9var)
+java       376854   root  cwd   VDIR               31,2                  0 5086810234312196096 /prj (/dev/prjlv)
+java       376854   root    0u  VREG               31,2                  0 5092919640607162368 /prj (/dev/prjlv)
+java       376854   root    1u  VREG               31,2                  0 5092919640607162368 /prj (/dev/prjlv)
+java       376854   root    2u  VREG               31,2                  0 5092919640607162368 /prj (/dev/prjlv)
+java       376854   root    3r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root    4r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root    5r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root    6r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root    7r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root    8r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root    9r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   10r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   11r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   12r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   13r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   14r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   15r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   16r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   17r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   18r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   19r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   20r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   21r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   22r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   23r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   24r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   25r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   26r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   27r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   28r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   29r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   30r  VREG               31,2                  0 5092985117383589888 /prj (/dev/prjlv)
+java       376854   root   31r  VREG               31,2                  0 5092985121678557184 /prj (/dev/prjlv)
+java       376854   root   32r  VREG               31,2                  0 5092985121678557184 /prj (/dev/prjlv)
+java       376854   root   33r  VREG               31,2                  0 5092985121678557184 /prj (/dev/prjlv)
+java       376854   root   34r  VREG               31,2                  0 5092985121678557184 /prj (/dev/prjlv)
+java       376854   root   35r  VREG               31,2                  0 5092985121678557184 /prj (/dev/prjlv)
+java       376854   root   36r  VREG               31,2                  0 5092985121678557184 /prj (/dev/prjlv)
+java       376854   root   37r  VREG               31,2                  0 5092985121678557184 /prj (/dev/prjlv)
+java       376854   root   38r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   39u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root   40u  unix 0xf100060000263400                0t0                     ->(none)
+java       376854   root   41r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   42r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   43r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   44r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   45r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   46r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   47r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   48r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   49r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   50r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   51r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   52r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   53r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   54r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   55r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   56r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   57r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   58r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   59r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   60r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   61r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   62r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   63r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   64r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   65r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   66r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   67r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   68r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   69r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   70r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   71r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   72r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   73r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   74r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   75r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   76r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   77r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   78r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   79r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   80r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   81r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   82r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   83r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   84r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   85r  VREG               31,2                  0 5086810225722261504 /prj (/dev/prjlv)
+java       376854   root   86r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   87r  VREG               31,2                  0 5086810225722261504 /prj (/dev/prjlv)
+java       376854   root   88r  VREG               31,2                  0 5086810225722261504 /prj (/dev/prjlv)
+java       376854   root   89r  VREG               31,2                  0 5086810225722261504 /prj (/dev/prjlv)
+java       376854   root   90r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   91r  VREG               31,2                  0 5086810225722261504 /prj (/dev/prjlv)
+java       376854   root   92r  VREG               31,2                  0 5086810225722261504 /prj (/dev/prjlv)
+java       376854   root   93r  VREG               31,2                  0 5086810225722261504 /prj (/dev/prjlv)
+java       376854   root   94r  VREG               31,2                  0 5086810225722261504 /prj (/dev/prjlv)
+java       376854   root   95r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   96r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   97r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   98r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root   99r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  100r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  101r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  102r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  103r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  104r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  105r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  106r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  107r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  108r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  109r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  110r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  111r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  112r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  113r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  114r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  115r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  116r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  117r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  118r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  119r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  120r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  121r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  122r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  123r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  124r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  125r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  126r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  127r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  128r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  129r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  130r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  131r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  132r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  133r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  134r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  135r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  136r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  137r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  138r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  139r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  140r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  141r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  142r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  143r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  144r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  145r  VREG               31,2                  0 5086810225722261504 /prj (/dev/prjlv)
+java       376854   root  146r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  147r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  148r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  149r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  150r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  151r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  152r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  153r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  154r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  155r  VREG               31,2                  0 5086810917211996160 /prj (/dev/prjlv)
+java       376854   root  156r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  157r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  158r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  159r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  160r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  161r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  162r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  163r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  164r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  165r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  166r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  167r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  168r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  169r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  170r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  171r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  172r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  173r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  174r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  175r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  176r  VREG               31,2                  0 5086810917211996160 /prj (/dev/prjlv)
+java       376854   root  177r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  178r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  179r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  180r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  181r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  182r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  183r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  184r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  185r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  186r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  187r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  188r  VREG               31,2                  0 5092985121678557184 /prj (/dev/prjlv)
+java       376854   root  189r  VREG               31,2                  0 5092985121678557184 /prj (/dev/prjlv)
+java       376854   root  190r  VREG               31,2                  0 5086810208542392320 /prj (/dev/prjlv)
+java       376854   root  191r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  192r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  193r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  194r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  195r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  196r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  197r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  198r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  199r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  200r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  201r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  202r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  203r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  204r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  205r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  206r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  207r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  208r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  209r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  210r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  211r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  212r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  213r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  214r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  215r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  216r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  217r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  218r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  219r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  220r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  221r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  222r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  223r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  224r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  225r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  226r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  227r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  228r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  229r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  230r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  231r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  232r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  233r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  234r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  235r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  236r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  237r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  238r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  239r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  240r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  241r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  242r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  243r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  244r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  245r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  246r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  247r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  248r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  249r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  250r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  251r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  252r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  253r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  254r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  255r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  256r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  257r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  258r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  259r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  260r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  261r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  262r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  263r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  264r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  265r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  266r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  267r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  268r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  269r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  270r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  271r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  272r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  273r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  274r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  275r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  276r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  277r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  278r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  279r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  280r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  281r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  282r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  283r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  284r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  285r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  286r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  287r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  288r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  289r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  290r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  291r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  292r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  293r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  294r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  295r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  296r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  297r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  298r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  299r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  300r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  301r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  302r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  303r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  304r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  305r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  306r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  307r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  308r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  309r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  310r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  311r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  312r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  313r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  314r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  315r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  316r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  317r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  318r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  319r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  320r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  321r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  322r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  323r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  324r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  325r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  326r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  327r  VREG               31,2                  0 5086810225722261504 /prj (/dev/prjlv)
+java       376854   root  328r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  329r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  330r  VREG               31,2                  0 5086810212837359616 /prj (/dev/prjlv)
+java       376854   root  331r  VREG               31,2                  0 5086810212837359616 /prj (/dev/prjlv)
+java       376854   root  332r  VREG               31,2                  0 5086810212837359616 /prj (/dev/prjlv)
+java       376854   root  333r  VREG               31,2                  0 5086810917211996160 /prj (/dev/prjlv)
+java       376854   root  334r  VREG               31,2                  0 5086810917211996160 /prj (/dev/prjlv)
+java       376854   root  335r  VREG               31,2                  0 5086810917211996160 /prj (/dev/prjlv)
+java       376854   root  336r  VREG               31,2                  0 5086810917211996160 /prj (/dev/prjlv)
+java       376854   root  337r  VREG               31,2                  0 5086810917211996160 /prj (/dev/prjlv)
+java       376854   root  338r  VREG               31,2                  0 5086810917211996160 /prj (/dev/prjlv)
+java       376854   root  339r  VREG               31,2                  0 5086810917211996160 /prj (/dev/prjlv)
+java       376854   root  340r  VREG               31,2                  0 5086810917211996160 /prj (/dev/prjlv)
+java       376854   root  341u  VREG               31,2                  0 5086810754003238912 /prj (/dev/prjlv)
+java       376854   root  342r  VREG               31,2                  0 5086810208542392320 /prj (/dev/prjlv)
+java       376854   root  343w  VREG               31,2                  0 5095456707853680640 /prj (/dev/prjlv)
+java       376854   root  344w  VREG               31,2                  0 5092919713621606400 /prj (/dev/prjlv)
+java       376854   root  345u  IPv6 0xf10006000122e390                0t0                 TCP *:10032 (LISTEN)
+java       376854   root  346r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  347r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  348u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  349w  VREG               31,2                  0 5095958853955092480 /prj (/dev/prjlv)
+java       376854   root  350u  IPv6 0xf100060000343b90                0t0                 TCP *:10025 (LISTEN)
+java       376854   root  351u  VREG               31,2                  0 5086810766888140800 /prj (/dev/prjlv)
+java       376854   root  352u  VREG               31,2                  0 5086810754003238912 /prj (/dev/prjlv)
+java       376854   root  353u  IPv6 0xf1000600017d1390                0t0                 TCP *:10036 (LISTEN)
+java       376854   root  354u  IPv6 0xf100060000267b90                0t0                 TCP *:10031 (LISTEN)
+java       376854   root  355u  IPv6 0xf10006000027e390                0t0                 TCP *:10033 (LISTEN)
+java       376854   root  356u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  357u  VREG               31,2                  0 5086810311621607424 /prj (/dev/prjlv)
+java       376854   root  358r  VREG               31,2                  0 5086810230017228800 /prj (/dev/prjlv)
+java       376854   root  359u  VREG               31,2                  0 5086810311621607424 /prj (/dev/prjlv)
+java       376854   root  360u  IPv6 0xf100060000355390                0t0                 TCP *:10034 (LISTEN)
+java       376854   root  361u  VREG               31,2                  0 5086810311621607424 /prj (/dev/prjlv)
+java       376854   root  362u  VREG               31,2                  0 5086810311621607424 /prj (/dev/prjlv)
+java       376854   root  363r  VREG               31,2                  0 5091395897879691264 /prj (/dev/prjlv)
+java       376854   root  364r  VREG               31,2                  0 5091395897879691264 /prj (/dev/prjlv)
+java       376854   root  365r  VREG               31,2                  0 5091395897879691264 /prj (/dev/prjlv)
+java       376854   root  366u  VREG               31,2                  0 5094440200763867136 /prj (/dev/prjlv)
+java       376854   root  367u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  368u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  369u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  370u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  371u  VREG               31,2                  0 5086810758298206208 /prj (/dev/prjlv)
+java       376854   root  372u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  373u  VREG               31,2                  0 5086810758298206208 /prj (/dev/prjlv)
+java       376854   root  374u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  375u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  376u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  377u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  378u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  379u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  380u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  381u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  382u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  383u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  384u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  385u  VREG               31,2                  0 5086810766888140800 /prj (/dev/prjlv)
+java       376854   root  386u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  387u  VREG               31,2                  0 5086810754003238912 /prj (/dev/prjlv)
+java       376854   root  388w  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  389u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  390uw VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  391u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  392u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  393r  VREG               31,2                  0 5086810693873696768 /prj (/dev/prjlv)
+java       376854   root  394u  VREG               31,2                  0 5094440200763867136 /prj (/dev/prjlv)
+java       376854   root  395u  VREG               31,2                  0 5094440200763867136 /prj (/dev/prjlv)
+java       376854   root  396r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  397r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  398r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  399r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  400r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  401r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  402r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  403r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  404r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  405r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  406r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  407r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  408r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  409r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  410r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  411r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  412r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  413r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  414r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  415r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  416r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  417r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  418r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  419r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  420r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  421r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  422r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  423r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  424r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  425r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  426r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  427r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  428r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  429r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  430r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  431r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  432r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  433r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  434r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  435r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  436r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  437r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  438r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  439r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  440r  VREG               31,2                  0 5086810702463631360 /prj (/dev/prjlv)
+java       376854   root  441r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  442r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  443r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  444r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  445r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  446r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  447r  VREG               31,2                  0 5086810698168664064 /prj (/dev/prjlv)
+java       376854   root  448u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  449u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  450u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  451u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  452u  VREG               31,2                  0 5086810758298206208 /prj (/dev/prjlv)
+java       376854   root  453u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  454u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  455u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  456u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  457u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  458u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  459u  VREG               31,2                  0 5086810766888140800 /prj (/dev/prjlv)
+java       376854   root  460u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  461u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  462u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  463u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  464u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  465u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  466u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  467u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  468u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  469u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  470u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  471u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  472u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  473u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  474u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  475u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  476u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  477u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  478u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  479u  VREG               31,2                  0 5086810758298206208 /prj (/dev/prjlv)
+java       376854   root  480u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  481u  VREG               31,2                  0 5086810749708271616 /prj (/dev/prjlv)
+java       376854   root  482u  VREG               31,2                  0 5086810758298206208 /prj (/dev/prjlv)
+java       376854   root  483u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  484u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  485u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  486w  VREG               31,2                  0 5086810234312196096 /prj (/dev/prjlv)
+java       376854   root  487u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  488u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  489u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  490w  VREG               31,2                  0 5086810234312196096 /prj (/dev/prjlv)
+java       376854   root  491u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  492u  VREG               31,2                  0 5086810766888140800 /prj (/dev/prjlv)
+java       376854   root  493u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  494u  VREG               31,2                  0 5086810766888140800 /prj (/dev/prjlv)
+java       376854   root  495u  VREG               31,2                  0 5095756582470287360 /prj (/dev/prjlv)
+java       376854   root  496u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  497u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  498u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  499u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  500u  VREG               31,2                  0 5086810766888140800 /prj (/dev/prjlv)
+java       376854   root  501u  VREG               31,2                  0 5086810758298206208 /prj (/dev/prjlv)
+java       376854   root  502u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  503u  VREG               31,2                  0 5086810758298206208 /prj (/dev/prjlv)
+java       376854   root  504u  IPv6 0xf100060001736a88             0t1389                 TCP olcru148.olo.belastingdienst.nl:*->10.79.106.73:3762
+java       376854   root  505u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  506u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  507u  VREG               31,2                  0 5086810766888140800 /prj (/dev/prjlv)
+java       376854   root  508u  VREG               31,2                  0 5086810758298206208 /prj (/dev/prjlv)
+java       376854   root  509u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  510u  VREG               31,2                  0 5086810766888140800 /prj (/dev/prjlv)
+java       376854   root  511u  IPv6 0xf100060000276b90                0t0                 TCP olcru148.olo.belastingdienst.nl:58983->olcru142.olo.belastingdienst.nl:50000 (ESTABLISHED)
+java       376854   root  512u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  513                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+java       376854   root  514u  IPv6 0xf100060001783390                0t0                 TCP olcru148.olo.belastingdienst.nl:33983->olinfw01.pc.ololab.nl:389 (ESTABLISHED)
+java       376854   root  515u  IPv6 0xf100060000f99390                0t0                 TCP olcru148.olo.belastingdienst.nl:33984->olinfw01.pc.ololab.nl:389 (ESTABLISHED)
+java       376854   root  516u  VREG               31,2                  0 5086810758298206208 /prj (/dev/prjlv)
+java       376854   root  517u  VREG               31,2                  0 5086810234312196096 /prj (/dev/prjlv)
+java       376854   root  518w  VREG               31,2                  0 5086810238607163392 /prj (/dev/prjlv)
+java       376854   root  519w  VREG               31,2                  0 5086810238607163392 /prj (/dev/prjlv)
+java       376854   root  520u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  521r  VREG               31,2                  0 5086810238607163392 /prj (/dev/prjlv)
+java       376854   root  522u  IPv6 0xf100060001787288             0t1376                 TCP olcru148.olo.belastingdienst.nl:*->10.79.106.73:3763
+java       376854   root  523u  IPv6 0xf1000600017cd390                0t0                 TCP olcru148.olo.belastingdienst.nl:58985->olcru142.olo.belastingdienst.nl:50000 (ESTABLISHED)
+java       376854   root  524u  VREG               31,2                  0 5086810238607163392 /prj (/dev/prjlv)
+java       376854   root  525w  VREG               31,2                  0 5086810234312196096 /prj (/dev/prjlv)
+java       376854   root  526u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  527u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  528u  VREG               31,2                  0 5086810758298206208 /prj (/dev/prjlv)
+java       376854   root  529u  VREG               31,2                  0 5086810234312196096 /prj (/dev/prjlv)
+java       376854   root  530u  VREG               31,2                  0 5086810758298206208 /prj (/dev/prjlv)
+java       376854   root  531u  VREG               31,2                  0 5086810234312196096 /prj (/dev/prjlv)
+java       376854   root  532u  VREG               31,2                  0 5086810758298206208 /prj (/dev/prjlv)
+java       376854   root  533u  VREG               31,2                  0 5086810758298206208 /prj (/dev/prjlv)
+java       376854   root  534u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  535u  VREG               31,2                  0 5086810762593173504 /prj (/dev/prjlv)
+java       376854   root  536u  VREG               31,2                  0 5086810234312196096 /prj (/dev/prjlv)
+java       376854   root  537u  VREG               31,2                  0 5086810234312196096 /prj (/dev/prjlv)
+java       376854   root  538u  VREG               31,2                  0 5086810234312196096 /prj (/dev/prjlv)
+java       376854   root  539r  VREG               31,2                  0 5086810238607163392 /prj (/dev/prjlv)
+java       376854   root  540r  VREG               31,2                  0 5086810238607163392 /prj (/dev/prjlv)
+java       376854   root  541r  VREG               31,2                  0 5086810238607163392 /prj (/dev/prjlv)
+java       376854   root  542r  VREG               31,2                  0 5086810238607163392 /prj (/dev/prjlv)
+java       376854   root  543w  VREG               31,2                  0 5086810234312196096 /prj (/dev/prjlv)
+java       376854   root  544w  VREG               31,2                  0 5086810234312196096 /prj (/dev/prjlv)
+java       376854   root  545r  VREG               31,2                  0 5086810234312196096 /prj (/dev/prjlv)
+java       376854   root  546u  VREG               31,2                  0 5086810238607163392 /prj (/dev/prjlv)
+java       376854   root  547u  VREG               31,2                  0 5086810238607163392 /prj (/dev/prjlv)
+java       376854   root  548u  VREG               31,2                  0 5086810238607163392 /prj (/dev/prjlv)
+java       376854   root  549u  VREG               31,2                  0 5086810238607163392 /prj (/dev/prjlv)
+java       376854   root  550u  VREG               31,2                  0 5086810234312196096 /prj (/dev/prjlv)
+java       376854   root  551u  VREG               31,2                  0 5086810234312196096 /prj (/dev/prjlv)
+java       376854   root  552                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+java       376854   root  553u  IPv6 0xf10006000123f288             0t1389                 TCP olcru148.olo.belastingdienst.nl:*->10.79.106.73:3764
+java       376854   root  554u  IPv6 0xf10006000177ab90                0t0                 TCP olcru148.olo.belastingdienst.nl:33357->olcru142.olo.belastingdienst.nl:50000 (ESTABLISHED)
+java       376854   root  555                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+java       376854   root  556                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+java       376854   root  557                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+java       376854   root  558r  FIFO 0xf100010029b4d970                  0                     
+java       376854   root  559w  FIFO 0xf100010029b4d970                  0                     
+java       376854   root  560r  FIFO 0xf100010029b4d8b0                  0                     
+java       376854   root  561w  FIFO 0xf100010029b4d8b0                  0                     
+java       376854   root  562u  IPv6 0xf10006000176e390                0t0                 TCP *:10027 (LISTEN)
+java       376854   root  563r  FIFO 0xf100010029b4dbb0                  0                     
+java       376854   root  564w  FIFO 0xf100010029b4dbb0                  0                     
+java       376854   root  565u  IPv6 0xf100060001783b90                0t0                 TCP *:10038 (LISTEN)
+java       376854   root  566u  IPv6 0xf1000600017c7b90                0t0                 TCP *:10039 (LISTEN)
+java       376854   root  567u  IPv6 0xf10006000028ab90                0t0                 TCP *:10035 (LISTEN)
+sshd       446574   root  cwd   VDIR               10,4                  0 5086728578393964544 / (/dev/hd4)
+sshd       446574   root    0u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+sshd       446574   root    1u  VCHR                2,2                0t0 5086728582688931840 / (/dev/hd4) (like character special /dev/null)
+sshd       446574   root    2w  VMPC                4,0                0t0 5086728604163768320 / (/dev/hd4) (like character special /dev/console)
+sshd       446574   root    3u  IPv4 0xf10006000177a390            0t43422                 TCP olcru148.olo.belastingdienst.nl:22->10.79.106.65:4417 (ESTABLISHED)
+sshd       446574   root    4r  VREG               10,5                  0 5086728634228539392 /usr (/dev/hd2)
+sshd       446574   root    5r  FIFO 0xf1000100481119d0                  0                     
+sshd       446574   root    6w  FIFO 0xf1000100481119d0                  0                     
+sshd       446574   root    7u  VCHR               18,0             0t2111                     / (/dev/hd4)
+sshd       446574   root    8u  VCHR               18,0             0t2111                     / (/dev/hd4)
+sshd       446574   root    9u  VCHR               18,0             0t2111                     / (/dev/hd4)
+ksh        483568   root  cwd   VDIR               31,2                  0 5086810204247425024 /prj (/dev/prjlv)
+ksh        483568   root    0u  VCHR               19,0             0t2087 5086728956351086592 / (/dev/hd4) (like character special /dev/pts/0)
+ksh        483568   root    1u  VCHR               19,0             0t2087 5086728956351086592 / (/dev/hd4) (like character special /dev/pts/0)
+ksh        483568   root    2u  VCHR               19,0             0t2087 5086728956351086592 / (/dev/hd4) (like character special /dev/pts/0)
+ksh        483568   root    3                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root    4                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root    5                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root    6                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root    7                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root    8                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root    9                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   10r  VREG               10,5                  0 5086728634228539392 /usr (/dev/hd2)
+ksh        483568   root   11                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   12                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   13                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   14                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   15                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   16                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   17                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   18                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   19                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   20                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   21                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   22                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   23                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   24                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   25                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   26                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   27                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   28                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   29                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   30                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   31                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   32                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   33                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   34                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   35                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   36                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   37                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   38                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   39                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   40                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   41                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   42                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   43                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   44                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   45                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   46                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   47                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   48                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   49                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   50                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   51                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   52                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   53                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   54                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   55                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   56                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   57                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   58                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   59                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   60                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   61                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   62                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh        483568   root   63u  VREG               10,4                  0 5093004315887403008 / (/dev/hd4)
+ksh       1650818   root  cwd   VDIR               31,2                  0 5086810204247425024 /prj (/dev/prjlv)
+ksh       1650818   root    0u  VCHR               19,0             0t2087 5086728956351086592 / (/dev/hd4) (like character special /dev/pts/0)
+ksh       1650818   root    1u  VCHR               19,0             0t2087 5086728956351086592 / (/dev/hd4) (like character special /dev/pts/0)
+ksh       1650818   root    2u  VCHR               19,0             0t2087 5086728956351086592 / (/dev/hd4) (like character special /dev/pts/0)
+ksh       1650818   root    3                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root    4                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root    5                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root    6                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root    7                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root    8                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root    9                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   10r  VREG               10,5                  0 5086728634228539392 /usr (/dev/hd2)
+ksh       1650818   root   11                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   12                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   13                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   14                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   15                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   16                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   17                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   18                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   19                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   20                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   21                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   22                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   23                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   24                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   25                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   26                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   27                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   28                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   29                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   30                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   31                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   32                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   33                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   34                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   35                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   36                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   37                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   38                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   39                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   40                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   41                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   42                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   43                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   44                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   45                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   46                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   47                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   48                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   49                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   50                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   51                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   52                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   53                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   54                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   55                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   56                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   57                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   58                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   59                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   60                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   61                                                                  0xf00000002ff45d98 file struct, ty=0x5e30, op=0x1330
+ksh       1650818   root   62r  VREG               31,2                  0 5095975054571732992 /prj (/dev/prjlv)
+ksh       1650818   root   63u  VREG               10,4                  0 5093004315887403008 / (/dev/hd4)

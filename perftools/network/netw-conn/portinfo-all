@@ -1,0 +1,4 @@
+lsof -P >./lsof-all.txt
+ps -ef > ps-all.txt
+netstat -an >netstat-all.txt
+

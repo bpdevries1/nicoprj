@@ -1,0 +1,509 @@
+package require Itcl
+package require ndv
+package require struct::list
+package require struct::matrix
+package require math
+
+::ndv::source_once [file join [file dirname [info script]] .. lib ThreadHelper.tcl]
+
+itcl::class TaskGraph {
+
+	private common log
+	set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+	# set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+
+  private common instance ""
+  private common Y_STEP 0.1
+  # private common SEC_TIME_MARGIN 120 
+  private common GRAPH_X_SIZE 1024
+  private common GRAPH_Y_SIZE 768
+  private common LINE_WIDTH 3
+  
+  private variable db
+  private variable conn  
+  
+  # filtersettings en graph name
+  # private variable taskfilter
+  # private variable taskregexp ; # ook bijhouden voor logging en check op alles.
+  # private variable taskgraphname
+  private variable subdir
+  private variable min_duration
+  private variable maxlines ; # geen grafiek maken als er meer dan zoveel lijnstukken zijn.
+  
+  # tijdens query-en: mapping van threadname,threadnr -> y-waarde.
+  # dit is de integer y-waarde, wel in deze class houden
+  private variable ar_thread_y 
+  
+  # tijdens maken graph: graph_start en graph_end
+  private variable graph_start
+  private variable graph_end
+  
+  # diverse 'heights' voor y-waarden
+  # deze nu in ThreadHelper
+  #private variable ar_heights
+  #private variable ar_n_heights
+  
+  # voor bepalen relatieve heights van tasks in een 'thread'
+  private variable thread_helper
+  
+  # mapping van taskname -> linetype
+  private variable ar_task_lt
+  private variable n_task_lt
+  
+  private common dat0
+  # dat0 bepalen bij het ::ndv::source_oncen van de file, anders verkeerde dir
+  set dat0 [file normalize [file join [file dirname [info script]] tasks.dat0]]
+  
+  public proc get_instance {} {
+    if {$instance == ""} {
+   		set instance [uplevel {namespace which [TaskGraph #auto]}]
+      $instance init0
+    }
+    return $instance
+  }
+
+  public method init0 {} {
+    set db ""
+    # @note default filter op .* zetten, zodat het wel altijd toegepast kan worden.
+    set_taskregexp ".*"
+    # set taskgraphname ""
+    set subdir ""
+    set min_duration 0
+  }
+  
+  public method init {} {
+    array unset ar_thread_y
+    array unset ar_task_lt
+    set n_task_lt 0
+    array unset ar_heights
+    array unset ar_n_heights
+  }
+
+  public method set_database {a_db} {
+    set db $a_db 
+    set conn [$db get_connection]
+  }
+  
+  public method set_threadnamefilter {filter} {
+    make_filter_proc proc_threadnamefilter $filter 
+  }
+  
+  public method set_taskfilter {filter} {
+    make_filter_proc proc_taskfilter $filter
+  }
+
+  private method make_filter_proc {proc_name filter} {
+    $log debug "make_filter_proc: $proc_name - $filter"
+    proc $proc_name [lindex $filter 0] [lindex $filter 1]
+  }
+  
+  public method set_taskregexp {taskregexp} {
+    $log debug "set_taskregexp: $taskregexp"
+    # set taskregexp $a_taskregexp
+    set_taskfilter [list x "regexp -- \{$taskregexp\} \$x"]
+  }
+
+  public method set_threadnameregexp {regexp} {
+    make_filter_proc proc_threadnamefilter [list x "regexp -- \{$regexp\} \$x"] 
+  }
+  
+  public method set_subdir {value} {
+    set subdir $value 
+  }
+  
+  public method set_min_duration {value} {
+    set min_duration $value 
+  }
+  
+  public method set_maxlines {value} {
+    set maxlines $value 
+  }
+  
+  #@param graph_start/end: "" or "2009-10-22 12:00:00"
+  public method make_graph {testrun_id testrun_name output_dir a_graph_start a_graph_end} {
+    global env
+    $log debug "make_graph in output_dir: $output_dir: START"
+    # file mkdir $output_dir
+    file mkdir [file join $output_dir $subdir]
+    set graph_start $a_graph_start
+    set graph_end $a_graph_end
+    set dt [det_str_start_end]
+    set basename [file join $output_dir $subdir "tasks"]
+    $log info "Make task graph: $basename START"
+    # set cmd_filename "$basename$taskgraphname$dt.m"
+    # set graph_filename "$basename$taskgraphname$dt.png"
+    set cmd_filename "$basename.m"
+    # set graph_filename "$basename.png"
+    set graph_filename "$basename.tcl"
+    if {[file exists $graph_filename]} {
+      $log info "$graph_filename already exists; do nothing"
+      return [list "" ""]
+    }
+    # 24-6-2010 mogelijk is script dir de .. van deze, dus dan anders.
+    file copy -force [file join [file dirname [info script]] graphmaker tasks.bat] [file dirname $graph_filename]
+
+    init
+    # make_temptask $testrun_id
+    make_temptables $testrun_id
+    # foreach {graph_start graph_end} [make_cmdfile $testrun_id [file tail $testrun_name] $cmd_filename $graph_filename] break
+    lassign [make_cmdfile $testrun_id [file tail $testrun_name] $cmd_filename $graph_filename] graph_start graph_end
+    gnuplot_file $cmd_filename $graph_filename $dat0
+    # $log debug "Returning start-end: $graph_start-$graph_end"
+    # $log debug "make_graph in output_dir: $output_dir: FINISHED"
+    $log info "Make task graph: $basename FINSIHED"
+    return [list $graph_start $graph_end]
+  }
+
+  private method det_str_start_end {} {
+    if {$graph_start != ""} {
+      set res "$graph_start-$graph_end"
+      regsub -all -- " " $res "-" res
+      regsub -all -- ":" $res "-" res
+      return $res
+    } else {
+      return "" 
+    }
+  }
+  
+  private method make_temptables {testrun_id} {
+    make_temptable temptask taskname $testrun_id proc_taskfilter
+    make_temptable tempthreadname threadname $testrun_id proc_threadnamefilter
+  }
+  
+  # make and fill a temporary table for determining if to include tasks
+  # join this table with every query.
+  # @note 19-1-2010 NdV the regexp/filter works on the taskname, not the graphlabel
+  private method make_temptable {temptablename columnname testrun_id proc_filtername} {
+    catch {::mysql::exec $conn "drop table $temptablename"}
+    ::mysql::exec $conn "create table $temptablename (value varchar(255))"
+    set query "select distinct t.$columnname
+               from task t, logfile l
+               where t.logfile_id = l.id
+               and l.testrun_id = $testrun_id
+               [det_subwhere_start_end]
+               and t.sec_duration >= $min_duration
+               order by 1"
+    set qresult [::mysql::sel $conn $query -flatlist]
+    set qresult [::struct::list filter $qresult [itcl::code $proc_filtername]]
+    foreach value $qresult {
+      ::mysql::exec $conn "insert into $temptablename values ('$value')"
+    }
+  }
+
+  # @return list with 2 elements: start and end, in format 2009-11-23 12:23:45
+  private method make_cmdfile {testrun_id testrun_name cmd_filename graph_filename} {
+    $log debug "Making cmdfile: $cmd_filename: START"
+    set graph_id [$db insert_object graph -path $graph_filename]
+    set x_start ""
+    foreach {x_start x_end} [det_xrange $testrun_id] break
+    if {$x_start == ""} {
+      $log debug "Empty x-range, returning"
+      return [list "" ""]
+    }
+    foreach {y_start y_end} [det_yrange $testrun_id] break
+    set thread_helper [ThreadHelper::new]
+    $log debug "x_start: $x_start"
+    $log debug "x_end: $x_end"
+    $log debug "margin: [det_sec_time_margin $x_start $x_end]"
+    $thread_helper set_sec_time_margin [det_sec_time_margin $x_start $x_end]
+    
+    set f [open $cmd_filename w]
+    puts $f "    
+#set terminal png medium size 1024,768
+# set terminal png medium size $GRAPH_X_SIZE,$GRAPH_Y_SIZE
+set terminal tkcanvas interactive
+set output \"$graph_filename\"
+set datafile separator \"	\"
+
+reset
+set data style lines
+set title \"Tasks for testrun: $testrun_name\"
+set xlabel \"Test time\"
+set format x \"%d-%m-%Y\\n%H:%M:%S\"
+set xdata time
+
+set timefmt \"%Y-%m-%d %H:%M:%S\"
+set xrange \[\"$x_start\":\"$x_end\"\]
+set yrange \[\"$y_start\":\"$y_end\"\]
+set ytics [det_ytics $testrun_id]
+set grid xtics ytics back
+set key left
+set linestyle 1
+
+[det_arrows $testrun_id [det_y_step $y_start $y_end] $graph_id]
+
+[det_plot_legend $testrun_id]
+"
+    close $f
+    $log debug "Return x_start-x_end: $x_start-$x_end"
+    $log debug "Making cmdfile: $cmd_filename: FINISHED"
+    return [list $x_start $x_end]
+  }
+
+  # @return list with 2 elements: start and end, in format 2009-11-23 12:23:45
+  private method det_xrange {testrun_id} {
+    if {$graph_start == ""} {
+      set query "select min(t.dt_start) start, max(t.dt_end) end, t.taskname
+                 from task t, logfile l, temptask tt, tempthreadname ttn
+                 where t.logfile_id = l.id
+                 and l.testrun_id = $testrun_id
+                 and t.sec_duration >= $min_duration
+                 and tt.value = t.taskname
+                 and ttn.value = t.threadname
+                 group by 3"
+      set qresult [::mysql::sel $conn $query -list]
+      # ook hier is taskname het 3e element.
+      
+      # 14-1-2010 niet meer nodig.
+      #set qresult [::struct::list filter $qresult [itcl::code pr_lindex2]]
+      if {$qresult == {}} {
+        return {} 
+      }
+      # nu start als minimum van start en end als maximum van end bepalen.
+      
+      # fold als hieronder is wel leuk, maar niet nodig, ::math::min kan ook wel een lijst aan.
+      # staat wel in docs dat ::math::min op numerieke waardes werkt, gebruik hier timestamps.
+      # 8-1-2010 NdV Blijkbaar toch iets aan de hand met ::math functies: met fold gaat het wel goed, zonder deze wordt
+      # het resultaat in een list gezet, ofwel {2009-11-23 12:23:45} ipv 2009-11-23 12:23:45. 
+      set start [::struct::list fold [::struct::list mapfor el $qresult {lindex $el 0}] 9999 ::math::min]
+      set end [::struct::list fold [::struct::list mapfor el $qresult {lindex $el 1}] 0 ::math::max]
+      
+      #set start [::math::min [::struct::list mapfor el $qresult {lindex $el 0}]]
+      #set end [::math::max [::struct::list mapfor el $qresult {lindex $el 1}]]
+
+      # foreach {start end} $qresult break
+      set result "\[\"$start\":\"$end\"\]"
+      $log debug "xrange result: $result"
+      # return $result
+      return [list $start $end]
+    } else {
+      # return "\[\"$graph_start\":\"$graph_end\"\]"
+      return [list $graph_start $graph_end]
+    }
+  }
+
+  # eigenlijk alleen een count van de threadname, threadnr combi´s, maar wel alleen als task voldoet aan het filter.
+  private method det_yrange {testrun_id} {
+    set count [llength [det_y_range_list $testrun_id]]
+    set result [list -0.1 $count]
+    $log debug "yrange result: $result"
+    return $result
+  }
+  
+  private method det_ytics {testrun_id} {
+    return "([join [::struct::list mapfor el [det_y_range_list $testrun_id] { 
+      format "\"%s\" %d" {*}$el 
+    }] ", "])"
+  }  
+    
+  # @note side-effect on ar_thread_y
+  # @result is list van lists, nog niet geformatteerd, dit moet in det_ytics.
+  private method det_y_range_list {testrun_id} {
+    set query [det_y_query $testrun_id]
+    $log debug "executing query: $query"
+    set qresult [::mysql::sel $conn $query -list]
+    # 14-1-2010 niet meer nodig.
+    #set qresult [::struct::list filter $qresult [itcl::code pr_lindex2]]
+    if {$qresult == {}} {
+      $log warn "Empty result while determining y_range_list"
+      # { {} {} } transposed is {}
+      return {} 
+    }
+    
+    set result [::struct::list mapfor el $qresult {
+      det_thread_label [lindex $el 0] [lindex $el 1]
+    }]
+    set result [lsort -unique $result]
+    $log debug "result: $result"
+    # generate a list of integers, starting with 0 (iota)
+    set i_list [::struct::list iota [llength $result]]
+    
+    # nu beide lijsten combineren, zeg maar transponeren of zippen? Gebruik een matrix.
+    set tresult [transpose [list $result $i_list]]
+    
+    # side-effect: ar_thread_y
+    array set ar_thread_y [::struct::list flatten $tresult]
+    
+    return $tresult
+  }
+  
+  # nu beide lijsten combineren, zeg maar transponeren. Gebruik een matrix.
+  private method transpose {lst_lsts} {
+    set m [::struct::matrix]
+    $m add columns [llength [lindex $lst_lsts 0]]
+    $m add rows [llength $lst_lsts]
+    # $m set rect 0 0 [list $result $i_list]
+    $m set rect 0 0 $lst_lsts
+    $m transpose
+    set result [$m get rect 0 0 [expr [$m columns] - 1] [expr [$m rows] - 1]]
+    $m destroy
+    return $result
+  }
+  
+  private method det_y_query {testrun_id} {
+    set query "select distinct t.threadname, t.threadnr, t.taskname, td.graphlabel
+               from task t, logfile l, temptask tt, tempthreadname ttn, taskdef td
+               where t.logfile_id = l.id
+               and l.testrun_id = $testrun_id
+               and t.taskname = td.taskname
+               [det_subwhere_start_end]
+               and t.sec_duration >= $min_duration
+               and tt.value = t.taskname
+               and ttn.value = t.threadname
+               order by 1,2,3"    
+    return $query
+  }
+  
+  private method det_thread_label {threadname threadnr} {
+    $log trace "thread name and nr: $threadname *** $threadnr ***"
+    # @note evt ook bepalen uit filename, per logfile een nieuw threadnr, maar dan wel bij subclass.
+    if {$threadnr == ""} {
+      set threadnr 1
+    }
+    return "$threadname-$threadnr"
+  }
+  
+  # @return string: lines with arrow commands or comment if too many lines.
+  # @side effect: task_graph rows are inserted in DB.
+  # @note linewidth == LINEWIDTH + task_graph.tag / 1.000.000
+  private method det_arrows {testrun_id y_step graph_id} {
+    $log debug "det_arrows: START"
+    set query "select t.id, t.threadname, t.threadnr, t.taskname, t.dt_start, t.dt_end, td.graphlabel
+               from task t, logfile l, temptask tt, tempthreadname ttn, taskdef td
+               where t.logfile_id = l.id
+               and l.testrun_id = $testrun_id
+               and t.taskname = td.taskname
+               [det_subwhere_start_end]
+               and t.sec_duration >= $min_duration
+               and tt.value = t.taskname
+               and ttn.value = t.threadname
+               order by t.dt_start, t.dt_end"
+    $log debug "query: $query"
+    set qresult [::mysql::sel $conn $query -list]
+    $log debug "# in qresult na query: [llength $qresult]"
+    if {($maxlines > 0) && ([llength $qresult] > $maxlines)} {
+      $log warn "More than $maxlines rows in resultset: [llength $qresult]; don't make graph"
+      return "# More than $maxlines rows in resultset: [llength $qresult]; don't make graph"
+    }
+    # $log debug "# in qresult na filter: [llength $qresult]"
+    set tag 0
+    set result [::struct::list mapfor el $qresult {
+      incr tag
+      # foreach {t_id threadname threadnr taskname dt_start dt_end graphlabel} $el break
+      lassign $el t_id threadname threadnr taskname dt_start dt_end graphlabel
+      $db insert_object task_graph -task_id $t_id -graph_id $graph_id -tag $tag  
+      
+      # $log debug "det_arrows: el: $el"
+      set y [det_y $threadname $threadnr $dt_start $dt_end $y_step]
+      set lw [format %.6f [expr 1.0 * $LINE_WIDTH + (0.000001 * $tag)]]
+      format "set arrow from \"%s\",%f to \"%s\",%f nohead front lt %d lw $lw" \
+        $dt_start $y $dt_end $y [det_linetype $graphlabel]
+    }]
+    $log debug "# in result: [llength $result]"
+    set result [join $result "\n"]
+    $log debug "det_arrows: FINISHED"
+    return $result
+  }
+
+  private method det_y {threadname threadnr dt_start dt_end y_step} {
+    set name [det_thread_label $threadname $threadnr]
+    set rel_height [$thread_helper det_relative_height $name $dt_start $dt_end]
+    return [expr $ar_thread_y($name) + ($y_step * $rel_height)]    
+  }
+
+  # @return y step-size in y values
+  private method det_y_step {y_start y_end} {
+    set result [expr 1.0 * ($y_end - $y_start) * (2 * $LINE_WIDTH) / (0.9 * $GRAPH_Y_SIZE)]
+    $log debug "y_step: $result"
+    return $result
+  }
+  
+  # default was 120 seconden, doel is in grafiek nog verschil te kunnen zien als 2 lijnstukken met dezelfde kleur achter elkaar zitten.
+  # lijnen zijn 3 pixels hoog, dus minimale afstand ook 3 pixels doen.
+  # hoe groter de xrange, hoe groter de marge
+  # hoe groter de line_width, hoe groter de marge
+  # hoe groter de graph_x_size, hoe kleiner de marge
+  # niet de hele x-size voor x-range gebruikt, dus factor toepassen.
+  private method det_sec_time_margin {start end} {
+    $log debug "$start => $end"
+    set sec_start [clock scan $start -format "%Y-%m-%d %H:%M:%S"]
+    set sec_end [clock scan $end -format "%Y-%m-%d %H:%M:%S"]
+    # bij tekenen lijnen mogelijk naar boven afgerond, zodat toch meer pixels worden gezet dan verwacht.
+    set result [expr 1.0 * ($sec_end - $sec_start) * (2 * $LINE_WIDTH) / (0.9 * $GRAPH_X_SIZE)]
+    $log debug "sec_time_margin: $result"
+    # test, margin = 0 sec
+    # set result 0
+    return $result
+  }
+  
+  private method det_linetype {graphlabel} {
+    if {[array get ar_task_lt $graphlabel] == {}} {
+      incr n_task_lt
+      set ar_task_lt($graphlabel) $n_task_lt
+    }
+    return $ar_task_lt($graphlabel)
+  }
+
+  private method det_linetype_old {taskname} {
+    if {[array get ar_task_lt $taskname] == {}} {
+      incr n_task_lt
+      set ar_task_lt($taskname) $n_task_lt
+    }
+    return $ar_task_lt($taskname)
+  }
+  
+  private method det_plot_legend {testrun_id} {
+    $log debug "det_plot_legend: START"
+    set query "select distinct td.graphlabel
+               from task t, logfile l, temptask tt, tempthreadname ttn, taskdef td  
+               where t.logfile_id = l.id
+               and l.testrun_id = $testrun_id
+               and t.taskname = td.taskname
+               [det_subwhere_start_end]
+               and t.sec_duration >= $min_duration
+               and tt.value = t.taskname
+               and ttn.value = t.threadname
+               order by td.graphlabel"
+    set qresult [::mysql::sel $conn $query -flatlist]
+    # 14-1-2010 NdV niet meer nodig, nu temptask.
+    #set qresult [::struct::list filter $qresult [itcl::code proc_taskfilter]]
+    set result "plot [join [::struct::list mapfor graphlabel $qresult {
+      format "'%s' using 1:2 lt %d lw 3 t \"%s\"" \
+         $dat0 [det_linetype $graphlabel] [graphlabel2legend $graphlabel]
+    }] ", \\\n     "]"
+    $log debug "det_plot_legend: FINISHED"
+    return $result
+  }
+ 
+  private method graphlabel2legend {graphlabel} {
+    # testje: niet te lang, geen rare tekens als haakjes en pijltjes.
+    # string range $graphlabel 0 5
+    regsub -all {[()>-]} $graphlabel "" graphlabel
+    string range $graphlabel 0 20
+  }
+  
+  private method det_subwhere_start_end {} {
+    if {$graph_start != ""} {
+      return " and t.dt_end >= '$graph_start'
+               and t.dt_start <= '$graph_end' "
+    } else {
+      return " " 
+    }
+  }
+  
+  # @todo deze verplaatsen, naar bv package of perflib
+  private method gnuplot_file {cmd_filename graph_filename dat_filename} {
+   	global env
+    try_eval {
+      if {[regexp -nocase "windows" $env(OS)]} {
+        # set result "${prefix}-windows.m3u"
+        # set gnuplot_exe pgnuplot.exe
+        set gnuplot_exe "d:/util/gnuplot424/bin/pgnuplot.exe"
+      } 
+    } {
+      set gnuplot_exe gnuplot 
+    }
+    exec $gnuplot_exe $cmd_filename
+  }
+  
+}

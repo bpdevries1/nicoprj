@@ -1,0 +1,1352 @@
+*** start filename: ./contents.txt ***
+*** start filename: ./contents.txt ***
+
+*** end filename: ./contents.txt ***
+*** start filename: ./create.sql ***
+-- met Web2py creeren?
+
+create table testrun (
+  id integer NOT NULL auto_increment,
+  name varchar(255),
+  UNIQUE KEY `id` (`id`) 
+);
+
+create table logfile (
+  id integer NOT NULL auto_increment,
+  testrun_id integer,
+  path varchar(255),
+  kind varchar(100),
+  UNIQUE KEY `id` (`id`)
+);
+
+create table resusage (
+  id integer NOT NULL auto_increment,
+  logfile_id integer,
+  linenr integer,
+  machine varchar(255),
+  name varchar(255),
+  value float,
+  dt datetime,
+  dec_dt decimal(17,3),
+  UNIQUE KEY `id` (`id`)
+);
+
+create table task (
+  id integer NOT NULL auto_increment,
+  logfile_id integer,
+  threadname varchar(255),
+  threadnr integer,
+  taskname varchar(255),
+  dt_start datetime,
+  dt_end datetime,
+  sec_duration float,
+  dec_start decimal(17,3),
+  dec_end decimal(17,3),
+  details varchar(255),
+  UNIQUE KEY `id` (`id`)
+);
+
+*** end filename: ./create.sql ***
+*** start filename: ./lib ***
+*** start filename: ./logreader ***
+*** start filename: ./ModelSchemaDef.tcl ***
+# DB schema definition for the Perfmeetmodel database.
+# @todo separate general functionality with specific music functionality
+package require Itcl
+package require ndv
+
+# class maar eenmalig definieren
+if {[llength [itcl::find classes ModelSchemaDef]] > 0} {
+	return
+}
+
+# source [file join $env(CRUISE_DIR) checkout lib perflib.tcl]
+source [file join [file dirname [info script]] lib CClassDef.tcl]
+source [file join [file dirname [info script]] lib AbstractSchemaDef.tcl]
+
+
+# @todo (?) ook nog steeds pk en fk defs, voor queries?
+# source [file join $env(CRUISE_DIR) checkout script lib CLogger.tcl]
+
+itcl::class ModelSchemaDef {
+	inherit AbstractSchemaDef
+  
+  private common log
+	# set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+  set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+	
+	public constructor {} {
+		set db ""
+		set no_db 0 ; # default is een db beschikbaar.
+    set_db_name_user_password  "indmeetmod" "perftest" "perftest"
+	}
+
+	public method get_db_name {} {
+		return $db_name
+	}
+
+  public method get_username {} {
+    return $username 
+  }
+  
+  public method get_password {} {
+    return $password 
+  }
+  
+ 	public method set_db_name_user_password {a_db_name a_username a_password} {
+		set db_name $a_db_name
+    set username $a_username
+    set password $a_password
+	}
+
+	private method define_classes {} {
+    $log debug "Define the 4 model classes"
+    define_testrun
+    define_logfile
+    define_resusage
+    define_task
+	}
+
+	private method define_testrun {} {
+		set classdef [::CClassDef::new_classdef $this testrun id]
+		set classdefs(testrun) $classdef
+		$classdef add_field_def id integer ; # blijkbaar toch nog nodig.
+		$classdef add_field_def name string
+	}
+
+	private method define_logfile {} {
+		set classdef [::CClassDef::new_classdef $this logfile id]
+		set classdefs(logfile) $classdef
+		$classdef add_field_def id integer ; # blijkbaar toch nog nodig.
+		$classdef add_field_def testrun_id integer
+    $classdef add_field_def path string 
+    $classdef add_field_def kind string
+	}
+
+ 	private method define_resusage {} {
+		set classdef [::CClassDef::new_classdef $this resusage id]
+		set classdefs(resusage) $classdef
+		$classdef add_field_def id integer ; # blijkbaar toch nog nodig.
+		$classdef add_field_def logfile_id integer
+    $classdef add_field_def linenr integer 
+    $classdef add_field_def machine string
+    $classdef add_field_def name string
+    $classdef add_field_def value float
+    $classdef add_field_def dt datetime
+    $classdef add_field_def dec_dt float
+	}
+
+ 	private method define_task {} {
+		set classdef [::CClassDef::new_classdef $this task id]
+		set classdefs(task) $classdef
+		$classdef add_field_def id integer ; # blijkbaar toch nog nodig.
+		$classdef add_field_def logfile_id integer
+		$classdef add_field_def threadname string 
+		$classdef add_field_def threadnr integer
+		$classdef add_field_def taskname string
+		$classdef add_field_def dt_start datetime
+		$classdef add_field_def dt_end datetime
+		$classdef add_field_def sec_duration float
+		$classdef add_field_def dec_start float
+		$classdef add_field_def dec_end float
+		$classdef add_field_def details string
+	}
+  
+}
+
+
+*** end filename: ./ModelSchemaDef.tcl ***
+*** start filename: ./ModelSchemaDef.tcl.1 ***
+# DB schema definition for the Perfmeetmodel database.
+# @todo separate general functionality with specific music functionality
+package require Itcl
+package require ndv
+
+# class maar eenmalig definieren
+if {[llength [itcl::find classes ModelSchemaDef]] > 0} {
+	return
+}
+
+# source [file join $env(CRUISE_DIR) checkout lib perflib.tcl]
+source [file join [file dirname [info script]] CClassDef.tcl]
+source [file join [file dirname [info script]] AbstractSchemaDef.tcl]
+
+
+# @todo (?) ook nog steeds pk en fk defs, voor queries?
+# source [file join $env(CRUISE_DIR) checkout script lib CLogger.tcl]
+
+itcl::class ModelSchemaDef {
+	inherit AbstractSchemaDef
+  
+  private common log
+	set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+	# set log [CLogger::new_logger [file tail [info script]] debug]
+
+	private variable no_db
+	
+	private variable db
+	private variable classdefs
+
+	# todo pk- en fk-defs afleiden uit classdefs, later misschien helemaal weg.
+	private variable pk_field
+	private variable fk_field
+
+	public constructor {} {
+		set db ""
+		set no_db 0 ; # default is een db beschikbaar.
+	}
+
+	public method set_no_db {val} {
+		$log debug "set_no_db called with val: $val"
+		set no_db $val
+		set_classes_no_db
+	}
+	
+	public method get_no_db {} {
+		return $no_db
+	}
+	
+	private method set_classes_no_db {} {
+		$log debug "set_classes_no_db called"
+		foreach classdef [array names classdefs] {
+			$classdefs($classdef) set_no_db $no_db
+		}
+	}
+	
+	public method get_db_name {} {
+		# @todo eerst notes2 voor testen, later notes weer.
+		# return "notes_test"
+		# return "notes_test2"
+		return "indmeetmod"
+	}
+
+	public method set_db {a_db} {
+		set db $a_db
+		define_classes
+		set_classes_no_db
+	}
+
+	public method get_db {} {
+		return $db
+	}
+
+	public method get_pk_field {table_name} {
+		return $pk_field($table_name)
+	}
+	
+	public method get_fk_field {fromtable totable} {
+		return $fk_field($fromtable,$totable)
+	}
+		
+	private method define_classes {} {
+    define_testrun
+    define_logfile
+    define_resusage
+    define_task
+    if {0} {
+      define_musicfile
+      define_played
+      define_property
+      
+      define_temp_filename
+    }
+	}
+
+	private method define_testrun {} {
+		set classdef [::CClassDef::new_classdef $this testrun id]
+		set classdefs(testrun) $classdef
+		$classdef add_field_def id integer ; # blijkbaar toch nog nodig.
+		$classdef add_field_def name string
+	}
+
+	private method define_logfile {} {
+		set classdef [::CClassDef::new_classdef $this logfile id]
+		set classdefs(logfile) $classdef
+		$classdef add_field_def id integer ; # blijkbaar toch nog nodig.
+		$classdef add_field_def testrun_id integer
+    $classdef add_field_def path string 
+    $classdef add_field_def kind string
+	}
+
+ 	private method define_resusage {} {
+		set classdef [::CClassDef::new_classdef $this resusage id]
+		set classdefs(resusage) $classdef
+		$classdef add_field_def id integer ; # blijkbaar toch nog nodig.
+		$classdef add_field_def logfile_id integer
+    $classdef add_field_def linenr integer 
+    $classdef add_field_def machine string
+    $classdef add_field_def name string
+    $classdef add_field_def value float
+    $classdef add_field_def dt datetime
+    $classdef add_field_def dec_dt float
+	}
+
+ 	private method define_task {} {
+		set classdef [::CClassDef::new_classdef $this task id]
+		set classdefs(task) $classdef
+		$classdef add_field_def id integer ; # blijkbaar toch nog nodig.
+		$classdef add_field_def logfile_id integer
+		$classdef add_field_def threadname string 
+		$classdef add_field_def threadnr integer
+		$classdef add_field_def taskname string
+		$classdef add_field_def dt_start datetime
+		$classdef add_field_def dt_end datetime
+		$classdef add_field_def sec_duration float
+		$classdef add_field_def dec_start float
+		$classdef add_field_def dec_end float
+		$classdef add_field_def details string
+	}
+  
+	public method get_classdef {class_name} {
+		return $classdefs($class_name)
+	}
+	
+	# @param class_name: testbuild
+	# @param args: -cctimestamp $cctimestamp -label $label -artifacts_dir $artifacts_dir
+	public method insert_object {class_name args} {
+		$log debug "args: $args \[[llength $args]\]"
+		set classdef $classdefs($class_name)
+		return [$classdef insert_object $args]
+	}
+
+	# @param class_name: testbuild
+	# @param args: -cctimestamp $cctimestamp -label $label -artifacts_dir $artifacts_dir
+	public method update_object {class_name id args} {
+		$log debug "args: $args \[[llength $args]\]"
+		set classdef $classdefs($class_name)
+		return [$classdef update_object $id $args]
+	}
+
+	public method find_objects {class_name args} {
+		$log debug "args: $args \[[llength $args]\]"
+		set classdef $classdefs($class_name)
+		return [$classdef find_objects $args]
+	
+	}
+
+	# @param class_name: testbuild
+	public method delete_object {class_name id} {
+		# $log debug "args: $args \[[llength $args]\]"
+		set classdef $classdefs($class_name)
+		return [$classdef delete_object $id]
+	}
+
+}
+
+
+*** end filename: ./ModelSchemaDef.tcl.1 ***
+*** start filename: ./test-db.tcl ***
+# test database connection with perftoolset like CDatabase etc.
+
+package require ndv
+package require Tclx
+
+# source all C*.tcl files in the same dir
+if {0} {
+  foreach filename [glob -directory [file dirname [info script]] C*.tcl] {
+    source $filename 
+  }
+}
+
+source [file join [file dirname [info script]] ModelSchemaDef.tcl]
+source [file join [file dirname [info script]] lib CDatabase.tcl]
+source [file join [file dirname [info script]] logreader LogReaderFactory.tcl]
+
+set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+
+proc main {} {
+  test_db
+  test_readlog
+}
+
+proc test_db {} {
+  # set db [CDatabase::get_database]
+  set db [CDatabase::get_database ModelSchemaDef]
+  if {1} {
+    # add test records 
+    set id [$db insert_object logfile -path "/test/pad" -kind "testje"]
+  }
+  set lf [$db find_objects logfile -id $id]
+  puts "logfiles found for $id: $lf"
+  set lf [$db find_objects logfile -kind testje]
+  puts "logfiles found: $lf"
+  $db delete_object logfile $id
+}
+
+proc test_readlog {} {
+  global log
+  set datadir "i:/klanten/ind/performance/input/logtest"
+  $log debug "data dir: $datadir"
+
+  set db [CDatabase::get_database ModelSchemaDef]
+  set testrun_id [$db insert_object testrun -name "testje"]
+  
+  set lr_fact [LogReaderFactory::get_instance]
+  foreach date_subdir [glob -type d -directory $datadir "20*"] {
+     handle_date_subdir $date_subdir $lr_fact $db $testrun_id
+  }   
+  
+}
+
+proc handle_date_subdir {date_subdir lr_fact db testrun_id} {
+  global log
+  # set f [open [file join $date_subdir samenvatting.tsv] w]
+  for_recursive_glob filename [list $date_subdir] "*" {
+    # alleen log en csv
+    # $log debug "Reading file: $filename"
+    set reader [$lr_fact get_reader $filename]
+    if {$reader != ""} {
+      $reader read_log $filename $db $testrun_id
+    }
+    if {0} {
+      set ext [file extension $filename]
+      if {$ext == ".log" || $ext == ".csv"} {
+        handle_log_file $filename $f 
+      }
+    }
+  }
+  # close $f
+}
+
+main
+
+*** end filename: ./test-db.tcl ***
+*** start filename: ./to_text.tcl ***
+package require Tclx
+
+proc main {} {
+  for_recursive_glob filename . "*" {
+    puts_file $filename 
+  }
+}
+
+proc puts_file {filename} {
+  puts "*** start filename: $filename ***" 
+  if {[file isfile $filename]} {
+    set f [open $filename r]
+    set text [read $f]
+    close $f
+    puts $text
+    puts "*** end filename: $filename ***"
+  }
+}
+
+main
+
+*** end filename: ./to_text.tcl ***
+*** start filename: ./lib/AbstractSchemaDef.tcl ***
+# DB schema definition for the Perfmeetmodel database.
+# @todo separate general functionality with specific music functionality
+package require Itcl
+package require ndv
+
+# class maar eenmalig definieren
+if {[llength [itcl::find classes AbstractSchemaDef]] > 0} {
+	return
+}
+
+# source [file join $env(CRUISE_DIR) checkout lib perflib.tcl]
+source [file join [file dirname [info script]] CClassDef.tcl]
+
+
+# @todo (?) ook nog steeds pk en fk defs, voor queries?
+# source [file join $env(CRUISE_DIR) checkout script lib CLogger.tcl]
+
+itcl::class AbstractSchemaDef {
+  
+  private common log
+	# set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+	set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+
+  protected variable no_db
+	
+	protected variable db
+	protected variable classdefs
+
+	# todo pk- en fk-defs afleiden uit classdefs, later misschien helemaal weg.
+	protected variable pk_field
+	protected variable fk_field
+
+  protected variable db_name
+  protected variable username
+  protected variable password
+  
+	public constructor {} {
+		set db ""
+		set no_db 0 ; # default is een db beschikbaar.
+    set db_name ""
+	}
+
+	public method set_no_db {val} {
+		$log debug "set_no_db called with val: $val"
+		set no_db $val
+		set_classes_no_db
+	}
+	
+	public method get_no_db {} {
+		return $no_db
+	}
+	
+	private method set_classes_no_db {} {
+		$log debug "set_classes_no_db called"
+		foreach classdef [array names classdefs] {
+			$classdefs($classdef) set_no_db $no_db
+		}
+	}
+	
+	public method get_db_name {} {
+		# @todo eerst notes2 voor testen, later notes weer.
+		# return "notes_test"
+		# return "notes_test2"
+		return "<abstract>"
+	}
+
+	public method set_db {a_db} {
+		set db $a_db
+		define_classes
+		set_classes_no_db
+	}
+
+	public method get_db {} {
+		return $db
+	}
+
+	public method get_pk_field {table_name} {
+		return $pk_field($table_name)
+	}
+	
+	public method get_fk_field {fromtable totable} {
+		return $fk_field($fromtable,$totable)
+	}
+		
+	private method define_classes {} {
+    $log debug "Abstract define_classes"
+  }
+    
+	public method get_classdef {class_name} {
+		return $classdefs($class_name)
+	}
+	
+	# @param class_name: testbuild
+	# @param args: -cctimestamp $cctimestamp -label $label -artifacts_dir $artifacts_dir
+	public method insert_object {class_name args} {
+		$log debug "args: $args \[[llength $args]\]"
+		set classdef $classdefs($class_name)
+		return [$classdef insert_object $args]
+	}
+
+	# @param class_name: testbuild
+	# @param args: -cctimestamp $cctimestamp -label $label -artifacts_dir $artifacts_dir
+	public method update_object {class_name id args} {
+		$log debug "args: $args \[[llength $args]\]"
+		set classdef $classdefs($class_name)
+		return [$classdef update_object $id $args]
+	}
+
+	public method find_objects {class_name args} {
+		$log debug "args: $args \[[llength $args]\]"
+		set classdef $classdefs($class_name)
+		return [$classdef find_objects $args]
+	
+	}
+
+	# @param class_name: testbuild
+	public method delete_object {class_name id} {
+		# $log debug "args: $args \[[llength $args]\]"
+		set classdef $classdefs($class_name)
+		return [$classdef delete_object $id]
+	}
+
+}
+
+
+*** end filename: ./lib/AbstractSchemaDef.tcl ***
+*** start filename: ./lib/CClassDef.tcl ***
+# Class definition for persisting objects of a given class.
+
+package require Itcl
+package require ndv
+
+# class maar eenmalig definieren
+if {[llength [itcl::find classes CClassDef]] > 0} {
+	return
+}
+
+#source [file join $env(CRUISE_DIR) checkout lib perflib.tcl]
+#source [file join $env(CRUISE_DIR) checkout script lib CLogger.tcl]
+
+# @todo (?) ook nog steeds pk en fk defs, voor queries?
+itcl::class CClassDef {
+
+	private common log
+	set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+	# set log [CLogger::new_logger [file tail [info script]] debug]
+
+	# private common logger_name $logger_name
+	# private common NO_DB
+	# set NO_DB 0
+
+	public proc new_classdef {schemadef class_name id_field} {
+    set classdef [uplevel {namespace which [CClassDef #auto]}]
+    $classdef init $schemadef $class_name $id_field
+    return $classdef
+	}
+
+	private variable schemadef
+	private variable db
+	private variable no_db ; # boolean (0/1), true if no database available.
+	
+	private variable class_name
+	private variable table_name
+	private variable id_field
+	private variable superclass_def ""
+	private variable superclass_field_name ""
+	private variable field_defs ; # assoc. array of CFieldDef
+
+	public method init {a_schemadef a_class_name an_id_field} {
+		set schemadef $a_schemadef
+		set db [$schemadef get_db]
+		set class_name $a_class_name
+		set table_name $class_name
+		set id_field $an_id_field
+		set no_db 0
+	}
+
+	public method set_no_db {val} {
+		$log debug "Set no_db to $val"
+		set no_db $val
+	}
+	
+	public method get_no_db {} {
+		return $no_db
+	}
+		
+	
+	# @param a_superclass_name: notesobject
+	# @param a_field_name: notesobject_id ; # fieldname in subclass table
+	# @todo superclass_field_name niet nodig, want is gelijk aan id_field
+	public method set_superclass {a_superclass_name a_superclass_field_name} {
+		# set superclass_name $a_superclass_name
+		set superclass_def [$schemadef get_classdef $a_superclass_name]
+		set superclass_field_name $a_superclass_field_name
+		add_field_def $superclass_field_name integer null
+	}
+
+	public method add_field_def {a_field_name {a_datatype string} {a_default ""}} {
+		set field_defs($a_field_name) [CFieldDef #auto $a_field_name $a_datatype $a_default]
+	}
+
+	public method get_table_name {} {
+		return $table_name
+	}
+
+	public method get_field_def {field_name} {
+		return $field_defs($field_name)
+	}
+
+	public method get_id_field {} {
+		return $id_field
+	}
+
+	# @param args: -cctimestamp $cctimestamp -label $label -artifacts_dir $artifacts_dir
+	public method insert_object {args} {
+		# @note: possible that all args are now in the list, but llength == 1
+		if {[llength $args] == 1} {
+			set args [lindex $args 0]
+		}
+
+		set args_prev {}
+		while {([llength $args] == 1) && ($args != $args_prev)} {
+			set args_prev $args
+			set args [lindex $args 0]
+		}
+
+		$log debug "args: $args \[[llength $args]\]" 
+	
+		init_values values
+		if {$superclass_def != ""} {
+			set id [$superclass_def insert_object $args]
+			set values($superclass_field_name) $id
+		} else {
+			set id ""
+		}
+		# array set fields $args
+		set_values_from_args values $args
+
+		set query "insert into $table_name ([det_field_names]) values ([det_values values])"
+		$log debug "inserting record into $table_name: $query"
+		if {$no_db} {
+			set res 1
+			set id 1
+		} else {
+	    set res [::mysql::exec $db $query]
+	  }
+    if {$res != 1} {
+      error "insert of $class_name did not return 1" 
+    }
+		
+		if {$id == ""} {
+      set id [::mysql::insertid $db] 
+		} else {
+			# id al bij superclass gezet.
+		}
+		
+    $log debug "Inserted $class_name with id: $id"
+		
+		return $id
+	}
+
+	# @param args: -cctimestamp $cctimestamp -label $label -artifacts_dir $artifacts_dir
+	public method update_object {id args} {
+		if {$no_db} {
+			$log debug "No database connection, returning"
+			return
+		}
+		
+		# @note: possible that all args are now in the list, but llength == 1
+		if {[llength $args] == 1} {
+			set args [lindex $args 0]
+		}
+		
+		set args_prev {}
+		while {([llength $args] == 1) && ($args != $args_prev)} {
+			set args_prev $args
+			set args [lindex $args 0]
+		}
+		
+		$log debug "args: $args \[[llength $args]\]"
+	
+		# init_values values ; # not here, don't want the defaults to overwrite the previously set values.
+		if {$superclass_def != ""} {
+			$superclass_def update_object $id $args
+		} else {
+			# nothing
+		}
+		# array set fields $args
+		set_values_from_args values $args
+
+		set set_clause [det_set_clause values]
+		if {$set_clause == ""} {
+			# nothing, no fields to be updated in this (super)class
+			$log debug "set clause empty, no need to update $class_name"
+		} else {
+			set query "update $table_name $set_clause where $id_field = $id"
+			$log debug "updating record in $table_name with id $id: $query"
+	    set res [::mysql::exec $db $query]
+	    if {$res == 1} {
+				# ok
+			} elseif {$res == 0} {
+				# also ok, it's possible that no field is updated, so 0 is returned.
+			} else {
+	      error "update of $class_name $id did not return 0 or 1, but $res; query: $query" 
+	    }
+	    $log debug "Updated $class_name with id: $id"
+		}		
+	}
+
+	private method det_set_clause {values_name} {
+		upvar $values_name values
+		set result {}
+		foreach field_name [array names values] {
+			if {[array names field_defs -exact $field_name] != ""} {
+				lappend result "$field_name = [$field_defs($field_name) det_value $values($field_name)]"
+			} else {
+				$log debug "$field_name not found in $class_name"
+			}
+		}
+		if {[llength $result] == 0} {
+			return ""
+		} else {
+			return "set [join $result ", "] "
+		}
+	}
+
+	# @return: list of object ids: 0, 1 or more.
+	public method find_objects {args} {
+		if {$no_db} {
+			$log debug "No database connection, returning empty list"
+			return {}
+		}
+		# @note: possible that all args are now in the list, but llength == 1
+		set args_prev {}
+		while {([llength $args] == 1) && ($args != $args_prev)} {
+			set args_prev $args
+			set args [lindex $args 0]
+		}
+		$log debug "args: $args \[[llength $args]\]" 
+		# set query "select t.$id_field from $table_name t where [det_where_clause $args]"
+		set query "select t.$id_field from [det_table_refs] where [det_where_clause $args]"
+		$log debug "query: $query"
+		# @todo query uitvoeren
+		# set result {}
+		
+   	set result [::mysql::sel $db $query -flatlist]
+		# lappend result 23
+		# lappend result 24
+		return $result
+	}
+
+	# @return <tablename> t if no superclass and '<tablename> t, <super-tablename> s' if the class has a superclass.
+	private method det_table_refs {} {
+		if {$superclass_def == ""} {
+			return "$table_name t"
+		} else {
+			return "$table_name t, [$superclass_def get_table_name] s"
+		}
+	}
+
+	private method init_values {values_name} {
+		upvar $values_name values
+		foreach field_name [array names field_defs] {
+			set values($field_name) [$field_defs($field_name) get_default]
+		}
+	}
+
+	private method set_values_from_args {values_name lparams} {
+		upvar $values_name values
+		$log debug "lparams: $lparams \[[llength $lparams]\]"
+
+		array set params $lparams
+		foreach param_name [array names params] {
+			if {[regexp {^-(.+)$} $param_name z par_name]} {
+				set values($par_name) $params($param_name)
+			} else {
+				error "syntax error in param_name (should start with -): $param_name"
+			}
+		}		
+	}
+
+	private method det_field_names {} {
+		set result [lsort [array names field_defs]]
+		return [join $result ", "]
+	}
+
+	private method det_values {values_name} {
+		upvar $values_name values
+		set result {}
+		foreach field_name [lsort [array names field_defs]] {
+			lappend result [$field_defs($field_name) det_value $values($field_name)]
+		}
+		return [join $result ", "]
+	}
+
+	private method det_where_clause {lparams} {
+		array set params $lparams
+		set result {}
+		foreach param_name [array names params] {
+			if {[regexp {^-(.+)$} $param_name z par_name]} {
+				# set values($par_name) $params($param_name)
+				# lappend result "t.$par_name = [$field_defs($par_name) det_value $params($param_name)]"
+				if {[array names field_defs -exact $par_name] != ""} {
+					lappend result "t.$par_name = [$field_defs($par_name) det_value $params($param_name)]"
+				} else {
+					$log debug "$par_name not found in $table_name, asking superclass"
+					if {$superclass_def != ""} {
+            lappend result "s.$par_name = [[$superclass_def get_field_def $par_name] det_value $params($param_name)]"
+          } else {
+            error "$par_name not found in $table_name, and don't have superclass to ask"
+          }
+				}
+			} else {
+				error "syntax error in param_name (should start with -): $param_name"
+			}
+		}
+		if {$superclass_def != ""} {
+			lappend result "t.$id_field = s.[$superclass_def get_id_field]"
+		}
+		return [join $result " and "]
+	}
+
+	# @param args: -cctimestamp $cctimestamp -label $label -artifacts_dir $artifacts_dir
+	public method delete_object {id} {
+		if {$no_db} {
+			$log debug "No database connection, returning"
+			return
+		}
+		
+		# init_values values ; # not here, don't want the defaults to overwrite the previously set values.
+		# possible that superclass can only be deleted after this class instance.
+    if {$superclass_def != ""} {
+			$superclass_def delete_object $id
+		} else {
+			# nothing
+		}
+
+    set query "delete from $table_name where $id_field = $id"
+    $log debug "deleting record in $table_name with id $id: $query"
+    set res [::mysql::exec $db $query]
+    if {$res == 1} {
+      # ok
+    } elseif {$res == 0} {
+      # also ok, it's possible that the record did not exists, so 0 is returned.
+    } else {
+      error "delete of $class_name $id did not return 0 or 1, but $res; query: $query" 
+    }
+    $log debug "Deleted $class_name with id: $id"
+	}  
+  
+}
+
+itcl::class CFieldDef {
+
+	private common log
+	set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+
+	private variable field_name
+	private variable data_type
+	private variable default	
+
+	public constructor {a_field_name a_data_type a_default} {
+		set field_name $a_field_name
+		set data_type $a_data_type
+		set default $a_default
+	}
+
+	public method get_default {} {
+		if {$default == "CURTIME"} {
+			return [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
+		} else {
+			return $default
+		}
+	}
+	
+	# quote the value if necessary
+	public method det_value {value} {
+		if {($data_type == "integer") || ($data_type == "float")} {
+			if {$value == "null"} {
+				return $value
+			} elseif {$value == ""} {
+				return "null"
+			} else {
+				return $value
+			}
+		} else {
+			if {$value == "null"} {
+				return $value
+			} else {
+				return "'$value'"
+			}
+		}
+	}
+	
+}
+
+
+*** end filename: ./lib/CClassDef.tcl ***
+*** start filename: ./lib/CDatabase.tcl ***
+# Main class for database connections to mysql.
+# @todo separate general with music specific functionality
+package require Itcl
+package require ndv
+
+# class maar eenmalig definieren
+if {[llength [itcl::find classes CDatabase]] > 0} {
+	return
+}
+
+# source [file join $env(CRUISE_DIR) checkout lib perflib.tcl]
+# source [file join $env(CRUISE_DIR) checkout script database JMSchemaDef.tcl]
+# source [file join $env(CRUISE_DIR) checkout script database NOSchemaDef.tcl]
+# source [file join $env(CRUISE_DIR) checkout script database NotesSchemaDef.tcl]
+# source [file join [file dirname [info script]] ModelSchemaDef.tcl]
+
+# controlled loading of package.
+if {[catch {package require mysqltcl} msg]} {
+  set MYSQLTCL_LIB 0
+  puts stderr "Failed to load mysqltcl library. Msg = $msg"
+} else {
+  set MYSQLTCL_LIB 1
+}
+
+# source [file join $env(CRUISE_DIR) checkout script lib CLogger.tcl]
+
+itcl::class CDatabase {
+	private common log
+	set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+
+  # common, static things for singleton
+  private common instance  ""
+  private common DB_NAME "indmeetmod"
+
+  public proc get_database {modelclass} {
+    if {$instance == ""} {
+   		set instance [uplevel {namespace which [CDatabase #auto]}]
+      $instance set_modelclass $modelclass
+    }
+    return $instance
+  }
+  
+  # instance stuff
+  private variable db
+  private variable connected
+  private variable schemadef
+  
+  private constructor {} {
+    set db ""
+    set connected 0
+  }
+
+  public method set_modelclass {modelclass} {
+    global MYSQLTCL_LIB
+ 		# set schemadef [uplevel {namespace which [ModelSchemaDef #auto]}]
+ 		set schemadef [uplevel {namespace which [$modelclass #auto]}]
+		
+    if {$MYSQLTCL_LIB} {
+      if {[catch {set db [::mysql::connect -host localhost -user [$schemadef get_username] \
+          -password [$schemadef get_password] -db [$schemadef get_db_name]]} msg]} {
+        $log warn "Failed to connect to database: $msg"
+				$schemadef set_no_db 1
+      } else {
+        set connected 1
+        $log info "Connected to database"
+      }
+    } else {
+			$schemadef set_no_db 1
+		}
+    $schemadef set_db $db
+    
+  }
+  
+  private destructor {
+	  if {$connected} {
+      ::mysql::close $db
+    }
+	  set db "" 
+	  set connected 0
+    $log info "Disconnected from database"
+    set instance ""
+  }
+
+	public method get_connection {} {
+		if {$connected} {
+			return $db
+		} else {
+			$log warn "Not connected to database"
+			return $db
+		}
+	}
+
+	public method get_schemadef {} {
+		return $schemadef
+	}
+
+	# @param class_name: testbuild
+	# @param args: -cctimestamp $cctimestamp -label $label -artifacts_dir $artifacts_dir
+	public method insert_object {class_name args} {
+		$log debug "args: $args \[[llength $args]\]"
+		return [$schemadef insert_object $class_name $args]
+	}
+
+	# @param class_name: testbuild
+	# @param args: -cctimestamp $cctimestamp -label $label -artifacts_dir $artifacts_dir
+	public method update_object {class_name id args} {
+		$log debug "args: $args \[[llength $args]\]"
+		return [$schemadef update_object $class_name $id $args]
+	}
+
+	public method find_objects {class_name args} {
+		$log debug "args: $args \[[llength $args]\]"
+		return [$schemadef find_objects $class_name $args]
+	}
+
+  # @todo add select_objects, which selects objects based on id, name the fields to select.
+  # possibly combine with find_objects.
+  
+	public method delete_object {class_name id} {
+		# $log debug "args: $args \[[llength $args]\]"
+		return [$schemadef delete_object $class_name $id]
+	}
+
+  # @result: gelijk aan input, met / en - verwijderd
+  public method dt_to_decimal {dt} {
+     regsub -all "/" $dt "" dt
+     regsub -all "-" $dt "" dt
+     return $dt
+  }
+  
+}
+
+
+
+
+*** end filename: ./lib/CDatabase.tcl ***
+*** start filename: ./logreader/AbstractLogReader.tcl ***
+package require Itcl
+package require ndv
+
+# class maar eenmalig definieren
+if {[llength [itcl::find classes AbstractLogReader]] > 0} {
+	return
+}
+
+itcl::class AbstractLogReader {
+  private common log
+	# set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+  set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+	  
+  private common instance  ""
+
+  public proc get_instance {} {
+    error "Abstract class: AbstractLogReader"
+  }
+  
+  public method can_read {filename} {
+    error "Abstract class: AbstractLogReader"
+  }
+
+
+  public method read_log {filename db testrun_id} {
+    error "Abstract class: AbstractLogReader"
+  }
+  
+}
+*** end filename: ./logreader/AbstractLogReader.tcl ***
+*** start filename: ./logreader/GeneralLogReader.tcl ***
+package require Itcl
+package require ndv
+
+# class maar eenmalig definieren
+if {[llength [itcl::find classes GeneralLogReader]] > 0} {
+	return
+}
+
+itcl::class GeneralLogReader {
+  inherit AbstractLogReader
+  
+  private common log
+	# set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+  set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+	  
+  private common instance  ""
+
+  public proc get_instance {} {
+    if {$instance == ""} {
+   		set instance [uplevel {namespace which [GeneralLogReader #auto]}]
+    }
+    return $instance  
+  }
+
+  public method can_read {filename} {
+    set ext [file extension $filename]
+    if {$ext == ".log" || $ext == ".csv"} {
+      return 1 
+    }
+    return 0
+  }
+  
+  public method read_log {filename db testrun_id} {
+    $log debug "read_log: $filename, $db, $testrun_id"
+  # 2009/10/22 - 15:48:05: prg/logmanager.p fnOpenLogfile: Logging gestart    
+  # 2009/10/22 - 15:49:22: pr
+    set eerste ""
+    set laatste ""
+    set logfile_id [$db insert_object logfile -testrun_id $testrun_id -path $filename -kind [det_kind $filename]]
+    set fi [open $filename r]
+    while {![eof $fi]} {
+      gets $fi line
+      if {[parse_timestamp $line ts]} {
+        if {$eerste == ""} {
+          set eerste $ts 
+        }
+        set laatste $ts
+      }
+    }  
+    close $fi
+    # puts $f [join [list [file dirname $filename] [file tail $filename] $eerste $laatste] "\t"]
+
+    # todo:
+    # threadnr integer,
+    # taskname varchar(255),
+    # sec_duration float,
+    # details varchar(255),
+ 
+    $db insert_object task -logfile_id $logfile_id -threadname [det_threadname $filename] \
+      -dt_start $eerste -dt_end $laatste -dec_start [$db dt_to_decimal $dt_start] \
+      -dec_end [$db dt_to_decimal $dt_end] 
+  }
+
+  private method det_kind {filename} {
+    return "general" 
+  }
+  
+  # @result: 1 als timestamp geparsed, result in out_timestamp in formaat: dd-mm-yyyy hh:mm:ss
+  #          0 als geen timestamp geparsed.
+  private method parse_timestamp {line out_timestamp_name} {
+    # global log
+    upvar $out_timestamp_name out_timestamp
+    set out_timestamp ""
+    set result 0
+    # 2009/12/19 - 04:32:28
+    if {[regexp {^([0-9]{4})/([0-9]{2})/([0-9]{2}) - ([0-9]{2}):([0-9]{2}):([0-9]{2})} $line z jr maand dag hr min sec]} {
+      set result 1
+      #set out_timestamp [format "%s-%s-%s %s:%s:%s" $dag $maand $jr $hr $min $sec]
+    }
+    # 19/12/2009 - 04:27:01
+    if {[regexp {^([0-9]{2})/([0-9]{2})/([0-9]{4}) - ([0-9]{2}):([0-9]{2}):([0-9]{2})} $line z dag maand jr hr min sec]} {
+      set result 1
+      #set out_timestamp [format "%s-%s-%s %s:%s:%s" $dag $maand $jr $hr $min $sec]
+    }
+    # 19-12-2009 5:04:40
+    if {[regexp {([0-9]{2})-([0-9]{2})-([0-9]{4}) ([0-9]{1,2}):([0-9]{2}):([0-9]{2})} $line z dag maand jr hr min sec]} {
+      # $log debug "3e type gevonden: $line"
+      set result 1
+      if {[regexp {^0.$} $hr]} {
+        regsub {^0} $hr "" hr
+      }
+      #set out_timestamp [format "%s-%s-%s %02d:%s:%s" $dag $maand $jr $hr $min $sec]
+    }
+    if {$result} {
+      set out_timestamp [format "%s-%s-%s %02d:%s:%s" $jr $maand $dag $hr $min $sec]
+    }
+    return $result
+  }
+
+  private method det_threadname {filename} {
+    set dirname [file dirname $filename]
+    set tail [file tail $filename]
+    if {[regexp {_([0-9]+)_([^_]+)\.csv} $filename z nr soort]} {
+      # continue
+    } elseif {[regexp {^EdossierLogging} $tail]} {
+      set threadname "edossier" 
+    } elseif {[regexp {^logging_.+extractie} $tail]} {
+      set threadname "extractie" 
+    } elseif {[regexp {^extractie_[0-9]+.log} $tail]} {
+      set threadname "extractie2" 
+    } elseif {[regexp {^kopverw} $tail]} {
+      set threadname "kopverw" 
+    } elseif {[regexp {^selectie} $tail]} {
+      set threadname "selectie" 
+    } elseif {[regexp {verwijderen} $tail]} {
+      set threadname "verwijderen" 
+    } elseif {[file tail $dirname] == "fabriek"} {
+      set threadname "fabriek"    
+    } else {
+      error "Cannot parse: $filename" 
+    }
+    return $threadname
+  }
+  
+}
+*** end filename: ./logreader/GeneralLogReader.tcl ***
+*** start filename: ./logreader/LogReaderFactory.tcl ***
+package require Itcl
+package require ndv
+
+# class maar eenmalig definieren
+if {[llength [itcl::find classes LogReaderFactory]] > 0} {
+	return
+}
+
+# source alle logreaders
+foreach filename [glob -nocomplain -type f -directory [file dirname [info script]] "*LogReader.tcl"] {
+  source $filename 
+}
+
+itcl::class LogReaderFactory {
+  private common log
+	# set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+  set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+	  
+  private common instance  ""
+
+  public proc get_instance {} {
+    if {$instance == ""} {
+   		set instance [uplevel {namespace which [LogReaderFactory #auto]}]
+    }
+    return $instance
+  }
+  
+  # instance stuff
+  private variable lst_readers
+  
+  private constructor {} {
+    set lst_readers {}
+    foreach clazz [itcl::find classes ::*LogReader] {
+      if {![regexp {Abstract} $clazz]} {
+        $log debug "Registering class: $clazz"
+        lappend lst_readers [${clazz}::get_instance]
+      }
+    }
+  }
+
+  public method get_reader {filename} {
+    foreach reader $lst_readers {
+      if {[$reader can_read $filename]} {
+        return $reader 
+      }
+    }
+  }
+  
+}
+
+*** end filename: ./logreader/LogReaderFactory.tcl ***
+*** start filename: ./logreader/SarLogReader.tcl ***
+package require Itcl
+package require ndv
+
+# class maar eenmalig definieren
+if {[llength [itcl::find classes SarLogReader]] > 0} {
+	return
+}
+
+itcl::class SarLogReader {
+  inherit AbstractLogReader
+  
+  private common log
+	# set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+  set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+	  
+  private common instance  ""
+
+  public proc get_instance {} {
+    if {$instance == ""} {
+   		set instance [uplevel {namespace which [SarLogReader #auto]}]
+    }
+    return $instance  
+  }
+  
+  public method can_read {filename} {
+    return 0
+  }
+  
+  public method read_log {filename db testrun_id} {
+    $log debug "read_log: $filename, $db, $testrun_id"
+  }
+  
+}
+*** end filename: ./logreader/SarLogReader.tcl ***
+*** start filename: ./logreader/TypeperfLogReader.tcl ***
+package require Itcl
+package require ndv
+
+# class maar eenmalig definieren
+if {[llength [itcl::find classes TypeperfLogReader]] > 0} {
+	return
+}
+
+itcl::class TypeperfLogReader {
+  inherit AbstractLogReader
+  
+  private common log
+	# set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+  set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+	  
+  private common instance  ""
+
+  public proc get_instance {} {
+    if {$instance == ""} {
+   		set instance [uplevel {namespace which [TypeperfLogReader #auto]}]
+    }
+    return $instance  
+  }
+  
+  public method can_read {filename} {
+    return 0
+  }
+
+  public method read_log {filename db testrun_id} {
+    $log debug "read_log: $filename, $db, $testrun_id"
+  }
+  
+}
+*** end filename: ./logreader/TypeperfLogReader.tcl ***

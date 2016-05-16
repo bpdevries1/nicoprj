@@ -1,0 +1,6 @@
+Persoonsgegevens.aspx: webpagina waar de data uit moet komen. 
+
+Request.c: Web_custom_request zoals opgenomen met VUGen. 
+  (alleen het deel beginnend met "&ctl00$ctl00$ctl00$ …. “  dient gegenereerd te worden de rest in copy/past. 
+
+Functions.c: Bevat de functie met binnen de functie de nodige web_reg_save_param’s. 

@@ -1,0 +1,18 @@
+				<include name="checkout-script-analyse-general.analyse_results.tcl.file"/>
+				<include name="checkout-CJMeterRuns.tcl.file"/>
+				<include name="checkout-script-run-CJmxGen.tcl.file"/>
+				<include name="checkout-client.startlogging.tcl.file"/>
+				<include name="checkout-client.stoplogging.tcl.file"/>
+				<include name="checkout-report-filtersuite.tcl.file"/>
+				<include name="checkout-report-filtersuite.tcl.file"/>
+				<include name="checkout-script-run-initrun.tcl.file"/>
+				<include name="checkout-script-suite-initsuite.tcl.file"/>
+				<include name="checkout-process.killnew.tcl.file"/>
+				<include name="checkout-process.saveids.tcl.file"/>
+				<include name="checkout-report-reportall.tcl.file"/>
+				<include name="checkout-analyse-servers.machine.dettimediff.tcl.file"/>
+				<include name="checkout-analyse-servers.machine.dettimediff.tcl.file"/>
+				<include name="checkout-analyse-servers.machine.dettimediff.tcl.file"/>
+				<include name="checkout-script-suite-suite2db.tcl.file"/>
+				<include name="checkout-waitforstart.tcl.file"/>				
+

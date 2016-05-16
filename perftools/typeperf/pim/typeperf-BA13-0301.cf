@@ -1,0 +1,6 @@
+\LogicalDisk(_Total)\% Disk Time
+\PhysicalDisk(_Total)\% Disk Time
+\Processor(_Total)\% Processor Time
+\Memory\Available MBytes
+\Network Interface(HP NC364T PCIe Quad Port Gigabit Server Adapter _2)\Bytes Total/sec
+\Network Interface(HP NC364T PCIe Quad Port Gigabit Server Adapter _8)\Bytes Total/sec

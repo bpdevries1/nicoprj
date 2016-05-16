@@ -1,0 +1,72 @@
+Sitescope raw data:
+
+in offline.dat: offline_datapoint_1377
+
+zoek op offline_datapoint_1377 => staat in offl_1377.def.
+
+Hierin (offl_1377.def): 
+[Graph definition]
+count=3
+GraphTitle=Percentage processortijd (Processor _Total)
+DataPointLabel_1=offline_datapoint_1377
+LineTitle_1=nb0880
+LineGroup_1=0
+
+Vraag: is nb0880 de machine naam?
+
+DataPointLabel_2=offline_datapoint_1393
+LineTitle_2=NB9869
+LineGroup_2=1
+
+DataPointLabel_3=offline_datapoint_1409
+LineTitle_3=nb0853
+LineGroup_3=2
+
+collate.txt (volledig):
+[Diagnostics]
+Status=-1
+[Collate Recovery]
+Scenario=C:\Program Files\HP\LoadRunner\scenario\VLOS.lrs
+Completed=1
+[Hosts]
+nb0880=C:\Documents and Settings\LocalService\Local Settings\Temp\brr_Dcw.626\netdir\c\temp\yvalidatetest_vlosv3\nb0880_4.eve
+nb9869=C:\Documents and Settings\LocalService\Local Settings\Temp\brr_3s7.516\netdir\c\temp\yvalidatetest_vlosv3\nb9869_14.eve
+nb0853=C:\Documents and Settings\LocalService\Local Settings\Temp\brr_NNb.592\netdir\c\temp\yvalidatetest_vlosv3\nb0853_5.eve
+-nb0880=C:\Documents and Settings\LocalService\Local Settings\Temp\brr_EYt.625\netdir\c\temp\yvalidatetest_vlosv3\nb0880_1.eve
+-NB9869=C:\Documents and Settings\LocalService\Local Settings\Temp\brr_rf2.515\netdir\c\temp\yvalidatetest_vlosv3\NB9869_2.eve
+-nb0853=C:\Documents and Settings\LocalService\Local Settings\Temp\brr_hvA.591\netdir\c\temp\yvalidatetest_vlosv3\nb0853_3.eve
+
+Dus lijkt dat nb0880 een sitescope groep is.
+
+in .lrr:
+[Wan_Emulation]
+nb0880=
+nb9869=
+nb0853=
+nb0920=
+
+Dus de nb0880 zou ook een LG kunnen zijn, vrij zeker zelfs, ook door andere files.
+
+Heb dit zelfs in mijn testplan staan:
+Load Generator 1	Nb0880.tweedekamer.statengeneraal.local	10.100.215.42
+
+Dus combi van graphtitle en linetitle lijkt het datapunttype wel uniek te identificeren!
+
+Dit testen met alle meetwaarden!
+
+Ook: de timestamp is een seconds since epoch, met Tcl uitstekend te vertalen naar de echte tijd: met -format "%H:%M:%S" meteen in de goede tijdzone.
+
+Van user data point ook wel wat leesbaars te zien.
+
+Verder veel responstijden in .eve bestanden. De .eve zelf wel leesbaar, de .eve.gzl zijn gzip bestanden, wel te unzipped, dan deels te lezen, wel binary. Eens verder met hex edit bekijken, kijken of getallen goed ge-encodeerd zijn en of record/field endings te vinden zijn.
+
+Conclusie: sitescope lijkt goed te te doen, wel vergelijken met export vanuit analyser en grafieken in analyser zelf: komt hier wel hetzelfde uit als ik het allemaal zelf doe?
+
+---
+
+Correlatie viewstate size: als input looptijd en (1 gedeeld door) spreker-frequentie meenemen.
+
+
+
+
+

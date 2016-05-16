@@ -1,0 +1,36 @@
+Script	#/uur	looptijd scenario (sec)	#vusers	#/rampup		#/sec	#vusers (loadfactor)	pacing (sec)	#/rampup (loadfactor)	rampup every (sec)	rampup periode	stabiele periode	#testgevallen	check pacing/looptijd	min #vusers	#/sec bji te weinig vusers	#/uur bij te weinig vusers	Check: N = X * pacing	Check: N = X * looptijd scen.
+ramp12	300.0	30	5	1		0.08333	5	60	1	12	48	7152.0	598		3	0.08333	300.0	5.0	2.5
+ramp10	300.0	30	5	1		0.08333	5	60	1	10	40	7160.0	598		3	0.08333	300.0	5.0	2.5
+ramp11	300.0	30	5	1		0.08333	5	60	1	11	44	7156.0	598		3	0.08333	300.0	5.0	2.5
+ramp13	300.0	30	5	1		0.08333	5	60	1	13	52	7148.0	598		3	0.08333	300.0	5.0	2.5
+ramp14	300.0	30	5	1		0.08333	5	60	1	14	56	7144.0	598		3	0.08333	300.0	5.0	2.5
+ramp11.9	300.0	30	5	1		0.08333	5	60	1	11.9	47.6	7152.4	598		3	0.08333	300.0	5.0	2.5
+ramp12.1	300.0	30	5	1		0.08333	5	60	1	12.1	48.4	7151.6	598		3	0.08333	300.0	5.0	2.5
+ramp1	300.0	30	5	1		0.08333	5	60	1	1	4	7196.0	600		3	0.08333	300.0	5.0	2.5
+ramp4	300.0	30	5	1		0.08333	5	60	1	4	16	7184.0	599		3	0.08333	300.0	5.0	2.5
+ramp8	300.0	30	5	1		0.08333	5	60	1	8	32	7168.0	599		3	0.08333	300.0	5.0	2.5
+ramp20	300.0	30	5	1		0.08333	5	60	1	20	80	7120.0	597		3	0.08333	300.0	5.0	2.5
+ramp25	300.0	30	5	1		0.08333	5	60	1	25	100	7100.0	596		3	0.08333	300.0	5.0	2.5
+ramp30	300.0	30	5	1		0.08333	5	60	1	30	120	7080.0	595		3	0.08333	300.0	5.0	2.5
+ramp40	300.0	30	5	1		0.08333	5	60	1	40	160	7040.0	593		3	0.08333	300.0	5.0	2.5
+Totaal	4200		70			1.16667	70				160	7040.0	8365		42				
+																			
+Looptijd test	7200.0																		
+Loadfactor	1.0																		
+																			
+																			
+Input	#scripts (iteraties) / uur		"vanuit business aantal transacties voor dit script per uur (normaal, gemiddeld)"																
+	Looptijd scenario		"Hoelang doet 1 scenario (script) erover inclusief denktijden en responstijden, 1 iteratie"																
+	#vusers																		
+	#vusers/rampup		Hoeveel vusers tegelijk te starten																
+	loadfactor		"hoeveel meer load dan de normale load, bv tijdens piek belasting"																
+																			
+Output	#/sec		aantal transacties per seconde																
+	#vusers (loadfactor)		aantal vusers vermenigvuldigd met loadfactor																
+	pacing		in te stellen pacing in load generator																
+	#/rampup (loadfactor)		"hoeveel vusers tegelijk te starten, rekening houdend met loadfactor"																
+	rampup every		in te stellen rampup: start X vusers every Y seconds																
+	check pacing		"als er te weinig vusers zijn, worden *** getoond."																
+	min #vusers		minimaal benodigde vusers zodat pacing >= looptijd scenario																
+	#/sec bji te weinig vusers		het aantal transacties per seconde dat wordt gehaald als te weinig vusers worden gebruikt																
+	#/uur bij te weinig vusers		het aantal transacties per uur dat wordt gehaald als te weinig vusers worden gebruikt																

@@ -1,0 +1,72 @@
+ 1:  proc main {} {\n	set cl1 [Class1 #auto]\n	$cl1 main\n}
+ 1:  main
+ 2:    Class1 #auto
+ 2:    set cl1 class10
+ 2:    class10 main
+ 3:      Class3 #auto
+ 3:      set cl3 class30
+ 3:      Class2::new_instance
+ 4:        Class2 #auto
+ 4:        set res class20
+ 4:        puts {res: class20}
+ 4:        itcl::code class20
+ 4:        set res2 {namespace inscope ::Class2 class20}
+ 4:        puts {res2: namespace inscope ::Class2 class20}
+ 4:        namespace which class20
+ 4:        puts {nw: ::Class2::class20}
+ 4:        return {namespace inscope ::Class2 class20}
+ 3:      set ref {namespace inscope ::Class2 class20}
+ 3:      class30 method1 {namespace inscope ::Class2 class20}
+ 4:        puts {ref: namespace inscope ::Class2 class20}
+ 5:          ::unknown {namespace inscope ::Class2 class20} get_value
+ 6:            variable ::tcl::UnknownPending
+ 6:            global auto_noexec auto_noload env tcl_interactive
+ 6:            lindex {{namespace inscope ::Class2 class20} get...} 0
+ 6:            set cmd {namespace inscope ::Class2 class20}
+ 6:            if {[regexp "^:*namespace\[ \t\n\]+inscope" ...} {\n	#return -code error "You need an {*}"\n...}
+ 6:            regexp {^:*namespace[ 	\n]+inscope} {namespace inscope ::Class2 class20}
+ 6:            llength {namespace inscope ::Class2 class20}
+ 7:              lrange {{namespace inscope ::Class2 class20} get...} 1 end
+ 7:              set arglist get_value
+ 7:              catch {uplevel 1 ::$cmd $arglist} result opts
+ 8:                uplevel 1 {::namespace inscope ::Class2 class20} get_value
+ 9:                  ::namespace inscope ::Class2 class20 get_value
+10:                    class20 get_value
+11:                      return 4242
+ 7:              set ret 0
+ 7:              dict unset opts -errorinfo
+ 8:                ::tcl::dict::unset opts -errorinfo
+ 7:              dict incr opts -level
+ 8:                ::tcl::dict::incr opts -level
+ 7:              return -options {-code 0 -level 1} 4242
+ 4:        puts 4242
+ 3:      Class2::new_instance2
+ 4:        Class2 #auto
+ 4:        itcl::code class21
+ 4:        return {namespace inscope ::Class2 class21}
+ 3:      set ref2 {namespace inscope ::Class2 class21}
+ 3:      class30 method1 {namespace inscope ::Class2 class21}
+ 4:        puts {ref: namespace inscope ::Class2 class21}
+ 5:          ::unknown {namespace inscope ::Class2 class21} get_value
+ 6:            variable ::tcl::UnknownPending
+ 6:            global auto_noexec auto_noload env tcl_interactive
+ 6:            lindex {{namespace inscope ::Class2 class21} get...} 0
+ 6:            set cmd {namespace inscope ::Class2 class21}
+ 6:            if {[regexp "^:*namespace\[ \t\n\]+inscope" ...} {\n	#return -code error "You need an {*}"\n...}
+ 6:            regexp {^:*namespace[ 	\n]+inscope} {namespace inscope ::Class2 class21}
+ 6:            llength {namespace inscope ::Class2 class21}
+ 7:              lrange {{namespace inscope ::Class2 class21} get...} 1 end
+ 7:              set arglist get_value
+ 7:              catch {uplevel 1 ::$cmd $arglist} result opts
+ 8:                uplevel 1 {::namespace inscope ::Class2 class21} get_value
+ 9:                  ::namespace inscope ::Class2 class21 get_value
+10:                    class21 get_value
+11:                      return 4242
+ 7:              set ret 0
+ 7:              dict unset opts -errorinfo
+ 8:                ::tcl::dict::unset opts -errorinfo
+ 7:              dict incr opts -level
+ 8:                ::tcl::dict::incr opts -level
+ 7:              return -options {-code 0 -level 1} 4242
+ 4:        puts 4242
+ 1:  exit 0

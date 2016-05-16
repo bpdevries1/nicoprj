@@ -1,0 +1,57 @@
+LR - Correlate params based on recording.
+Used at FB.
+
+mogelijkheden van web_reg_save_param:
+
+web_reg_save_param ("ID1Value", "LB= value=\"", "RB=\"", "Ord=1", LAST);
+
+web_reg_save_param ("IDValues", "LB= value=\"", "RB=\"", "Ord=All", LAST);
+=> automatisch alles, paramnames gegenereerd.
+Please, note that I specified initial parameter name - "IDValues". Values were 
+saved into parameters "IDValues_1", "IDValues_2", "IDValues_3", etc. So, an array of values were created.
+
+# // get number of matches
+# nCount = atoi(lr_eval_string("{IDValue_count}"));
+
+Docs: http://learnloadrunner.com/correlation/web_reg_save_param-function-explained/
+
+web_reg_save_param ("ID1Value", "LB= value=\"", "RB=\"", "NotFound=EMPTY", LAST);
+web_reg_save_param ("ID1Value", "LB= value=\"", "RB=\"", "NOTFOUND=EMPTY", "CONVERT=HTML_TO_URL", LAST);
+
+
+------------
+
+
+HTML:
+id="Anthem_ctl00_ctl00_ctl00_PageContent_PageContent_ColumnLeft_tbAchternaam_textBox__"><input name="ctl00$ctl00$ctl00$PageContent$PageContent$ColumnLeft$tbAchternaam$textBox" type="text" value="Blanken" maxlength="255" readonly="readonly" id="ctl00_ctl00_ctl00_PageContent_PageContent_ColumnLeft_tbAchternaam_textBox"
+
+Nog een:
+onchange="javascript:Anthem_FireCallBackEvent(this,event,
+'ctl00$ctl00$ctl00$PageContent$PageContent$ColumnLeft$tbAchternaam$textBox','',false,'','','',true,Anthem_PreCallBack_TextBox_PageChanged,Anthem_PostCallBack_TextBox,null,true,true);"
+
+req:
+ 		"&ctl00$ctl00$ctl00$PageContent$PageContent$ColumnLeft$tbAchternaam$textBox={pAchternaam}" // value: Blanken
+
+ 		
+Tussenvoegsel:
+req:
+ 		"&ctl00$ctl00$ctl00$PageContent$PageContent$ColumnLeft$tbTussenvoegsel$textBox={pTussenvoegsel}" // empty value, add parameter manually!
+
+HTML:
+class="textbox_label">Tussenvoegsel</label><span id="Anthem_ctl00_ctl00_ctl00_PageContent_PageContent_ColumnLeft_tbTussenvoegsel_textBox__"><input name="ctl00$ctl00$ctl00$PageContent$PageContent$ColumnLeft$tbTussenvoegsel$textBox" type="text" maxlength="255" readonly="readonly" id="ctl00_ctl00_ctl00_PageContent_PageContent_ColumnLeft_tbTussenvoegsel_textBox"
+
+onchange="javascript:Anthem_FireCallBackEvent(this,event,'ctl00$ctl00$ctl00$PageContent$PageContent$ColumnLeft$tbTussenvoegsel$textBox','',false,'','','',true,Anthem_PreCallBack_TextBox_PageChanged,Anthem_PostCallBack_TextBox,null,true,true);"
+
+
+$ddlOpleiding$dropDownList" id="ctl00_ctl00_ctl00_PageContent_PageContent_ColumnMiddle_ddlOpleiding_dropDownList" class="dropdownlist" onmouseover="this.className = 'groteSelect';this.focus();" onblur="this.className = 'dropdownlist';" onchange="javascript:Anthem_FireCallBackEvent(this,event,'ctl00$ctl00$ctl00$PageContent$PageContent$ColumnMiddle$ddlOpleiding$dropDownList','',false,'','','',true,PageChanged,null,null,true,true);return false;">
+		<option selected="selected" value="">
+		
+name="ctl00$ctl00$ctl00$PageContent$PageContent$ColumnLeft$ddlTypeContractant$dropDownList" id="ctl00_ctl00_ctl00_PageContent_PageContent_ColumnLeft_ddlTypeContractant_dropDownList" class="dropdownlist" onchange="javascript:Anthem_FireCallBackEvent(this,event,'ctl00$ctl00$ctl00$PageContent$PageContent$ColumnLeft$ddlTypeContractant$dropDownList','',false,'','','',true,PageChanged,null,null,true,true);return false;">
+		<option selected="selected" value="HOOFDELIJKE_AANSPRAKELIJKE">Hoofdelijk aansprakelijke</option>
+		
+		
+<label for="ctl00_ctl00_ctl00_PageContent_PageContent_ColumnLeft_rblPersoneel_radioButtonList_0">Ja</label></td><td><input id="ctl00_ctl00_ctl00_PageContent_PageContent_ColumnLeft_rblPersoneel_radioButtonList_1" type="radio" name="ctl00$ctl00$ctl00$PageContent$PageContent$ColumnLeft$rblPersoneel$radioButtonList" value="False" checked="checked" /><label for="ctl00_ctl00_ctl00_PageContent_PageContent_ColumnLeft_rblPersoneel_radioButtonList_1">Nee</label></td>		
+
+=> Deze is geselecteerd, want checked="checked" en hier geen onClick.
+
+

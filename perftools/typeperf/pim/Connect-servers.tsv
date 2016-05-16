@@ -1,0 +1,7 @@
+HOST	IP	LOGIN	PASSWORD	DRIVE	DIR	NET
+ba13-0301	172.16.1.1	workadmin	"uijk89;"	D	perftest	e
+ba13-0302	172.16.1.2	workadmin	Dnoyeb5002	D	perftest	f
+ba13-0303	172.16.1.3	workadmin	Dnoyeb5002	D	perftest	g
+ba13-0304	172.16.1.4	workadmin	Dnoyeb5002	D	perftest	h
+ba13-0305	172.16.1.5	workadmin	Dnoyeb5002	D	perftest	i
+ba13-0306	172.16.1.6	workadmin	Dnoyeb5002	D	perftest	j

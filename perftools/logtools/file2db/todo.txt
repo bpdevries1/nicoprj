@@ -1,0 +1,81 @@
+in progressperf/doc.txt:
+
+12:20 Warning: another user is using this database in update mode.  
+12:20 Accessing the database with -RO may give unexpected results. (1531)
+12:20 WARNING: Before-image file of database /ggztst/doc/db/doc is not truncated. (1552)
+12:20 [Warning] database in use - reported statistics are approximations. (12567)
+12:20 
+
+error komt niet voor in deze log
+warning wel.
+
+11:58 Warning: another user is using this database in update mode.  
+11:58 WARNING: Before-image file of database /ggztst/doc/db/doc is not truncated. (1552)
+11:58 [Warning] database in use - reported statistics are approximations. (12567)
+11:59 Warning: another user is using this database in update mode.  
+11:59 WARNING: Before-image file of database /ggztst/doc/db/doc is not truncated. (1552)
+11:59 [Warning] database in use - reported statistics are approximations. (12567)
+12:01 Warning: another user is using this database in update mode.  
+12:01 WARNING: Before-image file of database /ggztst/doc/db/doc is not truncated. (1552)
+12:01 [Warning] database in use - reported statistics are approximations. (12567)
+12:02 Warning: another user is using this database in update mode.  
+12:02 WARNING: Before-image file of database /ggztst/doc/db/doc is not truncated. (1552)
+12:02 [Warning] database in use - reported statistics are approximations. (12567)
+12:03 Warning: another user is using this database in update mode.  
+12:03 WARNING: Before-image file of database /ggztst/doc/db/doc is not truncated. (1552)
+12:03 [Warning] database in use - reported statistics are approximations. (12567)
+12:05 Warning: another user is using this database in update mode.  
+12:05 WARNING: Before-image file of database /ggztst/doc/db/doc is not truncated. (1552)
+12:05 [Warning] database in use - reported statistics are approximations. (12567)
+12:06 Warning: another user is using this database in update mode.  
+12:06 WARNING: Before-image file of database /ggztst/doc/db/doc is not truncated. (1552)
+12:06 [Warning] database in use - reported statistics are approximations. (12567)
+12:07 Warning: another user is using this database in update mode.  
+12:07 WARNING: Before-image file of database /ggztst/doc/db/doc is not truncated. (1552)
+12:07 [Warning] database in use - reported statistics are approximations. (12567)
+12:08 Warning: another user is using this database in update mode.  
+12:08 WARNING: Before-image file of database /ggztst/doc/db/doc is not truncated. (1552)
+12:08 [Warning] database in use - reported statistics are approximations. (12567)
+12:10 Warning: another user is using this database in update mode.  
+12:10 WARNING: Before-image file of database /ggztst/doc/db/doc is not truncated. (1552)
+12:10 [Warning] database in use - reported statistics are approximations. (12567)
+12:11 Warning: another user is using this database in update mode.  
+12:11 WARNING: Before-image file of database /ggztst/doc/db/doc is not truncated. (1552)
+12:11 [Warning] database in use - reported statistics are approximations. (12567)
+12:12 Warning: another user is using this database in update mode.  
+12:12 WARNING: Before-image file of database /ggztst/doc/db/doc is not truncated. (1552)
+12:12 [Warning] database in use - reported statistics are approximations. (12567)
+12:14 Warning: another user is using this database in update mode.  
+12:14 WARNING: Before-image file of database /ggztst/doc/db/doc is not truncated. (1552)
+12:14 [Warning] database in use - reported statistics are approximations. (12567)
+12:15 Warning: another user is using this database in update mode.  
+
+garb/20:
+10:20 CollectionCount: 1
+10:20 CollectionTime: 124
+10:20 Name: PS MarkSweep
+10:20 Valid: true
+10:20 MemoryPoolNames: Array[java.lang.String] of length 4
+10:20   PS Eden Space
+10:20   PS Survivor Space
+10:20   PS Old Gen
+10:20   PS Perm Gen
+
+12:15 CollectionCount: 26
+12:15 CollectionTime: 182140
+
+jmx8181/20:
+12:15 maxThreads: 450
+12:15 sSLEnabled: true
+12:15 keystorePass: 4NYmlkaj
+12:15 currentThreadCount: 450
+12:15 currentThreadsBusy: 450
+
+mem/20:
+12:15 PeakUsage: javax.management.openmbean.CompositeDataSupport(compositeType=javax.management.openmbean.CompositeType(name=java.lang.management.MemoryUsage,items=((itemName=committed,itemType=javax.management.openmbean.SimpleType(name=java.lang.Long)),(itemName=init,itemType=javax.management.openmbean.SimpleType(name=java.lang.Long)),(itemName=max,itemType=javax.management.openmbean.SimpleType(name=java.lang.Long)),(itemName=used,itemType=javax.management.openmbean.SimpleType(name=java.lang.Long)))),contents={committed=897974272, init=805306368, max=910622720, used=897974272})
+Used lijkt aardig tegen de max aan te zitten.
+
+Hieronder de standaard regels, dus gemakkelijk in te voeren in DB.
+Dingen als PeakUsage in mem/20 wat lastiger, nog inhoudelijk parsen.
+12:15 currentThreadsBusy: 450
+

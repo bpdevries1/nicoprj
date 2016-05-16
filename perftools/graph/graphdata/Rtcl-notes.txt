@@ -1,0 +1,247 @@
+./configure --with-tcl=/opt/ActiveTcl-8.5 --with-R-src=~/tools/R-2.13.2 --with-tclinclude /opt/ActiveTcl-8.5/include
+./configure --with-R-src=~/tools/R-2.13.2 --with-tclinclude=/opt/ActiveTcl-8.5/include --with-tcl=/opt/ActiveTcl-8.5
+./configure --with-R-src=~/tools/R-2.13.2 --with-tclinclude=/opt/ActiveTcl-8.5/include --with-tcl=/opt/ActiveTcl-8.5/lib
+
+./configure --with-R-src=~/tools/R-2.13.2 --with-tclinclude=/opt/ActiveTcl-8.5/include --with-tcl=/opt/ActiveTcl-8.5/lib --with-R-include=~/tools/R-2.13.2/include
+
+symlink gemaakt: 
+./configure --with-R-src=~/tools/R-2.13.2 --with-tclinclude=/opt/ActiveTcl-8.5/include --with-tcl=/opt/ActiveTcl-8.5/lib
+
+gaat wel goed, wel melding:
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: WARNING:  'Makefile.in' seems to ignore the --datarootdir setting
+Fri Oct 14 - 17:12:46
+
+ error: ac_nonexistent.h: No such file or directory
+
+nico@pclinux:688:196:~/tools/Rtcl0.3$ make
+cc -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DVERSION=\"0.3\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DUSE_TCL_STUBS=1 -DR_HOME="\"/usr/lib/R\"" -DPACKAGE_NAME=\"tcl\" -DPACKAGE_TARNAME=\"tcl\" -DPACKAGE_VERSION=\"8.5\" -DPACKAGE_STRING=\"tcl\ 8.5\" -DPACKAGE_BUGREPORT=\"\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1 -DHAVE_SYS_PARAM_H=1 -DUSE_THREAD_ALLOC=1 -D_REENTRANT=1 -D_THREAD_SAFE=1 -DHAVE_PTHREAD_ATTR_SETSTACKSIZE=1 -DHAVE_PTHREAD_GETATTR_NP=1 -DGETATTRNP_NOT_DECLARED=1 -DTCL_THREADS=1 -DTCL_CFGVAL_ENCODING=\"iso8859-1\" -DMODULE_SCOPE=extern\ __attribute__\(\(__visibility__\(\"hidden\"\)\)\) -DTCL_SHLIB_EXT=\".so\" -DTCL_CFG_OPTIMIZED=1 -DTCL_CFG_DEBUG=1 -DTCL_TOMMATH=1 -DMP_PREC=4 -D_LARGEFILE64_SOURCE=1 -DTCL_WIDE_INT_TYPE=long\ long -DHAVE_STRUCT_STAT64=1 -DHAVE_OPEN64=1 -DHAVE_LSEEK64=1 -DHAVE_TYPE_OFF64_T=1 -DHAVE_GETCWD=1 -DHAVE_OPENDIR=1 -DHAVE_STRTOL=1 -DHAVE_WAITPID=1 -DHAVE_GETADDRINFO=1 -DHAVE_GETPWUID_R_5=1 -DHAVE_GETPWUID_R=1 -DHAVE_GETPWNAM_R_5=1 -DHAVE_GETPWNAM_R=1 -DHAVE_GETGRGID_R_5=1 -DHAVE_GETGRGID_R=1 -DHAVE_GETGRNAM_R_5=1 -DHAVE_GETGRNAM_R=1 -DHAVE_GETHOSTBYNAME_R_6=1 -DHAVE_GETHOSTBYNAME_R=1 -DHAVE_GETHOSTBYADDR_R_8=1 -DHAVE_GETHOSTBYADDR_R=1 -DUSE_TERMIOS=1 -DHAVE_SYS_TIME_H=1 -DTIME_WITH_SYS_TIME=1 -DHAVE_STRUCT_TM_TM_ZONE=1 -DHAVE_TM_ZONE=1 -DHAVE_GMTIME_R=1 -DHAVE_LOCALTIME_R=1 -DHAVE_MKTIME=1 -DHAVE_TM_GMTOFF=1 -DHAVE_TIMEZONE_VAR=1 -DHAVE_STRUCT_STAT_ST_BLKSIZE=1 -DHAVE_ST_BLKSIZE=1 -DHAVE_INTPTR_T=1 -DHAVE_UINTPTR_T=1 -DHAVE_SIGNED_CHAR=1 -DHAVE_LANGINFO=1 -DHAVE_SYS_IOCTL_H=1 -DTCL_UNLOAD_DLLS=1       -I"/opt/ActiveTcl-8.5/include" -I"/usr/lib/R/include" -I"~/tools/R-2.13.2/src/include"    -O2  -fPIC  -c `echo ./Rtcl.c` -o Rtcl.o
+<command-line>: warning: "PACKAGE_NAME" redefined
+<command-line>: warning: this is the location of the previous definition
+<command-line>: warning: "PACKAGE_TARNAME" redefined
+<command-line>: warning: this is the location of the previous definition
+<command-line>: warning: "PACKAGE_VERSION" redefined
+
+--enable-gcc
+
+./configure --enable-gcc --with-R-src=~/tools/R-2.13.2 --with-tclinclude=/opt/ActiveTcl-8.5/include --with-tcl=/opt/ActiveTcl-8.5/lib
+
+checking for tclsh8.4... /usr/bin/tclsh8.4
+
+make nu idd met gcc, maar zelfde foutmeldingen.
+
+./Rtcl.c:18:20: error: config.h: No such file or directory
+./Rtcl.c:19:18: error: Defn.h: No such file or directory
+
+gcc -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DVERSION=\"0.3\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DUSE_TCL_STUBS=1 -DR_HOME="\"/usr/lib/R\"" -DPACKAGE_NAME=\"tcl\" -DPACKAGE_TARNAME=\"tcl\" -DPACKAGE_VERSION=\"8.5\" -DPACKAGE_STRING=\"tcl\ 8.5\" -DPACKAGE_BUGREPORT=\"\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1 -DHAVE_SYS_PARAM_H=1 -DUSE_THREAD_ALLOC=1 -D_REENTRANT=1 -D_THREAD_SAFE=1 -DHAVE_PTHREAD_ATTR_SETSTACKSIZE=1 -DHAVE_PTHREAD_GETATTR_NP=1 -DGETATTRNP_NOT_DECLARED=1 -DTCL_THREADS=1 -DTCL_CFGVAL_ENCODING=\"iso8859-1\" -DMODULE_SCOPE=extern\ __attribute__\(\(__visibility__\(\"hidden\"\)\)\) -DTCL_SHLIB_EXT=\".so\" -DTCL_CFG_OPTIMIZED=1 -DTCL_CFG_DEBUG=1 -DTCL_TOMMATH=1 -DMP_PREC=4 -D_LARGEFILE64_SOURCE=1 -DTCL_WIDE_INT_TYPE=long\ long -DHAVE_STRUCT_STAT64=1 -DHAVE_OPEN64=1 -DHAVE_LSEEK64=1 -DHAVE_TYPE_OFF64_T=1 -DHAVE_GETCWD=1 -DHAVE_OPENDIR=1 -DHAVE_STRTOL=1 -DHAVE_WAITPID=1 -DHAVE_GETADDRINFO=1 -DHAVE_GETPWUID_R_5=1 -DHAVE_GETPWUID_R=1 -DHAVE_GETPWNAM_R_5=1 -DHAVE_GETPWNAM_R=1 -DHAVE_GETGRGID_R_5=1 -DHAVE_GETGRGID_R=1 -DHAVE_GETGRNAM_R_5=1 -DHAVE_GETGRNAM_R=1 -DHAVE_GETHOSTBYNAME_R_6=1 -DHAVE_GETHOSTBYNAME_R=1 -DHAVE_GETHOSTBYADDR_R_8=1 -DHAVE_GETHOSTBYADDR_R=1 -DUSE_TERMIOS=1 -DHAVE_SYS_TIME_H=1 -DTIME_WITH_SYS_TIME=1 -DHAVE_STRUCT_TM_TM_ZONE=1 -DHAVE_TM_ZONE=1 -DHAVE_GMTIME_R=1 -DHAVE_LOCALTIME_R=1 -DHAVE_MKTIME=1 -DHAVE_TM_GMTOFF=1 -DHAVE_TIMEZONE_VAR=1 -DHAVE_STRUCT_STAT_ST_BLKSIZE=1 -DHAVE_ST_BLKSIZE=1 -DHAVE_INTPTR_T=1 -DHAVE_UINTPTR_T=1 -DHAVE_SIGNED_CHAR=1 -DHAVE_LANGINFO=1 -DHAVE_SYS_IOCTL_H=1 -DTCL_UNLOAD_DLLS=1       -I"/opt/ActiveTcl-8.5/include" -I"/usr/lib/R/include" -I"~/tools/R-2.13.2/src/include"    -O2  -fPIC  -c `echo ./Rtcl.c` -o Rtcl.o
+
+
+enige include dirs:
+-I"/opt/ActiveTcl-8.5/include" -I"/usr/lib/R/include" -I"~/tools/R-2.13.2/src/include"
+
+Rtcl.c:
+#include <tcl.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+/*@@@ NOTE: ideally, we shouldn't need to incude Defn.h. @@@*/
+
+#include "config.h"
+#include "Defn.h"
+#include "R.h"
+
+dus wel de std c includes en ook tcl.h, maar dus niet config.h
+
+/opt/ActiveTcl-8.5/include
+/usr/lib/R/include
+~/tools/R-2.13.2/src/include
+
+ls /opt/ActiveTcl-8.5/include/config.h
+ls /usr/lib/R/include/config.h
+ls ~/tools/R-2.13.2/src/include/config.h
+
+nico@pclinux:708:217:~/tools/Rtcl0.3$ ls /opt/ActiveTcl-8.5/include/config.h
+ls: cannot access /opt/ActiveTcl-8.5/include/config.h: No such file or directory
+Fri Oct 14 - 17:38:00
+nico@pclinux:709:218:~/tools/Rtcl0.3$ ls /usr/lib/R/include/config.h
+ls: cannot access /usr/lib/R/include/config.h: No such file or directory
+Fri Oct 14 - 17:38:00
+nico@pclinux:710:219:~/tools/Rtcl0.3$ ls ~/tools/R-2.13.2/src/include/config.h
+/home/nico/tools/R-2.13.2/src/include/config.h
+Fri Oct 14 - 17:38:01
+
+config.h is er dus wel, maar niet in symlink /usr/lib/R/include/config.h
+
+opnieuw configure en make, en lijkt nu beter:
+wel warnings, geen errors:
+
+<command-line>: warning: "PACKAGE_NAME" redefined
+<command-line>: warning: this is the location of the previous definition
+<command-line>: warning: "PACKAGE_TARNAME" redefined
+<command-line>: warning: this is the location of the previous definition
+<command-line>: warning: "PACKAGE_VERSION" redefined
+<command-line>: warning: this is the location of the previous definition
+<command-line>: warning: "PACKAGE_STRING" redefined
+<command-line>: warning: this is the location of the previous definition
+In file included from ./Rtcl.c:18:
+/usr/lib/R/include/config.h:885:1: warning: "PACKAGE_BUGREPORT" redefined
+<command-line>: warning: this is the location of the previous definition
+/usr/lib/R/include/config.h:888:1: warning: "PACKAGE_NAME" redefined
+<command-line>: warning: this is the location of the previous definition
+/usr/lib/R/include/config.h:891:1: warning: "PACKAGE_STRING" redefined
+<command-line>: warning: this is the location of the previous definition
+/usr/lib/R/include/config.h:894:1: warning: "PACKAGE_TARNAME" redefined
+<command-line>: warning: this is the location of the previous definition
+/usr/lib/R/include/config.h:900:1: warning: "PACKAGE_VERSION" redefined
+<command-line>: warning: this is the location of the previous definition
+/usr/lib/R/include/config.h:1050:1: warning: "VERSION" redefined
+<command-line>: warning: this is the location of the previous definition
+./Rtcl.c: In function ‘REval’:
+./Rtcl.c:410: warning: passing argument 1 of ‘Rf_protect’ makes pointer from integer without a cast
+rm -f libRtcl0.3.so
+gcc -shared -O2  -fPIC  -o libRtcl0.3.so Rtcl.o  -L/opt/ActiveTcl-8.5/lib -ltclstub8.5 -L/usr/lib/R/lib -lR -Wl,-rpath,/usr/lib/R/lib:/usr/lib/R/lib:/usr/lib/jvm/java-6-sun/jre/lib/i386/client:/usr/lib/jvm/java-6-sun/jre/lib/i386:/usr/lib/R/lib:/usr/lib/jvm/java-6-sun/jre/lib/i386/client:/usr/lib/jvm/java-6-sun/jre/lib/i386
+: libRtcl0.3.so
+If you have documentation to create, place the commands to
+build the docs in the 'doc:' target.  For example:
+
+xml2nroff Rtcl.xml > Rtcl.n
+xml2html Rtcl.xml > Rtcl.html
+
+libRtcl0.3.so is nu gemaakt.
+
+man Rtcl doet het.
+tclsh
+% package require Rtcl
+can't find package Rtcl
+
+in Tcl8.4:
+nico@pclinux:729:238:~/tools/Rtcl0.3$ tclsh8.4
+% package require Rtcl
+can't find package Rtcl
+
+Dan zelf op dezelfde plaats als mysqltcl?
+
+nico@pclinux:730:239:~/tools/Rtcl0.3$ tclsh
+% set tcl_version
+8.5
+% package require mysqltcl
+3.02
+
+nico@pclinux:569:69:/opt/ActiveTcl-8.5$ find . -name "*mysqltcl*"
+./lib/mysqltcl-3.02
+./lib/mysqltcl-3.02/libmysqltcl3.02.so
+
+in lib dir /opt/ActiveTcl-8.5/lib staan ook direct .so files.
+
+nico@pclinux:573:73:/opt/ActiveTcl-8.5/lib$ sudo cp /home/nico/tools/Rtcl0.3/libRtcl0.3.so .
+Fri Oct 14 - 17:49:34
+nico@pclinux:574:74:/opt/ActiveTcl-8.5/lib$ tclsh
+% package require Rtcl
+can't find package Rtcl
+
+nico@pclinux:576:76:/opt/ActiveTcl-8.5/lib/mysqltcl-3.02$ ls
+libmysqltcl3.02.so  pkgIndex.tcl
+
+nico@pclinux:577:77:/opt/ActiveTcl-8.5/lib/mysqltcl-3.02$ cat pkgIndex.tcl 
+#
+# Tcl package index file
+#
+package ifneeded mysqltcl 3.02 \
+    [list load [file join $dir libmysqltcl3.02.so] mysqltcl]
+
+Dit kan ik ook nog wel voor Rtcl doen:
+
+% package require Rtcl
+attempt to provide package Rtcl 0.3 failed: package Rtcl 2.13.2 provided instead
+
+even aanpassen in de pkgIndex:
+
+nico@pclinux:591:91:/opt/ActiveTcl-8.5/lib/Rtcl-2.13.2$ tclsh
+% package require Rtcl
+2.13.2
+% 
+
+En dan het gebruik:
+
+       ::Rtcl::eval R_expression
+              Evaluates argument R_expression inside the embedded R interpreter.  Returns an error message if R_expression contains an error, and returns nothing otherwise.
+
+       ::Rtcl::getval R_expression
+              Evaluates  argument  R_expression  inside  the  embedded R interpreter.  Returns an error if the R expression can’t be evaluated.  It then tries to convert the returned value to something
+              equivalent in Tcl. If it can, it returns the value; otherwise, it returns an error.
+
+       ::Rtcl::type R_expression
+              Evaluates R_expression inside the embedded R interpreter.  Returns an error if the R expression can’t be evaluated.  Otherwise, it returns the type of the R expression.
+
+
+::Rtcl::eval "library(ggplot2)"              
+
+
+% ::Rtcl::eval "library(ggplot2)"
+Loading required package: reshape
+Loading required package: plyr
+
+ *** caught segfault ***
+address 0xb76e1182, cause 'invalid permissions'
+
+Traceback:
+ 1: as.name(name)
+ 2: getNamespace(ns)
+ 3: asNamespace(pkg)
+ 4: get(name, envir = asNamespace(pkg), inherits = FALSE)
+ 5: methods:::is
+ 6: registerS3methods(nsInfo$S3methods, package, env)
+ 7: loadNamespace(package, c(which.lib.loc, lib.loc), keep.source = keep.source)
+ 8: doTryCatch(return(expr), name, parentenv, handler)
+ 9: tryCatchOne(expr, names, parentenv, handlers[[1L]])
+10: tryCatchList(expr, classes, parentenv, handlers)
+11: tryCatch(expr, error = function(e) {    call <- conditionCall(e)    if (!is.null(call)) {        if (identical(call[[1L]], quote(doTryCatch)))             call <- sys.call(-4L)        dcall <- deparse(call)[1L]        prefix <- paste("Error in", dcall, ": ")        LONG <- 75L        msg <- conditionMessage(e)        sm <- strsplit(msg, "\n")[[1L]]        w <- 14L + nchar(dcall, type = "w") + nchar(sm[1L], type = "w")        if (is.na(w))             w <- 14L + nchar(dcall, type = "b") + nchar(sm[1L],                 type = "b")        if (w > LONG)             prefix <- paste(prefix, "\n  ", sep = "")    }    else prefix <- "Error : "    msg <- paste(prefix, conditionMessage(e), "\n", sep = "")    .Internal(seterrmessage(msg[1L]))    if (!silent && identical(getOption("show.error.messages"),         TRUE)) {        cat(msg, file = stderr())        .Internal(printDeferredWarnings())    }    invisible(structure(msg, class = "try-error"))})
+12: try({    ns <- loadNamespace(package, c(which.lib.loc, lib.loc), keep.source = keep.source)    dataPath <- file.path(which.lib.loc, package, "data")    env <- attachNamespace(ns, pos = pos, dataPath = dataPath,         deps)})
+13: library(pkg, character.only = TRUE, logical.return = TRUE, lib.loc = lib.loc)
+14: .getRequiredPackages2(pkgInfo, quietly = quietly)
+15: library(pkg, character.only = TRUE, logical.return = TRUE, lib.loc = lib.loc)
+16: .getRequiredPackages2(pkgInfo, quietly = quietly)
+17: library(ggplot2)
+
+Possible actions:
+1: abort (with core dump, if enabled)
+2: normal R exit
+3: exit R without saving workspace
+4: exit R saving workspace
+Selection: 
+
+% package require Rtcl
+2.13.2
+% ::Rtcl::eval 1
+% ::Rtcl::eval 1+1
+% ::Rtcl::eval 1/0
+% ::Rtcl::eval 1/e
+object 'e' not found
+
+% ::Rtcl::eval e=2.7
+% ::Rtcl::eval 1/e
+
+dan dus wel goed.
+
+% ::Rtcl::getval 1/e
+0.37037037037037035
+
+::Rtcl::type 1/e
+% ::Rtcl::type 1/e
+
+ *** caught segfault ***
+address 0x4a8d4c51, cause 'memory not mapped'
+
+Possible actions:
+1: abort (with core dump, if enabled)
+2: normal R exit
+3: exit R without saving workspace
+4: exit R saving workspace
+
+Conclusie: werkt wel een beetje, maar je kunt er niet op vertrouwen, andere opties vooralsnog beter.
+
+aan andere kant: type niet echt nodig, nog eens proberen onder sudo ggplot te laden:
+
+Zelfde melding, dus helaas...
+

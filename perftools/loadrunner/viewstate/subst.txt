@@ -1,0 +1,247 @@
+Action()
+{
+
+	web_set_user("TWEEDEKAMER.STATENGENERAAL.LOCAL\\remm1210", 
+		lr_decrypt("4e2fb6f2241bd962ac08ac5a"), 
+		"vlos:80");
+
+	web_url("vlos", 
+		"URL=http://vlos/", 
+		"Resource=0", 
+		"RecContentType=text/html", 
+		"Referer=", 
+		"Snapshot=t1.inf", 
+		"Mode=HTML", 
+		LAST);
+
+	lr_start_transaction("02_tabblad_tweedekamer");
+
+	web_url("default.aspx", 
+		"URL=http://vlos/TK/default.aspx", 
+		"Resource=0", 
+		"RecContentType=text/html", 
+		"Referer=http://vlos/default.aspx", 
+		"Snapshot=t2.inf", 
+		"Mode=HTML", 
+    		LAST);
+
+	lr_end_transaction("02_tabblad_tweedekamer",LR_AUTO);
+
+	lr_start_transaction("03_open_agenda");
+
+	web_url("20200726", 
+		http://vlos/TK/2019-2020/20200726
+		"Resource=0", 
+		"RecContentType=text/html", 
+		"Referer=http://vlos/TK/default.aspx", 
+		"Snapshot=t3.inf", 
+		"Mode=HTML", 
+    		LAST);
+
+	lr_end_transaction("03_open_agenda",LR_AUTO);
+
+	lr_start_transaction("04_nalezen");
+
+	lr_think_time(25);
+
+	web_url("Nalezen.aspx", 
+		"URL=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx", 
+		"Resource=0", 
+		"RecContentType=text/html", 
+		"Referer=http://vlos/TK/2019-2020/20200726/default.aspx", 
+		"Snapshot=t4.inf", 
+		"Mode=HTML", 
+    		LAST);
+
+	lr_end_transaction("04_nalezen",LR_AUTO);
+
+	lr_start_transaction("05_selecteer_beurten");
+
+	web_custom_request("Nalezen.aspx_2", 
+		"URL=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=text/plain", 
+		"Referer=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx", 
+		"Snapshot=t5.inf", 
+		"Mode=HTML", 
+		"Body=ctl00$ctl15=ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$ctl05|ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl02$ctl00&MSO_PageHashCode=2416-948562310&MSOWebPartPage_PostbackSource=&MSOTlPn_SelectedWpId=&MSOTlPn_View=0&MSOTlPn_ShowSettings=False&MSOGallery_SelectedLibrary=&MSOGallery_FilterString=&MSOTlPn_Button=none&__EVENTTARGET=ctl00%24m%24g_c98a624b_12f1_49de_ad92_a0deb70b8ceb%24selectlistgrid%24ctl02%24ctl00&__EVENTARGUMENT=&__REQUESTDIGEST={cREQUESTDIGEST1}&MSOSPWebPartManager_DisplayModeName=Browse&MSOWebPartPage_Shared=&MSOLayout_LayoutChanges=&MSOLayout_InDesignMode=&MSOSPWebPartManager_OldDisplayModeName=Browse&MSOSPWebPartManager_StartWebPartEditingName=false&__LASTFOCUS=&__VIEWSTATE={cViewState1}&__EVENTVALIDATION={cEventValidation1}&ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl02$ctl00=on&__spDummyText1=&__spDummyText2=&", 
+		LAST);
+
+	web_custom_request("Nalezen.aspx_3", 
+		"URL=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=text/plain", 
+		"Referer=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx", 
+		"Snapshot=t6.inf", 
+		"Mode=HTML", 
+		"Body=ctl00$ctl15=ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$ctl05|ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl03$ctl00&MSO_PageHashCode=2416-948562310&MSOWebPartPage_PostbackSource=&MSOTlPn_SelectedWpId=&MSOTlPn_View=0&MSOTlPn_ShowSettings=False&MSOGallery_SelectedLibrary=&MSOGallery_FilterString=&MSOTlPn_Button=none&__EVENTTARGET=ctl00%24m%24g_c98a624b_12f1_49de_ad92_a0deb70b8ceb%24selectlistgrid%24ctl03%24ctl00&__EVENTARGUMENT=&__REQUESTDIGEST={cREQUESTDIGEST1}&MSOSPWebPartManager_DisplayModeName=Browse&MSOWebPartPage_Shared=&MSOLayout_LayoutChanges=&MSOLayout_InDesignMode=&MSOSPWebPartManager_OldDisplayModeName=Browse&MSOSPWebPartManager_StartWebPartEditingName=false&__LASTFOCUS=&__VIEWSTATE={cViewState2}&__EVENTVALIDATION={cEventValidation2}&ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl02$ctl00=on&ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl03$ctl00=on&__spDummyText1=&__spDummyText2=&__VIEWSTATEENCRYPTED=&", 
+		LAST);
+
+	web_custom_request("Nalezen.aspx_4", 
+		"URL=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=text/plain", 
+		"Referer=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx", 
+		"Snapshot=t7.inf", 
+		"Mode=HTML", 
+		"Body=ctl00$ctl15=ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$ctl05|ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl04$ctl00&MSO_PageHashCode=2416-948562310&MSOWebPartPage_PostbackSource=&MSOTlPn_SelectedWpId=&MSOTlPn_View=0&MSOTlPn_ShowSettings=False&MSOGallery_SelectedLibrary=&MSOGallery_FilterString=&MSOTlPn_Button=none&__EVENTTARGET=ctl00%24m%24g_c98a624b_12f1_49de_ad92_a0deb70b8ceb%24selectlistgrid%24ctl04%24ctl00&__EVENTARGUMENT=&__REQUESTDIGEST={cREQUESTDIGEST1}&MSOSPWebPartManager_DisplayModeName=Browse&MSOWebPartPage_Shared=&MSOLayout_LayoutChanges=&MSOLayout_InDesignMode=&MSOSPWebPartManager_OldDisplayModeName=Browse&MSOSPWebPartManager_StartWebPartEditingName=false&__LASTFOCUS=&__VIEWSTATE={cViewState3}&__EVENTVALIDATION={cEventValidation3}&ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl02$ctl00=on&ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl03$ctl00=on&ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl04$ctl00=on&__spDummyText1=&__spDummyText2=&__VIEWSTATEENCRYPTED=&", 
+		LAST);
+
+	web_custom_request("Nalezen.aspx_5", 
+		"URL=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=text/plain", 
+		"Referer=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx", 
+		"Snapshot=t8.inf", 
+		"Mode=HTML", 
+		"Body=ctl00$ctl15=ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$ctl05|ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl05$ctl00&MSO_PageHashCode=2416-948562310&MSOWebPartPage_PostbackSource=&MSOTlPn_SelectedWpId=&MSOTlPn_View=0&MSOTlPn_ShowSettings=False&MSOGallery_SelectedLibrary=&MSOGallery_FilterString=&MSOTlPn_Button=none&__EVENTTARGET=ctl00%24m%24g_c98a624b_12f1_49de_ad92_a0deb70b8ceb%24selectlistgrid%24ctl05%24ctl00&__EVENTARGUMENT=&__REQUESTDIGEST={cREQUESTDIGEST1}&MSOSPWebPartManager_DisplayModeName=Browse&MSOWebPartPage_Shared=&MSOLayout_LayoutChanges=&MSOLayout_InDesignMode=&MSOSPWebPartManager_OldDisplayModeName=Browse&MSOSPWebPartManager_StartWebPartEditingName=false&__LASTFOCUS=&__VIEWSTATE={cViewState4}&__EVENTVALIDATION={cEventValidation4}&ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl02$ctl00=on&ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl03$ctl00=on&ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl04$ctl00=on&ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl05$ctl00=on&__spDummyText1=&__spDummyText2=&__VIEWSTATEENCRYPTED=&", 
+		LAST);
+
+	web_custom_request("Nalezen.aspx_6", 
+		"URL=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=text/plain", 
+		"Referer=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx", 
+		"Snapshot=t9.inf", 
+		"Mode=HTML", 
+		"Body=ctl00$ctl15=ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$ctl05|ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl06$ctl00&MSO_PageHashCode=2416-948562310&MSOWebPartPage_PostbackSource=&MSOTlPn_SelectedWpId=&MSOTlPn_View=0&MSOTlPn_ShowSettings=False&MSOGallery_SelectedLibrary=&MSOGallery_FilterString=&MSOTlPn_Button=none&__EVENTTARGET=ctl00%24m%24g_c98a624b_12f1_49de_ad92_a0deb70b8ceb%24selectlistgrid%24ctl06%24ctl00&__EVENTARGUMENT=&__REQUESTDIGEST={cREQUESTDIGEST1}&MSOSPWebPartManager_DisplayModeName=Browse&MSOWebPartPage_Shared=&MSOLayout_LayoutChanges=&MSOLayout_InDesignMode=&MSOSPWebPartManager_OldDisplayModeName=Browse&MSOSPWebPartManager_StartWebPartEditingName=false&__LASTFOCUS=&__VIEWSTATE={cViewState5}&__EVENTVALIDATION={cEventValidation5}&ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl02$ctl00=on&ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl03$ctl00=on&ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl04$ctl00=on&ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl05$ctl00=on&ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl06$ctl00=on&__spDummyText1=&__spDummyText2=&__VIEWSTATEENCRYPTED=&", 
+		LAST);
+
+	lr_end_transaction("05_selecteer_beurten",LR_AUTO);
+
+	lr_start_transaction("05_beurten_samenstellen");
+
+	web_submit_data("Nalezen.aspx_7", 
+		"Action=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx", 
+		"Method=POST", 
+		"RecContentType=text/html", 
+		"Referer=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx", 
+		"Snapshot=t10.inf", 
+		"Mode=HTML", 
+		ITEMDATA, 
+		"Name=MSO_PageHashCode", "Value=2416-948562310", ENDITEM, 
+		"Name=MSOWebPartPage_PostbackSource", "Value=", ENDITEM, 
+		"Name=MSOTlPn_SelectedWpId", "Value=", ENDITEM, 
+		"Name=MSOTlPn_View", "Value=0", ENDITEM, 
+		"Name=MSOTlPn_ShowSettings", "Value=False", ENDITEM, 
+		"Name=MSOGallery_SelectedLibrary", "Value=", ENDITEM, 
+		"Name=MSOGallery_FilterString", "Value=", ENDITEM, 
+		"Name=MSOTlPn_Button", "Value=none", ENDITEM, 
+		"Name=__EVENTTARGET", "Value=", ENDITEM, 
+		"Name=__EVENTARGUMENT", "Value=", ENDITEM, 
+		"Name=__REQUESTDIGEST", "Value=0x864E5021327119D465920B98FF76FC6CE59FB58CEB0F685E2C40FCB72D841DE136DE1657FDA72B6FE3FD53C5FE7706F64142024EFA4FDE6DA6BFDB7DE87D486C,27 Jul 2011 06:54:12 -0000", ENDITEM, 
+		"Name=MSOSPWebPartManager_DisplayModeName", "Value=Browse", ENDITEM, 
+		"Name=MSOWebPartPage_Shared", "Value=", ENDITEM, 
+		"Name=MSOLayout_LayoutChanges", "Value=", ENDITEM, 
+		"Name=MSOLayout_InDesignMode", "Value=", ENDITEM, 
+		"Name=MSOSPWebPartManager_OldDisplayModeName", "Value=Browse", ENDITEM, 
+		"Name=MSOSPWebPartManager_StartWebPartEditingName", "Value=false", ENDITEM, 
+		"Name=__LASTFOCUS", "Value=", ENDITEM, 
+		"Name=__VIEWSTATE", "Value={cViewState6}", ENDITEM, 
+		"Name=__EVENTVALIDATION", "Value={cEventValidation6}", ENDITEM, 
+		"Name=ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$spltonen", "Value=Samenstellen", ENDITEM, 
+		"Name=ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl02$ctl00", "Value=on", ENDITEM, 
+		"Name=ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl03$ctl00", "Value=on", ENDITEM, 
+		"Name=ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl04$ctl00", "Value=on", ENDITEM, 
+		"Name=ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl05$ctl00", "Value=on", ENDITEM, 
+		"Name=ctl00$m$g_c98a624b_12f1_49de_ad92_a0deb70b8ceb$selectlistgrid$ctl06$ctl00", "Value=on", ENDITEM, 
+		"Name=__spDummyText1", "Value=", ENDITEM, 
+		"Name=__spDummyText2", "Value=", ENDITEM, 
+		"Name=__VIEWSTATEENCRYPTED", "Value=", ENDITEM, 
+        		LAST);
+
+	web_url("Nalezen.aspx_8", 
+		"URL=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx?ts={cOther1}", 
+		"Resource=0", 
+		"RecContentType=text/html", 
+		"Referer=", 
+		"Snapshot=t11.inf", 
+		"Mode=HTML", 
+    		LAST);
+
+	lr_end_transaction("05_beurten_samenstellen",LR_AUTO);
+
+	lr_start_transaction("06_word_aanpassen");
+
+	lr_end_transaction("06_word_aanpassen",LR_AUTO);
+
+	lr_start_transaction("07_selecteer_werkdocument");
+
+	web_custom_request("Nalezen.aspx_9", 
+		"URL=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx?ts={cOther1}", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=text/plain", 
+		"Referer=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx?ts={cOther1}", 
+		"Snapshot=t12.inf", 
+		"Mode=HTML", 
+		"Body=ctl00$ctl15=ctl00$m$g_5eca2402_e7b5_4de0_bc36_69976c60ef84$ctl05|ctl00$m$g_5eca2402_e7b5_4de0_bc36_69976c60ef84$selectlistgrid$ctl02$rb_0&MSO_PageHashCode=2416-948562310&MSOWebPartPage_PostbackSource=&MSOTlPn_SelectedWpId=&MSOTlPn_View=0&MSOTlPn_ShowSettings=False&MSOGallery_SelectedLibrary=&MSOGallery_FilterString=&MSOTlPn_Button=none&__EVENTTARGET=ctl00%24m%24g_5eca2402_e7b5_4de0_bc36_69976c60ef84%24selectlistgrid%24ctl02%24rb_0&__EVENTARGUMENT=&__REQUESTDIGEST={cREQUESTDIGEST2}&MSOSPWebPartManager_DisplayModeName=Browse&MSOWebPartPage_Shared=&MSOLayout_LayoutChanges=&MSOLayout_InDesignMode=&MSOSPWebPartManager_OldDisplayModeName=Browse&MSOSPWebPartManager_StartWebPartEditingName=false&__LASTFOCUS=&__VIEWSTATE={cViewState7}&__EVENTVALIDATION={cEventValidation7}&ctl00$m$g_5eca2402_e7b5_4de0_bc36_69976c60ef84$selectlistgrid;0;RowSelector=rb_0&__spDummyText1=&__spDummyText2=&", 
+		LAST);
+
+	lr_end_transaction("07_selecteer_werkdocument",LR_AUTO);
+
+	lr_start_transaction("08_werkdocument_bijwerken");
+
+	web_submit_data("Nalezen.aspx_10", 
+		"Action=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx?ts={cOther1}", 
+		"Method=POST", 
+		"RecContentType=text/html", 
+		"Referer=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx?ts={cOther1}", 
+		"Snapshot=t13.inf", 
+		"Mode=HTML", 
+		ITEMDATA, 
+		"Name=MSO_PageHashCode", "Value=2416-948562310", ENDITEM, 
+		"Name=MSOWebPartPage_PostbackSource", "Value=", ENDITEM, 
+		"Name=MSOTlPn_SelectedWpId", "Value=", ENDITEM, 
+		"Name=MSOTlPn_View", "Value=0", ENDITEM, 
+		"Name=MSOTlPn_ShowSettings", "Value=False", ENDITEM, 
+		"Name=MSOGallery_SelectedLibrary", "Value=", ENDITEM, 
+		"Name=MSOGallery_FilterString", "Value=", ENDITEM, 
+		"Name=MSOTlPn_Button", "Value=none", ENDITEM, 
+		"Name=__EVENTTARGET", "Value=", ENDITEM, 
+		"Name=__EVENTARGUMENT", "Value=", ENDITEM, 
+		"Name=__REQUESTDIGEST", "Value=0xF5A1F0D0DA3B7B92B0B0961DF6F9124477186E93274CF9EECD5430AD37B1B7FB532D2EB3BE642C5802DE7159EA38A42A1220534D09C6C3101F9B4F41D91712A9,27 Jul 2011 06:55:14 -0000", ENDITEM, 
+		"Name=MSOSPWebPartManager_DisplayModeName", "Value=Browse", ENDITEM, 
+		"Name=MSOWebPartPage_Shared", "Value=", ENDITEM, 
+		"Name=MSOLayout_LayoutChanges", "Value=", ENDITEM, 
+		"Name=MSOLayout_InDesignMode", "Value=", ENDITEM, 
+		"Name=MSOSPWebPartManager_OldDisplayModeName", "Value=Browse", ENDITEM, 
+		"Name=MSOSPWebPartManager_StartWebPartEditingName", "Value=false", ENDITEM, 
+		"Name=__LASTFOCUS", "Value=", ENDITEM, 
+		"Name=__VIEWSTATE", "Value={cViewState8}", ENDITEM, 
+		"Name=__EVENTVALIDATION", "Value={cEventValidation8}", ENDITEM, 
+		"Name=ctl00$m$g_5eca2402_e7b5_4de0_bc36_69976c60ef84$splbijwerken", "Value=Bijwerken", ENDITEM, 
+		"Name=ctl00$m$g_5eca2402_e7b5_4de0_bc36_69976c60ef84$selectlistgrid;0;RowSelector", "Value=rb_0", ENDITEM, 
+		"Name=__spDummyText1", "Value=", ENDITEM, 
+		"Name=__spDummyText2", "Value=", ENDITEM, 
+		"Name=__VIEWSTATEENCRYPTED", "Value=", ENDITEM, 
+    		LAST);
+
+	web_url("Nalezen.aspx_11", 
+		"URL=http://vlos/TK/2019-2020/20200726/Pages/Nalezen.aspx?ts={cOther2}", 
+		"Resource=0", 
+		"RecContentType=text/html", 
+		"Referer=", 
+		"Snapshot=t14.inf", 
+		"Mode=HTML", 
+    	LAST);
+
+	lr_end_transaction("08_werkdocument_bijwerken",LR_AUTO);
+
+	return 0;
+}
+vuser_end()
+{
+	return 0;
+}
+
+vuser_init()
+{
+	return 0;
+}
+

@@ -1,0 +1,71 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>net.sf.woko</groupId>
+    <artifactId>wokotcltrace</artifactId>
+    <name>wokotcltrace</name>
+    <version>1.0-rc3</version>
+    <packaging>war</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>net.sf.woko</groupId>
+            <artifactId>woko-core</artifactId>
+            <version>1.0-rc3</version>
+        </dependency>
+				<dependency>
+					<groupId>net.sf.woko</groupId>
+					<artifactId>woko-web</artifactId>
+					<version>1.0-rc3</version>
+					<type>war</type>	
+				</dependency>
+				<dependency>
+					<groupId>mysql</groupId>
+					<artifactId>mysql-connector-java</artifactId>
+					<version>5.1.6</version>
+				</dependency>
+    </dependencies>
+    <build>
+    	<finalName>wokotcltrace</finalName>
+        <plugins>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<configuration>
+				<source>1.5</source>
+				<target>1.5</target>
+			</configuration>
+            </plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-war-plugin</artifactId>
+			<version>2.0</version>
+			<configuration>
+				<dependentWarExcludes>WEB-INF/web.xml</dependentWarExcludes>   
+			</configuration>
+		</plugin>
+            <plugin>
+                <groupId>org.codehaus.cargo</groupId>
+                <artifactId>cargo-maven2-plugin</artifactId>
+                <configuration>
+                    <wait>true</wait>
+                    <!-- Container configuration -->
+                    <container>
+                        <containerId>tomcat5x</containerId>
+                        <home>${tomcat5.home}</home>
+                    </container>
+                    <!-- Configuration to use with the container -->
+                    <configuration>
+                        <home>${project.build.directory}/tomcat5x</home>
+                    </configuration>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <repositories>
+        <repository>
+            <id>woko-repo</id>
+            <name>Woko Repository</name>
+            <url>http://woko.sourceforge.net/maven2</url>
+        </repository>
+    </repositories>
+</project>

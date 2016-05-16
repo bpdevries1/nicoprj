@@ -1,0 +1,22 @@
+Tcl scripts om Force logfiles om te zetten naar een formaat dat door HP Performance Center Analysis ingelezen kan worden.
+
+Algemeen script.
+- 1x uitvoeren per testrun om alle logs op te halen en te verwerken.
+- 1 script voor starten van de testrun, om een timestamp te zetten.
+
+Detail scripts:
+- DBSLA2analysis.tcl: lees de 2 Force SLA tabellen vanaf een bepaald tijdstip en maak 1 log analysis bestand.
+- <aantal scripts om diverse logs te lezen, evt inclusief ophalen vanaf de server>
+
+Release notes
+==============
+
+6-10-2010 (NdV)
+===============
+* Kopie van versie voor TD's naar versie voor BPR kredieten.
+
+
+11-8-2010 (NdV)
+===============
+* Versie voor Force BPM TD's
+

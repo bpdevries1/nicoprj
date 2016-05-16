@@ -1,0 +1,22 @@
+# db params Force SLA DB
+sladb=FAOForceSLA
+sladbuser=sql_perf
+sladbpassword=Welkom01
+
+# db params Force DB
+forcedb=FAOForce
+forcedbuser=sql_perf
+forcedbpassword=Welkom01
+
+# Force server logfiles params
+# Op FAO geen rechten (NdV, 15-9-2010)
+#log_driveletter=Z
+#log_driveletter=X
+#log_unc_root=\\10.87.0.65\Log
+#log_user=rc1waforce03\sis_mon
+#log_password=jBXzg5
+
+# local root log path
+local_log_root=L:\Force LSP Keten\FAO-force-logs
+
+

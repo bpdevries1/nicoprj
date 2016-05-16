@@ -1,0 +1,26 @@
+Stel 1 vuser		
+pacing 	60	seconden
+X	0.016666667	per seconde
+X	60	per uur
+		
+"Stel een variabele pacing, met gemiddelde van 60 seconden, min = 20, max = 100."		
+		
+"Stel pacing=10x 20 seconden, en 10x 100 seconden"		
+periode 1	200	
+periode 2	1000	
+totale tijd	1200	
+#trans	20	
+X	0.016666667	per seconde
+X	60	per uur
+		
+"Klopt dan gewoon wel dus, wel oppassen dat iteratie niet korter dan 20 seconden duurt, dan gaat het wel fout."		
+		
+X periode 1	0.05	
+X periode 2	0.01	
+X gemiddeld	0.03	
+X	108	per uur
+		
+X gewogen gemiddelde	0.016666667	
+X	60	per uur
+		
+Dan wel weer goed.		

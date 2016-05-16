@@ -1,0 +1,59 @@
+LR - Correlate and add parameters.
+add-params.tcl and viewstate.tcl
+Also used (tried to use?) for other projects.
+Used at FB.
+
+Notes
+
+Bugs:
+
+Todo:
+* transacties bepalen obv think_times, deze markeren nieuwe transactie.
+  => nu eerste versie, zelf tekst van transactie nog invullen.
+* text_checks inbouwen, valideren dat er geen error is opgetreden. in ieder geval een template, unieke tekst in result zoeken?
+  die in ieder geval nog niet in vorige .htm voorkomt.
+* Op bepaalde manier modulair te maken, zoals RM gedaan heeft. Sequence van reqs levert een aantal params op, die in een volgende
+  sequence worden gebruikt. Misschien als volgende fase proces, na gen.
+* nu comment: // get from snapshot t63, use in snapshot t64. Dit is niet volledige verhaal, vaak ook meerdere keren ge-used.  
+* lr_start_sub_transaction statements automatisch genereren: obv hoofd-transactie en label van het request.
+* Bij LB's ook accolades escapen, nodig voor add-subtrans. Alleen \{ wordt door VuGen niet herkend. Accolades zijn nu vaak het eerste
+  teken van de LB, kan deze dan ook helemaal weglaten.
+
+Done:
+* RB bij viewstate lijkt niet goed. string range pos 1 eerder, toch.
+* pViewState1 wel gedef-ed bij save-params.c, maar niet gebruikt in action-filtered.c: had met vullen lijst te maken.
+* Bepalen hoeveelste, volgnummer meegeven. => komt maar 1x voor in test 1action.
+* Bij automatisch parsen viewstate en valueexchange en meer dan 1:
+  - ofwel kijken naar grotere LB en/of RB. => nu gedaan, werkt goed.
+  - ofwel bepalen hoeveelste het is, kan dit meegeven aan lr_ functie.
+* Efficienter? (voor VuGen) door params te hergebruiken waar mogelijk, dan scope bepalen (tussen 2 snapshots, def en laatste gebruik)
+* max_param_length bepalen: staat (meestal) al een waarde in oorspronkelijk, houd bij wat max is en zet deze (+20%) weer terug.
+
+=> te grote LB: (maar soms ook te kleine). Bepaald stuk van de LB (van viewstate hier) 
+is al vervangen, zou dan niet hier voor moeten komen.
+lijkt alleen bij evenvalidation voor te komen.
+// get from snapshot t7, use in snapshot t13
+	web_reg_save_param("cEventValidation8", 
+		"LB/IC=qf8MTThkUsspTT1XRW0\",\"eventValidation\":\"", 
+		"RB/IC=\",\"c", 
+		"Ord=1", 
+		"Search=Body", 
+		"RelFrameId=1",
+		"Convert=HTML_TO_URL", 
+		LAST);
+
+* web_convert_param staat standaard (bug?) na de request die de vertaalde waarde gebruikt, moet er voor. Vaak gaat het ook wel goed
+  als het er na staat, maar soms ook niet. Beter lijkt 't (RM agrees) om ze altijd ervoor te zetten.
+  - Invulling: nog een parse/vervang ronde, waarbij steeds 2 calls gematched worden en evt omgedraaid. Dit dan wel voor andere calls,
+    omdat anders free-param statements in de weg kunnen zitten. Ook meer dan 1 run met verwisselingen, omdat soms 2x een web_convert_param 
+    voorkomt na de web-request. Dan bijhouden of er iets vervangen is. Wel opletten dat te verwisselen dingen 'goed' zijn, dus ook de 3xwebrequest.
+  - 2 opeenvolgende verwisselen gaat niet werken, soms gebeurt convert pas 4 stappen later.
+  - ofwel alle converts opvangen in een array en hierna neerzetten bij de goede snapshot.
+  - Alternatief is de bestaand web_reg_save_param op te vangen en hier een param convert=HTML_TO_URL neer te zetten. Dan wel rekening
+  houden met 2 var namen.
+  - Nog een alternatief is het script opnieuw op te nemen zonder deze te matchen en dit later in het script te doen. => hiervoor gekozen, werkt nu goed.		
+		
+
+* Als web_set_max_html_param_len niet voorkomt in bron, dan ergens aan het begin neerzetten.
+
+

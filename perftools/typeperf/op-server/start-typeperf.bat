@@ -1,0 +1,1 @@
+typeperf.exe -si 10 -cf typeperf.cf -o typeperf.csv

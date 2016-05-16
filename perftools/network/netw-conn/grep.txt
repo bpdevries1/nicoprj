@@ -1,0 +1,4 @@
+grep -v "file struct" lsof-test142a.txt >lsof-test142b.txt
+
+
+

@@ -1,0 +1,19 @@
+C functions en lib:
+==================
+functions.c - in_vugen()
+wrr_functions.c - set_proxy(config)
+configfile.c - config_read
+functions.c - include vugen.h en dynatrace.c
+wrr_functions.c - include functions.c en configfile.c
+
+mag niet in conc_group:
+web_revert_auto_header("Origin");
+
+checks op concurrent group: klopt start/stop gebeuren? En komen binnen de start niet foute functies voor, text check mag mogelijk ook niet.
+
+checks op settings: niet non-critical as warning. [2016-05-03 15:55:04] stond bij nieuw script standaard aan.
+
+Dan libs mee (zie att) en goede verdeling maken, zo weinig mogelijk onderlinge afhankelijkheden, zeker van dingen als dynatrace.c.
+
+Ook dingen met rb_ laten beginnen, bv rb_functions.c voor algemene dingen, rcc_functions etc voor specifieke dingen. Wil configfile bv wel los houden, wel vraag of deze afhankelijkheden heeft of andersom, bv proxy settings verwacht een config ‘object’.
+

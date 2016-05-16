@@ -1,0 +1,9 @@
+delete from task;
+delete from resusage;
+delete from resname;
+delete from logfile;
+delete from testrun;
+delete from machine;
+delete from taskdef;
+delete from task_graph;
+delete from graph;
