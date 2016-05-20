@@ -41,7 +41,8 @@ proc unison {args} {
 
 proc zip_projects {} {
   zip_project {c:\PCC\nico\nicoprj} /c/PCC/Nico/zips/nicoprj.zip
-  zip_project {c:\PCC\nico\perftoolset\tools} /c/PCC/Nico/zips/perftoolset-tools.zip
+  # [2016-05-19 17:25:35] vanaf nu zou perftoolset niet meer nodig moeten zijn.
+  # zip_project {c:\PCC\nico\perftoolset\tools} /c/PCC/Nico/zips/perftoolset-tools.zip
 }
 
 proc zip_project {dir zipfile} {
