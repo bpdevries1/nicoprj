@@ -3,6 +3,9 @@ setlocal
 rem startapps.bat - start apps like , lync, 
 rem start from standard command prompt.
 
+rem [2016-05-17 09:59:37] deze zou automatisch moeten kunnen
+set workingdir=c:\pcc\nico\util\startapps
+
 rem start /b om geen nieuw window te openen. 
 rem /wait wil je juist niet. Toch bij totalcmd wacht 'ie wel.
 
@@ -10,7 +13,9 @@ rem deze doen het:
 start /b C:\PCC\Util\TotalCommander\TOTALCMD.EXE
 rem start C:\PCC\Util\Console2\Console.exe -t Bash -t 4NT -r c:\PCC\Nico\nicoprj\misctools\startapps\4nt-emacs.bat
 rem 4NT moet als eerste config staan, emacs wordt ook hierin geladen dan.
-start C:\PCC\Util\Console2\Console.exe -t 4NT -t Bash -r c:\PCC\Nico\nicoprj\misctools\startapps\4nt-emacs.bat
+rem start C:\PCC\Util\Console2\Console.exe -t 4NT -t Bash -r c:\PCC\Nico\nicoprj\misctools\startapps\4nt-emacs.bat
+start C:\PCC\Util\Console2\Console.exe -t 4NT -t Bash -r %workingdir%\4nt-emacs.bat
+
 start C:\PCC\Util\PortableApps\Notepad++Portable\Notepad++Portable.exe
 rem start /b C:\PCC\util\emacs24.4\bin\emacs.exe
 start /b C:\PCC\Util\PortableApps\FirefoxPortable\FirefoxPortable.exe
@@ -36,7 +41,8 @@ cd C:\PCC\nico\typeperf
 start c:\PCC\util\4nt\4nt.exe /c start-typeperf.bat
 
 rem AHK shortcuts, first only F8 for timestamp insertion.
-start c:\PCC\Nico\AHK-Demo\demo\send-timestamp.exe
+rem start c:\PCC\Nico\AHK-Demo\demo\send-timestamp.exe
+start c:\PCC\Nico\util\ahkmacro\send-timestamp.exe
 
 rem activitylog
 c:\PCC\util\4nt\4nt.exe /c C:\pcc\nico\nicoprj\misctools\activitylog\start-activitylog-rabo.bat
