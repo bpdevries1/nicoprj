@@ -9,7 +9,7 @@ ndv::source_once ssl.tcl pubsub.tcl
 # [2016-02-08 11:13:55] Bug - when logfile contains 0-bytes (eg in Vugen output.txt with log webregfind for PDF/XLS), the script sees this as EOF and misses transactions and errors.
 
 # set_log_global perf {showfilename 0}
-set_log_global debug {showfilename 0}
+
 
 set VUSER_END_ITERATION 1000
 
@@ -84,9 +84,14 @@ proc readlogfile {logfile db ssl} {
   if {[is_logfile_read $db $logfile]} {
     return
   }
+  set vuserid [det_vuserid $logfile]
+  if {$vuserid == ""} {
+    log warn "Could not determine vuserid from $logfile: continue with next."
+    return
+  }
   set ts_cet [clock format [file mtime $logfile] -format "%Y-%m-%d %H:%M:%S"]
   # set logfile [file tail $logfilepath]
-  set vuserid [det_vuserid $logfile]
+
   
   # $db add_tabledef logfile {id} {logfile dirname ts_cet filesize runid project}
   
@@ -108,8 +113,10 @@ proc readlogfile {logfile db ssl} {
     set error_iter {}
     set user ""
     set ts_cet ""
-    handle_ssl_start $db $logfile_id $vuserid $iteration
-	  while {[gets $fi line] >= 0} {
+    if {$ssl} {
+      handle_ssl_start $db $logfile_id $vuserid $iteration  
+    }
+    while {[gets $fi line] >= 0} {
 		  incr linenr
 		  set iteration [get_iteration $line $iteration]
       
@@ -140,7 +147,6 @@ proc readlogfile {logfile db ssl} {
       }
 		  set error [handle_error $line $db [file tail $logfile] $logfile_id $vuserid $linenr $iteration $ts_cet $user]
 		  set error_iter [update_error_iter $error_iter $error]
-      # TODO: deze weer aanzetten. Zorgt 3-5-2016 voor out-of-memory, waarsch een dict die je vrij moet geven.
       if {$ssl} {
         handle_ssl_line $db $logfile_id $vuserid $iteration $line $linenr  
       }
@@ -270,9 +276,10 @@ proc det_vuserid {logfile} {
     return $vuser
   } elseif {[file tail $logfile] == "output.txt"} {
     # Vugenlog file, vuser=-1
-	return -1
+    return -1
   } else {
-    error "Could not determine vuser from logfile: $logfile"
+    log warn "Could not determine vuser from logfile: $logfile"
+    return ""
   }
 }
 
@@ -501,6 +508,7 @@ proc delete_database {dbname} {
 
 if {[this_is_main]} {
   log debug "This is main, so call main proc"
+  set_log_global debug {showfilename 0}  
   main $argv  
 } else {
   log debug "This is not main, don't call main proc"

@@ -20,7 +20,7 @@ oo::class create PubSub {
   }
 
   method pub {topic value} {
-    foreach lst [dict get $listeners $topic] {
+    foreach lst [dict_get $listeners $topic] {
       $lst sub $topic $value
     }
   }
