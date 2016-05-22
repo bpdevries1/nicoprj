@@ -5,7 +5,7 @@
    [potemkin.macros :as pm]
    [libndv.coerce :refer [to-key]]))
 
-;; TODO model-ns(symbol seems to be missing a space, but leave it for now.
+;; TODO: [2016-05-22 15:14] model-ns(symbol seems to be missing a space, but leave it for now.
 (defn model-fn
   [model-ns obj-type-name action]
   (ns-resolve model-ns(symbol (str obj-type-name "-" action))))
