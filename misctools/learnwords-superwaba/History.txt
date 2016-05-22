@@ -1,0 +1,5 @@
+23-2-2003:
+* Import and export from and to Memo's.
+* Bugfix: words overview->select->null pointer.
+* One hand control: more button control.
+
