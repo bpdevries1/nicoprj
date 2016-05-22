@@ -1,0 +1,150 @@
+<?xml version="1.0"?>
+<project>
+  <pomVersion>3</pomVersion>
+  <name>readlog</name>
+  <id>readlog</id>
+  <currentVersion>1.0-b1-dev</currentVersion>
+  <organization>
+    <name>Ordina</name>
+    <url>http://www.ordina.nl/</url>
+  </organization>
+  <inceptionYear>2002</inceptionYear>
+  <package>nl.utopics.ndv.readlog</package>
+
+  <shortDescription>Analysing Log4J log for performance engineering</shortDescription>
+
+  <!-- Gump integration TODO -->
+  <gumpRepositoryId>jakarta</gumpRepositoryId>
+
+  <description>
+    Readlog (workink title) is a tool for analyzing the logs
+    created with Log4J with respect to performance. A callgraph
+    is presented with the used time per node.
+    TODO: extend description, see readlog.doc.
+  </description>
+
+	<!-- TODO: homepage voor project inrichten, mogelijk met webserver (op linux?) -->
+  <url>http://localhost/readlog</url>
+  <issueTrackingUrl>
+    http://nagoya.apache.org/scarab/servlet/scarab/
+  </issueTrackingUrl>
+  <siteAddress>jakarta.apache.org</siteAddress>
+  <siteDirectory>
+    /www/maven2.apache.org/
+  </siteDirectory>
+  <distributionDirectory>
+    /www/jakarta.apache.org/builds/jakarta-turbine-maven2/
+  </distributionDirectory>
+
+  <repository>
+    <!-- TODO: repository aanpassen -->
+    <connection>
+      scm:cvs:pserver:anoncvs@cvs.apache.org:/home/cvspublic:maven2
+    </connection>
+    <url>
+      http://cvs.apache.org/viewcvs/maven2/
+    </url>
+  </repository>
+
+  <versions>
+    <version>
+      <id>b1</id>
+      <name>1.0-b1</name>
+      <tag>READLOG_1_0_B1</tag>
+    </version>
+  </versions>
+
+  <mailingLists>
+    <!-- TODO aanpassen -->
+    <mailingList>
+      <name>Readlog User List</name>
+      <subscribe>
+        users-subscribe@maven2.apache.org
+      </subscribe>
+      <unsubscribe>
+        users-unsubscribe@maven2.apache.org
+      </unsubscribe>
+      <archive>
+        http://www.mail-archive.com/users@maven2.apache.org/
+      </archive>
+    </mailingList>
+    <mailingList>
+      <name>ReadLog Developer List</name>
+      <subscribe>
+        dev-subscribe@maven2.apache.org
+      </subscribe>
+      <unsubscribe>
+        dev-unsubscribe@maven2.apache.org
+      </unsubscribe>
+      <archive>
+        http://www.mail-archive.com/dev@maven2.apache.org/
+      </archive>
+    </mailingList>
+  </mailingLists>
+
+  <developers>
+
+    <developer>
+      <name>Nico de Vreeze</name>
+      <id>nico</id>
+      <email>nico.de.vreeze@ordina.nl</email>
+      <organization>Ordina</organization>
+    </developer>
+
+    <developer>
+      <name>Pim Kars</name>
+      <id>pim</id>
+      <email>pim.kars@ordina.nl</email>
+      <organization>Ordina</organization>
+    </developer>
+  </developers>
+
+  <dependencies>
+
+    <dependency>
+      <id>regexp</id>
+      <version>1.2</version>
+      <url>http://jakarta.apache.org/regexp/</url>
+    </dependency>
+    
+  </dependencies>
+
+  <build>
+
+    <nagEmailAddress>
+      dev@maven2.apache.org
+    </nagEmailAddress>
+
+    <sourceDirectory>src</sourceDirectory>
+
+    <unitTestSourceDirectory>src/test</unitTestSourceDirectory>
+    <integrationUnitTestSourceDirectory/>
+
+    <aspectSourceDirectory/>
+
+    <!-- Unit test cases -->
+    <unitTest>
+      <includes>
+        <include>**/*Test.java</include>
+      </includes>
+      <excludes>
+        <exclude>**/RepositoryTest.java</exclude>
+      </excludes>
+    </unitTest>
+              
+    <!-- J A R  R E S O U R C E S -->
+    <!-- Resources that are packaged up inside the JAR file -->
+    <resources>
+      <includes>
+        <include>*.xsd</include>
+        <include>log4j.properties</include>
+      </includes>
+    </resources>
+
+    <!-- Integration unit test cases -->
+    <integrationUnitTest/>
+
+    <jars>
+    </jars>
+  </build>
+</project>

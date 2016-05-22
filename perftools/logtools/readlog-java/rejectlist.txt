@@ -1,0 +1,44 @@
+#############################
+# BPR: fouten in rel2/it2
+nl.achmea.aol.basisproduct.BasisproductComponentBean# retrieveProduct
+
+#############################
+# BTA: fouten in rel2/it2
+# in de service findBTA is de log.end verkeerd: hier staat createBetaalwijze; qua begin/end klopt het wel, negeren dus.
+# opgenomen met KL (11-9-02): NdV aanpassingen doen voor rel3/it3.
+# retrBTA helemaal fout, rejecten dus.
+nl.achmea.aol.bta.BetaalafspraakComponentBean# retrieveBetaalwijzegegevens
+
+#############################3
+# Klok: is eerste call, hier last van bij readlog.
+nl.achmea.aol.klk.KlokComponentBean# getKlokForUser
+
+############################
+# ORG: fouten in rel2/it2
+# nl.achmea.aol.organisatie
+nl.achmea.aol.organisatie.objectmodel.system.MedewerkerAccessor# Starting to retrieve medewerker
+nl.achmea.aol.organisatie.objectmodel.system.MedewerkerAccessor# Retrieved medewerker
+
+############################
+# OVK: fouten in rel1/it2
+# collectPBF staat niet tussen try-finally
+#nl.achmea.aol.ovk.om.bus.COvereenkomst# start: collectPBF
+#nl.achmea.aol.ovk.om.bus.COvereenkomst# stop: collectPBF
+#nl.achmea.aol.ovk.om.bus.COvereenkomst# start: acceptKlant
+#nl.achmea.aol.ovk.om.bus.COvereenkomst# stop: acceptKlant
+
+############################
+# PERSOON: fouten in rel2/it2
+nl.achmea.aol.persoon.PersoonComponentBean# GetBijzondereIncasso
+nl.achmea.aol.persoon.services.CRetrieveNAWAanhefService# doeGetBijzondereIncasso
+
+############################
+# SERVICE DISPATCHER: ignore, niet fout.
+nl.achmea.aol.sdp.ServiceDispatcher# onMessage called
+nl.achmea.aol.sdp.ServiceDispatcher# onMessage stop
+
+############################
+# UITVOER: fouten in rel2/it2
+# 10-9-02: geen fouten tijdens perftest
+# nl.achmea.aol.uitvoer
+
