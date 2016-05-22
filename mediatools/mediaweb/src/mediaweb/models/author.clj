@@ -12,7 +12,9 @@
 
 ;; TODO hier evt een limit op zetten of paging maken.
 (defn all-authors []
-  (select author (order :fullname)))
+  (select author
+          (order :fullname)
+          (limit 50)))
 
 (defn author-by-id [id]
   (h/map-flatten

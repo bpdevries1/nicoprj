@@ -23,15 +23,18 @@
   (select book
           (join bookformat (= :bookformat.book_id :book.id))
           (join relfile (= :relfile.bookformat_id :bookformat.id))
-          (where {:relfile.id (to-key id)})))
+          (where {:relfile.id (to-key id)})
+          (limit 50)))
 
 (defn relfile-bookformats [id]
   (select bookformat
           (join relfile (= :relfile.bookformat_id :bookformat.id))
-          (where {:relfile.id (to-key id)})))
+          (where {:relfile.id (to-key id)})
+          (limit 50)))
 
 (defn relfile-files [id]
   (select file
-          (where {:relfile_id (to-key id)})))
+          (where {:relfile_id (to-key id)})
+          (limit 50)))
 
 

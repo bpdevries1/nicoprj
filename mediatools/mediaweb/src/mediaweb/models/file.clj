@@ -13,10 +13,10 @@
 (def-model-crud :obj-type :file
   :pre-fn (fn [params] (-> params
                            (h/updates-in [:ts] parse-date-time))))
-;; TODO iets met limit te doen? Of clojure take 20 of zo
+
 (defn all-files []
   (select file (order :filename)
-          (limit 30)
+          (limit 50)
           (offset 0)))
 
 ;; TODO: hier nu geen flatten in, want later ook refs naar books etc hierbij in een struct.
@@ -28,23 +28,27 @@
 (defn file-relfiles [id]
   (select relfile
           (join file (= :file.relfile_id :relfile.id))
-          (where {:file.id (to-key id)})))
+          (where {:file.id (to-key id)})
+          (limit 50)))
 
 (defn file-bookformats [id]
   (select bookformat
           (join relfile (= :bookformat.id :relfile.bookformat_id))
           (join file (= :file.relfile_id :relfile.id))
-          (where {:file.id (to-key id)})))
+          (where {:file.id (to-key id)})
+          (limit 50)))
 
 (defn file-books [id]
   (select book
           (join bookformat (= :bookformat.book_id :book.id))
           (join relfile (= :relfile.bookformat_id :bookformat.id))
           (join file (= :file.relfile_id :relfile.id))
-          (where {:file.id (to-key id)})))
+          (where {:file.id (to-key id)})
+          (limit 50)))
 
 (defn file-actions [id]
   (select action
-          (where {:file_id (to-int id)})))
+          (where {:file_id (to-int id)})
+          (limit 50)))
 
 

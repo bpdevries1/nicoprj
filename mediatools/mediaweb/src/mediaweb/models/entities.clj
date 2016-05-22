@@ -145,6 +145,7 @@
 
 ;; Use functions instead of macros here, to dynamically create query.
 ;; TODO make limit of 30 items configurable.
+;; Here 30 instead of normal 50, because of results of multiple tables.
 (defn search-items-table
   "Search items in a specific table/entity.
    Add tablename as field to search results"

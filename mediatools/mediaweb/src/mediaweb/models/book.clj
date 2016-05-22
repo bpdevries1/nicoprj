@@ -14,7 +14,9 @@
 
 ;; TODO hier evt een limit op zetten of paging maken.
 (defn all-books []
-  (select book (order :title)))
+  (select book
+          (order :title)
+          (limit 50)))
 
 (defn book-by-id [id]
   (h/map-flatten
@@ -24,12 +26,14 @@
 
 (defn book-formats [id]
   (select bookformat
-          (where {:book_id (to-key id)})))
+          (where {:book_id (to-key id)})
+          (limit 50)))
 
 (defn book-relfiles [id]
   (select relfile
           (with bookformat
-                (where {:book_id (to-key id)}))))
+                (where {:book_id (to-key id)}))
+          (limit 50)))
 
 ;; geeft meer velden terug dan je wilt, mss geen last van.
 (defn book-files [id]
@@ -38,7 +42,8 @@
                 (fields [:id :rfid])
                 (with bookformat
                       (where {:book_id (to-key id)})
-                      (fields [:id :bfid])))))
+                      (fields [:id :bfid])))
+          (limit 50)))
 
 #_(defn testje
   "Some tests, interactive, should be put in test namespace."

@@ -15,7 +15,7 @@
 ;; TODO hier evt een limit op zetten of paging maken.
 (defn all-directories []
   (select directory (order :fullpath)
-          (limit 30)
+          (limit 50)
           (offset 0)))
 
 (defn directory-by-id [id]
@@ -26,10 +26,13 @@
                          (where {:d.id (to-key id)}))))
 
 (defn subdirs [id]
-  (select directory (order :fullpath)
-          (where {:parent_id (to-key id)})))
+  (select directory
+          (order :fullpath)
+          (where {:parent_id (to-key id)})
+          (limit 50)))
 
 (defn files [id]
   (select file (order :filename)
-          (where {:directory_id (to-key id)})))
+          (where {:directory_id (to-key id)})
+          (limit 50)))
 

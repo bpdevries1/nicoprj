@@ -21,7 +21,9 @@
 
 ;; TODO: hier evt een limit op zetten of paging maken.
 (defn all-itemgroups []
-  (select itemgroup (order :name)))
+  (select itemgroup
+          (order :name)
+          (limit 50)))
 
 (defn itemgroup-by-id [id]
   (h/map-flatten
@@ -31,7 +33,8 @@
 (defn itemgroup-queries [id]
   (select itemgroupquery
           (where {:itemgroup_id (to-key id)})
-          (order :type)))
+          (order :type)
+          (limit 50)))
 
 ;; TODO: nu per item een losse query, gaat in tegen perf principes. Maar zolang het niet te traag is, is het ok.
 ;; TODO: stuk hiervan (map/sort) mss in losse functie, ook voor search en andere dingen.
