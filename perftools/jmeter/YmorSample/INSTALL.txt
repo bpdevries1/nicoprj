@@ -1,0 +1,11 @@
+Use
+===
+Copy lib/ext/ApacheJMeter_ymor.jar to the corresponding directory in your JMeter install.
+
+Build/Compile
+=============
+1. Install Java (>= 1.5)
+2. Install Ant (>= 1.8) 
+3. Pas in build.xml de regel met <property name="jmeter.root" value="c:/develop/java/jmeter2.6-src"/> aan zodat deze wijst naar de lokatie op jouw harde schijf. Dit moet wel een source versie van JMeter zijn.
+4. ant (to compile the java file and make the jar).
+
