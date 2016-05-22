@@ -156,11 +156,19 @@ proc det_year {date} {
   }
 }
 
+# @param date: %Y-%m-%d
 proc det_verlof_year {date} {
-  if {[regexp {^\d+-0?(\d+)-} $date z month]} {
-    set nmonth [expr 12 - $month + 1] ; # aantal maanden waarover je verlof krijgt
+  if {[regexp {^(\d+)-0?(\d+)-} $date z year month]} {
+    set nmonth [expr 12 - $month + 1] ; # aantal maanden waarover je verlof krijgt. Eerste datum is 1-4-2011, dan dus over 9 maanden.
     # par maand 2 dagen a factor 0.9 (per werkdag bouw ik ook 0.1 deeltijd dag op, vandaar)
-    expr 0.9 * $nmonth * 2 * 8
+    set base [expr 0.9 * $nmonth * 2 * 8]
+    set extra 0
+    if {$year == 2015} {
+      # 9-10-2015 Van alles in Cobra gechecked, ik blijk nog wat extra recht te hebben.
+      # zie dropbox/ymor/vakantie-saldo
+      set extra 29.2
+    }
+    expr $base + $extra
   } else {
     error "Unable to parse month from: $date"
   }
