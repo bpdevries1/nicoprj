@@ -37,12 +37,13 @@
   :redir-delete-key :itemgroup_id
   :model-ns mediaweb.models.itemgroup)
 
+;; TODO: only first x chars from notes in main overview?
 (def-objects-form itemgroups-form itemgroups g
   {:model-read-fn (fn [_] (mg/all-itemgroups)),
    :actions #{:add-get},
    :row-type :itemgroup,
    :columns [{:name "Name", :width 15, :form (itemgroup-href (:id g) (:name g))}
-             {:name "Notes", :width 10, :form (:notes g)}
+             {:name "Notes", :width 70, :form (:notes g)}
              {:name "Tags", :width 15, :form (:tags g)}]})
 
 (def-page itemgroups
