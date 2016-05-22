@@ -187,7 +187,7 @@ proc last_ok_filename {cmd} {
 
 # replace special characters in cmd, so it can be user as a filename base.
 proc replace_special {cmd} {
-  regsub -all {[/ ?:*\{\}\\]} $cmd "_" cmd
+  regsub -all {[/ ?:*\{\}\\><&]} $cmd "_" cmd
   return $cmd
 }
 
