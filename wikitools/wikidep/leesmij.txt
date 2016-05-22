@@ -8,3 +8,5 @@ Uit te voeren stappen:
 4. Bekijk de resultaten (index.html) in een browser.
 
 Nico de Vreeze, 15-10-2008.
+
+[2016-05-22 20:42] Zie perftools/xyz/wikidep.
