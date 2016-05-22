@@ -1,0 +1,594 @@
+cd /media/nas/aaa/rws/mht
+
+
+package require tdom
+package require mime
+
+set m [::mime::initialize -string $html]
+
+set b [::mime::getbody $m -decode]
+# duurt lang
+
+% string length $html
+4631462
+% string length $b
+4412411
+
+string range $b 0 100
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>*Facilitor server A
+
+
+set doc [dom parse –html $b]
+#set root [$doc documentElement]
+#set node [$root selectNodes {//table[7]/tr[2]/td[2]/a}]
+#set text [[$node childNode] nodeValue]
+
+set doc [dom parse –html "<HTML><HEAD><TITLE>*Facilitor server A</TITLE></HEAD></HTML>"]
+error "not well-formed (invalid token)" at line 1 character 0
+"â <--Error-- html"
+
+set doc [dom parse $b]
+
+
+https://github.com/jfisteus/html2xhtml
+=> ok
+https://github.com/jfisteus/html2xhtml.git
+
+git clone https://github.com/jfisteus/html2xhtml.git
+=> doet het niet, via github site wel te downloaden.
+
+./configure script is er niet.
+
+autoconf
+=> geeft melding, maakt wel configure file.
+
+./configure
+=> foutmeldingen
+
+Via online wel naar xhtml kunnen vertalen, dus deze proberen:
+
+set ch [open log.xhtml r]
+set doc [dom parse -channel $ch]
+=> ok!
+
+set root [$doc documentElement]
+
+set nodes [$root selectNodes {//table[1]/tr[class="script"]}]
+
+foreach child [$root childNodes] {
+  puts "child: [$child nodeName]"
+}
+
+child: head
+child: body
+
+$root selectNodes {head}
+=> werkt niet, varianten ook niet.
+
+getElementsByTagName name
+    Returns a list of all elements in the subtree matching (glob style) name.
+    
+% $root getElementsByTagName head
+domNode0x8120770
+
+% $root getElementsByTagName table
+domNode0x8120e30 domNode0x81450f8 domNode0x814d7a0 domNode0x8155d88 domNode0x815e370 domNode0x8166958 domNode0x816ef40 domNode0x818a6a0 domNode0x818cf70 domNode0x818f840 domNode0x8196a40 domNode0x819f398 domNode0x81a8560 domNode0x81b0eb8 domNode0x81b9810 domNode0x81c2168 domNode0x81caac0 domNode0x81d3418 domNode0x81dbd70 domNode0x81e46c8 domNode0x81ed020 domNode0x81f5978 domNode0x81fe2d0 domNode0x8206c28 domNode0x820f580 domNode0x8217ed8 domNode0x8220830 domNode0x8229188 domNode0x8231ae0 domNode0x823a438 domNode0x8242d90 domNode0x824b6e8 domNode0x8254048 domNode0x825cac8 domNode0x826a370 domNode0x8272b78 domNode0x827b3d8 domNode0x8283c38 domNode0x828c498 domNode0x8294cf8 domNode0x829d558 domNode0x82a5db8 domNode0x82ae618 domNode0x82b6e78 domNode0x82bf6d8 domNode0x82c7f38 domNode0x82d0798 domNode0x82d8ff8 domNode0x82e1858 domNode0x82ea0b8 domNode0x82f2918 domNode0x82fb178 domNode0x8304500 domNode0x831af88 domNode0x8323930 domNode0x86f8648 domNode0x87ab7b8 domNode0x87af488 domNode0x87b5ef8 domNode0x87b9bc8 domNode0x87bd998
+
+selectNodes wel meest uitgebreide.
+
+set head [$root getElementsByTagName head]
+$head nodeName
+
+
+asList => op grote lijst misschien niet efficient?
+
+% $head asList
+head {} {{title {} {{{#text} {
+      *Facilitor server ASP/SQL logger (c) SG|facilitor bv
+    }}}} {style {type text/css xml:space preserve} {{{#text} {TD {
+	PADDING-RIGHT: 2px; PADDING-LEFT: 2px; FONT-SIZE: smaller; PADDING-BOTTOM: 2px; PADDING-TOP: 2px; FONT-FAMILY: Verdana; BACKGROUND-COLOR: #d6d8e8
+}
+.script TD {
+	BACKGROUND-COLOR: #c6c8c8
+}
+.querystring {
+	COLOR: #666
+}
+}}}} {meta {content {MSHTML 6.00.5730.13} name GENERATOR} {}}}
+
+toXPath
+    Returns an XPath, which exactly addresses the given node in its document. This XPath is only valid as there are no changes to DOM tree made later one.
+
+$head toXPath    
+/html/head
+
+$root selectNodes /html/head 
+
+
+set doc [dom parse {<doc xmlns="http://www.defaultnamespace.org"><child/></doc>}]
+set root [$doc documentElement]
+set childNodes [$root selectNodes -namespaces {default http://www.defaultnamespace.org} default:child]
+=> ok
+
+set ch2 [$root selectNodes child]
+=> not
+
+$root selectNodes -namespaces {default http://www.defaultnamespace.org} default:head
+
+set mydoc [dom parse $b]
+
+######################################################
+######################################################
+######################################################
+
+# even helemaal overnieuw
+package require tdom
+set f [open log.xhtml r]
+set mydoc [dom parse -channel $f]
+
+set myroot [$mydoc documentElement]
+$myroot selectNodes {/html/head}
+=> niet dus.
+
+% set f2 [open data.xml r]
+file6
+% set doc2 [dom parse -channel $f2]
+domDoc0x811b340
+% set root2 [$doc2 documentElement]
+domNode0x8123da0
+% $root2 selectNodes {/VisioDocument}
+domNode0x8123da0
+
+=> deze dus wel.
+
+% $myroot selectNodes {/html}
+% $myroot selectNodes {/html123}
+% $myroot selectNodes {/}
+domNode0x811b780
+=> er werkt dus toch iets.
+
+% $myroot childNodes
+domNode0x8120770 domNode0x8120ba8
+
+$myroot selectNodes -namespaces {default http://www.w3.org/1999/xhtml} default:head
+
+% $myroot selectNodes -namespaces {default http://www.w3.org/1999/xhtml} default:head
+domNode0x8120770
+=> now we're getting somewhere!
+
+log2.xhtml gemaakt zonder namespace decl.
+
+set f3 [open log2.xhtml r]
+set doc3 [dom parse -channel $f3]
+set root3 [$doc3 documentElement]
+
+% error "not well-formed (invalid token)" at line 7 character 5
+
+DOCTYPE ook weg in log2.xhtml
+set doc3 [dom parse -channel $f3]
+error "not well-formed (invalid token)" at line 3 character 5
+
+lag aan extra quote, DOCTYPE weer teruggezet, dus alleen namespace is nu weg.
+
+set root3 [$doc3 documentElement]
+
+% $root3 selectNodes {/html/head/title}
+domNode0x8b24e48
+
+Ofwel ligt aan de namespace. Vraag is dan hoe namespace er goed in te krijgen.
+
+$doc3 selectNodesNamespaces
+=> niets, maar nu weer terug naar orig.
+
+set f1 [open log.xhtml r]
+set doc1 [dom parse -channel $f1]
+set root1 [$doc1 documentElement]
+$doc1 selectNodesNamespaces
+=> ook niets
+
+set doc [dom parse {<doc xmlns="http://www.defaultnamespace.org"><child/></doc>}]
+set root [$doc documentElement]
+set childNodes [$root selectNodes -namespaces {default http://www.defaultnamespace.org} default:child]
+
+heb zelf:
+<!DOCTYPE html
+   PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" >
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+html is mijn root-element:
+$root1 nodeName
+=> html
+
+$root1 selectNodes -namespaces {default http://www.w3.org/1999/xhtml} default:html
+$root1 selectNodes -namespaces {default http://www.w3.org/1999/xhtml} default:head
+de html levert niets op, maar de head wel!
+
+% set head [$root1 selectNodes -namespaces {default http://www.w3.org/1999/xhtml} default:head]
+domNode0x8d17bc0
+
+en dan title opvragen:
+$head selectNodes title
+=> nada
+$head selectNodes -namespaces {default http://www.w3.org/1999/xhtml} default:title
+% $head selectNodes -namespaces {default http://www.w3.org/1999/xhtml} default:title
+domNode0x8d17c50
+domNode0x8d17c50 asText
+% domNode0x8d17c50 asText
+
+      *Facilitor server ASP/SQL logger (c) SG|facilitor bv
+
+werkt dus.
+
+Dan ineens:
+
+$root1 selectNodes -namespaces {default http://www.w3.org/1999/xhtml} default:head/title
+=> niet dus.
+
+% $root3 nodeName
+html
+% $root3 selectNodes /html/head/title
+domNode0x8b24e48
+% $root3 selectNodes html/head/title
+% $root3 selectNodes html
+% $root3 selectNodes head
+domNode0x8b25260
+% $root3 selectNodes head/title
+domNode0x8b24e48
+
+$root1 selectNodes *
+domNode0x8d17bc0 domNode0x8d17ed0
+% $root1 selectNodes */title
+
+$root1 selectNode {*[local-name()='title' and namespace-uri()='http://www.w3.org/1999/xhtml']} 
+
+% $root1 selectNode {*[local-name()='title' and namespace-uri()='http://www.w3.org/1999/xhtml']}
+% $root1 selectNode {*[local-name()='html' and namespace-uri()='http://www.w3.org/1999/xhtml']}
+% $root1 selectNode {*[local-name()='head' and namespace-uri()='http://www.w3.org/1999/xhtml']}
+domNode0x8d17bc0
+
+% $root1 selectNode {*[local-name()='head/title' and namespace-uri()='http://www.w3.org/1999/xhtml']}
+
+$root1 setAttributeNS "" xmlns:xhtml "http://www.w3.org/1999/xhtml"
+foreach node [$root selectNodes html40:b] {
+
+% $root1 setAttributeNS "" xmlns:xhtml "http://www.w3.org/1999/xhtml"
+domNode0x8d17ae0
+% set root1
+domNode0x8d17ae0
+=>ofwel dezelfde
+
+$root1 selectNodes xhtml:head
+% $root1 selectNodes xhtml:head
+domNode0x8d17bc0
+
+$root1 selectNodes xhtml:head/title
+niets
+$root1 selectNodes xhtml:head/xhtml:title
+domNode0x8d17c50
+
+begint ergens op te lijken, maar nog steeds niet handig.
+
+$root1 setAttributeNS "" xmlns:myprefix "myNamespaceURI" -> al gedaan
+$root1 setAttributeNS "" xmlns "http://www.w3.org/1999/xhtml"
+
+% $root1 setAttributeNS "" xmlns "http://www.w3.org/1999/xhtml"
+For all prefixed attributes with prefixes other than 'xml' or 'xmlns' you have to provide a namespace URI
+
+$root1 setAttributeNS "" xmlns:default "http://www.w3.org/1999/xhtml"
+doet het wel
+
+$root1 selectNodes xhtml:head/xhtml:title
+% $root1 selectNodes xhtml:head/xhtml:title
+domNode0x8d17c50
+
+doet het dus nog steeds
+
+$root1 selectNodes default:head/default:title
+domNode0x8d17c50
+
+doet het dus ook.
+
+$root1 selectNodes head/title
+en weer niets.
+
+$root1 setAttributeNS "" xml:xmlns "http://www.w3.org/1999/xhtml"
+ok, geen fout
+
+If the XPath expression does not include a prefix, it is assumed that the namespace Uniform Resource Identifier (URI) is the empty namespace. If your XML includes a default namespace, you must still add a prefix and namespace URI to the XmlNamespaceManager; otherwise, no nodes will be selected.
+
+For more information on the namespaces, see Namespaces in an XML Document.
+
+ $root1 selectNodes "/html/head/title"
+domNode0x95c0960
+
+Idee: op root element de namespace verwijderen of op leeg zetten.
+
+removeAttributeNS uri localName
+
+eigenlijk op zoek naar methode zonder params, op root element los te laten.
+
+namespaceURI
+
+baseURI ?URI?
+
+% set root [$doc documentElement $doc]
+domNode0x9ebb7a0
+% $root namespaceURI
+http://www.w3.org/1999/xhtml
+
+$root baseURI
+leeg
+
+$root namespaceURI bla
+
+$root setAttributeNS "" "" ""
+
+leuk idee, maar gaat niet werken, denk ik.
+
+# xmlns tag weer even weg, nu kijken of ik de tables/rows/etc kan vinden.
+
+set f [open log.xml r]
+set doc [dom parse -channel $f]
+set root [$doc documentElement]
+$root nodeName
+=> ok, html
+
+set reqs [$root selectNodes {/html/body/table/tbody/tr[@class='script']}]
+1467 elementen
+
+set reqs0 [lindex $reqs 0]
+
+# toch om en om user reqs en onderliggende reqs.
+set reqs2 [$root selectNodes {/html/body/table/tbody/tr}]
+
+% llength $reqs2
+5977
+=> stukje meer dus.
+
+[lindex $reqs2 0] asText
+
+[lindex $reqs2 0] getAttribute class none
+
+% [lindex $reqs2 0] getAttribute class none
+none
+% [lindex $reqs2 1] getAttribute class none
+script
+% [lindex $reqs2 2] getAttribute class none
+none
+
+na script de volgende bekijken
+
+set scriptnode [lindex $reqs2 1]
+set detailnode [lindex $reqs2 2]
+
+% [$scriptnode selectNode td/span] asText
+?usrrap_key=243&timeID=-1&fclt_f_colvalue1=&fclt_f_colname1=Fclt_F_Datum&fclt_f_colvalue2=&fclt_f_colname2=Fclt_F_Ipadres&fclt_f_colvalue3=&fclt_f_colname3=Fclt_F_Gebruiker&nr_charcols=3
+
+% string trim [[$scriptnode selectNode td] asText]
+8-06-2011 appl\fac\fac_usrrap_list.asp?usrrap_key=243&timeID=-1&fclt_f_colvalue1=&fclt_f_colname1=Fclt_F_Datum&fclt_f_colvalue2=&fclt_f_colname2=Fclt_F_Ipadres&fclt_f_colvalue3=&fclt_f_colname3=Fclt_F_Gebruiker&nr_charcols=3
+
+de datum evt strippen en/of als filter gebruiken.
+
+% string trim [[$scriptnode selectNode td] text]
+8-06-2011 appl\fac\fac_usrrap_list.asp
+=> dit is dus alleen de text er direct onder.
+
+% $scriptnode @class
+script
+% $detailnode @class none
+none
+
+[$detailnode selectNode {td[1]} asText]
+
+% string trim [[$detailnode selectNodes {td[1]}] asText]
+12:43:50.288
+het tijdstip dus, start of einde? Al eens eerder uitgezocht, dacht ik. is dus start.
+
+% string trim [[$detailnode selectNodes {td[2]}] asText]
+select fac_usrrap_omschrijving fac_usrrap_omschrijving ,
+              FAC_USRRAP_FUNCTIE, FAC_USRRAP_VIEW_NAME FROM FAC_USRRAP WHERE
+              FAC_USRRAP_KEY = 243
+
+de query dus
+
+% string trim [[$detailnode selectNodes {td[3]}] asText]
+31ms
+
+de tijd, wel in verschillende vormen.
+
+evt extra checks op de detail elements, omdat ze geen class hebben.
+
+Met sqlite meteen in een database zetten, met single pass moet het dan lukken.
+
+Morgen is er weer een dag...
+
+//*[count(tr)=2]
+dit wel te gebruiken om alleen details met sql te krijgen, maar dan relatie met hoofdelement kwijt.
+
+23-9-2011
+=========
+* Even reproduceren, ga uit van log.xml, namespace lijkt hier weg.
+
+tclsh
+package require tdom
+
+set f [open log.xml r]
+set doc [dom parse -channel $f]
+set root [$doc documentElement]
+$root nodeName
+=> ok, html
+
+set reqs [$root selectNodes {/html/body/table/tbody/tr[@class='script']}]
+
+Analyse 23-9-2011
+==================
+sqlite> select nqdb, count(*) from quser where start > '2011-08-30' group by nqdb order by nqdb;
+1|16
+2|8
+3|5
+4|6
+6|1
+8|3
+12|2
+13|2
+14|1
+18|1
+20|6
+27|4
+30|2
+40|4
+92|2
+140|1
+579|1
+
+Dacht dat de grote nog meer dan ruim 500 was, meer richting 1000, even rapport checken.
+
+sqlite> select count(*), sum(nqdb) from quser where start > '2011-08-30';
+65|1534
+
+Gemiddeld dan 23 queries per user actie, best veel.
+
+Backup van db gemaakt, nu alles ouder dan 30-8 en ook alles dat met logging heeft te maken:
+
+delete from quser where start < '2011-08-30';
+delete from qdb where start < '2011-08-30';
+
+delete from quser where urlquery like '%logging=3%';
+delete from quser where urlmain like '%perfmon.asp%';
+
+select nqdb, count(*) from quser where start > '2011-08-30' group by nqdb order by nqdb;
+
+1|16
+2|7
+3|5
+4|6
+8|1
+12|2
+13|2
+14|1
+18|1
+20|6
+27|4
+30|2
+40|4
+92|2
+140|1
+579|1
+
+sqlite> select count(*), sum(nqdb) from quser where start > '2011-08-30';
+61|1510
+
+gemiddeld 24, dus is meer geworden.
+
+Soorten queries.
+sqlite> select count(*), urlmain from quser group by urlmain;
+3|Appl\Fac\Facilitor.asp
+4|Appl\Fac\PerformanceTester.asp
+4|Appl\MLD\loadPrioriteit.asp
+4|Appl\MLD\mld_edit_melding.asp
+4|Appl\MLD\mld_edit_melding_save.asp
+2|Appl\MLD\mld_melding.asp
+6|Appl\MLD\mld_show_melding.asp
+2|Appl\MLD\mld_show_note.asp
+1|appl\Shared\loadDeel.asp
+1|appl\Shared\loadGroup.asp
+1|appl\alg\alg_edit_wp_save.asp
+4|appl\fac\fac_list.asp
+4|appl\fac\fac_nieuws.asp
+4|appl\fac\fac_user_messages.asp
+1|appl\fac\fac_usrrap.asp
+2|appl\fac\fac_usrrap_filter.asp
+1|appl\fac\fac_usrrap_list.asp
+3|appl\mld\mld_search.asp
+6|appl\mld\mld_search_list.asp
+4|appl\shared\load_lcl.asp
+
+PerformanceTester ook weg.
+
+delete from quser where urlmain like '%Performance%';
+
+3|Appl\Fac\Facilitor.asp
+4|Appl\MLD\loadPrioriteit.asp
+4|Appl\MLD\mld_edit_melding.asp
+4|Appl\MLD\mld_edit_melding_save.asp
+2|Appl\MLD\mld_melding.asp
+6|Appl\MLD\mld_show_melding.asp
+2|Appl\MLD\mld_show_note.asp
+1|appl\Shared\loadDeel.asp
+1|appl\Shared\loadGroup.asp
+1|appl\alg\alg_edit_wp_save.asp
+4|appl\fac\fac_list.asp
+4|appl\fac\fac_nieuws.asp
+4|appl\fac\fac_user_messages.asp
+1|appl\fac\fac_usrrap.asp
+2|appl\fac\fac_usrrap_filter.asp
+1|appl\fac\fac_usrrap_list.asp
+3|appl\mld\mld_search.asp
+6|appl\mld\mld_search_list.asp
+4|appl\shared\load_lcl.asp
+
+per soort de min,max nq en min,max duration.
+
+select urlmain, count(*), min(nqdb), max(nqdb), min(duration), max(duration) from quser group by urlmain;
+
+Appl\Fac\Facilitor.asp|3|2|8|94|1059
+Appl\MLD\loadPrioriteit.asp|4|1|1|77|140
+Appl\MLD\mld_edit_melding.asp|4|40|40|2641|5848
+Appl\MLD\mld_edit_melding_save.asp|4|27|27|1345|8227
+Appl\MLD\mld_melding.asp|2|12|12|631|1381
+Appl\MLD\mld_show_melding.asp|6|20|20|748|4530
+Appl\MLD\mld_show_note.asp|2|1|1|15|94
+appl\Shared\loadDeel.asp|1|1|1|140|140
+appl\Shared\loadGroup.asp|1|1|1|46|46
+appl\alg\alg_edit_wp_save.asp|1|2|2|46|46
+appl\fac\fac_list.asp|4|2|2|207|3358
+appl\fac\fac_nieuws.asp|4|1|1|46|218
+appl\fac\fac_user_messages.asp|4|1|1|15|281
+appl\fac\fac_usrrap.asp|1|3|3|235|235
+appl\fac\fac_usrrap_filter.asp|2|4|4|282|452
+appl\fac\fac_usrrap_list.asp|1|14|14|5206|5206
+appl\mld\mld_search.asp|3|13|18|2371|5955
+appl\mld\mld_search_list.asp|6|30|579|691|66776
+appl\shared\load_lcl.asp|4|3|3|118|1353
+
+
+Rare query, lijkt alleen constanten te bevatten:
+SELECT 3, 'Normaal', '1315314201000' einddatum, 5 uitvoertijd, 7 weekdagen FROM DUAL 
+UNION 
+SELECT 1, 'Kritiek', '1319547801000' einddatum, 40 uitvoertijd, 56 weekdagen FROM DUAL 
+UNION 
+SELECT 2, 'Hoog', '1317128601000' einddatum, 20 uitvoertijd, 28 weekdagen FROM DUAL 
+UNION 
+SELECT 4, 'Laag', '1315919001000' einddatum, 10 uitvoertijd, 14 weekdagen FROM DUAL
+
+Check:
+* Overlappende tijden?
+
+select d1.start, d1.end, d2.start, d2.end
+from qdb d1, qdb d2
+where d1.id < d2.id
+and d1.quser_id = d2.quser_id
+and d1.end > d2.start;
+=> komt zeker voor, maar verschillen zijn klein.
+
+kan strptime ook fractions aan?
+
+delete from qdb where not exists (select 1 from quser where quser.id = qdb.quser_id);
+
+
+TODO:
+* nq versus totale tijd.
+* sowieso >1 query versus repeated queries, echt lijst door.
+* Kan ik uitgaan van het klikpad, van de gemeten transacties? en dan gemiddeldes hiervan vergelijken met 
+  de waarden in de mht-file?
+* Check dat query-tijden binnen een quser niet overlappen. Soms dus wel, maar toch wel overtuigd dat genoemde
+  tijd de starttijd is, niet de eindtijd, het klopt te vaak te goed om anders te zijn.
+* Aandeel query-tijd in totale tijd: hoe weergeven: scatterplot: x=totaal, y=query
+* Top-down benadering: zelf queries op alle data van 30-8 uitvoeren.
+* Zoek er een paar uit: die met 500, maar ook bovenstaande rare query (hierbij wel tijd vermelden),
+  dus wel paar met hoge responstijden.
+  
+

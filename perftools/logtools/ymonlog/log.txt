@@ -1,0 +1,166 @@
+
+;{:clojureql.internal/default-connection {:connection #<Conn org.sqlite.Conn@bc36ff>, :opts {:subprotocol "sqlite", :classname "org.sqlite.JDBC", :subname "/tmp/cql.sqlite3", :create true}}}
+
+;(use 'lobos.connectivity
+;     'lobos.core
+;     'lobos.schema)
+
+(create 
+  (table :event 
+    (char :ts ) (char :type) (char :monitor) (char :logtext)))
+    
+
+ymonlog.core=> (all-ns)
+;(#<Namespace clojure.set> #<Namespace clojure.pprint> #<Namespace clojure.java.jdbc.internal> #<Namespace clojure.walk> #<Namespace user> #<Namespace clojure.main> #<Namespace clojure.java.jdbc> #<Namespace clojureql.core> #<Namespace clojureql.predicates> #<Namespace clj-time.format> #<Namespace clojureql.internal> #<Namespace clojure.core.incubator> #<Namespace clojure.core> #<Namespace clojure.java.shell> #<Namespace lobos.utils> #<Namespace clojure.java.browse> #<Namespace clojure.repl> #<Namespace lobos.connectivity> #<Namespace ymonlog.core> #<Namespace clj-time.core> #<Namespace clojure.java.io> #<Namespace clojure.string> #<Namespace clj-time.coerce> #<Namespace clojure.core.protocols> #<Namespace clojure.java.javadoc>)
+
+; lobos.core en lobos.schema staan er nog niet in.
+(use 'lobos.core)
+;WARNING: alter already refers to: #'clojure.core/alter in namespace: ymonlog.core, being replaced by: #'lobos.core/alter
+;IllegalStateException drop already refers to: #'clojureql.core/drop in namespace: ymonlog.core  clojure.lang.Namespace.warnOrFailOnReplace (Namespace.java:88)
+
+(all-ns)
+;(#<Namespace lobos.migration> #<Namespace clojure.set> #<Namespace lobos.analyzer> #<Namespace lobos.compiler> #<Namespace clojure.pprint> #<Namespace clojure.java.jdbc.internal> #<Namespace clojure.walk> #<Namespace user> #<Namespace lobos.schema> #<Namespace lobos.core> #<Namespace clojure.main> #<Namespace clojure.java.jdbc> #<Namespace clojureql.core> #<Namespace clojureql.predicates> #<Namespace clj-time.format> #<Namespace clojureql.internal> #<Namespace clojure.core.incubator> #<Namespace clojure.core> #<Namespace clojure.java.shell> #<Namespace lobos.ast> #<Namespace lobos.internal> #<Namespace lobos.utils> #<Namespace clojure.java.browse> #<Namespace clojure.repl> #<Namespace clojure.tools.macro> #<Namespace lobos.metadata> #<Namespace ymonlog.core> #<Namespace lobos.connectivity> #<Namespace clj-time.core> #<Namespace clojure.java.io> #<Namespace clojure.string> #<Namespace clj-time.coerce> #<Namespace clojure.core.protocols> #<Namespace clojure.java.javadoc>)
+; lobos.core staat er nu in.
+
+(use 'lobos.schema)
+;(#<Namespace lobos.migration> #<Namespace clojure.set> #<Namespace lobos.analyzer> #<Namespace lobos.compiler> #<Namespace clojure.pprint> #<Namespace clojure.java.jdbc.internal> #<Namespace clojure.walk> #<Namespace user> #<Namespace lobos.schema> #<Namespace lobos.core> #<Namespace clojure.main> #<Namespace clojure.java.jdbc> #<Namespace clojureql.core> #<Namespace clojureql.predicates> #<Namespace clj-time.format> #<Namespace clojureql.internal> #<Namespace clojure.core.incubator> #<Namespace clojure.core> #<Namespace clojure.java.shell> #<Namespace lobos.ast> #<Namespace lobos.internal> #<Namespace lobos.utils> #<Namespace clojure.java.browse> #<Namespace clojure.repl> #<Namespace clojure.tools.macro> #<Namespace lobos.metadata> #<Namespace ymonlog.core> #<Namespace lobos.connectivity> #<Namespace clj-time.core> #<Namespace clojure.java.io> #<Namespace clojure.string> #<Namespace clj-time.coerce> #<Namespace clojure.core.protocols> #<Namespace clojure.java.javadoc>)
+; en lobos.schema nu ook.
+
+(resolve 'create)
+;#'lobos.core/create
+
+(create 
+  (table :event 
+    (varchar :ts 25) 
+    (varchar :type 20) 
+    (varchar :monitor 50) 
+    (text :logtext)))
+
+ymonlog.core=> (create 
+  (table :event 
+    (char :ts ) (char :type) (char :monitor) (char :logtext)))
+
+ClassCastException clojure.lang.Keyword cannot be cast to java.lang.Number  clojure.lang.RT.charCast (RT.java:905)
+
+(doc create)
+CompilerException java.lang.RuntimeException: Unable to resolve symbol: doc in this context, compiling:(NO_SOURCE_PATH:45)
+
+(clojure.repl/doc create)
+; werkt wel, want doc functie is verdwenen als je in ymonlog.core zit.
+
+(create 
+  (table :event 
+    (varchar :ts 25) 
+    (varchar :type 20) 
+    (varchar :monitor 50) 
+    (text :logtext)))
+; varchar kent 'ie niet.
+
+(create 
+  (table :event 
+    (char :ts 25) 
+    (char :type 20) 
+    (char :monitor 50) 
+    (text :logtext)))
+
+(resolve 'char)
+#'clojure.core/char
+
+(resolve 'varchar)
+nil
+
+ymonlog.core=> (keys (ns-publics 'lobos.schema))
+(->Index name-required schema definition? def-numeric-like-typed-columns time map->Constraint table check* nvarchar clob ntext data-type varchar expression? sql-prefix-operators build-alter-statement expression map->Table timestamp default index? text Creatable ->Expression map->Column column? date primary-key column* ->CheckConstraint Buildable boolean sql-symbols def-optional-precision-typed-columns sql-functions float build-create-statement datetime-now-alias constraint sql-infix-operators nchar ->ForeignKeyConstraint map->Index build-definition ->UniqueConstraint numeric map->Schema smallint check data-type? foreign-key map->DataType table? def-simple-typed-columns ->Column integer schema? unique-constraint def-optional-length-typed-columns ->Schema def-length-bounded-typed-columns binary column char nclob ->Constraint Dropable constraint? ->DataType bigint map->ForeignKeyConstraint double-precision varbinary decimal map->UniqueConstraint table* unique double ->Table build-drop-statement Alterable blob real map->CheckConstraint def-typed-columns* index map->Expression)
+; hier zitten char en varchar in.
+
+ymonlog.core=> (all-ns)
+(#<Namespace lobos.migration> #<Namespace clojure.set> #<Namespace lobos.analyzer> #<Namespace lobos.compiler> #<Namespace clojure.pprint> #<Namespace clojure.java.jdbc.internal> #<Namespace clojure.walk> #<Namespace user> #<Namespace lobos.schema> #<Namespace lobos.core> #<Namespace clojure.main> #<Namespace clojure.java.jdbc> #<Namespace clojureql.core> #<Namespace clojureql.predicates> #<Namespace clj-time.format> #<Namespace clojureql.internal> #<Namespace clojure.core.incubator> #<Namespace clojure.core> #<Namespace clojure.java.shell> #<Namespace lobos.ast> #<Namespace lobos.internal> #<Namespace lobos.utils> #<Namespace clojure.java.browse> #<Namespace clojure.repl> #<Namespace clojure.tools.macro> #<Namespace lobos.metadata> #<Namespace ymonlog.core> #<Namespace lobos.connectivity> #<Namespace clj-time.core> #<Namespace clojure.java.io> #<Namespace clojure.string> #<Namespace clj-time.coerce> #<Namespace clojure.core.protocols> #<Namespace clojure.java.javadoc>)
+; hier zit lobos.schema in.
+
+(resolve 'lobos.schema/varchar)
+#'lobos.schema/varchar
+
+(use 'lobos.schema)
+
+IllegalStateException table already refers to: #'clojureql.core/table in namespace: ymonlog.core  clojure.lang.Namespace.warnOrFailOnReplace (Namespace.java:88)
+; mogelijk is lobos niet helemaal goed geladen.
+
+(resolve 'table)
+#'clojureql.core/table
+
+(resolve 'lobos.schema/table)
+#'lobos.schema/table
+
+(use 'lobos.schema :only [varchar])
+
+(lobos.core/create 
+  (lobos.schema/table :event 
+    (lobos.schema/char :ts 25) 
+    (lobos.schema/char :type 20) 
+    (lobos.schema/char :monitor 50) 
+    (lobos.schema/text :logtext)))
+
+;Exception No such global connection currently open: :default-connection, only got []  lobos.connectivity/with-named-connection (connectivity.clj:129)
+; waarsch is open ook de CQL variant.
+
+(open-global db)
+
+ymonlog.core=> (resolve 'open-global)
+#'clojureql.core/open-global
+
+(resolve 'lobos.core/open-global)
+
+(resolve 'lobos.connectivity/open-global)
+#'lobos.connectivity/open-global
+
+(lobos.connectivity/open-global db)
+{:default-connection {:connection #<Conn org.sqlite.Conn@543c44>, :db-spec {:subprotocol "sqlite", :classname "org.sqlite.JDBC", :subname "/tmp/cql.sqlite3", :create true}}}
+
+(lobos.core/create 
+  (lobos.schema/table :event 
+    (lobos.schema/char :ts 25) 
+    (lobos.schema/char :type 20) 
+    (lobos.schema/char :monitor 50) 
+    (lobos.schema/text :logtext)))
+;nil, dus goed.
+
+(lobos.connectivity/close-global db)
+; error
+(lobos.connectivity/close-global)
+;ok
+
+nico@pclinux:533:38:/tmp$ sqlite3 cql.sqlite3 
+SQLite version 3.4.2
+Enter ".help" for instructions
+sqlite> .schema
+CREATE TABLE event (ts CHAR(25), type CHAR(20), monitor CHAR(50), logtext CLOB);
+
+[2012-01-08 16:46:29] is nu gelukt met Lobos om de tabel aan te maken in sqlite3.
+[2012-01-08 17:02:45] raar: als je 2x :refer-clojure met excludes doet, werkt het anders dan je zou willen:
+                      de excludes tellen niet op, dus mogelijk vervangt de tweede de eerste.
+                      betekent dat je zelf de lijsten moet samenvoegen.
+[2012-01-08 17:06:00] lein upgrade gedaan, ging wel goed. Benieuwd of hiermee doc etc het weer doen.                      
+
+[2012-01-08 17:06:36] lein repl: Using JLine for console I/O; install rlwrap for optimum experience.
+[2012-01-08 17:06:58] zit nu meteen in ymonlog.core=>(doc doc) werkt.
+[2012-01-08 18:49:44] handige functie, ergens neerzetten? (defn- ns-publics-list [ns] (#(list (ns-name %) (map first (ns-publics %))) ns))
+[2012-01-08 19:28:35] rlwrap geinstalleerd voor lein repl, lijkt wel goed, met pgup ook vorige commando's terug te halen die beginnen met tekst.
+[2012-01-08 19:29:00] kan nu file lezen en regexp doen met resultaten in vars, nu nog in db zetten.
+[2012-01-08 19:48:09] rlwrap doet raar, kan geen functies met >1 line goed kopieren van jEdit naar repl. Even geprobeerd file in jEdit
+                      op Windows te zetten, maar helpt niets. Als alleen linefeeds niet goed gaan, hoeft het niet erg te zijn, maar moest
+                      nu zelf nog paar keer ) toevoegen voordat de prompt weer terug kwam.
+[2012-01-08 20:06:13] repl ook wel raar als laden misgaat door fout in code, je komt dan in clojure.core namespace terecht.
+                      hierna weer net als eerder, dan bv resolve en doc niet meer gevonden worden.
+[2012-01-08 20:27:37] rlwrap, readline komt door .inputrc instelling, zonder een .inputrc gaat het wel goed. Heb ook een veel kleinere
+                      .inputrc.orig, maar met deze gaat het al fout, apart.
+[2012-01-08 20:37:41] hele .inputrc weer teruggezet, de regel met ctrl-j eruit, hierna gaat het goed, en werkt zowaar pgup ook weer met pg-down.                      
+[2012-01-08 23:51:26] kan andere log SiteScope* ook vrij simpel inlezen, heb er nu 2, 1 per dag. Hiermee looptijd
+                      van scripts te bepalen. Dan genoeg data om graphs te maken, wel DDL in losse file/ns zetten
+                      zodat je geen conflicten krijgt met ClojureQL.
+                      
+[2012-01-14 19:22:39] weer even verder, nu eerst DDL met lobos in aparte file/namespace gezet. 
+[2012-01-14 19:23:32] Testen door lein run ~/aaa/ymonlog.db          
+[2012-01-14 19:25:19] door sqlite staat er in ymonlog dir een native subdir, met per OS een sqlite lib.
+[2012-01-14 23:08:31] nu ook SiteScope logs ingelezen, dir opgeven waar error.log en instaan, gaat goed, worden in sqlite ingelezen.
+[2012-01-14 23:08:59] todo is dan hier graphs van te maken: via R en/of via Incanter of andere plotter.
+

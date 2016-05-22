@@ -1,0 +1,54 @@
+Tekstueel:
+* pagina met plaatjes: [{Image src='attach/AspectOrientedProgramming/wasadmin1.JPG}]
+  => [[Portals-{Imagesrc='attach/AspectOrientedProgramming/wasadmin1.JPG}]]
+  => [[image:wasadmin1.JPG]]
+* attachments?
+* ''__BELANGRIJK__
+* SIBUSAanmaken.txt:[{Image src='WikiServer:attach/SIBUSAanmaken/ScreenShot001.bmp' caption='Geef Bus naam' }]
+* AanmakenJSFSourcePortletComplex
+  * bekijken: [JSFSourcePortletportlet.wsdl | JSFSourcePortletportlet.wsdl] -> attachment.
+  * [{Image src='commandlink.JPG' caption='Toevoegen link' }]
+
+
+Import:
+* Van een bestaande pagina: gebeurt nu niets mee, wordt niet overschreven.
+* Dit betekent dat alle tijdens testfase geimporteerde pagina's eerst weer weg moeten. Uit DB of via menu. Hierna tijdstip voor migratie
+  afspreken met rest team.
+
+Test
+* items en genummerde items met meerdere niveau's.
+
+
+
+================
+Opmerkingen:
+================
+* file: url's gaan niet goed, onduidelijk hoe dit moet in MediaWiki.
+* speciale tekens gaan mogelijk niet goed (é etc.).
+* TableOfContents wordt niet gemigreerd; elke pagina heeft automatisch een TOC.
+* Externe links blijven wijzen naar de oorspronkelijke lokatie. Dit geldt dus ook voor Webserver: en TomcatServer: links!
+* Externe plaatjes kunnen niet ge-embed worden in de pagina. Hiervoor in de plaats wordt een link opgenomen. Dit was ook al zo in JSPWiki.
+* Inline images: de links worden opgenomen, het uploaden moet wel met de hand gebeuren. Het pad verdwijnt wel (kan MediaWiki niet mee omgaan).
+
+=============
+DONE
+=============
+
+Bestanden gedaan:
+* Portals-Performance: externe links, tabellen erg groot.
+* Portals-PerformanceModellering.
+* LeftMenu: WebServer: en file: links. Ook \\ -> <br>
+* Portals-KopieerBestandenVanDeVoorbeeldStrutsWebapplicatie.txt
+* Infrastructuur:
+  - tabel
+  - links
+  
+Export
+* van een pagina met een <br> tag.
+
+* '' als cursief is blijkbaar hetzelfde in beide wiki's, underline blijkbaar niet.
+* code, {{{ vertalen naar tekst beginnend met spatie(s)
+* Ook {{StrutsPortletProject/JavaSource}}: Portals-KopieerBestandenVanDeVoorbeeldStrutsWebapplicatie.txt
+
+
+

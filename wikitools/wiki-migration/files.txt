@@ -1,0 +1,24 @@
+Te groot (groter dan 150k?), met warning, handmatig doen:
+Portals-Ant-ant-classpath.jpg
+Portals-Architectuur-ipb-systeem-analysis-Software_Architecture_Document-2.doc
+Portals-Ontwerp-Ontwerprichtlijnen+Portals.doc
+Portals-PerformanceModelleren-Pres+PerfMod+BD+2007-03-06.ppt
+
+
+Echt te groot (grens 2MB?), staat server niet toe:
+Portals-Architectuur-Applicatie+Architecture+Document.doc
+
+
+Onbekende extensies:
+.wsdl
+.nodes
+.xml
+.jar
+.0.jar
+.2.7-1.0.jar
+.tld
+.html
+.pdf
+.bmp (beetje raar)
+
+

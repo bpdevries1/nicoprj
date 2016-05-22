@@ -1,0 +1,3352 @@
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.3/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.3/ http://www.mediawiki.org/xml/export-0.3.xsd" version="0.3" xml:lang="nl">
+  <siteinfo>
+    <sitename>ICTwiki</sitename>
+    <base>http://10.75.99.121/wiki/index.php/Hoofdpagina</base>
+    <generator>MediaWiki 1.8.2</generator>
+    <case>first-letter</case>
+      <namespaces>
+      <namespace key="-2">Media</namespace>
+      <namespace key="-1">Speciaal</namespace>
+      <namespace key="0"/>
+      <namespace key="1">Overleg</namespace>
+      <namespace key="2">Gebruiker</namespace>
+      <namespace key="3">Overleg gebruiker</namespace>
+      <namespace key="4">ICTwiki</namespace>
+      <namespace key="5">Overleg ICTwiki</namespace>
+      <namespace key="6">Afbeelding</namespace>
+      <namespace key="7">Overleg afbeelding</namespace>
+      <namespace key="8">MediaWiki</namespace>
+      <namespace key="9">Overleg MediaWiki</namespace>
+      <namespace key="10">Sjabloon</namespace>
+      <namespace key="11">Overleg sjabloon</namespace>
+      <namespace key="12">Help</namespace>
+      <namespace key="13">Overleg help</namespace>
+      <namespace key="14">Categorie</namespace>
+      <namespace key="15">Overleg categorie</namespace>
+      <namespace key="100">Relation</namespace>
+      <namespace key="101">Relation talk</namespace>
+      <namespace key="102">Attribute</namespace>
+      <namespace key="103">Attribute talk</namespace>
+      <namespace key="104">Type</namespace>
+      <namespace key="105">Type talk</namespace>
+    </namespaces>
+  </siteinfo>
+  <page>
+    <title>Portals-Schaalbaarheid</title>
+    <id>2526</id>
+    <revision>
+      <id>6605</id>
+      <timestamp>2007-09-03T12:56:06Z</timestamp>
+      <contributor>
+        <username>Dollm01</username>
+        <id>53</id>
+      </contributor>
+      <comment>/* Todo */</comment>
+      <text xml:space="preserve">== Context ==
+{| border="1" style="border-collapse:collapse; border:1px solid silver;"
+
+|-
+|'''Status:'''
+|Actueel
+|-
+|'''Portals Release:'''
+| 2
+|-
+|'''Portal Server version:'''
+|nvt
+|-
+|'''Afhankelijkheden:'''
+|geen
+|-
+|'''Overig:'''
+| -
+|}
+
+== Todo ==
+* Bepalen doelplatform, verschillende opties.
+* Bepalen welke docs voor het project uitgangspunten zijn, en welke als nuttige achtergrond info gebruikt kan worden.
+* Overleg (15-5-2007) met architect (David van Kuijk) over aandachtspunten CR release 2 (tot eind 2007).
+
+== Reactie David van Kuijk op versie plateau 1 ==
+De managementsamenvatting zette me even op het verkeerde been: Ik kreeg de indruk dat de testen al uitgevoerd zijn, maar begrijp dat dat nog niet het geval is. Je kunt dus nu al wel wat zeggen over theoretische schaalbaarheid, maar nog niet of WPS voldoende schaalbaar is om aan de eisen van de Belastingdienst te kunnen voldoen. Het lijkt me goed om dat wat explicieter te maken.
+
+Enkele opmerkingen:
+* Je geeft terecht aan dat aantal applicaties, portlets etc. ook van belang is. Daar is nog weinig zicht op, maar er loopt binnen CPP een traject Persoonsgebonden Internet Diensten (nu Globaal Ontwerp) dat deze diensten voor de externe Portal gaat specificeren.
+* Als de IB ook als FOL-3 beschikbaar wordt gesteld kan het aantal concurrent gebruikers oplopen tot 40.000!
+* Ik denk dat 16 miljoen externe gebrukers aan de ruime kant is. We rekenen meestal met 6-8 miljoen.
+
+Ik denk dat in de vraagstelling ook de volgende vragen moeten worden meegenomen:
+* Inzicht in resourceverbruik (CPU, I/O, Geheugen) bij oplopende load. Welke van deze factoren vormt de bottle-neck wanneer het systeem niet meer lineair schaalt? Welke maatregelen horen daarbij?
+* Door je op de Portal te concentreren en bijvoorbeeld beveiligingstools buiten beschouwing te laten krijg je slechts een beeld van de schaalbaarheid van een deel van de oplossing. Tenzij duidelijk is dat maatregelen voor performance en schaalbaarheid voor verschillende tools onafhankelijk zijn, betekent dit dat onderzoek later ook nog in de totale context moet worden gedaan.
+* Is virtualisatie van de hardware een optie? Zolang we dit niet kunnen, hebben we altijd te maken met een omgeving die op de pieken is geschaald (overscaled).
+* Welke richtlijnen zijn er voor ontwikkelaars om perfomante en schaalbare Portal-applicaties te kunnen maken?
+* Wat voor alternatieven zijn er wanneer blijkt dat WPS niet voldoende (of niet tegen acceptabele kosten voor hardware en licenties) schaalbaar is? IBM heeft bijvoorbeeld n.a.v. de resultaten van de PoC PD gesuggereerd dat het verstandig kan zijn delen van webapplicaties (denk bijv. aan specifieke FOL-3 formulieren) buiten de Portal-Server te houden.
+* Welke referentie-sites heeft IBM waarbij Portal-Server is ingezet in een omgeving met vergelijkbare eisen?
+
+=== Reactie Nico ===
+Dank voor de review, geeft weer een stukje richting voor het vervolg traject. Ik heb het even met Ramzi en Hermen besproken, met de volgende eerste korte reactie als gevolg:
+* We nemen deze dingen mee in het volgende plateau. Om een aantal van deze vragen te beantwoorden, zijn we dan wel afhankelijk van een voldoende geschaalde testomgeving.
+* Voor andere dingen is een wisselwerking tussen architectuur en ontwikkeling nodig. Dit geldt bv voor de aantallen (portlets, applicaties, gebruik) en de keuze voor beveiliging. Ook moet er gekozen worden of we gaan experimenteren met virtualisatie (zeker in samenwerking met portals staat dit nog in de kinderschoenen).
+* De vraag over de referentie sites willen we bij architectuur neerleggen. Ik heb wel een aantal IBM referenties kunnen vinden, maar hierin staat niets over aantallen, performance en schaalbaarheid.
+
+
+== Doelstelling Schaalbaarheidsrapport  ==
+
+op 20070131 hebben we voor de tweede maal bijeen gezeten rondom het verwachte rapport over schaalbaarheid. Het doel van het rapport is een basis te geven - samen met andere documenten - over de te verwachten schaalbaarheid van de Portal oplossing. Allereerst voor de 'eerste applicatie' die gaat landen op het Portal platform, maar ook voor het uiteindelijke doel (PD/16 mln klanten!?)
+
+==  Aandachtspunten ==
+
+Schaalbaarheid is niet simpelweg een rekenmethode: Enkele kengetallen in Excel, beetje vermenigvuldigen en er komt 'een getal' uit. Er zijn teveel variabelen.
+
+Dit onderkennende moeten we hier dus aandacht besteden en zorgen dat dit besef gaat leven. Hierbij kunnen we mogelijk geholpen worden door de werkzaamheden rondom schaalbaarheid van eCommerce.
+
+schaalbaarheid is niet slechts voorspellen, maar een proces van continue meten, tunen en bijsturen. Bovendien is het een ketenverantwoordelijkheid (waarmee bedoeld wordt dat alle componenten de schaalbaarheid kunnen maken of breken)
+
+Enkele componenten die we moeten benoemen
+
+* Externe Security Service (TAM?)
+* User repository (LDAP)
+* database(s)
+* componenten als OS, netwerk, monitoring, lokatie
+* Portal specifieke componenten (search etc)
+
+==  Kengetallen ==
+Doelstelling van het rapport moet echter nog steeds het opleveren van kengetallen zijn. Hoewel we ze ''moeten'' voorzien van alle mitsen en maren, kun we best een ''guessed estimate'' opleveren.
+
+==  PoCPD ==
+De door IBM uitgevoerde PoCPD is waardevol. Misschien is het resultaat niet direct een doorslaand succes, maar we zullen in ons rapport wel een waardeoordeel over de gepresenteerde en behaalde resultaten kunnen geven.
+
+==  Personen ==
+
+{| border="1" cellspacing="0"
+|-
+! persoon 
+! rol
+|-
+| Nico 
+| Performance (regie)
+|-
+| Jeroen 
+| advies, auteur
+|-
+| Joost 
+| infra advies
+|-
+| Huig  
+| infra advies
+|}
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>JMeter-JMS-testen</title>
+    <id>3183</id>
+    <revision>
+      <id>8480</id>
+      <timestamp>2007-11-30T09:51:41Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">In clearcase staan de webservice consumer's onder de volgende directory: "CR_Portals_Showcase\fiscaal\bouw\" 
+De projecten hebben namen als "relatieinfo-ps-ws-client" en "berichtinfo-ps-ws-client" etc.
+Binnen deze project bevindt zich een map genaamd "wsdl" waarin de WSDL staat.
+In de wsdl is een service element te vinden welke concreet beschrijft waar de webservice te benaderen is:
+
+&lt;pre&gt;
+	&lt;wsdl:service name="JmsInterfaceBeanService"&gt;
+		&lt;wsdl:port name="RaadplegenAdresEnPersoonsGegevensBeanJMS" binding="impl:RaadplegenAdresEnPersoonsGegevensJMSSoapBinding"&gt;
+			&lt;wsdlsoap:address location="jms:/queue?destination=jms/gsRelatieQ&amp;amp;connectionFactory=jms/gsRelatieQCF&amp;amp;targetService=RaadplegenAdresEnPersoonsGegevensBeanJMS"/&gt;
+		&lt;/wsdl:port&gt;
+	&lt;/wsdl:service&gt;
+&lt;/pre&gt;
+
+In bovenstaande voorbeel van relatieinformatie service is dit dus:
+
+&lt;pre&gt;jms:/queue?destination=jms/gsRelatieQ&amp;amp;connectionFactory=jms/gsRelatieQCF&amp;amp;targetService=RaadplegenAdresEnPersoonsGegevensBeanJMS&lt;/pre&gt;
+
+Wat dus inhoudt:
+	
+JDNI naam van de queue jms/gsRelatieQ
+JDNI naam van de connectionFactory jms/gsRelatieQCF
+Hierbij houden wij standaard dan als queue naam gsRelatieQ aan en als connection factory gsRelatieQCf, dus gewoon het jms prefix weglaten.
+
+Deze zijn (indien de omgeving correct is geconfigureerd) ook te vinden via de adminstrative console als volgt:
+Resources -&gt; JMS Providers -&gt; Default messaging (voor de connection factories and queues)
+
+De destination gebruikt bij de queu configuratie is aangemaakt bij: 
+Service integration -&gt; buses -&gt; {selecteer de bus} -&gt; Destinations</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-JMeter</title>
+    <id>2425</id>
+    <revision>
+      <id>8520</id>
+      <timestamp>2007-12-03T16:08:04Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== JMeter 2.3 ==
+* Nieuw sinds juli 2007.
+* 17-7-07: docs bekeken, nog niet gedownload. Voornaamste verbeteringen zijn SSL/HTPPS tests en wat dingetjes in remote testing.
+
+== Remote testing ==
+* JMeter source wat aangepast, class HoldFileSampleSender.java toegevoegd, werkt met RMI. In jmeter.properties deze gebruiken met mode=HoldFile.
+* Met -r optie ook via toolset te gebruiken.
+* Nog wel een serie aandachtspunten, deels vergelijkbaar met het nog meer onafhankelijk uitvoeren van JMeter vanaf verschillende machines:
+* Report.jtl: responses staan niet op volgorde, alleen per test-server, maar deze staat niet in de JTL. Hierdoor is throughput in de looptijd niet goed, op het eind een burst, maar is niet echt zo.
+* jmeter.log en responses.zip remote ophalen.
+* Remote starten en stoppen van jmeter-server.bt (incl rmiregistry.exe).
+* Clock sync mogelijk nodig, maar op XP worden klokken wel synchroon gehouden.
+* Elke server gaat nu doen wat in JMX staat. Dit betekent als er bv 5 threads in de JMX staan, en er 2 servers zijn, er totaal met 10 threads wordt getest.
+* Door bovenstaande ook Operationale Analyse berekening aanpassen. Alternatief is in de gegenereerde JMX het aantal threads te delen door het aantal test servers.
+* Ook bij fixed throughput instelling waarschijnlijk een factor toepassen.
+* databestanden (users.dat, bsn.dat) mogelijk ook splitsen per server. Geldt vooral voor users, om niet vanaf verschillende machines met dezelfde user ingelogd te zijn.
+* check ant jmremote taken en instellingen.
+* Hoe om te gaan met evt hangende externe JMeter processen? Sowieso de externe jmeter processen killen?
+* vmstat.exe en netstat.exe mogelijk ook starten op alle remote JMeters.
+
+Keuze instellen van remote testing:
+* In suite.xml: optie met lijstje van remote servers.
+* Verwijzing naar client.omgeving, hierin het lijstje opnemen. Vraag is dan wat er behalve de IP-adressen nog verder in moet. Afhankelijk hiervan met -r, -R of geen optie starten.
+
+== Diversen ==
+* Sinds JMeter 2.2: pas op met constant throughput timer: als hier nog een string staat (param niet opgegeven in suite), wordt hier 0.0 van gemaakt, en heb je dus een oneindig trage throughput.
+* Follow redirects: werkt vanaf JMeter 2.2 zowel in Sun als commons http mode. Auto redirect werkt in ieder geval niet in commons mode.
+* Reguliere expressies, multiline: "&lt;a class="wpsNavItem wpsNavLevel1" href="([^"]+)" *&gt;[^&lt;]+?Toezenden"; Toezenden staat op volgende regel.
+* (24-11-2006) Neem 'log_level.org.apache.commons.httpclient.HttpMethodDirector=WARN' op in je jmeter.properties. Anders krijg je verwarrende meldingen in je jmeter.log bij het gebruik van (niet-automatische) redirects in combi met de commons http client.
+* (22-11-2006) Ook bij Portals is een cookie manager nodig. Zie testrun 110 voor een foute, en testrun 111 voor een goede run.
+* (20-11-2006) De volgende combinatie geeft problemen, lange responsetijden: Commons http, keepalive = false, AIX (140). Responsetijden dan minimaal 4,5 seconde. Nog verder onderzoeken met ethereal...
+* Vanaf JMeter 2.2: pas op met constant throughput timer: als hier nog een string staat (param niet opgegeven in suite), wordt hier 0.0 van gemaakt, en heb je dus een oneindig trage throughput.
+* Follow redirects: werkt vanaf JMeter 2.2 zowel in Sun als commons http mode. Auto redirect werkt in ieder geval niet in commons mode. Zie onder voor melding.
+* Latency wordt niet opgenomen in JTL, ook al staat in jmeter.properties "jmeter.save.saveservice.latency=true".
+* Gebruik keepalive settings bij Commons http client, anders worden connecties niet hergebruikt en blijven ze nog 4 minuten open staan. De beschikbare 4000 connecties zijn zo snel op. Zie testruns 21 (fout) en 22 (goed) dd 7-11-2006.
+
+java.lang.IllegalArgumentException: Entity enclosing requests cannot be redirected without user intervention
+at org.apache.commons.httpclient.methods.EntityEnclosingMethod.setFollowRedirects(EntityEnclosingMethod.java:221)
+at org.apache.jmeter.protocol.http.sampler.HTTPSampler2.setupConnection(HTTPSampler2.java:302)
+at org.apache.jmeter.protocol.http.sampler.HTTPSampler2.sample(HTTPSampler2.java:518)
+at org.apache.jmeter.protocol.http.sampler.HTTPSamplerBase.sample(HTTPSamplerBase.java:658)
+at org.apache.jmeter.protocol.http.sampler.HTTPSamplerBase.sample(HTTPSamplerBase.java:647)
+at org.apache.jmeter.threads.JMeterThread.run(JMeterThread.java:247)
+at java.lang.Thread.run(Thread.java:595)
+
+== JMS ==
+* JMSPointToPoint.jmx kon eerst niet ingelezen worden in GUI van JMeter, met in jmeter.log een vage fout: class niet gevonden, terwijl die er wel is. Opgelost door in lib/ext de file jms.jar neer te zetten.
+* test starten geeft vervolgens de melding dat de class org.activemq.jndi.ActiveMQInitialContextFactory niet gevonden kan worden. Deze class staat o.a. in apache-activemq-4.1.1.jar en deze jar ook in lib/ext neergezet.
+* Werkt nog niet, in genoemde jar staat org/apache/activemq/jndi/ActiveMQInitialContextFactory.class, ofwel met subdir apache ertussen.
+* In JMX staat deze InitialContextFactory genoemd, mogelijk deze van oude versie, dus nieuwe gezet: org.apache.activemq.jndi.ActiveMQInitialContextFactory.
+* Nu wel de verwachte melding: Could not connect to broker URL: tcp://localhost:61616. Vervolgens wachten op BSB mensen.
+
+== Command line opties ==
+* Zie manual voor JMeter opties, paragraaf 2.4.7 (in Jmeter 2.3RC3)
+
+=== NT/XP command line modifiers ===
+&lt;pre&gt;
+Modifier Description
+%~1 Expands %1 and removes any surrounding quotation marks ("").
+%~f1 Expands %1 to a fully qualified path name.
+%~d1 Expands %1 to a drive letter.
+%~p1 Expands %1 to a path.
+%~n1 Expands %1 to a file name.
+%~x1 Expands %1 to a file extension.
+%~s1 Expanded path contains short names only.
+%~a1 Expands %1 to file attributes.
+%~t1 Expands %1 to date and time of file.
+%~z1 Expands %1 to size of file.
+%~$PATH:1 Searches the directories listed in the PATH environment variable
+and expands %1 to the fully qualified name of the first one found. If the
+environment variable name is not defined or the file is not found, this
+modifier expands to the empty string.
+
+The following table lists possible combinations of modifiers and
+qualifiers that you can use to get compound results.
+
+Modifier Description
+%~dp1 Expands %1 to a drive letter and path.
+%~nx1 Expands %1 to a file name and extension.
+%~dp$PATH:1 Searches the directories listed in the PATH environment
+variable for %1 and expands to the drive letter and path of the first one
+found.
+%~ftza1 Expands %1 to a dir-like output line.
+
+Note
+
+In the previous examples, you can replace %1 and PATH with other batch
+parameter values.
+The %* modifier is a unique modifier that represents all arguments passed
+in a batch file. You cannot use this modifier in combination with the %~
+modifier. The %~ syntax must be terminated by a valid argument value.
+
+You cannot manipulate batch parameters in the same manner that you can
+manipulate environment variables. You cannot search and replace values or
+examine substrings. However, you can assign the parameter to an
+environment variable, and then manipulate the environment variable.
+&lt;/pre&gt;
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>CxR-Performance</title>
+    <id>3222</id>
+    <revision>
+      <id>11304</id>
+      <timestamp>2008-09-11T12:05:34Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== Inleiding ==
+Dit is de startpagina voor alle aspecten betreffende CxR brede performance werkzaamheden.
+
+== Resultaten ==
+* Zie http://10.79.150.6:8088/dashboard
+
+== IKT Testen ==
+=== Algemeen ===
+* [[KLOP2_OTAP]]
+* [[Performance-inrichten-omgeving]]
+* [[CxR-Performance-raakvlakken]]
+
+=== Integratie omgeving IKT 1 ===
+* [[Klop2_Integratie]]
+* [http://10.75.99.211/wps/portal KLOP II op int211 (:80)]
+* [http://olcru202.olo.belastingdienst.nl:9080/wps/portal KLOP II op Int202 (:9080)]
+
+=== Integratie omgeving IKT 2 ===
+* Nog geen gegevens.
+
+=== URL's testclient IKT 1 ===
+* AangifteplichtService: http://olcru202.olo.belastingdienst.nl:9080/AangifteplichtServiceTestClient_v2/TestClient
+* BD-organisatieService: http://olcru202.olo.belastingdienst.nl:9080/BDorganisatieTestClient_v2/TestClient
+* BerichtenService: http://olcru202.olo.belastingdienst.nl:9080/BerichtenServiceTestClient_v2/TestClient
+* BerichtenService-perf: http://olcru202.olo.belastingdienst.nl:9080/BerichtenServiceTestClient_v2/PerformanceTestClient
+* CollectiefService: http://olcru202.olo.belastingdienst.nl:9080/CollectiefServiceTestClient_v2/TestClient
+* DossierService: http://olcru202.olo.belastingdienst.nl:9080/DossierServiceTestClient_v2/RaadplegenBeweringTestClient
+* DossierService: http://olcru202.olo.belastingdienst.nl:9080/DossierServiceTestClient_v2/RaadplegenHeffingszaakTestClient
+* DossierService: http://olcru202.olo.belastingdienst.nl:9080/DossierServiceTestClient_v2/RaadplegenPresentatiestructuurTestClient
+* DossierService: http://olcru202.olo.belastingdienst.nl:9080/DossierServiceTestClient_v2/RaadplegenVooringevuldeInformatieTestClient
+* InningenService: http://olcru202.olo.belastingdienst.nl:9080/InningServiceTestClient_v2/RaadplegenInningmeldingenTestClient
+* InningenService: http://olcru202.olo.belastingdienst.nl:9080/InningServiceTestClient_v2/RaadplegenRekeningenTestClient
+* PersonenService: http://olcru202.olo.belastingdienst.nl:9080/PersonenServiceTestClient_v2/RaadplegenTestClient
+* PersonenService: http://olcru202.olo.belastingdienst.nl:9080/PersonenServiceTestClient_v2/ZoekenTestClient
+* ZaakService: http://olcru202.olo.belastingdienst.nl:9080/ZaakServiceTestClient_v2/TestClient
+
+=== URL's testclient IKT 2 ===
+* AangifteplichtService: http://olcru213.olo.belastingdienst.nl:9080/AangifteplichtServiceTestClient_v2/TestClient
+* BD-organisatieService: http://olcru213.olo.belastingdienst.nl:9080/BDorganisatieTestClient_v2/TestClient
+* BerichtenService: http://olcru213.olo.belastingdienst.nl:9080/BerichtenServiceTestClient_v2/TestClient
+* BerichtenService-perf: http://olcru213.olo.belastingdienst.nl:9080/BerichtenServiceTestClient_v2/PerformanceTestClient
+* CollectiefService: http://olcru213.olo.belastingdienst.nl:9080/CollectiefServiceTestClient_v2/TestClient
+* DossierService: http://olcru213.olo.belastingdienst.nl:9080/DossierServiceTestClient_v2/RaadplegenBeweringTestClient
+* DossierService: http://olcru213.olo.belastingdienst.nl:9080/DossierServiceTestClient_v2/RaadplegenHeffingszaakTestClient
+* DossierService: http://olcru213.olo.belastingdienst.nl:9080/DossierServiceTestClient_v2/RaadplegenPresentatiestructuurTestClient
+* DossierService: http://olcru213.olo.belastingdienst.nl:9080/DossierServiceTestClient_v2/RaadplegenVooringevuldeInformatieTestClient
+* InningenService: http://olcru213.olo.belastingdienst.nl:9080/InningServiceTestClient_v2/RaadplegenInningmeldingenTestClient
+* InningenService: http://olcru213.olo.belastingdienst.nl:9080/InningServiceTestClient_v2/RaadplegenRekeningenTestClient
+* PersonenService: http://olcru213.olo.belastingdienst.nl:9080/PersonenServiceTestClient_v2/RaadplegenTestClient
+* PersonenService: http://olcru213.olo.belastingdienst.nl:9080/PersonenServiceTestClient_v2/ZoekenTestClient
+* ZaakService: http://olcru213.olo.belastingdienst.nl:9080/ZaakServiceTestClient_v2/TestClient
+
+
+== Acceptatie omgeving ==
+* Toegang aanvragen via &lt;CICT EX SAS Safety Zaalbeheer_Postbus&gt;, ovv periode, namen en ruimte G5.
+
+== Portals Bavo performance ==
+* zie [[Portals-Performance]]</text>
+    </revision>
+  </page>
+  <page>
+    <title>CxR-Performance-raakvlakken</title>
+    <id>3223</id>
+    <revision>
+      <id>8764</id>
+      <timestamp>2007-12-18T15:38:44Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <comment>/* Algemeen */</comment>
+      <text xml:space="preserve">== Aanvragen ==
+* Algemeen via "Lab CR postbus".
+* Dagelijks (paar dagen vantevoren aanvragen) via "Loket OTL CICT_Postbus": 7400 of 7676 (direct mainframe).
+* Contactpersoon Gert van de Kraats
+
+== Algemeen ==
+* Tot 23.00 uur werkt alles in principe.
+* Hierna worden queues en CICS-en gestopt. (Gert stuurt nog overzicht)
+* Voor database moet database manager bekend zijn.
+* Voor MQ moet MQ server bekend zijn.
+* In OLO (T) wordt 't niet automatisch weer opgestart.
+* In TAO (Q) wordt 't wel automatisch weer opgestart.
+* Elwin kan helpen met mainframe analyse; vooral DB2 met Oomegamon.
+* Zie ook [[MQ_topologie_van_Business_services]]
+
+== Integratie omgeving ==
+=== Databases ===
+{| border="1" cellspacing="0"
+|-
+!Raakvlaksysteem
+!partitie
+!instantie
+!start
+!eind
+|-
+|BVR
+|T
+|I52
+|3-12-2007
+|15-2-2008
+|-
+|BBA
+|T
+|I01
+|3-12-2007
+|15-2-2008
+|-
+|OCP
+|T
+|I98
+|3-12-2007
+|15-2-2008
+|-
+|COA
+|T
+|ICOA CICS.CDxxx
+|3-12-2007
+|15-2-2008
+|-
+|VIA
+|T
+|IVIAU01
+|3-12-2007
+|15-2-2008
+|-
+|ABS
+|T
+|
+|15-12-2007
+|15-2-2008
+|}
+
+==== COA ====
+* VISAM database (geen DB2)
+* In 2007
+
+{| border="1" cellspacing="0"
+|-
+!NNP-databases
+!NP-databases
+!Huidig JAAR
+|-
+|CD1000
+|CD2000
+|2003
+|-
+|CD1100
+|CD2100
+|2004
+|-
+|CD1200
+|CD2200
+|2005
+|-
+|CD1300
+|CD2300
+|2006
+|-
+|CD1400
+|CD2400
+|2007
+|-
+|CD1500
+|CD2500
+|2000
+|-
+|CD1600
+|CD2600
+|2001
+|-
+|CD1700
+|CD2700
+|2002
+|}
+
+=== CICS-en ===
+&lt;invullen&gt;
+
+=== MQ managers ===
+* QI55 (CxR mainframe)
+* QTI1 (mainframe)
+
+=== MQ namen ===
+&lt;invullen&gt;
+
+== Acceptatie omgeving ==
+{| border="1" cellspacing="0"
+|-
+!Raakvlaksysteem
+!partitie
+!instantie
+!start
+!eind
+|-
+|BVR
+|Q
+|A04 en/of Q01
+|10-12-2007
+|15-2-2008
+|-
+|BBA
+|Q
+|
+|10-12-2007
+|15-2-2008
+|-
+|OCP
+|Q
+|A99
+|10-12-2007
+|15-2-2008
+|-
+|COA
+|Q
+|
+|10-12-2007
+|15-2-2008
+|-
+|VIA
+|Q
+|
+|10-12-2007
+|15-2-2008
+|-
+|ABS
+|Q
+|A02, A03 of A99
+|14-1-2008
+|15-2-2008
+|}
+
+=== CICS-en ===
+&lt;invullen&gt;
+
+=== MQ managers ===
+* QA56 (CxR mainframe)
+* QQA1 (mainframe)
+
+=== MQ namen ===
+&lt;invullen&gt;</text>
+    </revision>
+  </page>
+  <page>
+    <title>HLD2008.1 Performance over de keten</title>
+    <id>3146</id>
+    <revision>
+      <id>8206</id>
+      <timestamp>2007-11-21T12:44:50Z</timestamp>
+      <contributor>
+        <username>Hans Oesterholt</username>
+        <id>60</id>
+      </contributor>
+      <minor/>
+      <text xml:space="preserve">{{Sjabloon:ARMenu}}
+
+==Inzicht krijgen in performance==
+
+
+
+
+
+
+===Inrichten van meetpunten===
+
+===Meten van de performance===
+
+===Performance maatregelen===
+
+===Pre-fetching &amp; Service caching===
+
+===Inrichten van een ODS===
+
+===AR Kaders===</text>
+    </revision>
+  </page>
+  <page>
+    <title>Performance-inrichten-omgeving</title>
+    <id>3180</id>
+    <revision>
+      <id>8583</id>
+      <timestamp>2007-12-06T09:29:24Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <comment>/* LDAP */</comment>
+      <text xml:space="preserve">== Gebruiker en directory aanmaken ==
+Op de omgeving moeten de volgende stappen worden uitgevoerd om performance te kunnen testen mbv JMeter en de hierbij behorende toolset. Voor elke machine in de omgeving, waarop resource logging en applicatie logging moet plaatsvinden:
+# Log in als root
+# Maak met &lt;b&gt;smit user&lt;/b&gt; een gebruiker &lt;b&gt;perf&lt;/b&gt; aan. Voeg deze gebruiker toe aan alle groepen (escape-4). Indien dit niet wenselijk is, dan in ieder geval aan de groepen adm (volgens RUN-infra) en system (om nmon uit te kunnen voeren). Verder zijn was, mq en db2 groepen ook wenselijk om deze processen te beheren.
+# Voor deze gebruiker toe aan de cron-lijst in &lt;b&gt;/var/adm/cron/cron.allow&lt;/b&gt;
+# Maak een directory aan: &lt;b&gt;/prj/perftest&lt;/b&gt; en geef &lt;b&gt;perf&lt;/b&gt; lees en schrijf rechten hierop.
+# Zorg dat de gebruiker het goede password heeft.
+
+Op een windows omgeving wordt vervolgens de omgeving gedefineerd met ip adressen etc. Mbv een script worden dan de performance scripts gekopieerd naar de /prj/perftest directories op elke machine.
+
+== Scripts op de AIX machines ==
+De script in /prj/perftest worden normaal gesproken uitgevoerd met de user &lt;b&gt;perf&lt;/b&gt;. De volgende tabel geeft een overzicht van de systeem-tools/scripts die hierbij nodig zijn:
+* standaard dingen: date, gzip, tar, ps, grep, egrep, kill, sed, awk, sleep, df, du, ls, cd, ln, cat, chmod, chown, tail, find, touch, xargs
+* nmon
+* netstat
+* crontab
+* lsof: om ip-poorten aan processen te koppelen. Mogelijk niet standaard aanwezig.
+* nohup: nmon etc starten vanuit cron
+* xmlaccess, oa voor het aanmaken van gebruikers in de LDAP.
+* db2, oa voor het tellen van events na het uitvoeren van een test en evt opschonen van de tabel.
+* runmqsc: mq queries
+* empty: tool om een mq queue te legen.
+* Tcl: scripting taal.
+* /prj/was/bin/wsadmin.sh
+* /prj/mqbrkrs/etc/init.rc: opvragen broker status.
+* /prj/was/bin/stopServer.sh
+* /prj/was/bin/startServer.sh
+* /prj/wps/bin/genVersionReport.sh
+
+== Rechten op directories ==
+Verder zijn lees en/of schrijf rechten nodig op de volgende directories:
+* lees en schrijf: /prj/wps/log/
+* directory aanmaken op portal machine: /prj/wps/log/portals
+* lees en schrijf: /prj/was/logs/
+* lees en schrijf: /prj/perftest
+* lees: /prj/was/installedApps/
+* lees en schrijf op /log4j.xml: is de huidige lokatie, wellicht niet zo handig.
+
+== OLO en TAO ==
+* In principe zijn de stappen voor beide soorten omgevingen dezelfde. Wanneer beveiliging een rol speelt, en een van bovenstaande zaken niet kan in de TAO, zal in overleg een alternatief bepaald moeten worden.
+
+== Gebruikers aaanmaken (LDAP) ==
+=== Aanmaken via wpsadmin console ===
+* 600 gebruikers, van perf00000001-perf00000600.
+
+&lt;pre&gt;
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;request xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="PortalConfig_1.4.xsd" type="update"
+	create-oids="true"&gt;
+	&lt;!-- sample for creating a user and adding the user to a group --&gt;
+	&lt;portal action="locate"&gt;
+        &lt;user action="update" name="perf00000001" firstname="perf00000001" lastname="User" password="pwd4prt"&gt;
+            &lt;description&gt;perf00000001&lt;/description&gt;
+            &lt;parameter name="preferredLanguage" type="string" update="set"&gt;nl&lt;/parameter&gt;
+            &lt;parameter name="cn" type="string" update="set"&gt;sample&lt;/parameter&gt;
+        &lt;/user&gt;
+        &lt;group action="update" name="Perf-users"&gt;
+            &lt;member-user update="set" id="perf00000001"/&gt;
+        &lt;/group&gt;
+        &lt;/portal&gt;
+&lt;/request&gt;
+&lt;/pre&gt;
+
+=== LDAP commando's ===
+&lt;pre&gt;
+ldapsearch -h localhost -b "dc=belastingdienst,dc=nl" -D "cn=root" -w "pa55word" "(cn=Perf-users)"  "uniquemember" | more
+&lt;/pre&gt;
+
+== Gegevens ==
+&lt;pre&gt;
+TDS olcru241
+user: "cn=root"
+ww: 
+
+http://olcru200.olo.belastingdienst.nl:9060/admin
+user:wasadmin
+ww:
+
+http://olcru211.olo.belastingdienst.nl/wps/portal
+https://olcru202.olo.belastingdienst.nl:9443/wps/portal
+http://olcru202.olo.belastingdienst.nl:9080/wps/portal
+user: wpsadmin
+ww: 
+
+olcru200
+olcru202
+olcru211
+olcru241
+user: root
+ww: 
+&lt;/pre&gt;</text>
+    </revision>
+  </page>
+  <page>
+    <title>Performance-inrichting-BSB-test</title>
+    <id>3039</id>
+    <revision>
+      <id>7157</id>
+      <timestamp>2007-10-09T09:39:46Z</timestamp>
+      <contributor>
+        <username>Sikkm00</username>
+        <id>76</id>
+      </contributor>
+      <comment>/* Problemen */</comment>
+      <text xml:space="preserve">== Doel ==
+* werkend op laptop met Menko: aansluiting JMeter op MQ/broker, en dit inpassen in performance toolset (cruisecontrol etc.).
+* Alles lokaal op laptop.
+
+== Voorbereiding ==
+* MQ en broker installeren.
+* Performance test toolset installeren.
+* JMeter JMS script maken. En zien werken in GUI van JMeter.
+
+== Stappen ==
+* jmx gecreeerd
+* parameters threadgroup / loops / ramp-up / duration / sleeptime
+* testomgeving 
+* testcase gecreerd
+* testsuite gecreerd
+
+* cmd line: once testsuites\test-mq-local.xml
+
+
+== Problemen ==
+* Correlation id niet gevonden: mogelijke oorzaak: queue was nog niet leeg.
+Oplossing: In de JMeter Test-Plan de JNDI variabelen queue.Q.REQ en queue.Q.RPL verwijderen. Deze worden in de connection factory file (C:/labcr/java/JNDI-Directory gezet. 
+* bestand niet gevonden: mqjbnd05. Dit is een dll, neergezet in jmeter/lib/ext. Test: PATH uitbreiden met jmeter/lib/ext.
+
+== FAQ ==
+* Nieuwe JMeter, wat nu: installeren op nieuwe lokatie; in setenv-xxx.bat de paden voor JMeter aanpassen. Testen.</text>
+    </revision>
+  </page>
+  <page>
+    <title>PerformanceModellen</title>
+    <id>2835</id>
+    <revision>
+      <id>5720</id>
+      <timestamp>2007-06-21T12:40:44Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== Inleiding ==
+Bij het programma Complexiteits Reductie release 2 vormen performance en schaalbaarheid een belangrijk aandachtsgebied. Met behulp van het opstellen van performance modellen wordt zo snel mogelijk inzicht verkregen in de haalbare performance van het geheel en van de deelgebieden.
+
+== Modellen ==
+De volgende modellen worden opgesteld:
+* Een (of meerdere) overkoepelend model, waarin Portals, BSB, GGHH en achterliggende systemen zijn opgenomen.
+* Een (of meerdere) model specifiek voor Portals, mogelijk meer gedetailleerd dan het overkoepelende model.
+* Een (of meerdere) model specifiek voor de BSB, mogelijk meer gedetailleerd dan het overkoepelende model.
+* Een (of meerdere) model specifiek voor GGHH, mogelijk meer gedetailleerd dan het overkoepelende model.
+
+== Openstaande vragen ==
+* BSB: verwerkingstijd lijkt kwadratisch afhankelijk te zijn van de grootte van het bericht, en dus niet lineair. De tijd die erbij komt voor persistente berichten is wel lineair afhankelijk.
+* GGHH: welke van de genoemde 3 oplossingen voor het zoeken op postcode wordt gekozen? Evt verschillende modellen hiervoor opstellen.
+
+== Model technisch ==
+Grafieken:
+* Normaal N (of Z) op de X-as uitzetten, en dan X en R (ook D en U) op de Y-as.
+* Voor open netwerken ook al eens &amp;lambda; op de X-as.
+* Voor BSB bv de grootte van berichten op de X-as.
+* Voor GGHH bv het aantal BS nummers op de X-as.
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Performance tuning en capaciteitsmanagement</title>
+    <id>3301</id>
+    <revision>
+      <id>9141</id>
+      <timestamp>2008-01-28T12:15:32Z</timestamp>
+      <contributor>
+        <username>Moerj01</username>
+        <id>24</id>
+      </contributor>
+      <text xml:space="preserve">Terug naar [[Procedure overzicht]]
+
+==Doel==
+
+Doel van deze procedure is dat prognose en performance modellen up to date gehouden worden zodat op elk moment duidelijk is wat verwacht wordt dat de omgeving aankan en of hier eventueel in aanpassingen op gedaan moet worden.
+ 
+
+==Link Beheerhandboek en documentatie==
+
+In het beheerhandboek is een overzicht te vinden met de laatst bekende versies van documenten. Wanneer een document niet ter beschikking wordt gesteld door het service team op intranet en u niet in bezit bent van het betreffende document kunt u contact opnemen met het ICI loket (CICT ICI loket_Postbus), hierbij dient u het release en of borgingsnummer te vermelden. Het service team dat het document gepubliceerd heeft kunt u terug vinden bij de onderstaande documenten. 
+
+
+==Benodigde documentatie==
+
+* Beheerhandboek eCommerce HB (Performance tuning en capaciteitsmanagement)
+:CO/GIOS/WHS
+
+* Handleiding prognose_sheet
+:CO/GIOS/WHS
+
+
+==Best Practices==
+
+Onder deze kop wordt u van harte uitgenodigd best practices en of aanpassingen op gerelateerde documentatie te noteren. Vergeet echter niet om via het generieke proces bij de betreffende CO afdeling wijzigingen aan te geven, zodat deze opgenomen worden in de volgende release van de documentatie.</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-Performance</title>
+    <id>2476</id>
+    <revision>
+      <id>8943</id>
+      <timestamp>2008-01-16T14:41:56Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <comment>/* Performance Engineering */</comment>
+      <text xml:space="preserve">{{Sjabloon:PortalsMenu}}
+== Performance Engineering ==
+Performance Engineering bestaat uit oa de volgende onderdelen:
+
+* Vaststellen (non-functional) [[Portals-Performancerequirements]];
+* Samenwerking met architectuur, ontwerp, bouw, infra, OTL;
+* [[Portals-PerformanceTesten]] met bv. [[Portals-JMeter]];
+* [[Portals-PerformanceModelleren]].
+* [[Portals-Schaalbaarheid]]
+* [[Portals-Profilen]];
+
+Zie ook de volgende pagina's:
+* [[Portals-PerformanceToolset]]
+* [[Portals-PerformancePortalsCursus]]
+* [[Portals-Performance-Opleidingsplan]]
+
+Test Resultaten:
+* [http://dpc0465524.pc.belastingdienst.nl:8088/cruisecontrol/buildresults Perf Test Results (DPC0465524, zet proxy uit)]
+
+WAS Instellingen:
+* [[Portals-Performance-WASinstellingen]]
+
+Logging:
+* [[Portals-Performance-Logging]]
+
+Zie ook http://en.wikipedia.org/wiki/Performance_engineering
+
+== Performance grafieken ==
+Het is soms lastig performance grafieken goed te lezen en te interpreteren. Kijk op de volgende pagina's voor uitleg:
+* [[Portals-Performance-Grafieken]]
+* [[Portals-PerformanceModelleren-Grafieken]]
+* [[Portals-PerformanceLQN]]
+
+== Performance todo ==
+* [[Portals-Performance-Release3|Performance activiteiten Release 3]]
+* [[Portals-Performance-Release2|Performance activiteiten Release 2]]
+* Onderzoeken van bruikbaarheid van [[Portals-Performance-Tools|Performance tools]]
+* Bepalen van relevantie van [[Portals-Performance-Documenten|Performance documenten]]
+* Rapport [[Portals-Schaalbaarheid|Portals en schaalbaarheid]]
+* [[Portals-Performance-TodoGeeltjes]]
+* [[Portals-Performance-Keten]]
+
+== Performance test omgevingen ==
+* Zie http://10.75.99.121/ganglia/ voor statistieken van machines in de test omgeving.
+* Zie [[Portals-Infrastructuur]] voor een overzicht van de omgevingen
+* [[Klop2_Integratie]]
+* [[KLOP2_OTAP]]
+* [[Performance-inrichten-omgeving]]
+
+=== Sofinummers ===
+Uit [[Documentatie]], per 21-6-2007:
+{| border="1" cellspacing="0"
+|-
+!Sofinummer
+!Postcode, huisnummer
+|-
+|262170887
+|8032DD, 2
+|-
+|262170929
+|8032DD, 2
+|-
+|262171260
+|2565SL, 46
+|-
+|262171727
+|7339LK, 95
+|}
+
+== Performance contactpersonen ==
+{| border="1" cellspacing="0"
+|-
+!Persoon
+!Aandachtsgebied
+|-
+|Geert Willem Haasjes
+|Architect CPP van IBM, onderzoek &amp; Marketing
+|-
+|Rob de Jong
+|Contactpersoon CPP
+|-
+|Maurice van Laarhoven
+|Domein architect, technisch.
+|-
+|David van Kuijk
+|Domein architect
+|-
+|Jeroen Weerink
+|PM Lab
+|-
+|Bert Harmsen
+|Inrichting Lab
+|-
+|William Verkooijen
+|Inrichting Lab
+|-
+|Martin Schilder
+|IBM
+|-
+|Bert Arends
+|Poort Infra ontwerper
+|-
+|Erik Bits
+|Poort Infra test coordinator
+|-
+|Barry Geerdink
+|Poort infra tester, mogelijk ook performance modellen.
+|}
+
+== Performance input ==
+{| border="1" cellspacing="0"
+|-
+!Naam
+!Opmerkingen
+|-
+|IBM Redbooks
+|Zie [[Portals-IBMWebSpherePortalServers]] en [[Portals-PortalampPortletDevelopment]]
+|-
+|BDS
+|Zie &lt;br&gt;Approw50\approw50.dg\ALGEMEEN\BDS0712-PROJECTOFFICE\400-Ontwikkeling (Projecten)\80-Complexiteits Reductie\Portals\fase 0\Piekaantallen
+|-
+|BDS Portals
+|Zie &lt;br&gt;Approw58\APPROW58.DG\CICT_ON_Applicaties\BLD\IOA\OP\BDS_0712_Portals
+|-
+|RUP
+|Zie 2. WebServer:documentatie/rup/index.htm
+|}
+
+* R: =&gt; &lt;br&gt;approw50\APPROW50.DG (algemeen CR BDS)
+* S: =&gt; &lt;br&gt;Approw58\APPROW58.DG\CICT_ON_Applicaties\BLD\IOA\OP\BDS_0712_Portals (Werk BDS van Portals)
+
+== Tools documentatie ==
+* [http://jakarta.apache.org/jmeter/index.html JMeter]
+* [http://httpd.apache.org/ Apache HTTP Server]
+
+== Diversen ==
+* Herstarten IHS: /prj/ihs/bin/apachectl restart.
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-Performance-Documenten</title>
+    <id>2682</id>
+    <revision>
+      <id>6078</id>
+      <timestamp>2007-07-20T14:05:31Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <comment>/* Redbooks etc IBM */</comment>
+      <text xml:space="preserve">== Architectuur ==
+{| border="1" cellspacing="0"
+|-
+! Document
+! Versie
+! Lokatie
+! Opmerkingen
+|-
+| BO PID
+| 0.41 (1-4-2007)
+| http://10.79.106.58/documentatie/architectuur/basisontwerp_rapport_pid%200.41.doc
+| 2-5-2007 ontvangen van David van Kuijk.
+|-
+| DA WebInfra
+| 2007v08
+| http://10.79.106.58/documentatie/architectuur/DA_WebInfra_2007v08.doc
+| -
+|-
+| KLOP arch blauwdruk
+| 0.5 (16-1-2007)
+| http://10.79.106.58/documentatie/architectuur/KLOP%20architectuur%20blauwdruk%20V0.5.doc
+| Hermen: kijk naar hoofdstuk 6.
+|}
+
+Toevoegen:
+* docs via Bert Arends ontvangen.
+* Andere docs van Hermen?
+* IBM redbooks etc.
+
+== Redbooks etc IBM ==
+{| border="1" cellspacing="0"
+|-
+! Document
+! Versie
+! Lokatie
+! Opmerkingen
+|-
+| WCM Best practices
+| -
+| http://10.79.106.58/documentatie/portal/0701_devos-WCM6-BestPractices.pdf
+| 
+* Zie ook [[Portals-IBMWebSpherePortalServers]]
+* [[Portals-Performance-WCMOpmerkingen]]
+|-
+| WebSphere Portal Version 6 Enterprise Scale Deployment Best Practices
+| -
+| http://publib-b.boulder.ibm.com/abstracts/sg247387.html&lt;br/&gt;http://10.79.106.58/documentatie/IBM/sg247387.pdf
+| Par 8.4 over monitoring&lt;br/&gt;21-3-2007 link van Hermen ontvangen.
+|-
+| IBM InfoCenter
+| -
+| http://10.79.106.58:1516/help/index.jsp&lt;br/&gt;http://10.79.106.58/documentatie/portal/infocenter51/
+| -
+|-
+| IBM InfoCenter performance
+| -
+| http://10.79.106.58:1516/help/index.jsp?topic=/com.ibm.websphere.base.doc/info/aes/ae/welc6toptuning.html
+| -
+|-
+| IBM SPE Docs
+| -
+| c:\nico_share\bieb\IBM SPE
+| -
+|}
+
+=== Portal 6 ===
+In Portal 6 (http://www-306.ibm.com/software/genservers/portal/topten.html):
+* Performance enhancements to improve page throughput and support up to 40,000 dynamic portal pages.
+* Caching context in session
+* Reuse already computed results and objects
+* Reduced number of DB calls
+* Better linear scaling by adding CPUs
+
+=== Integrating Jakarta Commons Logging with IBM WebSphere Application Server V5 ===
+(http://whitepapers.techrepublic.com.com/whitepaper.aspx?docid=79968)
+
+Overview: This white paper provides instructions and suggestions for configuring the features of WebSphere Application Server and JCL to integrate application-specific JCL artifacts. The artifacts integrate into the WebSphere Application Server run-time environment, overriding those supplied by WebSphere Application Server. WebSphere Application Server V5 (WAS5) supplies and utilizes JCL v1.2. JCL defines a common programming model for logging over pluggable logging implementations.
+
+=== Best Practices for IBM WebSphere Application Server Performance WebCast ===
+(http://whitepapers.techrepublic.com.com/webcast.aspx?docid=80365)
+
+Overview: This webcast will help WebSphere architects, designers, and developers create WebSphere applications that offer better performance when running on WebSphere Application Servers (WAS). It outlines the best practices in six areas: design pattern, servlets and JSP, sessions, connecting to databases and back ends, memory use, and Enterprise Java Beans (EJB).
+
+== Anti Patterns ==
+{| border="1" cellspacing="0"
+|-
+! Document
+! Opmerkingen
+|-
+| http://www-128.ibm.com/developerworks/webservices/library/ws-antipatterns/
+| Via BD werkplek te lezen. Oa "Chatty services" en "The Silo Approach".
+|-
+| http://www.infoq.com/articles/SOA-anti-patterns
+| -
+|-
+| http://www.ebizq.net/topics/soa/features/7238.html?rss
+| -
+|-
+| http://blueprints.jot.com/SOA%20Anti-Patterns
+| -
+|}
+
+== Project documenten ==
+* Staan in ClearCase: IPB_Plateau_2\CR_Portals\fundament\test\perf\docs
+* Staan in ClearCase (req's): C:\vreen00_IPB_Plateau_2\CR_Portals\fundament\ontwerp\Supplementary specifications\Portals performance requirements.doc
+
+== Referenties ==
+* Portals performance referenties document.
+* Lokaal op PC Nico: c:\nico_share\bieb\architectuur.
+* http://10.79.106.58/documentatie/architectuur/ (kopieer naar \\10.79.106.58\c$\data\httpdocs\documentatie\architectuur)
+* [[Portals-IBMWebSpherePortalServers]]
+* C:\nico\bieb\perf-frankW
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-Performance-Grafieken</title>
+    <id>2596</id>
+    <revision>
+      <id>6453</id>
+      <timestamp>2007-08-23T12:42:05Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <comment>/* Throughput en responsetijden */</comment>
+      <text xml:space="preserve">== Throughput en responsetijden ==
+In de meeste grafieken zie je de throughput en de responsetijden uitgezet worden tegen de load die op het systeem als geheel wordt gezet.
+De load wordt meestal uitgedrukt in het aantal gebruikers (ook wel parallelle gebruikers, threads, virtual users) dat requests uitvoert.
+Een voorbeeld van zo'n grafiek staat hieronder:
+
+[[image:Portals-Performance-Suitegraph1.png]]
+
+De titel 'R, X en D tov N (aix, Z=0)' betekent het volgende:
+* R is de gemiddelde responsetijd (in seconden), deze is uitgezet op de linker y-as.
+* X is de gehaalde throughput (requests per seconde), deze is uitgezet op de rechter y-as.
+* D is de gemiddelde service demand (in seconden), deze is uitgezet op de linker y-as. De service demand is de tijd die het de server kost om één request af te handelen.
+* tov: ten opzichte van: op de X-as wordt N (het aantal gebruikers) uitgezet; op de y-as de waarden voor R, X en D.
+* N is het aantal gebruikers in een test.
+* aix: de test is uitgevoerd op een aix-server.
+* Z=0: de gebruikers denktijd is hier 0 seconden: meteen na het ontvangen van antwoord van de server (nieuwe pagina) wordt de volgende request (muisklik) gestuurd.
+
+Er zijn drie assen van belang in deze grafiek:
+* De X-as, waarop het aantal gebruikers (N) is uitgezet. In dit geval zijn er 8 tests uitgevoerd, met een oplopend aantal gebruikers van 1 tot en met 10.
+* De linker Y-as, waarop de responsetijd (R) en de service demand (D) zijn uitgezet. Dit zijn waarden gemeten in seconden.
+* De rechter Y-as, waarop de throughput (X) is uitgezet. Dit zijn waarden gemeten in aantal requests per seconde.
+
+De drie lijnen in deze grafiek zijn:
+* De rode lijn met de responsetijden. Deze zie je lineair oplopen van 0,05 seconden naar 0,35 seconden.
+* De groene lijn met de throughput. Deze zie je oplopen van iets minder dan 20 requests per seconde (bij 1 gebruiker) naar de maximaal haalbare waarde van ongeveer 28 requests per seconde.
+* De blauwe lijn geeft de berekende service demand. In theorie zou deze lijn horizontaal moeten lopen, de service demand is onafhankelijk van de load op het systeem. In de praktijk zie je vaak dat de waarde wat kleiner wordt bij grotere N; door o.a. caching kan het systeem de requests wat efficienter afhandelen.
+
+De rode en de groene lijn hangen samen: zolang de throughput nog niet de maximaal haalbare waarde heeft bereikt, zal de responsetijd niet snel oplopen. Maar wanneer de maximale throughput wel bereikt wordt, is het systeem verzadigd en zullen de responsetijden snel oplopen.
+
+== Responstijd percentielen ==
+Een andere soort grafiek die je kan tegenkomen is die waarin percentielen van responsetijden staan, zoals hieronder.
+
+[[image:Portals-Performance-Report-KlntBeh.png]]
+
+Hier zie je in de titel dat een test met 'KlntBeh' (ofwel Klant Beheer) is uitgevoerd.
+
+Er zijn twee assen:
+* Op de X-as zijn de verschillende soorten requests uitgezet, in dit geval 8. Deze requests zijn onderdeel van een scenario 'Klant Beheer'.
+* Op de Y-as zijn de responsetijden uitgezet.
+
+Per soort request zie je vervolgens een staafdiagram met vier verschillende kleuren:
+* Het paarse stuk (avg) geeft de gemiddelde responsetijd.
+* Het blauwe stuk (perc90) geeft het 90% percentiel: 90% van de gemeten responsetijden vallen op of onder deze waarde.
+* Het groene stuk (perc95) geeft het 95% percentiel: 95% van de gemeten responsetijden vallen op of onder deze waarde.
+* Het rode stuk (perc98) geeft het 98% percentiel: 98% van de gemeten responsetijden vallen op of onder deze waarde.
+
+Je ziet dus dan de 90, 95 en 98 percentielen significant hoger kunnen liggen dan de gemiddelde waarde.
+
+Een andere manier van presenteren van dezelfde gegevens zie je in onderstaande grafiek:
+
+[[image:Portals-Performance-Percentiles-report-KlntBeh.png]]
+
+Op de assen staat het volgende:
+* De X-as geeft het percentiel aan.
+* De Y-as geeft de bijbehorende responsetijd, in milliseconden.
+
+Elke soort request wordt nu met een eigen lijn weergegeven, zoals:
+* De rode lijn geeft de tijden voor de pagina (request) PortalStart. 65% van de responsetijden zijn goed, maximaal 200 milliseconden. Meer dan 20% van de waarden zit echter boven de 1200 milliseconden.
+* De paarse lijn geeft de tijden voor Select2006 (een pagina waarin WCM gegevens worden getoond). De responsetijden van deze pagina zijn behoorlijk gelijk, rond de 400 milliseconden, met slechts een paar uitschieters van rond de 1600 milliseconden.
+
+== Verdeling responstijden ==
+Door middel van metingen op het niveau van de HTTP server en de Portal server intern is het mogelijk te bepalen hoe de responstijd van een request (pagina) is opgebouwd. Zie onderstaande grafiek:
+
+[[image:Portals-Performance-Log-histogram.png]]
+
+Je ziet hier ook weer per soort request wat de verdeling is, bijvoorbeeld voor 'Select2006':
+* De aan de client (JMeter) gemeten responsetijd (het rode stuk) is 0,38 seconden.
+* Op de HTTP server wordt maar een net iets lagere tijd gemeten (het groene stuk). Dit betekent hier dat er nauwelijks overhead is van de client en het netwerk tussen client en server.
+* Het blauwe stuk (0,1 seconde) geeft aan welke tijd in de action() en render() methoden van de Portal Server wordt doorgebracht. Dit kun je weer onderverdelen in tijd nodig voor het uitvoeren van de java code en tijd voor het aanroepen van externe systemen, in dit geval WCM. Het verschil tussen de blauwe en groene balk zit in de overhead van de Portal Server zelf, o.a. in het renderen van de volledige pagina voor de client.
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-Performance-Guerrilla-Capacity-Planning</title>
+    <id>2829</id>
+    <revision>
+      <id>5069</id>
+      <timestamp>2007-05-30T13:55:51Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== Inleiding ==
+Guerrilla Capacity Planning is een methode van Neil Gunther, met als doel om met zo weinig mogelijk hulpmiddelen toch een zinvolle uitspraak te doen over de schaalbaarheid van een systeem. Deze schaalbaarheid wordt ook kwantitatief uitgedrukt. De wet van Amdahl (zie http://en.wikipedia.org/wiki/Amdahls_Law) is hiervoor als basis gebruikt, met een uitbreiding naar de Universal Scalability Law:
+
+ C(p) = p / (1 + &amp;sigma;(p-1) + &amp;kappa;p(p-1))
+
+De volgende variabelen spelen een rol:
+* p: het aantal processoren of machines; maar kan ook worden gebruikt om het aantal gebruikers (vusers, threads) aan te geven.
+* C(p): de relatieve capaciteit bij p processoren: C(p) = X(p) / X(1)
+* &amp;sigma;: een maat voor de contention, mate van queue vorming, deel van het proces dat niet parallel kan worden uitgevoerd.
+* &amp;kappa;: een maat voor de coherency, extra tijd die nodig is om alle data overal in sync te brengen en te houden.
+
+In het geval van KLOP2, waarbij alleen informatie geraadpleegd wordt, moeten in theorie zowel &amp;sigma; als &amp;kappa; naar 0 gaan, functioneel gezien. Technische gezien spelen de volgende factoren een rol:
+* Bij oplopend aantal processoren: de machines zitten in een cluster, waarbij gegevens in sync moeten worden gehouden.
+* Bij oplopend aantal gebruikers op een machine: alle threads en sessies moeten worden beheerd, wat voor extra, niet lineaire, overhead zorgt.
+
+In bijgevoegde excel sheet is een aantal berekeningen en grafieken opgenomen: [[media:Portals-performance-Univ-scaling.xls|Univ-scaling.xls]].
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-Performance-Keten</title>
+    <id>2919</id>
+    <revision>
+      <id>6320</id>
+      <timestamp>2007-08-02T11:56:35Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== Algemeen ==
+Met [[Keten_en_Integratie]] wordt overlegd en samengewerkt op het gebied van performance modellering en performance testen.
+
+== Actiepunten ==
+{| border="1" cellspacing="0"
+|-
+!Wat
+!Wie
+!Opgevoerd
+!Deadline
+!Status
+!Opmerkingen
+|-
+|Bevindingen in CQ zetten
+|Nico
+|2-8-2007
+|3-8-2007
+|Open
+|BSB traag&lt;br/&gt;WCM traag
+|-
+|Prio perftesten als risico in PMP
+|Dick
+|2-8-2007
+|
+|Open
+|
+|-
+|BSB aanbodmodel in LQNS
+|Nico
+|2-8-2007
+|
+|Open
+|
+|-
+|RFI/RFP Tool eisen
+|Jan W.
+|2-8-2007
+|
+|Open
+|Jan regelt overleg met Nico en Rene. Invullen met JMeter Toolset, HP, Rational, …
+|-
+|Resource logging op MF
+|Menko
+|2-8-2007
+|
+|Open
+|
+|-
+|Robot PoC
+|Menko
+|2-8-2007
+|
+|Open
+|
+|-
+|perfmod technieken
+|Nico
+|2-8-2007
+|
+|Open
+|Bas Otten heeft een performance modellerings methodiek, ivm Mainframe Op Orde (M.O.O.)&lt;br/&gt;mBrace bekijken.
+|-
+|perfmod verwerken opmerkingen Hermen
+|Nico
+|18-6-2007
+|
+|Open
+|Aanvulling Hermen (zie mail) verwerken.
+|}
+
+
+
+== Afspraken ==
+* 2-8-2007 (Roel de Weerd): GGHH is aangspreekpunt voor het correleren van testdata uit diverse systemen: BvR, BBA. Zorgen dat bij een BSN gegevens uit meerdere systemen beschikbaar zijn.
+* 19-6-2007: René Menninga en Michel van der Meer coordineren de testen op de lab omgeving.
+
+== Opmerkingen ==
+* Loggen in de keten: GGHH (Roel de Weerd) heeft hier ideeen over; ook UUID opnemen in header.
+* Frank G: bij portals nu niet met Robot of Testmanager werken, wel RSA en Excel.
+* 19-6-2007: JMeter gebruiken voor BSB? Knelpunten is mainframe communicatie, mogelijk 3270 telnet tools te gebruiken zoals Tcl3270 of Jagacy.
+
+== Testen ==
+=== Sofinummers ===
+Uit [[Documentatie]], per 21-6-2007:
+{| border="1" cellspacing="0"
+|-
+!Sofinummer
+!Postcode, huisnummer
+|-
+|262170887
+|8032DD, 2
+|-
+|262170929
+|8032DD, 2
+|-
+|262171260
+|2565SL, 46
+|-
+|262171727
+|7339LK, 95
+|}
+
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-Performance-Logging</title>
+    <id>3258</id>
+    <revision>
+      <id>8944</id>
+      <timestamp>2008-01-16T14:45:02Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== Per 16-1-2008 ==
+* Algemeen: PERF niveau instellen in log4j.xml
+* Zie http://10.75.99.209/ voor alle MTHV's.
+
+== Voorbeeld log4j.xml ==
+
+&lt;pre&gt;
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE log4j:configuration SYSTEM "log4j.dtd"&gt;
+&lt;log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/"&gt;
+        &lt;appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender"&gt;
+                &lt;param name="File" value="/prj/wps/log/portals/portals.log"/&gt;
+                &lt;param name="DatePattern" value="'.'yyyy-MM-dd-HH-mm"/&gt;
+                &lt;layout class="org.apache.log4j.PatternLayout"&gt;
+                        &lt;param name="ConversionPattern" value="%d %-5p (%t:%x) [%c{1}] %m%n"/&gt;
+                &lt;/layout&gt;
+        &lt;/appender&gt;
+        &lt;logger name="framework_nl.belastingdienst.portals"&gt;
+                &lt;priority value="PERF" class="nl.belastingdienst.portals.framework.common.logging.BelastingdienstLevel" /&gt;
+        &lt;/logger&gt;
+        &lt;logger name="nl.belastingdienst.portals"&gt;
+                &lt;priority value="PERF" class="nl.belastingdienst.portals.framework.common.logging.BelastingdienstLevel" /&gt;
+        &lt;/logger&gt;
+    &lt;root&gt;
+        &lt;priority value="INFO" class="nl.belastingdienst.portals.framework.common.logging.BelastingdienstLevel" /&gt;
+        &lt;appender-ref ref="FILE" /&gt;
+    &lt;/root&gt;
+&lt;/log4j:configuration&gt;
+&lt;/pre&gt;
+
+== Oud, archief ==
+* Met AOP, bestanden neerzetten, WAS Console instellen.</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-Performance-Opleidingsplan</title>
+    <id>2826</id>
+    <revision>
+      <id>5084</id>
+      <timestamp>2007-05-31T12:30:42Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">Een aantal dingen waar je in een performance opleidings plan rekening mee moet houden.
+
+Termen:
+* virtual users, threads, throughput, responsetime, scalability, load, usage, utilisation, service demand, bottleneck, performance (anti) patterns, queueing network, operational analysis, ...
+
+Tools:
+* Load generatie: JMeter / Rational Robot / Loadrunner
+* Resource logging: nmon, netstat, perfmon.
+* Analyse: LQNS, log analysers
+
+Vaardigheden:
+* Performance requirements
+* Impact architectuur keuzes op performance.
+* Performance tijdens ontwerp (aantal calls, grootte berichtem, grootte sessie, ...)
+* Performance tijdens bouw (algoritmes, Strings, object creatie, XML, ...)
+* Performance test ontwerpen (welke UC, welke scenario's, welke combi).
+* Performance dataset (groot genoeg, productielike).
+* Performance testomgeving inrichten (productielike)
+* Test uitvoeren, gegevens verzamelen, analyseren, rapporteren
+* Performance bottleneck herkennen, in overleg met architectuur, bouw, test, infra, gebruikers adresseren.
+* Schaalbaarheidsonderzoek.
+* Performance modelleren en voorspellen.
+
+Boeken:
+* schrijver: Connie U. Smith (performance engineering)
+* schrijver: Daniel Menascé (performance engineering)
+* schrijver: Neil J. Gunther (performance engineering)
+* schrijver: Jack Shirazi (vooral java)
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-Performance-Release2</title>
+    <id>2825</id>
+    <revision>
+      <id>6058</id>
+      <timestamp>2007-07-18T11:33:26Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <comment>/* Performance risico's */</comment>
+      <text xml:space="preserve">== Planning ==
+Data:
+* 15-6-07: performance model, onderdeel van showcase.
+* 13-7-07: performance test.
+* 10-8-07: 'grote' performance test.
+
+dd 30-5-07 met William Verkooijen besproken (en Huig en Jeroen):
+* Tot 15-6 focus op enkelvoudige omgeving.
+* Huig door voorzet eisen omgeving, nav sessie Huig, Jereoen, Nico op 30-7.
+* William gaat hiermee aan de slag, na 15-6, opleverdatum nog niet te geven.
+
+== Performance risico's ==
+dd 29-5-2007 afgestemd tussen FrankW en Nico.&lt;br/&gt;
+dd 05-7-2007 afgestemd tussen Jacob en Nico. Volgens Jacob is de lijst zo compleet.
+dd 09-7-2007 laatste punten afgestemd tussen Hermen en Nico. In Rel.2 geen audit trail en ECM, wel ODS.
+
+Aandachtspunten:
+{| border="1" cellspacing="0"
+|-
+!Scope
+!Prio
+!Onderwerp
+!In EL2 (5-7-07)
+!Wanneer
+!MoSCoW
+!Contact-persoon
+!Opmerkingen
+|-
+|CR
+|1
+|Communicatie achterkant: BSB, BVR, ABS
+|Ja
+|
+|
+|
+|
+|-
+|CR
+|2
+|Eisen OTAP
+|Nee
+|IN
+|M
+|Huig
+|
+|-
+|CR
+|2
+|Infra ontwerp incl schaalbaarheid
+|Nee
+|EL1
+|M
+|Huig/Joost
+|
+|-
+|Portals
+|3
+|front office DB: portal diensten (UC)
+|Nee
+|IN
+|M
+|FrankW
+|5-7-07: nu gestubt, in CO1 echte implementatie met hibernate.
+|-
+|Portals
+|3
+|front office DB: service berichten (UC)
+|Nee
+|IN
+|M
+|FrankW
+|5-7-07: nu gestubt, in CO1 echte implementatie met hibernate.
+|-
+|Portals
+|3
+|parallelle calls
+|Nee
+|IN
+|M
+|Jacob
+|5-7-07: eerst PoC inplannen.
+|-
+|Portals
+|3
+|[[Portals-Performance-ParallelleCalls|PoC parallelle calls]]
+|Nvt
+|EL2
+|M
+| -
+|
+|-
+|Portals
+|3
+|Remoting protocol Hessian
+|Ja
+|IN
+|M
+|FrankW
+|5-7-07: alleen voor workaround classloading, verder niet meer nodig. Hessian
+|-
+|Portals
+|3
+|Remoting protocol JMS
+|Ja
+|
+|
+|
+|
+|-
+|KLOP2
+|4
+|Telefonie (papieren exercitie?)
+|Nee
+|EL1
+|S
+|Hermen/Ed
+|5-7-07: vooral vraag of externe portlet (niet IBM) gebruikt kan worden; niet in rel.2
+|-
+|Portals
+|5
+|Spring MVC Implementatie
+|Deels
+|EL2
+|M
+| -
+|5-7-07: wel InzienRelaties, rest nog niet.
+|-
+|BSB
+|
+|[[Portals-Performance-logging2|Performance logging]]
+|Nee
+|CO3?
+| -
+|Jacob
+|
+|-
+|BSB
+|
+|Audit trail (incl perf info in messages)
+|Nee
+|EL1
+| -
+|Hermen
+|BSB doet dit; 9-7-07: niet in Rel.2
+|-
+|CR
+|
+|Common Event Infrastructure
+|Nee
+|
+|
+|
+|5-7-07: voorlopig niet gebruiken.
+|-
+|Portals
+|
+|ECM bouw
+|Nee
+|CO
+| -
+|Hermen
+|9-7-07: niet in Rel.2
+|-
+|Portals
+|
+|ECM onderzoek
+|Nee
+|EL1
+|M
+|Huig/Bastiaan/PeterS
+|5-7-07: niet in Rel.2?
+|-
+|Portals
+|
+|Lotus Domino (o.a. frobos') verschillende manieren van aanroep.
+|Nee
+|EL1
+|S
+|Ed/Huig
+|5-7-07: niet in Rel.2
+|-
+|GGHH
+|
+|ODS (ongelijk aan FO DB)
+|Nee
+|
+|
+|Hermen
+|11-7-07: Dik Bruins (GGHH): wordt nog niet gebruikt, wel directe SQL op BVR database&lt;br/&gt;9-7-07: Hermen: wordt gebruikt.&lt;br/&gt;Replica BO
+|-
+|Portals
+|
+|Portlet factory
+|Nee
+|
+|
+|
+|5-7-07: mogelijk later in Rel.2
+|-
+|Portals
+|
+|Portlet factory PoC
+|Nvt
+|EL1
+|M
+|Pascal/Maarten
+|Generatie tool, eerst PoC
+|-
+|CR
+|
+|process server
+|Nee
+|IN
+|M
+|FrankW
+|5-7-07: vooralsnog vervallen.
+|-
+|Portals
+|
+|Role based security?
+|Nee
+|EL1
+|M
+|Joost
+|5-7-07: later in Rel.2&lt;br/&gt;Ander mechanisme, wordt std. J2EE, zou sneller moeten zijn.
+|-
+|BSB
+|
+|Security keten
+|Nee
+|CO
+| -
+| -
+|5-7-07: vraag wanneer dit gaat gebeuren&lt;br/&gt;BSB doet dit
+|-
+|Portals
+|
+|Spring MVC PoC
+|Nvt
+|EL1
+|M
+|Ed/Bastiaan
+|Vanaf eind EL1 - PoC
+|-
+|CR
+|
+|TAM install
+|Nee
+|EL1
+|S
+|Joost
+|5-7-07 in KLOP2 geen TAM, in showcase Rel.2 ook niet.
+|-
+|CR
+|
+|TAM PoC
+|Nee
+|EL1
+|S
+|Joost
+|5-7-07: evt door BSB: Benny Bosman
+|-
+|Portals
+|
+|Themes/skins
+|Ja
+|
+|
+|
+|5-7-07: mogelijk nog nieuwe theme/skin, van invloed op client ervaring.
+|-
+|Portals
+|
+|Wiring over pagina's
+|Nee
+|EL1
+|M
+|PeterO/Pascal
+|5-7-07: wel PoC geweest, wat issues, voorlopig niet nodig.
+|}
+
+== Performance model ==
+* Vergelijk cijfers (D, maxX etc) tussen 140http en 141cl.
+
+== Performance 'model' / engineering (CR/Keten) ==
+* Contact opnemen over Infra/testomgeving met Jeroen Weerink, Hessel Keegstra, Bert Harmsen. Jeroen Zomer heeft hier nog info over, wat handig is. Verder is Huig bezig met opstellen requirements voor OTAP omgeving (per 25-5-2007)
+* Docs mailen naar Keten mensen: perf &amp; schaalbaarheid, perf rapport en perf model.
+* In wiki: links naar boeken en artikelen.
+
+== Performance eisen/input ==
+* Voor KLOP2 1500-2000 concurrent sessies.
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-Performance-Release3</title>
+    <id>3054</id>
+    <revision>
+      <id>7330</id>
+      <timestamp>2007-10-17T15:55:41Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== Testen en omgevingen ==
+{| border="1" cellspacing="0"
+|-
+!Test
+!Omgeving
+!Status
+!Eerste nodige actie
+|-
+|Cluster: showcase
+|140 (oud)
+|Infra gedaan
+|Deploykit: Bastiaan?
+|-
+|Cluster: showcase
+|? (nw)
+|17-10 Huig bezig met installatie infra.
+|Infra
+|-
+|WCM
+|?
+|17-10 niet testbaar.
+|Joost: install op AIX
+|-
+|ECMS
+|ECMS
+|17-10 bij lab infra
+|Behandelen lab/infra
+|-
+|WS Security
+|?
+|17-10 ergens installeren
+|Maarten: "should have" in iteratie 1.
+|-
+|Profiling
+|148
+|17-10 a.s. Vrijdag evt
+|Install agent.
+|}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-Performance-Tools</title>
+    <id>2612</id>
+    <revision>
+      <id>6079</id>
+      <timestamp>2007-07-20T14:09:08Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <comment>/* Tools van IBM */</comment>
+      <text xml:space="preserve">== Doelen ==
+* Profiling: welke delen van de (source) code zijn duur?
+* Details runtime gedrag server: garbage collection, gebruik caches, connection pools.
+
+== Tools van IBM ==
+{| border="1" cellspacing="0"
+|-
+!Naam
+!Bron
+!URL
+!Opmerkingen
+|-
+|Performance Servlet
+|Jeroen
+|?
+| -
+|-
+|SIBus analyse
+|Jeroen
+|?
+|11-4-2007 gedownload.
+|-
+|CacheViz
+|Jeroen
+|http://www.alphaworks.ibm.com/tech/cacheviz
+|11-5-2007 gedownload.
+|-
+|Tra
+|Jeroen
+|http://www.alphaworks.ibm.com/tech/tra
+|11-5-2007 gedownload.
+|-
+|Pmat
+|Jeroen
+|http://www.alphaworks.ibm.com/tech/pmat
+|11-5-2007 gedownload.
+|-
+|HeapAnalyzer
+|Jeroen
+|http://www.alphaworks.ibm.com/tech/heapanalyzer?open
+|11-5-2007 gedownload.
+|-
+|Ta4was
+|Jeroen
+|http://www.alphaworks.ibm.com/tech/ta4was
+|11-5-2007 gedownload.
+|-
+|VPA
+|Jeroen
+|http://www.alphaworks.ibm.com/tech/vpa
+|11-5-2007 gedownload.
+|-
+|Tivoli Perf viewer en analyser
+|Jeroen
+|?
+|Ook WAS console
+|-
+|Tivoli Monitoring for Transaction Performance
+|Website
+|http://www-306.ibm.com/software/tivoli/products/monitor-transaction/
+|?
+|}
+
+Tools staan in c:\nico_share\install\IBM perf tools.
+
+=== Response time tracking tool IBM ===
+IBM Tivoli Composite Application Manager for Response Time Tracking Proof
+of Technology
+
+Wilt u hands-on leren hoe IBM de laatste jaren heeft gewerkt aan de
+invulling van ketenmonitoring, dan is deze 'Proof of Technology' over IBM
+Tivoli Composite Application Manager for Response Time Tracking uw kans om
+hier meer over te leren.
+
+Vrijdag 4 Mei organiseert IBM in het IBM Forum in Amsterdam een Proof of
+Technology. Dit 1-daagse event biedt een unieke mogelijkheid om op
+technische vlak kennis te maken met IBM Tivoli Composite Application
+Manager for Response Time Tracking - ITCAM for RTT. Tijdens deze dag kunt u
+hands-on ervaring opdoen met het product. Door middel van oefeningen worden
+de installatie, configuratie en het gebruik van het product
+achtereenvolgens doorlopen.
+
+Highlights IBM Tivoli Composite Application Manager for Response Time
+Tracking:
+* Detecteren, isoleren en mogelijk automatisch repareren van
+* transactionele performance problemen, liefst voordat er een probleem
+* optreedt voor de business en eindgebruikers.
+* Real-time monitoren van eindgebruikerservaring en pro-aktief monitoren van eindgebruikerstransacties.
+* Visualisatie van de complete transactie keten.
+* Integratie met diverse key middleware oplossingen en applicaties, zoals
+* WebSphere Application Server, CICS, DB2 en IMS.
+
+Meer informatie over IBM Tivoli Composite Application Manager for RTT is te
+vinden op de volgende website:
+http://www-306.ibm.com/software/tivoli/products/composite-application-mgr-rtt/
+
+== Diversen ==
+URL info:
+www.javaperformancetuning.com
+
+=== Monitor ===
+* jstat, jstatd
+* visualgc
+
+=== Profiling ===
+Applicatie:
+* prof/hprof agents
+* HPJmeter
+* JVMTI
+
+JVM
+* verbose GC
+* HPJTune
+
+Database
+* P6Spy
+* SQLProfiler
+* IronEyeSql
+
+=== Performance testen ===
+* Badboy test: ook opnemen portal script, kijken of hier ook dubbele urls en results komen.
+* CLIF
+* SLAMD
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-Performance-WASinstellingen</title>
+    <id>3004</id>
+    <revision>
+      <id>10715</id>
+      <timestamp>2008-07-17T15:40:24Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== Stubs of niet ==
+Controle of op de lokale omgevingen wel of geen stubs worden gebruikt, of welke stubs:
+* https://10.75.99.151:10039/admin
+* wasadmin/wasadmin
+* Resources/resource environment providers
+* pagina 2
+* Portletservice registry service
+* Custom properties
+* 1) ServiceStub: stub zit bij de portlet in, geen JMS/ESB calls.
+* 2) ServiceImpl: ofwel echte implementatie, ofwel stub van GGHH, via JMS/ESB rerouting opgelost. ESB calls wel gelogd.
+
+=== Op 19-9-2007 op 148 geinstalleerd ===
+* Optie 1: relatie en berichten.
+* Optie 2: aangifte en status.
+
+== Parallel rendering inschakelen ==
+=== Op Portal niveau ===
+* https://10.75.99.151:10039/admin
+* wasadmin/wasadmin
+* menu: resources/resource environment providers
+* mogelijk naar pagina 2 (onderaan)
+* select: WP PortletContainerService
+* custom properties (rechts)
+* std.useParallelRendering = false/true (dit geldt portal breed) (deze is voor JSR 168 portlets, andere voor IBM portlets).
+* std.useParallelRendering.html of std.useParallelRendering.wml =&gt; als niet aanwezig, dan eerste.
+* Op portal niveau: opnieuw opstarten
+
+=== Per Portlet ===
+Per portlet in wpsadmin (via normale inlogpagina):
+* Wpsadmin/wpsadmin
+* Beheer
+* Portletbeheer/portlets
+* Steeksleutel (derde icoon)
+* Checkbox: parallelle weergave inschakelen.
+* Op portlet niveau: niet opnieuw opstarten.
+
+== Settings voor workerthreads voor parallel rendering ==
+* Wasadmin op https://10.75.99.151:10039/admin
+* Resources/async beans/work managers
+* Browse servers
+* Websphere portal -&gt; ok
+* WpsWorkmanager (onderaan)
+* Work request queue size: 1-&gt;10
+* Worktimeout: 0-&gt;100 ms
+* Minimum number of threads: 1-&gt;20
+
+== Thread pool settings ==
+Thread pool settings
+
+Use this page to configure a group of threads that an application server uses. A thread pool enables components of the server to reuse threads to eliminate the need to create new threads at run time. Creating new threads expends time and resources.
+
+To view this administrative console page, click Servers &gt; Application Servers &gt; server_name &gt; Thread Pools, then select the thread pool. (You can reach this page through more than one navigational route.)</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-Performance-WCMOpmerkingen</title>
+    <id>2685</id>
+    <revision>
+      <id>6092</id>
+      <timestamp>2007-07-24T08:20:16Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== Uit http://10.79.106.58/documentatie/portal/0701_devos-WCM6-BestPractices.pdf ==
+* Consider caching the results of jsp pages that aren’t security dependant using dynacache to improve performance
+* Don’t use the Workplace Web Content Management API and JSP files if the same thing can be done with Out-of-the-box functionality =&gt; doen wij zulke speciale dingen?
+* Remote Rendering (?) vs Local Rendering.
+* par 5.8 caching en pre-rendering.
+* Tracing uitzetten.
+* Many projects fail because customers attempt to use Workplace Web Content Management out-of-the-box (OOB), without obtaining the proper skills to use the facilities. For example, in one case, a consultant wrote his own Rendering portlet, using many Workplace Web Content Management API calls, and set up an extremely linear site framework. This took a lot of custom work and performed badly. However, soon after some product skills were brought in, the same function was created using OOB Workplace Web Content Management function and the Local Rendering Portlet (LRP). 
+* Tune the Workplace Web Content Management database before the migration begins in order to expedite the migration process 
+** See the 'Performance – Database Tuning' section for more information 
+* Don’t save IDs externally and expect integrity.
+** IDs are internal pointers to parts and may change as parts are updated or moved through a workflow. You cannot rely on these being valid from session to session, so do not store them externally, as you risk broken links.
+
+Hele checklist maken van alles dat in de pdf is genoemd. Niet alleen afvinken, ook opnemen hoe dit punt is aangepakt.
+
+== Context ==
+{| border="1" style="border-collapse:collapse; border:1px solid silver;"
+
+|-
+|'''Status:'''
+|Actueel
+|-
+|'''Portals Release:'''
+| 1, 2
+|-
+|'''Portal Server version:'''
+|nvt
+|-
+|'''Afhankelijkheden:'''
+|geen
+|-
+|'''Overig:'''
+| -
+|}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-Performance-logging2</title>
+    <id>2943</id>
+    <revision>
+      <id>6069</id>
+      <timestamp>2007-07-19T13:09:22Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== Eisen aan performance logging ==
+(input voor de supplementary specs, Q1600)
+
+Functioneel:
+* Op portlet-niveau: action- en render-fasen, incl. portlet en methode naam, en ook de pagina.
+* Op portlet-service-niveau: calls naar webservices, incl. service en methode naam. Bij synchrone calls de totale tijd tussen request en response.
+* Gelogde tijden in milliseconden (microseconden mag ook).
+* Logging moet op runtime aangepast kunnen worden, dus zonder de Portal server te herstarten.
+* Discussie: BSN oid loggen, zodat een call/request over de hele keten gevolgd kan worden.
+
+Technisch:
+* Geen AspectJ Logging, te veel risico.
+* Op portlet-niveau: gebruik PMI logging, evt zelf classes bijmaken (FrankW)
+* Op portlet-service-niveau: gebruik standaard Log4J functionaliteit. Later evt met spring aspects.
+
+== Besproken 17-7-2007 ==
+* Besluit: AspectJ wordt niet in productie gebruikt.
+* Opties voor logging (zowel productie als test) zijn AspectJ, PMI logging, portlet filters.
+* Filter kan mogelijk gebruikt worden voor action() en render() methoden, maar niet voor JMS
+* Met PMI mogelijk wel JMX te doen, en ook action() en render(). Mogelijk ook hele portals pagina.
+* Voor logging in de keten mogelijk HP tooling.
+
+Acties:
+* Nico: Checken supplementary specs op dit vlak bij Hermen.
+* Joost: PMI onderzoeken (welke prio?)
+* FrankW: Filters onderzoeken (welke prio?)
+
+== Zie ook specifiek ==
+* [[Portals-TestTechnischeLogging]]
+* [[Portals-Test]]
+* [[Portals-TechnischLoggen]]
+* [[Portals-AspectOrientedProgramming]]
+* [[Portals-Performance-Release2]]
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-Performance-termen</title>
+    <id>2831</id>
+    <revision>
+      <id>9569</id>
+      <timestamp>2008-02-26T13:38:03Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== Afkortingen ==
+
+{| border="1" cellspacing="0"
+|-
+!Afkorting 
+!Categorie 
+!Betekenis
+|-
+|ARM
+|Perf
+|Application Responsetime Measurement.
+|-
+|BaVo
+|CR
+|Basis Voorziening
+|-
+|BSB
+|CR
+|Belastingdienst Service Bus
+|-
+|BT
+|CR
+|Business Thema
+|-
+|BV
+|CR
+|Basis Voorziening
+|-
+|CR 
+|CR 
+|Complexiteit Reductie
+|-
+|CxR 
+|CR 
+|Complexiteit Reductie
+|-
+|D 
+|Perf 
+|Service Demand
+|-
+|GGHH
+|CR
+|Gegevens Huishouding
+|-
+|HLD
+|CR
+|High Level Design
+|-
+|ITA
+|CR
+|Interactie en Transactie Analyse
+|-
+|KLOP
+|CR
+|KLant ondersteuning Ondernemers en Particulieren.
+|-
+|LAD
+|Algemeen
+|Linear Application Development
+|-
+|LQN 
+|Perf 
+|Layered Queueing Network, uitbreiding van Queueing Network.
+|-
+|LQNS 
+|Perf 
+|LQN Solver: tool om een LQN analytisch door te rekenen.
+|-
+|LQSIM 
+|Perf 
+|LQN Simulator: tool om een simulatie uit te voeren op basis van een LQN model.
+|-
+|MTHV
+|CR
+|Methoden, Technieken, Hulpmiddelen en Voorschriften.
+|-
+|N 
+|Perf 
+|Aantal parallelle gebruikers
+|-
+|N' 
+|Perf 
+|Controle berekening voor het aantal parallelle gebruikers: N' = X * (R + Z)
+|-
+|OTAP
+|Algemeen
+|Ontwikkel, Test, Acceptatie, Productie.
+|-
+|PE
+|Perf
+|Performance Engineering
+|-
+|Perf 
+|Perf 
+|Performance
+|-
+|PoC
+|Algemeen
+|Proof of Concept
+|-
+|QN 
+|Perf 
+|Queueing Network
+|-
+|R 
+|Perf 
+|Gemiddelde responsetijd
+|-
+|ROI
+|Algemeen
+|Return On Investment
+|-
+|RSA
+|Algemeen
+|Rational Software Architect
+|-
+|SAD
+|CR
+|Software Architectuur Document
+|-
+|SD
+|CR
+|Service Delivery
+|-
+|SPE
+|Perf
+|Software Performance Engineering
+|-
+|ST
+|CR
+|Solution Team
+|-
+|X 
+|Perf 
+|Throughput
+|-
+|U 
+|Perf 
+|Usage.
+|-
+|VpB
+|CR
+|Voortbrengings Proces
+|-
+|WAS 
+|WAS 
+|Websphere Application Server
+|-
+|Z 
+|Perf 
+|Denktijd.
+|}
+
+
+== Termen ==
+{| border="1" cellspacing="0"
+|-
+!Term 
+!Categorie 
+!Betekenis
+|-
+|Arrival rate 
+|Perf 
+|Snelheid (aantal per seconde) waarin requests binnenkomen.
+|-
+|Cell 
+|WAS 
+|Een WAS administratieve eenheid, met WAS nodes.
+|-
+|Closed QN 
+|Perf 
+|QN waarbij een vast aantal gebruikers wordt gehanteerd met een bepaalde denktijd.
+|-
+|CR 
+|CR 
+|Complexiteits Reductie.
+|-
+|Denktijd 
+|Perf 
+|Denktijd van een gebruiker in seconden. Tijdens deze denktijd wordt niet op het systeem gewacht.
+|-
+|DnA 
+|CR 
+|Design Authority.
+|-
+|Frame 
+|Infra 
+|Fysieke kast, machine, een LPAR setup. Deze is onderverdeeld in een aantal LPAR's.
+|-
+|HA infra 
+|Infra 
+|High Availability, hoge beschikbaarheids infrastructuur.
+|-
+|HBKT 
+|Infra 
+|Hoge Beschikbaarheid Korte Termijn: project van Poort Infra.
+|-
+|Iteratie 
+|Perf 
+|Eenmalige uitvoering van een scenario.
+|-
+|Lineaire schaalbaarheid 
+|Perf 
+|Wanneer het systeem met een factor n wordt vergroot (bijvoorbeeld aantal machines, aantal processoren), neemt de capaciteit (throughput, belasting die het systeem aankan) ook met een factor n toe. In de praktijk is lineaire schaalbaarheid niet haalbaar, extra machines zorgen ook deels voor extra overhead.
+|-
+|Load 
+|Perf 
+|Belasting van het systeem. Bijvoorbeeld een load van 100 threads met Z=1 seconde.
+|-
+|LPAR 
+|Infra 
+|Logische partitie, virtuele machine, heeft een eigen OS (en één of meerdere eigen IP adressen). Zie ook WAS Node.
+|-
+|Mixed cell topologie 
+|WAS 
+|Meerdere cellen, meerdere servers per cell.
+|-
+|Multiple cell topologie 
+|WAS 
+|Meerdere cellen, per cell één server.
+|-
+|Named user 
+|Infra 
+|Gebruiker die is opgevoerd in de gebruikers database/repository.
+|-
+|Open QN 
+|Perf 
+|QN waarbij een vaste arrival rate wordt gehanteerd.
+|-
+|Parallelle gebruiker 
+|Perf 
+|Gebruiker die is ingelogd op het systeem, maar niet noodzakelijkerwijs een request aan het uitvoeren is (hij kan ook aan het denken zijn).
+|-
+|Profiler
+|Perf
+|Tool (binnen RSA aanwezig) om te bepalen welke stukken van de (source-)code duur zijn qua tijd en geheugen gebruik.
+|-
+|Queueing Network 
+|Perf 
+|Modellerings techniek voor het doorrekenen van performance aspecten van een systeem.
+|-
+|Rate 
+|Perf 
+|Throughput
+|-
+|Request 
+|Perf 
+|Op portal niveau het uitvoeren van een actie door de gebruiker, zoals inloggen of zoeken van een BSN. Op BSB niveau het aanroepen van een service.
+|-
+|Scenario 
+|Perf 
+|Uitvoering van een aantal sequentiele stappen door een gebruiker, op basis van een of meerdere UseCases.
+|-
+|Server 
+|Infra 
+|Zie LPAR
+|-
+|Server (proces) 
+|WAS 
+|JVM, Cluster member, een unix proces.
+|-
+|Service Demand 
+|Perf 
+|Belasting van een onderdeel van het systeem door een specifieke request (in seconden). Bijvoorbeeld de gemiddelde service demand van de requests van scenario KlantBeheer op de CPU van de Portal server is 0,0210 seconden.
+|-
+|Single cell topologie 
+|WAS 
+|Topologie met één cell, met hierin mogelijk meerdere nodes en servers.
+|-
+|Thread 
+|Perf 
+|Parallelle gebruiker
+|-
+|Throughput 
+|Perf 
+|Aantal requests per seconde
+|-
+|Usage 
+|Perf 
+|Zie Utiilisation
+|-
+|Utilisation 
+|Perf 
+|Percentage gebruik van een bepaalde resource, zoals de CPU.
+|-
+|Wachttijd 
+|Perf 
+|Synoniem voor denktijd, de term Wachttijd schept verwarring.
+|-
+|WAS 
+|WAS 
+|Websphere Application Server
+|-
+|WAS Node 
+|WAS 
+|Onderdeel van een cell, bevat één of meerdere servers. In principe wordt per LPAR één node gedefinieerd en vice versa.
+|-
+|WP 
+|WAS 
+|Websphere Portal Server (WAS 6.0)
+|-
+|WPS 
+|WAS 
+|Websphere Process Server (WAS 6.0)
+|-
+|XD 
+|Infra 
+|Extended Deployment, virtualisatie.
+|}
+
+
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformanceLQN</title>
+    <id>2477</id>
+    <revision>
+      <id>6805</id>
+      <timestamp>2007-09-18T15:36:08Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <comment>/* LQN Opmerkingen */</comment>
+      <text xml:space="preserve">== Inleiding ==
+De techniek van Layered Queueing Netwerken (LQN) is een techniek om modellen voor performance op te stellen. Het is gebaseerd op de theorie van Queueing Netwerken, dat zijn oorsprong heeft in de jaren 50 van de vorige eeuw. LQN is ontwikkeld door prof. Murray Woodside van de universiteit van Carleton, Canada. Zie verder op http://www.sce.carleton.ca/faculty/woodside.html.
+
+== Schematisch model ==
+Om een LQN model op te stellen, is het raadzaam eerst een abstract schematisch model te maken, waarin de focus ligt op de hardware en de belangrijkste processen die draaien op deze hardware. Een model voor de cluster test omgeving van Portals ziet er bv. als volgt uit:
+
+[[image:Portals-Performance-PerfModel-template.png]]
+
+Je ziet hierin de volgende machines (gestippeld) en processen (rechthoeken):
+* Browser: het systeem met browser bij de eindgebruiker.
+* HTTP Server, één instantie.
+* Portal Server 1 en 2:
+* PSP: Proceslaag binnen de Portal omgeving.
+* Portal DB: hier worden de gebruikers instellingen specifiek voor Portals opgeslagen.
+* LDAP/IDS: zorgt voor authenticatie en (evt) authorisatie.
+
+Verder zie je de aanroepen (alle synchroon) van het ene proces naar het andere. Het startpunt is (uiteraard) de browser van de gebruiker.
+
+
+== LQN model ==
+Op basis van het hiervoor beschreven schematische model is het mogelijk een LQN performance model op te stellen en door te rekenen, zoals weergegeven in onderstaande plaat:
+
+[[image:Portals-Performance-Cluster-LQSIM-60sec-2000.xml.png]]
+
+De belangrijkste concepten/onderdelen die je ziet, zijn:
+* Processoren (machines, servers), weergegeven door cirkels. In bovenstaande plaat zie je er drie (P140, P142 en P149). Met een kleur is aangegeven hoe druk de processor is belast, waarbij rood de hoogste belasting aangeeft, hier de P140. De waarde &amp;mu; (mu) geeft de belasting (usage) van een processor, in principe van 0 tot 1. Wanneer de processor meervoudig is uitgevoerd, kan de waarde groter dan 1 zijn.
+* Tasks (taken), weergegeven door de grote parallellogrammen, soms ook ingekleurd. In bovenstaande plaat zie je bv dat de task 'THttpKB' druk bezet is. Achter de task-naam staat tussen accolades de multipliciteit van deze taak, ofwel het maximale aantal threads. Hiernaast kan nog iets staan als 'Z=60'; dit betekent dat de denktijd van de gebruiker 60 seconden is. De berekende (of gesimuleerde) waarden zijn:
+** &amp;lambda; (lambda): de throughput (aantal requests per seconde) die deze taak uitvoert. Voor TWPSKB1 is dit bv 15,9, de helft van de throughput op het niveau van de browser (TBrKB).
+** &amp;mu; (mu): de belasting (vergelijk met de processor belasting) van deze task. Voor TWPSKB1 zijn gemiddeld 15,95 threads actief.
+* Entries zijn gedefinieerd binnen de taken, je kan dit zien als de verschillende services/methoden die uitgevoerd kunnen worden. Per entry is tussen blokhaken de service demand (D) weergegeven, en hieronder staat de berekende responstijd voor de entry. In het voorbeeld voor EBrKB (de responstijd op de browser) ongeveer 3 seconden.
+* Pijlen tussen entries geven calls aan, bv van EHttpKB naar EWPSKB1. De 0,5 tussen haakjes geeft aan dat in de helft van de gevallen de aanroep plaatsvindt, in de andere helft vindt een aanroep plaats naar EWPSKB2. Het getal hieronder geeft de wachttijd op de queue van de aangeroepen task/entry weer.
+* De overige getallen zijn minder belangrijk.
+
+
+De verdeling van de processor belasting over de taken is niet direct af te leiden uit de plaat. Hiervoor is de gedetailleerde uitvoer nodig van LQNS of LQSIM:
+
+&lt;pre&gt;
+      &lt;task multiplicity="20" name="TWPSKB1" scheduling="fcfs"&gt;
+      &lt;result-task phase1-utilization="1.59487e+001" proc-utilization="6.79847e-001" throughput="1.59091e+001" utilization="1.59487e+001"&gt;
+&lt;/pre&gt;
+
+Hieruit blijkt dus dat de &lt;nowiki&gt;proc-utilization&lt;/nowiki&gt; van de taak TWPSKB1 gelijk is aan 0.679847, ofwel bijna 68%. Uit de plaat is deze waarde af te leiden door de throughput (&amp;lambda;) van deze task (=15.9091) te vermenigvuldigen met de service demand (D, tussen blokhaken) van 0.0428. Dit levert een waarde op van 0,6809.
+
+== Bepalen service demands uit test meetresultaten ==
+Voor een enkele server is het bepalen van de service demand (D) vrij triviaal: deel de gemeten usage (utilisation) door de gehaald throughput, en voila:
+
+ D = U / X
+
+Op een systeem met meerdere servers is het wat complexer. Hieronder is een voorbeeld voor een geclusterde omgeving uitgewerkt.
+
+Input uit meetresultaten (zie bv Testrun 733, run 23):
+* N = 500
+* Z = 10
+* U(wps1) = 0,941
+* U(wps2) = 0,870
+* U(db)   = 0,280
+* X = 35.263
+* R = 3.714
+* N' = X * (R+Z) = 35,263 * (3,714+10) = 484, redelijk in de buurt van N=500.
+* tr(wps1) = 14761
+* tr(wps2) = 16837
+
+Hieruit volgt:
+* X(wps1) = X * (tr(wps1) / (tr(wps1) + tr(wps2)) = 35,263 * (14761 / (14761 + 16154)) = 16,837
+* X(wps2) = X * (tr(wps2) / (tr(wps1) + tr(wps2)) = 35,263 * (16154 / (14761 + 16154)) = 18,426
+* D(wps) = U(wps2) / X(wps2) = 0,870 / 18,426 = 0,0472
+* U(wps1,wps) = D(wps) * X(wps1) = 0,0472 * 16,837 = 0,7947
+* U(wps1,rest) = U(wps) - U(wps1,wps) = 0,941 - 0,7947 = 0,1463
+* D(wps1,rest) = U(wps1,rest) / X(alg) = 0,1463 / 35,263 = 0,00415.
+* Deze D verdeeld over PSP en HTTP (eigen inschatting):
+** D(PSP): 0,0035
+** D(HTTP): 0,00065
+* X(DB) = X(login) = X(alg) * (N(login) / N(totaal)) = 35,263 * (500 / 31915) = 0,5524
+* D(DB) = U(DB) / X(DB) = 0,280 / 0,5524 = 0,5069.
+* Deze D gelijkmatig verdeeld over LDAP en DBsettings:
+** D(LDAP) = 0,5069 / 2 = 0,2334
+** D(DBsettings) = 0,5069 / 2 = 0,2334
+
+Wanneer deze waarden worden ingevuld voor het model, ontstaat na simulatie de volgende grafiek:
+
+[[image:Portals-Performance-Cluster-Z-10sec-XR.png]]
+
+Te zien is dat de throughput goed overeenkomt, en dat in de responstijden een afwijking zit, vooral bij kleine N. Een mogelijke oorzaak zit in het grote verschil tussen de responstijd en de denktijd; een kleine afwijking in de throughput heeft dan een grote afwijking in de responstijd tot gevolg:
+
+ R = N / X - Z
+
+ test: R = 100 / 9,677 - 10 = 0,33 sec.
+ simulatie: R = 100 / 9,876 - 10 = 0,13 sec.
+
+== LQN Opmerkingen ==
+* Denktijd op Task niveau toevoegen. Op entry niveau heeft tot gevolg dat de Z bij R wordt opgeteld.
+* Netwerk latency: gemodelleerd als aparte task met infinite server. Mogelijk ook te doen met thinktime op een task of entry, maar in de docs staat dat deze attributen voor reference tasks zijn, is hier dus niet het geval.
+* Simulatie lukt niet wanneer er een infinite server (netwerk latency) in het model zit. Op te vangen door te zorgen dat de multiplicity van deze server hoog genoeg is.
+* Berekeningen lukken niet altijd, maar dit wordt wel aangegeven. Verder controle door asymptoten berekeningen en ook door te checken of usage meer dan 100% is.
+* De berekeningen gaan het vaakste fout bij een overbelast systeem, sowieso een situatie die voorkomen moet worden. De precieze waarden bij een overbelast systeem zijn minder relevant.
+* Berekende &amp;mu; (mu) geeft de mate waarin tasks belast zijn. Dit kan een goede indicatie zijn voor het benodigd aantal threads in een threadpool of DB connecties in een connection pool.
+* Bounds analyse (asymptoten): aantal aannames en keuzes gemaakt in Tcl script. Deze beschrijven en valideren.
+* Activities evt ook gebruiken om een scenario te modelleren: inloggen, 60 keer zoek+select, uitloggen.
+* Reneging (uit een queue stappen als deze te lang is, ongeduldig) niet mogelijk met LQN, wel bv met SimPy.
+* Memory modelleren met locks?
+* CPU verhoudings parameters: 0,5 cpu, 2 cpu's. speed-factor.
+* testje: FCFS processor vs pre-emptive. Verwachting dat R groter wordt met pre-emptive (alle taken worden onderbroken voor andere, alle dus langer wachten?). De X zou niet anders worden (?), wat een contradictie is met Little's Law. Zelfde misschien met PS: processor sharing.
+
+== LQN Parallelle taken ==
+* Parallelle taken kunnen met activities worden gemodelleerd, met precedence en POST-AND, zie onder.
+* Wanneer de standaard exponentiele verdeling wordt gebruikt (alleen host-demand-mean opgeven), levert de berekening (en simulatie) veel hogere responsetijden op dan je zou verwachten: bij 2 taken met D's van 2 resp. 3 seconden verwacht je als R het maximum van 3 seconden, maar dit is 4,25 seconden. Dit komt dus door de exponentiele verdeling van zowel de D's als ook het aantal calls (mean = 1). Zie hiervoor ook http://en.wikipedia.org/wiki/Exponential_distribution. Door op activity niveau twee attributen toe te voegen, zorg je dat de D's en calls vast zijn, zie onder.
+
+&lt;pre&gt;
+            &lt;precedence&gt;
+               &lt;pre&gt;
+                  &lt;activity name="AWPStart"/&gt;
+               &lt;/ pre&gt;
+               &lt;post-AND&gt;
+                  &lt;activity name="AWPCallBVR"/&gt;
+                  &lt;activity name="AWPCallABS"/&gt;
+               &lt;/post-AND&gt;
+            &lt;/precedence&gt;
+&lt;/pre&gt;
+
+&lt;pre&gt;
+               &lt;activity name="ENWBVR_ph1" phase="1" host-demand-mean="${D_NW_BVR}" host-demand-cvsq="0.0" call-order="DETERMINISTIC"&gt;
+                  &lt;synch-call dest="EBVR" calls-mean="1"/&gt;
+               &lt;/activity&gt;
+&lt;/pre&gt;
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformanceModelleren</title>
+    <id>2478</id>
+    <revision>
+      <id>5777</id>
+      <timestamp>2007-06-26T15:16:08Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== Inleiding ==
+Zie [[media:Portals-PerformanceModelleren-Pres+PerfMod+BD+2007-03-06.ppt|Presentatie Perfmod]] voor een presentatie over performance modelleren.
+
+Een logisch testontwerp (LTO) kan worden gezien als een performance model. Hierin worden use case model en exploitatie model gecombineerd op basis van performance aspecten. Hierbij wordt bepaald, op basis van de eisen qua load, responstijd en middelenbeslag, waar bottlenecks worden verwacht. &lt;br&gt;
+
+Het model dat zo verkregen is, kan worden omgezet in een rekenkundig model. Hiermee kan op basis van gemeten waarden worden voorspeld hoe de performance kan zijn bij vergroting van de load of uitbreiding van de resources.
+
+Een aantal afkortingen en termen zie je steeds weer terugkomen, zie [[Portals-Performance-termen|Performance termen en afkortingen]]:
+
+== Methoden en tools ==
+Bij Portals worden verschillende technieken voor performance modellering gehanteerd:
+* [[Portals-PerformanceOpAn|Operationele Analyse]]: relatief eenvoudige berekeningen voor controleren test resultaten en bepalen service demands als input voor performance model.
+* [[Portals-PerformanceLQN|LQN]]: Layered Queueing Networks, uitbreiding van standaard QN theorie.
+* [[Portals-Performance-Guerrilla-Capacity-Planning|Guerrilla Capacity Planning]]
+
+Zie de [[Portals-PerformanceBibliotheek]] voor een aantal (inleidende) documenten.
+
+Hiernaast zijn er nog andere mogelijkheden:
+* [[Portals-PerformancePDQ|PDQ]]: Modelleren mbv C code en/of Python scripts. Gebaseerd op QN theorie.
+* [[Portals-WinModTool]]: Op QN gebaseerd, ook simulatie. Met GUI.
+* [http://jmt.sourceforge.net/ QN Tools van Politecnico di Milano]
+
+== Modelleren op CR niveau ==
+* Zie de aparte pagina: [[PerformanceModellen]]
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformanceModelleren-Grafieken</title>
+    <id>2607</id>
+    <revision>
+      <id>5713</id>
+      <timestamp>2007-06-21T12:37:46Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== Inleiding ==
+Het lezen van performance model grafieken vereist enige ervaring en doorzettingsvermogen. Het loont echter beslist de moeite! In onderstaande paragrafen wordt een aantal grafieken getoond en uitgelegd. In de meeste grafieken zie je de throughput en de responsetijden uitgezet worden tegen de load die op het systeem als geheel wordt gezet. De load wordt meestal uitgedrukt in het aantal gebruikers (ook wel parallelle gebruikers, threads, virtual users) dat requests uitvoert.
+
+== Gesloten queueing netwerk zonder denktijd ==
+Een gesloten queueing netwerk is een netwerk/model waarbij het aantal gebruikers (N) vast is, en samen met de denktijd de belasting op het systeem bepaalt. Door zo'n model een aantal keer door te rekenen en te simuleren met een oplopend aantal gebruikers, kan een grafiek worden gemaakt, zoals bv in onderstaande plaat:
+
+[[image:Portals-Performance-Cluster-Z-0sec-XRcalc.png]]
+
+Drie assen zijn hier belangrijk:
+* De X-as, waarop het aantal gebruikers van een berekening of simulatie is weergegeven.
+* De linker Y-as, waarop de throughput (requests per seconde) te zien is.
+* De rechter Y-as, waarop de responstijd (in seconden) is te zien.
+
+In de grafiek zie je zes lijnen:
+* X-asymp (rood): dit geeft de theoretisch maximaal haalbare throughput aan, op basis van een eenvoudige analyse en berekening van het model. Het dient vooral ter controle.
+* R-asymp (groen): de geeft de theoretisch minimaal haalbare responstijd aan, berekende en gesimuleerde waarden mogen nooit onder deze lijn komen.
+* X-lqns (donkerblauw): de analytisch (LQN solver) berekende waarde voor de throughput. In het voorbeeld wordt deze waarde (van ongeveer 30 requests per seconde) al behaald bij N=10. Ook is te zien dat bij N=70 en N=80 de berekening niet goed gelukt is; er is wel een waarde, maar de solver geeft aan dat deze waarde niet betrouwbaar is. In de grafiek is dit weergegeven door zogenaamde error-lines, die verticaal staan op het meetpunt. Deze error lines geven ook aan dat de berekende waarden voor R (R-lqns) ook niet betrouwbaar zijn).
+* R-lqns (paars, blokjes): de analytisch (LQN solver) berekende waarde voor de responstijd, bij N=100 loopt deze op tot 3 seconden.
+* X-lqsim (lichtblauw): de door simulatie bepaalde waarde voor de throughput. Te zien is dat deze waarde iets afwijkt van de berekende waarde, maar dat het verschil klein is.
+* R-lqsim (bruin, rondjes): de door simulatie bepaalde waarde voor de responstijd. Ook deze waarde wijkt iets (maar niet veel) af van de berekende waarde.
+
+== Gesloten queueing netwerk met denktijd ==
+Vergelijkbaar met de vorige grafiek is de volgende, waarbij een gebruikers denktijd van 60 seconden is gehanteerd. Hier is duidelijk te zien dat het systeem volledig belast is vanaf 2000 gebruikers. De throughput bereikt dan de maximale waarde van iets meer dan 30 requests per seconde, en de responstijd loopt vanaf dit moment snel op. Een dergelijk verzadigingspunt is altijd te vinden, het is belangrijk te zorgen dat het punt boven de verwachte belasting (load) op het systeem blijft. Wanneer dit niet zo is, moeten maatregelen worden getroffen.
+
+[[image:Portals-Performance-Cluster-Z-60sec-XRcalc.png]]
+
+== Gesloten queueing netwerk met oplopende denktijd ==
+Om de invloed van de gebruikers denktijd weer te geven, kan een grafiek zoals hieronder worden gepresenteerd:
+
+[[image:Portals-Performance-Cluster-Z-var-XRcalc.png]]
+
+We hebben nu te maken met de volgende assen:
+* De X-as, waarop de denktijd van de gebruikers is weergegeven.
+* De linker Y-as, waarop de throughput (requests per seconde) te zien is.
+* De rechter Y-as, waarop de responstijd (in seconden) is te zien.
+
+De zes lijnen die getoond worden, zijn dezelfde als in de eerdere grafieken hierboven. Ze hebben alleen een wat andere vorm:
+* De throughput (X) waarden zitten bij een lage denktijd op het maximum, het systeem is dan nog verzadigd. In het voorbeeld is dit het geval bij een denktijd van 0 tot ongeveer 30 seconden.
+* Bij een grotere denktijd neemt de throughput af. De gebruikers denken dan zo lang na, dat ze het systeem niet meer volledig belasten.
+* De responstijd is het grootst bij een denktijd van 0 seconden, de gebruikers zijn dan het drukst bezig, maar moeten wel het langst wachten op het systeem. Deze tijd neemt lineair af totdat het systeem niet meer volledig is belast.
+* Bij een grotere denktijd benadert de responstijd een bepaald minimum (niet 0 seconden!), die in principe gelijk is aan de som van de service demands van de verschillende systeem onderdelen.
+
+We merken overigens op dat de berekeningen vaak niet goed gaan bij een (te) hoge belasting van het systeem.
+
+== Open queueing netwerk ==
+Een iets andere vorm van modelleren is gebruik te maken van een Open Queueing Netwerk (Open QN). Hierbij wordt niet gewerkt met een aantal gebruikers (N) en een denktijd (Z), maar met een vast aantal requests per seconde dat op het systeem binnenkomt. Zolang het systeem niet overbelast is, blijft het in evenwicht, en is het aantal voltooide requests gelijk aan het aantal binnenkomende. Wanneer echter het binnenkomende aantal requests per seconde de maximaal haalbare throughput overschreidt, is het systeem niet meer stabiel en in evenwicht, en zijn verdere berekeningen en simulaties zinloos. In onderstaande grafiek is hiervan een voorbeeld te zien:
+
+[[image:Portals-Performance-Cluster-OpenQN-1-XRcalc.png]]
+
+De X-as geeft nu het binnenkomend aantal requests per seconde weer (ondanks dat op de as nog N staat vermeld). Tot 31 requests per seconde is de throughput gelijk aan de input, hierna gaat het fout. De responstijd loopt wel sterk op naarmate de haalbare throughput dichter wordt benaderd.
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformanceOpAn</title>
+    <id>2940</id>
+    <revision>
+      <id>6019</id>
+      <timestamp>2007-07-11T14:08:25Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== Revisiehistorie ==
+
+{| border="1" cellspacing="0"
+|-
+!Datum
+!Versie
+!Beschrijving
+!Auteur
+|-
+|11-7-2007
+|0.1
+|Eerste versie nav wiki
+|Nico de Vreeze
+|}
+
+== Algemeen ==
+{| border="1" cellspacing="0"
+|-
+!Doel
+!Betrouwbaarheid performance test bepalen; input performance model.
+|-
+|Doelgroep
+|Performance engineers.
+|-
+|Fase
+|Alle
+|-
+|Reikwijdte
+|Performance
+|-
+|Categorie
+|
+|}
+
+== Introductie ==
+=== Doel ===
+Het uitvoeren van operationele analyse dient de volgende doelen:
+* Betrouwbaarheid van een performance test bepalen; 
+* Input voor een performance model.
+
+=== Referenties ===
+{| border="1" cellspacing="0"
+|-
+!Nr
+!Naam document
+!Auteur/ opsteller
+!Versie
+!datum
+|-
+|1
+|The Operation Analysis of Queueing Network Models (p225-denning (OpAn).pdf)
+|Denning
+|nvt
+|21-3-2003
+|-
+|2
+|(01p6047 (Experience Operational Analysis).pdf)
+|?
+|nvt
+|28-11-2002
+|}
+
+== Betrouwbaarheid valideren ==
+Wanneer je een performance test uitvoert, stel je o.a. de volgende dingen in:
+* N: het aantal virtuele gebruikers in je test.
+* Z: de denktijd van de gebruikers in je test.
+
+Als je de waarde van deze variabelen constant houdt gedurende de test (dus niet het aantal gebruikers laten oplopen en geen random waarden voor Z), kun je de volgende formule gebruiken om te controleren of je test goed gelopen heeft:
+
+  N = X * (R + Z)
+
+Hierbij geldt dat R de gemiddelde responsetijd is (meestal in seconden) en X de gehaalde throughput (per seconde, deel het aantal requests door de looptijd). Als de test goed gelopen heeft, zal de berekende N in de buurt komen van de ingestelde N. Als het afwijkt, zijn er de volgende mogelijkheden:
+* De berekende N is kleiner dan de ingestelde: waarschijnlijk is je testclient (bv JMeter) de bottleneck, en niet de server die je aan het testen bent. Verklein het aantal gebruikers (N) of voer de test gedistribueerd uit.
+* De berekende N is groter dan de ingestelde: dit is theoretisch onmogelijk, er is iets misgegaan met je metingen.
+
+== Input performance model ==
+In een performance model moet je per taak en resource (processor, disk, netwerk) aangeven wat de Service Demand (D) is. Deze D is met de volgende formule af te leiden uit je testresultaten:
+
+  D = U / X
+
+Hierbij is U de utilisation van de resource, met normaal gesproken een waarde tussen 0 en 1. Ga bij het bepalen van de D niet over een nacht testen, vergewis je ervan dat de waarde steeds ongeveer hetzelfde is.
+
+Een snelle manier om de maximaal haalbare throughput van een systeem te bepalen, is gebruik te maken van de volgende formule:
+
+  Xmax = 1 / Dmax
+
+Hierbij is Dmax het maximum van de service demands van de resources in het te testen systeem. Dit maximum geeft ook meteen de bottleneck aan. Xmax is dan de haalbare throughput in seconden. Weer met behulp van de eerstgenoemde formule (N=X(R+Z)) kun je een inschatting krijgen van het maximale aantal gebruikers dat het systeem aankan, gegeven de maximale responsetijd en de denktijd. Een voorbeeld:
+* X = 4
+* R = 2 (seconden, maximale responsetijd)
+* Z = 60 (tussen het tonen van een nieuwe pagina en het klikken voor een nieuwe pagina zitten 60 seconden)
+* N = 4 * (2 + 60) = 248 gebruikers.
+
+Als er dan bv 400 gebruikers aan het werk zijn, wordt de responsetijd:
+
+  R = (400 / 4) - 60 = 100 - 60 = 40 seconden.
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformancePDQ</title>
+    <id>2479</id>
+    <revision>
+      <id>5715</id>
+      <timestamp>2007-06-21T12:39:36Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== Prereqs ==
+De volgende dingen zijn nodig voor installatie van PDQ:
+* Een cygwin installatie, te vinden in &lt;br&gt;10.73.24.88\nico_share\install\cygwin. Zorg dat Python (script taal) ook geinstalleerd wordt. Installeer bv in c:\nico\util\cygwin, hierna &lt;cygwinroot&gt;.
+* Een PDQ installatie, te vinden in &lt;br&gt;10.73.24.88\nico_share\install\pdq (perfmod). Installeer deze bv in c:\nico\util\pdq, hierna &lt;pdqroot&gt;.
+
+Handmatige stappen:
+* Maak in &lt;cygwinroot&gt; een cygwin.bat file, zie onder.
+* &lt;nowiki&gt;cp pdq.dll /usr/local/lib&lt;/nowiki&gt;
+* &lt;nowiki&gt;cp libpdq.a /usr/local/lib&lt;/nowiki&gt;
+* In &lt;pdqroot/python&gt;: make all
+* In &lt;pdqroot/python&gt;: python test.py. Deze moet resultaten opleveren.
+
+&lt;code&gt;
+rem cygwin.bat&lt;br&gt;
+@echo off&lt;br&gt;
+&lt;br&gt;
+c:&lt;br&gt;
+chdir c:\nico\util\cygwin\bin&lt;br&gt;
+&lt;br&gt;
+bash --login -i&lt;br&gt;
+&lt;/code&gt;
+
+Zorg voor de goede symbolic links:
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformancePortalsCursus</title>
+    <id>2480</id>
+    <revision>
+      <id>4207</id>
+      <timestamp>2001-01-15T00:00:00Z</timestamp>
+      <contributor>
+        <ip/>
+      </contributor>
+      <text xml:space="preserve">
+Cursus Portals gehad bij AppliGate eind oktober 2006. Notities:
+* caching service en portlet service
+* Portal 6: ondersteunt AJAX, DHTML.
+* Portal reference implementatie: pluto, op portals.apache.org/pluto.
+* Sessie grootte: zou niet groter dan 2k moeten zijn, maar wordt sowieso 4kbyte gebruikt voor 'lege' sessie.
+* Parallel rendering is een instelbare optie.
+* IBM site: artikelen over caching.
+* Idee caching: bij lage load werkt dit goed, lagere responsetijden. Bij hoge load mogelijk meer geheugen gebruik en hierdoor mogelijk minder schaalbaar.
+* cursusboek blz 16-35: link caching.
+* cursusboek blz 16-10: trek 4 maanden uit voor perf testen.
+* cursusboek blz 16-16: performance tips.
+* cursusboek blz 16-24: logging API.</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformanceResultaten</title>
+    <id>2481</id>
+    <revision>
+      <id>5716</id>
+      <timestamp>2007-06-21T12:39:52Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">Performance resultaten zijn op een aantal plekken te vinden:
+* Automatisch gegenereerde resultaten op de machine van [[Portals-NicoDeVreeze]]: http://dpc0465524:8088/cruisecontrol/buildresults
+
+Verder zijn er testplannen, rapportages etc van verschillende releases van Webdiensten. Zie hiervoor de attachments.
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformanceTestCase</title>
+    <id>2482</id>
+    <revision>
+      <id>4211</id>
+      <timestamp>2001-01-15T00:00:00Z</timestamp>
+      <contributor>
+        <ip/>
+      </contributor>
+      <text xml:space="preserve">
+Een performance test case is een directory binnen de directory &lt;nowiki&gt;&lt;project-dir&gt;&gt;/testcases&lt;/nowiki&gt;. Hierin kunnen de volgende bestanden staan:
+* build-&lt;testcase&gt;.xml: Een Ant script waarin extra taken staan die worden uitgevoerd voor en na afloop van een testrun.
+* users*.dat: per middel een bestand met performance test gebruikers. Deze bestanden worden door JMeter ingelezen.
+* Een JMeter script, met de extensie JMX. In de JMX zijn vaste waarden voor oa threads en loops vervangen door parameters. In een [[Portals-PerformanceTestSuite]] worden deze parameters vervangen.
+
+Voorbeelden zijn te vinden bij de attachments.
+
+@TODO opnemen van JMX-en, vervangen waarden door parameters. Uitleg commons en sun http client.</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformanceTestCitrix</title>
+    <id>2483</id>
+    <revision>
+      <id>4213</id>
+      <timestamp>2001-01-15T00:00:00Z</timestamp>
+      <contributor>
+        <ip/>
+      </contributor>
+      <text xml:space="preserve">
+Om performance testen op TAO straat 1 uit te kunnen voeren, heb je een Citrix account nodig. Deze kun je aanvragen via SHOP, Richard Rook kan je evt ook verder helpen. Naast de standaard tools (Bestandsoverdracht, Filezilla, Internet Explorer, SecureCRT) heb je een aantal extra scripts nodig. Voor een voorbeeld zie de accounts van vreen00 en wissp02.
+
+De volgende scripts zijn beschikbaar:
+
+{| border="1" cellspacing="0"
+|-
+!script
+!beschrijving
+|-
+|GetServerLogs
+|Haal server resource logs over naar het lokale windows werkstation
+|-
+|delete-trans-db2
+|Verwijder transacties uit DB2, zodat een volgende test uitgevoerd kan worden
+|-
+|haalhuidigewaslogs
+|Haal de huidige was logs op, zodat evt problemen kunnen worden bekeken
+|-
+|install-serverscripts
+|Installeer scripts op de server machines
+|-
+|listipto
+|Toon welke databases door de WAS worden gebruikt
+|-
+|lswaslogs12
+|Toon de datum/tijd en grootte van de WAS logs
+|-
+|removelogs-all
+|Verwijder resource logs van de servers
+|-
+|showcron-all
+|Toon de cron jobs voor de performance user
+|-
+|showdate-all
+|Toon de datum op alle server machines
+|-
+|showdf-all
+|Toon de beschikbare schijfruimte op alle server machines
+|-
+|showversions-all
+|Toon de versies van de infra componenten op alle server machines
+|-
+|startcron-all
+|Start de resource logging cron jobs op alle server machines
+|-
+|stopcron-all
+|Stop alle cron jobs van de performance user
+|-
+|tailwaslogs12
+|Toon het laatste stuk van alle WAS logs
+|-
+|teardown-db2
+|Ruim gegevens op uit DB2 en stel resource logs veilig
+|-
+|teardown-extwas12
+|Stel gegevens veilig van de WAS machines
+|}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformanceTestMaken</title>
+    <id>2485</id>
+    <revision>
+      <id>4217</id>
+      <timestamp>2001-01-15T00:00:00Z</timestamp>
+      <contributor>
+        <ip/>
+      </contributor>
+      <text xml:space="preserve">
+Het maken van een performance test bestaat uit het maken van de volgende dingen:
+* Een of meerdere [[Portals-PerformanceTestCase]]s.
+* Een aantal [[Portals-PerformanceTestSuite]]s, waarin deze [[Portals-PerformanceTestCase]]s worden gebruikt.
+
+Als je de testen uitvoert vanaf je eigen werkplek, kun je na het maken van de testsuites gelijk door naar [[Portals-PerformanceTestUitvoeren]].
+
+Als voorbereiding voor het uitvoeren van testen vanaf [[Portals-PerformanceTestG5|G5]] doe je het volgende:
+# Ga naar de directory waarin de release specifieke dingen staan (bv Webdiensten60_testVOB\92 Performance\cruise) en type &lt;nowiki&gt;dist&lt;/nowiki&gt;. Hiermee worden zip bestanden gemaakt in de &lt;nowiki&gt;dist&lt;/nowiki&gt; directory.
+# Zet deze zip bestanden op een USB stick en pak deze weer uit op de machine op [[Portals-PerformanceTestG5|G5]].
+# Hierna kun je verder met [[Portals-PerformanceTestUitvoeren]].
+
+Als voorbereiding voor het uitvoeren van testen vanaf een AIX machine voer je de volgende stappen uit:
+# Draai een keer CruiseControl met jouw suite: &lt;nowiki&gt;once &lt;suite.xml&gt;&lt;/nowiki&gt;.
+# Hierna zijn in de artifacts directory (c:\cruiseresults\artifacts\&lt;run&gt;) een .tar.gz bestand en een .cron bestand gemaakt. Kopieer deze naar de AIX testmachine in de directory /prj/perftest/testaix en pak de .tar.gz vervolgens uit.
+# Kopieer indien nodig ook de users*.dat files naar de directory /prj/perftest/testaix. Deze bestanden kun je vinden als resultaat van een OLO test in de _archive.zip binnen een artifacts directory.
+# Hierna kun je verder met [[Portals-PerformanceTestUitvoeren]].</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformanceTestOmgeving</title>
+    <id>2486</id>
+    <revision>
+      <id>4219</id>
+      <timestamp>2001-01-15T00:00:00Z</timestamp>
+      <contributor>
+        <ip/>
+      </contributor>
+      <text xml:space="preserve">
+Om performance testen op een omgeving uit te voeren, moet je deze eerst hiervoor inrichten. Op een OLO machine gaat dit als volgt:
+
+==== Test scripts ====
+# Maak een perf gebruiker aan met &lt;nowiki&gt;smit user&lt;/nowiki&gt;. Zorg dat deze gebruiker in de goede groepen zit (in alle groepen werkt ook).
+# Geef de perf gebruiker crontab rechten door 'em op te nemen in &lt;nowiki&gt;/etc/adm/cron/cron.allow&lt;/nowiki&gt;.
+# Maak een directory /prj/perftest/scripts. Zorg dat de perf gebruiker hier alle rechten heeft.
+# Kopieer de server scripts naar de net gemaakte directory op de server(s). Deze scripts staan in &lt;nowiki&gt;&lt;cruisedir&gt;/checkout/testomgevingen/serverscripts&lt;/nowiki&gt; en &lt;nowiki&gt;projectdir&lt;/nowiki&gt;/testomgevingen/serverscripts&lt;/nowiki&gt;. Doe dit door de volgende stappen uit te voeren:
+## Zorg dat je een testomgeving directory hebt aangemaakt, met hierin &lt;nowiki&gt;build-testomgeving.xml&lt;/nowiki&gt; en &lt;nowiki&gt;testomgeving.properties&lt;/nowiki&gt;
+## In een command prompt: cd naar je project directory en setenv uitvoeren.
+## cdclient uitvoeren.
+## setomgeinvg &lt;omgevingnaam&gt;
+## install-serverscripts.bat
+
+Op een TAO omgeving is het vergelijkbaar, met de kanttekening dat je alles via Citrix (zie [[Portals-PerformanceTestCitrix]]) moet uitvoeren. Om alle serverscripts in één keer op alle machines binnen de TAO straat te kopieren, kun je gebruik maken van het script &lt;nowiki&gt;install-serverscripts&lt;/nowiki&gt;. Voor dat je dit kunt doen, moet je wel handmatig de eerste drie hiervoor beschreven stappen uitvoeren.
+
+Nadat de omgeving is ingericht, moet je nog zorgen voor performance test gebruikers in LDAP en in de database. In theorie is dit afhankelijk van de [[Portals-PerformanceTestCase]]s die je gebruikt, in de praktijk maak je gebruik van 2500 performance test gebruikers. Voer hiervoor de volgende stappen uit:
+# Voer binnen testcases/lib uit: &lt;nowiki&gt;generatepds-wbd.bat&lt;/nowiki&gt;, bv met de parameters &lt;nowiki&gt;PERF 90000000 2500 10&lt;/nowiki&gt;.
+# Zet de gegenereerde sql bestanden op de database server en de ldif bestanden op de externe LDAP server.
+# Voer de gen*.sql bestanden uit op de database server dmv &lt;nowiki&gt;./doesql &lt;database&gt; &lt;script.sql&gt;&lt;/nowiki&gt;. De database is meestal WBD_001, behalve voor de accounts, deze moeten in IAM_001. Tijdens het uitvoeren van de script kun je het best gebruiker &lt;nowiki&gt;iodsu01&lt;/nowiki&gt; zijn.
+# Voer het script insertldap uit op de externe LDAP server. Het is aan te bevelen na elke stap het LDAP proces te herstarten.
+
+==== HTTP logging ====
+Wanneer je gebruik maakt van een IHS (IBM Http Server), pas je het volgende aan in /prj/ihs/conf/httpd.conf:
+* Zet de volgende regel: LogFormat "%{%Y-%m-%d %H:%M:%S}t \"%r\" %&gt;s %b req:%{Reqlabel}i e:%D" common
+
+
+==== WPS logging ====</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformanceTestSuite</title>
+    <id>2487</id>
+    <revision>
+      <id>4221</id>
+      <timestamp>2001-01-15T00:00:00Z</timestamp>
+      <contributor>
+        <ip/>
+      </contributor>
+      <text xml:space="preserve">
+Een Performance test suite bestaat uit Ã©Ã©n of meerdere ingevulde [[Portals-PerformanceTestCase]]s, waarin de parameters zijn ingevuld. Zo'n ingevuld testcase noemen we een Performance Testrun. Een deel van een testsuite is hieronder weergegeven:
+
+&lt;pre&gt;
+&lt;!-- tijdens piekuren, met 20 threads per middel --&gt;
+&lt;testrun&gt;
+&lt;extrapubdir&gt;Piek-OBLAEDM-${testrun.aangiftela.threads}thr&lt;/extrapubdir&gt;
+&lt;testomgeving&gt;str1.washttp&lt;/testomgeving&gt;
+&lt;testcase&gt;OBLAEDM&lt;/testcase&gt;
+&lt;duration&gt;900&lt;/duration&gt;
+&lt;keepalive&gt;false&lt;/keepalive&gt;
+&lt;headerkeepaliveseconds&gt;30&lt;/headerkeepaliveseconds&gt;
+&lt;followredirects&gt;false&lt;/followredirects&gt;
+&lt;aangifteob&gt;
+&lt;threads&gt;20&lt;/threads&gt;
+&lt;loops&gt;1250&lt;/loops&gt;
+&lt;rampup&gt;30&lt;/rampup&gt;
+&lt;sleeptime&gt;0&lt;/sleeptime&gt;
+&lt;targetthroughput&gt;4617&lt;/targetthroughput&gt;
+&lt;/aangifteob&gt;
+&lt;aangiftela&gt;
+&lt;threads&gt;20&lt;/threads&gt;
+&lt;loops&gt;200&lt;/loops&gt;
+&lt;sleeptime&gt;0&lt;/sleeptime&gt;
+&lt;targetthroughput&gt;95&lt;/targetthroughput&gt;
+&lt;rampup&gt;30&lt;/rampup&gt;
+&lt;stap1enabled&gt;true&lt;/stap1enabled&gt;
+&lt;/aangiftela&gt;
+&lt;edm&gt;
+&lt;threads&gt;20&lt;/threads&gt;
+&lt;loops&gt;1250&lt;/loops&gt;
+&lt;sleeptime&gt;0&lt;/sleeptime&gt;
+&lt;targetthroughput&gt;3040&lt;/targetthroughput&gt;
+&lt;rampup&gt;30&lt;/rampup&gt;
+&lt;stap1enabled&gt;true&lt;/stap1enabled&gt;
+&lt;/edm&gt;
+&lt;waitbefore&gt;120&lt;/waitbefore&gt;
+&lt;waitafter&gt;300&lt;/waitafter&gt;
+&lt;/testrun&gt;
+&lt;/pre&gt;
+
+Hieronder zijn de parameters beschreven:
+* extrapubdir: de naam waaronder deze testrun te herkennen is;
+* testomgeving: de omgeving waarop de test wordt uitgevoerd;
+* testcase: de testcase die wordt uitgevoerd;
+* duration: de duur van de test in seconden;
+* keepalive: een technische parameter, staat normaal gesproken op &lt;nowiki&gt;false&lt;/nowiki&gt;;
+* headerkeepaliveseconds: een technische parameter, staat normaal gesproken op &lt;nowiki&gt;30&lt;/nowiki&gt;;
+* followredirects: een technische parameter, staat normaal gesproken op &lt;nowiki&gt;false&lt;/nowiki&gt;;
+* per middel (OB, LA, EDM) de volgende parameters:
+** threads: het aantal threads of virtuele gebruikers dat aangiftes van het betreffende middel uitvoert;
+** loops: het aantal loops (aangiftes) dat een virtuele gebruiker uitvoert, zolang de &lt;nowiki&gt;duration&lt;/nowiki&gt; het toelaat;
+** rampup: de tijd in seconden waarbinnen alle virtuele gebruikers worden gestart;
+** sleeptime: de tijd in milliseconden tussen het ontvangen van een respons en het uitvoeren van de volgende http(s) request;
+** targetthroughput: de throughput in http requests per minuut die we willen halen;
+* waitbefore: de tijd in seconden die wordt gewacht voor het starten van de test; de resource logging draait dan al wel;
+* waitafter: de tijd in seconden die wordt gewacht na afloop van de test; de resource logging draait dan nog.</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformanceTestUitvoeren</title>
+    <id>2488</id>
+    <revision>
+      <id>4223</id>
+      <timestamp>2001-01-15T00:00:00Z</timestamp>
+      <contributor>
+        <ip/>
+      </contributor>
+      <text xml:space="preserve">
+Voordat je een performance test kunt uitvoeren, moet je eerst zorgen voor een [[Portals-PerformanceTestOmgeving]]. Ook moet je de beschikking hebben over de [[Portals-PerformanceToolset]] en moeten jij of een collega je al eens in het [[Portals-PerformanceTestMaken]] hebben verdiept.
+
+Op een OLO machine is het relatief eenvoudig:
+# Open een command prompt en ga naar de goede directory, bv C:\vreen00_view\Webdiensten60_testVOB\92 Performance\cruise of C:\webdiensten\rel70.
+# Voer een setenv script uit, bv setenv-nico385112.bat of setenv-nico-wbd.bat
+# Kies een [[Portals-PerformanceTestSuite]], deze staan in de subdirectory testsuites
+# Voor het direct uitvoeren van een test type je &lt;nowiki&gt;once &lt;testsuite.xml&gt;&lt;/nowiki&gt;; de testsuite bevat alleen de bestandsnaam, niet de directory.
+# Om te zorgen dat de test elke avond om 19.00 uur start, type je &lt;nowiki&gt;prod &lt;testsuite.xml&gt;&lt;/nowiki&gt;
+# Wanneer de test klaar is, krijg je een mailtje met een link naar de [[Portals-PerformanceResultaten]].
+
+Op de TAO Straat 1 (performance test omgeving) is het wat ingewikkelder, je werkt hier deels via Citrix (zie [[Portals-PerformanceTestCitrix]]):
+# Open een Citrix sessie.
+# Start uit het Webdiensten submenu het commando: startcron-all. Dit zorgt ervoor dat resource logging op de server wordt aangezet en dat de database en queues periodiek worden geschoond.
+# Start of schedule de test. Hiervoor heb je verschillende mogelijkheden:
+## Vanaf Walter Bos, gebouw G, 5e verdieping. Hier staan windows machines, het starten van de test is vergelijkbaar met de OLO. Zet na de test de client resultaten op een USB stick.
+## Vanaf de Edge server. Open hiervoor binnen Citrix een ssh sessie naar de Edge server en ga naar de directory /prj/perftest/testaix. Voer uit &lt;nowiki&gt;addcron runtests.cron&lt;/nowiki&gt;, de tests worden hierdoor gescheduled vanaf 19.00 uur.
+# Wacht tot de test is afgelopen.
+# Stop de resource logging door het uitvoeren van stopcron-all uit het Webdiensten submenu.
+# Haal de resource logs op: GetServerLogs.
+# Verwijder de resource logs van de servers: removelogs-all.
+# Zet de client testresultaten op je eigen werkstation, bv in C:\cruiseresults\str1\jmeter.
+# Combineer de client en server resultaten door het uitvoeren van &lt;nowiki&gt;combine &lt;testsuite.xml&gt;&lt;/nowiki&gt;
+# Wanneer de analyse klaar is, krijg je een mailtje met een link naar de [[Portals-PerformanceResultaten]].</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformanceTesten</title>
+    <id>2484</id>
+    <revision>
+      <id>8466</id>
+      <timestamp>2007-11-29T10:25:42Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <comment>/* Performance Testen */</comment>
+      <text xml:space="preserve">== Performance Testen ==
+Performance Testen heeft oa de volgende doelen:
+* Vaststellen of (non-functional) requirements worden gehaald.
+* Zo vroeg mogelijk vaststellen waar de bottlenecks in een systeem zitten en of deze mogelijk problematisch zijn.
+
+Je kan performance testen vanuit een aantal standpunten bekijken:
+* Als klant, geinteresseerde in [[Portals-PerformanceResultaten]]
+* Als performance tester, om al gemaakte tests uit te voeren: [[Portals-PerformanceTestUitvoeren]]
+* Als performance tester, om nieuwe testen te maken: [[Portals-PerformanceTestMaken]]
+* Als bouwer/onderhouder van de [[Portals-PerformanceToolset]].
+
+Testcase: [[Performance-inrichting-BSB-test]]
+
+== Inrichten omgeving ==
+* Zie [[Performance-inrichten-omgeving]]
+
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformanceToolset</title>
+    <id>2489</id>
+    <revision>
+      <id>5718</id>
+      <timestamp>2007-06-21T12:40:21Z</timestamp>
+      <contributor>
+        <username>Vreen00</username>
+        <id>32</id>
+      </contributor>
+      <text xml:space="preserve">== Performance Toolset ==
+
+Je hebt de Performance Toolset nodig om met JMeter performance tests te kunnen uitvoeren. Je kunt deze tests op verschillende manieren uitvoeren:
+# Vanaf je eigen werkplek, of een andere Windows XP machine. JMeter draait dan binnen Cruise Control op je eigen machine, en vuurt requests af naar de ingestelde [[Portals-PerformanceTestOmgeving]]. Dit zal normaal gesproken een OLO machine zijn, die ook vanuit CruiseControl wordt bestuurd ivm resource logging.
+# Vanaf een werkplek op [[Portals-PerformanceTestG5|G5]], ook een Windows XP machine. JMeter draait hier ook binnen Cruise Control. De server machines worden hier autonoom bestuurd, via crontab's.
+# Vanaf een AIX machine binnen de testomgeving. JMeter draait dan op zo'n AIX machine. Ook hier worden de server machines worden hier autonoom bestuurd. Op TAO Straat 1 worden hiervoor de Edge server en Externe WAS 1 gebruikt.
+
+TODO: optie 1 en 2 uitleggen.
+
+Voor de derde optie (AIX) is het nodig een deel van de toolset op de AIX machine te installeren:
+# Zorg voor een werkende java omgeving, minimaal JDK 1.4. Installeer bv zo dat er een java executable staat in /prj/jre14/jre/bin. Mogelijk staat er al een in /prj/was/java/bin/java;
+# Installeer JMeter in /prj/jmeter2.1.1. Waarschijnlijk moet je dit als root doen. Zorg er wel voor dat de bestanden te benaderen zijn door jouw testuser (perf, vreen00, wissp02).
+# Kopieer de aangepaste JMeter bestanden uit de performance VOB (...\auto\aix) naar de JMeter/bin directory. Controleer de lokatie van de java executable.
+# Installeer de bestanden vanuit de Performance TestVOB/auto/testaix/serverscripts naar /prj/perftest/testaix.
+# Ga verder met [[Portals-PerformanceTestMaken]] en [[Portals-PerformanceTestUitvoeren]].
+
+De Performance Toolset is qua lokaties verdeeld in:
+* Algemene tools en libraries, op internet te vinden. Deze staan op de BDS onder ...\Algemeen\Tools &amp; Manuals\PerfTools. Hierbinnen:
+** install: versies van de software om zelf te installeren.
+** installed: voor geinstalleerde versies van de software. Deze kan je in principe zo kopieren naar c:\webdiensten, of een andere directory die je als root gebruikt voor je performance testen.
+** aix: tools die je op AIX moet installeren als je JMeter vanaf een AIX wilt draaien. Hieronder staan java jdk 1.4, jmeter 2.1.1 en Tcl 8.2.
+* De Performance VOB binnen ClearCase: Webdiensten_performanceVOB\auto. Hierin staan Webdiensten release onafhankelijke zaken.
+* De TestVOB van een specifieke release, bv Webdiensten60_testVOB. Binnen '92 Performance\cruise' staan performance test zaken zoals testomgevingen, testcases en testsuites.
+
+Zie verder de volgende pagina's
+* [[Portals-PerformanceToolsetGebruik]]
+* [[Portals-PerformanceToolsetInstalleren]]
+* [[Portals-PerformanceToolsetWerking]]
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformanceToolsetInstalleren</title>
+    <id>2491</id>
+    <revision>
+      <id>11369</id>
+      <timestamp>2008-09-22T11:09:49Z</timestamp>
+      <contributor>
+        <username>Weera09</username>
+        <id>112</id>
+      </contributor>
+      <comment>/* MySQL */</comment>
+      <text xml:space="preserve">== Inleiding ==
+De Performance Toolset is qua lokaties verdeeld in:
+* Algemene tools en libraries, op internet te vinden. Deze staan op de BDS onder ...\PerfTools. Hierbinnen:
+** install: versies van de software om zelf te installeren. Zoals bijv. de installable bestanden van MySQL.
+** installed: voor geinstalleerde versies van de software. Deze kan je in principe zo kopieren naar c:\webdiensten, of een andere directory die je als root gebruikt voor je performance testen.
+** aix: tools die je op AIX moet installeren als je JMeter vanaf een AIX wilt draaien. Hieronder staan java jdk 1.4, jmeter 2.1.1 en Tcl 8.2.
+** util: voor geinstalleerde versies van utilities. Zoals oa. cygwin, gnuplot, e.d.
+* De Performance VOB binnen ClearCase: Webdiensten_performanceVOB\auto. Hierin staan Webdiensten release onafhankelijke zaken.
+* De TestVOB van een specifieke release, bv Webdiensten60_testVOB. Binnen '92 Performance\cruise' staan performance test zaken zoals testomgevingen, testcases en testsuites.
+
+== Algemene tools ==
+=== Stappen ===
+# Tools kopieren, zie onderstaande tabel.
+# Kopieren vanuit \vreen00_IPB_Plateau_2\CR_Portals\fundament\test\perf\testprj\showcase
+# Kopieren vanuit \vreen00_IPB_Plateau_2\CR_Portals\fundament\test\perf\toolset\cruise
+
+=== Tabel ===
+{| border="1" cellspacing="0"
+|-
+!Naam
+!Versie
+!Opmerkingen
+|-
+|CruiseControl
+|2.7.3
+|Uit &lt;BDS&gt;\PerfTools\java
+|-
+|Java JDK
+|1.5.0
+|Uit &lt;BDS&gt;\PerfTools\java
+|-
+|Ant
+|1.6.5
+|Uit &lt;BDS&gt;\PerfTools\java
+|-
+|Ant contrib
+|1.0b3
+|Uit &lt;BDS&gt;\PerfTools\java\Extra_Ant_Libraries
+|-
+|Ant jsch
+|?
+|Uit &lt;BDS&gt;\PerfTools\java\Extra_Ant_Libraries
+|-
+|Tcl
+|8.5
+|Uit &lt;BDS&gt;\PerfTools\util\Tcl
+|-
+|Gnuplot
+|4.0
+|Uit &lt;BDS&gt;\PerfTools\util\gnuplot-cmd
+|-
+|TomCat
+|5.5.4
+|Uit &lt;BDS&gt;\PerfTools\java
+|-
+|JMeter
+|2.3.2
+|Uit &lt;BDS&gt;\PerfTools\java
+|-
+|Diversen
+|nvt
+|Uit &lt;BDS&gt;\PerfTools\bin (volledig)
+|-
+|Cygwin
+|?
+|uit &lt;BDS&gt;\PerfTools\util\cygwin (zie onder)
+|-
+|SysInternals
+|?
+|uit &lt;BDS&gt;\PerfTools\util\sysinternals
+|-
+|MySQL
+|5.0.22
+|Zelf installeren, database aanmaken en users. Installable files staat in &lt;BDS&gt;\PerfTools\install\mySQL
+|}
+
+=== Tcl ===
+* Installeer Active Tcl 8.5 (of hoger).
+* Hierna moet een aantal extensies worden geinstalleerd, met &lt;b&gt;teacup install &lt;package-naam&gt;&lt;/b&gt;.
+* Naast handmatig onderstaande libs installeren kun je ook de repository kopieren: kopieer de directory repository van &lt;nowiki&gt;C:\gebr000_toolset2\CxR_Toolset\Perf\toolset\tool\Tcl85&lt;/nowiki&gt; naar &lt;nowiki&gt;C:\Documents and Settings\gebr000\Teapot&lt;/nowiki&gt;
+* Config spec voor toolset VOB: &lt;b&gt;include \\ol29u22\cspecs\CxR\toolset.txt&lt;/b&gt;
+* De bestanden in de Teapot directory moeten allemaal ReadWrite zijn en niet &amp;quot;Alleen-lezen&amp;quot; (ReadOnly).
+* In de directory &lt;tcl install&gt;\lib\tcl8.5 staat een bestand &lt;b&gt;teapot-link.txt&lt;/b&gt;. Pas de tekst die hierin staat aan zodat naar de zo juiste gekopieerde repository verwezen wordt. 
+* Controleer of de extensies goed geinstalleerd zijn door &lt;b&gt;tclsh&lt;/b&gt; te starten en in de shell de command's &lt;b&gt;package require xml&lt;/b&gt; en/of &lt;b&gt;package require math&lt;/b&gt; in uit te voeren.
+* Test ook of de MySQL library beschikbaar is door binnen Tcl het commando &lt;b&gt;package require mysqltcl&lt;/b&gt; uit te voeren.
+* Het systeem geeft op deze command's het versie nummer van de extensie terug (bijv. &lt;b&gt;2.6&lt;/b&gt; of &lt;b&gt;1.2.4&lt;/b&gt;).
+
+&lt;pre&gt;
+package-cmdline-1.3-tcl.tm
+package-fileutil-1.13.4-tcl.tm
+package-html-1.4-tcl.tm
+package-Itcl-3.4-win32-ix86.zip
+package-math-1.2.4-tcl.zip
+package-ncgi-1.3.2-tcl.tm
+package-sgml-1.9-macosx-universal.tm
+package-sgml-1.9-tcl.tm
+package-sgmlparser-1.1-macosx-universal.tm
+package-sgmlparser-1.1-tcl.tm
+package-struct%3a%3amatrix-1.2.1-tcl.tm
+package-struct%3a%3amatrix-2.0.1-tcl.tm
+package-struct-1.4-tcl.tm
+package-struct-2.1-tcl.tm
+package-struct-graph-2.2-tcl.zip
+package-struct-list-1.6.2-tcl.tm
+package-struct-matrix-2.0.1-tcl.tm
+package-struct-pool-1.2.1-tcl.tm
+package-struct-prioqueue-1.3.1-tcl.tm
+package-struct-queue-1.4-tcl.tm
+package-struct-record-1.2.1-tcl.tm
+package-struct-set-2.2.1-tcl.zip
+package-struct-skiplist-1.3-tcl.tm
+package-struct-stack-1.3.1-tcl.tm
+package-struct-tree-2.1.1-tcl.zip
+package-tclparser-2.6-macosx-universal.tm
+package-tclparser-2.6-tcl.tm
+package-Tclx-8.4-win32-ix86.zip
+package-uri-1.1.5-tcl.tm
+package-uri-1.2-tcl.tm
+package-uri-1.2.1-tcl.tm
+package-xml%3a%3atcl-2.6-macosx-universal.tm
+package-xml%3a%3atcl-2.6-tcl.tm
+package-xml%3a%3atclparser-2.6-macosx-universal.tm
+package-xml%3a%3atclparser-2.6-tcl.tm
+package-xml-2.6-tcl.tm
+package-xml-tcl-2.6-tcl.tm
+package-xml-tclparser-2.6-tcl.tm
+package-xmldefs-2.6-macosx-universal.tm
+package-xmldefs-2.6-tcl.tm
+&lt;/pre&gt;
+
+=== Cygwin ===
+Van de cygwin distributie is maar een beperkt aantal bestanden noodzakelijk uit de bin-directory:
+&lt;pre&gt;
+13-03-04   5:26          13.824  cygstart.exe
+26-05-04   3:07       1.153.417  cygwin1.dll
+ 4-12-03   4:03          62.464  cygz.dll
+24-07-03   7:03          62.976  gzip.exe
+20-02-02   0:26          40.448  sort.exe
+20-02-02   0:26          19.456  split.exe
+19-04-04  21:20         225.792  ssh.exe
+10-11-03  15:51         144.384  tar.exe
+15-08-03  11:42          18.432  uudecode.exe
+15-08-03  11:42          16.896  uuencode.exe
+21-09-02   0:24          11.776  vmstat.exe
+20-02-02   0:26          23.552  wc.exe
+22-11-03  20:28         176.128  wget.exe
+21-03-02   6:16          85.504  grep.exe
+20-11-03   2:55          15.360  cygminires.dll
+11-12-03  18:01          62.976  cygpcre-0.dll
+11-04-03   9:33          64.924  cygpcre.dll
+11-12-03  18:01           9.216  cygpcreposix-0.dll
+11-04-03   9:33          62.850  cygpcreposix.dll
+18-03-04   0:00         174.592  cygssl-0.9.7.dll
+ 4-12-03   4:03          62.464  cygz.dll
+19-10-03  10:12           6.656  cygcrypt-0.dll
+18-03-04   0:00         860.672  cygcrypto-0.9.7.dll
+10-08-03  21:59         980.992  cygiconv-2.dll
+13-12-01  10:33          22.016  cygintl-1.dll
+10-08-03  23:15          37.888  cygintl-2.dll
+20-06-01  18:14          21.504  cygintl.dll
+ 9-06-02   6:50          22.528  cygpopt-0.dll
+&lt;/pre&gt;
+
+=== MySQL ===
+# Installeer met setup.exe, deze mogelijk wel eerst renamen, anders gebeurt er niets. Mogelijk kan herstarten van de machine ook helpen.
+# 3 andere MySQL tools installeren: admin en querybrowser
+# user perftest/perftest aanmaken.
+# laad notes-create.sql in de query-browser (open script, niet open query) en voer uit (Script staat in &lt;ClearCase Toolset VOB&gt;\CxR_Toolset\Perf\toolset\cruise\checkout\script\database).
+# Geeft de database user perftest full control voor het notes schema
+
+=== Tomcat ===
+Tomcat wordt gebruikt om de resultaten van de performance testen te kunnen presenteren via een web pagina. Voor CruiseControl 2.7.3 is een web archive (war) beschikbaar die dit mogelijk maakt. Voer de volgende stappen uit:
+# Installeer TomCat (bv versie 5.5.4)
+## Stel 8088 in als poort (zodat je poort 8080 vrijhoudt voor de JMeter proxy)
+## Stel een wachtwoord in en kies een Java JRE (minimaal 1.5.0)
+## Na installatie wordt de service automatisch gestart.
+## Test dit door in je browser de volgende URL te proberen: http://localhost:8088
+# Installeer het CruiseControl Dashboard:
+## Kopieer &lt;cruisecontrol&gt;/webapps/dashboard naar &lt;tomcat&gt;/webapps
+## Stop Tomcat indien nodig.
+## Start "Monitor Tomcat" via je start-menu.
+## Maak een dashboard-config bestand, een voorbeeld staat in &lt;cruisecontrol&gt;. Geef hierin de lokaties van je logs en artifacts directories. Beide directories hebben een subdirectory met je project (bv klop2).
+## Voeg de setting toe in de Java-tab: -Ddashboard.config=&lt;lokatie naar je dashboard.config&gt;
+## Start de TomCat server.
+## Nu is het dashboard te benaderen via http://localhost:8088/dashboard.
+## In cruisecontrol.bat: vervang -webport 8080 door -dashboardurl http://localhost:8088/dashboard
+
+Oud (Cruisecontrol 2.2.1 versie):
+# Installeer de CruiseControl War
+## Kopieer de war vanuit ClearCase &lt;b&gt;VOB Toolset\\CxR_Toolset\Perf\toolset\tool\CruiseControl-Tomcat&lt;/b&gt; naar de &lt;b&gt;webapps&lt;/b&gt; directory binnen Tomcat.
+## In de log (/logs dir) is dan te zien dat deze wordt gedeployed.
+## Vervolgens in de URL http://localhost:8088/cruisecontrol/buildresults te benaderen.
+## Als je al wat testen hebt gedraaid, zijn deze op de webpagina te zien.
+
+Opmerking: de WAR gaat ervan uit (is hardcoded) dat de resultaten in &lt;b&gt;c:\cruiseresults&lt;/b&gt; staan. Mocht dit bij jou anders zijn, dan zul je de War opnieuw moeten compileren etc.
+
+{{Sjabloon:Portals-Perf-ZieOok}}</text>
+    </revision>
+  </page>
+  <page>
+    <title>Portals-PerformanceToolsetWerking</title>
+    <id>2492</id>
+    <revision>
+      <id>4231</id>
+      <timestamp>2001-01-15T00:00:00Z</timestamp>
+      <contributor>
+        <ip/>
+      </contributor>
+      <text xml:space="preserve">
+CruiseControl
+Ant
+JMeter
+Gnuplot
+
+Prepare
+Run
+Teardown</text>
+    </revision>
+  </page>
+</mediawiki>

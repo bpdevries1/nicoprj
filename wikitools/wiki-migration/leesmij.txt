@@ -1,0 +1,3 @@
+Deze tool is (eenmalig) gebruikt voor de migratie van JspWiki naar Mediawiki.
+
+Nico de Vreeze, 15-10-2008.

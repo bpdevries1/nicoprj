@@ -1,0 +1,3 @@
+Deze directory bevat scripts om mediawiki pagina's te vertalen naar het MTHV-XML formaat.
+
+Nico de Vreeze, 15-10-2008.

@@ -1,0 +1,145 @@
+Internal link 		 [[Main Page]] 		 Main Page
+Category link 		 [[:Category:Help]] 		 Category:Help
+Piped link 		 [[Main Page|different text]] 		 different text
+Anchor link 		 [[#External links|Anchor link]] 		 Anchor link
+External link 		 http://mediawiki.org 		 http://mediawiki.org
+External link,
+
+different title
+		 [http://mediawiki.org MediaWiki] 		 MediaWiki
+
+Advanced options
+
+The full syntax for displaying an image is:
+
+[[Image:{name}|{options}]]
+
+Where options can be zero or more of the following, separated by pipes:
+
+    * thumb, thumbnail, or frame: Controls how the image is formatted
+    * left, right, center, none: Controls the alignment of the image on
+the page
+    * {width}px: Resizes the image to the given width in pixels
+    * {caption text}
+
+The options can be given in any order. If a given option does not match
+any of the other possibilities, it is assumed to be the caption text.
+Caption text can contain wiki links or other formatting.
+
+{| border="1" cellpadding="20" cellspacing="0"
+!Yummy
+!Yummier
+|-
+|Orange
+|Apple
+|-
+|Bread
+|Pie
+|-
+|Butter
+|Ice cream
+|}
+
+
+
+{| border="1" cellpadding="20" cellspacing="0"
+!Yummy!!Yummier
+|-
+|Orange||Apple
+|-
+|Bread||Pie
+|-
+|Butter||Ice cream
+|}
+
+
+
+
+
+
+
+===============================================================================================
+Voorbeeld eigen wiki:
+
+== Inleiding ==
+(van [[Peter Dijkshoorn]])
+
+Heren,
+"Performance engineering"
+We horen er steeds vaker over, we lijken het steeds vaker nodig te hebben,
+we gaan het steeds vaker aanbieden. Dat is kort gezegd de weg die het
+begrip performance engineering momenteel bewandelt. Groei, omdat projecten
+meeromvattend en complexer worden. De kans dat het mis gaat wordt groter.
+Kortom: kansen en uitdagingen. Tijd dus om onszelf te gaan organiseren en
+profileren.
+Al eerder zijn ideeën aangedragen om performance engineering als speerpunt
+vanuit Ordina verder te ontwikkelen al dan niet binnen Check IT!. In
+presentaties, op TWO en op andere manieren is gecommuniceerd dat
+performance engineering is op te splitsen in een viertal deelgebieden:
+* Performance by design: we passen best practices toe in alle fasen van
+het ontwikkelproces om voor goede performance te zorgen.
+* Performance testing: we meten en monitoren de performance om inzicht te
+krijgen in het gedrag van het systeem, de bottlenecks te detecteren en te
+checken of aan performance-eisen wordt voldaan.
+* Performance tuning: we analyseren performance-problemen en lossen ze op.
+* Performance modelling: door te modelleren kunnen we in een vroeg stadium
+sizen en kunnen we aan capacity management doen.
+
+=== Doelen ===
+Het hebben van een speerpunt dient diverse doelen. Die doelen kunnen
+intern of extern gericht zijn. Enkele doelen voor performance engineering
+(kunnen) zijn:
+* Extern gericht: de klant tonen dat het onderwerp de juiste aandacht krijgt;
+* Intern en extern gericht: het vergaren van relevante referenties;
+* Intern gericht: kennisdeling en -groei.
+
+=== Middelen ===
+Middelen die je kunt inzetten om die doelen te verwezenlijken zijn
+bijvoorbeeld:
+* Het ontwikkelen van een gezamenlijke (powerpoint-)visie;
+* Het organiseren van expert-sprekeravonden, workshops, etc.;
+* Het samen doen van specifieke performance projecten;
+* Het spreken op congressen c.q. schrijven van artikelen.
+
+=== Collega's ===
+Ik heb begrepen dat binnen TC een aantal mensen in eerste instantie hebben
+aangegeven mee te willen doen aan de invulling van het speerpunt, of daar
+in opdrachten al mee bezig zijn. Naast [[Peter Dijkshoorn|mijzelf]]
+betreft het de volgende collega's:
+* [[Paul Fischer]];
+* [[Melle Haarsma]];
+* [[Toby Hage]];
+* [[Pim Kars]];
+* [[Nico de Vreeze]];
+* [[Peter Dijkshoorn]];
+* [[Patric Schoenaker]];
+* [[Arjan Almekinders]];
+* [[Eric van der Ende]];
+* [[Marcel Wigman]];
+
+== Acties (per 23-8-2006) ==
+* Peter: notulen.
+* Eric: acties uitzetten.
+* Zie ook [[In het nieuws]].
+
+=== Later ===
+* Verhaal richting account managers
+* Kennisdeling/wiki: wat willen we hiermee?
+* Mercury Certificering: zitten we niet meteen op te wachten, klant ook
+niet. Wel zo dat Mercury mensen 185 euro per uur vragen.
+
+== En verder ==
+* [[Performance Engineering Flyers]]
+* [[Performance Engineering Documenten]]
+* [[Performance Engineering Projecten]]
+* [[Performance Engineering Tools]]
+* [[Historie]]
+
+Converteren naar Confluence:
+http://confluence.atlassian.com/display/CONFEXT/Universal+Wiki+Converter
+
+
+
+
+
+

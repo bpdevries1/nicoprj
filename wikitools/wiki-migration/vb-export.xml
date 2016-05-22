@@ -1,0 +1,62 @@
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.3/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.3/ http://www.mediawiki.org/xml/export-0.3.xsd" version="0.3" xml:lang="nl">
+  <siteinfo>
+    <sitename>ICTwiki</sitename>
+    <base>http://10.75.99.121/wiki/index.php/Hoofdpagina</base>
+    <generator>MediaWiki 1.8.2</generator>
+    <case>first-letter</case>
+      <namespaces>
+      <namespace key="-2">Media</namespace>
+      <namespace key="-1">Speciaal</namespace>
+      <namespace key="0" />
+      <namespace key="1">Overleg</namespace>
+      <namespace key="2">Gebruiker</namespace>
+      <namespace key="3">Overleg gebruiker</namespace>
+      <namespace key="4">ICTwiki</namespace>
+      <namespace key="5">Overleg ICTwiki</namespace>
+      <namespace key="6">Afbeelding</namespace>
+      <namespace key="7">Overleg afbeelding</namespace>
+      <namespace key="8">MediaWiki</namespace>
+      <namespace key="9">Overleg MediaWiki</namespace>
+      <namespace key="10">Sjabloon</namespace>
+      <namespace key="11">Overleg sjabloon</namespace>
+      <namespace key="12">Help</namespace>
+      <namespace key="13">Overleg help</namespace>
+      <namespace key="14">Categorie</namespace>
+      <namespace key="15">Overleg categorie</namespace>
+      <namespace key="100">Relation</namespace>
+      <namespace key="101">Relation talk</namespace>
+      <namespace key="102">Attribute</namespace>
+      <namespace key="103">Attribute talk</namespace>
+      <namespace key="104">Type</namespace>
+      <namespace key="105">Type talk</namespace>
+    </namespaces>
+  </siteinfo>
+  <page>
+    <title>Portals</title>
+    <id>1657</id>
+    <revision>
+      <id>1963</id>
+      <timestamp>2007-03-02T14:25:25Z</timestamp>
+      <contributor>
+        <username>Grieh00</username>
+        <id>7</id>
+      </contributor>
+      <text xml:space="preserve">'''Deelgebieden'''
+*[[Beveiliging]]
+*[[Content Management]]
+*[[Deployment]]
+*[[Informatiediensten]]
+*[[Infra]]
+*[[Portal]]
+*[[Portal Patterns]]
+*[[Portal Standaarden]]
+*[[Portal SOA]]
+*[[Portal SAP]]
+*[[Portlets]]
+*[[RSA]]
+*[[Toegangsdiensten]]
+*[[UCM]]
+*[[UserInterface]]</text>
+    </revision>
+  </page>
+</mediawiki>
