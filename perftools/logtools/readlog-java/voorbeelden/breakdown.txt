@@ -1,0 +1,64 @@
+Service: Start creating Batch : Overeenkomst Prolongatie
+comp	naam	n	tijd (ms)	wl	comm	bo
+Diversen			140	140
+Totaal			140	140	0	0
+Totaal Perc			100%	100%	 0%	 0%
+
+Service: Starting to set deploy status for dispatcher to : true
+comp	naam	n	tijd (ms)	wl	comm	bo
+Diversen			150	150
+Totaal			150	150	0	0
+Totaal Perc			100%	100%	 0%	 0%
+
+Service: onMessage _batchMessageDispatcher called
+comp	naam	n	tijd (ms)	wl	comm	bo
+ovk	handleXML	1	116	116
+ovk	prolongeer	1	96	96
+ovk	prolongeer	0	469	469
+prx	start loperservice requestEigenVerwijzing in Bean	0	544	22	493	29
+col	getCollectiviteit	0	414	7	370	37
+col	retrieveCollectiviteiten	0	299	3	281	15
+col	getKortingsafsprakenForContract	0	112	112
+basisproduct	getDefaultCollectiviteitsKorting	2	67	67
+persoon	klantproxy.retrieveKlant	0	430	5	383	42
+basisproduct	determineTermijnPremies	0	54	54
+ovk	determineVaststelling	0	1042	1042
+common	dbStoreObjects	0	76	76
+common	dbStoreRelations	0	5651	5651
+bta	CFindBTABusinessLogic.doeFIndBTA	0	435	4	383	48
+trm	COnderhoudenTermijn.doeOnderhoudenTermijn	0	439	0	402	37
+gbk	findJournaalregel	0	440	440
+common	dbStoreObjects	0	67	67
+col	getCollectiviteit	0	355	0	321	34
+col	retrieveCollectiviteiten	0	244	0	230	14
+col	getKortingsafsprakenForContract	0	63	63
+ovk	processUitvoer	0	68	68
+col	retrieveCollectiviteiten	0	396	1	377	18
+persoon	klantproxy.retrieveKlant	0	468	1	467
+persoon	doeRetrieveAanhef	0	331	1	330
+persoon	doeRetrieveAdressering	0	336	0	336
+uitvoer	dbStoreReferences	0	314	314
+persoon	klantproxy.retrieveKlant	0	334	0	334
+cmm	COpslaanContactmoment.doeOpslaanContactmoment	0	405	0	346	59
+cmm	COpslaanTransactieBijContactmoment.doeOpslaanTransactieBijContactmoment	0	376	0	326	50
+Diversen			881	881
+Totaal			15321	9560	5379	383
+Totaal Perc			100%	62%	35%	 2%
+*** Verschil in berekening: -1
+
+Service: onMessage called for BatchCompletionListener
+comp	naam	n	tijd (ms)	wl	comm	bo
+bth	Starting to set deploy status for dispatcher to : false	1	102
+Diversen			20	20
+Totaal			122	122	0	0
+Totaal Perc			100%	100%	 0%	 0%
+
+Service: onMessage called for BatchExecutor
+comp	naam	n	tijd (ms)	wl	comm	bo
+bth	start retrieving database information	1	80	80
+bth	Starting to set deploy status for dispatcher to : true	2	500	500
+Diversen			1247	1247
+Totaal			1828	1827	0	0
+Totaal Perc			100%	100%	 0%	 0%
+*** Verschil in berekening: 1
+

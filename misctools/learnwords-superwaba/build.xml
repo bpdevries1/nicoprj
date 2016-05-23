@@ -1,0 +1,181 @@
+<project name="learnwords" default="all" basedir=".">
+
+  <property name="version" value="1.0"/>
+
+  <!-- Where the Sources live -->
+  <property name="src.dir" value="src"/>
+
+  <!-- Where the class files should live -->
+  <property name="classes.dir" value="classes"/>
+
+  <!-- Where the build files should live -->
+  <property name="build.dir" value="build"/>
+
+	<!-- where the palm files are distributed -->
+  <property name="dist.dir" value="dist"/>
+
+  <!-- Where the local test is done -->
+  <property name="localtest.dir" value="test"/>
+
+	<!-- extra entries for classpath -->
+  <property name="java.dir" value="d:/java"/>
+  <property name="superwaba.classes.dir" value="d:/java/superwaba/classes"/>
+
+	<!-- properties for generating pdb and prc -->
+  <property name="warpextrafiles" value=""/>
+  <property name="appName" value="LearnWords"/>
+  <property name="creator" value="NgDB"/>
+  <property name="appIcon" value=""/>
+  <property name="useWExtras" value=""/>
+  <property name="useRetro" value=""/>
+  <property name="add2cp" value=""/>
+
+  <property name="swjvmpath" value="D:\java\j2sdk1.4.1_01"/>
+  <property name="swpath" value="d:\java"/>
+	<property name="swjarfile" value="${swjvmpath}/jre/lib/rt.jar"/>
+
+	<!-- for installing on palm -->
+	<property name="install.tool" value="d:\Palm\Instapp.exe"/>
+
+  <!-- compile classpath -->
+  <path id="compile.classpath">
+	  <fileset dir=".">
+	    <include name="**/lib/*.jar"/>
+	    <include name="**/ext/*.jar"/>
+	  </fileset>
+  	<pathelement location="${java.dir}"/>
+  	<pathelement location="${superwaba.classes.dir}"/>
+  </path>
+
+	<!-- classpath used for warping and also exegen -->
+  <path id="warp.classpath">
+  	<pathelement location="${swjarfile}"/>
+  	<pathelement location="${swpath}/superwaba/bin"/>
+  	<pathelement location="${swpath}/superwaba/classes"/>
+  	<pathelement location="${add2cp}"/>
+  	<pathelement location="${classes.dir}"/>
+	</path>
+
+  <path id="srcpaths">
+  	<pathelement location="${src.dir}"/>
+  </path>
+
+  <target name="init">
+  	<mkdir dir="${classes.dir}"/>
+  	<mkdir dir="${build.dir}"/>
+  	<mkdir dir="${dist.dir}"/>
+  </target>
+
+  <target name="compile" depends="init" description="Compile to classes">
+		<javac
+				 destdir="${classes.dir}"
+				 optimize="true"
+				 debug="false"
+				 target="1.1">
+			<src>			
+				<path refid="srcpaths"/>
+			</src>
+		  <include name="**/*.java"/>
+		  <classpath refid="compile.classpath"/>
+		</javac>
+  </target>
+
+  <!-- subtask to check if warping is needed now -->
+	<target name="check.warp">
+    <uptodate property="warp.uptodate" targetfile="${build.dir}/${appName}.pdb">
+      <srcfiles dir="${classes.dir}" includes="**/*.class"/>
+    </uptodate>
+	</target>
+
+	<target name="warp" depends="compile,check.warp" unless="warp.uptodate" description="Warp to pdb">
+		<copy file="${classes.dir}/${appName}.class" todir="${build.dir}"/>
+		<java classname="Warp" dir="${build.dir}" fork="true" failonerror="true">	
+		  <classpath refid="warp.classpath"/>
+			<arg value="c"/>	
+			<arg value="/c"/>	
+			<arg value="${creator}"/>	
+			<arg value="${appName}"/>	
+			<arg value="${appName}.class"/>	
+			<arg value="${warpextrafiles}"/>	
+		</java>
+	</target>
+
+  <!-- subtask to check if exegen is needed now -->
+	<target name="check.exegen">
+    <uptodate property="exegen.uptodate"
+              targetfile="${build.dir}/${appName}.prc"
+      				srcfile="${build.dir}/${appName}.pdb"
+    />
+	</target>
+
+	<target name="exegen" depends="warp,check.exegen" unless="exegen.uptodate" description="Make prc">
+		<java classname="Exegen" dir="${build.dir}" fork="true" failonerror="true">	
+		  <classpath refid="warp.classpath"/>
+			<arg value="/C"/>	
+			<arg value="${creator}"/>	
+			<arg value="${appName}"/>	
+		</java>
+	</target>
+
+	<target name="listpdb" depends="warp" description="Show contents of pdb">
+		<java classname="Warp" dir="${build.dir}" fork="true" failonerror="true">	
+		  <classpath refid="warp.classpath"/>
+			<arg value="l"/>	
+			<arg value="${appName}.pdb"/>	
+		</java>
+	</target>
+	
+  <target name="deploylocal" depends="compile" description="Deploy locally">
+		<echo message="Nothing needed"/>
+  </target>
+
+  <target name="testlocal" depends="deploylocal" description="Test locally">
+		<java classname="waba.applet.Applet" dir="${localtest.dir}" fork="true" failonerror="true">	
+		  <classpath refid="warp.classpath"/>
+			<arg value="LearnWords"/>	
+		</java>
+
+<!--
+setlocal
+set swpath=d:\java\superwaba\
+set swpathext=d:\java
+
+set classpath=%classpath%;%swpath%classes;%swpathext%;..\classes
+echo %classpath%
+rem java ConvertList %1 %2
+rem java %swclasspath%;%swpath%org\superwaba\palm\ext\wextras\classes;%swpath%org/superwaba/palm/classes waba.applet.Applet %appName%
+rem java waba.applet.Applet ConvertList %1 %2
+java waba.applet.Applet LearnWords
+-->
+
+  </target>
+
+	<target name="clean" description="Delete generated classfiles and palmfiles">
+	  <delete dir="${classes.dir}"/>
+	  <delete file="${build.dir}/${appName}.class"/>
+	  <delete file="${build.dir}/${appName}.pdb"/>
+	  <delete file="${build.dir}/${appName}.prc"/>
+	</target>
+
+	<target name="dist" depends="exegen" description="Distribute palmfiles to dist directory">
+		<copy file="${build.dir}/${appName}.pdb" todir="${dist.dir}"/>
+		<copy file="${build.dir}/${appName}.prc" todir="${dist.dir}"/>
+	</target>
+
+	<target name="all" depends="clean,dist" description="Clean, build and distribute"/>
+
+	<target name="installpdb" depends="dist" description="Install pdb on palm">
+		<exec dir="${dist.dir}" executable="${install.tool}">
+		  <arg value="${appName}.pdb"/>
+		</exec>
+		<echo message="Now do a Palm HotSync"/>
+	</target>
+
+	<target name="installpalm" depends="dist,installpdb" description="Install on palm">
+		<exec dir="${dist.dir}" executable="${install.tool}">
+		  <arg value="${appName}.prc"/>
+		</exec>
+		<echo message="Now do a Palm HotSync"/>
+	</target>
+
+</project>

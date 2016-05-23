@@ -14,7 +14,7 @@ proc main {} {
 
 proc zip_projects {} {
   zip_project /home/nico/nicoprj /home/ymor/RABO/zips/nicoprj.zip
-  zip_project /home/nico/perftoolset/tools /home/ymor/RABO/zips/perftoolset-tools.zip
+  # zip_project /home/nico/perftoolset/tools /home/ymor/RABO/zips/perftoolset-tools.zip
 }
 
 proc add_xr {str} {
@@ -29,7 +29,7 @@ proc zip_project {dir zipfile} {
 
   # for testing etc no password:
 
-  set ignores {*~ *.exe *.dll *.jar *.log *.out *.xls .git tryout target output logs}
+  set ignores {*~ *.exe *.dll *.jar *.class .jnilib *.log *.out *.xls .git mediatools tryout target output logs}
   set options [map add_xr $ignores]
   
   # set options {-xr!*.exe -xr!*.dll -xr!*.log -xr!*.xls -xr!.git}
