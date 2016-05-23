@@ -8,6 +8,11 @@ package require ndv
 proc main {argv} {
   # eerst alleen nicoprj
   set os [det_os]
+  if {$os == "windows"} {
+    set git_exe "c:/util/GitHub/cmd/git.exe"
+  } else {
+    set git_exe "git"
+  }
   set commit_msg ""
   if {[:# $argv] > 0} {
     if {[:# $argv] == 1} {
@@ -24,7 +29,8 @@ proc main {argv} {
       cd ~/nicoprj 
     }
   }
-  set res [exec git status]
+  # set res [exec git status]
+  set res [exec $git_exe status]
   puts "result of git-status:"
   puts $res
   set filename "git-add-commit.sh" 
