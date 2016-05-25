@@ -6,8 +6,22 @@ Dim oExcel
 Set oExcel = CreateObject("Excel.Application")
 Dim oBook
 Set oBook = oExcel.Workbooks.Open(Wscript.Arguments.Item(0))
-oBook.SaveAs WScript.Arguments.Item(1), 6
-'oBook.SaveAs WScript.Arguments.Item(1), 21
+'oBook.SaveAs WScript.Arguments.Item(1), 6
+'WScript.Echo "oBook.ActiveSheet = " + oBook.ActiveSheet.Name 
+const xlTSV = 21 ' 3-11-2012: code 3 werkt mogelijk ook.
+const xlCSV = 6 ' 3-11-2012: code 3 werkt mogelijk ook.
+
+
+'oBook2.SaveAs WScript.Arguments.Item(1), 21
+
+dim sht
+for each sht in oBook.worksheets
+ sht.activate
+ dim output_filename
+ output_filename = WScript.Arguments.Item(1) & "_" & replace( sht.name, " ", "_" ) & ".csv"
+ oBook.saveAs output_filename, xlCSV
+next
+
 oBook.Close False
 oExcel.Quit
 'WScript.Echo "Done"
