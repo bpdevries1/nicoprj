@@ -73,7 +73,7 @@
   "Create a function <fn-name> to view a generic page with header and base-page.
   params in map:
   page-name     - String
-  page-fn       - (Fn [Obj -> Html-Table])
+  page-fn       - (Fn [Obj,Obj -> Html-Table]) (which 2 objects?)
   
   Defines       - (Fn [() -> Html])
   "
