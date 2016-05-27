@@ -41,7 +41,7 @@ proc unison {args} {
 
 proc zip_projects {} {
   zip_project {c:\PCC\nico\nicoprj} /c/PCC/Nico/zips/nicoprj.zip
-  zip_project {c:\PCC\nico\perftoolset\tools} /c/PCC/Nico/zips/perftoolset-tools.zip
+  # zip_project {c:\PCC\nico\perftoolset\tools} /c/PCC/Nico/zips/perftoolset-tools.zip
 }
 
 proc zip_project {dir zipfile} {
