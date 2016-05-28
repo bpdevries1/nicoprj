@@ -13,7 +13,10 @@ proc main {argv} {
   handle_dir [file normalize $root] $fr 0
   flush $fr ; # should not be needed.
   close $fr
-  log warn "Unknown extensions: [lsort  [dict keys $unknowns]]"
+  set keys [lsort  [dict keys $unknowns]]
+  if {$keys != {}} {
+    log warn "Unknown extensions: $keys"  
+  }
 }
 
 proc temp_dir {} {
