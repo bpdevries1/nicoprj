@@ -1,4 +1,4 @@
-#!/usr/bin/env tclsh86
+#!/usr/bin/env tclsh861
 
 # test-libdb.tcl - test functionality of libdb.tcl, especially user defined functions in sqlite.
 
