@@ -201,7 +201,7 @@ proc set_log_global {level {options {}}} {
     if {[:filename $options] == ""} {
       set symlink_name "logs/[file tail [info script]]-latest.log"
       file delete $symlink_name
-      puts stderr "point $symlink_name -> $logfile_name"
+      # puts stderr "point $symlink_name -> $logfile_name"
       file link -symbolic $symlink_name [file tail $logfile_name]
     } else {
       # fixed logname, no need to make symlink.
