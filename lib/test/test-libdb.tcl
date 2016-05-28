@@ -1,16 +1,12 @@
 #!/usr/bin/env tclsh86
 
-# test-libfp.tcl - test functionality of libfp.tcl
-
-# @note don't package require libfp, but source it, easier to test.
-
+# test-libdb.tcl - test functionality of libdb.tcl, especially user defined functions in sqlite.
 
 package require tcltest
 namespace import -force ::tcltest::*
 
-# source ../libfp.tcl
-
 # TODO: zo te zien hebben libs nogal wat onderlinge afhankelijkheden. Oplosbaar?
+# mogelijk bij een lib te checken of de log functie beschikbaar is. Zo niet, dan zelf een kleine versie maken, evt een no-op.
 source [file join [file dirname [info script]] .. libfp.tcl]
 source [file join [file dirname [info script]] .. libdict.tcl]
 source [file join [file dirname [info script]] .. CLogger.tcl]
@@ -19,7 +15,6 @@ source [file join [file dirname [info script]] .. generallib.tcl]
 source [file join [file dirname [info script]] .. libdb.tcl]
 
 set_log_global info
-
 log debug "Starting the tests"
 
 proc testndv {args} {
@@ -39,7 +34,7 @@ proc iden {args} {
 testndv {pi} 3.14159
 testndv {iden 1 2 3} {1 2 3}
 
-# Nu 1x de setup
+# one time setup
 set dbname "/tmp/test-libdb.db"
 file delete $dbname
 set db [dbwrapper new $dbname]
@@ -48,10 +43,6 @@ set handle [$conn getDBhandle]
 $handle function pi pi
 $handle function iden iden
 
-# enable loading C extensions with load_extension()
-$handle enable_load_extension 1
-
-# load_extension(X,Y) dan een .dll of .so nodig? Maar ook vraag of aggregates dan kunnen.
 $db exec "create table testtbl (val integer)"
 foreach val {11 12 13 14 15} {
   $db exec "insert into testtbl values ($val)"
@@ -64,9 +55,8 @@ testndv {
   = $qpi [pi]
 } 1
 
-# vraag of function ook met group by etc kan werken.
-# zgn aggregate function
-# [2016-05-27 20:59] dit werkt niet, iden(val) geeft hier 15, val van de laatste.
+# Tcl functions in DB don't work as aggregate functions.
+# [2016-05-27 20:59] this does not work, iden(val) gives 15, val of the last record.
 if 0 {
   testndv {
     global db handle
@@ -77,22 +67,20 @@ if 0 {
   } 1
 }
 
-# [2016-05-27 20:59] gecompileerde c library zou wel moeten lukken, en is er zowaar al voor percentile functie. Compileren op Linux ging heel gemakkelijk, zie ~/prj/sqlite-functions.
-
+# [2016-05-27 20:59] Compiled C library does work, percentile function already available. Compilation on Linux is straighforward, see compile.sh. On Windows
+# also fairly easy with Visual Studio 2013, but use a special dev command prompt.
 testndv {
   global db
-  # TODO: kijk of je dummy table hebt, met name voor config van c functions.
   set res [$db query "select 1 value from testtbl where val=11"]
   log debug "res of select 1: $res"
   return 1
 } 1
 
-# TODO: cross compile naar windows mogelijk op linux?
+# [2016-05-28 12:17:00] Using relative path and no extension (.so/.dll) this works on both Linux and Windows.
 testndv {
-  global db
-  # TODO: kijk of je dummy table hebt, met name voor config van c functions.
-  # TODO: ook kijken of het werkt als je val is null zegt. Zonder where clause faalt 'ie'
-  set res [$db query "select load_extension('/home/nico/nicoprj/lib/sqlite-functions/percentile.so') value from testtbl where val=11"]
+  global db handle
+  $handle enable_load_extension 1
+  set res [$db query "select load_extension('../sqlite-functions/percentile')"]
   log debug "res of select 1: $res"
   return 1
 } 1
@@ -103,16 +91,10 @@ testndv {
   set query "select count(*) cnt, percentile(val, 95) perc from testtbl"
   set res [$db query $query]
   log debug "res of percentile: $res"
-  # return 1
-  # :perc [:0 $res] => don't use other libs here.
   dict get [lindex $res 0] perc
 } 14.8
 
 $db close
 file delete $dbname
-
-
-# en na de test de breakdown
-
 
 cleanupTests
