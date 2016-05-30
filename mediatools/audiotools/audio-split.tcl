@@ -5,11 +5,34 @@
 package require ndv
 package require Tclx
 
+set_log_global info
+
 proc main {argv} {
-  set src_dir "/home/media/EBooks/_toplace/Donna Tartt - The Goldfinch-m4b"
-  set target_prefix "Goldfinch"
-  set split_size_sec 300
-  set overlap_size_sec 5
+
+  set options {
+    {srcdir.arg "" "Directory with source files"}
+    {targetprefix.arg "auto" "Prefix of target files"}
+    {splitsizesec.arg "300" "Size of split files in seconds"}
+    {overlapsizesec.arg "5" "Seconds to overlap between parts"}
+  }
+  set usage ": [file tail [info script]] \[options] :"
+  set dargv [getoptions argv $options $usage]
+
+  #set src_dir "/home/media/EBooks/_toplace/Donna Tartt - The Goldfinch-m4b"
+  #set target_prefix "Goldfinch"
+  set src_dir [:srcdir $dargv]
+  set target_prefix [:targetprefix $dargv]
+  set split_size_sec [:splitsizesec $dargv]
+  set overlap_size_sec [:overlapsizesec $dargv]
+
+  if {$src_dir == ""} {
+    log error "srcdir is mandatory"
+    exit 1
+  }
+  if {$target_prefix == ""} {
+    log error "targetprefix is mandatory"
+    exit 1
+  }
   
   set ndx 0
   foreach src_file [lsort [glob -directory $src_dir -tails *.mp3]] {
@@ -21,11 +44,12 @@ proc main {argv} {
   }
 }
 
-# avconv -i 01\ The\ Goldfinch\ \(Unabridged\)\ Part\ 1.mp3 -t 00:05:05 -ss 00:00:00 -acodec copy gf01b.mp3
-# avconv -i 01\ The\ Goldfinch\ \(Unabridged\)\ Part\ 1.mp3 -t 00:05:05 -ss 00:05:00 -acodec copy gf02b.mp3
-
 proc split_file {src_dir src_file target_prefix ndx split_size_sec overlap_size_sec} {
   set size_treshold 10000
+
+  if {$target_prefix == "auto"} {
+    set target_prefix [file rootname $src_file]
+  }
   
   set target_dir [file join $src_dir "${target_prefix}_$ndx"]
   file mkdir $target_dir
