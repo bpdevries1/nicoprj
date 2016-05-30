@@ -200,3 +200,36 @@ proc :k {d} {
   dict keys $d
 }
 
+# [2016-05-30 21:34] dict merge functions, no testcases yet.
+proc dict_merge_append {d1 d2 args} {
+  # soort curry/partial dit:
+  dict_merge_fn concat $d1 $d2 {*}$args
+}
+
+# merge dicts as in dict merge, but don't let later values replace older ones, but apply fn to values
+proc dict_merge_fn {fn d1 d2 args} {
+  # first combine d1 and d2
+  set res [dict create]
+  dict for {k v} $d1 {
+    if {[dict exists $d2 $k]} {
+      # dict set res $k [concat $v [dict get $d2 $k]]
+      dict set res $k [$fn $v [dict get $d2 $k]]
+    } else {
+      dict set res $k $v
+    }
+  }
+  dict for {k v} $d2 {
+    if {[dict exists $d1 $k]} {
+      # nothing, already done
+    } else {
+      dict set res $k $v
+    }
+  }
+  # if args != {}, combine result of d1/d2 with the rest
+  if {$args != {}} {
+    # tail call, oh well.
+    dict_merge_fn $fn $res {*}$args
+  } else {
+    return $res
+  }
+}
