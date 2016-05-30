@@ -29,7 +29,9 @@ proc zip_project {dir zipfile} {
 
   # for testing etc no password:
 
-  set ignores {*~ *.exe *.dll *.jar *.class *.jnilib *.log *.out *.xls .git mediatools tryout target output logs}
+  # set ignores {*~ *.exe *.dll *.jar *.class *.jnilib *.log *.out *.xls .git mediatools tryout target output logs}
+  # [2016-05-29 19:38] .dll nu wel, zou alleen percentile.dll moeten zijn, rest van de dll's staan in een target dir, worden ook ignored.
+  set ignores {*~ *.exe *.jar *.class *.jnilib *.log *.out *.xls .git mediatools tryout target output logs}
   set options [map add_xr $ignores]
   
   # set options {-xr!*.exe -xr!*.dll -xr!*.log -xr!*.xls -xr!.git}
