@@ -8,11 +8,12 @@ proc main {argv} {
     {dir.arg "." "Directory to handle (default current dir)"}
     {config.arg "~/.config/media/media.tcl" "Config file to load with log and dir settings"}
     {outfile.arg "rm-unseen.sh" "Output shell script file"}
+    {minwatch.arg "600" "Minimum time in seconds watched before defined as seen"}
   }
   set usage ": [file tail [info script]] \[options] :"
   set dargv [getoptions argv $options $usage]
   set config [read_config [:config $dargv]] ; # returns dict
-  set seen [read_seen $config];               # also a dict, used as set.
+  set seen [read_seen $config [:minwatch $dargv]]  ; # also a dict, used as set.
   # breakpoint
   set media_roots [:media_roots $config]
   file delete [:outfile $dargv]
@@ -32,19 +33,51 @@ proc read_config {config_file} {
 
 
 # @return dict, used as set. key = absolute path of media item seen.
-proc read_seen {config} {
-  set d [dict create]
+proc read_seen {config minwatch} {
+  set df [dict create];         # finished watching, only if longer than minwatch seconds
+  set ds [dict create];         # started watching
   set f [open [:logfile_seen $config] r]
   while {[gets $f line] >= 0} {
-    if {[regexp {Finished: (.+) \(subs: (.*)\)} $line z media subs]} {
-      dict set d $media 1
+    if {[regexp {\[([0-9 :-]+)\] Start: (.+) \(subs: (.*)\)} $line z ts media subs]} {
+      dict set ds $media $ts
       if {$subs != ""} {
-        dict set d $subs 1
+        dict set ds $subs $ts
+      }
+    }
+    if {[regexp {\[([0-9 :-]+)\] Finished: (.+) \(subs: (.*)\)} $line z ts media subs]} {
+      if {[long_enough $ds $media $ts $minwatch]} {
+        dict set df $media 1  
+      } else {
+        log warn "Watched not long enough: $media"
+      }
+      if {$subs != ""} {
+        if {[long_enough $ds $subs $ts $minwatch]} {
+          dict set df $subs 1  
+        }
       }
     }
   }
   close $f
-  return $d
+  return $df
+}
+
+# return 1 if time between start / finish is at least minwatch seconds
+proc long_enough {d filename ts_end minwatch} {
+  set ts_start [dict_get $d $filename]
+  if {$ts_start == ""} {
+    return 0
+  }
+  set sec_start [to_sec $ts_start]
+  set sec_end [to_sec $ts_end]
+  if {$sec_end - $sec_start >= $minwatch} {
+    return 1
+  } else {
+    return 0
+  }
+}
+
+proc to_sec {ts} {
+  clock scan $ts -format "%Y-%m-%d %H:%M:%S"
 }
 
 # return dict: {seen {list of seen files} unseen {list of unseen files}}
@@ -53,6 +86,9 @@ proc handle_dir {dir seen media_roots} {
   set lfseen {}
   set lfunseen {}
   foreach filename [glob -nocomplain -directory $dir -type f *] {
+    if {[ignore_file $filename]} {
+      continue
+    }
     if {[is_seen $filename $seen $media_roots]} {
       lappend lfseen $filename
     } else {
@@ -70,6 +106,17 @@ proc handle_dir {dir seen media_roots} {
   return $d
 }
 
+proc ignore_file {filename} {
+  if {[file extension $filename] == ".log"} {
+    return 1
+  }
+  if {[regexp {DELETE_} [file tail $filename]]} {
+    # even deze wel
+    return 0
+  }
+  return 0
+}
+
 proc is_seen {filename seen media_roots} {
   set rel_filename [det_rel_filename $filename $media_roots]
   if {$rel_filename == ""} {
@@ -85,10 +132,27 @@ proc is_seen {filename seen media_roots} {
   return 0
 }
 
-proc det_rel_filename {filename media_roots} {
+proc det_rel_filename_old {filename media_roots} {
   foreach root $media_roots {
     if {[string range $filename 0 [string length $root]-1] == $root} {
       return [string range $filename [string length $root]+1 end]
+    }
+  }
+  return ""
+}
+
+proc det_rel_filename {filename media_roots} {
+  set root [det_root $filename $media_roots]
+  if {$root == ""} {
+    return ""
+  }
+  return [string range $filename [string length $root]+1 end] 
+}
+
+proc det_root {filename media_roots} {
+  foreach root $media_roots {
+    if {[string range $filename 0 [string length $root]-1] == $root} {
+      return $root
     }
   }
   return ""
@@ -106,11 +170,23 @@ proc mk_rm_unseen {seen_unseen media_roots outfile} {
   }
   puts $f "# ---------------"
   foreach unseenfile [:unseen $seen_unseen] {
-    # TODO: put remove for all media_roots iff file exists!
-    # TODO: ? rename file to DELETE-origname instead of deleting it? (for now)
-    puts $f "rm \"$unseenfile\""
+    log info "unseenfile: $unseenfile"
+    set rel_name [det_rel_filename $unseenfile $media_roots]
+    foreach root $media_roots {
+      log info "check root: $root"
+      set abs_name [file join $root $rel_name]
+      if {[file exists $abs_name]} {
+        log info "exists: mk rm: $rel_name"
+        # puts $f "rm \"$abs_name\""
+        # set abs_deleted [file join [file dirname $abs_name] "DELETE_[file tail $abs_name]"]
+        set abs_deleted [file join [det_root $abs_name $media_roots] _DELETED_ [file tail $abs_name]]
+        puts $f "mkdir -p \"[file dirname $abs_deleted]\""
+        puts $f "mv -f \"$abs_name\" \"$abs_deleted\""
+      }
+    }
   }
   close $f
+  exec chmod +x $outfile
 }
 
 main $argv
