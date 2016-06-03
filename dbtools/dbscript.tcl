@@ -1,5 +1,8 @@
 #!/usr/bin/env tclsh86
 
+#TODO:
+# check on statement separation now if on ; followed directly by newline. Should trim lines first before checking.
+
 package require Tclx
 package require ndv
 package require fileutil
@@ -10,6 +13,7 @@ $log set_file "[file tail [info script]].log"
 
 proc main {argv} {
   log debug "argv: $argv"
+  # breakpoint
   set options {
     {db.arg "" "DB full path"}
     {rootdir.arg "" "Root directory that contains db's."}
@@ -63,12 +67,17 @@ proc do_script_dbs {dargv} {
 
 
 proc det_statements {scriptname} {
+  # breakpoint
   set lines [split [read_file $scriptname] "\n"]
   
   # remove comments, starting with --
   set lines2 [lmap line $lines {ifp [= [string range [string trim $line] 0 1] "--"] "" $line}]
   set stmts [textutil::splitx [join $lines2 "\n"] {;\n}]
-  set stmts2 [filter el $stmts {not= [string trim $el] ""}]
+  # breakpoint
+  # set stmts2 [filter el $stmts {not= [string trim $el] ""}]
+  # [2016-05-31 10:39:22] volgorde in nieuwe filter andersom.
+  set stmts2 [filter el {not= [string trim $el] ""} $stmts]
+  # breakpoint
   return $stmts2
 }
 
@@ -76,6 +85,12 @@ proc do_statements_db {dbname stmts dargv} {
   global fo
   log info "Opened connection to: $dbname"
   set db [dbwrapper new $dbname]
+  
+  # [2016-05-31 10:50:56] Enable loading extensions like percentile.
+  set conn [$db get_conn]
+  set handle [$conn getDBhandle] 
+  $handle enable_load_extension 1 
+  
   if {[:coe $dargv]} {
     set try "-try" 
   } else {
@@ -93,7 +108,10 @@ proc do_statements_db {dbname stmts dargv} {
           puts $fo [res2table $res]     
           flush $fo
         } else {
-          log warn "select statement without output file set, not executing: $stmt"
+		  # [2016-05-31 10:54:10] For now, do execute, could be loading of extension.
+          # log warn "select statement without output file set, not executing: $stmt"
+		  log warn "select statement without output file set, executing without displaying result: $stmt"
+		  set res [$db query $stmt]
         }
       } else {
         $db exec2 $stmt -log $try
