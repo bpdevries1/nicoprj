@@ -23,7 +23,9 @@ start /b C:\PCC\Util\PortableApps\FirefoxPortable\FirefoxPortable.exe
 rem 31-7-2015 greenshot just added, not tested yet.
 start C:\PCC\Util\Greenshot\Greenshot.exe
 
-cd "C:\Program Files (x86)\HP\LoadRunner\bin"
+rem cd "C:\Program Files (x86)\HP\LoadRunner\bin"
+rem [2016-06-01 10:05:52] nu versie 12.50.
+cd "C:\Program Files (x86)\HP\Virtual User Generator\bin"
 start VuGen.exe
 
 cd "C:\Program Files (x86)\Microsoft Office\Office12"
