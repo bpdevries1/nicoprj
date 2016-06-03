@@ -1,15 +1,18 @@
-#!/usr/bin/env tclsh86
+#!/usr/bin/env tclsh861
 
 package require ndv
 
 # history
 # 2015-08-11 NdV ook delete uit status halen en git rm maken.
 
+set_log_global debug
+
 proc main {argv} {
   # eerst alleen nicoprj
   set os [det_os]
   if {$os == "windows"} {
-    set git_exe "c:/util/GitHub/cmd/git.exe"
+    # set git_exe "c:/util/GitHub/cmd/git.exe"
+	set git_exe [which_git c:/util/GitHub/cmd c:/PCC/util/cygwin/bin]
   } else {
     set git_exe "git"
   }
@@ -176,6 +179,18 @@ proc ignore_file {line} {
   } else {
     return 0
   }
+}
+
+# search git.exe in directories mentioned in (varargs) args
+proc which_git {args} {
+	foreach dir $args {
+		set exe [file join $dir "git.exe"]
+		log debug "git exe option: $exe"
+		if {[file exists $exe]} {
+			return $exe
+		}
+	}
+	error "No git.exe found in $args"
 }
 
 main $argv
