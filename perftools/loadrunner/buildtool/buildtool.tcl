@@ -16,7 +16,11 @@ package require ndv
 ndv::source_once configs.tcl lr_params.tcl
 
 # deze mogelijk  nog dynamisch, of in config file.
-set lr_include_dir {C:\Program Files (x86)\HP\LoadRunner\include}
+# set lr_include_dir {C:\Program Files (x86)\HP\LoadRunner\include}
+# [2016-06-01 14:51:09] LR 12.50 in new dir:
+set lr_include_dir {C:\Program Files (x86)\HP\Virtual User Generator\include}
+
+set_log_global info
 
 proc main {argv} {
   global repodir repolibdir as_project
@@ -262,7 +266,9 @@ proc task_libs {args} {
   set repo_libs [get_repo_libs]
   # puts "repo_libs: $repo_libs"
   set source_files [lsort [get_source_files]]
+  log debug "source_files: $source_files"
   set included_files [det_includes_files [filter_ignore_files $source_files]]
+  log debug "included_files: $included_files"
   set all_files [lsort -unique [concat $source_files $included_files]]
   set diff_found 0
   # also check if all included files exist.
