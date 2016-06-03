@@ -5,3 +5,4 @@ rem del C:\pcc\Nico\Testruns\RCC-All\run596.db
 
 tclsh read-vuserlogs-db-dir.tcl -dir C:\pcc\Nico\Testruns\RCC-All
 tclsh read-vuserlogs-db-dir.tcl -dir C:\pcc\Nico\Testruns\clientreporting
+tclsh read-vuserlogs-db-dir.tcl -dir C:\pcc\Nico\Testruns\Calypso

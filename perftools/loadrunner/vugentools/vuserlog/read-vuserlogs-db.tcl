@@ -302,8 +302,10 @@ proc split_transname {transname} {
     list $usecase $revisit $transid $transshort ""    
   } else {
     puts "Transname niet te splitten: $transname"
-    breakpoint
-    list "" "" 0 "" ""
+	# [2016-05-31 13:07:39] deze komt voor bij Calypso, niet eigen script. Dan alleen transshort=trans
+    # breakpoint
+    # list "" "" 0 "" ""
+	list "" "" 0 $transname ""
   }
 }
 
