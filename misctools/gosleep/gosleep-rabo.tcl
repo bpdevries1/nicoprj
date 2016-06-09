@@ -11,14 +11,14 @@ set UNISON_BINARY {c:\PCC\Util\Unison\Unison-2.40.102-Text.exe}
 proc main {} {
   zip_projects
   # zip_vugens
-  if 0 {
+  if 1 {
 	  unison -auto projecten2h
 	  unison -auto -batch backup2g
 	  unison -auto -batch vugen2h
 	  zip_vugens
 	  zip_alm_dbs
 	  zip_notes_org
-	  cleanup
+	  # cleanup
   }
 }
 
