@@ -1,6 +1,8 @@
 # ndvlib.R - general R functions to use
 # note: make it a package sometime, but first just source the thing.
 
+# TODO split into useful sub-files, as libndv.tcl.
+
 # install.packages("gsubfn")
 # sudo apt-get install tcl8.5-dev tk8.5-dev 
 # NOT: install.packages("tcltk"), door apt-get hierboven komt het goed.
@@ -206,7 +208,7 @@ make.scatterplot = function(df, indep, dep, title, pngname, width=12, height=9, 
   ggsave(pngname, dpi=100, width=width, height=height, ...) 
 }
 
-add.psxtime = function(df, from, to, format="%Y-%m-%d") {
+add.psxtime = function(df, from, to, format="%Y-%m-%d %H:%M:%OS") {
   df[,to] = as.POSIXct(strptime(df[,from], format=format))
   df
 }
@@ -222,7 +224,27 @@ db.query.dt = function(db, query) {
   df.add.dt(df)
 }
 
+# als kolom met ts_ begint, dan .psx toevoegen.
+# for met evt ook filter erbij.
 df.add.dt = function(df) {
+  for (colname in colnames(df)[grep("^ts", colnames(df))]) {
+    df[,paste0(colname,".psx")] = as.POSIXct(strptime(df[,colname], format="%Y-%m-%d %H:%M:%S"))
+  }
+  if ("date" %in% colnames(df)) {
+    # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d"))
+    # df$date_date = as.Date(df$date, "%Y-%m-%d")
+    # @todo rename field to date_parsed, and ts_parsed, cause format is not Posix always.
+    df$date_Date = as.Date(df$date, "%Y-%m-%d")
+    # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d", tz="UTC"))
+    # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d", tz="GMT"))
+  }
+  if ("time" %in% colnames(df)) {
+    df$time_psx = as.POSIXct(strptime(df$time, format="%H:%M:%S"))
+  }
+  df
+}
+
+df.add.dt.orig = function(df) {
   if ("ts" %in% colnames(df)) {
     df$ts_psx = as.POSIXct(strptime(df$ts, format="%Y-%m-%d %H:%M:%S"))
   }
@@ -252,25 +274,6 @@ det.fmt.string = function(vct, ndigits) {
     totaldigits = ndigits + 2;    
   }
   concat('[%', totaldigits, '.', ndigits, 'f] ')
-}
-
-db.query.dt.old = function(db, query) {
-  df = db.query(db, query)
-  if ("ts" %in% colnames(df)) {
-    df$ts_psx = as.POSIXct(strptime(df$ts, format="%Y-%m-%d %H:%M:%S"))
-  }
-  if ("date" %in% colnames(df)) {
-    # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d"))
-    # df$date_date = as.Date(df$date, "%Y-%m-%d")
-    # @todo rename field to date_parsed, and ts_parsed, cause format is not Posix always.
-    df$date_Date = as.Date(df$date, "%Y-%m-%d")
-    # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d", tz="UTC"))
-    # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d", tz="GMT"))
-  }
-  if ("time" %in% colnames(df)) {
-    df$time_psx = as.POSIXct(strptime(df$time, format="%H:%M:%S"))
-  }
-  df
 }
 
 # Used from R-wrapper.tcl
@@ -310,3 +313,72 @@ print.log = function(str) {
   # print(concat(format(Sys.time(), "[%Y-%m-%d %H:%M:%S] "), str))
   cat(concat(format(Sys.time(), "[%Y-%m-%d %H:%M:%S] "), str, "\n"))
 }
+
+# return data.frame based on df with per timestamp number of active/concurrent
+# actions based on startcol and endcol, which should be timestamps (posix),
+# or other numeric values.
+# cnt = det.nconc(df, "ts_cet_start.psx", "ts_cet_end.psx")
+det.nconc = function(df, startcol, endcol) {
+  df.step1 = ddply(df, c(startcol), function (df) {
+    data.frame(ts=df[1,startcol], step=length(df[,startcol]))})
+  df.step2 = ddply(df, c(endcol), function (df) {
+    data.frame(ts=df[1,endcol], step=-length(df[,endcol]))})
+  df.step = subset(rbind.fill(df.step1, df.step2), select=c(ts,step)) 
+  
+  # eerst samenvoegen, dan arrange
+  df.steps = arrange(ddply(df.step, .(ts), function(df) {
+    c(step=sum(df$step))}), ts)
+  df.steps$count = cumsum(df.steps$step) # werkt omdat het sorted is.
+  df.steps$ts_psx = df.steps$ts
+  df.steps  
+}
+
+graph.conc = function(df, startcol, endcol, ylab, filename, width=12, height=7) {
+  cnt = det.nconc(df, startcol, endcol)
+  qplot(data=cnt, x=ts_psx, y=count, geom="step", xlab=NULL, ylab = ylab) +
+    scale_y_continuous(limits=c(0, max(cnt$count))) +
+    scale_x_datetime(labels = date_format("%Y-%m-%d\n%H:%M:%OS"))
+  ggsave(filename=filename, width=width, height=height, dpi=100)
+  write.csv(cnt, file=paste0(filename,".csv"))
+}
+
+# TODO: hier een algemene facet van te maken, waarbij je aangeeft wat de single graph functie is?
+graph.gantt.facet = function(df, startcol, endcol, ycol, colourcol, facetcol, filename.prefix, lwd=10, width=12) {
+  print("graph.gantt.facet: start")
+  d_ply(df, c(facetcol), function(dft) {
+    if (det.height.ycol(dft, ycol) > 2.2) {
+      filename = paste0(filename.prefix , dft[1,facetcol], ".png")
+      graph.gantt(dft, startcol, endcol, ycol, colourcol, filename)   
+    }
+  })
+  print("graph.gantt.facet: finished")
+}
+
+graph.gantt = function(df, startcol, endcol, ycol, colourcol, filename, lwd=10, width=12) {
+  if (det.height.ycol(df, ycol) > 2.2) {
+    # minimaal 2 threads.
+    # [2016-06-07 15:58:15] guide_legend lijkt hier niet nodig.
+    g = guide_legend(colourcol, ncol=6)
+    qplot(x=df[,startcol], xend=df[,endcol], y=df[,ycol], yend=df[,ycol], colour = df[,colourcol], lwd=lwd, data=df, 
+          geom="segment", xlab = NULL, 
+          main = sprintf("Requests in period: %d",
+                         df$period_id[1])) +
+      ylab(ycol) +
+      scale_x_datetime(labels = date_format("%Y-%m-%d\n%H:%M:%OS")) +
+      # scale_y_discrete(limits = rev(levels(as.factor(df$Thread_Name)))) + 
+      scale_y_discrete(limits = rev(levels(as.factor(df[,ycol])))) + 
+      scale_colour_discrete(name=colourcol) +
+      scale_shape_manual(name=colourcol, values=rep(1:25,10)) +
+      guides(colour = g, shape = g, lwd=FALSE) +
+      # guides(lwd=FALSE) +
+      theme(legend.position="bottom")
+    
+    ggsave(filename=filename, width=12, height=det.height.ycol(df, ycol), dpi=100, limitsize=FALSE)
+  }
+}
+
+det.height.ycol = function(df, ycol) {
+  df1 = ddply(df, c(ycol), function(dft) {c(n=1)})
+  2 + 0.20 * nrow(df1)
+}
+
