@@ -43,8 +43,9 @@ create index ix_rep_2 on report(end_time);
 
 create table longreq as
 select * from report
-where agent like 'Scrittura_Prod%'
-and response_time__ms_ > 5000;
+where response_time__ms_ > 5000;
+-- and agent like 'Scrittura_Prod%'
+
 
 -- maar 418 records hier, 418 grafieken natuurlijk wel wat veel.
 create index ix_lr_1 on longreq(start_time);
