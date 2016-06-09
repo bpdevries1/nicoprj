@@ -1,7 +1,7 @@
 # ndvlib.R - general R functions to use
 # note: make it a package sometime, but first just source the thing.
 
-load.def.libs = function() {
+load.def.libs.old.see.ndvlib = function() {
   library(RSQLite, quietly=TRUE) ; # quietly: so we have no warnings, and no error output reported by Tcl.
   # print("Loaded RSQLITe quietly")
   library(ggplot2, quietly=TRUE) ; # quietly: so we have no warnings, and no error output reported by Tcl.
@@ -55,24 +55,6 @@ make.logger = function(filename) {
     }
   }
   fn  
-}
-
-df.add.dt = function(df) {
-  if ("ts" %in% colnames(df)) {
-    df$ts_psx = as.POSIXct(strptime(df$ts, format="%Y-%m-%d %H:%M:%S"))
-  }
-  if ("date" %in% colnames(df)) {
-    # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d"))
-    # df$date_date = as.Date(df$date, "%Y-%m-%d")
-    # @todo rename field to date_parsed, and ts_parsed, cause format is not Posix always.
-    df$date_Date = as.Date(df$date, "%Y-%m-%d")
-    # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d", tz="UTC"))
-    # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d", tz="GMT"))
-  }
-  if ("time" %in% colnames(df)) {
-    df$time_psx = as.POSIXct(strptime(df$time, format="%H:%M:%S"))
-  }
-  df
 }
 
 calc.df.aggr = function(df, xcol, ycol, nsegments, extracols = c(), aggr.fn=mean) {

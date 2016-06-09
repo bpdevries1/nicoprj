@@ -1,56 +1,42 @@
-source("C:/PCC/Nico/nicoprj/R/lib/ndvlib.R")
-source("C:\\PCC\\Nico\\nicoprj\\R\\RABO\\perflib.R")
-source("C:\\PCC\\Nico\\nicoprj\\R\\lib\\HTMLlib.R")
+#source("C:/PCC/Nico/nicoprj/R/lib/ndvlib.R")
+#source("C:\\PCC\\Nico\\nicoprj\\R\\RABO\\perflib.R")
+#source("C:\\PCC\\Nico\\nicoprj\\R\\lib\\HTMLlib.R")
+
+source("C:/PCC/Nico/nicoprj/perftools/graph/R/lib/ndvlib.R")
+#source("C:/PCC/Nico/nicoprj/perftools/graph/R/current/perflib.R")
+#source("C:/PCC/Nico/nicoprj/perftools/graph/R/lib/HTMLlib.R")
+
 load.def.libs()
 
 main = function() {
-  # dir = "C:\\PCC\\Nico\\Projecten\\Scrittura\\Troubleshoot-dec-2015\\purepaths"
-  # dir = "C:\\PCC\\Nico\\Projecten-no-sync\\Scrittura\\DT-exports\\2016-01-25-week"
-  dir = "C:\\PCC\\Nico\\Projecten-no-sync\\Scrittura\\DT-reports\\2016-01-28-week-deel"
-  
+  # dir = "C:\\PCC\\Nico\\Projecten-no-sync\\Scrittura\\DT-reports\\2016-01-28-week-deel"
+  dir = "C:/PCC/Nico/Projecten/Scrittura/Troubleshoot-2016/analysis/20160606-1500" 
   # filename = "purepaths.db"
-  filename = "2016-01-28-week-deel.db"
+  filename = "analysis.db"
   
-  make.graphs(dir, filename)
+#  make.graphs(dir, filename)
+  make.graphs("C:/PCC/Nico/Projecten/Scrittura/Troubleshoot-2016/analysis/20160606-1500", "analysis.db")
+  make.graphs("C:/PCC/Nico/Projecten/Scrittura/Troubleshoot-2016/analysis/20160606-1600", "20160606-1600.db")
 }
 
 make.graphs = function(dir, filename) {
   setwd(dir)
   db = db.open(filename)
-  
-  query = "select rp.id period_id, r.*
-           from report r join req_period rp on rp._id = r._id
-           "
+  query = "select Start_Time ts_start, End_Time ts_end, wait_type, Client_IP, Thread_Name
+           from report"
   df = db.query.dt(db, query)
-  df$ts.start.psx = as.POSIXct(strptime(df$Start_Time, format="%Y-%m-%d %H:%M:%OS"))
-  df$ts.end.psx  = as.POSIXct(strptime(df$End_Time,  format="%Y-%m-%d %H:%M:%OS"))
+
+  graph.conc(df, "ts_start.psx", "ts_end.psx", "#conc pure paths", "Purepaths-concurrent.png")
   
-  d_ply(df, .(period_id), function(dft) {
-    # testje of yend=y werkt -> niet dus.
-    if (det.height(dft) > 2.2) {
-      # minimaal 2 threads.
-      qplot(x=ts.start.psx, xend=ts.end.psx, y=Thread_Name, yend=Thread_Name, colour = wait_type, lwd=10, data=dft, 
-            geom="segment", xlab = NULL, ylab=NULL,
-            main = sprintf("Requests in period: %d",
-                           dft$period_id[1])) +
-        scale_x_datetime(labels = date_format("%Y-%m-%d\n%H:%M:%OS")) +
-        scale_y_discrete(limits = rev(levels(as.factor(dft$Thread_Name)))) + 
-        guides(lwd=FALSE) +
-        theme(legend.position="bottom")
-      
-      fn.graph = sprintf("period-requests-%04d.png", dft$period_id[1])
-      ggsave(filename=fn.graph, width=12, height=det.height(dft), dpi=100)
-    }
-  })
+  graph.gantt(df, "ts_start.psx", "ts_end.psx", "Thread_Name", "wait_type", "purepaths-waittype.png")
+  graph.gantt(df, "ts_start.psx", "ts_end.psx", "Thread_Name", "Client_IP", "purepaths-clientip.png")  
+  graph.gantt(df, "ts_start.psx", "ts_end.psx", "Client_IP", "wait_type", "purepaths-clientip-waittype.png")  
+  graph.gantt.facet(df, "ts_start.psx", "ts_end.psx", "Thread_Name", "wait_type", "Client_IP", "purepaths-waittype-ip")  
   
   db.close(db)
 }
 
-det.height = function(df) {
-  nq = length(ddply(df, .(Thread_Name), function(dft) {c(n=1)})$Thread_Name)
-  2 + 0.20 * nq
-  #9
-}
+
 
 main()
 
