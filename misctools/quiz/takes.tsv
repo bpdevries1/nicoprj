@@ -1,0 +1,18 @@
+vraagnr	vraag	take2	take3	take4	take5	take6	take7
+1	smallest time frame	1min	10sec	10sec	10sec	10sec	1min
+2	stmt appl false	app config multi sys profile	app config multi sys profile	auto identify	auto identify	app config multi sys profile	auto identify
+3	stmt baseline true	must return A,RT,T	must return A,RT,T	only avail appl ovw	server side host health	server side host health	server side host health
+4	benefit business trans	combine app context	auto create baseline	combine app context	auto capture	combine app context	combine app context
+5	which is calculated	IO time	IO time	IO time	IO time	IO time	IO time
+6	which not business trans	purestack	purestack	purestack	purestack	purestack	purestack
+7	slowdown online banking	export	export	export	export	export	export
+8	how long baseline calc?	7 days	7 days	7 days	7 days	7 days	7 days
+9	insight CPU app server	host health	host health	host health	host health	host health	host health
+10	which client single server	web start	web start	web start	web start	web start	web start
+11	SLA agreements coming year	create business trans	create business trans	create business trans	create business trans	gen report	create business trans
+12	meant by throughput	reqs/min	reqs/min	reqs/min	reqs/min	reqs/min	reqs/min
+13	socketwrite0	method hotspot dashlet	method hotspot dashlet	method hotspot dashlet	method hotspot dashlet	method hotspot dashlet	method hotspot dashlet
+14	succesful logins 30d	create business trans	create dashboard	create web req and chart	create business trans	create web req and chart	create web req and chart
+15	what measure aggr vals to repo hourly	percentile	average	percentile	percentile	percentile	average
+score		11	10	12	11	11	9
+
