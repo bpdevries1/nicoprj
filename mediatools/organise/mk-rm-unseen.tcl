@@ -46,6 +46,7 @@ proc read_seen {config minwatch} {
     }
     if {[regexp {\[([0-9 :-]+)\] Finished: (.+) \(subs: (.*)\)} $line z ts media subs]} {
       if {[long_enough $ds $media $ts $minwatch]} {
+        log debug "Watched long enough: $media"
         dict set df $media 1  
       } else {
         log warn "Watched not long enough: $media"
@@ -90,8 +91,10 @@ proc handle_dir {dir seen media_roots} {
       continue
     }
     if {[is_seen $filename $seen $media_roots]} {
+      log debug "Adding to lfseen: $filename"
       lappend lfseen $filename
     } else {
+      log debug "Adding to lfunseen: $filename"
       lappend lfunseen $filename
     }
   }
@@ -130,15 +133,6 @@ proc is_seen {filename seen media_roots} {
     }
   }
   return 0
-}
-
-proc det_rel_filename_old {filename media_roots} {
-  foreach root $media_roots {
-    if {[string range $filename 0 [string length $root]-1] == $root} {
-      return [string range $filename [string length $root]+1 end]
-    }
-  }
-  return ""
 }
 
 proc det_rel_filename {filename media_roots} {
@@ -186,7 +180,8 @@ proc mk_rm_unseen {seen_unseen media_roots outfile} {
     }
   }
   close $f
-  exec chmod +x $outfile
+  puts "making file executable: $outfile"
+  exec /bin/chmod a+x $outfile
 }
 
 main $argv
