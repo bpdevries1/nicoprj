@@ -2,9 +2,14 @@
 
 package require ndv
 
-set_log_global info
-
 set MAX_SIMULATIONS 100000
+set SIM1 0
+
+if {$SIM1} {
+  set_log_global debug
+} else {
+  set_log_global info  
+}
 
 set str_questions {
   1	"smallest time frame"
@@ -57,7 +62,7 @@ proc read_possible_answers {} {
     set total 0
     set options {}
     foreach {p answer} [lrange $l 2 end] {
-      if {$p > 0} {
+      if {$p != ""} {
         lappend options $p $answer
         set total [expr $total + $p]
       }
@@ -114,7 +119,7 @@ proc check_answers {poss_answers takes} {
         if {[is_possible_answer $ansnr $answer $poss_answers]} {
           log debug "take $name, ans#: $ansnr, answer: $answer"    
         } else {
-          log debug "Impossible answer: take $name, ans#: $ansnr, answer: $answer"
+          log warn "Impossible answer: take $name, ans#: $ansnr, answer: $answer"
           error "Impossible!"
         }
       }
@@ -133,7 +138,7 @@ proc is_possible_answer {nr answer poss_answers} {
 }
 
 proc simulate {questions poss_answers takes} {
-  global MAX_SIMULATIONS n_found_answers
+  global MAX_SIMULATIONS n_found_answers SIM1
   srandom [clock seconds]
   set sim_it 0
   while 1 {
@@ -150,6 +155,7 @@ proc simulate {questions poss_answers takes} {
       set act [dict get $takes $take score]
       if {$calc == $act} {
         # ok, score is ok
+        log debug "Take $take: Calculated score ($calc) is the same as actual score ($act)"        
       } else {
         set all_ok 0
         log debug "Take $take: Calculated score ($calc) differs from actual score ($act)"        
@@ -161,6 +167,9 @@ proc simulate {questions poss_answers takes} {
       log debug "Not all calculated scores are correct"
     }
     if {$sim_it >= $MAX_SIMULATIONS} {
+      break
+    }
+    if {$SIM1} {
       break
     }
   }
@@ -218,14 +227,18 @@ set found_answers [dict create]
 set n_found_answers 0
 
 # TODO: oplossing in een dict bewaren, kijken welke het meest voorkomt.
-proc append_answers {filename sel_ans} {
+proc append_answers {filename sel_ans {with_index 1}} {
   global found_answers n_found_answers
   dict incr found_answers $sel_ans
   incr n_found_answers
   set f [open $filename a]
   puts $f "Found one possible solution:"
   foreach k [dict keys $sel_ans] {
-    puts $f "answer $k: [dict get $sel_ans $k]"
+    if {$with_index} {
+      puts $f "answer $k: [dict get $sel_ans $k]"  
+    } else {
+      puts $f [dict get $sel_ans $k]
+    }
   }
   puts $f "================"
   close $f
@@ -251,7 +264,7 @@ proc puts_answers_counts {} {
   set f [open $filename a]
   puts $f "Next answer found the most ($curmax) times:"
   close $f
-  append_answers $filename $cursol
+  append_answers $filename $cursol 0
 }
 
 main $argv

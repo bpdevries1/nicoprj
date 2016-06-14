@@ -1,3 +1,36 @@
-Next answer found the most (0) times:
+Next answer found 10 times:
 Found one possible solution:
+answer 1: 10sec
+answer 2: app config multi sys profile
+answer 3: only avail appl ovw
+answer 4: combine app context
+answer 5: IO time
+answer 6: purestack
+answer 7: export
+answer 8: 7 days
+answer 9: infra overview
+answer 10: web start
+answer 11: create business trans
+answer 12: reqs/min
+answer 13: method hotspot dashlet
+answer 14: create business trans
+answer 15: percentile
+================
+Next answer found the most (10) times:
+Found one possible solution:
+10sec
+app config multi sys profile
+only avail appl ovw
+combine app context
+IO time
+purestack
+export
+7 days
+infra overview
+web start
+create business trans
+reqs/min
+method hotspot dashlet
+create business trans
+percentile
 ================
