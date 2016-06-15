@@ -1,16 +1,16 @@
 1	smallest time frame	10	1min	90	10sec				
-2	stmt appl false	40	app config multi sys profile	40	auto identify	20	spec config setting		
-3	stmt baseline true	30	must return A,RT,T	40	only avail appl ovw	30	server side host health		
-4	benefit business trans	40	combine app context	40	auto create baseline	20	auto capture		
-5	which is calculated	100	IO time						
+2	stmt appl false	40	app config multi sys profile	20	auto identify	20	spec config setting	20	app manual
+3	stmt baseline true	30	must return A,RT,T	20	only avail appl ovw	30	server side host health	20	no splittings
+4	benefit business trans	30	combine app context	30	auto create baseline	20	auto capture	20	reduce overhead
+5	which is calculated	100	IO time	0	susp time				
 6	which not business trans	100	purestack						
-7	slowdown online banking	100	export						
+7	slowdown online banking	60	export	20	support archive	10	email	10	scripting
 8	how long baseline calc?	100	7 days						
-9	insight CPU app server	100	host health						
+9	insight CPU app server	80	host health	20	infra overview				
 10	which client single server	100	web start						
-11	SLA agreements coming year	70	create business trans	30	gen report
+11	SLA agreements coming year	50	create business trans	30	gen report	10	spreadsheet	10	add sensor
 12	meant by throughput	100	reqs/min						
 13	socketwrite0	60	method hotspot dashlet	20	seq diag	10	method dashlet	10	resp time hotspot
-14	succesful logins 30d	30	create business trans	40	create dashboard	30	create web req and chart		
+14	succesful logins 30d	30	create business trans	30	create dashboard	30	create web req and chart	10	create sensor
 15	what measure aggr vals to repo hourly	50	percentile	50	average				
 
