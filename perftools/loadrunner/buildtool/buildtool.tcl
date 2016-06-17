@@ -13,17 +13,20 @@ term::ansi::send::import
 
 package require ndv
 
-ndv::source_once configs.tcl lr_params.tcl
+ndv::source_once configs.tcl lr_params.tcl syncrepo.tcl
 
 # deze mogelijk  nog dynamisch, of in config file.
 # set lr_include_dir {C:\Program Files (x86)\HP\LoadRunner\include}
 # [2016-06-01 14:51:09] LR 12.50 in new dir:
-set lr_include_dir {C:\Program Files (x86)\HP\Virtual User Generator\include}
+
 
 set_log_global info
 
 proc main {argv} {
-  global repodir repolibdir as_project
+  global repodir repolibdir as_project lr_include_dir
+  # set lr_include_dir {C:\Program Files (x86)\HP\Virtual User Generator\include}
+  set lr_include_dir [det_lr_include_dir]
+  
   # maybe add some checks
   if {$argv == ""} {
     help
@@ -38,6 +41,7 @@ proc main {argv} {
     set as_project 0
     task_$tname {*}$trest
   } elseif {[is_project_dir $dir]} {
+    # in a container dir with script dirs as subdirs.
     set repodir [file normalize "repo"]
     set repolibdir [file join $repodir libs]
     set as_project 1
@@ -63,7 +67,14 @@ proc main {argv} {
 }
 
 proc get_current_script_dirs {dir} {
-  split [string trim [read_file [file join $dir "current.prj"]]] ";"
+  set prj_filename [file join $dir "current.prj"]
+  if {[file exists $prj_filename]} {
+    split [string trim [read_file $prj_filename]] ";"  
+  } else {
+    log warn "No current.prj found in dir: $dir"
+    return {}
+  }
+  
 }
 
 # TODO tasks dynamisch afleiden uit deze source file. Evt deftask ipv proc task_gebruiken voor admin, dan ook met help erbij.
@@ -138,7 +149,8 @@ proc is_project_dir {dir} {
   return $res
 }
 
-
+# A script dir is a VuGen script dir, which contains vuser_init.c
+# TODO: could also be a TruClient dir which (maybe) does not have vuser_init.c?
 proc is_script_dir {dir} {
   if {[file exists [file join $dir vuser_init.c]]} {
     return 1
@@ -166,86 +178,6 @@ proc delete_path {pathname} {
   }
 }
 
-# put lib file from working/script directory into repository
-proc task_put {args} {
-  global repolibdir
-  # puts "args: $args"
-  file mkdir $repolibdir
-  lassign [det_force $args] args force
-  foreach libfile $args {
-    if {[file exists $libfile]} {
-      set repofile [file join $repolibdir $libfile]
-      if {[file exists $repofile]} {
-        # TODO: only put newer files. Maybe add -force option.
-        if {[file mtime $libfile] > [file mtime $repofile]} {
-          # ok, newer file
-          puts "Putting newer lib file to repo: $libfile"
-          file copy -force $libfile $repofile
-        } else {
-          if {$force} {
-            puts "\[FORCE\] Putting older lib file to repo: $libfile"
-            file copy -force $libfile $repofile
-          } else {
-            puts "Local file $libfile is not newer than repo file: do nothing"  
-          }
-        }
-      } else {
-        # ok, new lib file
-        puts "Putting new lib file to repo: $libfile"
-        file copy $libfile $repofile
-      }
-    } else {
-      puts "Local lib file not found: $libfile"
-    }
-  }
-}
-
-# get lib file from repository into working/script directory
-proc task_get {args} {
-  global repolibdir
-  # puts "args: $args"
-  file mkdir $repolibdir
-  lassign [det_force $args] args force
-  foreach libfile $args {
-    set repofile [file join $repolibdir $libfile]
-    if {[file exists $repofile]} {
-      if {[file exists $libfile]} {
-        # TODO: only get newer files from repo. Maybe add -force option.
-        if {[file mtime $libfile] < [file mtime $repofile]} {
-          # ok, newer file in repo
-          puts "Getting newer repo file: $repofile"
-          file copy -force $repofile $libfile
-        } else {
-          if {$force} {
-            puts "\[FORCE\] Getting older repo file: $repofile"
-            file copy -force $repofile $libfile
-          } else {
-            puts "Repo file $libfile is not newer than local file: do nothing"  
-          }
-        }
-      } else {
-        # ok, new repo file, not yet in local prj dir.
-        puts "Getting new repo file: $repofile"
-        file copy $repofile $libfile
-      }
-    } else {
-      puts "Repo lib file not found: $repofile"
-    }
-  }
-}
-
-proc det_force {lst} {
-  set force 0
-  set res {}
-  foreach el $lst {
-    if {$el == "-force"} {
-      set force 1
-    } else {
-      lappend res $el
-    }
-  }
-  list $res $force
-}
 
 proc det_full {lst} {
   set full 0
@@ -258,48 +190,6 @@ proc det_full {lst} {
     }
   }
   list $res $full
-}
-
-# args are ignored, but needed for task_check.
-proc task_libs {args} {
-  global as_project
-  set repo_libs [get_repo_libs]
-  # puts "repo_libs: $repo_libs"
-  set source_files [lsort [get_source_files]]
-  log debug "source_files: $source_files"
-  set included_files [det_includes_files [filter_ignore_files $source_files]]
-  log debug "included_files: $included_files"
-  set all_files [lsort -unique [concat $source_files $included_files]]
-  set diff_found 0
-  # also check if all included files exist.
-  foreach srcfile $all_files {
-    set st "ok"
-    if {$srcfile == "globals.h"} {
-      # ignore
-    } elseif {[in_lr_include $srcfile]} {
-      # default loadrunner include file, ignore.
-    } elseif {[file extension $srcfile] == ".h"} {
-      set st [show_status $srcfile]
-    } elseif {[lsearch -exact $included_files $srcfile] >= 0} {
-      # puts "in included: $srcfile"
-      set st [show_status $srcfile]
-    } elseif {[lsearch -exact $repo_libs $srcfile] >= 0} {
-      # puts "in repo: $srcfile"
-      set st [show_status $srcfile]
-    } else {
-      # puts "ignore: $srcfile"
-    }
-    if {$st != "ok"} {
-      set diff_found 1
-    }
-  }
-  if {$diff_found} {
-    puts "\n*** FOUND DIFFERENCES ***"
-  } else {
-    if {!$as_project} {
-      puts "\nEverything up to date"  
-    }
-  }
 }
 
 proc get_repo_libs {} {
@@ -354,75 +244,6 @@ proc in_lr_include {srcfile} {
   file exists [file join $lr_include_dir $srcfile]
 }
 
-proc show_status {libfile} {
-  global repolibdir as_project
-  set repofile [file join $repolibdir $libfile]
-  if {[file exists $repofile]} {
-    if {[file exists $libfile]} {
-      if {[file mtime $libfile] < [file mtime $repofile]} {
-        set status "repo-new"
-      } elseif {[file mtime $libfile] > [file mtime $repofile]} {
-        set status "local-new"
-      } else {
-        set status "ok"
-      }
-    } else {
-      set status "only in repo"
-    }
-  } else {
-    if {[file exists $libfile]} {
-      set status "only local"
-    } else {
-      set status "included file not found"
-    }
-  }
-  # in project scope zo weinig mogelijk uitvoer naar stdout.
-  if {$status != "ok" || !$as_project} {
-    puts "\[$status\] $libfile"  
-  }
-  
-  return $status
-}
-
-proc task_diff {libfile} {
-  set st [show_status $libfile]
-  puts "local: [file_info $libfile]"
-  puts "repo : [file_info [repofile $libfile]]"
-  if {[regexp {new} $st]} {
-    diff_files $libfile [repofile $libfile]
-  } else {
-    # no use to do diff
-  }
-}
-
-proc diff_files {file1 file2} {
-  set res "<none>"
-  try_eval {
-    set temp_out "__TEMP__OUT__"
-    set res [exec -ignorestderr diff $file1 $file2 >$temp_out]
-  } {
-    # diff always seems to fail, possibly exit-code.
-    # puts "diff failed: $errorResult"
-  }
-  if {$res == "<none>"} {
-    set res [read_file $temp_out]
-  }
-  file delete $temp_out
-  puts $res
-}
-
-proc file_info {libfile} {
-  if {[file exists $libfile]} {
-    return "[clock format [file mtime $libfile] -format "%Y-%m-%d %H:%M:%S"], [file size $libfile] bytes"
-  } else {
-    return "-"
-  }
-}
-
-proc repofile {libfile} {
-  global repolibdir
-  file join $repolibdir $libfile
-}
 
 # perform some tests. For now only show if libs are up-to-date
 proc task_test {args} {
@@ -676,6 +497,19 @@ proc puts_colour {colour str} {
   # ::term::ansi::send::sda_reset - alles op orig, wil je dit?
   # ::term::ansi::send::sda_fgdefault - zet 'em op zwart, wil je niet.
   send::sda_fgwhite
+}
+
+# return the first of a list of loadrunner include dirs that exists
+# if none exists, return empty string.
+proc det_lr_include_dir {} {
+  set dirs {{C:\Program Files (x86)\HP\Virtual User Generator\include}
+    /home/ymor/RABO/VuGen/lr_include}
+  foreach dir $dirs {
+    if {[file exists $dir]} {
+      return $dir
+    }
+  }
+  return ""
 }
 
 main $argv
