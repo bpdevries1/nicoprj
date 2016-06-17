@@ -265,6 +265,16 @@ proc handle_trans {line db logfile_id vuserid linenr iteration} {
     $db insert trans [vars_to_dict logfile_id vuserid ts_cet sec_cet transname user resptime status usecase \
                           revisit transid transshort searchcrit linenr iteration]
     return [list $user $ts_cet]
+  } elseif {[regexp {: \[([0-9 :.-]+)\] trans=([^ ]+), user=([^ ,]+), resptime=([0-9.,-]+), status=([0-9-]+)} \
+                 $line z ts_cet transname user resptime status]} {
+    # [2016-06-15 10:23:22] timestamp incl milliseconds
+    # functions.c(377): [2016-06-09 15:52:22.096] trans=CR_UC3_newuser_01_Login_Cras_QQQ, user=3002568887, resptime=-1.000, status=-1, iteration=1 [06/09/16 15:52:22]
+    set sec_cet [parse_cet $ts_cet]
+    regsub -all {,} $resptime "." resptime
+    lassign [split_transname $transname] usecase revisit transid transshort searchcrit
+    $db insert trans [vars_to_dict logfile_id vuserid ts_cet sec_cet transname user resptime status usecase \
+                          revisit transid transshort searchcrit linenr iteration]
+    return [list $user $ts_cet]
   } elseif {[regexp {trans=CR_UC} $line]} {
     breakpoint
   }

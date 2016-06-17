@@ -47,3 +47,6 @@ source [file join [file dirname [info script]] listc.tcl]
 
 # 4-5-2016 have had CPRogresscalculator for a long time, but not included
 source [file join [file dirname [info script]] CProgressCalculator.tcl]
+
+# [2016-06-15 10:45:26] add date/time functions
+source [file join [file dirname [info script]] libdatetime.tcl]
