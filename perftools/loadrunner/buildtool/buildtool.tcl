@@ -2,9 +2,10 @@
 
 # Build tool, mainly for VuGen scripts and libraries
 
-# TODO:
-# Build tool: bv bij functions.c wel nieuwe spul in repo zetten met put, maar ook benieuwd of andere projecten nog andere changes hebben. Eerder ook met nycsync gewerkt, zou hier ook een oplossing kunnen zijn. Alleen lijkt het dan weer beter iets als git te gebruiken.
-# Neig nu wel naar de nycsync oplossing: bij zowel git als unison met config files toch nog omslachtig. Met Unison wel dezelfde functionaliteit: geen versiebeheer, alleen maar kijken waar iets is gewijzigd. Met git zou het gecompliceerd worden, want dan 2 masters mogelijk, heb ook al git voor het gewone versie beheer van het script, dat is dus geen optie.
+# TODO general
+# create deftask proc, which includes documentation and possibly other settings
+# like if task can be done at project scope or not.
+# also include long and short comment (or use first line for short)
 
 package require term
 package require term::ansi::code::attr
@@ -13,18 +14,12 @@ term::ansi::send::import
 
 package require ndv
 
-ndv::source_once configs.tcl lr_params.tcl syncrepo.tcl
-
-# deze mogelijk  nog dynamisch, of in config file.
-# set lr_include_dir {C:\Program Files (x86)\HP\LoadRunner\include}
-# [2016-06-01 14:51:09] LR 12.50 in new dir:
-
+ndv::source_once configs.tcl lr_params.tcl syncrepo.tcl regsub.tcl
 
 set_log_global info
 
 proc main {argv} {
   global repodir repolibdir as_project lr_include_dir
-  # set lr_include_dir {C:\Program Files (x86)\HP\Virtual User Generator\include}
   set lr_include_dir [det_lr_include_dir]
   
   # maybe add some checks
@@ -45,7 +40,7 @@ proc main {argv} {
     set repodir [file normalize "repo"]
     set repolibdir [file join $repodir libs]
     set as_project 1
-    # todo check of task wel in project scope gedaan kan/mag worden. put iig niet.
+    # TODO: check of task wel in project scope gedaan kan/mag worden. put iig niet.
     if {$tname == "put"} {
       puts "Put action cannot be done in project scope, only script scope"
       exit 1
@@ -111,7 +106,6 @@ proc task_help {} {
 }
 
 # project functions, set and setcurrent
-# TODO: check of je in een project dir zit.
 proc task_project {args} {
   if {![is_project_dir .]} {
     puts "Not a project dir, leaving"
@@ -357,7 +351,7 @@ proc check_script {} {
   }
 }
 
-# TODO comment blocks
+# TODO: multiline comment blocks
 proc line_type {line} {
   set line [string trim $line]
   if {$line == ""} {
@@ -382,55 +376,6 @@ proc line_type {line} {
   return other
 }
 
-# args can only be -do, to really perform the replacements. Should be at the end, could be that regexps have/are -do.
-# if not really, create a file.__TEMP__ with the new version. Then perform a diff on both.
-# TODO: als -do is meegegeven, dan actie opslaan (in repo, want ook voor andere scripten). dan optie om deze te tonen en te kiezen.
-# en mss ook een naam te geven.
-proc task_regsub {from to args} {
-  set really 0
-  puts "from: $from, to: $to, args: $args"
-  if {[lindex $args 0] == "-do"} {
-    set really 1
-    puts "Really perform replacements!"
-  }
-  # vervang meegegeven \n op cmdline in echte newline voor regsub:
-  regsub -all {\\n} $to "\n" to2
-  set origdir "_orig.[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"]"
-  foreach srcfile [filter_ignore_files [get_source_files]]	{
-    regsub_file $srcfile $from $to2 $origdir $really
-  }
-}
-
-proc regsub_file {srcfile from to origdir really} {
-  set text [read_file $srcfile]
-  set nreplaced [regsub -all $from $text $to text2]
-  if {$nreplaced == 0} {
-    # nothing, no replacements done.
-  } else {
-    puts "$srcfile - $nreplaced change(s):"
-    set tempfile "$srcfile.__TEMP__"
-    set f [open $tempfile w]
-    puts $f $text2
-    close $f
-    set temporig "$srcfile.__ORIG__"
-    set f [open $temporig w]
-    puts $f $text
-    close $f
-    diff_files $temporig $tempfile
-    if {$really} {
-      puts "really perform replacement, orig files in _orig dir"
-      file delete $temporig
-      file mkdir $origdir
-      # file rename $srcfile [file join _orig $srcfile]
-      file rename $srcfile [file join $origdir $srcfile]
-      file rename $tempfile $srcfile
-    } else {
-      file delete $temporig
-      file delete $tempfile
-    }
-  }
-}
-
 proc task_totabs {args} {
   # default 4 tabs, kijk of in args wat anders staat.
   if {[:# $args] == 1} {
@@ -445,8 +390,6 @@ proc task_totabs {args} {
   }
 }
 
-# TODO: alleen file aanpassen als er echt iets is aangepast.
-# TODO: y_core.c checken, niet mijn eigen file.
 proc totabs_file {srcfile origdir tabwidth} {
   set orig_file [file join $origdir [file tail $srcfile]]
   set temp_file "$srcfile.__TEMP__"

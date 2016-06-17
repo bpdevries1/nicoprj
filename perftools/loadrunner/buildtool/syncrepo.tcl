@@ -167,7 +167,8 @@ proc task_diff {libfile} {
   }
 }
 
-proc diff_files {libfile repofile basefile} {
+# diff_files also called from regsub_file, with no base file.
+proc diff_files {libfile repofile {basefile ""}} {
   set res "<none>"
   try_eval {
     set temp_out "__TEMP__OUT__"
@@ -219,7 +220,6 @@ proc task_put {args} {
     if {[file exists $libfile]} {
       set repofile [file join $repolibdir $libfile]
       if {[file exists $repofile]} {
-        # TODO: only put newer files. Maybe add -force option.
         if {[file mtime $libfile] > [file mtime $repofile]} {
           # ok, newer file
           puts "Putting newer lib file to repo: $libfile"
@@ -256,7 +256,6 @@ proc task_get {args} {
     set repofile [file join $repolibdir $libfile]
     if {[file exists $repofile]} {
       if {[file exists $libfile]} {
-        # TODO: only get newer files from repo. Maybe add -force option.
         if {[file mtime $libfile] < [file mtime $repofile]} {
           # ok, newer file in repo
           puts "Getting newer repo file: $repofile"
