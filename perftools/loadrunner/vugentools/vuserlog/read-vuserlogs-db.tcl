@@ -44,7 +44,8 @@ proc read_logfile_dir {logdir dbname ssl} {
   # TODO mss pubsub nog eerder zetten als je read-vuserlogs-dir.tcl gebruikt.
   set pubsub [PubSub new]
   set db [get_results_db $dbname $ssl]
-  $db insert readstatus [dict create ts [now] status "starting"]
+  # $db insert read_status [dict create ts [now] status "starting"]
+  add_read_status $db "starting"
   set nread 0
   set db [get_results_db $dbname $ssl]
   set logfiles [concat [glob -nocomplain -directory $logdir *.log] \
@@ -65,14 +66,18 @@ proc read_logfile_dir {logdir dbname ssl} {
   if {$ssl} {
     handle_ssl_global_end $db
   }
-  log info "handle_ssl_final_end finished, setting readstatus"
-  $db insert readstatus [dict create ts [now] status "complete"]
-  log info "set readstatus, closing DB"
+  log info "handle_ssl_final_end finished, setting read_status"
+  # $db insert read_status [dict create ts [now] status "complete"]
+  add_read_status $db "complete"
+  log info "set read_status, closing DB"
   $db close
   log info "closed DB"
   log info "Read $nread logfile(s) in $logdir"
 }
 
+proc add_read_status {db status} {
+  $db insert read_status [dict create ts [now] status $status]
+}
 
 
 #  $db add_tabledef trans {id} {logfile {vuserid int} ts_cet {sec_cet int} transname user {resptime real} {status int}
@@ -90,19 +95,15 @@ proc readlogfile {logfile db ssl} {
     return
   }
   set ts_cet [clock format [file mtime $logfile] -format "%Y-%m-%d %H:%M:%S"]
-  # set logfile [file tail $logfilepath]
-
-  
-  # $db add_tabledef logfile {id} {logfile dirname ts_cet filesize runid project}
-  
+ 
   set dirname [file dirname $logfile]
   set filesize [file size $logfile]
   lassign [det_project_runid_script $logfile] project runid script
-  
-  
+    
   # TODO: 22-10-2015 NdV niet tevreden over error bepaling per iteratie. Met prev_iteration is altijd lastig.
   # liever functioneel oplossen, soort merge, en ook prio van errors bepalen, met pas > timeout > rest.
-  set fi [open $logfile r]
+  # set fi [open $logfile r]
+  set fi [open $logfile rb] ; # read binary, so 0 byte will not signal eof?
   $db in_trans {
     # insert logfile within trans; if something fails, this will be rolled back.
     set logfile_id [$db insert logfile [vars_to_dict logfile dirname ts_cet \
@@ -116,8 +117,10 @@ proc readlogfile {logfile db ssl} {
     if {$ssl} {
       handle_ssl_start $db $logfile_id $vuserid $iteration  
     }
+    set bytes_read 0
     while {[gets $fi line] >= 0} {
 		  incr linenr
+      incr bytes_read [expr [string length $line] + 2] ; # allow for end-of-line characters.
 		  set iteration [get_iteration $line $iteration]
       
 		  # possibly handle previous error_iteration
@@ -132,7 +135,8 @@ proc readlogfile {logfile db ssl} {
           set prev_iteration $iteration
         }
 		  }
-		  
+
+      # TODO: [2016-06-17 15:48:17] retraccts not used anymore?
 		  handle_retraccts $line $db $logfile_id $vuserid $linenr $iteration
 		  lassign [handle_trans $line $db $logfile_id $vuserid $linenr $iteration] user2 ts_cet2
 
@@ -150,9 +154,13 @@ proc readlogfile {logfile db ssl} {
       if {$ssl} {
         handle_ssl_line $db $logfile_id $vuserid $iteration $line $linenr  
       }
-    }
+    } ; # end of while gets
 	  log info "Last line number: $linenr"
-    
+    if {$bytes_read < [file size $logfile]} {
+      log warn "Number of bytes read ($bytes_read) < file size ([file size $logfile])"
+      add_read_status $db "$logfile: Number of bytes read ($bytes_read) < file size ([file size $logfile])"
+      # breakpoint
+    }
     insert_error_iter $db $logfile_id [file tail $logfile] $vuserid $prev_iteration \
         $error_iter
     if {![eof $fi]} {
@@ -161,7 +169,7 @@ proc readlogfile {logfile db ssl} {
     if {$ssl} {
       handle_ssl_end $db $logfile_id $vuserid $iteration  
     }
-  };                            # end of $db in_trans
+  };  # end of $db in_trans
   close $fi
 }
 
@@ -472,7 +480,7 @@ proc get_results_db {db_name ssl} {
 }
 
 proc define_tables {db ssl} {
-  $db add_tabledef readstatus {id} {ts status}
+  $db add_tabledef read_status {id} {ts status}
   
   $db add_tabledef logfile {id} {logfile dirname ts_cet {filesize int} \
                                      {runid int} project script}

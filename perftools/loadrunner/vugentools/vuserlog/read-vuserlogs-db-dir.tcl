@@ -55,7 +55,7 @@ proc ignore_dir {dir} {
 
 proc is_dir_fully_read {dbname ssl} {
   set db [get_results_db $dbname $ssl]
-  set res [:# [$db query "select 1 from readstatus where status='complete'"]]
+  set res [:# [$db query "select 1 from read_status where status='complete'"]]
   $db close
   return $res
 }
