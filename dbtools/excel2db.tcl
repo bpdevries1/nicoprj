@@ -1,4 +1,4 @@
-#!/usr/bin/env tclsh86
+#!/usr/bin/env tclsh861
 
 # [2016-03-29 16:37:40] Dit is waarsch nieuwe versie, oude in perftoolset/tools/excel2db.
 
@@ -7,18 +7,23 @@ package require Tclx
 package require ndv
 package require csv
 
-# TODO
+# TODO:
+# procs in een namespace zetten, omdat je deze file ook als lib kunt sourcen. Clojure ideeen hierbij te gebruiken?
 # * nog iets meer met als je meerdere excel files hebt en/of meerdere tabs: hoe met tabelnamen omgaan?
 # * datatype per veld op kunnen geven. Wordt nu wel aardig afgeleid en op int gezet als het kan, maar met userid wil je dit niet altijd.
 # * conversie functie voor date/time velden, om ze in het goede formaat te zetten. In certs van Gilbert bv '10/16/2015 19:12:23'.
 #   - door de 2015 weet je dat dit het jaar is. En door 16 weet je dat dit de dag is, 10 is dan dus de maand. Wellicht ook iets met filename/date
 #     te doen, maar wordt dan wel complex en foutgevoelig. Beter om het expliciet op te kunnen geven.
+# * Vraag of je deze in lib-dir neer wilt zetten. Voor beide wat te zeggen.
+
 
 # set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
-set log [::ndv::CLogger::new_logger [file tail [info script]] info]
-$log set_file "excel2db.log"
+#set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+#$log set_file "excel2db.log"
 
-proc main {argv} {
+set_log_global info
+
+proc excel2db_main {argv} {
   global fill_blanks
   
   set options {
@@ -50,7 +55,7 @@ proc handle_dir {dirname db table deletedb} {
   } else {
     log warn "System != windows, cannot extract csv's from Excel" 
   }
-  csv2sqlite $dirname $db $table $deletedb
+  file2sqlite $dirname $db $table $deletedb
 }
 
 proc make_csvs {dirname} {
@@ -75,7 +80,7 @@ proc delete_old_csv {targetroot} {
   }
 }
 
-proc csv2sqlite {dirname db table deletedb} {
+proc file2sqlite {dirname db table deletedb} {
   if {$db == "auto"} {
     set basename [file join $dirname [file tail $dirname]]
     set dbname "$basename.db"
@@ -84,7 +89,7 @@ proc csv2sqlite {dirname db table deletedb} {
     set basename $table
   }
   
-  # log info "csv2sqlite: $basename"
+  # log info "file2sqlite: $basename"
   if {$deletedb} {
     delete_database $dbname
   }
@@ -96,21 +101,23 @@ proc csv2sqlite {dirname db table deletedb} {
   
   db_eval $conn "begin transaction"
   set idx 0
-  foreach csvname [glob -directory $dirname "*.csv"] {
-    incr idx
-    try_eval {
-      csv2sqlite_table $conn $basename $csvname $table $idx
-    } {
-      log warn "Failed to convert csv: $csvname" 
-      log warn "Error: $errorResult"
+  foreach filespec {*.csv *.tsv} {
+    foreach filename [glob -nocomplain -directory $dirname $filespec] {
+      incr idx
+      try_eval {
+        file2sqlite_table $conn $basename $filename $table $idx
+      } {
+        log warn "Failed to convert csv: $filename" 
+        log warn "Error: $errorResult"
+      }
     }
   }
   db_eval $conn "commit"
 }
 
-proc csv2sqlite_table {conn basename csvname table idx} {
+proc file2sqlite_table {conn basename filename table idx} {
   if {$table == "auto"} {
-    set tablename [det_tablename $basename $csvname]
+    set tablename [det_tablename $basename $filename]
   } else {
     if {$idx == 1} {
       set tablename $table
@@ -119,11 +126,12 @@ proc csv2sqlite_table {conn basename csvname table idx} {
     }
   }
 
-  log info "csv2sqlite_table: basename=$basename, csvname=$csvname" 
+  log info "file2sqlite_table: basename=$basename, filename=$filename" 
   log info "tablename to create: $tablename"
-  set f [open $csvname r]
+  set sep_char [det_sep_char $filename]
+  set f [open $filename r]
   gets $f headerline
-  set fields [det_fields $headerline]
+  set fields [det_fields $headerline $sep_char]
   log debug "fields: $fields"
   if {[llength $fields] == 0} {
     log warn "No fields in table $tablename, return"
@@ -139,8 +147,9 @@ proc csv2sqlite_table {conn basename csvname table idx} {
       # string trim gebruiken, want kan 'lege' line zijn met alleen komma's.
       if {[string trim $line] != ""} {
         set lines "$lines$line"
+        # [2016-07-01 10:38] note - iscomplete should work both for csv and tsv, just count number of double quotes.
         if {[csv::iscomplete $lines]} {
-          set dct_prev [insert_line $conn $stmt_insert $tablename $fields $lines $linenr $dct_prev]
+          set dct_prev [insert_line $conn $stmt_insert $tablename $fields $lines $linenr $dct_prev $sep_char]
           set lines ""
         } else {
           set lines "$lines\n" 
@@ -151,15 +160,26 @@ proc csv2sqlite_table {conn basename csvname table idx} {
   close $f
 }
 
-# @pre csvname starts with basename
-proc det_tablename {basename csvname} {
-  sanitise [file root [file tail $csvname]] 
+proc det_sep_char {filename} {
+  set ext [file extension $filename]
+  if {$ext == ".csv"} {
+    return ","
+  } elseif {$ext == ".tsv"} {
+    return "\t"
+  } else {
+    return "<none>"
+  }
 }
 
-proc det_fields {headerline} {
+# @pre filename starts with basename
+proc det_tablename {basename filename} {
+  sanitise [file root [file tail $filename]] 
+}
+
+proc det_fields {headerline sep_char} {
   set res {}
   set fieldindex 0
-  foreach el [csv::split $headerline] {
+  foreach el [csv::split $headerline $sep_char] {
     incr fieldindex
     if {$el == ""} {
       lappend res "field$fieldindex"
@@ -177,11 +197,11 @@ proc sanitise {str} {
 }
 
 # @param line can be 'multiline'
-proc insert_line {conn stmt_insert tablename fields line linenr dct_prev} {
+proc insert_line {conn stmt_insert tablename fields line linenr dct_prev sep_char} {
   global fill_blanks
   log debug "line $linenr: $line"
   set dct {}
-  foreach k $fields v [csv::split $line] {
+  foreach k $fields v [csv::split $line $sep_char] {
     if {$v == ""} {
       if {$fill_blanks} {
         if {[dict exists $dct_prev $k]} {
@@ -225,5 +245,7 @@ proc delete_database {dbname} {
   }
 }
 
+if {[this_is_main]} {
+  excel2db_main $argv  
+}
 
-main $argv
