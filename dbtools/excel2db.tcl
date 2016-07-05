@@ -34,14 +34,19 @@ proc excel2db_main {argv} {
     {deletedb "Delete DB before reading (for debugging)"}
     {fillblanks "Fill blank cells with contents of previous row"}
   }
-  set usage ": [file tail [info script]] \[options] :"
+  set usage ": [file tail [info script]] \[options] \[dirname\]:"
   set dargv [getoptions argv $options $usage]
-
-  
+	
   set fill_blanks [:fillblanks $dargv] 
   set config_tcl [:config $dargv]
   # lassign $argv dirname config_tcl
-  set dirname [:dir $dargv]
+  if {[:dir $dargv] == ""} {
+    # final argument after options
+	set dirname [:0 $argv]
+  } else {
+    set dirname [:dir $dargv]
+  }
+  log info "Handle dir: $dirname"
   if {$config_tcl != ""} {
     source $config_tcl 
   }
