@@ -8,6 +8,10 @@ package require ndv
 package require csv
 
 # TODO:
+# Bug: [2016-07-06 17:07:26 +0200] [excel2db.tcl] [info] Committing after 900000 lines
+# unable to realloc 3690464 bytes
+# check if 'objects' can be deleted or not created in the first place. Maybe something with dicts or fillblanks.
+
 # procs in een namespace zetten, omdat je deze file ook als lib kunt sourcen. Clojure ideeen hierbij te gebruiken?
 # * nog iets meer met als je meerdere excel files hebt en/of meerdere tabs: hoe met tabelnamen omgaan?
 # * datatype per veld op kunnen geven. Wordt nu wel aardig afgeleid en op int gezet als het kan, maar met userid wil je dit niet altijd.
@@ -33,6 +37,7 @@ proc excel2db_main {argv} {
     {config.arg "" "Config.tcl file"}
     {deletedb "Delete DB before reading (for debugging)"}
     {fillblanks "Fill blank cells with contents of previous row"}
+    {commitlines.arg "100000" "Perform commit after reading n lines"}
   }
   set usage ": [file tail [info script]] \[options] \[dirname\]:"
   set dargv [getoptions argv $options $usage]
@@ -50,17 +55,17 @@ proc excel2db_main {argv} {
   if {$config_tcl != ""} {
     source $config_tcl 
   }
-  handle_dir $dirname [:db $dargv] [:table $dargv] [:deletedb $dargv]
+  handle_dir $dirname [:db $dargv] [:table $dargv] [:deletedb $dargv] [:commitlines $dargv]
 }
 
-proc handle_dir {dirname db table deletedb} {
+proc handle_dir {dirname db table deletedb commit_lines} {
   global tcl_platform
   if {$tcl_platform(platform) == "windows"} {
     make_csvs $dirname
   } else {
     log warn "System != windows, cannot extract csv's from Excel" 
   }
-  file2sqlite $dirname $db $table $deletedb
+  file2sqlite $dirname $db $table $deletedb $commit_lines
 }
 
 proc make_csvs {dirname} {
@@ -85,7 +90,7 @@ proc delete_old_csv {targetroot} {
   }
 }
 
-proc file2sqlite {dirname db table deletedb} {
+proc file2sqlite {dirname db table deletedb commit_lines} {
   if {$db == "auto"} {
     set basename [file join $dirname [file tail $dirname]]
     set dbname "$basename.db"
@@ -104,23 +109,26 @@ proc file2sqlite {dirname db table deletedb} {
   #@note begin_trans lijkt alleen voor perf zin te hebben, want als het halverwege fout gaan, wordt er geen rollback gedaan.
   # 2010-10-21 NdV nog omzetter naar nieuwe db lib met $db in_trans
   
-  db_eval $conn "begin transaction"
+
   set idx 0
   foreach filespec {*.csv *.tsv} {
     foreach filename [glob -nocomplain -directory $dirname $filespec] {
+      # [2016-07-06 17:00:29] sowieso per file een transaction.
+      db_eval $conn "begin transaction"      
       incr idx
       try_eval {
-        file2sqlite_table $conn $basename $filename $table $idx
+        file2sqlite_table $conn $basename $filename $table $idx $commit_lines
       } {
         log warn "Failed to convert csv: $filename" 
         log warn "Error: $errorResult"
       }
+      db_eval $conn "commit"    
     }
   }
-  db_eval $conn "commit"
+  
 }
 
-proc file2sqlite_table {conn basename filename table idx} {
+proc file2sqlite_table {conn basename filename table idx commit_lines} {
   if {$table == "auto"} {
     set tablename [det_tablename $basename $filename]
   } else {
@@ -159,6 +167,11 @@ proc file2sqlite_table {conn basename filename table idx} {
         } else {
           set lines "$lines\n" 
         }
+      }
+      if {$linenr % $commit_lines == 0} {
+        log info "Committing after $linenr lines"
+        db_eval $conn "commit"
+        db_eval $conn "begin transaction"      
       }
     }
   }
