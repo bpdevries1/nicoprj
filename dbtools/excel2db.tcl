@@ -37,6 +37,7 @@ proc excel2db_main {argv} {
     {config.arg "" "Config.tcl file"}
     {deletedb "Delete DB before reading (for debugging)"}
     {fillblanks "Fill blank cells with contents of previous row"}
+    {singlelines "Each CSV record is on a single line (faster processing)"}
     {commitlines.arg "100000" "Perform commit after reading n lines"}
   }
   set usage ": [file tail [info script]] \[options] \[dirname\]:"
@@ -55,17 +56,17 @@ proc excel2db_main {argv} {
   if {$config_tcl != ""} {
     source $config_tcl 
   }
-  handle_dir $dirname [:db $dargv] [:table $dargv] [:deletedb $dargv] [:commitlines $dargv]
+  handle_dir $dirname [:db $dargv] [:table $dargv] [:deletedb $dargv] [:commitlines $dargv] $dargv
 }
 
-proc handle_dir {dirname db table deletedb commit_lines} {
+proc handle_dir {dirname db table deletedb commit_lines dargv} {
   global tcl_platform
   if {$tcl_platform(platform) == "windows"} {
     make_csvs $dirname
   } else {
     log warn "System != windows, cannot extract csv's from Excel" 
   }
-  file2sqlite $dirname $db $table $deletedb $commit_lines
+  file2sqlite $dirname $db $table $deletedb $commit_lines $dargv
 }
 
 proc make_csvs {dirname} {
@@ -90,7 +91,7 @@ proc delete_old_csv {targetroot} {
   }
 }
 
-proc file2sqlite {dirname db table deletedb commit_lines} {
+proc file2sqlite {dirname db table deletedb commit_lines dargv} {
   if {$db == "auto"} {
     set basename [file join $dirname [file tail $dirname]]
     set dbname "$basename.db"
@@ -117,7 +118,7 @@ proc file2sqlite {dirname db table deletedb commit_lines} {
       db_eval $conn "begin transaction"      
       incr idx
       try_eval {
-        file2sqlite_table $conn $basename $filename $table $idx $commit_lines
+        file2sqlite_table $conn $basename $filename $table $idx $commit_lines $dargv
       } {
         log warn "Failed to convert csv: $filename" 
         log warn "Error: $errorResult"
@@ -128,7 +129,7 @@ proc file2sqlite {dirname db table deletedb commit_lines} {
   
 }
 
-proc file2sqlite_table {conn basename filename table idx commit_lines} {
+proc file2sqlite_table {conn basename filename table idx commit_lines dargv} {
   if {$table == "auto"} {
     set tablename [det_tablename $basename $filename]
   } else {
@@ -151,31 +152,60 @@ proc file2sqlite_table {conn basename filename table idx commit_lines} {
   } else {
     db_eval $conn "create table $tablename ([join $fields ", "])"
     set stmt_insert [prepare_insert $conn $tablename {*}$fields]
-    set linenr 1
-    set lines ""
-    set dct_prev {}
-    while {![eof $f]} {
-      gets $f line
-      incr linenr
-      # string trim gebruiken, want kan 'lege' line zijn met alleen komma's.
-      if {[string trim $line] != ""} {
-        set lines "$lines$line"
-        # [2016-07-01 10:38] note - iscomplete should work both for csv and tsv, just count number of double quotes.
-        if {[csv::iscomplete $lines]} {
-          set dct_prev [insert_line $conn $stmt_insert $tablename $fields $lines $linenr $dct_prev $sep_char]
-          set lines ""
-        } else {
-          set lines "$lines\n" 
+
+    if {[:singlelines $dargv]} {
+      read_single_lines $f $conn $stmt_insert $tablename $fields $sep_char $dargv
+    } else {
+      set lines ""
+      set dct_prev {}
+      set linenr 1
+      while {![eof $f]} {
+        gets $f line
+        incr linenr
+        # string trim gebruiken, want kan 'lege' line zijn met alleen komma's.
+        if {[string trim $line] != ""} {
+          set lines "$lines$line"
+          # [2016-07-01 10:38] note - iscomplete should work both for csv and tsv, just count number of double quotes.
+          if {[csv::iscomplete $lines]} {
+            set dct_prev [insert_line $conn $stmt_insert $tablename $fields $lines $linenr $dct_prev $sep_char]
+            set lines ""
+          } else {
+            set lines "$lines\n" 
+          }
+        }
+        if {$linenr % $commit_lines == 0} {
+          log info "Committing after $linenr lines"
+          db_eval $conn "commit"
+          db_eval $conn "begin transaction"      
         }
       }
-      if {$linenr % $commit_lines == 0} {
-        log info "Committing after $linenr lines"
-        db_eval $conn "commit"
-        db_eval $conn "begin transaction"      
-      }
+      
     }
   }
   close $f
+}
+
+proc read_single_lines {f conn stmt_insert tablename fields sep_char dargv} {
+  log info "reading single lines for $tablename"
+  set linenr 1;                 # already read header line.
+  set commit_lines [:commitlines $dargv]
+  while {![eof $f]} {
+    gets $f line
+    incr linenr
+    # string trim gebruiken, want kan 'lege' line zijn met alleen komma's.
+    if {[string trim $line] != ""} {
+      insert_single_line $conn $stmt_insert $tablename $fields $line $linenr $sep_char
+    } else {
+      set lines "$lines\n" 
+    }
+    # breakpoint
+    if {$linenr % $commit_lines == 0} {
+      log info "Committing after $linenr lines"
+      db_eval $conn "commit"
+      db_eval $conn "begin transaction"      
+    }
+  }
+  log info "Finished reading single lines for $tablename"
 }
 
 proc det_sep_char {filename} {
@@ -218,6 +248,7 @@ proc sanitise {str} {
 proc insert_line {conn stmt_insert tablename fields line linenr dct_prev sep_char} {
   global fill_blanks
   log debug "line $linenr: $line"
+  # TODO: should use dict interface, with dict create and dict set.
   set dct {}
   foreach k $fields v [csv::split $line $sep_char] {
     if {$v == ""} {
@@ -237,10 +268,25 @@ proc insert_line {conn stmt_insert tablename fields line linenr dct_prev sep_cha
   try_eval {
     $stmt_insert execute $dct
   } {
-    puts "dct: $dct_zipped"
+    puts "dct: $dct"
     breakpoint 
   }
   return $dct
+}
+
+proc insert_single_line {conn stmt_insert tablename fields line linenr sep_char} {
+  # TODO: find other way to create dict with list of keys and list of values
+  # or another way to put in DB, using something else besides a dict.
+  set dct [dict create]
+  foreach k $fields v [csv::split $line $sep_char] {
+    dict set dct $k $v
+  }
+  try_eval {
+    $stmt_insert execute $dct
+  } {
+    puts "dct: $dct"
+    breakpoint 
+  }
 }
 
 proc delete_database {dbname} {
