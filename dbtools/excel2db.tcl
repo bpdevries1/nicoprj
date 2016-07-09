@@ -8,9 +8,7 @@ package require ndv
 package require csv
 
 # TODO:
-# Bug: [2016-07-06 17:07:26 +0200] [excel2db.tcl] [info] Committing after 900000 lines
-# unable to realloc 3690464 bytes
-# check if 'objects' can be deleted or not created in the first place. Maybe something with dicts or fillblanks.
+# [2016-07-09 14:16] Using sqlite directly instead of tdbc could be faster, using dbcmd eval with $var as named parameter. dbCmd copy also promising, directly import a file, take care of header lines though. dbcmd progress for callbacks on long running commands.
 
 # procs in een namespace zetten, omdat je deze file ook als lib kunt sourcen. Clojure ideeen hierbij te gebruiken?
 # * nog iets meer met als je meerdere excel files hebt en/of meerdere tabs: hoe met tabelnamen omgaan?
