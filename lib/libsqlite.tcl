@@ -12,6 +12,8 @@ if {$tcl_version == "8.5"} {
   # puts stderr "Creating tcl 8.6 tdbc::sqlite helper procs" 
   
   proc open_db {db_name} {
+    # [2016-07-09 13:27] vraag of deze connectie via prepared statemwnr memory
+    # leaks oplevert.
     set conn [tdbc::sqlite3::connection create db $db_name]
     return $conn
   }
@@ -120,7 +122,10 @@ if {$tcl_version == "8.5"} {
   # @param args: field names
   proc prepare_insert {conn tablename args} {
     # $conn prepare "insert into $tablename ([join $args ", "]) values ([join [map {par {return ":$par"}} $args] ", "])"
-    $conn prepare [create_insert_sql $tablename {*}$args]
+    set sql [create_insert_sql $tablename {*}$args]
+    set res [$conn prepare $sql]
+    # log info "Prepared insert stmt: $res for connection $conn and sql $sql"
+    return $res
   }
 
   # @param args: field names
