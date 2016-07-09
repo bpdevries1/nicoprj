@@ -56,17 +56,17 @@ proc excel2db_main {argv} {
   if {$config_tcl != ""} {
     source $config_tcl 
   }
-  handle_dir $dirname [:db $dargv] [:table $dargv] [:deletedb $dargv] [:commitlines $dargv] $dargv
+  handle_dir $dirname [:db $dargv] [:table $dargv] [:deletedb $dargv] $dargv
 }
 
-proc handle_dir {dirname db table deletedb commit_lines dargv} {
+proc handle_dir {dirname db table deletedb dargv} {
   global tcl_platform
   if {$tcl_platform(platform) == "windows"} {
     make_csvs $dirname
   } else {
     log warn "System != windows, cannot extract csv's from Excel" 
   }
-  file2sqlite $dirname $db $table $deletedb $commit_lines $dargv
+  file2sqlite $dirname $db $table $deletedb $dargv
 }
 
 proc make_csvs {dirname} {
@@ -91,7 +91,7 @@ proc delete_old_csv {targetroot} {
   }
 }
 
-proc file2sqlite {dirname db table deletedb commit_lines dargv} {
+proc file2sqlite {dirname db table deletedb dargv} {
   if {$db == "auto"} {
     set basename [file join $dirname [file tail $dirname]]
     set dbname "$basename.db"
@@ -118,9 +118,9 @@ proc file2sqlite {dirname db table deletedb commit_lines dargv} {
       db_eval $conn "begin transaction"      
       incr idx
       try_eval {
-        file2sqlite_table $conn $basename $filename $table $idx $commit_lines $dargv
+        file2sqlite_table $conn $basename $filename $table $idx $dargv
       } {
-        log warn "Failed to convert csv: $filename" 
+        log warn "Failed to convert: $filename" 
         log warn "Error: $errorResult"
       }
       db_eval $conn "commit"    
@@ -129,7 +129,7 @@ proc file2sqlite {dirname db table deletedb commit_lines dargv} {
   
 }
 
-proc file2sqlite_table {conn basename filename table idx commit_lines dargv} {
+proc file2sqlite_table {conn basename filename table idx dargv} {
   if {$table == "auto"} {
     set tablename [det_tablename $basename $filename]
   } else {
@@ -139,7 +139,7 @@ proc file2sqlite_table {conn basename filename table idx commit_lines dargv} {
       set tablename "$table$idx"
     }
   }
-
+  set commit_lines [:commitlines $dargv]
   log info "file2sqlite_table: basename=$basename, filename=$filename" 
   log info "tablename to create: $tablename"
   set sep_char [det_sep_char $filename]
@@ -152,7 +152,7 @@ proc file2sqlite_table {conn basename filename table idx commit_lines dargv} {
   } else {
     db_eval $conn "create table $tablename ([join $fields ", "])"
     set stmt_insert [prepare_insert $conn $tablename {*}$fields]
-
+    log info "stmt_insert: $stmt_insert"
     if {[:singlelines $dargv]} {
       read_single_lines $f $conn $stmt_insert $tablename $fields $sep_char $dargv
     } else {
@@ -179,7 +179,6 @@ proc file2sqlite_table {conn basename filename table idx commit_lines dargv} {
           db_eval $conn "begin transaction"      
         }
       }
-      
     }
   }
   close $f
@@ -195,8 +194,6 @@ proc read_single_lines {f conn stmt_insert tablename fields sep_char dargv} {
     # string trim gebruiken, want kan 'lege' line zijn met alleen komma's.
     if {[string trim $line] != ""} {
       insert_single_line $conn $stmt_insert $tablename $fields $line $linenr $sep_char
-    } else {
-      set lines "$lines\n" 
     }
     # breakpoint
     if {$linenr % $commit_lines == 0} {
@@ -266,7 +263,7 @@ proc insert_line {conn stmt_insert tablename fields line linenr dct_prev sep_cha
     }
   }
   try_eval {
-    $stmt_insert execute $dct
+    [$stmt_insert execute $dct] close
   } {
     puts "dct: $dct"
     breakpoint 
@@ -275,14 +272,15 @@ proc insert_line {conn stmt_insert tablename fields line linenr dct_prev sep_cha
 }
 
 proc insert_single_line {conn stmt_insert tablename fields line linenr sep_char} {
-  # TODO: find other way to create dict with list of keys and list of values
+  # TODO: find other way to create dict with list of keys and list of values (zipper?)
   # or another way to put in DB, using something else besides a dict.
   set dct [dict create]
   foreach k $fields v [csv::split $line $sep_char] {
     dict set dct $k $v
   }
   try_eval {
-    $stmt_insert execute $dct
+    # [2016-07-09 13:44] should catch result and close/free it.
+    [$stmt_insert execute $dct] close
   } {
     puts "dct: $dct"
     breakpoint 
