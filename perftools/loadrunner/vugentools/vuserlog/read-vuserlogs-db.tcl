@@ -5,11 +5,11 @@ package require tdbc::sqlite3
 
 ndv::source_once ssl.tcl pubsub.tcl
 
-# TODO:
-# [2016-02-08 11:13:55] Bug - when logfile contains 0-bytes (eg in Vugen output.txt with log webregfind for PDF/XLS), the script sees this as EOF and misses transactions and errors.
+# [2016-07-09 10:09] for parse_cet and now:
+use libdatetime
 
-# set_log_global perf {showfilename 0}
-
+# Note:
+# [2016-02-08 11:13:55] Bug - when logfile contains 0-bytes (eg in Vugen output.txt with log webregfind for PDF/XLS), the script sees this as EOF and misses transactions and errors. [2016-07-09 10:12] this should be solved by reading as binary.
 
 set VUSER_END_ITERATION 1000
 
@@ -527,6 +527,7 @@ proc delete_database {dbname} {
 }
 
 if {[this_is_main]} {
+  set_log_global perf {showfilename 0}
   log debug "This is main, so call main proc"
   set_log_global debug {showfilename 0}  
   main $argv  

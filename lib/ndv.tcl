@@ -50,3 +50,7 @@ source [file join [file dirname [info script]] CProgressCalculator.tcl]
 
 # [2016-06-15 10:45:26] add date/time functions
 source [file join [file dirname [info script]] libdatetime.tcl]
+
+# [2016-07-09 09:49] namespace functions, compare Clojure
+source [file join [file dirname [info script]] libns.tcl]
+

@@ -1,6 +1,7 @@
 #!/usr/bin/env tclsh861
 
 # test-libdatetime.tcl - test functionality of libdatetime.tcl
+package require ndv
 
 # @note don't package require libdatetime, but source it, easier to test.
 
@@ -8,6 +9,8 @@ package require tcltest
 namespace import -force ::tcltest::*
 
 source [file join [file dirname [info script]] .. libdatetime.tcl]
+
+use libdatetime
 
 proc testndv {args} {
   global testndv_index

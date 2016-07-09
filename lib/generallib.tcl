@@ -598,7 +598,8 @@ proc det_hostname {} {
 }
 
 #### datetime functions ####
-proc now {args} {
+# [2016-07-09 10:06] moved to libdatetime
+proc now_old {args} {
   # for now, the timestamp as can be inserted in sqlite
   clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S %z"
 }
