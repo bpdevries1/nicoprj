@@ -33,7 +33,7 @@ proc main {argv} {
       foreach domain [split $value " "] {
         log debug "domain: $domain"
         
-        $stmt_insert execute [vars_to_dict ts configfile domain configtype]
+        [$stmt_insert execute [vars_to_dict ts configfile domain configtype]] close
       }
     }
     
@@ -47,7 +47,7 @@ proc main {argv} {
       log debug "match-host: $host"
       foreach domain [split $host " "] {
         log debug "match-domain: $domain"
-        $stmt_insert execute [vars_to_dict ts configfile domain configtype]
+        [$stmt_insert execute [vars_to_dict ts configfile domain configtype]] close
       }
     }
     

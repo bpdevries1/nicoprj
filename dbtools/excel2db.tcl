@@ -173,6 +173,7 @@ proc file2sqlite_table {conn basename filename table idx dargv} {
         }
         if {$linenr % $commit_lines == 0} {
           log info "Committing after $linenr lines"
+          close_resultsets $stmt_insert
           db_eval $conn "commit"
           db_eval $conn "begin transaction"      
         }
@@ -180,6 +181,18 @@ proc file2sqlite_table {conn basename filename table idx dargv} {
     }
   }
   close $f
+}
+
+proc close_resultsets {stmt} {
+  # The resultsets method returns a list of all the result sets that have been returned by executing the statement and have not yet been closed.
+  set warnings 0
+  foreach rs [$stmt resultsets] {
+    $rs close
+    incr warnings
+  }
+  if {$warnings > 0} {
+    log warn "$warnings Resultsets had to be closed in a sweep run, should be done directly after finishing with it."
+  }
 }
 
 proc read_single_lines {f conn stmt_insert tablename fields sep_char dargv} {
@@ -196,6 +209,7 @@ proc read_single_lines {f conn stmt_insert tablename fields sep_char dargv} {
     # breakpoint
     if {$linenr % $commit_lines == 0} {
       log info "Committing after $linenr lines"
+      close_resultsets $stmt_insert
       db_eval $conn "commit"
       db_eval $conn "begin transaction"      
     }
@@ -279,6 +293,8 @@ proc insert_single_line {conn stmt_insert tablename fields line linenr sep_char}
   try_eval {
     # [2016-07-09 13:44] should catch result and close/free it.
     [$stmt_insert execute $dct] close
+    # nog even test zonder, kijken of vangnet 'em pakt
+    # $stmt_insert execute $dct
   } {
     puts "dct: $dct"
     breakpoint 

@@ -33,7 +33,7 @@ proc read_beachcomp {filename conn stmt_insert} {
     if {[regexp {^((\de divisie)|(Toptoernooi)) \(M\) \(([^\(\)]+)\)} $line z niveau z z datumstr]} {
       set datum [parse_datum $datumstr]
       log info "Inserting event: $lokatie - $niveau - $datum"
-      $stmt_insert execute [vars_to_dict lokatie niveau datum] 
+      [$stmt_insert execute [vars_to_dict lokatie niveau datum]] close
       log info "Inserted event"
     } elseif {[regexp {divisie} $line]} {
       # sla (V) hier over.
@@ -89,7 +89,7 @@ proc read_beachvolley {filename conn stmt_insert} {
     if {[regexp {2013$} $line]} {
       set datum [parse_datum_volley $line]
       log info "Inserting event: $lokatie - $niveau - $datum"
-      $stmt_insert execute [vars_to_dict lokatie niveau datum] 
+      [$stmt_insert execute [vars_to_dict lokatie niveau datum]] close
     } elseif {[string trim $line] == ""} {
       # ok, nothing  
     } else {

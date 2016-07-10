@@ -20,7 +20,9 @@ if {$tcl_version == "8.5"} {
 
   proc db_eval {conn query {return_id 0}} {
     set stmt [$conn prepare $query]
-    $stmt execute
+    # [2016-07-10 08:30] execute always returns resultset, need to close.
+    set res [$stmt execute]
+    $res close
     $stmt close
     if {$return_id} {
       return [[$conn getDBhandle] last_insert_rowid]   
@@ -45,7 +47,8 @@ if {$tcl_version == "8.5"} {
   }
 
   proc stmt_exec {conn stmt dct {return_id 0}} {
-    $stmt execute $dct
+    set res [$stmt execute $dct]
+    $res close
     if {$return_id} {
       return [[$conn getDBhandle] last_insert_rowid]   
     }

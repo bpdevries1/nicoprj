@@ -24,8 +24,6 @@ proc main {argv} {
   db_eval $conn "begin transaction"
   set stmt_insert [prepare_insert $conn firebug ts reportfile url embedded_url embedded_domain]
   set ts [det_now]
-# $stmt_insert execute [vars_to_dict ts configfile domain configtype]
-
   foreach reportfile [glob -directory $dir "*.htm*"] {
     log info "reportfile: $reportfile"
     read_report $conn $stmt_insert $ts $reportfile
@@ -59,7 +57,7 @@ proc read_report {conn stmt_insert ts reportfile} {
     set embedded_domain [det_domain $embedded_url]
     log info "Embedded resource: $embedded_url (domain: $embedded_domain)" 
     # breakpoint
-    $stmt_insert execute [vars_to_dict ts reportfile url embedded_url embedded_domain]
+    [$stmt_insert execute [vars_to_dict ts reportfile url embedded_url embedded_domain]] close
   }
 }
 

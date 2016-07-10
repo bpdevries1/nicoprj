@@ -165,7 +165,7 @@ proc add_seconds_frames {track} {
     # append and update do not work, maybe have made a dict_set_multi before.
     dict set track seconds $seconds
     dict set track frames $frames
-    $stmt(set_seconds_frames) execute $track
+    [$stmt(set_seconds_frames) execute $track] close
   } else {
     # just return original 
   }
@@ -217,12 +217,14 @@ proc update_track {track answer start_sec stop_sec} {
     puts "Unrecognised answer, continuing..."
     return
   }    
-  $stmt(update_nright_nwrong) execute $track
+  [$stmt(update_nright_nwrong) execute $track] close
   set ts [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
   #$stmt(insert_test) execute [dict create path [dict get $track path] \
   #  result $result ts $ts start_sec $start_sec stop_sec $stop_sec]
-  $stmt(insert_track_test) execute [dict create session_id $session_id track_id [dict get $track id] \
-    result $result ts $ts start_sec $start_sec stop_sec $stop_sec]
+  [$stmt(insert_track_test) execute [dict create session_id $session_id \
+                                         track_id [dict get $track id] \
+                                         result $result ts $ts start_sec $start_sec \
+                                         stop_sec $stop_sec]] close
 }
 
 proc handle_quit {} {

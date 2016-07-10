@@ -35,7 +35,7 @@ proc set_positie {track} {
   global stmts
   set positie [det_positie $track]
   dict set track positie $positie
-  $stmts(update_positie) execute $track
+  [$stmts(update_positie) execute $track] close
 }
 
 proc det_positie {track} {
@@ -49,7 +49,7 @@ proc det_positie {track} {
 
 proc db_eval {conn query} {
   set stmt [$conn prepare $query]
-  $stmt execute
+  [$stmt execute] close
   $stmt close
 }
 

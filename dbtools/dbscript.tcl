@@ -108,10 +108,10 @@ proc do_statements_db {dbname stmts dargv} {
           puts $fo [res2table $res]     
           flush $fo
         } else {
-		  # [2016-05-31 10:54:10] For now, do execute, could be loading of extension.
+          # [2016-05-31 10:54:10] For now, do execute, could be loading of extension.
           # log warn "select statement without output file set, not executing: $stmt"
-		  log warn "select statement without output file set, executing without displaying result: $stmt"
-		  set res [$db query $stmt]
+          log warn "select statement without output file set, executing without displaying result: $stmt"
+          set res [$db query $stmt]
         }
       } else {
         $db exec2 $stmt -log $try

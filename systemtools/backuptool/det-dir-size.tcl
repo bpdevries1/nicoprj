@@ -89,7 +89,7 @@ proc det_size_dir_root {conn cmd_args size_check_id} {
     $conn begintransaction
     foreach todo $lst_todo {
       det_size_dir $conn [dict get $todo path] $recur_size 0
-      $stmt(size_check_todo_delete) execute [dict create size_check_dir_id [dict get $todo size_check_dir_id]]
+      [$stmt(size_check_todo_delete) execute [dict create size_check_dir_id [dict get $todo size_check_dir_id]]] close
     }
     set lst_todo [$conn allrows -as dicts "select * from size_check_todo order by size_check_dir_id limit 10"]
     $conn commit
@@ -122,7 +122,7 @@ proc det_size_dir {conn path recur_size isroot} {
       } else {
         set size_check_dir_id [stmt_exec $conn $stmt(size_check_dir) [dict create path $subpath size_mb $size_mb last_mod $last_mod] 1]
         if {$size_mb >= $recur_size} {
-          $stmt(size_check_todo) execute [dict create size_check_dir_id $size_check_dir_id path $subpath] 
+          [$stmt(size_check_todo) execute [dict create size_check_dir_id $size_check_dir_id path $subpath]] close
         }
       }
     } elseif {$line == ""} {
@@ -192,7 +192,7 @@ proc det_hostname {} {
 
 proc db_eval_old {conn query {return_id 0}} {
   set stmt [$conn prepare $query]
-  $stmt execute
+  [$stmt execute] close
   $stmt close
   if {$return_id} {
     return [[$conn getDBhandle] last_insert_rowid]   
@@ -200,7 +200,7 @@ proc db_eval_old {conn query {return_id 0}} {
 }
 
 proc stmt_exec_old {conn stmt dct {return_id 0}} {
-  $stmt execute $dct
+  [$stmt execute $dct] close
   if {$return_id} {
     return [[$conn getDBhandle] last_insert_rowid]   
   }
@@ -221,7 +221,7 @@ proc det_disk_free {conn size_check_id} {
     lassign $line filesystem total_mb used_mb free_mb
     set mounted [join [lrange $line 5 end] " "]
     if {$mounted != ""} {
-      $stmt execute [vars_to_dict size_check_id filesystem total_mb used_mb free_mb mounted]
+      [$stmt execute [vars_to_dict size_check_id filesystem total_mb used_mb free_mb mounted]] close
     }
   }
 }

@@ -17,6 +17,7 @@ proc main {argc argv} {
     {ignoreext.arg "avi,mp4,mkv,m4v,jpg,png,rar,sub,mp3,ico,pdf,epub,lrf,azw3,mobi" "Source extensions to ignore"}
     {minsize.arg "1000000" "Minimum size in bytes of files to convert"}
     {deleteorig "Delete original file"}
+    {outputoptions.arg "" "Extra output options, like -r 24"}
     {dryrun "Don't actually convert, just count files and MBytes"}
   }
 
@@ -30,7 +31,7 @@ proc main {argc argv} {
   
   $log info "Starting: [:dir $d] (minsize=[:minsize $d])"
   set warnings {}
-  set size [convert_files [:dir $d] [split  [:fromext $d] ","] [:toext $d] [concat [split  [:ignoreext $d] ","] [:toext $d]] [:minsize $d] [:deleteorig $d] [:dryrun $d]]
+  set size [convert_files [:dir $d] [split  [:fromext $d] ","] [:toext $d] [concat [split  [:ignoreext $d] ","] [:toext $d]] [:minsize $d] [:deleteorig $d] [:dryrun $d] $d]
 
   $log warn "All warnings: [join $warnings "\n"]"
   $log info "Total size converted: [format %.1f  $size] MB"
@@ -53,13 +54,13 @@ proc cur_time {} {
 # @param fromext: list
 # @param toext: single element
 # @param ignoreext: list
-proc convert_files {dir fromext toext ignoreext minsize deleteorig dryrun} {
+proc convert_files {dir fromext toext ignoreext minsize deleteorig dryrun d} {
   global log
   set totalsize_MB 0
   foreach fromfile [glob -nocomplain -directory $dir -type f *] {
     set ext [string tolower [string range [file extension $fromfile] 1 end]]
     if {[lsearch $fromext $ext] >= 0} {
-      set size [convert_file $fromfile [det_tofile $fromfile $toext] $deleteorig $dryrun]
+      set size [convert_file $fromfile [det_tofile $fromfile $toext] $deleteorig $dryrun $d]
       set totalsize_MB [expr $totalsize_MB + $size]
     } elseif {[lsearch $ignoreext $ext] >= 0} {
       # ok, can ignore this one
@@ -84,7 +85,7 @@ proc det_tofile {fromfile toext} {
 }
 
 # @pre determined that this file has to be converted
-proc convert_file {from to deleteorig dryrun} {
+proc convert_file {from to deleteorig dryrun d} {
   global log warnings
   if {[file exists $to]} {
     warn "target already exists, returning: $to"
@@ -102,7 +103,7 @@ proc convert_file {from to deleteorig dryrun} {
     set ok 0
   } else {
     catch {
-      set cmd [list avconv {*}[extra_params $from] -i $from -strict experimental -qscale 1 -aq 1  $totemp]
+      set cmd [list avconv {*}[extra_params $from] -i $from -strict experimental -qscale 1 -aq 1 {*}[:outputoptions $d] $totemp]
       log info "Executing cmd: $cmd"
       # set output [exec -ignorestderr avconv -i $from $totemp]
       set output [exec -ignorestderr {*}$cmd]

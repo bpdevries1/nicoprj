@@ -67,7 +67,7 @@ proc handle_ahk {path root_dir} {
   }
   
   log info "handle_ahk: filename: $path"
-  [dict get $stmts ins_file] execute [vars_to_dict path]
+  [[dict get $stmts ins_file] execute [vars_to_dict path]] close
   set caller "<file>"
   # use \x7b and \x7d instead of {}, otherwise paren-matching in jEdit fails. (Vi? Emacs?)
   set linenr 0
@@ -81,7 +81,7 @@ proc handle_ahk {path root_dir} {
       if {[is_keyword $name]} {
         # nothing 
       } else {
-        [dict get $stmts ins_function] execute [vars_to_dict path name linenr params]
+        [[dict get $stmts ins_function] execute [vars_to_dict path name linenr params]] close
         set caller $name
       }
     } elseif {[regexp {^\x7d *$} $line]} {
@@ -91,7 +91,7 @@ proc handle_ahk {path root_dir} {
       foreach call [det_calls $line] {
         lassign $call callee calltype params 
         # @todo call kan over meerdere lines gaan. In de praktijk nodig? 
-        [dict get $stmts ins_call] execute [vars_to_dict path linenr caller callee calltype params]
+        [[dict get $stmts ins_call] execute [vars_to_dict path linenr caller callee calltype params]] close
       }
     }
   }
@@ -150,7 +150,7 @@ proc add_fsm_calls {conn} {
     # gebruik conventie dat <prefix> gelijk is aan de callende functie
     foreach rec [db_query $conn "select name from function where name like '${caller}_%'"] {
       set callee [dict get $rec name]
-      $stmt execute [dict merge $call [vars_to_dict callee calltype]]
+      [$stmt execute [dict merge $call [vars_to_dict callee calltype]]] close
     }
   }
 }

@@ -179,7 +179,9 @@ namespace eval ::ndv {
     # @todo getDBhandle does (probably) not work with MySQL.
     public method exec_query {query {return_id 0}} {
       set stmt [$conn prepare $query]
-      $stmt execute
+      # [2016-07-10 08:28] execute always returns resultset, should be closed.
+      set res [$stmt execute]
+      $res close
       $stmt close
       if {$return_id} {
         return [[$conn getDBhandle] last_insert_rowid]   

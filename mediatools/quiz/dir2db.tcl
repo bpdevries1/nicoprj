@@ -57,13 +57,13 @@ proc handle_file {path root_dir} {
     #log debug $query
     log debug "inserting $path"
     # db eval $query
-    $stmt execute [dict create track [file normalize $path]]
+    [$stmt execute [dict create track [file normalize $path]]] close
   }
 }
 
 proc db_eval {conn query} {
   set stmt [$conn prepare $query]
-  $stmt execute
+  [$stmt execute] close
   $stmt close
 }
 

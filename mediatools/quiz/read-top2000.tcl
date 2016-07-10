@@ -22,7 +22,7 @@ proc main {argv} {
     lassign $l positie titel artiest jaar
     if {[llength $l] == 4} {
       if {[string is integer $positie] && ($positie != "")} {
-        $stmts(insert) execute [dict create positie $positie titel $titel artiest $artiest jaar $jaar]  
+        [$stmts(insert) execute [dict create positie $positie titel $titel artiest $artiest jaar $jaar]] close
       }
     }
   }
@@ -38,7 +38,9 @@ proc open_db {db_name} {
 
 proc db_eval {conn query} {
   set stmt [$conn prepare $query]
-  $stmt execute
+  # [2016-07-10 09:24] close resultset
+  [$stmt execute] close
+  # [2016-07-10 09:24] close statement
   $stmt close
 }
 
