@@ -107,7 +107,7 @@ proc show_status {libfile} {
     }
 
     default {
-      log warn "$lib_file - Unexpected situation: status_ex"
+      log warn "$libfile - Unexpected situation: status_ex"
       set status "Unexpected: $status_ex"
     }
   }
@@ -213,6 +213,7 @@ proc basefile {libfile} {
 # put lib file from working/script directory into repository
 proc task_put {args} {
   global repolibdir
+  file mkdir ".base"
   # puts "args: $args"
   file mkdir $repolibdir
   lassign [det_force $args] args force
@@ -249,6 +250,7 @@ proc task_put {args} {
 # get lib file from repository into working/script directory
 proc task_get {args} {
   global repolibdir
+  file mkdir ".base"
   # puts "args: $args"
   file mkdir $repolibdir
   lassign [det_force $args] args force
