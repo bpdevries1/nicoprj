@@ -70,6 +70,10 @@ proc adapt_script {scriptdir filename img_found dargv} {
   # checkpoint_wrap_image(trans, domesticX, domesticY, 0, 0, 1024, 768, ["template-domestic.png"], timeout)
   # TODO: als er meerdere files in template lijst staan, of als hier wildcards in staan.
   while {[gets $fi line] >= 0} {
+    if {[is_comment $line]} {
+      puts $fo $line
+      continue
+    }
     if {[regexp {^(.*?)(\d+), (\d+), (\d+), (\d+), \["([^ ]+)"\](.*)$} $line z prefix x1 y1 x2 y2 imgname postfix]} {
       incr changes [min_region $dargv $img_found $fo $line $prefix $x1 $y1 $x2 $y2 $imgname $postfix]
     } elseif {[regexp {checkpoint_wrap} $line]} {
@@ -82,6 +86,10 @@ proc adapt_script {scriptdir filename img_found dargv} {
   close $fi
   
   return $changes  
+}
+
+proc is_comment {line} {
+  regexp {^;} [string trim $line]
 }
 
 proc min_region {dargv img_found fo line prefix x1 y1 x2 y2 imgname postfix} {
