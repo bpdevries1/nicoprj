@@ -277,11 +277,13 @@ proc task_get {args} {
         puts "Getting new repo file: $repofile"
         # file copy $repofile $libfile
         file_copy_base $repofile $libfile [basefile $libfile]
+        # also add to project
+        add_file $libfile
       }
     } else {
       puts "Repo lib file not found: $repofile"
-    }
-  }
+    } ; # if file exists repofile
+  } ; # foreach libfile
 }
 
 proc file_copy_base {src target base} {

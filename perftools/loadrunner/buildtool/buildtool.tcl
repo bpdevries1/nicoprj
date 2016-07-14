@@ -14,7 +14,7 @@ term::ansi::send::import
 
 package require ndv
 
-ndv::source_once configs.tcl lr_params.tcl syncrepo.tcl regsub.tcl
+ndv::source_once configs.tcl backup.tcl inifile.tcl lr_params.tcl syncrepo.tcl regsub.tcl files.tcl
 
 set_log_global info
 
@@ -24,7 +24,7 @@ proc main {argv} {
   
   # maybe add some checks
   if {$argv == ""} {
-    help
+    task_help
     exit 1
   }
   set dir [file normalize .]
@@ -34,6 +34,7 @@ proc main {argv} {
     set repodir [file normalize "../repo"]
     set repolibdir [file join $repodir libs]
     set as_project 0
+    set_origdir ; # to use by all subsequent tasks.
     task_$tname {*}$trest
   } elseif {[is_project_dir $dir]} {
     # in a container dir with script dirs as subdirs.
