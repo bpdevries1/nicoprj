@@ -54,6 +54,15 @@ proc ini_add {ini header line} {
   return $res
 }
 
+# add line to ini, but only if it does not already exist
+proc ini_add_no_dups {ini header new_line} {
+  set lines [ini_lines $ini $header]
+  if {[lsearch -exact $lines $new_line] < 0} {
+    set ini [ini_add $ini $header $new_line]
+  }
+  return $ini
+}
+
 proc ini_lines {ini header} {
   foreach d $ini {
     if {[:header $d] == $header} {

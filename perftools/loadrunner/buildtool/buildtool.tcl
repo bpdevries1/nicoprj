@@ -272,6 +272,7 @@ proc check_file {srcfile full} {
   # check_globals
 }
 
+# check if include statement occurs after other statements. Includes should all be at the top.
 proc check_file_includes {srcfile} {
   set other_found 0
   set in_comment 0

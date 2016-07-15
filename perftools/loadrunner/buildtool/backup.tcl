@@ -21,10 +21,18 @@ proc set_origdir {} {
 proc change_file {filename} {
   global _origdir
   if {[read_file $filename] == [read_file [tempname $filename]]} {
+    # files are the same, no changes, delete temp file.
     file delete [tempname $filename]
   } else {
+    # Files are different, do update.
     file mkdir $_origdir
-    file rename $filename [file join $_origdir $filename]
+    set backupname [file join $_origdir $filename]
+    if {[file exists $backupname]} {
+      # Earlier backup within same main action, keep the earliest one.
+      file delete $filename
+    } else {
+      file rename $filename $backupname
+    }
     file rename [tempname $filename] $filename
   }
 }

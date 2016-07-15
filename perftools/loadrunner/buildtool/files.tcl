@@ -19,9 +19,22 @@ proc task_add_file {args} {
 proc add_file {filename} {
   add_file_usr $filename
   add_file_metadata $filename
+  add_file_include $filename
 }
 
 proc add_file_usr {filename} {
+  if {![file exists $filename]} {
+    set f [open $filename w]
+    close $f
+  }
+  # maybe use project dir instead of current dir?
+  set usr_file "[file tail [file normalize .]].usr"
+  set ini [ini_read $usr_file]
+  set ini [ini_add_no_dups $ini ManuallyExtraFiles "$filename="]
+  ini_write $usr_file $ini
+}
+
+proc add_file_usr_old {filename} {
   if {![file exists $filename]} {
     set f [open $filename w]
     close $f
@@ -44,6 +57,7 @@ proc add_file_usr {filename} {
     ini_write $usr_file $ini  
   }
 }
+
 
 # add file to ScriptUploadMetadata.xml, also crlf endings
 proc add_file_metadata {filename} {
@@ -71,15 +85,158 @@ proc add_file_metadata {filename} {
   change_file $meta
 }
 
+# add file to #include list in globals.h
+proc add_file_include {filename} {
+  set fn "globals.h"
+  set fi [open $fn r]
+  set fo [open [tempname $fn] w]
+  set in_includes 0
+  set found 0
+  while {[gets $fi line] >= 0} {
+    if {$in_includes} {
+      if {[regexp {\#include \"(.+)\"} $line z include]} {
+        if {$include == $filename} {
+          set found 1
+        }
+      } elseif {[string trim $line] == ""} {
+        # ok, continue
+      } else {
+        # not in includes anymore, so add new one if needed
+        if {!$found} {
+          puts $fo "#include \"$filename\""
+        }
+        set in_includes 0
+      }
+    } else {
+      if {[regexp {\#include} $line]} {
+        # first line should always be lrun.h, so don't check on this one.
+        set in_includes 1
+      }
+    }
+    puts $fo $line
+  }
+  close $fo
+  close $fi
+  change_file $fn
+}
+
 # add actions. Similar to add_file, but add to action part of hierarchy.
 proc task_add_action {args} {
+  foreach action $args {
+    add_action $action
+  }  
+}
 
-  
+# create $action.c and add to project: default.usp, <prj>.usr, ScriptUploadMetadata.xml
+proc add_action {action} {
+  create_action_file $action
+  update_default_usp $action
+  add_action_usr $action
+  add_file_metadata ${action}.c
+}
+
+proc create_action_file {action} {
+  set filename "${action}.c"
+  if {![file exists $filename]} {
+    set f [open $filename w]
+    puts $f "$action\(\) \{
+
+\treturn 0;
+\}
+"
+    close $f
+  }
+}
+
+proc update_default_usp {args} {
+  set new_actions $args ; # could be more than 1
+  set fn "default.usp"
+  set fi [open $fn r]
+  set fo [open [tempname $fn] w]
+  fconfigure $fo -translation crlf
+  while {[gets $fi line] >= 0} {
+    if {[regexp {^Profile Actions name=vuser_init,(.+),vuser_end$} $line z orig_actions]} {
+      # breakpoint
+      set total_actions [merge_actions [split $orig_actions ","] $new_actions]
+      puts $fo "Profile Actions name=vuser_init,[join $total_actions ","],vuser_end"
+    } else {
+      puts $fo $line
+    }
+  }
+  close $fo
+  close $fi
+  change_file $fn
+}
+
+# add each action in new list to orig add the end. Return result.
+proc merge_actions {orig new} {
+  set res $orig
+  foreach action $new {
+    # breakpoint
+    if {[lsearch -exact $orig $action] < 0} {
+      lappend res $action
+    }
+  }
+  return $res
+}
+
+proc add_action_usr {action} {
+  # maybe use project dir instead of current dir?
+  set usr_file "[file tail [file normalize .]].usr"
+  set ini [ini_read $usr_file]
+
+  set ini [ini_add_no_dups $ini "Actions" "$action=${action}.c"]
+  set ini [ini_add_no_dups $ini "Modified Actions" "$action=0"]
+  set ini [ini_add_no_dups $ini "Recorded Actions" "$action=0"]
+  set ini [ini_add_no_dups $ini "Interpreters" "$action=cci"]
+
+  ini_write $usr_file $ini  
 }
 
 # split files named in args by transaction names
 # default is Action.c
-proc task_split_actions {args} {
-  
+proc task_split_action {args} {
+  if {$args == {}} {
+    set args [list Action]
+  }
+  foreach action $args {
+    split_action $action
+  }
 }
+
+proc split_action {action} {
+  set new_actions {}
+  set fn "${action}.c"
+  set fi [open $fn r]
+  set fo [open [tempname $fn] w]
+  set foc $fo
+  while {[gets $fi line] >= 0} {
+    if {[regexp {lr_start_transaction\(\"(.+)\"\);} $line z transname]} {
+      if {[file exists "${transname}.c"]} {
+        log warn "transaction file already exists: ${transname}.c"
+        # error "transaction file already exists: ${transname}.c"
+      }
+      lappend new_actions $transname
+      set foa [open "${transname}.c" w]
+      puts $foa "$transname\(\) \{"
+      set foc $foa
+      puts $fo "\t$transname\(\);"
+      puts $foc $line
+    } elseif {[regexp {lr_end_transaction} $line]} {
+      puts $foa $line
+      puts $foa "\treturn 0;\n\}\n"
+      close $foa
+      set foc $fo
+    } else {
+      puts $foc $line
+    }
+  }
+  close $fo
+  close $fi
+  change_file $fn
+
+  # aan het einde aan project toevoegen
+  task_add_action {*}$new_actions
+}
+
 

@@ -42,36 +42,6 @@ proc task_libs {args} {
   }
 }
 
-proc show_status_old {libfile} {
-  global repolibdir as_project
-  set repofile [file join $repolibdir $libfile]
-  if {[file exists $repofile]} {
-    if {[file exists $libfile]} {
-      if {[file mtime $libfile] < [file mtime $repofile]} {
-        set status "repo-new"
-      } elseif {[file mtime $libfile] > [file mtime $repofile]} {
-        set status "local-new"
-      } else {
-        set status "ok"
-      }
-    } else {
-      set status "only in repo"
-    }
-  } else {
-    if {[file exists $libfile]} {
-      set status "only local"
-    } else {
-      set status "included file not found"
-    }
-  }
-  # in project scope zo weinig mogelijk uitvoer naar stdout.
-  if {$status != "ok" || !$as_project} {
-    puts "\[$status\] $libfile"  
-  }
-  
-  return $status
-}
-
 # @param libfile: relative, just file name.
 proc show_status {libfile} {
   global repolibdir as_project
@@ -108,7 +78,7 @@ proc show_status {libfile} {
 
     default {
       log warn "$libfile - Unexpected situation: status_ex"
-      set status "Unexpected: $status_ex"
+      set status "Unexpected: $status_ex (lib-repo-base)"
     }
   }
   # in project scope zo weinig mogelijk uitvoer naar stdout.
