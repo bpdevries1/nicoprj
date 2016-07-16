@@ -14,7 +14,8 @@ term::ansi::send::import
 
 package require ndv
 
-ndv::source_once task.tcl configs.tcl backup.tcl inifile.tcl lr_params.tcl syncrepo.tcl regsub.tcl files.tcl tabs.tcl
+ndv::source_once task.tcl configs.tcl backup.tcl inifile.tcl lr_params.tcl \
+    syncrepo.tcl regsub.tcl files.tcl tabs.tcl comment.tcl
 
 set_log_global info
 
