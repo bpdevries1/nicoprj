@@ -18,38 +18,29 @@ task regsub {Regular epression replace
   }
   # vervang meegegeven \n op cmdline in echte newline voor regsub:
   regsub -all {\\n} $to "\n" to2
-  set origdir "_orig.[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"]"
   foreach srcfile [filter_ignore_files [get_source_files]]	{
-    regsub_file $srcfile $from $to2 $origdir $really
+    regsub_file $srcfile $from $to2 $really
   }
 }
 
-proc regsub_file {srcfile from to origdir really} {
+proc regsub_file {srcfile from to really} {
   set text [read_file $srcfile]
   set nreplaced [regsub -all $from $text $to text2]
   if {$nreplaced == 0} {
     # nothing, no replacements done.
   } else {
     puts "$srcfile - $nreplaced change(s):"
-    set tempfile "$srcfile.__TEMP__"
+    # set tempfile "$srcfile.__TEMP__"
+    set tempfile [tempname $srcfile]
     set f [open $tempfile w]
     puts $f $text2
     close $f
-    set temporig "$srcfile.__ORIG__"
-    set f [open $temporig w]
-    puts $f $text
-    close $f
-    diff_files $temporig $tempfile
+    diff_files $srcfile $tempfile
     if {$really} {
       puts "really perform replacement, orig files in _orig dir"
-      file delete $temporig
-      file mkdir $origdir
-      # file rename $srcfile [file join _orig $srcfile]
-      file rename $srcfile [file join $origdir $srcfile]
-      file rename $tempfile $srcfile
+      change_file $srcfile
     } else {
-      file delete $temporig
-      file delete $tempfile
+      rollback_file $srcfile
     }
   }
 }

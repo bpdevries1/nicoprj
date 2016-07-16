@@ -37,3 +37,7 @@ proc change_file {filename} {
   }
 }
 
+# undo changes, heep original, eg when -do is not given in regsub
+proc rollback_file {filename} {
+  file delete [tempname $filename]
+}
