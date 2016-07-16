@@ -3,20 +3,20 @@
 # TODO: als -do is meegegeven, dan actie opslaan (in repo, want ook voor andere scripts). dan optie om deze te tonen en te kiezen.
 # en mss ook een naam te geven.
 # TODO: optie om replace wel/niet in libs uit te voeren, of alleen in actions. Default mss ook alleen in actions.
+# TODO: option to only do regsub in one file (or a list) or only action files.
+# Maybe something like -filter, could be used for other tasks as well.
 task regsub {Regular epression replace
-  Syntax: regsub <from> <to> [-do]
+  Syntax: regsub [-do] <from> <to>
   Without -do, perform a dry run.
 } {
-  # TODO: use cmdline parsing, put options in front.
-  lassign $args from to
-  set args [lrange $args 2 end]
-  set really 0
-  puts "from: $from, to: $to, args: $args"
-  if {[lindex $args 0] == "-do"} {
-    set really 1
-    puts "Really perform replacements!"
+  set options {
+    {do "Really perform regsub actions'"}
   }
-  # vervang meegegeven \n op cmdline in echte newline voor regsub:
+  set usage ": regsub \[options] <from> <to>:"
+  set opt [getoptions args $options $usage]
+  set really [:do $opt]
+  lassign $args from to  
+  puts "from: $from, to: $to, args: $args"
   regsub -all {\\n} $to "\n" to2
   foreach srcfile [filter_ignore_files [get_source_files]]	{
     regsub_file $srcfile $from $to2 $really
