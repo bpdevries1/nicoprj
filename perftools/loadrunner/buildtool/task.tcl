@@ -14,8 +14,10 @@ proc first_line {str} {
 }
 
 task help {Help for tasks
-  Syntax: help       - show help overview
-          help <cmd> - show help for cmd
+  Syntax:
+  help       - show help overview
+  help <task> - show help for task
+  help all   - show detailed help for all tasks
 } {
   # all defined tasks, alphabetical.
   global _tasks
@@ -27,6 +29,16 @@ task help {Help for tasks
     set len [max [map {x {string length $x}} [dict keys $_tasks]]]
     foreach task [lsort [dict keys $_tasks]] {
       puts [format "%-${len}s   %s" $task [:firstline [dict get $_tasks $task]]]          
+    }
+  } elseif {$taskname == "all"} {
+    puts "Tasks:"
+    # set len [max [map {x {string length $x}} [dict keys $_tasks]]]
+    foreach task [lsort [dict keys $_tasks]] {
+      set el [dict get $_tasks $task]
+      #puts [format "%-${len}s   %s" $task [:firstline $el]]
+      #puts [:desc $el]
+      puts "$task - [:desc $el]"
+      puts "--------------------"
     }
   } else {
     set el [dict_get $_tasks $taskname]
