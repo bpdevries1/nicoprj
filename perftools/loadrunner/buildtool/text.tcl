@@ -40,3 +40,28 @@ proc totabs_line {line tabwidth} {
   set nspaces [expr $width - ($ntabs * 4)]
   return "[string repeat "\t" $ntabs][string repeat " " $nspaces]$rest"
 }
+
+task fixcrlf {Fix line endings
+  Syntax: fixcrlf [<filename> ..]
+  Fix line endings for filenames. Handle all source files if none given.
+  Use Windows line endings (CRLF), as both VuGen and PC/ALM run on Windows.
+} {
+  if {$args == {}} {
+    set lst [filter_ignore_files [get_source_files]]
+  } else {
+    set lst $args
+  }
+  foreach filename $lst {
+    fixcrlf_file $filename
+  }
+}
+
+proc fixcrlf_file {filename} {
+  set text [read_file $filename]
+  set fo [open [tempname $filename] w]
+  fconfigure $fo -translation crlf
+  puts -nonewline $fo $text
+  close $fo
+  commit_file $filename
+}
+
