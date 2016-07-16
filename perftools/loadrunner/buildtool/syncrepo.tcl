@@ -1,5 +1,7 @@
 # args are ignored, but needed for task_check.
-proc task_libs {args} {
+task libs {Overview of lib files, including status
+  Show status of all library files, with respect to repository.
+} {
   global as_project
   file mkdir ".base"
   set repo_libs [get_repo_libs]
@@ -125,7 +127,9 @@ proc mtime_status {libfile} {
   return $status
 }
 
-proc task_diff {libfile} {
+task diff {Show differences between local version and repo version
+  Show date/time, size, and differences between local and repo version.
+} {
   set st [show_status $libfile]
   puts "1:local: [file_info $libfile]"
   puts "2:base : [file_info [basefile $libfile]]"
@@ -181,7 +185,10 @@ proc basefile {libfile} {
 }
 
 # put lib file from working/script directory into repository
-proc task_put {args} {
+task put {Put a local lib file in the repo
+  Syntax: put <lib> [-force]
+  Only put file in repo if it is newer than repo version, unless -force is used.
+} {
   global repolibdir
   file mkdir ".base"
   # puts "args: $args"
@@ -218,7 +225,10 @@ proc task_put {args} {
 }
 
 # get lib file from repository into working/script directory
-proc task_get {args} {
+task get {Get a repo lib file to local dir
+  Syntax: get <lib> [-force]
+  Only get repo version if it is newer than the local version, unless -force is used.
+} {
   global repolibdir
   file mkdir ".base"
   # puts "args: $args"

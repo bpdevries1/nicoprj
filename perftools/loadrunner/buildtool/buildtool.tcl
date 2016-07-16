@@ -14,7 +14,7 @@ term::ansi::send::import
 
 package require ndv
 
-ndv::source_once configs.tcl backup.tcl inifile.tcl lr_params.tcl syncrepo.tcl regsub.tcl files.tcl
+ndv::source_once task.tcl configs.tcl backup.tcl inifile.tcl lr_params.tcl syncrepo.tcl regsub.tcl files.tcl
 
 set_log_global info
 
@@ -73,41 +73,12 @@ proc get_current_script_dirs {dir} {
   
 }
 
-# TODO tasks dynamisch afleiden uit deze source file. Evt deftask ipv proc task_gebruiken voor admin, dan ook met help erbij.
-proc task_help {} {
-  global repolibdir
-  puts "Build tool v0.1.0"
-  puts "Tasks:"
-  set tasks {
-    "help" "Print this help"
-    "libs" "Overview of lib files, including status"
-    "put <lib> \[-force\]" "Put a local lib file in the repo ($repolibdir)"
-    "get <lib> \[-force\]" "Get a repo ($repolibdir) lib file to local"
-    "diff <lib>" "Show differences between local version and repo version"
-    "test \[<lib>\] \[-full\]" "Perform some tests (libs, check_sources for now)"
-    "check \[<lib>\] \[-full\]" "Perform some checks on sources (eg location of #includes)"
-    "regsub <from> <to> \[-do\]" "Perform regexp replacements, -do to really do it"
-    "project set <prj> [list of scripts]" "Define a project including several scripts."
-    "project setcurrent <prj>" "Set a project as current"
-    "clean" "Clean temporary files"
-  }
-
-  # cmd desc
-  # bepaal lengte, beter met reduce functie, of met max/map combi.
-  set len 0
-  foreach {task desc} $tasks {
-    set l [string length $task]
-    if {$l > $len} {
-      set len $l
-    }
-  }
-  foreach {task desc} $tasks {
-    puts [format "%-${len}s   %s" $task $desc]
-  }
-}
-
 # project functions, set and setcurrent
-proc task_project {args} {
+task project {Define and use projects
+  Syntax:
+  project set <prj> <script> [<script> ..] - Define a project including several scripts.
+  project setcurrent <prj>                 - Set a project as current
+} {
   if {![is_project_dir .]} {
     puts "Not a project dir, leaving"
     exit 1
@@ -123,7 +94,9 @@ proc task_project {args} {
   }
 }
 
-proc task_clean {} {
+task clean {Delete non script files
+  Delete files: *.idx *.log git-add-commit.sh output.* *.tmp TransactionsData.db *.bak TransactionsData.db Iteration* result1 data.
+} {
   set dir [file normalize .]
   if {[is_script_dir $dir]} {
     clean_script $dir
@@ -241,14 +214,17 @@ proc in_lr_include {srcfile} {
 
 
 # perform some tests. For now only show if libs are up-to-date
-proc task_test {args} {
+task test {Perform tests on script
+  Calls following tasks: libs, check, check_configs, check_lr_params.
+} {
   task_libs {*}$args
   task_check {*}$args
   task_check_configs {*}$args
   task_check_lr_params {*}$args
 }
 
-proc task_check {args} {
+task check {Perform some checks on sources
+  (eg location of #includes)} {
   lassign [det_full $args] args full
   if {$args != {}} {
     foreach libfile $args {
@@ -378,7 +354,9 @@ proc line_type {line} {
   return other
 }
 
-proc task_totabs {args} {
+task totabs {Convert spaces to tabs
+  Syntax: totabs [#tabs] - convert #tabs to a single tab. Default is 4.
+} {
   # default 4 tabs, kijk of in args wat anders staat.
   if {[:# $args] == 1} {
     lassign $args tabwidth

@@ -1,4 +1,6 @@
-proc task_check_configs {args} {
+task check_configs {Check .config files
+  Check if settings in config files occur more than once.
+} {
   # eerst per config kijken of er dubbele settings in voorkomen, regelnummers erbij noemen.
   foreach configfile [get_configs .] {
     read_check_configfile $configfile
@@ -35,7 +37,9 @@ proc read_check_configfile {configfile} {
   return $dct
 }
 
-proc task_show_configs {args} {
+task show_configs {Show .config files in HTML table
+  Create configs.html which shows all settings in all config files.
+} {
   puts "Show configs"
   set f [open configs.html w]
 

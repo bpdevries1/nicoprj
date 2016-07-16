@@ -1,4 +1,8 @@
-proc task_check_lr_params {args} {
+task check_lr_params {Check LR parameter settings
+  For each parameter, check:
+  * not set to sequential - should only be used for script testing.
+  * first row != 1        - should only be used for script testing.
+} {
   foreach filename [glob -nocomplain *.prm] {
     check_lr_params_file $filename
   }

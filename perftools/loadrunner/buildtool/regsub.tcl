@@ -1,8 +1,15 @@
 # args can only be -do, to really perform the replacements. Should be at the end, could be that regexps have/are -do.
 # if not really, create a file.__TEMP__ with the new version. Then perform a diff on both.
-# TODO: als -do is meegegeven, dan actie opslaan (in repo, want ook voor andere scripten). dan optie om deze te tonen en te kiezen.
+# TODO: als -do is meegegeven, dan actie opslaan (in repo, want ook voor andere scripts). dan optie om deze te tonen en te kiezen.
 # en mss ook een naam te geven.
-proc task_regsub {from to args} {
+# TODO: optie om replace wel/niet in libs uit te voeren, of alleen in actions. Default mss ook alleen in actions.
+task regsub {Regular epression replace
+  Syntax: regsub <from> <to> [-do]
+  Without -do, perform a dry run.
+} {
+  # TODO: use cmdline parsing, put options in front.
+  lassign $args from to
+  set args [lrange $args 2 end]
   set really 0
   puts "from: $from, to: $to, args: $args"
   if {[lindex $args 0] == "-do"} {

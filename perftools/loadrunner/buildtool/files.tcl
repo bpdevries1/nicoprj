@@ -9,7 +9,15 @@
 # dit dan obv name: als deze een extensie heeft (.h of .c) dan is het file, anders action.
 
 # add an empty file if none exist yet
-proc task_add_file {args} {
+proc task_add_file_old {args} {
+  foreach filename $args {
+    add_file $filename
+  }  
+}
+
+task add_file {Add an extra file to prj
+  Syntax: add_file <file> [<file> ..]
+  Adds files (create if needed) to the extra files part of the project.} {
   foreach filename $args {
     add_file $filename
   }  
@@ -121,7 +129,10 @@ proc add_file_include {filename} {
 }
 
 # add actions. Similar to add_file, but add to action part of hierarchy.
-proc task_add_action {args} {
+task add_action {Add action to project
+  Syntax: add_acion <action> [<action> ..]
+  Add actions to project.
+} {
   foreach action $args {
     add_action $action
   }  
@@ -195,7 +206,10 @@ proc add_action_usr {action} {
 
 # split files named in args by transaction names
 # default is Action.c
-proc task_split_action {args} {
+task split_action {Split file in multiple files per transaction
+  syntax: split_action <action> [<action> ..]
+  For each start_transaction, create a new file and put statements in here.
+} {
   if {$args == {}} {
     set args [list Action]
   }
