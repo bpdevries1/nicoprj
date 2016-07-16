@@ -87,6 +87,14 @@ testndv {= 1 1} 1
 testndv {!= 1 1} 0
 testndv {!= {a 1} {a 2}} 1
 
+# [2016-07-16 12:42] some math functions
+testndv {max 1 2 3} 3
+testndv {max 2} 2
+testndv {max {1 2 3}} 3
+testndv {max {1}} 1
+
+testndv {max [map {x {string length $x}} {"a" "abc" "-" "ab"}]} 3
+
 testndv {and 1 1} 1
 testndv {and 1 0} 0
 testndv {and {1==1} {1==2}} 0

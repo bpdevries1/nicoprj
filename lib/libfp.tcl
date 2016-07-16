@@ -61,6 +61,23 @@ proc or {args} {
   return 0
 }
 
+# some mathematical functions
+proc max {args} {
+  if {[llength $args] == 1} {
+    set lst [lindex $args 0]
+  } else {
+    set lst $args
+  }
+  set res [lindex $lst 0]
+  foreach el $lst {
+    if {$el > $res} {
+      set res $el
+    }
+  }
+  return $res
+}
+
+
 # this is the if from clojure, don't want to override the std Tcl def.
 # @todo handle expressions as first argument? Or should have been evaluated before?
 # how to handle nil or empty list?
@@ -205,6 +222,8 @@ proc map {args} {
       map [lambda_to_proc $arg1] $arg2
     }
   } elseif {[llength $args] == 3} {
+    # [2016-07-16 12:48] TODO: maybe should not support this, to stay similar to reduce
+    # function, which has optional start parameter.
     lassign $args arg1 arg2 arg3
     map [lambda_to_proc [list $arg1 $arg2]] $arg3
   } else {
@@ -252,8 +271,18 @@ proc filter_old {args} {
   return $res
 }
 
-proc fold {args} {
-
+# first only with fn and list, later also with start value
+proc reduce {args} {
+  if {[llength $args] == 2} {
+    lassign $args fn lst
+    if {[info proc $fn] != {}} {
+      # TODO: [2016-07-16 12:51] fill in, but not needed now
+    } else {
+      reduce [lambda_to_proc $fn] $lst
+    }
+  } else {
+    error "!= 2 args not supported: $args"
+  }
 
 }
 
