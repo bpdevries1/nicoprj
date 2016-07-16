@@ -22,4 +22,7 @@ testndv {parse_cet "2016-06-09 15:52:22.096"} 1465480342.096
 testndv {parse_cet "2016-06-09 15:52:22"} 1465480342
 testndv {parse_cet "abc2016-06-09 15:52:22.096"} -1
 
+# [2016-07-16 11:45] just check if now can be called.
+testndv {string length [now]} 25
+
 cleanupTests
