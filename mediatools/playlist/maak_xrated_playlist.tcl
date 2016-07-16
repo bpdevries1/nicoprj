@@ -6,6 +6,8 @@ package require ndv
 package require Tclx
 package require struct::list
 
+use libdatetime
+
 ::ndv::source_once ../db/MusicSchemaDef.tcl
 ::ndv::source_once [file join [file dirname [info script]] .. lib libmusic.tcl]
 
