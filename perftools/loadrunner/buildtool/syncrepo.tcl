@@ -128,8 +128,10 @@ proc mtime_status {libfile} {
 }
 
 task diff {Show differences between local version and repo version
+  Syntax: diff <filename>
   Show date/time, size, and differences between local and repo version.
 } {
+  lassign $args libfile
   set st [show_status $libfile]
   puts "1:local: [file_info $libfile]"
   puts "2:base : [file_info [basefile $libfile]]"
