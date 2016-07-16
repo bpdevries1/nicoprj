@@ -42,31 +42,6 @@ proc add_file_usr {filename} {
   ini_write $usr_file $ini
 }
 
-proc add_file_usr_old {filename} {
-  if {![file exists $filename]} {
-    set f [open $filename w]
-    close $f
-  }
-  # maybe use project dir instead of current dir?
-  set usr_file "[file tail [file normalize .]].usr"
-  set ini [ini_read $usr_file]
-
-  # check if file already occurs, don't add twice
-  set header ManuallyExtraFiles
-  set lines [ini_lines $ini $header]
-  set found 0
-  foreach line $lines {
-    if {$line == "$filename="} {
-      set found 1
-    }
-  }
-  if {!$found} {
-    set ini [ini_add $ini $header "$filename="]
-    ini_write $usr_file $ini  
-  }
-}
-
-
 # add file to ScriptUploadMetadata.xml, also crlf endings
 proc add_file_metadata {filename} {
   set meta ScriptUploadMetadata.xml
@@ -98,6 +73,7 @@ proc add_file_include {filename} {
   set fn "globals.h"
   set fi [open $fn r]
   set fo [open [tempname $fn] w]
+  fconfigure $fo -translation crlf
   set in_includes 0
   set found 0
   while {[gets $fi line] >= 0} {
@@ -150,6 +126,7 @@ proc create_action_file {action} {
   set filename "${action}.c"
   if {![file exists $filename]} {
     set f [open $filename w]
+    fconfigure $f -translation crlf
     puts $f "$action\(\) \{
 
 \treturn 0;
@@ -223,6 +200,7 @@ proc split_action {action} {
   set fn "${action}.c"
   set fi [open $fn r]
   set fo [open [tempname $fn] w]
+  fconfigure $fo -translation crlf
   set foc $fo
   while {[gets $fi line] >= 0} {
     if {[regexp {lr_start_transaction\(\"(.+)\"\);} $line z transname]} {
@@ -232,6 +210,7 @@ proc split_action {action} {
       }
       lappend new_actions $transname
       set foa [open "${transname}.c" w]
+      fconfigure $foa -translation crlf
       puts $foa "$transname\(\) \{"
       set foc $foa
       puts $fo "\t$transname\(\);"

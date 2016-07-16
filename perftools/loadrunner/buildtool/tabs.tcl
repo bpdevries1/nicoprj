@@ -16,6 +16,7 @@ task totabs {Convert spaces to tabs
 proc totabs_file {srcfile tabwidth} {
   set fi [open $srcfile r]
   set fo [open [tempname $srcfile] w]
+  fconfigure $f -translation crlf
   while {[gets $fi line] >= 0} {
     puts $fo [totabs_line $line $tabwidth]
   }
