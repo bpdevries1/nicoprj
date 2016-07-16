@@ -14,7 +14,7 @@ term::ansi::send::import
 
 package require ndv
 
-ndv::source_once task.tcl configs.tcl backup.tcl inifile.tcl lr_params.tcl syncrepo.tcl regsub.tcl files.tcl
+ndv::source_once task.tcl configs.tcl backup.tcl inifile.tcl lr_params.tcl syncrepo.tcl regsub.tcl files.tcl tabs.tcl
 
 set_log_global info
 
@@ -354,64 +354,6 @@ proc line_type {line} {
   return other
 }
 
-task totabs {Convert spaces to tabs
-  Syntax: totabs [#tabs] - convert #tabs to a single tab. Default is 4.
-} {
-  # default 4 tabs, kijk of in args wat anders staat.
-  if {[:# $args] == 1} {
-    lassign $args tabwidth
-  } else {
-    set tabwidth 4
-  }
-  set origdir "_orig.[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"]"
-  file mkdir $origdir
-  foreach srcfile [filter_ignore_files [get_source_files]]	{
-    totabs_file $srcfile $origdir $tabwidth
-  }
-}
-
-proc totabs_file {srcfile origdir tabwidth} {
-  set orig_file [file join $origdir [file tail $srcfile]]
-  set temp_file "$srcfile.__TEMP__"
-
-  set fi [open $srcfile r]
-  set fo [open $temp_file w]
-  set changed 0
-  while {[gets $fi line] >= 0} {
-    set line2 [totabs_line $line $tabwidth]
-    puts $fo $line2
-    if {$line != $line2} {
-      set changed 1
-    }
-  }
-  close $fi
-  close $fo
-
-  if {$changed} {
-    file rename $srcfile $orig_file
-    file rename $temp_file $srcfile
-  } else {
-    # keep orig, remove temp
-    file delete $temp_file
-  }
-}
-
-proc totabs_line {line tabwidth} {
-  regexp {^([ \t]*)(.*)$} $line z spaces rest
-  set width 0
-  foreach ch [split $spaces ""] {
-    if {$ch == " "} {
-      incr width
-    } else {
-      # tab
-      set width [expr (($width / $tabwidth) + 1) * $tabwidth]
-    }
-  }
-  set ntabs [expr $width / 4]
-  set nspaces [expr $width - ($ntabs * 4)]
-  return "[string repeat "\t" $ntabs][string repeat " " $nspaces]$rest"
-}
-
 # deze werkt nog niet op windows, zowel onder cygwin als 4NT.
 proc puts_colour {colour str} {
   send::sda_fg$colour
@@ -482,6 +424,8 @@ bld regsub - betere naam ipv replace? En dan replace voor std patterns gebruiken
   
 bld add(action) - voeg action toe, dus een file, maar ook opnemen in de 'script' van Vugen, nog even kijken hoe.
 
+[2016-07-16 14:56] Tasks om oud script om te zetten? Waarsch best lastig.
+  
 bld check - heb hier al wat, ook inbouwen check dat alle files ge-include zijn, alle .c en .h files moeten ergens in het script voorkomen, als action of additional. Deze moet in .usr zitten.
   
 specifieke tasks:
