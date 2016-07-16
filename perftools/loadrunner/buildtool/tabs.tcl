@@ -23,7 +23,7 @@ proc totabs_file {srcfile tabwidth} {
   }
   close $fi
   close $fo
-  change_file $srcfile
+  commit_file $srcfile
 }
 
 proc totabs_line {line tabwidth} {

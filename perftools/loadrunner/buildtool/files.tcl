@@ -90,7 +90,7 @@ proc add_file_metadata {filename} {
   }
   close $fo
   close $fi
-  change_file $meta
+  commit_file $meta
 }
 
 # add file to #include list in globals.h
@@ -125,7 +125,7 @@ proc add_file_include {filename} {
   }
   close $fo
   close $fi
-  change_file $fn
+  commit_file $fn
 }
 
 # add actions. Similar to add_file, but add to action part of hierarchy.
@@ -176,7 +176,7 @@ proc update_default_usp {args} {
   }
   close $fo
   close $fi
-  change_file $fn
+  commit_file $fn
 }
 
 # add each action in new list to orig add the end. Return result.
@@ -247,7 +247,7 @@ proc split_action {action} {
   }
   close $fo
   close $fi
-  change_file $fn
+  commit_file $fn
 
   # aan het einde aan project toevoegen
   task_add_action {*}$new_actions

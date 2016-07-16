@@ -18,7 +18,7 @@ proc set_origdir {} {
 # check if filename is different from temp version:
 # different -> do action as described
 # same -> remove temp file.
-proc change_file {filename} {
+proc commit_file {filename} {
   global _origdir
   if {[read_file $filename] == [read_file [tempname $filename]]} {
     # files are the same, no changes, delete temp file.

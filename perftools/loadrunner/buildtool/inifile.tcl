@@ -33,7 +33,7 @@ proc ini_write {filename ini {translation crlf}} {
     puts $f [join [:lines $d] "\n"]
   }
   close $f
-  change_file $filename
+  commit_file $filename
 }
 
 # add header/line combination to ini

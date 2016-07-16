@@ -38,7 +38,7 @@ proc regsub_file {srcfile from to really} {
     diff_files $srcfile $tempfile
     if {$really} {
       puts "really perform replacement, orig files in _orig dir"
-      change_file $srcfile
+      commit_file $srcfile
     } else {
       rollback_file $srcfile
     }
