@@ -186,7 +186,7 @@ proc basefile {libfile} {
 
 # put lib file from working/script directory into repository
 task put {Put a local lib file in the repo
-  Syntax: put <lib> [-force]
+  Syntax: put [-force] <lib>
   Only put file in repo if it is newer than repo version, unless -force is used.
 } {
   global repolibdir
@@ -226,7 +226,7 @@ task put {Put a local lib file in the repo
 
 # get lib file from repository into working/script directory
 task get {Get a repo lib file to local dir
-  Syntax: get <lib> [-force]
+  Syntax: get [-force] <lib>
   Only get repo version if it is newer than the local version, unless -force is used.
 } {
   global repolibdir
