@@ -8,8 +8,6 @@ task totabs {Convert spaces to tabs
   } else {
     set tabwidth 4
   }
-  #set origdir "_orig.[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"]"
-  #file mkdir $origdir
   foreach srcfile [filter_ignore_files [get_source_files]]	{
     totabs_file $srcfile $tabwidth
   }
