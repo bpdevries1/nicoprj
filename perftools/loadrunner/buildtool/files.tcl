@@ -8,16 +8,10 @@
 # TODO: task_add maken die ofwel add_file ofwel add_action aanroept.
 # dit dan obv name: als deze een extensie heeft (.h of .c) dan is het file, anders action.
 
-# add an empty file if none exist yet
-proc task_add_file_old {args} {
-  foreach filename $args {
-    add_file $filename
-  }  
-}
-
 task add_file {Add an extra file to prj
   Syntax: add_file <file> [<file> ..]
-  Adds files (create if needed) to the extra files part of the project.} {
+  Adds files (create if needed) to the extra files part of the project.
+} {
   foreach filename $args {
     add_file $filename
   }  
@@ -68,42 +62,6 @@ proc add_file_metadata {filename} {
   commit_file $meta
 }
 
-# add file to #include list in globals.h
-proc add_file_include {filename} {
-  set fn "globals.h"
-  set fi [open $fn r]
-  set fo [open [tempname $fn] w]
-  fconfigure $fo -translation crlf
-  set in_includes 0
-  set found 0
-  while {[gets $fi line] >= 0} {
-    if {$in_includes} {
-      if {[regexp {\#include \"(.+)\"} $line z include]} {
-        if {$include == $filename} {
-          set found 1
-        }
-      } elseif {[string trim $line] == ""} {
-        # ok, continue
-      } else {
-        # not in includes anymore, so add new one if needed
-        if {!$found} {
-          puts $fo "#include \"$filename\""
-        }
-        set in_includes 0
-      }
-    } else {
-      if {[regexp {\#include} $line]} {
-        # first line should always be lrun.h, so don't check on this one.
-        set in_includes 1
-      }
-    }
-    puts $fo $line
-  }
-  close $fo
-  close $fi
-  commit_file $fn
-}
-
 # add actions. Similar to add_file, but add to action part of hierarchy.
 task add_action {Add action to project
   Syntax: add_acion <action> [<action> ..]
@@ -111,7 +69,7 @@ task add_action {Add action to project
 } {
   foreach action $args {
     add_action $action
-  }  
+  }
 }
 
 # create $action.c and add to project: default.usp, <prj>.usr, ScriptUploadMetadata.xml
