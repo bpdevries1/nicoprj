@@ -29,6 +29,14 @@ proc get_template_files {} {
       file copy $filename $target_name
     }
   }
+  # get vuser_init.c from template iff it has not been changed yet.
+  set text [read_file vuser_init.c]
+  if {[:# [split $text "\n"]] <= 5} {
+    file copy [file join $repo_tmp vuser_init.c] [tempname vuser_init.c]
+    commit_file vuser_init.c
+  } else {
+    # log debug "vuser_init.c already too big."
+  }
 }
 
 proc set_rb_transactions {filename} {
