@@ -60,8 +60,19 @@ proc in_lr_include {srcfile} {
   file exists [file join $lr_include_dir $srcfile]
 }
 
-# return sorted list of all action files in project.
-# TODO: echt maken.
 proc get_action_files {} {
-  list "Action.c"
+  set usr_file "[file tail [file normalize .]].usr"
+  set ini [ini_read $usr_file]
+  set lines [ini_lines $ini Actions]
+  set res {}
+  foreach line $lines {
+    set filename [:1 [split $line "="]]
+    if {![regexp {^vuser_} $filename]} {
+      lappend res $filename
+    }
+  }
+  # log debug "action files: $res"
+  return $res
 }
+
+
