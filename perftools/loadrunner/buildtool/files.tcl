@@ -21,7 +21,7 @@ task add_file {Add an extra file to prj
 proc add_file {filename} {
   add_file_usr $filename
   add_file_metadata $filename
-  add_file_include $filename
+  globals_add_file_include $filename
 }
 
 proc add_file_usr {filename} {

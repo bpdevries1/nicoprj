@@ -1,5 +1,5 @@
 # add file to #include list in globals.h
-proc add_file_include {filename} {
+proc globals_add_file_include {filename} {
   set fn "globals.h"
   set fi [open $fn r]
   set fo [open [tempname $fn] w]
