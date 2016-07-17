@@ -20,10 +20,19 @@ proc set_origdir {} {
 # same -> remove temp file.
 proc commit_file {filename} {
   global _origdir
+  if {![file exists $filename]} {
+    # new file, just rename temp to filename
+    file rename [tempname $filename] $filename
+    return
+  }
+  # if temp does not exist, this is an error.
+  
   if {[read_file $filename] == [read_file [tempname $filename]]} {
     # files are the same, no changes, delete temp file.
+    log debug "Unchanged file: $filename"
     file delete [tempname $filename]
   } else {
+    log debug "File changed: $filename"
     # Files are different, do update.
     file mkdir $_origdir
     set backupname [file join $_origdir $filename]
