@@ -15,7 +15,6 @@ task templates {Make script adhere to templates and best practices
   foreach filename [get_action_files] {
     set_rb_transactions $filename
     set_web_reg_find $filename
-    
   }
   
 }

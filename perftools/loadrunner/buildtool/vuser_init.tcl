@@ -38,3 +38,51 @@ proc puts_ignore_domain_lines {fo ini} {
     }
   }
 }
+
+
+proc vuser_init_add_param {name datatype varparam default_val} {
+  set text [read_file vuser_init.c]
+  set line [vuser_init_param_line $name $datatype $varparam $default_val]
+  set lines [split $text "\n"]
+  if {[lsearch -exact $lines $line] < 0} {
+    set header_line "\t// Config parameters"
+    set ndx [lsearch -exact $lines $header_line]
+    if {$ndx < 0} {
+      set ndx [lsearch -exact $lines "\treturn 0;"]
+      if {$ndx < 0} {
+        error "return 0; not found in vuser_init.c"
+      }
+      set lines [linsert $lines $ndx $header_line]
+    }
+    set lines [linsert $lines $ndx+1 $line]
+    set fo [open [tempname vuser_init.c] w]
+    fconfigure $fo -translation crlf
+    puts -nonewline $fo [join $lines "\n"]
+    close $fo
+    commit_file vuser_init.c
+  }
+}
+
+proc vuser_init_param_line {name datatype varparam default_val} {
+  if {$varparam == "var"} {
+    if {$datatype == "int"} {
+      set line "\t$name = config_cmdline_get_int(config, \"$name\", $default_val);"
+    } elseif {$datatype == "str"} {
+      set line "\t$name = config_cmdline_get_string(config, \"${name}\", \"${default_val}\");"
+    } else {
+      error "Unknown datatype: $datatype (name=$name)"
+    }
+  } elseif {$varparam == "param"} {
+    if {$datatype == "int"} {
+      error "Combination not (yet) possible: $varparam/$datatype"
+    } elseif {$datatype == "str"} {
+      set line "\tlr_save_string(config_cmdline_get_string(config, \"${name}\", \"${default_val}\"), \"${name}\");"
+    } else {
+      error "Unknown datatype: $datatype (name=$name)"
+    }
+  } else {
+    error "Unknown value for varparam: $varparam (name=$name)"
+  }
+  return $line
+}
+

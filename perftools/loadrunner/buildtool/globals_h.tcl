@@ -34,3 +34,32 @@ proc globals_add_file_include {filename} {
   commit_file $fn
 }
 
+# // Global Variables
+# int scripttest;
+# char *userparam;
+# ook soort kopjes, vgl ini file:
+# //--------------------------------------------------------------------
+# // Global Variables
+proc globals_add_var {name datatype} {
+  set text [read_file globals.h]
+  if {$datatype == "int"} {
+    set line "int $name;"  
+  } elseif {$datatype == "str"} {
+    set line "char *$name;"
+  } else {
+    error "Unknown datatype: $datatype (name=$name)"
+  }
+  set lines [split $text "\n"]
+  if {[lsearch -exact $lines $line] < 0} {
+    # new line
+    set ndx [lsearch -exact $lines "// Global Variables"]
+    set lines [linsert $lines $ndx+1 $line]
+    set fo [open [tempname globals.h] w]
+    fconfigure $fo -translation crlf
+    puts -nonewline $fo [join $lines "\n"]
+    close $fo
+    commit_file globals.h
+  }
+}
+
+
