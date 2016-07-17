@@ -10,12 +10,26 @@ task templates {Make script adhere to templates and best practices
 } {
   # TODO: possibly something with options, like selecting files?
   # or keep as standard as possible.
+  get_template_files
+  
   foreach filename [get_action_files] {
     set_rb_transactions $filename
     set_web_reg_find $filename
     
   }
   
+}
+
+# get .config files from repo/templates iff they do not exist in project yet.
+proc get_template_files {} {
+  global repodir
+  set repo_tmp [file join $repodir template]
+  foreach filename [glob -nocomplain -directory $repo_tmp *.config] {
+    set target_name [file tail $filename]
+    if {![file exists $target_name]} {
+      file copy $filename $target_name
+    }
+  }
 }
 
 proc set_rb_transactions {filename} {
