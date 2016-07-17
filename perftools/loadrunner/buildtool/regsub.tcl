@@ -18,7 +18,7 @@ task regsub {Regular epression replace
   lassign $args from to  
   puts "from: $from, to: $to, args: $args"
   regsub -all {\\n} $to "\n" to2
-  foreach srcfile [filter_ignore_files [get_source_files]]	{
+  foreach srcfile [get_source_files]	{
     regsub_file $srcfile $from $to2 $really
   }
 }

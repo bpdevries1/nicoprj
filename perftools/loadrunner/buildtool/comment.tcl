@@ -1,7 +1,7 @@
 task comment_remove {Remove out commented code
   Remove lines starting with //<tab> and not containing timestamp or initials
 } {
-  foreach filename [filter_ignore_files [get_source_files]]	{
+  foreach filename [get_source_files]	{
     comment_remove_file $filename
   }
 }

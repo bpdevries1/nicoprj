@@ -18,7 +18,7 @@ ndv::source_once task.tcl configs.tcl selectfiles.tcl backup.tcl \
     inifile.tcl lr_params.tcl \
     syncrepo.tcl regsub.tcl files.tcl text.tcl comment.tcl domains.tcl
 
-set_log_global info
+set_log_global debug
 
 proc main {argv} {
   global repodir repolibdir as_project lr_include_dir
@@ -180,7 +180,7 @@ task check {Perform some checks on sources
       check_file $libfile $full
     }
   } else {
-    foreach srcfile [filter_ignore_files [get_source_files]]	{
+    foreach srcfile [get_source_files]	{
       check_file $srcfile $full
     }
     check_script
@@ -265,9 +265,10 @@ proc puts_warn {srcfile linenr text} {
 # check script scope things, eg all .c/.h files in dir are included in the script. Also for .config files.
 proc check_script {} {
   # puts "check_script called"
-  set src_files [filter_ignore_files [concat [glob -nocomplain -tails -directory . -type f "*.c"] \
-                                          [glob -nocomplain -tails -directory . -type f "*.h"] \
-                                          [glob -nocomplain -tails -directory . -type f "*.config"]]]
+  set src_files [filter_ignore_files \
+                     [concat [glob -nocomplain -tails -directory . -type f "*.c"] \
+                          [glob -nocomplain -tails -directory . -type f "*.h"] \
+                          [glob -nocomplain -tails -directory . -type f "*.config"]]]
   set prj_text [read_file [lindex [glob *.usr] 0]]
   foreach src_file $src_files {
     if {[string first $src_file $prj_text] == -1} {

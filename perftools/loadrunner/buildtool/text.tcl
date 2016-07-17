@@ -8,7 +8,7 @@ task totabs {Convert spaces to tabs
   } else {
     set tabwidth 4
   }
-  foreach srcfile [filter_ignore_files [get_source_files]]	{
+  foreach srcfile [get_source_files]	{
     totabs_file $srcfile $tabwidth
   }
 }
@@ -47,7 +47,7 @@ task fixcrlf {Fix line endings
   Use Windows line endings (CRLF), as both VuGen and PC/ALM run on Windows.
 } {
   if {$args == {}} {
-    set lst [filter_ignore_files [get_source_files]]
+    set lst [get_source_files]
   } else {
     set lst $args
   }

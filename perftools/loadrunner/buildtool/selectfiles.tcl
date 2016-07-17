@@ -3,9 +3,19 @@ proc get_repo_libs {} {
   glob -nocomplain -tails -directory $repolibdir -type f *
 }
 
-proc get_source_files {} {
+proc get_source_files_old {} {
   concat [glob -nocomplain -tails -directory . -type f "*.c"] \
       [glob -nocomplain -tails -directory . -type f "*.h"]
+}
+
+# return sorted list of all (.c/.h) source files in project directory.
+# so no config files etc.
+# [2016-07-17 09:12] filter_ignore_files was always called in combination with this one,
+# so make it standard.
+proc get_source_files {} {
+  set lst [concat [glob -nocomplain -tails -directory . -type f "*.c"] \
+               [glob -nocomplain -tails -directory . -type f "*.h"]]
+  lsort [filter_ignore_files $lst]
 }
 
 # delete combined_* files from list.
@@ -48,4 +58,10 @@ proc det_includes_file {source_file} {
 proc in_lr_include {srcfile} {
   global lr_include_dir
   file exists [file join $lr_include_dir $srcfile]
+}
+
+# return sorted list of all action files in project.
+# TODO: echt maken.
+proc get_action_files {} {
+  list "Action.c"
 }

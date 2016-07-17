@@ -6,9 +6,9 @@ task libs {Overview of lib files, including status
   file mkdir ".base"
   set repo_libs [get_repo_libs]
   # puts "repo_libs: $repo_libs"
-  set source_files [lsort [get_source_files]]
+  set source_files [get_source_files]
   log debug "source_files: $source_files"
-  set included_files [det_includes_files [filter_ignore_files $source_files]]
+  set included_files [det_includes_files $source_files]
   log debug "included_files: $included_files"
   set all_files [lsort -unique [concat $source_files $included_files]]
   set diff_found 0
