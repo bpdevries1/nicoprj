@@ -11,6 +11,7 @@ task regsub {Regular epression replace
 } {
   set options {
     {do "Really perform regsub actions'"}
+    {action "Only handle action files"}
   }
   set usage ": regsub \[options] <from> <to>:"
   set opt [getoptions args $options $usage]
@@ -18,7 +19,12 @@ task regsub {Regular epression replace
   lassign $args from to  
   puts "from: $from, to: $to, args: $args"
   regsub -all {\\n} $to "\n" to2
-  foreach srcfile [get_source_files]	{
+  if {[:action $opt]} {
+    set filenames [get_action_files]
+  } else {
+    set filenames [get_source_files]
+  }
+  foreach srcfile $filenames	{
     regsub_file $srcfile $from $to2 $really
   }
 }

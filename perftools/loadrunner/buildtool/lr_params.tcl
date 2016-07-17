@@ -66,6 +66,12 @@ proc add_param_configs {name default_val} {
   }
 }
 
-
+task param_domain {set domain param and replace within requests in action files
+  Syntax: param_domain <domain>
+} {
+  lassign $args domain
+  task_regsub -action -do $domain "{domain}"
+  task_add_param domain str param $domain
+}
 
 
