@@ -10,6 +10,7 @@ task libs {Overview of lib files, including status
   log debug "source_files: $source_files"
   set included_files [det_includes_files $source_files]
   log debug "included_files: $included_files"
+  # TODO: determine files in selectfiles.tcl
   set all_files [lsort -unique [concat $source_files $included_files]]
   set diff_found 0
   # also check if all included files exist.
