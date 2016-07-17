@@ -1,0 +1,151 @@
+# TODO: (ooit) use a real parser.
+proc read_source_statements {filename} {
+  set f [open $filename r]
+  set linenr 0
+  set lines {}
+  set linenr_start -1
+  while {[gets $f line] >= 0} {
+    incr linenr
+    if {([string trim $line] == "") || [regexp {^\s*//} $line]} {
+      # do want those lines in output again
+      lappend stmts [dict create lines [list $line] type comment \
+                        linenr_start $linenr linenr_end $linenr]
+      continue
+    }
+    if {$lines == {}} {
+      set linenr_start $linenr
+    }
+    lappend lines $line
+    if {[is_statement_end $line]} {
+      lappend stmts [dict create lines $lines type [stmt_type $lines] \
+                         linenr_start $linenr_start linenr_end $linenr]
+      set lines {}
+    } else {
+      # nothing.
+    }
+  } ; # end-of-while gets
+  if {$lines != {}} {
+    lappend stmts [dict create lines $lines type [stmt_type $lines] \
+                       linenr_start $linenr_start linenr_end $linenr]
+  }
+  close $f
+  return $stmts
+}
+
+# new statement for single line
+proc stmt_new {line {type ""} {linenr_start 0} {linenr_end 0}} {
+  dict create lines [list $line] type $type linenr_start $linenr_start \
+      linenr_end $linenr_end
+}
+
+proc is_statement_end {line} {
+  if {[regexp {;$} [string trim $line]]} {
+    return 1
+  }
+  # begin en einde file ook als statements zien.
+  if {[regexp {[\{\}]$} [string trim $line]]} {
+    return 1
+  }
+  return 0
+}
+
+# just check first lines, so Action()\n<brace> will not be recognised.
+# by checking on ending on just a paren, it should work too.
+# TODO: text checks (also added with build script) and web_reg_save_param => subs!
+# web_reg_find
+set stmt_types_regexps {
+  {[\{\}]$} main
+  {\)$} main
+  {\sreturn\s} main
+  
+  {\sweb_url} main-req
+  {\sweb_custom_request} main-req
+  {\sweb_submit_data} main-req
+  {auto_header}  main
+  {transaction\(} main
+  {\sweb_concurrent} main
+  {web_global_verification} main
+
+  {web_reg_find} sub-find
+  {web_add_header} sub
+  {web_reg_save_param} sub-save
+}
+
+# determine type of statement based on first line.
+proc stmt_type {lines} {
+  global stmt_types_regexps
+  set firstline [:0 $lines]
+  foreach {re tp} $stmt_types_regexps {
+    if {[regexp $re $firstline]} {
+      return $tp
+    }
+  }
+  # maybe check full text if just first line does not find anything.
+  error "Cannot determine type of $firstline (lines=$lines)"
+}
+
+# return list of statement-groups: each group is a dict with a list of statements and
+# a domain.
+# for now, assume that sub-types only occur before a main type, not after.
+proc group_statements {statements} {
+  set res {}
+  set stmts {}
+  set i 0
+  foreach stmt $statements {
+    incr i
+    if {$i > 10} {
+      # breakpoint
+    }
+    lappend stmts $stmt
+    # breakpoint
+    #log debug "stmt: $stmt"
+    #log debug "keys: [dict keys $stmt]"
+    # TODO: [2016-07-17 10:56] now need to set tp in a separate statement, if put directly within if, it will fail.
+    set tp [:type $stmt]
+    if {[regexp {web_add_header} $stmt]} {
+      # log debug "web add header found"
+      # breakpoint
+    }
+    if {[regexp {^main} $tp]} {
+      # log debug "tp=main, create new group and put in res"
+      # TODO: maybe determining domain should be a separate step.
+      set url [stmt_det_url $stmt]
+      lappend res [dict create statements $stmts domain [det_domain $url]\
+                       url $url]
+      set stmts {}
+    } else {
+      # nothing
+      # log debug "tp=sub, keep and add to next main"
+    }
+  }
+  if {$stmts != {}} {
+    set url [stmt_det_url $stmt]
+    lappend res [dict create statements $stmts domain [det_domain $url]\
+                     url $url]
+  }
+  return $res
+}
+
+proc write_source_statements {temp_filename stmt_groups} {
+  set f [open $temp_filename w]
+  fconfigure $f -translation crlf
+  foreach grp $stmt_groups {
+    foreach stmt [:statements $grp] {
+      puts $f [join [:lines $stmt] "\n"]    
+    }
+  }
+  close $f
+}
+
+# return 1 iff there is at least one statement in group with the given type
+# TODO: could use FP or list comprehension.
+proc stmt_grp_has {stmt_grp type} {
+  set found 0
+  foreach stmt [:statements $stmt_grp] {
+    if {[:type $stmt] == $type} {
+      set found 1
+    }
+  }
+  return $found
+}
+

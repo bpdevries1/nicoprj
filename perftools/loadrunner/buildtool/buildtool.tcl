@@ -16,7 +16,8 @@ package require ndv
 
 ndv::source_once task.tcl configs.tcl selectfiles.tcl backup.tcl \
     inifile.tcl lr_params.tcl templates.tcl parse.tcl \
-    syncrepo.tcl regsub.tcl files.tcl text.tcl comment.tcl domains.tcl
+    syncrepo.tcl regsub.tcl files.tcl text.tcl comment.tcl domains.tcl \
+    vuser_init.tcl
 
 set_log_global debug
 
