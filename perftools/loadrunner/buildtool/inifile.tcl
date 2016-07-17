@@ -30,7 +30,13 @@ proc ini_write {filename ini {translation crlf}} {
   fconfigure $f -translation $translation
   foreach d $ini {
     puts $f "\[[:header $d]\]"
-    puts $f [join [:lines $d] "\n"]
+    # don't put empty lines
+    foreach line [:lines $d] {
+      if {$line != ""} {
+        puts $f $line
+      }
+    }
+    # puts $f [join [:lines $d] "\n"]
   }
   close $f
   commit_file $filename
@@ -54,11 +60,30 @@ proc ini_add {ini header line} {
   return $res
 }
 
+# set all lines under a heading, eg for sorting
+# return updated ini
+proc ini_set_lines {ini header lines} {
+  set res {}
+  set found 0
+  foreach grp $ini {
+    if {[:header $grp] == $header} {
+      lappend res [dict create header $header lines $lines]
+      set found 1
+    } else {
+      lappend res $grp 
+    }
+  }
+  if {!$found} {
+    lappend res [dict create header $header lines $lines]
+  }
+  return $res
+}
+
 # add line to ini, but only if it does not already exist
-proc ini_add_no_dups {ini header new_line} {
+proc ini_add_no_dups {ini header line} {
   set lines [ini_lines $ini $header]
-  if {[lsearch -exact $lines $new_line] < 0} {
-    set ini [ini_add $ini $header $new_line]
+  if {[lsearch -exact $lines $line] < 0} {
+    set ini [ini_add $ini $header $line]
   }
   return $ini
 }
@@ -72,3 +97,11 @@ proc ini_lines {ini header} {
   return {}
 }
 
+# return 1 iff line exists under header
+proc ini_exists {ini header line} {
+  if {[lsearch -exact [ini_lines $ini $header] $line] >= 0} {
+    return 1
+  } else {
+    return 0
+  }
+}
