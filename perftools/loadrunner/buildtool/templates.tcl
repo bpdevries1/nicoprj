@@ -17,6 +17,9 @@ task templates {Make script adhere to templates and best practices
     set_web_reg_find $filename
   }
   
+  get_std_libs
+  # add TT (thinktime) parameter.
+  task_add_param TT int var 5
 }
 
 # get .config files from repo/templates iff they do not exist in project yet.
@@ -75,7 +78,7 @@ proc add_web_reg_find_group {stmt_grp} {
       if {[url_needs_find [:url $stmt_grp]]} {
         dict set stmt_grp statements \
             [linsert [:statements $stmt_grp] end-1 \
-                 [stmt_new "\tweb_reg_find(\"Text=<TODO>\", \"Notfound=warning\", LAST);\n" sub-find]]
+                 [stmt_new "\tweb_reg_find(\"Text=<TODO>\", \"SaveCount=savecount\", LAST);\n" sub-find]]
       }
     }
   }
@@ -101,4 +104,12 @@ proc url_needs_find {url} {
     return 0
   }
   return 1
+}
+
+proc get_std_libs {} {
+  foreach libname {vugen.h y_core.c functions.c configfile.c wrr_functions.c dynatrace.c} {
+    if {![file exists $libname]} {
+      task_get $libname  
+    }
+  }
 }
