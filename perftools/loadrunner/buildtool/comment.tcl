@@ -1,7 +1,8 @@
 task comment_remove {Remove out commented code
-  Remove lines starting with //<tab> and not containing timestamp or initials
+  Remove lines starting with //<tab> and not containing timestamp or initials.
+  Only do this with action files, not library files etc.
 } {
-  foreach filename [get_source_files]	{
+  foreach filename [get_action_files]	{
     comment_remove_file $filename
   }
 }
@@ -26,6 +27,10 @@ proc is_commented_line {line} {
   if {[regexp {^//\t} $line]} {
     if {[regexp {\d{4}-\d{2}-\d{2} \d{2}:\d{2}} $line]} {
       # timestamp occurs, probably a comment anyway, so keep
+      return 0
+    } elseif {[regexp -nocase {todo} $line]} {
+      return 0
+    } elseif {[regexp -nocase {ndv} $line]} {
       return 0
     } else {
       return 1
