@@ -81,7 +81,9 @@ proc stmt_type {lines} {
     }
   }
   # maybe check full text if just first line does not find anything.
-  error "Cannot determine type of $firstline (lines=$lines)"
+  # error "Cannot determine type of $firstline (lines=$lines)"
+  # [2016-07-18 11:22:50] main-other as default?
+  return "main-other"
 }
 
 # return list of statement-groups: each group is a dict with a list of statements and
