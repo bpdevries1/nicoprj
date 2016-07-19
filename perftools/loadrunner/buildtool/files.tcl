@@ -161,7 +161,7 @@ proc split_action {action} {
   fconfigure $fo -translation crlf
   set foc $fo
   while {[gets $fi line] >= 0} {
-    if {[regexp {lr_start_transaction\(\"(.+)\"\);} $line z transname]} {
+    if {[regexp {_start_transaction\(\"(.+)\"\);} $line z transname]} {
       if {[file exists "${transname}.c"]} {
         log warn "transaction file already exists: ${transname}.c"
         # error "transaction file already exists: ${transname}.c"
@@ -173,7 +173,7 @@ proc split_action {action} {
       set foc $foa
       puts $fo "\t$transname\(\);"
       puts $foc $line
-    } elseif {[regexp {lr_end_transaction} $line]} {
+    } elseif {[regexp {_end_transaction} $line]} {
       puts $foa $line
       puts $foa "\treturn 0;\n\}\n"
       close $foa
