@@ -19,7 +19,7 @@ ndv::source_once task.tcl configs.tcl selectfiles.tcl backup.tcl \
     syncrepo.tcl regsub.tcl files.tcl text.tcl comment.tcl domains.tcl \
     vuser_init.tcl globals_h.tcl
 
-set_log_global debug
+set_log_global info
 
 proc main {argv} {
   global repodir repolibdir as_project lr_include_dir
