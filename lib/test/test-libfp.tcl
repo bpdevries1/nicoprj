@@ -4,6 +4,9 @@
 
 # @note don't package require libfp, but source it, easier to test.
 
+# this one could interfere with the source-cmd below.
+# [2016-07-21 20:54] but it does seem to work
+package require ndv
 
 package require tcltest
 namespace import -force ::tcltest::*
@@ -170,6 +173,15 @@ testndv {> 3 4} 0
 testndv {> 4 3} 1
 
 testndv {filter x {> $x 3} {1 2 3 4 5}} {4 5}
+
+# One with a closure:
+# first test with a specific version of fn
+proc find_items {items re} {
+  filter [fn x {regexp $re $x}] $items
+}
+
+testndv {find_items {abc ab abd ac gh baab} ab} {abc ab abd baab}
+testndv {find_items {abc ab abd ac gh baab} {ab}} {abc ab abd baab}
 
 #puts "Start with filter \$x > 3"
 #testndv {filter x {$x >= 3} {1 2 3 4 5}} {3 4 5}

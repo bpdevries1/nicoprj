@@ -193,8 +193,38 @@ proc lambda_to_proc {lambda} {
 }
 
 # anonymous function
-proc fn {params body} {
+proc fn_ff {params body} {
   lambda_to_proc [list $params $body]
+}
+
+# anonymous functie with closures eval-ed.
+proc fn {params body} {
+  lambda_to_proc [list $params [eval_closure $params $body]]
+}
+
+# eval vars in closure of the proc, leave params alone.
+# first find all occurences of $var and replace by actual value in uplevel, iff
+# var does not occur in params.
+# TODO: check ${var}, maybe also [set var]
+# TODO: check if resulting value should be surrounded by quotes or braces. [2016-07-21 20:56] for now seems ok.
+# TODO: This probably fails if body is more complicated, and contains another method call with closure.
+proc eval_closure {params body} {
+  # want to use regsub which replaces elements with function call. Done this before with
+  # FB VuGen scripts, first simpler here.
+  # first only change one var.
+  # could also use regexp -all -indices and work from there.
+  set indices [regexp -all -indices -inline {\$([a-z0-9_]+)} $body]
+  # begin at the end, so when changing parts at the end, the indices at the start stay the same.
+  foreach {range_name range_total} [lreverse $indices] {
+    set varname [string range $body {*}$range_name]
+    if {[lsearch -exact $params $varname] < 0} {
+      upvar 2 $varname value
+      set body [string replace $body {*}$range_total $value]
+      # breakpoint
+    }
+  }
+  return $body
+  # breakpoint
 }
 
 # @todo maybe a 'proc fn' to create function-objects, lambda's?
