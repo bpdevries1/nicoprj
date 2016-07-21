@@ -165,6 +165,9 @@ proc split_action {action} {
       if {[file exists "${transname}.c"]} {
         log warn "transaction file already exists: ${transname}.c"
         # error "transaction file already exists: ${transname}.c"
+        # rename file, not the transaction
+        set transname [new_transname $transname]
+        log info "set new transname: $transname"
       }
       lappend new_actions $transname
       set foa [open "${transname}.c" w]
@@ -190,4 +193,17 @@ proc split_action {action} {
   task_add_action {*}$new_actions
 }
 
+# generate a new transname, because transname.c already exists.
+# will be like transname1.c, but check in filesystem if it does not exist already.
+proc new_transname {transname_orig} {
+  set exists 1
+  set ndx 0
+  while {$exists} {
+    incr ndx
+    set transname "${transname_orig}$ndx"
+    set filename "${transname}.c"
+    set exists [file exists $filename]
+  }
+  return $transname
+}
 

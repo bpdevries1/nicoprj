@@ -35,6 +35,9 @@ proc is_commented_line {line} {
     } else {
       return 1
     }
+  } elseif {$line == "//"} {
+    # just 2 slashes
+    return 1
   } else {
     return 0
   }

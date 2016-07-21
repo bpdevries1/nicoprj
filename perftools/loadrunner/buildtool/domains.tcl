@@ -89,6 +89,8 @@ proc update_domains_ini {ini stmt_groups} {
     set domain [:domain $grp]
     if {$domain == ""} {
       # nothing
+    } elseif {[regexp {[\{\}]} $domain]} {
+      # nothing, brace in domain, could be {domain}
     } else {
       set suffix [domain_suffix $domain]
       if {[ini_exists $ini keep $suffix] ||

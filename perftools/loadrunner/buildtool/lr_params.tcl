@@ -53,7 +53,8 @@ task add_param {Add var/param to script
 }
 
 proc add_param_configs {name default_val} {
-  set line "$name=$default_val"
+  #set line "$name=$default_val"
+  set line "$name = $default_val"
   foreach configname [glob -nocomplain *.config] {
     set text [read_file $configname]
     if {[lsearch -exact [split $text "\n"] $line] < 0} {
