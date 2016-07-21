@@ -3,11 +3,6 @@ proc get_repo_libs {} {
   glob -nocomplain -tails -directory $repolibdir -type f *
 }
 
-proc get_source_files_old {} {
-  concat [glob -nocomplain -tails -directory . -type f "*.c"] \
-      [glob -nocomplain -tails -directory . -type f "*.h"]
-}
-
 # return sorted list of all (.c/.h) source files in project directory.
 # so no config files etc.
 # [2016-07-17 09:12] filter_ignore_files was always called in combination with this one,
