@@ -21,13 +21,18 @@ ndv::source_once task.tcl configs.tcl selectfiles.tcl backup.tcl \
 
 set_log_global info
 
+# TODO:
+# help task als eerste checken, hoef je niet in goede dir te zitten.
+# als je command-naam met dashes ipv underscores intypt, moet het ook goed zijn,
+# dus gewoon een regsub van - naar _ uitvoeren en dan de rest.
+
 proc main {argv} {
   global repodir repolibdir as_project lr_include_dir
   set lr_include_dir [det_lr_include_dir]
   
   # maybe add some checks
-  if {$argv == ""} {
-    task_help
+  if {($argv == "") || [:0 $argv] == "help"} {
+    task_help {*}[lrange $argv 1 end]
     exit 1
   }
   set dir [file normalize .]
@@ -328,7 +333,12 @@ proc det_lr_include_dir {} {
   return ""
 }
 
-main $argv
+if {[this_is_main]} {
+  main $argv  
+} else {
+  puts "not main"  
+}
+
 
 if 0 {
 opdrachten vanaf de cmdline:
