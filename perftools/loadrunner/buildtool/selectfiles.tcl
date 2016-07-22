@@ -70,4 +70,17 @@ proc get_action_files {} {
   return $res
 }
 
-
+# return list of all project files, ie. all files which will be uploaden to ALM/PC
+# use ScriptUploadMetadata.xml and check filters, 2 or 4.
+#    <FileEntry Name="default.usp" Filter="4" />
+#    <FileEntry Name="globals.h" Filter="2" />
+proc get_project_files {} {
+  set lines [split [read_file ScriptUploadMetadata.xml] "\n"]
+  set res [list]
+  foreach line $lines {
+    if {[regexp {<FileEntry Name="(.+)" Filter="(2|4)"} $line z name]} {
+      lappend res $name
+    }
+  }
+  return $res
+}

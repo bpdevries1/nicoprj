@@ -14,6 +14,11 @@ proc set_origdir {} {
   set _origdir "_orig.[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"]"
 }
 
+proc get_origdir {} {
+  global _origdir
+  return $_origdir
+}
+
 # to put in backup/orig locations, in order to restore to a non-existing file when
 # undo is one.
 set EMPTY_CONTENTS "*** EMPTY ***"
@@ -65,6 +70,18 @@ proc commit_file {filename} {
 # undo changes, heep original, eg when -do is not given in regsub
 proc rollback_file {filename} {
   file delete [tempname $filename]
+}
+
+task backup {Backup complete project (source files) to .orig dir
+  Syntax: backup notes with spaces.
+} {
+  global _origdir
+  file mkdir $_origdir
+  foreach filename [get_project_files] {
+    set backupname [file join $_origdir $filename]
+    file copy $filename $backupname
+  }
+  mark_backup backup [join $args " "]
 }
 
 # put a description of the changes in the backup-dir, iff the backup dir has been made.
@@ -119,10 +136,3 @@ proc last_backup_dir {} {
   }
 }
 
-task test_backup {test a backup with empty file} {
-  set filename "test-file-ndv.txt"
-  set f [open [tempname $filename] w]
-  puts $f "Test creating and undo a new file"
-  close $f
-  commit_file $filename
-}

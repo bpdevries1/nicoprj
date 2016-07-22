@@ -23,7 +23,7 @@ task help {Help for tasks
   help <regexp> - show help for all tasks where either name or description matches regexp. 
 } {
   global _tasks
-  puts "Build tool v0.1.0"
+  puts "Build tool v0.1.0\n"
 
   lassign $args task_string
   set taskname [task_name $task_string]
