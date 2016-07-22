@@ -16,6 +16,10 @@
 # @note use Tcl syntax/formatting and Clojure-like formatting both, most applicable.
 # @note order is as in clojure: if a function A uses another function B, B should be defined before A.
 
+# import math operators and functions as first class procs
+# [2016-07-22 10:11] maybe should not have this dependency; however, don't need to require a package, so really part of the 'core'.
+namespace path {::tcl::mathop ::tcl::mathfunc}
+
 ##
 # @note some easy, helper functions first
 proc = {a b} {
@@ -166,24 +170,11 @@ proc proc_to_lambda {procname} {
 # eerst even simpel met een counter
 # vb: struct::list map {1 2 3 4} [lambda_to_proc {x {expr $x * 3}}] => {3 6 9 12}
 # vb: struct::list filter {1 2 3 4} [lambda_to_proc {x {expr $x >= 3}}]
+# TODO: find a way to clean up those procs. According to wiki.tcl.tk this is one of the
+# harder problems. Maybe start/stop "transaction" or exeution-timeline. If the timeline finishes, all created procs within can be removed. Maybe something with namespaces: put als temp procs in a namespace, and forget the namespace when you're done.
+# rename <proc> "" can be used to delete a proc.
+
 set proc_counter 0
-proc lambda_to_proc_fout {lambda} {
-  global proc_counter
-  incr proc_counter
-  set procname "zzlambda$proc_counter"
-  # proc $procname {*}$lambda ; # combi van args en body
-  lassign $lambda largs lbody
-  # deze werkt wel als er idd expr voor zou moeten staan, maar niet voor andere dingen.
-  # dus bepalen of het moet, of andere lambda_to_proc versie? En deze dan in filter aanroepen.
-  # maar ook bij filter optie om via proc of expr aan te roepen.
-
-  # string is expression?
-  # of eval?
-  
-  proc $procname $largs "expr $lbody"
-  return $procname
-}
-
 proc lambda_to_proc {lambda} {
   global proc_counter
   incr proc_counter
@@ -193,7 +184,8 @@ proc lambda_to_proc {lambda} {
 }
 
 # anonymous function
-proc fn_ff {params body} {
+# simple one, without closures.
+proc fn_old {params body} {
   lambda_to_proc [list $params $body]
 }
 
@@ -207,6 +199,7 @@ proc fn {params body} {
 # var does not occur in params.
 # TODO: check ${var}, maybe also [set var]
 # TODO: check if resulting value should be surrounded by quotes or braces. [2016-07-21 20:56] for now seems ok.
+# TODO: [2016-07-22 10:52] when a string with spaces is replaced, something is needed.
 # TODO: This probably fails if body is more complicated, and contains another method call with closure.
 proc eval_closure {params body} {
   # want to use regsub which replaces elements with function call. Done this before with
@@ -215,11 +208,14 @@ proc eval_closure {params body} {
   # could also use regexp -all -indices and work from there.
   set indices [regexp -all -indices -inline {\$([a-z0-9_]+)} $body]
   # begin at the end, so when changing parts at the end, the indices at the start stay the same.
+  # instead of checking if var usage in body occurs in param list, could also try to eval the var and if it succeeds, take the value. However, the current method seems more right.
   foreach {range_name range_total} [lreverse $indices] {
     set varname [string range $body {*}$range_name]
     if {[lsearch -exact $params $varname] < 0} {
       upvar 2 $varname value
-      set body [string replace $body {*}$range_total $value]
+      # set body [string replace $body {*}$range_total $value]
+      # TODO: or check value and decide what needs to be done, surround with quotes, braces, etc.
+      set body [string replace $body {*}$range_total [list $value]]
       # breakpoint
     }
   }
@@ -227,17 +223,63 @@ proc eval_closure {params body} {
   # breakpoint
 }
 
-# @todo maybe a 'proc fn' to create function-objects, lambda's?
+# from: http://wiki.tcl.tk/1239
+proc lstride {list n} {
+  set res {}
+  for {set i 0; set j [expr {$n-1}]} {$i < [llength $list]} {incr i $n; incr j $n} {
+    lappend res [lrange $list $i $j]
+  }
+  return $res
+}
+
+
+# use technique above with regexp to make a regsub which will replace found items
+# with the result of a function on these items. something like:
+# regsub_fn {re} $str [fn x {string length $x}]
+# done something like this before with FB/vugen script.
+# in regsub there is an example doing something similar.
+# then maybe could use this function in the above eval_closure def, but could be recursive explosion.
+# the regexp could contain parens, handle correctly. The x in the function could always
+# been the whole found string, but could also use fn with more params to bind them to
+# substrings (with parens) in regexp.
+# mgrp can be specified to replace not the whole regexp found, but the matching group.
+# implementation:
+# * begin at the end, so when changing parts at the end, the indices at the start stay the same.
+proc regsub_fn {re str fn {mgrp 0}} {
+  set indices [regexp -all -indices -inline $re $str]
+  set nsubs [+ 1 [:0 [regexp -about $re]]]
+  foreach match_ranges [lreverse [lstride $indices $nsubs]] {
+    set values [map [fn x {string range $str {*}$x}] $match_ranges]
+    set new_value [$fn {*}$values]
+    set str [string replace $str {*}[lindex $match_ranges $mgrp] $new_value]
+  }
+  return $str
+}
+
+proc regsub_fn_old {re str fn} {
+  set indices [regexp -all -indices -inline $re $str]
+  # begin at the end, so when changing parts at the end, the indices at the start stay the same.
+  # really need number of matching groups, or indices should return something else.
+  # could check range-values, if one is contained in the other.
+  # could have a helper function to group the ranges.
+  # for now assume no matching groups.
+  # could use regexp -about, first returned element is nr of groups/subexpressions.
+  foreach range [lreverse $indices] {
+    set value [string range $str {*}$range]
+    set new_value [$fn $value]
+    set str [string replace $str {*}$range $new_value]
+  }
+  return $str
+}
+
+# something like clojure lambda shortcuts, like #(+ 1 %)
+
+# TODO: put in namespace 'fp'
 
 # @todo handle more than one map-var, for traversing more than one map at the same time?
 # @note should handle 2 forms:
 # (map var list expression-with-var)
 # (map lambda list), where lambda is {var expr-with-var}
-proc map_old {args} {
-  lmap {*}$args
-  # note idea is to use cond to test for 2 or 3 arguments: 2 is with lambda, 3 is with var, list, expr
-}
-
 proc map {args} {
   if {[llength $args] == 2} {
     lassign $args arg1 arg2
