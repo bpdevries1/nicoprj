@@ -53,7 +53,16 @@ proc globals_add_var {name datatype} {
   if {[lsearch -exact $lines $line] < 0} {
     # new line
     set ndx [lsearch -exact $lines "// Global Variables"]
-    set lines [linsert $lines $ndx+1 $line]
+    # search first empty line after header, add line here.
+    set ndx2 [lsearch -start $ndx -regexp $lines {^\s*$}]
+    if {$ndx2 >= 0} {
+      set ndx $ndx2
+    } else {
+      # no empty line, add at the end
+      set ndx end
+    }
+
+    set lines [linsert $lines $ndx $line]
     set fo [open [tempname globals.h] w]
     fconfigure $fo -translation crlf
     puts -nonewline $fo [join $lines "\n"]

@@ -42,7 +42,9 @@ task add_param {Add var/param to script
     } elseif {$datatype == "str"} {
       set default_val ""
     } else {
-      error "Unknown datatype: $datetype (args=$args)"
+      puts "Unknown datatype: $datatype (args=$args)"
+      task_help add_param
+      exit
     }
   }
   if {$varparam == "var"} {
@@ -57,7 +59,7 @@ proc add_param_configs {name default_val} {
   set line "$name = $default_val"
   foreach configname [glob -nocomplain *.config] {
     set text [read_file $configname]
-    if {[lsearch -exact [split $text "\n"] $line] < 0} {
+    if {[lsearch -regexp [split $text "\n"] "^\\s*$name\\s*="] < 0} {
       set fo [open [tempname $configname] w]
       puts $fo $text
       puts $fo $line
