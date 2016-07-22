@@ -74,11 +74,10 @@ test cond-2 {cond 2} -body {cond 1} -returnCodes error -result {cond should be c
 ## test map ##
 # set fields [map x [:fields $table] {ifp [eq $x "id"] "id integer primary key autoincrement" $x}]
 # test map-1 {map 1} {map x {id field1 field2} \
-  {ifp [= $x "id"] "id integer primary key autoincrement" $x}} \
-  {{id integer primary key autoincrement} field1 field2}
+#  {ifp [= $x "id"] "id integer primary key autoincrement" $x}} \
+#  {{id integer primary key autoincrement} field1 field2}
 
-
-# 16-1-2016 hieronder de voor mij meest handige manieren om map/filter te gebruiken, deze moeten werken dus.
+# [2016-07-22 10:13] Two arguments to the test function should be enough: expression and expected result.
 proc testndv {args} {
   global testndv_index
   incr testndv_index
@@ -202,5 +201,57 @@ testndv {find_items {abc ab abd ac gh baab} {ab}} {abc ab abd baab}
 
 ## later: tdbc::sqlite connection which handles transactions automatically,
 # every 1000 (or 10000) statements. How to test?
+
+## test lstride, also in fp, could/should be in a list package.
+testndv {lstride {a b c d e f g h i} 3} {{a b c} {d e f} {g h i}}
+testndv {lstride {{0 2} {1 2} {5 7} {6 7}} 2} {{{0 2} {1 2}} {{5 7} {6 7}}}
+
+# if n == 1, should put all items in a list of their own:
+testndv {lstride {{0 2} {1 2} {5 7} {6 7}} 1} {{{0 2}} {{1 2}} {{5 7}} {{6 7}}}
+
+# regsub_fn uses math operators as first class procs (using tcl::mathop)
+# just a few tests
+testndv {+ 1 2} 3
+testndv {+ 4 5 6} 15
+testndv {+ 1} 1
+testndv {+} 0
+
+# matches should not overlap, so this one returns 2 groups of 3 items each:
+testndv {regexp -all -indices -inline {.(.)(.)} "abcdefgh"} \
+    {{0 2} {1 1} {2 2} {3 5} {4 4} {5 5}}
+# testndv {regsub_fn2 {.(.)(.)} "abcdefgh" sub_value_grp} abc
+
+# test regsub_fn, to regsub using functions on parameters
+# also some form of closure needed, use [fn ]
+# replace all series of a's with a<length>
+testndv {regsub_fn {a+} "aaa b djjd a jdu aa kj" \
+             [fn x {identity "a[string length $x]"}]} \
+    "a3 b djjd a1 jdu a2 kj"
+
+# one with a closure/proc handling the replace
+proc sub_value {val} {
+  if {$val == "a"} {
+    return "z"
+  } elseif {$val == "z"} {
+    return "y"
+  } else {
+    return $val
+  }
+}
+
+testndv {regsub_fn {.} "abcxyz" sub_value} "zbcxyy"
+
+# maybe another one with matching groups in regexp
+proc sub_value_grp {whole part1 part2} {
+  return "=$part1="
+}
+
+testndv {regsub_fn {.(.)(.)} "abcdefgh" sub_value_grp} "=b==e=gh"
+
+# just replace a subgroup:
+testndv {regsub_fn {.(.)(.)} "abcdefgh" sub_value_grp 1} "a=b=cd=e=fgh"
+
+# also test if this one still works when no subgroups are given
+testndv {regsub_fn {.{1,3}} "abcdefgh" [fn x {string length $x}]} "332"
 
 cleanupTests
