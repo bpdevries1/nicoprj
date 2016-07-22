@@ -31,29 +31,6 @@ set intLevel(critical) 0
 
 set loggers(DEFAULT) 0
 
-proc log_old {str {level critical} {service "DEFAULT"} {pref_stacklevel -1}} {
-	global LOGLEVEL stderr loggers intLevel
-
-	if {[regexp {^-?[0-9]+$} $level]} {
-	  if {$level <= $LOGLEVEL} {
-	    puts stderr "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] OLD: $str"
-	  }
-	} else {
-		# new syntax
-		if {$intLevel($level) <= $loggers($service)} {
-			# puts stderr "info level: [info level]"
-			set stacklevel [info level]
-			if {$stacklevel > 1} {
-	    	# puts stderr "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$service\] \[$level\] $str *** \[[info level -1]\]"
-	    	# puts stderr "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$service\] \[$level\] $str *** \[[info level $pref_stacklevel]\]"
-	    	puts stderr "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$service\] \[$level\] $str"
-	    } else {
-	    	puts stderr "\[[clock format [clock seconds] -format "%d-%m-%y %H:%M:%S"]\] \[$service\] \[$level\] $str"
-			}
-		}
-	}
-}
-
 proc add_logger {service} {
 	global loggers intLevel
   set loggers($service) $intLevel(debug)
@@ -188,106 +165,6 @@ proc xmlAttribute {f attribute {addspace 1}} {
 proc xmlComment {f comment} {
   puts $f "<!-- $comment -->"
 }
-
-########################################
-# Wat procs voor functioneel programmeren.
-# in tcllib 1.4 zit dit er standaard in, maar nu (1-2-08) nog tcllib 1.3, onder tcl 8.4.2.0.
-########################################
-proc lambda {argl body} {
-		# set name {}
-		set name $argl/$body
-		proc $name $argl $body
-		return $name
-}
-
-proc map {fun list} {
-		set res {}
-		foreach i $list {lappend res [$fun $i]}
-		return $res
-}
-
-# voorbeeld:
-# map [lambda x {expr $x * 3}] [list 4 7 3]
-# => 12 21 9
-
-# in tcl 8.5:
-proc map85 {lambda list} {
-   set result {}
-   foreach item $list {
-      lappend result [apply $lambda $item]
-   }
-   return $result
-}
-
-proc filter85 {lambda list} {
-	set result {}
-	foreach item $list {
-		if {[apply $lambda $item]} {
-			lappend result $item
-		}
-	}
-	return $result
-}
-
-# hier nog niet helemaal uitgekomen. Idee is met uplevel 2 uit te voeren, zodat geen upvars nodig zijn, behalve voor de loop-var.
-proc map85_l2 {lambda list} {
-  # upvar 2 [lindex $lambda 0] var ; misschien niet nodig vanwege apply en lambda 
-	upvar 1 _lambda0 lambda1 ; # kan niet direct koppelen aan lambda
-	upvar 1 _item0 item
-	set lambda1 $lambda ; # hiermee wordt level hoger lambda 0 ook gezet.
-	
-	set result {}
-   foreach item $list {
-      # lappend result [apply $lambda $item]
-			# zelfs met uplevel #0 wordt bij info level in de lambda nog 1 teruggegeven.
-			lappend result [uplevel #0 {apply $_lambda0 $_item0}]
-   }
-   return $result
-}
-
-proc maptest {lambda} {
-	upvar 1 lambda0 lambda1
-	set lambda1 $lambda
-	# set res [uplevel 1 {apply $lambda 23}]
-	set res [uplevel 1 {apply $lambda0 23}]
-	puts "res: $res"
-	return $res
-}
-#maptest {x {expr $x + 2}}
-
-proc maptest2 {lambda} {
-	upvar 1 lambda0 lambda
-	# set lambda1 $lambda
-	# set res [uplevel 1 {apply $lambda 23}]
-	set res [uplevel 1 {apply $lambda0 23}]
-	puts "res: $res"
-	return $res
-}
-#maptest2 {x {expr $x + 2}}
-
-
-#map {x {return [string length $x]:$x}} {a bb ccc dddd}
-#      -> 1:a 2:bb 3:ccc 4:dddd
-
-# van: http://invece.org/tclwise/extending_tcl_in_tcl.html
-# ander idee is de item variable met upvar te doen:
-# upvar 1 $item item2
-# note: gebruik geen return in de body, anders is het na het eerste item afgelopen.
-proc map2 {varname mylist body} {
-    upvar 1 $varname var
-    set res {}
-    foreach var $mylist {
-      # puts "var: $var"  
-			lappend res [uplevel 1 $body]
-    }
-		# puts "res: $res"
-    return $res
-}
-
-# hiermee werkt:
-# set a 23
-#% map2 x [list 1 2 3] {expr $x + $a}
-#24 25 26
 
 ###################################
 # List helpers
@@ -597,9 +474,112 @@ proc det_hostname {} {
   error "Cannot determine HOSTNAME from environment (env)"
 }
 
-#### datetime functions ####
-# [2016-07-09 10:06] moved to libdatetime
-proc now_old {args} {
-  # for now, the timestamp as can be inserted in sqlite
-  clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S %z"
+if 0 {
+  [2016-07-22 16:39] old functional programming procs, like map. Now in libfp.tcl
+
+  These ones could be used to describe "Evolution of the map proc/function in Tcl"
+
+########################################
+# Wat procs voor functioneel programmeren.
+# in tcllib 1.4 zit dit er standaard in, maar nu (1-2-08) nog tcllib 1.3, onder tcl 8.4.2.0.
+########################################
+proc lambda {argl body} {
+		# set name {}
+		set name $argl/$body
+		proc $name $argl $body
+		return $name
+}
+
+proc map {fun list} {
+		set res {}
+		foreach i $list {lappend res [$fun $i]}
+		return $res
+}
+
+# voorbeeld:
+# map [lambda x {expr $x * 3}] [list 4 7 3]
+# => 12 21 9
+
+# in tcl 8.5:
+proc map85 {lambda list} {
+   set result {}
+   foreach item $list {
+      lappend result [apply $lambda $item]
+   }
+   return $result
+}
+
+proc filter85 {lambda list} {
+	set result {}
+	foreach item $list {
+		if {[apply $lambda $item]} {
+			lappend result $item
+		}
+	}
+	return $result
+}
+
+# hier nog niet helemaal uitgekomen. Idee is met uplevel 2 uit te voeren, zodat geen upvars nodig zijn, behalve voor de loop-var.
+proc map85_l2 {lambda list} {
+  # upvar 2 [lindex $lambda 0] var ; misschien niet nodig vanwege apply en lambda 
+	upvar 1 _lambda0 lambda1 ; # kan niet direct koppelen aan lambda
+	upvar 1 _item0 item
+	set lambda1 $lambda ; # hiermee wordt level hoger lambda 0 ook gezet.
+	
+	set result {}
+   foreach item $list {
+      # lappend result [apply $lambda $item]
+			# zelfs met uplevel #0 wordt bij info level in de lambda nog 1 teruggegeven.
+			lappend result [uplevel #0 {apply $_lambda0 $_item0}]
+   }
+   return $result
+}
+
+proc maptest {lambda} {
+	upvar 1 lambda0 lambda1
+	set lambda1 $lambda
+	# set res [uplevel 1 {apply $lambda 23}]
+	set res [uplevel 1 {apply $lambda0 23}]
+	puts "res: $res"
+	return $res
+}
+#maptest {x {expr $x + 2}}
+
+proc maptest2 {lambda} {
+	upvar 1 lambda0 lambda
+	# set lambda1 $lambda
+	# set res [uplevel 1 {apply $lambda 23}]
+	set res [uplevel 1 {apply $lambda0 23}]
+	puts "res: $res"
+	return $res
+}
+#maptest2 {x {expr $x + 2}}
+
+
+#map {x {return [string length $x]:$x}} {a bb ccc dddd}
+#      -> 1:a 2:bb 3:ccc 4:dddd
+
+# van: http://invece.org/tclwise/extending_tcl_in_tcl.html
+# ander idee is de item variable met upvar te doen:
+# upvar 1 $item item2
+# note: gebruik geen return in de body, anders is het na het eerste item afgelopen.
+proc map2 {varname mylist body} {
+    upvar 1 $varname var
+    set res {}
+    foreach var $mylist {
+      # puts "var: $var"  
+			lappend res [uplevel 1 $body]
+    }
+		# puts "res: $res"
+    return $res
+}
+
+# hiermee werkt:
+# set a 23
+#% map2 x [list 1 2 3] {expr $x + $a}
+#24 25 26
+
+  
+
+  
 }

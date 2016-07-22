@@ -21,7 +21,7 @@
 namespace path {::tcl::mathop ::tcl::mathfunc}
 
 namespace eval ::libfp {
-  namespace export = != and or max ifp seq empty? cond_1 cond not not= \
+  namespace export = != and or ifp seq empty? cond_1 cond not not= \
       str identity fn lstride regsub_fn map filter reduce repeat range \
       lambda_to_proc proc_to_lambda
 
@@ -59,7 +59,7 @@ proc or {args} {
 }
 
 # some mathematical functions, maybe already provided by mathlib.
-proc max {args} {
+proc max_old {args} {
   if {[llength $args] == 1} {
     set lst [lindex $args 0]
   } else {

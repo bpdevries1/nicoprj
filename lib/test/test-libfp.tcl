@@ -6,7 +6,7 @@
 
 # this one could interfere with the source-cmd below.
 # [2016-07-21 20:54] but it does seem to work
-# package require ndv
+package require ndv
 
 package require tcltest
 namespace import -force ::tcltest::*
@@ -86,10 +86,12 @@ testndv {!= {a 1} {a 2}} 1
 # [2016-07-16 12:42] some math functions
 testndv {max 1 2 3} 3
 testndv {max 2} 2
-testndv {max {1 2 3}} 3
-testndv {max {1}} 1
 
-testndv {max [map {x {string length $x}} {"a" "abc" "-" "ab"}]} 3
+# [2016-07-22 16:48] this is now the max as exported by tcl::mathfunc
+testndv {max {*}{1 2 3}} 3
+testndv {max {*}{1}} 1
+
+testndv {max {*}[map {x {string length $x}} {"a" "abc" "-" "ab"}]} 3
 
 testndv {and 1 1} 1
 testndv {and 1 0} 0
