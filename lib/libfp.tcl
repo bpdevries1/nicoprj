@@ -191,6 +191,13 @@ proc fn {params body} {
   lambda_to_proc [list $params [eval_closure $params $body]]
 }
 
+# [2016-07-22 14:17] from http://wiki.tcl.tk/17444
+# [2016-07-22 14:19] does not work here in combination with the rest, maybe find out why
+# benefit could be the absence of need to create a proc, and it's smaller.
+proc fn_alt1 {params body} { list ::apply [list $params [list expr $body] ::] }
+
+# http://wiki.tcl.tk/17475 - [2016-07-22 14:28] Monads, could also be useful.
+
 # eval vars in closure of the proc, leave params alone.
 # first find all occurences of $var and replace by actual value in uplevel, iff
 # var does not occur in params.
