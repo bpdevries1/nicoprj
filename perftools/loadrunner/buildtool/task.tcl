@@ -1,5 +1,7 @@
 set _tasks [dict create]
 
+use libfp
+
 proc task {name desc body} {
   global _tasks
   set proc_name "task_$name"
@@ -27,7 +29,7 @@ task help {Help for tasks
   set taskname [task_name $task_string]
   if {$taskname == ""} {
     puts "Tasks:"
-    set len [max [map {x {string length $x}} [dict keys $_tasks]]]
+    set len [max {*}[map {x {string length $x}} [dict keys $_tasks]]]
     foreach task [lsort [dict keys $_tasks]] {
       puts [format "%-${len}s   %s" [task_str $task] [:firstline [dict get $_tasks $task]]]          
     }
