@@ -51,15 +51,15 @@ task help {Help for tasks
   }
 }
 
-# convert task string (as presented and given by user) to internal task name.
+# convert internal task name to string to be presented.
 # for now only from _ to -
 # this one is idempotent
 proc task_str {task_name} {
   regsub -all {_} $task_name "-"
 }
 
-# convert internal task name to string to be presented.
-# for now only from _ to -
+# convert task string (as presented and given by user) to internal task name.
+# for now only from - to _
 # this one is idempotent.
 proc task_name {task_str} {
   regsub -all -- {-} $task_str "_"
@@ -67,8 +67,8 @@ proc task_name {task_str} {
 
 # find all tasks where task matches regexp re. So check both the name and the description.
 proc find_tasks {tasks re} {
-  # could use -stride to handle the dict as a list, and sort on the keys.
-  # set tasks [lsort -stride 2 $tasks]
+  # could use -stride to handle the dict as a list, and sort on the keys:
+  #   set tasks [lsort -stride 2 $tasks]
   # [2016-07-21 21:05] fn is the closure variant, just made. Needs more test-cases in test-libfp.tcl. fn is a bit like a macro, it preps the body before evaluating.
   filter [fn x {regexp $re $x}] [dict values $tasks]
 }

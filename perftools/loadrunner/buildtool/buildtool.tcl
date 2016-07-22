@@ -36,7 +36,7 @@ proc main {argv} {
     exit 1
   }
   set dir [file normalize .]
-  set tname [lindex $argv 0]
+  set tname [task_name [lindex $argv 0]]
   set trest [lrange $argv 1 end]
   if {[is_script_dir $dir]} {
     set repodir [file normalize "../repo"]
@@ -44,6 +44,7 @@ proc main {argv} {
     set as_project 0
     set_origdir ; # to use by all subsequent tasks.
     task_$tname {*}$trest
+    mark_backup $tname $trest
   } elseif {[is_project_dir $dir]} {
     # in a container dir with script dirs as subdirs.
     set repodir [file normalize "repo"]
@@ -56,11 +57,13 @@ proc main {argv} {
     }
     if {$tname == "project"} {
       task_$tname {*}$trest
+
     } else {
       foreach scriptdir [get_current_script_dirs $dir] {
         puts "In $scriptdir"
         cd $scriptdir
         task_$tname {*}$trest
+        mark_backup $tname $trest
         cd ..
       }
       cd $dir
