@@ -35,6 +35,7 @@ proc commit_file {filename} {
     puts -nonewline $f $EMPTY_CONTENTS
     close $f
     file rename [tempname $filename] $filename
+    puts "new file: $filename"
     return
   }
   # if temp does not exist, this is an error.
@@ -45,6 +46,7 @@ proc commit_file {filename} {
     file delete [tempname $filename]
   } else {
     log debug "File changed: $filename"
+
     # Files are different, do update.
     file mkdir $_origdir
     
@@ -52,6 +54,8 @@ proc commit_file {filename} {
       # Earlier backup within same main action, keep the earliest one.
       file delete $filename
     } else {
+      # puts here, so will only be done once per file.
+      puts "changed file: $filename"      
       file rename $filename $backupname
     }
     file rename [tempname $filename] $filename
@@ -65,10 +69,10 @@ proc rollback_file {filename} {
 
 # put a description of the changes in the backup-dir, iff the backup dir has been made.
 proc mark_backup {tname trest} {
-  global _origdir
+  global _origdir argv0
   if {[file exists $_origdir]} {
     set f [open [file join $_origdir __BUILDTOOL_CHANGES__] w]
-    puts $f "\[[dt/now]] $tname $trest"
+    puts $f "\[[dt/now]] $argv0 $tname $trest"
     close $f
   }
 }
