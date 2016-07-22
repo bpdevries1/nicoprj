@@ -1,16 +1,13 @@
 # libfp.tcl - functional programming in Tcl
-# primary goal: make as easy to use as possible, compare Clojure
+# primary goals: make as easy to use as possible, compare Clojure
 # secondary goals: make fast, always correct.
 
-# @todo later
-# put in separate namespace
-
-# @note heavily based on things found on wiki.tcl.tk
+# @note partly based on things found on wiki.tcl.tk
 # @note also based on previous attempts to usable FP methods/procs/functions.
 # @note use Tcltest to validate functionality, also usable as documentation.
 # @note try to use CLojure function names (and arguments) as basis. 
 #       If name conflicts with existing tcl name, use another name, eg if -> ifp 
-# @todo find out how to handle closures, some simple things work, and some more elaborate things on the wiki.
+# @note basic closures work, need to test more complicated test cases.
 # @note ? and - are possible in proc names. ':' also, already used for dict accessors, see libdict.
 # @note what to do with lazy handling, eg in if-proc.
 # @note use Tcl syntax/formatting and Clojure-like formatting both, most applicable.
@@ -18,9 +15,18 @@
 
 # import math operators and functions as first class procs
 # [2016-07-22 10:11] maybe should not have this dependency; however, don't need to require a package, so really part of the 'core'.
+# need to have this both in main and in namespace:
+# * main: so functions can be called externally (export + does not work)
+# * ns  : so + can be used directly, although ::+ also fails.
 namespace path {::tcl::mathop ::tcl::mathfunc}
 
-##
+namespace eval ::libfp {
+  namespace export = != and or max ifp seq empty? cond_1 cond not not= \
+      str identity fn lstride regsub_fn map filter reduce repeat range \
+      lambda_to_proc proc_to_lambda
+
+  namespace path {::tcl::mathop ::tcl::mathfunc}
+
 # @note some easy, helper functions first
 proc = {a b} {
   if {$a == $b} {
@@ -32,19 +38,6 @@ proc = {a b} {
 
 proc != {a b} {
   expr ![= $a $b]
-}
-
-# deze leuk bedacht, recursief, maar uplevel zou dan ook mee moeten.
-proc and_old {exp1 args} {
-  if {[uplevel 1 [list expr $exp1]]} {
-    if {$args != {}} {
-      and {*}$args  
-    } else {
-      return 1
-    }
-  } else {
-    return 0
-  }
 }
 
 proc and {args} {
@@ -65,7 +58,7 @@ proc or {args} {
   return 0
 }
 
-# some mathematical functions
+# some mathematical functions, maybe already provided by mathlib.
 proc max {args} {
   if {[llength $args] == 1} {
     set lst [lindex $args 0]
@@ -80,7 +73,6 @@ proc max {args} {
   }
   return $res
 }
-
 
 # this is the if from clojure, don't want to override the std Tcl def.
 # @todo handle expressions as first argument? Or should have been evaluated before?
@@ -141,7 +133,6 @@ proc cond {args} {
   }
 }
 
-
 proc not {a} {
   ifp $a 0 1
 }
@@ -174,11 +165,17 @@ proc proc_to_lambda {procname} {
 # harder problems. Maybe start/stop "transaction" or exeution-timeline. If the timeline finishes, all created procs within can be removed. Maybe something with namespaces: put als temp procs in a namespace, and forget the namespace when you're done.
 # rename <proc> "" can be used to delete a proc.
 
+# Opties:
+# * fully qualified name teruggeven, dus met libfp:: ervoor.-> lijkt wel prima.
+# * aanmaken in main namespace: proc ::$procname
+# * aanmaken in callende namespace: kan dit?
+
 set proc_counter 0
 proc lambda_to_proc {lambda} {
   global proc_counter
   incr proc_counter
-  set procname "zzlambda$proc_counter"
+  # set procname "zzlambda$proc_counter"
+  set procname "::libfp::zzlambda$proc_counter"
   proc $procname {*}$lambda ; # combi van args en body
   return $procname
 }
@@ -202,10 +199,6 @@ proc fn {params body} {
 # TODO: [2016-07-22 10:52] when a string with spaces is replaced, something is needed.
 # TODO: This probably fails if body is more complicated, and contains another method call with closure.
 proc eval_closure {params body} {
-  # want to use regsub which replaces elements with function call. Done this before with
-  # FB VuGen scripts, first simpler here.
-  # first only change one var.
-  # could also use regexp -all -indices and work from there.
   set indices [regexp -all -indices -inline {\$([a-z0-9_]+)} $body]
   # begin at the end, so when changing parts at the end, the indices at the start stay the same.
   # instead of checking if var usage in body occurs in param list, could also try to eval the var and if it succeeds, take the value. However, the current method seems more right.
@@ -216,11 +209,9 @@ proc eval_closure {params body} {
       # set body [string replace $body {*}$range_total $value]
       # TODO: or check value and decide what needs to be done, surround with quotes, braces, etc.
       set body [string replace $body {*}$range_total [list $value]]
-      # breakpoint
     }
   }
   return $body
-  # breakpoint
 }
 
 # from: http://wiki.tcl.tk/1239
@@ -231,7 +222,6 @@ proc lstride {list n} {
   }
   return $res
 }
-
 
 # use technique above with regexp to make a regsub which will replace found items
 # with the result of a function on these items. something like:
@@ -247,7 +237,7 @@ proc lstride {list n} {
 # * begin at the end, so when changing parts at the end, the indices at the start stay the same.
 proc regsub_fn {re str fn {mgrp 0}} {
   set indices [regexp -all -indices -inline $re $str]
-  set nsubs [+ 1 [:0 [regexp -about $re]]]
+  set nsubs [+ 1 [lindex [regexp -about $re] 0]]
   foreach match_ranges [lreverse [lstride $indices $nsubs]] {
     set values [map [fn x {string range $str {*}$x}] $match_ranges]
     set new_value [$fn {*}$values]
@@ -274,7 +264,16 @@ proc regsub_fn_old {re str fn} {
 
 # something like clojure lambda shortcuts, like #(+ 1 %)
 
-# TODO: put in namespace 'fp'
+# find proc in either current or global namespace.
+# if procname is already namespace qualified, check if it exists: if so, return the name, otherwise {}
+# if it is not ns qualified, first check without namespace, then in global namespace.
+proc find_proc {procname} {
+  set res [info proc $procname]
+  if {$res != {}} {
+    return $res
+  }
+  info proc ::$procname
+}
 
 # @todo handle more than one map-var, for traversing more than one map at the same time?
 # @note should handle 2 forms:
@@ -283,15 +282,21 @@ proc regsub_fn_old {re str fn} {
 proc map {args} {
   if {[llength $args] == 2} {
     lassign $args arg1 arg2
-    if {[info proc $arg1] != {}} {
+    set procname [find_proc $arg1]
+    # if {[info proc $arg1] != {}} {}
+    if {$procname != {}} {
       set res {}
       foreach el $arg2 {
-        lappend res [$arg1 $el]
+        lappend res [$procname $el]
       }
       return $res
     } else {
       # assume lambda with 2 elements
-      map [lambda_to_proc $arg1] $arg2
+      if {[llength $arg1] == 2} {
+        map [lambda_to_proc $arg1] $arg2  
+      } else {
+        error "proc not found and not a lambda: $arg1"
+      }
     }
   } elseif {[llength $args] == 3} {
     # [2016-07-16 12:48] TODO: maybe should not support this, to stay similar to reduce
@@ -308,11 +313,12 @@ proc filter {args} {
   # puts "filter called: $args"
   if {[llength $args] == 2} {
     lassign $args arg1 arg2
-    if {[info proc $arg1] != {}} {
+    set procname [find_proc $arg1]
+    if {$procname != {}} {
       # puts "body: [info body $arg1]"
       set res {}
       foreach el $arg2 {
-        if {[$arg1 $el]} {
+        if {[$procname $el]} {
           lappend res $el
         }
       }
@@ -330,19 +336,6 @@ proc filter {args} {
 }
 
 
-# @todo use det_fields in apidata2dashboarddb.tcl as another testcase.
-# @param args: same as lmap: el list statement
-proc filter_old {args} {
-  lassign $args var l cmd
-  set res {}
-  foreach $var $l bool [lmap {*}$args] {
-    if {$bool} {
-      lappend res [set $var] 
-    }
-  }
-  return $res
-}
-
 # first only with fn and list, later also with start value
 proc reduce {args} {
   if {[llength $args] == 2} {
@@ -355,7 +348,6 @@ proc reduce {args} {
   } else {
     error "!= 2 args not supported: $args"
   }
-
 }
 
 # lib function, could also use struct::list repeat
@@ -378,3 +370,4 @@ proc range {start end {step 1}} {
   return $res
 }
 
+} ; # end-of-namespace

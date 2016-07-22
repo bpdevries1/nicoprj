@@ -1,4 +1,4 @@
-#!/usr/bin/env tclsh86
+#!/usr/bin/env tclsh861
 
 # test-libfp.tcl - test functionality of libfp.tcl
 
@@ -6,13 +6,21 @@
 
 # this one could interfere with the source-cmd below.
 # [2016-07-21 20:54] but it does seem to work
-package require ndv
+# package require ndv
 
 package require tcltest
 namespace import -force ::tcltest::*
 
+source [file join [file dirname [info script]] .. libns.tcl]
+
 # source ../libfp.tcl
 source [file join [file dirname [info script]] .. libfp.tcl]
+
+# sometimes useful for debugging.
+source [file join [file dirname [info script]] .. breakpoint.tcl]
+
+use libfp ; # all libfp functions now in namespace
+use libfp ; # should be idempotent.
 
 ## test easy, basic functions
 # test add-1 {simple addition} {add 3 4} 7
@@ -25,13 +33,6 @@ test eq-5 {equals 5} {= abc abcd} 0
 test eq-6 {equals 6} {= {abc def ghi} [list abc def]} 0
 
 # should = handle or less than 2 arguments?
-#test eq-7 {equals 7} {=} 0
-#test eq-7 {equals 7} {=} -returnCodes error -result {wrong # args}
-#test eq-8 {equals 8} {= 1} 1
-#test eq-9 {equals 9} {= 1 1 1} 1
-#test eq-10 {equals 10} {= 1 1 2} 0
-# for now, those calls should return an error
-# @note these tests are being skipped, why?
 test eq-7 {equals 7} -body {=} -returnCodes error -result {wrong # args: should be "= a b"}
 test eq-8 {equals 8} -body {= 1} -returnCodes error -result {wrong # args: should be "= a b"}
 test eq-9 {equals 9} -body {= 1 1 1} -returnCodes error -result {wrong # args: should be "= a b"}
@@ -71,12 +72,6 @@ test cond-5 {cond 5} {cond 1 2 3 4} 2
 test cond-6 {cond 6} {cond 0 2 3 4} 4
 test cond-2 {cond 2} -body {cond 1} -returnCodes error -result {cond should be called with an even number of arguments, got 1}
 
-## test map ##
-# set fields [map x [:fields $table] {ifp [eq $x "id"] "id integer primary key autoincrement" $x}]
-# test map-1 {map 1} {map x {id field1 field2} \
-#  {ifp [= $x "id"] "id integer primary key autoincrement" $x}} \
-#  {{id integer primary key autoincrement} field1 field2}
-
 # [2016-07-22 10:13] Two arguments to the test function should be enough: expression and expected result.
 proc testndv {args} {
   global testndv_index
@@ -84,7 +79,6 @@ proc testndv {args} {
   test test-$testndv_index test-$testndv_index {*}$args
 }
 
-# test eq-1 {equals 1} {= 1 1} 1
 testndv {= 1 1} 1
 testndv {!= 1 1} 0
 testndv {!= {a 1} {a 2}} 1
@@ -102,7 +96,6 @@ testndv {and 1 0} 0
 testndv {and {1==1} {1==2}} 0
 testndv {and {1==1} {2==2}} 1
 
-# set s1 1; set s2 2
 testndv {set s1 1; set s2 2; and {$s1 != {}} {$s2 != {}} {$s1 != $s2}} 1
 testndv {set s1 1; set s2 2; and [!= $s1 {}] [!= $s2 {}] [!= $s1 $s2]} 1
 
@@ -112,13 +105,10 @@ testndv {or {1==0} {1==1}} 1
 testndv {or {0==1} {1==0}} 0
 
 testndv {cond 0 2 1 42} 42
-# testndv {cond 0 2 1 42} 43
 
-# lambda_to_proc: faalt, f niet gevonden, iets met scoping dus.
-# set f [lambda_to_proc {x {expr $x * 2}}]
-# testndv {$f 12} 24
+set f [lambda_to_proc {x {expr $x * 2}}]
+testndv {global f; $f 12} 24
 
-# in 1 stap, gaat goed.
 testndv {[lambda_to_proc {x {expr $x * 2}}] 12} 24
 
 # 2 params, first is a proc, second a list
@@ -133,14 +123,6 @@ testndv {map {x {expr $x * 2}} {1 2 3}} {2 4 6}
 
 # 7-5-2016 map in combi with fn/lambda_to_proc
 testndv {map [fn x {expr $x * 2}] {1 2 3}} {2 4 6}
-
-proc * {args} {
-  set res 1
-  foreach arg $args {
-    set res [expr $res * $arg]
-  }
-  return $res
-}
 
 testndv {* 1 2 3} 6
 
@@ -182,12 +164,6 @@ proc find_items {items re} {
 testndv {find_items {abc ab abd ac gh baab} ab} {abc ab abd baab}
 testndv {find_items {abc ab abd ac gh baab} {ab}} {abc ab abd baab}
 
-#puts "Start with filter \$x > 3"
-#testndv {filter x {$x >= 3} {1 2 3 4 5}} {3 4 5}
-#puts "Finished with filter \$x > 3"
-
-# testndv {filter {x {$x >= 3}} {1 2 3 4 5}} {3 4 5}
-
 ## test fold ##
 
 
@@ -198,9 +174,6 @@ testndv {find_items {abc ab abd ac gh baab} {ab}} {abc ab abd baab}
 ## test str ##
 
 ## later: logging around procs
-
-## later: tdbc::sqlite connection which handles transactions automatically,
-# every 1000 (or 10000) statements. How to test?
 
 ## test lstride, also in fp, could/should be in a list package.
 testndv {lstride {a b c d e f g h i} 3} {{a b c} {d e f} {g h i}}
@@ -219,7 +192,6 @@ testndv {+} 0
 # matches should not overlap, so this one returns 2 groups of 3 items each:
 testndv {regexp -all -indices -inline {.(.)(.)} "abcdefgh"} \
     {{0 2} {1 1} {2 2} {3 5} {4 4} {5 5}}
-# testndv {regsub_fn2 {.(.)(.)} "abcdefgh" sub_value_grp} abc
 
 # test regsub_fn, to regsub using functions on parameters
 # also some form of closure needed, use [fn ]
@@ -241,7 +213,7 @@ proc sub_value {val} {
 
 testndv {regsub_fn {.} "abcxyz" sub_value} "zbcxyy"
 
-# maybe another one with matching groups in regexp
+# Another one with matching groups in regexp
 proc sub_value_grp {whole part1 part2} {
   return "=$part1="
 }
