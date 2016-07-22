@@ -1,5 +1,10 @@
 # add file to #include list in globals.h
 proc globals_add_file_include {filename} {
+  # only include .c and .h files
+  set ext [file extension $filename]
+  if {($ext != ".c") && ($ext != ".h")} {
+    return
+  }
   set fn "globals.h"
   set fi [open $fn r]
   set fo [open [tempname $fn] w]

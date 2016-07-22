@@ -20,6 +20,12 @@ task templates {Make script adhere to templates and best practices
   get_std_libs
   # add TT (thinktime) parameter.
   task_add_param TT int var 5
+  task_add_param usertestmode int var 0
+  task_add_param dynatrace int var 1
+  task_add_param scripttest int var 0
+  
+  # proxy_config_loc only used within set_proxy, so no var or param
+  # proxy_config_loc = g:\config\proxy.config
 }
 
 # get .config files from repo/templates iff they do not exist in project yet.
@@ -29,10 +35,13 @@ proc get_template_files {} {
   foreach filename [glob -nocomplain -directory $repo_tmp *.config] {
     set target_name [file tail $filename]
     if {![file exists $target_name]} {
-      file copy $filename $target_name
+      file copy $filename [tempname $target_name]
+      commit_file $target_name
     }
+    add_file $target_name
   }
   # get vuser_init.c from template iff it has not been changed yet.
+  # ie. it has 5 lines or less.
   set text [read_file vuser_init.c]
   if {[:# [split $text "\n"]] <= 5} {
     file copy [file join $repo_tmp vuser_init.c] [tempname vuser_init.c]
