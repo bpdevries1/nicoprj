@@ -18,14 +18,18 @@
 # need to have this both in main and in namespace:
 # * main: so functions can be called externally (export + does not work)
 # * ns  : so + can be used directly, although ::+ also fails.
-namespace path {::tcl::mathop ::tcl::mathfunc}
+# namespace path {::tcl::mathop ::tcl::mathfunc}
+
+# [2016-07-23 16:12] only mathop, don't want log function as a proc.
+namespace path {::tcl::mathop}
 
 namespace eval ::libfp {
   namespace export = != and or ifp seq empty? cond_1 cond not not= \
       str identity fn lstride regsub_fn map filter reduce repeat range \
       lambda_to_proc proc_to_lambda
 
-  namespace path {::tcl::mathop ::tcl::mathfunc}
+  # namespace path {::tcl::mathop ::tcl::mathfunc}
+  namespace path {::tcl::mathop}
 
 # @note some easy, helper functions first
 proc = {a b} {

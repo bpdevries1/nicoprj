@@ -7,7 +7,7 @@ namespace eval ::ndv {
 
 	namespace export assert_old2
 	
-  proc assert_old2 {expr {message ""}} {
+  proc _assert_old2 {expr {message ""}} {
     set res 1
     set code [catch {uplevel 1 [list expr $expr]} res]
     if {$code} {

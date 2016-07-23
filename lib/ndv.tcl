@@ -5,17 +5,31 @@
 source [file join [file dirname [info script]] _installed_datetime.tcl] 
 puts stderr "package ndv installed on: $_installed_datetime"
 
+proc test_log {} {
+  # info frame quite useful, could use again.
+  puts [info frame [expr [info frame] - 1]]
+  catch {log info "test"} res
+  puts "res: $res"
+}
+
 # there are some inter dependencies, so explicitly source other files in the right order.
-source [file join [file dirname [info script]] source_once.tcl] 
-source [file join [file dirname [info script]] CLogger.tcl] 
+source [file join [file dirname [info script]] source_once.tcl]
+
+source [file join [file dirname [info script]] CLogger.tcl]
+
+# [2016-07-23 21:32] CHtmlHelper needs CLogger on load. For now, source CLogger both
+# here and at the end.
 source [file join [file dirname [info script]] CHtmlHelper.tcl] 
 
 # database files in subdir 
-source [file join [file dirname [info script]] db AbstractSchemaDef.tcl] 
-source [file join [file dirname [info script]] db CDatabase.tcl] 
+source [file join [file dirname [info script]] db AbstractSchemaDef.tcl]
+
+source [file join [file dirname [info script]] db CDatabase.tcl]
+
 source [file join [file dirname [info script]] db CClassDef.tcl] 
 
 source [file join [file dirname [info script]] random.tcl]
+
 catch {source [file join [file dirname [info script]] music-random.tcl]} ; # deze heeft random.tcl nodig en ook CDatabase.tcl 
 
 source [file join [file dirname [info script]] fp.tcl]
@@ -58,4 +72,9 @@ source [file join [file dirname [info script]] libdatetime.tcl]
 
 # [2016-07-09 09:49] namespace functions, compare Clojure
 source [file join [file dirname [info script]] libns.tcl]
+
+# [2016-07-23 21:31] CLogger as the last one, because ir defines proc log, which is
+# defined before in Tclx.
+
+source [file join [file dirname [info script]] CLogger.tcl]
 

@@ -1,5 +1,14 @@
-proc use {ns} {
-  namespace import ::${ns}::*
+
+# import procs from namespace into the main/global namespace.
+# what can be a list of items/procs to import
+proc use {ns {what *}} {
+  if {$what == "*"} {
+    namespace import ::${ns}::*
+  } else {
+    foreach el $what {
+      namespace import ::${ns}::$el
+    }
+  }
 }
 
 # example: require libdatetime dt

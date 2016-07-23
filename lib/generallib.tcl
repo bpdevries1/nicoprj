@@ -84,7 +84,7 @@ proc line2list {line} {
 }
 
 # assert best lastig te maken, zie voorbeeld in ::Control::assert (control/assert.tcl)
-proc assert_old1 {expr {message ""}} {
+proc _assert_old1 {expr {message ""}} {
   set res 1
   set code [catch {uplevel 1 [list expr $expr]} res]
   if {$code} {
@@ -449,12 +449,6 @@ proc det_relative_path {sourcefile rootdir} {
   string range $sourcefile [string length $rootdir]+1 end
 }
 
-#### logging helper proc #### 
-proc log {args} {
-  global log
-  # variable log
-  $log {*}$args
-}
 
 ### determine HOSTNAME on both Linux and windows ###
 proc det_hostname {} {
