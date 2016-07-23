@@ -99,6 +99,8 @@ task project {Define and use projects
     set f [open "$project.prj" w]
     puts $f [join $scripts ";"]
     close $f
+    # [2016-07-23 23:16] also make current.
+    file copy -force "$project.prj" "current.prj"
   } elseif {$sub_action == "setcurrent"} {
     file copy -force "$project.prj" "current.prj"
   }
