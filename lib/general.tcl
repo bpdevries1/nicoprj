@@ -5,9 +5,9 @@ package provide ndv 0.1.1
 
 namespace eval ::ndv {
 
-	namespace export assert
+	namespace export assert_old2
 	
-  proc assert {expr {message ""}} {
+  proc assert_old2 {expr {message ""}} {
     set res 1
     set code [catch {uplevel 1 [list expr $expr]} res]
     if {$code} {

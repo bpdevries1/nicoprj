@@ -84,7 +84,7 @@ proc line2list {line} {
 }
 
 # assert best lastig te maken, zie voorbeeld in ::Control::assert (control/assert.tcl)
-proc assert {expr {message ""}} {
+proc assert_old1 {expr {message ""}} {
   set res 1
   set code [catch {uplevel 1 [list expr $expr]} res]
   if {$code} {
