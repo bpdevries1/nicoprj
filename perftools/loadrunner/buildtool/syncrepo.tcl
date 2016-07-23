@@ -245,12 +245,12 @@ task get {Get a repo lib file to local dir
           # ok, newer file in repo
           puts "Getting newer repo file: $repofile"
           # file copy -force $repofile $libfile
-          file_copy_base $repofile $libfile [basefile $libfile]
+          file_copy_base $repofile $libfile [basefile $libfile] 1
         } else {
           if {$force} {
             puts "\[FORCE\] Getting older repo file: $repofile"
             # file copy -force $repofile $libfile
-            file_copy_base $repofile $libfile [basefile $libfile]
+            file_copy_base $repofile $libfile [basefile $libfile] 1
           } else {
             puts "Repo file $libfile is not newer than local file: do nothing"  
           }
@@ -259,7 +259,7 @@ task get {Get a repo lib file to local dir
         # ok, new repo file, not yet in local prj dir.
         puts "Getting new repo file: $repofile"
         # file copy $repofile $libfile
-        file_copy_base $repofile $libfile [basefile $libfile]
+        file_copy_base $repofile $libfile [basefile $libfile] 1
         # also add to project
         add_file $libfile
       }
@@ -269,8 +269,14 @@ task get {Get a repo lib file to local dir
   } ; # foreach libfile
 }
 
-proc file_copy_base {src target base} {
-  file copy -force $src $target
+# if backup==1, create a backup of the lib (in .orig) before getting new repo version.
+proc file_copy_base {src target base {backup 0}} {
+  if {$backup} {
+    file copy -force $src [tempname $target]
+    commit_file $target
+  } else {
+    file copy -force $src $target    
+  }
   file copy -force $src $base
 }
 
