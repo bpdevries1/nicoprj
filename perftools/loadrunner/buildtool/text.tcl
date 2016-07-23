@@ -67,3 +67,39 @@ proc fixcrlf_file {filename} {
   commit_file $filename
 }
 
+task clean_empty_lines {Remove double empty lines from source files
+  Syntax: clean_empty_lines [<filename> ..]
+  Clean for filenames. Handle all source files if none given.
+} {
+  if {$args == {}} {
+    set lst [get_source_files]
+  } else {
+    set lst $args
+  }
+  foreach filename $lst {
+    clean_double_empty_lines $filename
+  }
+}
+
+proc clean_double_empty_lines {filename} {
+  set text [read_file $filename]
+  # first replace lines with only spaces and tabs with real empty lines
+  set text2 [regsub -lineanchor -all {^[ \t]+$} $text ""]
+
+  # then combinations of 2 empty lines or more with just 1.
+  set text3 [regsub -all {\n{3,}} $text2 "\n\n"]
+  if {$text != $text3} {
+    set f [open_temp_w $filename]
+    puts -nonewline $f $text3
+    close $f
+
+    # [2016-07-23 22:47] TODO: implement with_file 'macro'
+    if 0 {
+      with_file f [open_temp_w $filename] {
+        puts -nonewline $f $text3
+      }
+    }
+    
+    commit_file $filename
+  }
+}
