@@ -30,7 +30,12 @@ proc is_commented_line {line} {
       # timestamp occurs, probably a comment anyway, so keep
       return 0
     } elseif {[regexp -nocase {todo} $line]} {
-      return 0
+      if {[regexp -nocase {<todo>} $line]} {
+        # added todo for web_reg_find
+        return 1
+      } else {
+        return 0
+      }
     } elseif {[regexp -nocase {ndv} $line]} {
       return 0
     } else {
