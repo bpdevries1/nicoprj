@@ -6,22 +6,30 @@
 # TODO:
 # * use info stacklevel to also log the calling procedure.
 # * option to log in milli/microseconds.
-
 package require Itcl
 
 package provide ndv 0.1.1
 
-namespace eval ::ndv {
+# [2016-07-23 14:24] assert (in package control) also here, callback with log.
+package require control
 
-	# source [file join $env(CRUISE_DIR) checkout lib perflib.tcl]
-	
+#### logging helper proc ####
+# [2016-07-23 21:39] this one before namespace/classdef, because classdef returns if
+# class already exists. Need proc log to be defined again, to override logarithm function.
+proc log {args} {
+  global log
+  # variable log
+  $log {*}$args
+}
+
+namespace eval ::ndv {
 	# class maar eenmalig definieren
 	if {[llength [itcl::find classes CLogger]] > 0} {
 		return
 	}
 	
 	namespace export CLogger
-	
+
 	itcl::class CLogger {
 	
 		private common int_level
@@ -210,4 +218,24 @@ proc set_log_global {level {options {}}} {
     # check: voor windows nu ook mogelijk? of nog steeds alleen voor dirs?
   }
 }
+
+proc assert_callback {args} {
+  set str [join $args " "]
+  catch {log error $str}
+  puts stderr $str
+  return -code error
+}
+
+# first enable, then import in namespace
+::control::control assert enabled 1
+
+# also first set callback
+# configure assert, also to use logger
+# ::control::control assert enabled 1
+::control::control assert callback assert_callback
+
+# only import after settings done.
+# don't 'use' here, keep packages independent.
+# use control assert
+namespace import ::control::assert
 
