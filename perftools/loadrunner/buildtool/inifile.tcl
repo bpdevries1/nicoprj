@@ -1,26 +1,34 @@
 # procs for reading and writing (similiar to windows) .ini files, as used in Loadrunner.
 
 # return a list, where each item is a dict: header and lines. Lines is a list.
-proc ini_read {filename} {
+proc ini_read {filename {fail_on_file_not_found 1}} {
   set ini {}
   set header ""
   set lines {}
-  set f [open $filename r]
-  while {[gets $f line] >= 0} {
-    if {[regexp {^\[(.+)\]$} $line z h]} {
-      if {$header != ""} {
-        lappend ini [dict create header $header lines $lines]
+  if {[file exists $filename]} {
+    set f [open $filename r]
+    while {[gets $f line] >= 0} {
+      if {[regexp {^\[(.+)\]$} $line z h]} {
+        if {$header != ""} {
+          lappend ini [dict create header $header lines $lines]
+        }
+        set header $h
+        set lines {}
+      } else {
+        lappend lines $line
       }
-      set header $h
-      set lines {}
+    }
+    if {$header != ""} {
+      lappend ini [dict create header $header lines $lines]
+    }
+    close $f
+  } else {
+    if {$fail_on_file_not_found} {
+      error "File not found: $filename"
     } else {
-      lappend lines $line
+      # nothing, return empty ini
     }
   }
-  if {$header != ""} {
-    lappend ini [dict create header $header lines $lines]
-  }
-  close $f
   return $ini
 }
 
@@ -94,7 +102,7 @@ proc ini_lines {ini header} {
       return [:lines $d]
     }
   }
-  return {}
+  return [list]
 }
 
 # return 1 iff line exists under header
@@ -105,3 +113,17 @@ proc ini_exists {ini header line} {
     return 0
   }
 }
+
+# set value for name under header, create iff new.
+proc ini_set_param {ini header name value} {
+  set lines [ini_lines $ini $header]
+  set ndx [lsearch -regexp $lines "^$name\\s*="]
+  if {$ndx >= 0} {
+    set lines [lreplace $lines $ndx $ndx "$name=$value"]
+  } else {
+    lappend lines "$name=$value"
+  }
+  set ini [ini_set_lines $ini $header $lines]
+  return $ini
+}
+

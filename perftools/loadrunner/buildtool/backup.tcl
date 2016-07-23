@@ -9,6 +9,12 @@ proc tempname {filename} {
   return "$filename.__TEMP__"
 }
 
+proc open_temp_w {filename} {
+  set f [open [tempname $filename] w]
+  fconfigure $f -translation crlf
+  return $f
+}
+
 proc set_origdir {} {
   global _origdir
   set _origdir "_orig.[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"]"
@@ -31,7 +37,10 @@ set EMPTY_CONTENTS "*** EMPTY ***"
 # same -> remove temp file.
 proc commit_file {filename} {
   global _origdir EMPTY_CONTENTS
-  
+  if {$filename == ""} {
+    error "Empty filename: $filename"
+  }
+  assert {$filename != ""}
   set backupname [file join $_origdir $filename]
   if {![file exists $filename]} {
     # new file, just rename temp to filename

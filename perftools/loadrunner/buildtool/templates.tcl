@@ -23,7 +23,8 @@ task templates {Make script adhere to templates and best practices
   task_add_param usertestmode int var 0
   task_add_param dynatrace int var 1
   task_add_param scripttest int var 0
-  
+
+  add_param_iteration
   # proxy_config_loc only used within set_proxy, so no var or param
   # proxy_config_loc = g:\config\proxy.config
 }

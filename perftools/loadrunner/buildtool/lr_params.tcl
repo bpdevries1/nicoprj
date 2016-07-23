@@ -1,3 +1,6 @@
+# Both real LR params (like set with Ctrl-L) as vars/params set in code are handled here.
+# There is an overlap with add_param type=param.
+
 task check_lr_params {Check LR parameter settings
   For each parameter, check:
   * not set to sequential - should only be used for script testing.
@@ -77,4 +80,27 @@ task param_domain {set domain param and replace within requests in action files
   task_add_param domain str param $domain
 }
 
+# add iteration parameter to the script, iff it does not exist yet (idempotent)
+proc add_param_iteration {} {
+  # .usr: set ParameterFile=<script>.prm
+  set prm_file [script_filename prm]
+  set usr_file [script_filename usr]
+  set ini [ini_read $usr_file]
+  ini_set_param $ini General ParameterFile $prm_file
+  ini_write $usr_file $ini
+
+  # add param in .prm file
+  set ini [ini_read $prm_file 0]
+  set header "parameter:iteration"
+  if {[:# [ini_lines $ini $header]] == 0} {
+    set lines "Format=\"%d\"
+OriginalValue=\"\"
+Type=\"CurrentIteration\"
+ParamName=\"iteration\""
+    set ini [ini_set_lines $ini $header $lines] 
+  }
+  ini_write $prm_file $ini
+  
+  add_file_metadata $prm_file
+}
 

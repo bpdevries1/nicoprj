@@ -55,8 +55,19 @@ proc in_lr_include {srcfile} {
   file exists [file join $lr_include_dir $srcfile]
 }
 
+# get filename for script
+# spec can be: prm, usr
+proc script_filename {spec} {
+  set script_ext {prm usr}
+  if {[lsearch -exact $script_ext $spec] >= 0} {
+    return "[file tail [file normalize .]].$spec"
+  }
+  error "Unknown spec: $spec"
+}
+
 proc get_action_files {} {
-  set usr_file "[file tail [file normalize .]].usr"
+  # set usr_file "[file tail [file normalize .]].usr"
+  set usr_file [script_filename usr]
   set ini [ini_read $usr_file]
   set lines [ini_lines $ini Actions]
   set res {}
