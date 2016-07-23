@@ -1,5 +1,10 @@
 # ndv.tcl - base library file to source other files
 
+# write installation timestamp to stdout
+# TODO: maybe not always, dependent on package require param?
+source [file join [file dirname [info script]] _installed_datetime.tcl] 
+puts stderr "package ndv installed on: $_installed_datetime"
+
 # there are some inter dependencies, so explicitly source other files in the right order.
 source [file join [file dirname [info script]] source_once.tcl] 
 source [file join [file dirname [info script]] CLogger.tcl] 

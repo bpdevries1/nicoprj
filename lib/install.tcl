@@ -1,3 +1,8 @@
+#!/usr/bin/env tclsh
+
+# [2016-07-23 11:42] default want the same version for install as for interactive and script usage, i.e. tclsh, not tclsh861 etc.
+# Can always execute with eg. tclsh861 install.tcl
+
 #!/usr/bin/env tclsh861
 
 #!/home/nico/bin/tclsh
@@ -17,6 +22,12 @@ set package_version 0.1.1
 # lib_root D:/DEVELOP/TCL85/lib/tcl8.5 => D:/DEVELOP/TCL85/lib
 proc main {} {
   global package_name package_version
+
+  # [2016-07-23 11:35] create file with installation timestamp
+  # don't use ndv library procedures here.
+  set f [open _installed_datetime.tcl w]
+  puts $f {set _installed_datetime [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S %z"]}
+  close $f
   
   # 9-6-2014 also to dropbox
   # 22-8-2014 first to dropbox, otherwise output might be confusing.
