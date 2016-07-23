@@ -39,6 +39,9 @@ proc is_commented_line {line} {
   } elseif {$line == "//"} {
     # just 2 slashes
     return 1
+  } elseif {[regexp {^////} $line]} {
+    # 4 slashes is always (extra) out commented code.
+    return 1
   } else {
     return 0
   }
