@@ -55,8 +55,9 @@ proc det_domain_old {stmt} {
 
 # TODO: split this one in 1) comment lines and 2) write to file.
 proc domain_write_source_statements {filename stmt_groups domains_ini} {
-  set f [open $filename w]
-  fconfigure $f -translation crlf
+  #set f [open $filename w]
+  #fconfigure $f -translation crlf
+  set f [open_temp_w $filename]
   foreach grp $stmt_groups {
     set ignore [is_ignore_domain $domains_ini [:domain $grp]]
     # puts $f "// domain: [:domain $grp]"

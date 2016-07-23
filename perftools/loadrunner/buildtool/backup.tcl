@@ -9,9 +9,9 @@ proc tempname {filename} {
   return "$filename.__TEMP__"
 }
 
-proc open_temp_w {filename} {
+proc open_temp_w {filename {translation crlf}} {
   set f [open [tempname $filename] w]
-  fconfigure $f -translation crlf
+  fconfigure $f -translation $translation
   return $f
 }
 

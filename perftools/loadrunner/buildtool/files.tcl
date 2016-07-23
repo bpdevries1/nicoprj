@@ -40,8 +40,9 @@ proc add_file_usr {filename} {
 proc add_file_metadata {filename} {
   set meta ScriptUploadMetadata.xml
   set fi [open $meta r]
-  set fo [open [tempname $meta] w]
-  fconfigure $fo -translation crlf
+  #set fo [open [tempname $meta] w]
+  #fconfigure $fo -translation crlf
+  set fo [open_temp_w $meta]
   set found 0
   while {[gets $fi line] >= 0} {
     if {[regexp {</GeneralFiles>} $line]} {
@@ -83,8 +84,9 @@ proc add_action {action} {
 proc create_action_file {action} {
   set filename "${action}.c"
   if {![file exists $filename]} {
-    set f [open $filename w]
-    fconfigure $f -translation crlf
+    #set f [open $filename w]
+    #fconfigure $f -translation crlf
+    set f [open_temp_w $filename]
     puts $f "$action\(\) \{
 
 \treturn 0;
@@ -98,8 +100,9 @@ proc update_default_usp {args} {
   set new_actions $args ; # could be more than 1
   set fn "default.usp"
   set fi [open $fn r]
-  set fo [open [tempname $fn] w]
-  fconfigure $fo -translation crlf
+  #set fo [open [tempname $fn] w]
+  #fconfigure $fo -translation crlf
+  set fo [open_temp_w $fn]
   while {[gets $fi line] >= 0} {
     if {[regexp {^Profile Actions name=vuser_init,(.+),vuser_end$} $line z orig_actions]} {
       # breakpoint
@@ -157,8 +160,9 @@ proc split_action {action} {
   set new_actions {}
   set fn "${action}.c"
   set fi [open $fn r]
-  set fo [open [tempname $fn] w]
-  fconfigure $fo -translation crlf
+  #set fo [open [tempname $fn] w]
+  #fconfigure $fo -translation crlf
+  set fo [open_temp_w $fn]
   set foc $fo
   while {[gets $fi line] >= 0} {
     if {[regexp {_start_transaction\(\"(.+)\"\);} $line z transname]} {
@@ -170,8 +174,9 @@ proc split_action {action} {
         log info "set new transname: $transname"
       }
       lappend new_actions $transname
-      set foa [open "${transname}.c" w]
-      fconfigure $foa -translation crlf
+      #set foa [open "${transname}.c" w]
+      #fconfigure $foa -translation crlf
+      set foa [open_temp_w "${transname}.c"]
       puts $foa "$transname\(\) \{"
       set foc $foa
       puts $fo "\t$transname\(\);"

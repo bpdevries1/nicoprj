@@ -7,8 +7,9 @@ proc globals_add_file_include {filename} {
   }
   set fn "globals.h"
   set fi [open $fn r]
-  set fo [open [tempname $fn] w]
-  fconfigure $fo -translation crlf
+  #set fo [open [tempname $fn] w]
+  #fconfigure $fo -translation crlf
+  set fo [open_temp_w $fn]
   set in_includes 0
   set found 0
   while {[gets $fi line] >= 0} {
@@ -68,8 +69,9 @@ proc globals_add_var {name datatype} {
     }
 
     set lines [linsert $lines $ndx $line]
-    set fo [open [tempname globals.h] w]
-    fconfigure $fo -translation crlf
+    #set fo [open [tempname globals.h] w]
+    #fconfigure $fo -translation crlf
+    set fo [open_temp_w globals.h]
     puts -nonewline $fo [join $lines "\n"]
     close $fo
     commit_file globals.h

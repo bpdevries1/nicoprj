@@ -68,7 +68,8 @@ proc set_web_reg_find {filename} {
   # stmt_groups is sort-of like a parse tree. Work on this one, at the end write
   # back to file.
   set stmt_groups2 [add_web_reg_find $stmt_groups]
-  write_source_statements [tempname $filename] $stmt_groups2
+  # write_source_statements [tempname $filename] $stmt_groups2
+  write_source_statements $filename $stmt_groups2
   commit_file $filename
 }
 

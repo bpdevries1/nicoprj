@@ -38,8 +38,9 @@ proc regsub_file {srcfile from to really} {
     puts "$srcfile - $nreplaced change(s):"
     # set tempfile "$srcfile.__TEMP__"
     set tempfile [tempname $srcfile]
-    set f [open $tempfile w]
-    fconfigure $f -translation crlf
+    #set f [open $tempfile w]
+    #fconfigure $f -translation crlf
+    set f [open_temp_w $srcfile]
     puts -nonewline $f $text2
     close $f
     diff_files $srcfile $tempfile

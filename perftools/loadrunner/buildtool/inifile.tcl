@@ -34,8 +34,9 @@ proc ini_read {filename {fail_on_file_not_found 1}} {
 
 # also make backup
 proc ini_write {filename ini {translation crlf}} {
-  set f [open [tempname $filename] w]
-  fconfigure $f -translation $translation
+  #set f [open [tempname $filename] w]
+  #fconfigure $f -translation $translation
+  set f [open_temp_w $filename]
   foreach d $ini {
     puts $f "\[[:header $d]\]"
     # don't put empty lines

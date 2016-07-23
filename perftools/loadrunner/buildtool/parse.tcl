@@ -128,9 +128,10 @@ proc group_statements {statements} {
   return $res
 }
 
-proc write_source_statements {temp_filename stmt_groups} {
-  set f [open $temp_filename w]
-  fconfigure $f -translation crlf
+proc write_source_statements {filename stmt_groups} {
+  #set f [open $temp_filename w]
+  #fconfigure $f -translation crlf
+  set f [open_temp_w $filename]
   foreach grp $stmt_groups {
     foreach stmt [:statements $grp] {
       puts $f [join [:lines $stmt] "\n"]    

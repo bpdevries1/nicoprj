@@ -15,8 +15,9 @@ task totabs {Convert spaces to tabs
 
 proc totabs_file {srcfile tabwidth} {
   set fi [open $srcfile r]
-  set fo [open [tempname $srcfile] w]
-  fconfigure $f -translation crlf
+  #set fo [open [tempname $srcfile] w]
+  #fconfigure $fo -translation crlf
+  set fo [open_temp_w $srcfile]
   while {[gets $fi line] >= 0} {
     puts $fo [totabs_line $line $tabwidth]
   }
@@ -58,8 +59,9 @@ task fixcrlf {Fix line endings
 
 proc fixcrlf_file {filename} {
   set text [read_file $filename]
-  set fo [open [tempname $filename] w]
-  fconfigure $fo -translation crlf
+  #set fo [open [tempname $filename] w]
+  #fconfigure $fo -translation crlf
+  set fo [open_temp_w $filename]
   puts -nonewline $fo $text
   close $fo
   commit_file $filename

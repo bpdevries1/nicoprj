@@ -9,8 +9,9 @@ task comment_remove {Remove out commented code
 
 proc comment_remove_file {filename} {
   set fi [open $filename r]
-  set fo [open [tempname $filename] w]
-  fconfigure $fo -translation crlf
+  #set fo [open [tempname $filename] w]
+  #fconfigure $fo -translation crlf
+  set fo [open_temp_w $filename]
   while {[gets $fi line] >= 0} {
     if {[is_commented_line $line]} {
       # out commented line, remove.
@@ -55,8 +56,9 @@ task uncomment {Uncomment commented lines in source
 
 proc uncomment_file {filename} {
   set fi [open $filename r]
-  set fo [open [tempname $filename] w]
-  fconfigure $fo -translation crlf
+  #set fo [open [tempname $filename] w]
+  #fconfigure $fo -translation crlf
+  set fo [open_temp_w $filename]
   while {[gets $fi line] >= 0} {
     if {[is_commented_line $line]} {
       regexp {^//(.*)$} $line z line2

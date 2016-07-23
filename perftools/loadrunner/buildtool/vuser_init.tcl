@@ -6,8 +6,9 @@ proc vuser_init_update_domains {domains_ini} {
   # alle huidige ignore lines helemaal weg en vervangen door domains_ini, op alfabet.
   set replaced 0
   set fi [open vuser_init.c r]
-  set fo [open [tempname vuser_init.c] w]
-  fconfigure $fo -translation crlf
+  #set fo [open [tempname vuser_init.c] w]
+  #fconfigure $fo -translation crlf
+  set fo [open_temp_w vuser_init.c]
   while {[gets $fi line] >= 0} {
     if {[regexp {Filter out some production URLs} $line]} {
       puts $fo $line
@@ -67,8 +68,9 @@ proc vuser_init_add_param {name datatype varparam default_val} {
       }
     }
     set lines [linsert $lines $ndx $line]
-    set fo [open [tempname vuser_init.c] w]
-    fconfigure $fo -translation crlf
+    #set fo [open [tempname vuser_init.c] w]
+    #fconfigure $fo -translation crlf
+    set fo [open_temp_w vuser_init.c]
     puts -nonewline $fo [join $lines "\n"]
     close $fo
     commit_file vuser_init.c
