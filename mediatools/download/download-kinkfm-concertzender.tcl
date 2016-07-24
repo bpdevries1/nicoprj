@@ -61,10 +61,32 @@ proc download_x {sub outdir_root sec_date {hour none}} {
     }
   }
   set to_path [file join $outdir_root $str_date "X${sub}-$str_date2-${hour}00.mp3"]
+  set to_download [should_download $to_path]
+  if {$to_download} {
+    puts "Download: $to_path"
+    rename_orig $to_path
+    # example URL: http://streams.greenhost.nl/cz/cz/rod/20151004-2000.mp3
+    set url "http://streams.greenhost.nl/cz/cz/rod/$str_date2-${hour}00.mp3"
+    puts "From url: $url"
+    # puts "Should download: $to_path"
+    exec -ignorestderr curl -o $to_path $url
+  }
+}
+
+proc should_download {to_path} {
   set to_download 0
   if {[file exists $to_path]} {
-    if {[file size $to_path] > 10000} {
-      puts "Already downloaded: $to_path" 
+    set size [file size $to_path]
+    if {$size > 10000} {
+      # puts "Already downloaded: $to_path"
+      # [2016-07-24 10:45] sometimes file too small, maybe downloaded too soon.
+      # only try again if file is more than a week old and a retry has not
+      # been done before, need to check what works
+      if {[too_small $to_path]} {
+        set to_download [should_try_again $to_path]  
+      } else {
+        set to_download 0
+      }
     } else {
       if {[file size $to_path] == 64} {
         puts "Already downloaded, but not Xrated/ray: ignore: $to_path"
@@ -78,12 +100,44 @@ proc download_x {sub outdir_root sec_date {hour none}} {
     set to_download 1
     # exec -ignorestderr curl -o $to_path "http://streams.greenhost.nl/cz/cz/rod/$str_date2-2100.mp3" 
   }
-  if {$to_download} {
-    puts "Download: $to_path"
-    # example URL: http://streams.greenhost.nl/cz/cz/rod/20151004-2000.mp3
-    set url "http://streams.greenhost.nl/cz/cz/rod/$str_date2-${hour}00.mp3"
-    puts "From url: $url"
-    exec -ignorestderr curl -o $to_path $url
+  return $to_download
+}
+
+# return 1 iff $to_path is at least a week old and a backup does not exists.
+proc should_try_again {to_path} {
+  if {[age_days [file mtime $to_path]] > 7} {
+    set lst [glob -directory [file dirname $to_path] "[file tail $to_path]*"]
+    if {[llength $lst] == 1} {
+      return 1
+    } else {
+      puts "Already a backup file for $to_path"
+      return 0
+    }
+  } else {
+    return 0
+  }
+}
+
+proc age_days {sec} {
+  expr ([clock seconds] - $sec) / 86400
+}
+
+# XRated (2hours) should by at least 135 MiB, XRay at least 65 MiB
+proc too_small {filename} {
+  set size_mib [expr 1e-6 * [file size $filename]]
+  if {[regexp -nocase rated [file tail  $filename]]} {
+    expr $size_mib < 135
+  } else {
+    expr $size_mib < 65
+  }
+}
+
+# iff to_path exists, rename it to the same name with the mtime as extension.
+proc rename_orig {to_path} {
+  if {[file exists $to_path]} {
+    set new_name "$to_path.[clock format [file mtime $to_path] -format "%Y-%m-%d--%H-%M-%S"]"
+    puts "Rename (orig) $to_path => $new_name"
+    file rename $to_path $new_name
   }
 }
 
