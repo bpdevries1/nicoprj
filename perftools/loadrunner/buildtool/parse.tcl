@@ -152,3 +152,28 @@ proc stmt_grp_has {stmt_grp type} {
   return $found
 }
 
+# TODO: multiline comment blocks
+proc line_type {line} {
+  set line [string trim $line]
+  if {$line == ""} {
+    return empty
+  }
+  if {[regexp {^//} $line]} {
+    return comment
+  }
+  if {[regexp {^/\*} $line]} {
+    return comment_start
+  }
+  if {[regexp {\*/$} $line]} {
+    return comment_end
+  }
+  if {[regexp {^\#} $line]} {
+    if {[regexp {^\#include} $line]} {
+      return include
+    } else {
+      return directive
+    }
+  }
+  return other
+}
+

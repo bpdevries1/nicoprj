@@ -17,7 +17,7 @@ package require ndv
 ndv::source_once task.tcl configs.tcl selectfiles.tcl backup.tcl \
     inifile.tcl lr_params.tcl templates.tcl parse.tcl \
     syncrepo.tcl regsub.tcl files.tcl text.tcl comment.tcl domains.tcl \
-    vuser_init.tcl globals_h.tcl
+    vuser_init.tcl globals_h.tcl checks.tcl
 
 set_log_global info
 
@@ -183,137 +183,12 @@ task test {Perform tests on script
   task_check_lr_params {*}$args
 }
 
-task check {Perform some checks on sources
-  (eg location of #includes)} {
-  lassign [det_full $args] args full
-  if {$args != {}} {
-    foreach libfile $args {
-      check_file $libfile $full
-    }
-  } else {
-    foreach srcfile [get_source_files]	{
-      check_file $srcfile $full
-    }
-    check_script
-  }
-}
-
-proc check_file {srcfile full} {
-  check_file_includes $srcfile
-  if {$full} {
-    check_file_todos $srcfile
-    check_file_comments $srcfile
-  }
-  # [2016-02-05 17:29:15] TODO: Wil eigenlijk in globals.h een zeer beperkt aantal globals. Beter om te definieren waar ze gebruikt worden, zoals cachecontrol etc.
-  # check_globals
-}
-
-# check if include statement occurs after other statements. Includes should all be at the top.
-proc check_file_includes {srcfile} {
-  set other_found 0
-  set in_comment 0
-  set f [open $srcfile r]
-  set linenr 0
-  while {[gets $f line] >= 0} {
-    incr linenr
-    set lt [line_type $line]
-    if {$lt == "comment_start"} {
-      set in_comment 1
-    }
-    if {$lt == "comment_end"} {
-      set in_comment 0
-    }
-    if {!$in_comment} {
-      if {$lt == "include"} {
-        if {$other_found} {
-          # puts "$srcfile \($linenr\) WARN: #include found after other statements: $line"
-          puts_warn $srcfile $linenr "#include found after other statements: $line"
-        }
-      }
-      if {$lt == "other"} {
-        set other_found 1
-      }
-    }
-  }
-  close $f
-}
-
-# [2016-02-05 11:16:37] Deze niet std, levert te veel op, evt wel losse task.
-proc check_file_todos {srcfile} {
-  set f [open $srcfile r]
-  set linenr 0
-  while {[gets $f line] >= 0} {
-    incr linenr
-    if {[regexp {TODO} $line]} {
-      puts_warn $srcfile $linenr "TODO found: $line"
-    }
-  }
-  close $f
-}
-
-# [2016-02-05 11:14:23] deze niet std uitvoeren, levert te veel op. Mogelijk wel los, maar dan een task van maken.
-proc check_file_comments {srcfile} {
-  set f [open $srcfile r]
-  set linenr 0
-  while {[gets $f line] >= 0} {
-    incr linenr
-    set lt [line_type $line]
-    if {$lt == "comment"} {
-      # [2016-02-05 11:10:41] als er een haakje inzit, is het waarschijnlijk uitgecommente code.
-      if {[regexp {[\(\)]} $line]} {
-        puts_warn $srcfile $linenr "Possible out-commented code found: $line"
-      }
-    }
-  }
-  close $f
-}
 
 
 proc puts_warn {srcfile linenr text} {
   puts "[file tail  $srcfile] \($linenr\) WARN: $text"
 }
 
-# check script scope things, eg all .c/.h files in dir are included in the script. Also for .config files.
-proc check_script {} {
-  # puts "check_script called"
-  set src_files [filter_ignore_files \
-                     [concat [glob -nocomplain -tails -directory . -type f "*.c"] \
-                          [glob -nocomplain -tails -directory . -type f "*.h"] \
-                          [glob -nocomplain -tails -directory . -type f "*.config"]]]
-  set prj_text [read_file [lindex [glob *.usr] 0]]
-  foreach src_file $src_files {
-    if {[string first $src_file $prj_text] == -1} {
-      puts "Sourcefile not in script.usr file: $src_file"
-    } else {
-      # puts "Ok: $src_file found in script.usr"
-    }
-  }
-}
-
-# TODO: multiline comment blocks
-proc line_type {line} {
-  set line [string trim $line]
-  if {$line == ""} {
-    return empty
-  }
-  if {[regexp {^//} $line]} {
-    return comment
-  }
-  if {[regexp {^/\*} $line]} {
-    return comment_start
-  }
-  if {[regexp {\*/$} $line]} {
-    return comment_end
-  }
-  if {[regexp {^\#} $line]} {
-    if {[regexp {^\#include} $line]} {
-      return include
-    } else {
-      return directive
-    }
-  }
-  return other
-}
 
 # deze werkt nog niet op windows, zowel onder cygwin als 4NT.
 proc puts_colour {colour str} {
@@ -325,19 +200,6 @@ proc puts_colour {colour str} {
   send::sda_fgwhite
 }
 
-# return the first of a list of loadrunner include dirs that exists
-# if none exists, return empty string.
-proc det_lr_include_dir {} {
-  set dirs {{C:\Program Files (x86)\HP\Virtual User Generator\include}
-    /home/ymor/RABO/VuGen/lr_include}
-  foreach dir $dirs {
-    if {[file exists $dir]} {
-      return $dir
-    }
-  }
-  return ""
-}
-
 if {[this_is_main]} {
   main $argv  
 } else {
@@ -347,85 +209,22 @@ if {[this_is_main]} {
 
 if 0 {
 opdrachten vanaf de cmdline:
-bld deps : haalt nieuwste libs of vanuit repo-dir. Check in globals.h of mogelijk alle .c/.h files welke includes erin staan.
-bld help : toont commando's
 bld run : run vugen test vanaf cmdline, evt met cmdline opties.
 bld lint : checks uitvoeren op source code.
 
 bld deploy : in ALM neerzetten, voor later.
-bld libs : overview of library files, also showing if up-to-date with repo. Kijken of van alle files het type is te achterhalen, en of het een lib is of kan zijn. Ook deels afh van script, of het bij actions staat of extra files. Een actionfile kan ook lib zijn, bv inloggen, of CacheControl. Dit moet ook kunnen, wil flexibel zijn, bestaande scripten zo goed mogelijk kunnen bedienen. Dan actions alleen noemen als ze in repo zitten. Files bij extra iets meer kans, maar globals niet, en config files ook niet. Config is mss meer een skeleton verhaal. Ook kijken welke ge-include worden.
-bld diff <libfile> : toont verschillen lokale versie van lib met repo versie. Gebruik cmdline diff.
 bld compile : compile uitvoeren zoals binnen vugen
 
 bld new <prjname> - nieuwe dir maken met file scaffolding. Evt met opties voor web ding of iets anders. Deze scaffolding dan wel ergens neerzetten.
-bld task <specifiek> - specifieke user defined task. Maar ook met bld <specifiek>. En in bld help moeten deze specifieke ook getoond worden.
-bld repl - start repl waarin je bovenstaande taken kunt uitvoeren zonder steeds bld te typen. Maar dan weer history etc zelf regelen, anders in bash/4NT. Eigenlijk een tcl shell waarin je dit script gesourced hebt.
-bld version - versie van deze tool. Of niet zo belangrijk.
-bld showdeps - toon alle includes vanuit alle files. Eigenlijk een grep en wat je ook in de dotfile tool hebt.
-bld graphdeps - deze graphviz/dot tool voor huidige script.
-bld replace <from-regexp> <to-regexp> - vervang tekst in files, mss nog opgeven in welke files? bv optionele param glob-pattern. Deze al vaker nodig gehad, ook voor clojure.
- -> deze bv voor start_transaction dingen, maar zijn eigenlijk standaard patronen. Je zou kunnen zeggen dat als je deze aanroept met 1 param, dat dit dan zo'n pattern is, maar is wel tricky. Je kunt bv door-routes naar regsub task.
-bld regsub - betere naam ipv replace? En dan replace voor std patterns gebruiken?
-  bld replace <pattern>, bv bld replace transaction - vervang recorded transaction door rb_transaction_start etc.
-
 
   
-  Nog wat om lr_start_transaction om te zetten naar rb_start_transaction.
-
-  mss wil je een soort script, die meerdere regsubs achter elkaar uitvoert.
-
-  bld todo - show todo's in source (met sourcefile en mss stukje context)
-
   bld check - nog meer doen: ongebruikte params? wil met oude scripts nog wel eens gebeuren.
   bld check - heb ergens (loadrunner doc?) lijst van uitgangspunten en checks -> deze hier checken dus.
-  
-  bld regsub show - voorgaande regsubs tonen om nog eens te doen.
-  bld regsub do <nr> - een voorgaande uitvoeren.
-  bld regsub del <nr> - een voorgaande deleten.
-  meest gebruikte of laatst gebruikte bovenaan zetten?
 
-  zou bepaalde acties op hele VuGen dir kunenn doen, dat je bv checkt of alle scripts goed zijn en up-to-date met lib. Maar vaak met een subset bezig, en dan wil je alleen die checken. Dit dan ergens definieren. Opties:
-  * een subdir maken met config-file hierin met namen van andere scripten. Mss beetje overkill?
-  * in Vugen-dir iets als bld setcurrent DotCom*. Maar dan ook de recs. Deze evt eerst verplaatsen. Maar met tabgebruik in cmdline ook wel expliciet de 4 dirs te zetten. Een setcurrent komt altijd in de plaats van de vorige.
   
-bld add(action) - voeg action toe, dus een file, maar ook opnemen in de 'script' van Vugen, nog even kijken hoe.
-
 [2016-07-16 14:56] Tasks om oud script om te zetten? Waarsch best lastig.
   
-bld check - heb hier al wat, ook inbouwen check dat alle files ge-include zijn, alle .c en .h files moeten ergens in het script voorkomen, als action of additional. Deze moet in .usr zitten.
-  
-specifieke tasks:
-bld tabs - overal tabs/spaces goed zetten, evt ook in de libs, zou in libs sowieso goed moeten staan.
-  bld format - format overal goed zetten, wat algemener dan tabs. Wel oppassen dat je libs niet-van-mij overslaat. Hoe dit bij te houden, eerst hardcoded, of in config in repo.
-ook bij format: canonical form maken van config files. VuGen slaat deze nu vaak op in niet-sorted volgorde, waardoor diff heel lastig is.  
-<iets met splitsen recorded session in losse actions?> bv elke transactie wordt een action?
-bld rename <action-from> <action-to> - file renamen, inclusief in het script.
 bld save-as <nwe script naam> - ook iets wat je nu uit Vugen zelf doet.
-
-projecten om acties op scripts te combineren. Niet alle taken te combineren, zoals put (van lib). Get kan evt wel. Vooral voor test, evt ook running van scripts.
-
-# set a project, also if new scripts are added to project.
-bld project set dotcom scr1 scr2 scr3 scr4
-
-# set as current
-bld project setcurrent dotcom 
-
-wel checken of dit een project dir is, met subdirs als scriptdir.
-
-# next actions in root will be scoped to this project.
-  
-  
-check specifieke tools, vooral in vugen/loadrunner dirs.
-
-specifieke zit vooral in de #includes. Deze tool ook redelijk zo voor AHK te gebruiken. Vanuit tcl ook te compileren als nodig.
-
-iets om lib in repo te zetten. Maar wil je dit wel vanuit een project? vooralsnog met bld put.
-
-basis om te bouwen lijkt heel simpel:
-{*}$argv uitvoeren, met mss andere voor unknown, vergelijk :keyword oplossing. Deze kan gechained worden. Of je geeft eerst een stacktrace.
-params/arg stuk hier evt ook bij. Dat te optionele params aan taken kunt meegeven.
-
-evt extra taken ook in repo neerzetten? Of deze juist bij tool houden?
 
 Basisidee/uitgangspunt(en):
 * Als een file in repo staat, is het lib, en in principe overal hetzelfde. Een globals.h zet je normaal niet in de repo, hooguit als skeleton.
@@ -470,10 +269,5 @@ bld regsub "tr, vuserId" "tr"
 
 # [2016-04-04 09:41:02] Voor RCC, ivm CDN gebruik.
 bld regsub "https://{host}/rcc/DashboardLightThemeStatic/themes/DL2/ext" "https://{cdnhost}/{cdnprefix}"
-
-[2016-02-10 12:50:41] TODO: bld put lib
--> repo ook in git zetten. Doe nu gac/bld put, wil dan eigenlijk dezelfde commit met log comment.
-mss iets van:
-bld put <lib> <commit msg>
 
 }

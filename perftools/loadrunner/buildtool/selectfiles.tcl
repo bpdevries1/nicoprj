@@ -95,3 +95,18 @@ proc get_project_files {} {
   }
   return $res
 }
+
+# return the first of a list of loadrunner include dirs that exists
+# if none exists, return empty string.
+# [2016-07-24 18:54] this one should be set in a project/repo config task.
+proc det_lr_include_dir {} {
+  set dirs {{C:\Program Files (x86)\HP\Virtual User Generator\include}
+    /home/ymor/RABO/VuGen/lr_include}
+  foreach dir $dirs {
+    if {[file exists $dir]} {
+      return $dir
+    }
+  }
+  return ""
+}
+
