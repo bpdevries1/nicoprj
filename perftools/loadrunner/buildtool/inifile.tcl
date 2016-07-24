@@ -128,3 +128,16 @@ proc ini_set_param {ini header name value} {
   return $ini
 }
 
+proc ini_get_param {ini header name {default "<none>"}} {
+  set lines [ini_lines $ini $header]
+  set ndx [lsearch -regexp $lines "^$name\\s*="]
+  if {$ndx >= 0} {
+    set line [lindex $lines $ndx]
+    regexp {^[^=]+=(.*)$} $line z value
+    return [string trim $value]
+  } else {
+    return $default
+  }
+}
+
+

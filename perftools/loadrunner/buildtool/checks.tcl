@@ -99,7 +99,17 @@ proc check_script {} {
       # puts "Ok: $src_file found in script.usr"
     }
   }
-  #check_setting default.cfg <header> FailNonCriticalItem 1
-  #check_setting default.cfg <header> ProxyUseProxy 0
+  set ini [ini_read default.cfg]
+  check_setting $ini WEB FailNonCriticalItem 1
+  check_setting $ini WEB ProxyUseProxy 0
+  check_setting $ini WEB ProxyUseProxyServer 0
 }
 
+proc check_setting {ini header key value} {
+  set val [ini_get_param $ini $header $key "<none>"]
+  if {$val == $value} {
+    # ok, no worries
+  } else {
+    puts "WARN: unexpected value for $header/$key: $val (expected: $value)"
+  }
+}
