@@ -14,7 +14,8 @@ package require struct::list
 # evt todo
 # @todo met web_reg_save_param mee kunnen geven de hoeveelste occurence gebruikt moet worden? -> dit kan.
 
-set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+# set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+set_log_global info
 
 set PARAM_TYPES {dropDownList radioButtonList textBox}
 set PARAM_PREFIX "pgen_"
@@ -35,15 +36,15 @@ proc main {argc argv} {
 
   $log debug "ar_argv: [array get ar_argv]"
   if {$ar_argv(loglevel) != ""} {
-    ::ndv::CLogger::set_log_level_all $ar_argv(loglevel)  
+    # ::ndv::CLogger::set_log_level_all $ar_argv(loglevel)  
   }
-  ::ndv::CLogger::set_logfile "[file rootname [file tail [info script]]].log"
+  # ::ndv::CLogger::set_logfile "[file rootname [file tail [info script]]].log"
   $log info START
 
   handle_dir $ar_argv(inputdir) $ar_argv(outputdir) $ar_argv(preprocess)
 
   $log info FINISHED
-  ::ndv::CLogger::close_logfile
+  # ::ndv::CLogger::close_logfile
 }
 
 proc handle_dir {inputdir gendir preprocess} {
