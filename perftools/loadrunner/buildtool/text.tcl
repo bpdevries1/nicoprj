@@ -67,8 +67,8 @@ proc fixcrlf_file {filename} {
   commit_file $filename
 }
 
-task clean_empty_lines {Remove double empty lines from source files
-  Syntax: clean_empty_lines [<filename> ..]
+task remove_empty_lines {Remove double empty lines from source files
+  Syntax: remove_empty_lines [<filename> ..]
   Clean for filenames. Handle all source files if none given.
 } {
   if {$args == {}} {
@@ -77,11 +77,11 @@ task clean_empty_lines {Remove double empty lines from source files
     set lst $args
   }
   foreach filename $lst {
-    clean_double_empty_lines $filename
+    remove_double_empty_lines $filename
   }
 }
 
-proc clean_double_empty_lines {filename} {
+proc remove_double_empty_lines {filename} {
   set text [read_file $filename]
   # first replace lines with only spaces and tabs with real empty lines
   set text2 [regsub -lineanchor -all {^[ \t]+$} $text ""]
