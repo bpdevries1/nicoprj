@@ -21,7 +21,7 @@ task domains {get/update domains
     # breakpoint
     set stmt_groups [group_statements $statements]
     set domains_ini [update_domains_ini $domains_ini $stmt_groups]; # any new ones?
-    domain_write_source_statements [tempname $filename] $stmt_groups $domains_ini
+    domain_write_source_statements $filename $stmt_groups $domains_ini
     commit_file $filename
   }
   ini_write domains.ini $domains_ini

@@ -74,10 +74,12 @@ proc get_action_files {} {
   foreach line $lines {
     set filename [:1 [split $line "="]]
     if {![regexp {^vuser_} $filename]} {
+      assert {![regexp __TEMP__ $filename]}
       lappend res $filename
     }
   }
   # log debug "action files: $res"
+  # breakpoint
   return $res
 }
 

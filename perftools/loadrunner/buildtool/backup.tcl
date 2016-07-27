@@ -1,11 +1,9 @@
 # procs for making source backups, keeping originals.
 
-# TODO: deze backup functionaliteit overal gebruiken:
-# regsub, mogelijk nog anderen, check op orig.
-
 require libdatetime dt
 
 proc tempname {filename} {
+  assert {![regexp __TEMP__ $filename]}
   return "$filename.__TEMP__"
 }
 
