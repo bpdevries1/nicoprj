@@ -17,7 +17,7 @@ package require ndv
 ndv::source_once task.tcl configs.tcl selectfiles.tcl backup.tcl \
     inifile.tcl lr_params.tcl templates.tcl parse.tcl \
     syncrepo.tcl regsub.tcl files.tcl text.tcl comment.tcl domains.tcl \
-    vuser_init.tcl globals_h.tcl checks.tcl
+    vuser_init.tcl globals_h.tcl checks.tcl clean.tcl
 
 set_log_global info
 
@@ -106,17 +106,6 @@ task project {Define and use projects
   }
 }
 
-task clean {Delete non script files
-  Delete files: *.idx *.log git-add-commit.sh output.* *.tmp TransactionsData.db *.bak TransactionsData.db Iteration* result1 data.
-} {
-  set dir [file normalize .]
-  if {[is_script_dir $dir]} {
-    clean_script $dir
-  } else {
-    puts "Not a vugen script."
-  }
-}
-
 # project dir iff it contains minimal one script dir
 proc is_project_dir {dir} {
   set res 0
@@ -136,16 +125,6 @@ proc is_script_dir {dir} {
     return 1
   }
   return 0
-}
-
-proc clean_script {dir} {
-  set glob_patterns {*.idx *.log git-add-commit.sh output.* *.tmp TransactionsData.db *.bak TransactionsData.db Iteration* result1 data}
-  puts "Cleaning script dir: [file normalize $dir]"
-  foreach glob_pattern $glob_patterns {
-    foreach filename [glob -nocomplain -directory $dir $glob_pattern] {
-      delete_path $filename
-    }
-  }
 }
 
 proc delete_path {pathname} {
