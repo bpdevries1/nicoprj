@@ -25,8 +25,9 @@ proc main {} {
 
   # [2016-07-23 11:35] create file with installation timestamp
   # don't use ndv library procedures here.
-  set f [open _installed_datetime.tcl w]
-  puts $f {set _installed_datetime [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S %z"]}
+  set latest_file [det_latest_file]
+  set f [open _installed_message.tcl w]
+  puts $f "set _ndv_version \"package ndv installed on: [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S %z"] - $latest_file\""
   close $f
   
   # 9-6-2014 also to dropbox
@@ -40,6 +41,35 @@ proc main {} {
 
 }
 
+# determine latest/newest file and return string with filename and date/time
+# TODO: implement
+# maybe also use Clojure threading operator ->
+proc det_latest_file_new {} {
+  set files [glob_rec_files *.tcl]
+  map {dict name mtime}
+  # soort van max-dict fn maken, die hele dict retourneert gebaseerd op 1 veld. Zie Clojure, sort functie ook.
+  # ook iets van first [sort $files] te doen.
+  reduce [fn {old new} {ifp [:mtime $old] > [:mtime $new] $old $new}] ; start with first two.
+  format result  
+}
+
+# TODO: implement like above, also with subdirs.
+# for now only root dir
+proc det_latest_file {} {
+  set mt 0
+  set fn ""
+  foreach tclfile [glob *.tcl] {
+    if {[regexp {^_} [file tail $tclfile]]} {
+      continue
+    }
+    if {[file mtime $tclfile] > $mt} {
+      set mt [file mtime $tclfile]
+      set fn $tclfile
+    }
+  }
+  return "Newest file: $fn ([clock format $mt -format "%Y-%m-%d %H:%M:%S %z"])"
+}
+  
 proc install_to_dir {lib_install} {
   copy_dir $lib_install .
   copy_dir $lib_install db
