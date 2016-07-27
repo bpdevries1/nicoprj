@@ -102,13 +102,15 @@ proc group_statements {statements} {
     # breakpoint
     #log debug "stmt: $stmt"
     #log debug "keys: [dict keys $stmt]"
-    # TODO: [2016-07-17 10:56] now need to set tp in a separate statement, if put directly within if, it will fail.
-    set tp [:type $stmt]
+    # TODO: [2016-07-17 10:56] now need to set tp in a separate statement, if put directly within if, it will fail. [2016-07-27 22:03] non-reproduceable now.
+    #if {[regexp {^main} [:type $stmt]]} {set stmt}
+    #set tp [:type $stmt]
     if {[regexp {web_add_header} $stmt]} {
       # log debug "web add header found"
       # breakpoint
     }
-    if {[regexp {^main} $tp]} {
+    # [2016-07-27 22:02] This line below supposedly gave error before:
+    if {[regexp {^main} [:type $stmt]]} {
       # log debug "tp=main, create new group and put in res"
       # TODO: maybe determining domain should be a separate step.
       set url [stmt_det_url $stmt]
