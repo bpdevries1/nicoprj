@@ -61,8 +61,8 @@ proc zip_project {dir zipfile} {
 proc zip_vugens {} {
   # [2016-05-12 17:20:30] niet altijd de clean, want soms juist wel alle info bewaren.
   # exec {c:\pcc\util\tcl86\bin\tclsh86.exe} {C:\PCC\Nico\nicoprj\perftools\vugentools\vugenclean.tcl} {c:\PCC\Nico\VuGen}
-  zip_vugen ClientReporting
-  zip_vugen clrep-rec-20160512a
+  # zip_vugen ClientReporting
+  # zip_vugen clrep-rec-20160512a
   if 0 {
 	zip_vugen RCC_All
   }
