@@ -1,10 +1,9 @@
 # ndv.tcl - base library file to source other files
 
-# write installation timestamp to stdout
-# TODO: maybe not always, dependent on package require param?
 source [file join [file dirname [info script]] _installed_message.tcl] 
-puts stderr $_ndv_version
+# puts stderr $_ndv_version
 
+# proc to return install date/time and name/date/time of newest tcl file in lib.
 # should use namespace ndv
 proc ndv_version {} {
   global _ndv_version
