@@ -45,6 +45,7 @@ proc main {argv} {
     set_origdir ; # to use by all subsequent tasks.
     task_$tname {*}$trest
     mark_backup $tname $trest
+    check_temp_files
   } elseif {[is_project_dir $dir]} {
     # in a container dir with script dirs as subdirs.
     set repodir [file normalize "repo"]

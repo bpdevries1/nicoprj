@@ -47,7 +47,7 @@ task add_param {Add var/param to script
     } else {
       puts "Unknown datatype: $datatype (args=$args)"
       task_help add_param
-      exit
+      return
     }
   }
   if {$varparam == "var"} {

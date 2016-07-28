@@ -143,3 +143,9 @@ proc last_backup_dir {} {
   }
 }
 
+# check no __TEMP__ files have been left when the task(s) is/are done
+proc check_temp_files {} {
+  foreach filename [glob -nocomplain *__TEMP__] {
+    puts "WARN: temp file still exists: $filename"
+  }
+}

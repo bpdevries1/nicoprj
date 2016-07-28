@@ -185,6 +185,7 @@ proc split_action {action} {
       puts $foa $line
       puts $foa "\treturn 0;\n\}\n"
       close $foa
+      commit_file "${transname}.c"
       set foc $fo
     } else {
       puts $foc $line
