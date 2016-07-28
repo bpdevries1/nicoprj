@@ -10,7 +10,7 @@ task regsub {Regular epression replace
   Without -do, perform a dry run.
 } {
   set options {
-    {do "Really perform regsub actions'"}
+    {do "Really perform regsub actions"}
     {action "Only handle action files"}
   }
   set usage ": regsub \[options] <from> <to>:"

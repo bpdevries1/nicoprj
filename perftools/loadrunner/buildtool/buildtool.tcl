@@ -127,17 +127,7 @@ proc is_script_dir {dir} {
   return 0
 }
 
-proc delete_path {pathname} {
-  puts "Deleting: $pathname"
-  if {[file isdirectory $pathname]} {
-    # force nodig, dir is mogelijk niet leeg of heeft subdirs.
-    file delete -force $pathname  
-  } else {
-    file delete $pathname  
-  }
-}
-
-
+# TODO: waar wordt deze voor gebruikt?
 proc det_full {lst} {
   set full 0
   set res {}
@@ -150,7 +140,6 @@ proc det_full {lst} {
   }
   list $res $full
 }
-
 
 # perform some tests. For now only show if libs are up-to-date
 task test {Perform tests on script
