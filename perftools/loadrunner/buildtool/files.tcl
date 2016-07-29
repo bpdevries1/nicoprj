@@ -75,6 +75,9 @@ task add_action {Add action to project
 
 # create $action.c and add to project: default.usp, <prj>.usr, ScriptUploadMetadata.xml
 proc add_action {action} {
+  if {[regexp {^(.+)\.c$} $action z act]} {
+    set action $act
+  }
   create_action_file $action
   update_default_usp $action
   add_action_usr $action

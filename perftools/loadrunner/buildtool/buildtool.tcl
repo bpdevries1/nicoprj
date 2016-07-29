@@ -17,7 +17,8 @@ package require ndv
 ndv::source_once task.tcl configs.tcl selectfiles.tcl backup.tcl \
     inifile.tcl lr_params.tcl templates.tcl parse.tcl \
     syncrepo.tcl regsub.tcl files.tcl text.tcl comment.tcl domains.tcl \
-    vuser_init.tcl globals_h.tcl checks.tcl clean.tcl trans.tcl
+    vuser_init.tcl globals_h.tcl checks.tcl clean.tcl trans.tcl \
+    steps.tcl
 
 set_log_global info
 
@@ -128,20 +129,6 @@ proc is_script_dir {dir} {
   return 0
 }
 
-# TODO: waar wordt deze voor gebruikt?
-proc det_full {lst} {
-  set full 0
-  set res {}
-  foreach el $lst {
-    if {$el == "-full"} {
-      set full 1
-    } else {
-      lappend res $el
-    }
-  }
-  list $res $full
-}
-
 # perform some tests. For now only show if libs are up-to-date
 task test {Perform tests on script
   Calls following tasks: libs, check, check_configs, check_lr_params.
@@ -151,8 +138,6 @@ task test {Perform tests on script
   task_check_configs {*}$args
   task_check_lr_params {*}$args
 }
-
-
 
 proc puts_warn {srcfile linenr text} {
   puts "[file tail  $srcfile] \($linenr\) WARN: $text"
