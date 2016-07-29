@@ -1,39 +1,41 @@
-#!/usr/bin/env tclsh861
+#!/usr/bin/env tclsh
 
-package require Tclx
+package require ndv
 
-proc main {} {
-	puts "\{| border=\"1\" cellspacing=\"0\""
-	set state BEGIN
-	set n_cols 0
-	while {![eof stdin]} {
-		gets stdin line
-		# set line [string trim $line] ; # kan zijn dat lijn met tabs begint of eindigt, wil je houden.
-		if {$line != ""} {
-			set l [split $line "\t"]
-			puts "|-"
-			set n_row_cols 0
-			foreach el $l {
-				if {[regexp "^-" $el]} {
-					set el " $el"
-				}
-				if {$state == "BEGIN"} {
-					puts "!$el"
-					incr n_cols
-					incr n_row_cols
-				} else {
-					puts "|$el"
-					incr n_row_cols
-				}
-			}
-			set state "IN_TABEL"
-			for {set i $n_row_cols} {$i < $n_cols} {incr i} {
-				puts "| -"
-			}
-		}
-	}
+proc main {argv} {
+  global argv0
+  set options {
+    {line "Put all items for a row on a single line using ||"}
+  }
+  set usage "$argv0 \[options]"
+  set opt [getoptions argv $options $usage]
+  set oneline [:line $opt]
+	# puts "\{| border=\"1\" cellspacing=\"0\""
+  puts "\{| class=\"wikitable\""
+  set lines [split [read stdin] "\n"]
+  #set header [:0 $lines]
+  #set ncols [puts_header $header]
+  set rowchar "!"
+  foreach line $lines {
+    if {[string trim $line] == ""} {continue}
+    set cells [split $line "\t"]
+    # | aspect1 || a || b || c
+    # TODO: anders als geen -line
+    # [2016-07-29 22:12] Aanvullen van lege cellen lijkt niet meer nodig.
+    if {$oneline} {
+      puts "$rowchar [join $cells " || "]"      
+    } else {
+      # |Orange
+      # |Apple
+      puts "$rowchar [join $cells "\n$rowchar "]"      
+    }
+
+    set rowchar "|"
+    puts "|-"
+  }
 	puts "|\}"
 }
 
-cmdtrace on [open cmd.log w]
-main
+# [2016-07-29 21:48] Deze hieronder onduidelijk
+# cmdtrace on [open cmd.log w]
+main $argv
