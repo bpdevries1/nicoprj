@@ -1,13 +1,13 @@
-task comment_remove {Remove out commented code
+task remove_comment {Remove out commented code
   Remove lines starting with //<tab> and not containing timestamp or initials.
   Only do this with action files, not library files etc.
 } {
   foreach filename [get_action_files]	{
-    comment_remove_file $filename
+    remove_comment_file $filename
   }
 }
 
-proc comment_remove_file {filename} {
+proc remove_comment_file {filename} {
   set fi [open $filename r]
   #set fo [open [tempname $filename] w]
   #fconfigure $fo -translation crlf
@@ -55,7 +55,7 @@ proc is_commented_line {line} {
 task uncomment {Uncomment commented lines in source
   Syntax: uncomment [<file> ..]
   If no files given, do nothing.
-  Uncomment the same lines that would be removed by task comment_remove
+  Uncomment the same lines that would be removed by task remove_comment
 } {
   foreach filename $args {
     uncomment_file $filename
