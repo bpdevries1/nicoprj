@@ -1,27 +1,74 @@
 task check {Perform some checks on sources
-  (eg location of #includes)} {
-  lassign [det_full $args] args full
+  (eg location of #includes)
+} {
+  set options {
+    {includes "Check includes (default)"}
+    {todos "Check todo's"}
+    {comments "Check comments"}
+    {all "Do full check, including todo's and comments"}
+  }
+  set usage ": regsub \[options] <from> <to>:"
+  set opt [getoptions args $options $usage]
+  #puts "opt: $opt"
+  #breakpoint
+  # lassign [det_full $args] args full
   if {$args != {}} {
-    foreach libfile $args {
-      check_file $libfile $full
+    foreach filename $args {
+      check_file $filename $opt
     }
   } else {
     foreach srcfile [get_source_files]	{
-      check_file $srcfile $full
+      check_file $srcfile $opt
     }
     check_script
   }
 }
 
-proc check_file {srcfile full} {
-  check_file_includes $srcfile
-  if {$full} {
-    check_file_todos $srcfile
+proc det_full_old {lst} {
+  set full 0
+  set res {}
+  foreach el $lst {
+    if {$el == "-full"} {
+      set full 1
+    } else {
+      lappend res $el
+    }
+  }
+  list $res $full
+}
+
+proc check_file {srcfile opt} {
+  if {[:all $opt]} {
+    set opt [dict merge $opt [dict create includes 1 todos 1 comments 1]]
+  }
+  if {[count_set_options $opt] == 0} {
+    set opt [dict merge $opt [dict create includes 1]]
+  }
+  if {[:includes $opt]} {
+    check_file_includes $srcfile  
+  }
+  if {[:todos $opt]} {
+    check_file_todos $srcfile    
+  }
+  if {[:comments $opt]} {
     check_file_comments $srcfile
   }
+  
   # [2016-02-05 17:29:15] TODO: Wil eigenlijk in globals.h een zeer beperkt aantal globals. Beter om te definieren waar ze gebruikt worden, zoals cachecontrol etc.
   # [2016-07-24 18:46] aan de andere kant nu taken om globals toe te voegen, dus beter te beheren. Maar als global nog steeds maar door 1 lib wordt gebruikt, staat vorige statement nog steeds.
+  # [2016-07-29 12:53:39] check_globals does not exist.
   # check_globals
+}
+
+# return the number of set binary options in opt
+proc count_set_options {opt} {
+  set res 0
+  dict for {nm val} $opt {
+    if {$val == 1} {
+      incr res
+    }
+  }
+  return $res
 }
 
 # check if include statement occurs after other statements. Includes should all be at the top.
