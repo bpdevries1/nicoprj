@@ -39,7 +39,7 @@ proc main {argv} {
   read_logfile_dir $logdir $dbname $ssl
 }
 
-proc read_logfile_dir {logdir dbname ssl} {
+proc read_logfile_dir {logdir dbname ssl {split_proc split_transname}} {
   global pubsub
   # TODO mss pubsub nog eerder zetten als je read-vuserlogs-dir.tcl gebruikt.
   set pubsub [PubSub new]
@@ -54,7 +54,7 @@ proc read_logfile_dir {logdir dbname ssl} {
   $pg set_items_total [:# $logfiles]
   $pg start
   foreach logfile $logfiles {
-    readlogfile $logfile $db $ssl
+    readlogfile $logfile $db $ssl $split_proc
     incr nread
     $pg at_item $nread
     if {$nread >= 105} {
@@ -84,7 +84,7 @@ proc add_read_status {db status} {
 #                   usecase revisit {transid int} transshort searchcrit}
 # functions.c(343): [2015-09-02 05:51:41] [1441165901] trans=CR_UC1_revisit_11_Expand_transactions_DEP, user=u_lpt-rtsec_cr_tso_tso1_000005, resptime=0.156, status=0 [09/02/15 05:51:41]	[MsgId: MMSG-17999]
 # Transaction "CR_UC1_ -> deze wordt niet geparsed.
-proc readlogfile {logfile db ssl} {
+proc readlogfile {logfile db ssl split_proc} {
   log info "Reading: $logfile"
   if {[is_logfile_read $db $logfile]} {
     return
@@ -138,7 +138,8 @@ proc readlogfile {logfile db ssl} {
 
       # TODO: [2016-06-17 15:48:17] retraccts not used anymore?
 		  handle_retraccts $line $db $logfile_id $vuserid $linenr $iteration
-		  lassign [handle_trans $line $db $logfile_id $vuserid $linenr $iteration] user2 ts_cet2
+		  lassign [handle_trans $line $db $logfile_id $vuserid $linenr \
+                   $iteration $split_proc] user2 ts_cet2
 
       # TODO: wat wil ik met user2/ts_cet2, vast goede reden? 
       if {$user2 != ""} {
@@ -260,7 +261,41 @@ proc handle_retraccts {line db logfile_id vuserid linenr iteration} {
   }
 }
 
-proc handle_trans {line db logfile_id vuserid linenr iteration} {
+# [2016-07-30 21:18] TODO: clean this one up, based on latest version of rb_end_transaction.
+proc handle_trans {line db logfile_id vuserid linenr iteration split_proc} {
+  if {[regexp {: \[([0-9 :-]+)\] \[(\d+)\] trans: ([^ ]+) - user: (\d+), resptime: ([0-9.,]+)} \
+           $line z ts_cet sec_cet transname user resptime]} {
+    regsub -all {,} $resptime "." resptime
+    $db insert trans [vars_to_dict logfile_id vuserid ts_cet sec_cet transname user resptime linenr iteration]
+    return [list $user $ts_cet]
+  } elseif {[regexp {: \[([0-9 :-]+)\] \[(\d+)\] trans=([^ ]+), user=([^ ,]+), resptime=([0-9.,-]+), status=([0-9-]+)} \
+                 $line z ts_cet sec_cet transname user resptime status]} {
+    regsub -all {,} $resptime "." resptime
+    lassign [split_transname $transname] usecase revisit transid transshort searchcrit
+    $db insert trans [vars_to_dict logfile_id vuserid ts_cet sec_cet transname user resptime status usecase \
+                          revisit transid transshort searchcrit linenr iteration]
+    return [list $user $ts_cet]
+  } elseif {[regexp {: \[([0-9 :.-]+)\] trans=([^ ]+), user=([^ ,]+), resptime=([0-9.,-]+), status=([0-9-]+)} \
+                 $line z ts_cet transname user resptime status]} {
+    # [2016-06-15 10:23:22] timestamp incl milliseconds
+    # [2016-07-30 21:18] TODO: possibly this variant is the only one needed now.
+    # functions.c(377): [2016-06-09 15:52:22.096] trans=CR_UC3_newuser_01_Login_Cras_QQQ, user=3002568887, resptime=-1.000, status=-1, iteration=1 [06/09/16 15:52:22]
+    set sec_cet [parse_cet $ts_cet]
+    regsub -all {,} $resptime "." resptime
+
+    $db insert trans [dict merge [vars_to_dict logfile_id vuserid \
+                                      ts_cet sec_cet transname \
+                                      user resptime status linenr iteration] \
+                          [$split_proc $transname]]
+    
+    return [list $user $ts_cet]
+  } elseif {[regexp {trans=CR_UC} $line]} {
+    breakpoint
+  }
+  return [list "" ""]
+}
+
+proc handle_trans_old {line db logfile_id vuserid linenr iteration} {
   if {[regexp {: \[([0-9 :-]+)\] \[(\d+)\] trans: ([^ ]+) - user: (\d+), resptime: ([0-9.,]+)} \
            $line z ts_cet sec_cet transname user resptime]} {
     regsub -all {,} $resptime "." resptime
@@ -301,7 +336,9 @@ proc det_vuserid {logfile} {
   }
 }
 
-proc split_transname {transname} {
+# TODO: this one is not working anymore with all different kinds of transnames, should
+# have separate one per project/script.
+proc split_transname_old {transname} {
  #regexp {^([^ ]{0,5}_UC\d+)_([^ _]+)_(\d+)_([^ ]+?)_([^_]+)$} $transname z usecase revisit transid transshort searchcrit
 
   if {[regexp {^([^ ]{0,5}_UC\d+)_([^ _]+)_(\d+)_([^ ]+?)_([^ _]+)$} $transname z usecase revisit transid transshort searchcrit]} {
@@ -525,6 +562,15 @@ proc delete_database {dbname} {
     $db close
   }
 }
+
+# split transaction name in parts to store in DB. Proc should return a dict with a subset of the following fields:
+# usecase, revisit, transid, transshort, searchcrit
+# TODO: this one now in two places, also .bld/config.tcl
+proc split_transname {transname} {
+  regexp {^([^_]+)_(.+)$} $transname z usecase transshort
+  dict create usecase $usecase transshort $transshort
+}
+
 
 if {[this_is_main]} {
   set_log_global perf {showfilename 0}
