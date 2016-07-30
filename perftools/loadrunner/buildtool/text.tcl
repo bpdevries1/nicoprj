@@ -1,3 +1,5 @@
+use libio
+
 task totabs {Convert spaces to tabs
   Syntax: totabs [ntabs] - convert n tabs to a single tab. Default is 4.
   Handle all source files.
@@ -89,17 +91,11 @@ proc remove_double_empty_lines {filename} {
   # then combinations of 2 empty lines or more with just 1.
   set text3 [regsub -all {\n{3,}} $text2 "\n\n"]
   if {$text != $text3} {
-    set f [open_temp_w $filename]
-    puts -nonewline $f $text3
-    close $f
-
-    # [2016-07-23 22:47] TODO: implement with_file 'macro'
-    if 0 {
-      with_file f [open_temp_w $filename] {
-        puts -nonewline $f $text3
-      }
+    # write_file [temp_name $filename] $text3 ; # should also work.
+    # [2016-07-30 17:10] but leave one below for one, to also use it elsewhere.
+    with_file f [open_temp_w $filename] {
+      puts -nonewline $f $text3
     }
-    
     commit_file $filename
   }
 }
