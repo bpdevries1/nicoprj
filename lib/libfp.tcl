@@ -20,6 +20,9 @@
 # * ns  : so + can be used directly, although ::+ also fails.
 # namespace path {::tcl::mathop ::tcl::mathfunc}
 
+# [2016-07-30 10:06] TODO: add clj sequence functions like first, rest, second, count.
+# those instead of current :# :0 and :1 as defined in libdict.tcl.
+
 # [2016-07-23 16:12] only mathop, don't want log function as a proc.
 namespace path {::tcl::mathop}
 
@@ -170,7 +173,7 @@ proc proc_to_lambda {procname} {
 # rename <proc> "" can be used to delete a proc.
 
 # Opties:
-# * fully qualified name teruggeven, dus met libfp:: ervoor.-> lijkt wel prima.
+# * fully qualified name teruggeven, dus met libfp:: ervoor.-> [2016-07-30 09:31] lijkt wel prima, huidige keuze
 # * aanmaken in main namespace: proc ::$procname
 # * aanmaken in callende namespace: kan dit?
 
@@ -286,10 +289,11 @@ proc find_proc {procname} {
   info proc ::$procname
 }
 
-# @todo handle more than one map-var, for traversing more than one map at the same time?
+# @todo handle more than one map-var, for traversing more than one map at the same time? -> [2016-07-30 09:33] NOT.
 # @note should handle 2 forms:
-# (map var list expression-with-var)
+# (map var list expression-with-var) -> [2016-07-30 09:33] this one deprecated?
 # (map lambda list), where lambda is {var expr-with-var}
+# @todo [2016-07-30 09:34] check if apply can be be used instead of lambda_to_proc, to prevent memory leaks.
 proc map {args} {
   if {[llength $args] == 2} {
     lassign $args arg1 arg2

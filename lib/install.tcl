@@ -11,6 +11,10 @@
 set package_name ndv
 set package_version 0.1.1
 
+source libns.tcl
+source libfp.tcl
+use libfp
+
 # history
 # version date     notes
 # 0.1              initial version with logger, htmlhelper and xmlhelper
@@ -53,23 +57,39 @@ proc det_latest_file_new {} {
   format result  
 }
 
-# TODO: implement like above, also with subdirs.
-# for now only root dir
+# first an imperative version which also checks subdirs
 proc det_latest_file {} {
-  set mt 0
-  set fn ""
-  foreach tclfile [glob *.tcl] {
-    if {[regexp {^_} [file tail $tclfile]]} {
-      continue
-    }
-    if {[file mtime $tclfile] > $mt} {
-      set mt [file mtime $tclfile]
-      set fn $tclfile
+  lassign [det_latest_file_rec .] filename mtime
+  return "Newest: $filename ([clock format $mtime -format "%Y-%m-%d %H:%M:%S %z"])"  
+}
+
+# return [list <name> <timestamp in seconds>] of newest file in dir, including subdirs
+proc det_latest_file_rec {dir} {
+  set mtime 0
+  set filename ""
+  foreach path [glob -nocomplain -directory $dir *] {
+    if {[latest_ignore $path]} {continue}
+    if {[file isfile $path]} {
+      if {[file mtime $path] > $mtime} {
+        set mtime [file mtime $path]
+        set filename $path
+      }
+    } else {
+      # directory
+      set subres [det_latest_file_rec $path]
+      if {[lindex $subres 1] > $mtime} {
+        lassign $subres filename mtime
+      }
     }
   }
-  return "Newest file: $fn ([clock format $mt -format "%Y-%m-%d %H:%M:%S %z"])"
+  list $filename $mtime
 }
-  
+
+proc latest_ignore {path} {
+  set tail [file tail $path]
+  != {} [filter [fn re {regexp $re $tail}] {{^_} {^logs$}}]
+}
+
 proc install_to_dir {lib_install} {
   copy_dir $lib_install .
   copy_dir $lib_install db
