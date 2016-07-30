@@ -22,6 +22,8 @@ source [file join [file dirname [info script]] source_once.tcl]
 
 source [file join [file dirname [info script]] CLogger.tcl]
 
+source [file join [file dirname [info script]] liboptions.tcl]
+
 # [2016-07-23 21:32] CHtmlHelper needs CLogger on load. For now, source CLogger both
 # here and at the end.
 source [file join [file dirname [info script]] CHtmlHelper.tcl] 
