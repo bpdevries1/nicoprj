@@ -1,4 +1,4 @@
-#!/usr/bin/env tclsh861
+#!/usr/bin/env tclsh
 
 # test-libfp.tcl - test functionality of libfp.tcl
 

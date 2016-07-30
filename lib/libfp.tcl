@@ -171,6 +171,7 @@ proc proc_to_lambda {procname} {
 # TODO: find a way to clean up those procs. According to wiki.tcl.tk this is one of the
 # harder problems. Maybe start/stop "transaction" or exeution-timeline. If the timeline finishes, all created procs within can be removed. Maybe something with namespaces: put als temp procs in a namespace, and forget the namespace when you're done.
 # rename <proc> "" can be used to delete a proc.
+# TODO: maybe could use a watch on the generated proc name, to see when it goes out of scope. But should be careful when procname is given to another var.
 
 # Opties:
 # * fully qualified name teruggeven, dus met libfp:: ervoor.-> [2016-07-30 09:31] lijkt wel prima, huidige keuze
