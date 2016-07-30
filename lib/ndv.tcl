@@ -80,6 +80,8 @@ source [file join [file dirname [info script]] libdatetime.tcl]
 # [2016-07-09 09:49] namespace functions, compare Clojure
 source [file join [file dirname [info script]] libns.tcl]
 
+source [file join [file dirname [info script]] libio.tcl]
+
 # [2016-07-23 21:31] CLogger as the last one, because ir defines proc log, which is
 # defined before in Tclx.
 
