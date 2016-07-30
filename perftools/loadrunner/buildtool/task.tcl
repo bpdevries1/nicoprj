@@ -2,13 +2,18 @@ set _tasks [dict create]
 
 use libfp
 
+# @deprecated, use task2
+# TODO: change all tasks to use new task2. When done, rename back to task.
 proc task {name desc body} {
   global _tasks
   set proc_name "task_$name"
+  if {[dict_get $_tasks $name] != {}} {
+    puts "FATAL: Task already defined: $name"
+    exit ; # hard programming error.
+  }
   dict set _tasks $name [dict create name $name firstline [first_line $desc] desc $desc]
 
   proc $proc_name {args} $body
-  
 }
 
 # [2016-07-30 12:24] new version to automatically set options.
@@ -23,6 +28,10 @@ proc task2 {args} {
   set args [lrange $args 0 end-1]
   lassign $args options params
   set proc_name "task_$name"
+  if {[dict_get $_tasks $name] != {}} {
+    puts "FATAL: Task already defined: $name"
+    exit ; # hard programming error.
+  }
   dict set _tasks $name [dict create name $name firstline [first_line $desc] \
                              desc [make_desc $name $desc $options $params]]
   # [2016-07-30 14:11] Use [list] to ensure options and usage are given as single
