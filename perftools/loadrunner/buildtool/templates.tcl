@@ -31,8 +31,8 @@ task templates {Make script adhere to templates and best practices
 
 # get .config files from repo/templates iff they do not exist in project yet.
 proc get_template_files {} {
-  global repodir
-  set repo_tmp [file join $repodir template]
+  global repo_dir
+  set repo_tmp [file join $repo_dir template]
   foreach filename [glob -nocomplain -directory $repo_tmp *.config] {
     set target_name [file tail $filename]
     if {![file exists $target_name]} {

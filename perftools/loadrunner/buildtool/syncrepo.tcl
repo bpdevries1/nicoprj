@@ -3,7 +3,7 @@ task libs {Overview of lib files, including status
   Show status of all library files, with respect to repository.
 } {
   global as_project
-  file mkdir ".base"
+  file mkdir [base_dir]
   set repo_libs [get_repo_libs]
   # puts "repo_libs: $repo_libs"
   set source_files [get_source_files]
@@ -47,8 +47,8 @@ task libs {Overview of lib files, including status
 
 # @param libfile: relative, just file name.
 proc show_status {libfile} {
-  global repolibdir as_project
-  #set repofile [file join $repolibdir $libfile]
+  global repo_lib_dir as_project
+  #set repofile [file join $repo_lib_dir $libfile]
   set repofile [repofile $libfile]
   set basefile [basefile $libfile]
 
@@ -96,9 +96,9 @@ proc show_status {libfile} {
 # TODO: maybe allow for tiny difference between mtimes? Could be that a file system is
 # less detailed?
 proc mtime_status {libfile} {
-  global repolibdir
-  set repofile [file join $repolibdir $libfile]
-  set basefile [file join .base $libfile]
+  global repo_lib_dir
+  set repofile [file join $repo_lib_dir $libfile]
+  set basefile [file join [base_dir] $libfile]
 
   set lib_mtime [file mtime $libfile]
   set repo_mtime [file mtime $repofile]
@@ -179,12 +179,12 @@ proc file_info {libfile} {
 }
 
 proc repofile {libfile} {
-  global repolibdir
-  file join $repolibdir $libfile
+  global repo_lib_dir
+  file join $repo_lib_dir $libfile
 }
 
 proc basefile {libfile} {
-  file join .base $libfile
+  file join [base_dir] $libfile
 }
 
 # put lib file from working/script directory into repository
@@ -192,14 +192,14 @@ task put {Put a local lib file in the repo
   Syntax: put [-force] <lib>
   Only put file in repo if it is newer than repo version, unless -force is used.
 } {
-  global repolibdir
-  file mkdir ".base"
+  global repo_lib_dir
+  file mkdir [base_dir]
   # puts "args: $args"
-  file mkdir $repolibdir
+  file mkdir $repo_lib_dir
   lassign [det_force $args] args force
   foreach libfile $args {
     if {[file exists $libfile]} {
-      set repofile [file join $repolibdir $libfile]
+      set repofile [file join $repo_lib_dir $libfile]
       if {[file exists $repofile]} {
         if {[file mtime $libfile] > [file mtime $repofile]} {
           # ok, newer file
@@ -232,13 +232,13 @@ task get {Get a repo lib file to local dir
   Syntax: get [-force] <lib>
   Only get repo version if it is newer than the local version, unless -force is used.
 } {
-  global repolibdir
-  file mkdir ".base"
+  global repo_lib_dir
+  file mkdir [base_dir]
   # puts "args: $args"
-  file mkdir $repolibdir
+  file mkdir $repo_lib_dir
   lassign [det_force $args] args force
   foreach libfile $args {
-    set repofile [file join $repolibdir $libfile]
+    set repofile [file join $repo_lib_dir $libfile]
     if {[file exists $repofile]} {
       if {[file exists $libfile]} {
         if {[file mtime $libfile] < [file mtime $repofile]} {
@@ -291,4 +291,8 @@ proc det_force {lst} {
     }
   }
   list $res $force
+}
+
+proc base_dir {} {
+  file join [config_dir] ".base"
 }

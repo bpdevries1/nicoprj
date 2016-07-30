@@ -15,7 +15,8 @@ proc open_temp_w {filename {translation crlf}} {
 
 proc set_origdir {} {
   global _origdir
-  set _origdir "_orig.[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"]"
+  # set _origdir "_orig.[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"]"
+  set _origdir [file join [config_dir] "_orig.[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"]"]
 }
 
 proc get_origdir {} {
@@ -135,7 +136,7 @@ task undo {undo last task
 
 # find last/newest backup/orig dir.
 proc last_backup_dir {} {
-  set lst [glob -nocomplain -type d _orig.*]
+  set lst [glob -nocomplain -type d -directory [config_dir] _orig.*]
   if {$lst == {}} {
     return ""
   } else {

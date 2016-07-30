@@ -14,20 +14,87 @@ term::ansi::send::import
 
 package require ndv
 
+set_log_global info
+
 ndv::source_once task.tcl configs.tcl selectfiles.tcl backup.tcl \
-    inifile.tcl lr_params.tcl templates.tcl parse.tcl \
+    inifile.tcl init.tcl lr_params.tcl templates.tcl parse.tcl \
     syncrepo.tcl regsub.tcl files.tcl text.tcl comment.tcl domains.tcl \
     vuser_init.tcl globals_h.tcl checks.tcl clean.tcl trans.tcl \
     steps.tcl
-
-set_log_global info
 
 # TODO:
 # help task als eerste checken, hoef je niet in goede dir te zitten.
 # als je command-naam met dashes ipv underscores intypt, moet het ook goed zijn,
 # dus gewoon een regsub van - naar _ uitvoeren en dan de rest.
 
+# TODO: split this main proc, separate one for project actions.
 proc main {argv} {
+  # global repodir repolibdir as_project lr_include_dir
+  # set lr_include_dir [det_lr_include_dir]
+  
+  # maybe add some checks
+  if {($argv == "") || [:0 $argv] == "help"} {
+    task_help {*}[lrange $argv 1 end]
+    exit 1
+  }
+  set dir [file normalize .]
+  set tname [task_name [lindex $argv 0]]
+  set trest [lrange $argv 1 end]
+  if {[is_script_dir $dir]} {
+    handle_script_dir $dir $tname $trest
+  } elseif {[is_project_dir $dir]} {
+    handle_project_dir $dir $tname $trest
+  } else {
+    puts "Not a vugen script dir: $dir"
+  }
+}
+
+proc handle_script_dir {dir tname trest} {
+  global as_project
+  if {($tname == "init") || ([current_version] == [latest_version])} {
+    # TODO: repodir en repolibdir zetten vanuit config.tcl in .bld dir.
+    #set repodir [file normalize "../repo"]
+    #set repolibdir [file join $repodir libs]
+    if {$tname != "init"} {
+      source [config_tcl_name]      
+    }
+    set as_project 0
+    set_origdir ; # to use by all subsequent tasks.
+    task_$tname {*}$trest
+    mark_backup $tname $trest
+    check_temp_files
+  } else {
+    puts "Update config version with init -update"
+  }
+}
+
+proc handle_project_dir {dir tname trest} {
+  global as_project
+  # in a container dir with script dirs as subdirs.
+  #set repodir [file normalize "repo"]
+  #set repolibdir [file join $repodir libs]
+  # [2016-07-30 15:30] not sure if source is needed here.
+  source [config_tcl_name]
+  set as_project 1
+  # TODO: check of task wel in project scope gedaan kan/mag worden. put iig niet.
+  if {$tname == "put"} {
+    puts "Put action cannot be done in project scope, only script scope"
+    exit 1
+  }
+  if {$tname == "project"} {
+    task_$tname {*}$trest
+  } else {
+    foreach scriptdir [get_current_script_dirs $dir] {
+      puts "In $scriptdir"
+      cd $scriptdir
+      handle_script_dir $scriptdir $tname $trest
+      cd ..
+    }
+    cd $dir
+  }
+}
+
+proc main_old {argv} {
   global repodir repolibdir as_project lr_include_dir
   set lr_include_dir [det_lr_include_dir]
   
@@ -66,6 +133,7 @@ proc main {argv} {
         cd $scriptdir
         task_$tname {*}$trest
         mark_backup $tname $trest
+        check_temp_files
         cd ..
       }
       cd $dir
@@ -74,6 +142,7 @@ proc main {argv} {
     puts "Not a vugen script dir: $dir"
   }
 }
+
 
 proc get_current_script_dirs {dir} {
   set prj_filename [file join $dir "current.prj"]

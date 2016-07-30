@@ -1,6 +1,6 @@
 proc get_repo_libs {} {
-  global repolibdir
-  glob -nocomplain -tails -directory $repolibdir -type f *
+  global repo_lib_dir
+  glob -nocomplain -tails -directory $repo_lib_dir -type f *
 }
 
 # return sorted list of all (.c/.h) source files in project directory.
@@ -98,17 +98,4 @@ proc get_project_files {} {
   return $res
 }
 
-# return the first of a list of loadrunner include dirs that exists
-# if none exists, return empty string.
-# [2016-07-24 18:54] this one should be set in a project/repo config task.
-proc det_lr_include_dir {} {
-  set dirs {{C:\Program Files (x86)\HP\Virtual User Generator\include}
-    /home/ymor/RABO/VuGen/lr_include}
-  foreach dir $dirs {
-    if {[file exists $dir]} {
-      return $dir
-    }
-  }
-  return ""
-}
 

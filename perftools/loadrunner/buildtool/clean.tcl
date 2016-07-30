@@ -61,7 +61,8 @@ proc det_glob_patterns {opt} {
     lappend res "*.bak"
   }
   if {[:orig $opt]} {
-    lappend res "_orig*"
+    # [2016-07-30 15:00] glob should work with subdirs like this.
+    lappend res "[config_dir]/_orig*"
   }
   if {[:res $opt]} {
     lappend res result1 data
