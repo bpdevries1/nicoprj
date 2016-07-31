@@ -1,6 +1,8 @@
 # TODO: need to but this setting/location somewhere. This could be a user
 # setting in ~/.config/buildtool, next to location of eg R binary.
 ndv::source_once ../vugentools/vuserlog/read-vuserlogs-db.tcl
+ndv::source_once ../vugentools/vuser-report/vuser-report.tcl
+
 
 task2 report {Create report of output.txt in script dir
   Copy output.txt to testruns dir, call vugentools/vuserlog/read-vuserlogs-db.tcl
@@ -34,6 +36,8 @@ task2 report {Create report of output.txt in script dir
   # then call read_logfile_dir; idempotency should already be arranged by read_logfile_dir
   set dbname [file join $subdir "vuserlog.db"]
   read_logfile_dir $subdir $dbname [:ssl $opt] split_transname
-  
+
+  # and finally make the report.
+  vuser_report $subdir $dbname $opt
 }
 
