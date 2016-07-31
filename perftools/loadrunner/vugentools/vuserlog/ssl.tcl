@@ -866,7 +866,7 @@ proc ssl_define_tables {db} {
   # iteration can be 'vuser_end', so not an integer.
   # TODO: $db set_default_type nothing|as_same
   #       as_same: als een veld geen datatype heeft, en eerdere def met dezelfde naam wel, neem deze dan over. Dan bv maar 1x bij linenr_min integer op te geven.
-  # evt dan ook een def_datatype <col> <datatype> opnemen, zodat je dit vantevoren kunt
+  # evt dan ook een def_datatype <col-regexp> <datatype> opnemen, zodat je dit vantevoren kunt
   # doen, evt ook met regexp's.
   $db add_tabledef bio_entry {id} {logfile_id {vuserid integer} {iteration integer} {linenr_min integer} {linenr_max integer} entry functype address socket_fd call result}
   
