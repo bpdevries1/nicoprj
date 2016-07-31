@@ -96,14 +96,42 @@ if {$tcl_version == "8.5"} {
     return "create table [dict get $table_def table] ([join $fields ", "])"
   }
 
+  set _sqlite_datatypes [list]
+  proc def_datatype {regexps datatype} {
+    global _sqlite_datatypes
+    foreach re $regexps {
+      # anchor regexps to start/end.
+      # lappend _sqlite_datatypes [list "^${re}$" $datatype]
+      lappend _sqlite_datatypes "^${re}$" $datatype
+    }
+  }
+
+  proc find_datatype {fielddef} {
+    global _sqlite_datatypes
+    foreach {re datatype} $_sqlite_datatypes {
+      if {[regexp $re $fielddef]} {
+        return $datatype
+      }
+    }
+    return "" ; # if not found.
+  }
+
+  # TODO: some checks to see if fielddef already occurs with a different datatype.
+  # should give a warning then.
   proc fielddef2sql {fielddef} {
+    if {[regexp linenr $fielddef]} {
+      # breakpoint
+    }
     if {[llength $fielddef] == 2} {
       lassign $fielddef name datatype
       return "$name $datatype"
     } elseif {$fielddef == "id"} {
       return "id integer primary key autoincrement"
     } else {
-      if {[regexp {_id$} $fielddef]} {
+      set datatype [find_datatype $fielddef]
+      if {$datatype != ""} {
+        # nothing, datatype set.
+      } elseif {[regexp {_id$} $fielddef]} {
         set datatype "integer"        
       } else {
         # set datatype "varchar"

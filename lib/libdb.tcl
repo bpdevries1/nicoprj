@@ -181,6 +181,11 @@ oo::class create dbwrapper {
     $stmt close
     return $res
   }
+
+  method def_datatype {regexps datatype} {
+    # proc in libsqlite
+    def_datatype $regexps $datatype
+  }
   
   # @todo idea determine tabledef's from actual table definitions in the (sqlite) db.
   method add_tabledef {table args} {
