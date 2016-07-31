@@ -1,20 +1,22 @@
 # templates - tasks/functions to make script adhere to certain templates and best
 # practices: .config files, set of includes/libs, rb_transaction, text checks.
 
-task templates {Make script adhere to templates and best practices
+task2 templates {Make script adhere to templates and best practices
   .config files,
   set of includes/libs,
   rb_transaction,
   text checks.
   add TT var - ThinkTime.
+} {{debug "Add debug/structure lines to output files"}
 } {
   # TODO: possibly something with options, like selecting files?
   # or keep as standard as possible.
   get_template_files
-  
+
   foreach filename [get_action_files] {
     set_rb_transactions $filename
-    set_web_reg_find $filename
+    # [2016-07-31 13:13] set_web_reg_find is boosdoener, verplaatst regels.
+    set_web_reg_find $filename $opt
   }
   
   get_std_libs
@@ -54,22 +56,23 @@ proc get_template_files {} {
 
 proc set_rb_transactions {filename} {
   regsub_file $filename {lr_start_transaction\(([^())]+)\);} \
-    {rb_start_transaction(\1);} 1
+    {rb_start_transaction(\1);} {do 1}
   regsub_file $filename {lr_end_transaction\(([^()]+), ?LR_AUTO\);} \
-    {rb_end_transaction(\1, TT);} 1
-  regsub_file $filename {lr_think_time\(([^()]+)\);} {// lr_think_time(\1);} 1
+    {rb_end_transaction(\1, TT);} {do 1}
+  regsub_file $filename {lr_think_time\(([^()]+)\);} {// lr_think_time(\1);} {do 1}
 }
 
 # add web_reg_find statements before requests, if they do not already occur.
 # cannot simply use regsub to add the web_reg_finds, because it would not be idempotent.
-proc set_web_reg_find {filename} {
+proc set_web_reg_find {filename opt} {
   set statements [read_source_statements $filename]
   set stmt_groups [group_statements $statements]
   # stmt_groups is sort-of like a parse tree. Work on this one, at the end write
   # back to file.
   set stmt_groups2 [add_web_reg_find $stmt_groups]
   # write_source_statements [tempname $filename] $stmt_groups2
-  write_source_statements $filename $stmt_groups2
+  # breakpoint
+  write_source_statements $filename $stmt_groups2 $opt
   commit_file $filename
 }
 

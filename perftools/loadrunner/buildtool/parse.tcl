@@ -1,5 +1,39 @@
 # TODO: (ooit) use a real parser.
+# comment and empty lines should just be added to the current statement, so no special handling.
 proc read_source_statements {filename} {
+  set f [open $filename r]
+  set linenr 0
+  set lines {}
+  set linenr_start -1
+  while {[gets $f line] >= 0} {
+    incr linenr
+    if {($linenr > 76) && [regexp authorise_ft $filename]} {
+      # breakpoint
+    }
+    if {$lines == {}} {
+      set linenr_start $linenr
+    }
+    lappend lines $line
+    if {[is_statement_end $line]} {
+      #puts "before add 1"
+      lappend stmts [dict create lines $lines type [stmt_type $lines] \
+                         linenr_start $linenr_start linenr_end $linenr]
+      set lines {}
+    } else {
+      # nothing.
+    }
+  } ; # end-of-while gets
+  if {$lines != {}} {
+    #puts "before add 2"
+    # [2016-07-31 14:44] could be lines only has 1 empty line, so then list is not empty. This should be ok, could be more empty/comment lines at the end, want to keep those.
+    lappend stmts [dict create lines $lines type [stmt_type $lines] \
+                       linenr_start $linenr_start linenr_end $linenr]
+  }
+  close $f
+  return $stmts
+}
+
+proc read_source_statements_old {filename} {
   set f [open $filename r]
   set linenr 0
   set lines {}
@@ -9,7 +43,7 @@ proc read_source_statements {filename} {
     if {([string trim $line] == "") || [regexp {^\s*//} $line]} {
       # do want those lines in output again
       lappend stmts [dict create lines [list $line] type comment \
-                        linenr_start $linenr linenr_end $linenr]
+                         linenr_start $linenr linenr_end $linenr]
       continue
     }
     if {$lines == {}} {
@@ -39,6 +73,10 @@ proc stmt_new {line {type ""} {linenr_start 0} {linenr_end 0}} {
 }
 
 proc is_statement_end {line} {
+  # [2016-07-31 15:13] comment lines are never statement end!
+  if {[regexp {^\s*//} $line]} {
+    return 0
+  }
   if {[regexp {;$} [string trim $line]]} {
     return 1
   }
@@ -74,7 +112,8 @@ set stmt_types_regexps {
 # determine type of statement based on first line.
 proc stmt_type {lines} {
   global stmt_types_regexps
-  set firstline [:0 $lines]
+  # set firstline [:0 $lines]
+  set firstline [first_statement_line $lines]
   foreach {re tp} $stmt_types_regexps {
     if {[regexp $re $firstline]} {
       return $tp
@@ -84,6 +123,19 @@ proc stmt_type {lines} {
   # error "Cannot determine type of $firstline (lines=$lines)"
   # [2016-07-18 11:22:50] main-other as default?
   return "main-other"
+}
+
+# return the first line in lines that is not empty or a comment
+proc first_statement_line {lines} {
+  foreach line $lines {
+    if {([string trim $line] != "") && ![regexp {^\s*//} $line]} {
+      return $line
+    }
+  }
+  # [2016-07-31 14:45] could be (at the eof) that only empty/comment lines exist.
+  return ""
+  #breakpoint
+  #error "No non-empty/comment lines found in: $lines"
 }
 
 # return list of statement-groups: each group is a dict with a list of statements and
@@ -130,12 +182,18 @@ proc group_statements {statements} {
   return $res
 }
 
-proc write_source_statements {filename stmt_groups} {
+proc write_source_statements {filename stmt_groups {opt {debug 0}}} {
   #set f [open $temp_filename w]
   #fconfigure $f -translation crlf
   set f [open_temp_w $filename]
   foreach grp $stmt_groups {
+    if {[:debug $opt]} {
+      puts $f "// <NEW STATEMENT GROUP domain=[:domain $grp]>"  
+    }    
     foreach stmt [:statements $grp] {
+      if {[:debug $opt]} {
+        puts $f "// <NEW STATEMENT type=[:type $stmt]>"  
+      }
       puts $f [join [:lines $stmt] "\n"]    
     }
   }
