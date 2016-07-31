@@ -604,8 +604,9 @@ from trans_line order by logfile_id, linenr"
       default {
         error "Unknown transaction status: [:trans_status $row]"
       }
-    }
-  }
+    } ; # end-switch
+  } ; # end-foreach
+  insert_trans_not_finished $db $started_transactions
 }
 
 # return 1 iff either old user or old iteration differs from new one in row
@@ -639,9 +640,11 @@ proc insert_trans_finished {db row started_transactions} {
 proc insert_trans_error {db row} {
   # geen start velden, dus alleen row-waarden naar end velden omzetten.
   set line_fields {linenr ts sec_ts iteration}
+  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]  
   set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
   set d [dict_rename $row $line_fields $line_end_fields]
-  $db insert trans $d
+  set d2 [dict merge $d [dict_rename $row $line_fields $line_start_fields]]
+  $db insert trans $d2
 }
 
 # move to libdict:
