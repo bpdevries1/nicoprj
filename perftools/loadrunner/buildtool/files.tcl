@@ -37,7 +37,10 @@ proc add_file_usr {filename} {
 }
 
 # add file to ScriptUploadMetadata.xml, also crlf endings
+# [2016-07-31 13:11] could be that this proc adds a newline once at the end of the file.
+# calling a second time will not add another newline, so still idempotent.
 proc add_file_metadata {filename} {
+  # puts "add_file_meta: $filename"
   set meta ScriptUploadMetadata.xml
   set fi [open $meta r]
   #set fo [open [tempname $meta] w]
