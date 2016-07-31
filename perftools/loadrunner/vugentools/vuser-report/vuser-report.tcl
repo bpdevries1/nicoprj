@@ -55,7 +55,8 @@ proc vuser_report_iter_user {db row hh} {
              and user = '[:user $row]'
              order by ts_start"
   foreach trow [$db query $query] {
-    $hh table_row [:transshort $trow] [status_text $trow] \
+    $hh table_row_class [vuser_row_class $trow] [:transshort $trow] \
+        [status_text $trow] \
         [format "%.3f" [:resptime $trow]] \
         [time_part [:ts_start $trow]] [time_part [:ts_end $trow]]
   }
@@ -73,9 +74,20 @@ proc vuser_report_iter_user {db row hh} {
     $hh table_start
     $hh table_header Time Message
     foreach erow $res {
-      $hh table_row [time_part [:ts $erow]] [:line $erow]
+      # $hh set_colour red - dan wel ook bij andere dingen dan table te doen.
+      # of algemeen een set-option.
+      $hh table_row_class Failure [time_part [:ts $erow]] [:line $erow]
+      # $hh reset_colour
     }
     $hh table_end
+  }
+}
+
+proc vuser_row_class {trow} {
+  if {[:trans_status $trow] == 0} {
+    return ""
+  } else {
+    return "Failure"
   }
 }
 
