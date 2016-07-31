@@ -45,11 +45,33 @@ proc main {argv} {
   } elseif {[is_project_dir $dir]} {
     handle_project_dir $dir $tname $trest
   } else {
-    puts "Not a vugen script dir: $dir"
+    # puts "Not a vugen script dir: $dir"
+    handle_default_dir $dir $tname $trest
   }
 }
 
 proc handle_script_dir {dir tname trest} {
+  global as_project
+  if {($tname == "init") || ([current_version] == [latest_version])} {
+    # TODO: repodir en repolibdir zetten vanuit config.tcl in .bld dir.
+    #set repodir [file normalize "../repo"]
+    #set repolibdir [file join $repodir libs]
+    if {$tname != "init"} {
+      source [config_tcl_name]      
+    }
+    set as_project 0
+    set_origdir ; # to use by all subsequent tasks.
+    task_$tname {*}$trest
+    mark_backup $tname $trest
+    check_temp_files
+  } else {
+    puts "Update config version with init -update"
+  }
+}
+
+# [2016-07-31 12:07] Also handle non-vugen dirs, eg to do regsub.
+# TODO: for most actions, performing on non-vugen dir makes no sense.
+proc handle_default_dir {dir tname trest} {
   global as_project
   if {($tname == "init") || ([current_version] == [latest_version])} {
     # TODO: repodir en repolibdir zetten vanuit config.tcl in .bld dir.

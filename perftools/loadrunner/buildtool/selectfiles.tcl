@@ -3,6 +3,19 @@ proc get_repo_libs {} {
   glob -nocomplain -tails -directory $repo_lib_dir -type f *
 }
 
+proc get_filenames {opt} {
+  if {[:action $opt]} {
+    set filenames [get_action_files]
+  } elseif {[:all $opt]} {
+    set filenames [get_pattern_files]
+  } elseif {[:pat $opt] != ""} {
+    set filenames [get_pattern_files [:pat $opt]]
+  } else {
+    set filenames [get_source_files]
+  }
+  return $filenames
+}
+
 # return sorted list of all (.c/.h) source files in project directory.
 # so no config files etc.
 # [2016-07-17 09:12] filter_ignore_files was always called in combination with this one,
@@ -98,4 +111,8 @@ proc get_project_files {} {
   return $res
 }
 
+# get all non-hidden files in current directory
+proc get_pattern_files {{pat *}} {
+  glob -nocomplain -type f *
+}
 

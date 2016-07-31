@@ -7,7 +7,10 @@ proc tempname {filename} {
   return "$filename.__TEMP__"
 }
 
-proc open_temp_w {filename {translation crlf}} {
+proc open_temp_w {filename {translation ""}} {
+  if {$translation == ""} {
+    set translation [line_ending $filename]
+  }
   set f [open [tempname $filename] w]
   fconfigure $f -translation $translation
   return $f

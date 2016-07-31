@@ -9,9 +9,14 @@ task regsub {Regular epression replace
   Syntax: regsub [-do] <from> <to>
   Without -do, perform a dry run.
 } {
+  # TODO: all and allrec should be general options, applicable to more tasks.
   set options {
     {do "Really perform regsub actions"}
     {action "Only handle action files"}
+    {all "Handle all files (be careful!)"}
+    {allrec "Handle all files; recurse subdirs (be very careful!)"}
+    {text "Handle all text files (TBD)"}
+    {pat.arg "" "Handle all files matching glob pattern"}
   }
   set usage ": regsub \[options] <from> <to>:"
   set opt [getoptions args $options $usage]
@@ -19,11 +24,7 @@ task regsub {Regular epression replace
   lassign $args from to  
   puts "from: $from, to: $to, args: $args"
   regsub -all {\\n} $to "\n" to2
-  if {[:action $opt]} {
-    set filenames [get_action_files]
-  } else {
-    set filenames [get_source_files]
-  }
+  set filenames [get_filenames $opt]
   foreach srcfile $filenames	{
     regsub_file $srcfile $from $to2 $really
   }

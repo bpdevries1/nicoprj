@@ -44,6 +44,8 @@ proc totabs_line {line tabwidth} {
   return "[string repeat "\t" $ntabs][string repeat " " $nspaces]$rest"
 }
 
+# TODO: use code in separate tool fix-endings to check more extensions.
+# buildtool should also work for other things besides vugen scripts.
 task fixcrlf {Fix line endings
   Syntax: fixcrlf [<filename> ..]
   Fix line endings for filenames. Handle all source files if none given.
@@ -63,10 +65,21 @@ proc fixcrlf_file {filename} {
   set text [read_file $filename]
   #set fo [open [tempname $filename] w]
   #fconfigure $fo -translation crlf
-  set fo [open_temp_w $filename]
+  set fo [open_temp_w $filename [line_ending $filename]]
   puts -nonewline $fo $text
   close $fo
   commit_file $filename
+}
+
+# TODO: use code in separate tool fixendings to check more extensions.
+# [2016-07-31 12:28] but not yet, current implementation in fixendings clashes with needs here, eg. .c files.
+proc line_ending {filename} {
+  set ext [file extension $filename]
+  if {[lsearch -exact {.tcl .sh .R .clj .cljs} $ext] >= 0} {
+    return lf
+  } else {
+    return crlf
+  }
 }
 
 task remove_empty_lines {Remove double empty lines from source files
