@@ -15,7 +15,6 @@ task2 templates {Make script adhere to templates and best practices
 
   foreach filename [get_action_files] {
     set_rb_transactions $filename
-    # [2016-07-31 13:13] set_web_reg_find is boosdoener, verplaatst regels.
     set_web_reg_find $filename $opt
   }
   
