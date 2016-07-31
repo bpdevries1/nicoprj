@@ -91,6 +91,7 @@ proc ignore_dir {dir} {
   return 0
 }
 
+# TODO: [2016-07-31 12:28] not always this strict. Eg .c could be a vugen file, and loadrunner/vugen prefers and defaults to CRLF. So could check current platform, add .c to ignore, or decide if .c file is in a vugen-dir. 
 set extensions {
   unix {.awk .c .can .cron .css .clj .cljs .csv .dot .erb .graphml .groovy
     .hs .hsql .htm .html .java .jmx
