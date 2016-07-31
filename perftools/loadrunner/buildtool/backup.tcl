@@ -90,7 +90,11 @@ task backup {Backup complete project (source files) to .orig dir
   file mkdir $_origdir
   foreach filename [get_project_files] {
     set backupname [file join $_origdir $filename]
-    file copy $filename $backupname
+    if {[file exists $filename]} {
+      file copy $filename $backupname  
+    } else {
+      puts "warn: source file does not exist: $filename"
+    }
   }
   mark_backup backup [join $args " "]
 }
@@ -103,6 +107,8 @@ task2 history {Show history of backups made, also implicit
     set changes_file [file join $dir __BUILDTOOL_CHANGES__]
     if {[file exists $changes_file]} {
       puts [read_file -nonewline $changes_file]
+    } else {
+      puts "[file tail $dir] - no changes file"
     }
   }
 }
