@@ -55,12 +55,9 @@ proc read_logfile_dir {logdir dbname ssl {split_proc split_transname}} {
   $pg start
   foreach logfile $logfiles {
     readlogfile $logfile $db $ssl $split_proc
+    # readlogfile_trans $logfile $db
     incr nread
     $pg at_item $nread
-    if {$nread >= 105} {
-      #log warn "100 read, quitting for now."
-      #exit
-    }
   }
 
   if {$ssl} {
@@ -102,8 +99,7 @@ proc readlogfile {logfile db ssl split_proc} {
     
   # TODO: 22-10-2015 NdV niet tevreden over error bepaling per iteratie. Met prev_iteration is altijd lastig.
   # liever functioneel oplossen, soort merge, en ook prio van errors bepalen, met pas > timeout > rest.
-  # set fi [open $logfile r]
-  set fi [open $logfile rb] ; # read binary, so 0 byte will not signal eof?
+  set fi [open $logfile rb] ; # read binary, so 0 byte will not signal eof
   $db in_trans {
     # insert logfile within trans; if something fails, this will be rolled back.
     set logfile_id [$db insert logfile [vars_to_dict logfile dirname ts \
@@ -139,8 +135,8 @@ proc readlogfile {logfile db ssl split_proc} {
       # TODO: [2016-06-17 15:48:17] retraccts not used anymore?
       # [2016-07-31 16:30] removed.
 		  # handle_retraccts $line $db $logfile_id $vuserid $linenr $iteration
-		  lassign [handle_trans $line $db $logfile_id [file tail $logfile] $vuserid $linenr \
-                   $iteration $split_proc] user2 ts2
+		  lassign [handle_trans $line $db $logfile_id [file tail $logfile] $vuserid \
+                   $linenr $iteration $split_proc] user2 ts2
 
       # TODO: wat wil ik met user2/ts2, vast goede reden? 
       if {$user2 != ""} {
@@ -171,6 +167,7 @@ proc readlogfile {logfile db ssl split_proc} {
     if {$ssl} {
       handle_ssl_end $db $logfile_id $vuserid $iteration  
     }
+    fill_table_trans $db
   };  # end of $db in_trans
   close $fi
 }
@@ -257,7 +254,7 @@ proc is_start_iter {line} {
 proc handle_trans {line db logfile_id logfile vuserid linenr iteration split_proc} {
   # TODO: parse name/value pairs differently, so more can be added in the future.
   if {[regexp {: \[([0-9 :.-]+)\] trans=([^ ]+), user=([^ ,]+), resptime=([0-9.,-]+), status=([0-9-]+)} \
-                 $line z ts transname user resptime status]} {
+                 $line z ts transname user resptime trans_status]} {
     # [2016-06-15 10:23:22] timestamp incl milliseconds
     # [2016-07-30 21:18] TODO: possibly this variant is the only one needed now.
     # functions.c(377): [2016-06-09 15:52:22.096] trans=CR_UC3_newuser_01_Login_Cras_QQQ, user=3002568887, resptime=-1.000, status=-1, iteration=1 [06/09/16 15:52:22]
@@ -266,7 +263,7 @@ proc handle_trans {line db logfile_id logfile vuserid linenr iteration split_pro
 
     $db insert trans_line [dict merge [vars_to_dict logfile_id logfile vuserid \
                                            ts sec_ts transname \
-                                       user resptime status linenr iteration] \
+                                       user resptime trans_status linenr iteration] \
                                [$split_proc $transname]]
     
     return [list $user $ts]
@@ -564,6 +561,99 @@ proc split_transname {transname} {
   dict create usecase $usecase transshort $transshort
 }
 
+# mainly used for quicker testing of fill_table_trans
+proc readlogfile_trans {logfile db} {
+  $db in_trans {
+    fill_table_trans $db
+  }
+}
+
+# this runs within the main db transaction for reading a logfile.
+# goal is to full trans table based on trans_line table.
+# maybe need to be memory conscious and not return all rows in memory at once.
+proc fill_table_trans {db} {
+  $db exec "delete from trans"
+  set query "select logfile_id, logfile, vuserid, linenr, ts, sec_ts, iteration,
+ transname, user, resptime, trans_status, usecase, revisit, transid, transshort,
+ searchcrit
+from trans_line order by logfile_id, linenr"
+  set user ""; set iteration 0
+  set started_transactions [dict create]
+  foreach row [$db query $query] {
+    if {[new_user_iteration? $row $user $iteration]} {
+      insert_trans_not_finished $db $started_transactions
+      set started_transactions [dict create]
+      set user [:user $row]
+      set iteration [:iteration $row]
+      # dict_assign $row user iteration
+    }
+    switch [:trans_status $row] {
+      -1 {
+        # start of a transaction, keep data for now.
+        dict set started_transactions [:transname $row] $row
+      }
+      0 {
+        # succesful end of a transaction, find start data and insert row.
+        insert_trans_finished $db $row $started_transactions
+        dict unset started_transactions [:transname $row]
+      }
+      1 {
+        # synthetic error, just insert.
+        insert_trans_error $db $row
+      }
+      default {
+        error "Unknown transaction status: [:trans_status $row]"
+      }
+    }
+  }
+}
+
+# return 1 iff either old user or old iteration differs from new one in row
+proc new_user_iteration? {row user iteration} {
+  if {($user != [:user $row]) || ($iteration != [:iteration $row])} {
+    return 1
+  }
+  return 0
+}
+
+proc insert_trans_not_finished {db started_transactions} {
+  set line_fields {linenr ts sec_ts iteration}
+  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
+  foreach row [dict values $started_transactions] {
+    set d [dict_rename $row $line_fields $line_start_fields]
+    $db insert trans $d
+  }
+}
+
+proc insert_trans_finished {db row started_transactions} {
+  set line_fields {linenr ts sec_ts iteration}
+  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
+  set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
+  set dstart [dict_rename [dict get $started_transactions [:transname $row]] \
+                  $line_fields $line_start_fields]
+  set dend [dict_rename $row $line_fields $line_end_fields]
+  set d [dict merge $dstart $dend]
+  $db insert trans $d
+}
+
+proc insert_trans_error {db row} {
+  # geen start velden, dus alleen row-waarden naar end velden omzetten.
+  set line_fields {linenr ts sec_ts iteration}
+  set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
+  set d [dict_rename $row $line_fields $line_end_fields]
+  $db insert trans $d
+}
+
+# move to libdict:
+# rename fields in lfrom to lto and return new dict.
+proc dict_rename {d lfrom lto} {
+  set res $d
+  foreach f $lfrom t $lto {
+    dict set res $t [dict get $d $f]
+    dict unset res $f
+  }
+  return $res
+}
 
 if {[this_is_main]} {
   set_log_global perf {showfilename 0}
