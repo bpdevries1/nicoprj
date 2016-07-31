@@ -113,6 +113,6 @@ proc get_project_files {} {
 
 # get all non-hidden files in current directory
 proc get_pattern_files {{pat *}} {
-  glob -nocomplain -type f *
+  glob -nocomplain -type f $pat
 }
 

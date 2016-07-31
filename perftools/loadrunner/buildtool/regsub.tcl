@@ -17,6 +17,7 @@ task regsub {Regular epression replace
     {allrec "Handle all files; recurse subdirs (be very careful!)"}
     {text "Handle all text files (TBD)"}
     {pat.arg "" "Handle all files matching glob pattern"}
+    {filenames "Only show filenames with changes, no contents"}
   }
   set usage ": regsub \[options] <from> <to>:"
   set opt [getoptions args $options $usage]
@@ -25,12 +26,15 @@ task regsub {Regular epression replace
   puts "from: $from, to: $to, args: $args"
   regsub -all {\\n} $to "\n" to2
   set filenames [get_filenames $opt]
+  # breakpoint
   foreach srcfile $filenames	{
-    regsub_file $srcfile $from $to2 $really
+    # regsub_file $srcfile $from $to2 $really
+    regsub_file $srcfile $from $to2 $opt
   }
 }
 
-proc regsub_file {srcfile from to really} {
+proc regsub_file {srcfile from to opt} {
+  set really [:do $opt]
   set text [read_file $srcfile]
   set nreplaced [regsub -all $from $text $to text2]
   if {$nreplaced == 0} {
@@ -54,3 +58,26 @@ proc regsub_file {srcfile from to really} {
   }
 }
 
+proc regsub_file_old {srcfile from to really} {
+  set text [read_file $srcfile]
+  set nreplaced [regsub -all $from $text $to text2]
+  if {$nreplaced == 0} {
+    # nothing, no replacements done.
+  } else {
+    puts "$srcfile - $nreplaced change(s):"
+    # set tempfile "$srcfile.__TEMP__"
+    set tempfile [tempname $srcfile]
+    #set f [open $tempfile w]
+    #fconfigure $f -translation crlf
+    set f [open_temp_w $srcfile]
+    puts -nonewline $f $text2
+    close $f
+    diff_files $srcfile $tempfile
+    if {$really} {
+      puts "really perform replacement, orig files in _orig dir"
+      commit_file $srcfile
+    } else {
+      rollback_file $srcfile
+    }
+  }
+}
