@@ -38,3 +38,6 @@ output/
 # git add commit temp file
 git-add-commit.sh
 
+# build config dirs
+.bld
+
