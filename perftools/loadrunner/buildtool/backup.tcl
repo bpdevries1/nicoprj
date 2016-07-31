@@ -95,12 +95,26 @@ task backup {Backup complete project (source files) to .orig dir
   mark_backup backup [join $args " "]
 }
 
+task2 history {Show history of backups made, also implicit
+
+} {
+  set lst [lsort [glob -nocomplain -type d -directory [config_dir] _orig.*]]
+  foreach dir $lst {
+    set changes_file [file join $dir __BUILDTOOL_CHANGES__]
+    if {[file exists $changes_file]} {
+      puts [read_file -nonewline $changes_file]
+    }
+  }
+}
+
 # put a description of the changes in the backup-dir, iff the backup dir has been made.
 proc mark_backup {tname trest} {
   global _origdir argv0
   if {[file exists $_origdir]} {
     set f [open [file join $_origdir __BUILDTOOL_CHANGES__] w]
-    puts $f "\[[dt/now]] $argv0 $tname $trest"
+    # puts $f "\[[dt/now]] $argv0 $tname $trest"
+    # [2016-07-31 14:16] argv0 does not really add anything here.
+    puts $f "\[[dt/now]] $tname $trest"
     close $f
   }
 }
