@@ -174,9 +174,22 @@ namespace eval ::ndv {
         table_row_end
     }
 
-    public method table_row_start {} {
+    # TODO: merge with table_row method, or method to set/reset class.
+    public method table_row_class {clazz args} {
+      table_row_start $clazz
+      foreach cell_value $args {
+        table_data $cell_value
+      }
+      table_row_end
+    }
+    
+    public method table_row_start {{clazz ""}} {
+      if {$clazz == ""} {
         puts $channel "<tr>"
-        flush_channel
+      } else {
+        puts $channel "<tr class=\"$clazz\">"
+      }
+      flush_channel
     }
     
     public method table_row_end {} {
