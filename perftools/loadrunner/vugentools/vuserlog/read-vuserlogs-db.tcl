@@ -5,7 +5,7 @@ package require tdbc::sqlite3
 
 ndv::source_once ssl.tcl pubsub.tcl
 
-# [2016-07-09 10:09] for parse_cet and now:
+# [2016-07-09 10:09] for parse_ts and now:
 use libdatetime
 
 # Note:
@@ -80,7 +80,7 @@ proc add_read_status {db status} {
 }
 
 
-#  $db add_tabledef trans {id} {logfile {vuserid int} ts_cet {sec_cet int} transname user {resptime real} {status int}
+#  $db add_tabledef trans {id} {logfile {vuserid int} ts {sec_ts int} transname user {resptime real} {status int}
 #                   usecase revisit {transid int} transshort searchcrit}
 # functions.c(343): [2015-09-02 05:51:41] [1441165901] trans=CR_UC1_revisit_11_Expand_transactions_DEP, user=u_lpt-rtsec_cr_tso_tso1_000005, resptime=0.156, status=0 [09/02/15 05:51:41]	[MsgId: MMSG-17999]
 # Transaction "CR_UC1_ -> deze wordt niet geparsed.
@@ -94,7 +94,7 @@ proc readlogfile {logfile db ssl split_proc} {
     log warn "Could not determine vuserid from $logfile: continue with next."
     return
   }
-  set ts_cet [clock format [file mtime $logfile] -format "%Y-%m-%d %H:%M:%S"]
+  set ts [clock format [file mtime $logfile] -format "%Y-%m-%d %H:%M:%S"]
  
   set dirname [file dirname $logfile]
   set filesize [file size $logfile]
@@ -106,14 +106,14 @@ proc readlogfile {logfile db ssl split_proc} {
   set fi [open $logfile rb] ; # read binary, so 0 byte will not signal eof?
   $db in_trans {
     # insert logfile within trans; if something fails, this will be rolled back.
-    set logfile_id [$db insert logfile [vars_to_dict logfile dirname ts_cet \
+    set logfile_id [$db insert logfile [vars_to_dict logfile dirname ts \
                                             filesize runid project script]]
     set linenr 0
     set prev_iteration ""  
     set iteration ""
     set error_iter {}
     set user ""
-    set ts_cet ""
+    set ts ""
     if {$ssl} {
       handle_ssl_start $db $logfile_id $vuserid $iteration  
     }
@@ -137,20 +137,21 @@ proc readlogfile {logfile db ssl split_proc} {
 		  }
 
       # TODO: [2016-06-17 15:48:17] retraccts not used anymore?
-		  handle_retraccts $line $db $logfile_id $vuserid $linenr $iteration
-		  lassign [handle_trans $line $db $logfile_id $vuserid $linenr \
-                   $iteration $split_proc] user2 ts_cet2
+      # [2016-07-31 16:30] removed.
+		  # handle_retraccts $line $db $logfile_id $vuserid $linenr $iteration
+		  lassign [handle_trans $line $db $logfile_id [file tail $logfile] $vuserid $linenr \
+                   $iteration $split_proc] user2 ts2
 
-      # TODO: wat wil ik met user2/ts_cet2, vast goede reden? 
+      # TODO: wat wil ik met user2/ts2, vast goede reden? 
       if {$user2 != ""} {
         log debug "Setting user: $user2"
         set user $user2
       }
-      if {$ts_cet2 != ""} {
-        log debug "Settings ts_cet: $ts_cet2"
-        set ts_cet $ts_cet2
+      if {$ts2 != ""} {
+        log debug "Settings ts: $ts2"
+        set ts $ts2
       }
-		  set error [handle_error $line $db [file tail $logfile] $logfile_id $vuserid $linenr $iteration $ts_cet $user]
+		  set error [handle_error $line $db [file tail $logfile] $logfile_id $vuserid $linenr $iteration $ts $user]
 		  set error_iter [update_error_iter $error_iter $error]
       if {$ssl} {
         handle_ssl_line $db $logfile_id $vuserid $iteration $line $linenr  
@@ -252,44 +253,25 @@ proc is_start_iter {line} {
   regexp {Start auto log messages stack} $line
 }
 
-proc handle_retraccts {line db logfile_id vuserid linenr iteration} {
-  if {[regexp {: \[([0-9 :-]+)\] \[(\d+)\] RetrieveAccounts - user: (\d+), naccts: (\d+), resptime: ([0-9.,]+)} $line z ts_cet sec_cet user naccts resptime]} {
-    regsub -all {,} $resptime "." resptime
-    $db insert retraccts [vars_to_dict logfile_id vuserid ts_cet sec_cet user naccts resptime]
-  } elseif {[regexp {RetrieveAccounts} $line]} {
-    breakpoint
-  }
-}
-
 # [2016-07-30 21:18] TODO: clean this one up, based on latest version of rb_end_transaction.
-proc handle_trans {line db logfile_id vuserid linenr iteration split_proc} {
-  if {[regexp {: \[([0-9 :-]+)\] \[(\d+)\] trans: ([^ ]+) - user: (\d+), resptime: ([0-9.,]+)} \
-           $line z ts_cet sec_cet transname user resptime]} {
-    regsub -all {,} $resptime "." resptime
-    $db insert trans [vars_to_dict logfile_id vuserid ts_cet sec_cet transname user resptime linenr iteration]
-    return [list $user $ts_cet]
-  } elseif {[regexp {: \[([0-9 :-]+)\] \[(\d+)\] trans=([^ ]+), user=([^ ,]+), resptime=([0-9.,-]+), status=([0-9-]+)} \
-                 $line z ts_cet sec_cet transname user resptime status]} {
-    regsub -all {,} $resptime "." resptime
-    lassign [split_transname $transname] usecase revisit transid transshort searchcrit
-    $db insert trans [vars_to_dict logfile_id vuserid ts_cet sec_cet transname user resptime status usecase \
-                          revisit transid transshort searchcrit linenr iteration]
-    return [list $user $ts_cet]
-  } elseif {[regexp {: \[([0-9 :.-]+)\] trans=([^ ]+), user=([^ ,]+), resptime=([0-9.,-]+), status=([0-9-]+)} \
-                 $line z ts_cet transname user resptime status]} {
+proc handle_trans {line db logfile_id logfile vuserid linenr iteration split_proc} {
+  # TODO: parse name/value pairs differently, so more can be added in the future.
+  if {[regexp {: \[([0-9 :.-]+)\] trans=([^ ]+), user=([^ ,]+), resptime=([0-9.,-]+), status=([0-9-]+)} \
+                 $line z ts transname user resptime status]} {
     # [2016-06-15 10:23:22] timestamp incl milliseconds
     # [2016-07-30 21:18] TODO: possibly this variant is the only one needed now.
     # functions.c(377): [2016-06-09 15:52:22.096] trans=CR_UC3_newuser_01_Login_Cras_QQQ, user=3002568887, resptime=-1.000, status=-1, iteration=1 [06/09/16 15:52:22]
-    set sec_cet [parse_cet $ts_cet]
+    set sec_ts [parse_ts $ts]
     regsub -all {,} $resptime "." resptime
 
-    $db insert trans [dict merge [vars_to_dict logfile_id vuserid \
-                                      ts_cet sec_cet transname \
-                                      user resptime status linenr iteration] \
-                          [$split_proc $transname]]
+    $db insert trans_line [dict merge [vars_to_dict logfile_id logfile vuserid \
+                                           ts sec_ts transname \
+                                       user resptime status linenr iteration] \
+                               [$split_proc $transname]]
     
-    return [list $user $ts_cet]
-  } elseif {[regexp {trans=CR_UC} $line]} {
+    return [list $user $ts]
+  } elseif {[regexp {trans=} $line]} {
+    # [2016-07-31 11:54] trans= always signals transaction log line?
     breakpoint
   }
   return [list "" ""]
@@ -297,27 +279,27 @@ proc handle_trans {line db logfile_id vuserid linenr iteration split_proc} {
 
 proc handle_trans_old {line db logfile_id vuserid linenr iteration} {
   if {[regexp {: \[([0-9 :-]+)\] \[(\d+)\] trans: ([^ ]+) - user: (\d+), resptime: ([0-9.,]+)} \
-           $line z ts_cet sec_cet transname user resptime]} {
+           $line z ts sec_ts transname user resptime]} {
     regsub -all {,} $resptime "." resptime
-    $db insert trans [vars_to_dict logfile_id vuserid ts_cet sec_cet transname user resptime linenr iteration]
-    return [list $user $ts_cet]
+    $db insert trans [vars_to_dict logfile_id vuserid ts sec_ts transname user resptime linenr iteration]
+    return [list $user $ts]
   } elseif {[regexp {: \[([0-9 :-]+)\] \[(\d+)\] trans=([^ ]+), user=([^ ,]+), resptime=([0-9.,-]+), status=([0-9-]+)} \
-                 $line z ts_cet sec_cet transname user resptime status]} {
+                 $line z ts sec_ts transname user resptime status]} {
     regsub -all {,} $resptime "." resptime
     lassign [split_transname $transname] usecase revisit transid transshort searchcrit
-    $db insert trans [vars_to_dict logfile_id vuserid ts_cet sec_cet transname user resptime status usecase \
+    $db insert trans [vars_to_dict logfile_id vuserid ts sec_ts transname user resptime status usecase \
                           revisit transid transshort searchcrit linenr iteration]
-    return [list $user $ts_cet]
+    return [list $user $ts]
   } elseif {[regexp {: \[([0-9 :.-]+)\] trans=([^ ]+), user=([^ ,]+), resptime=([0-9.,-]+), status=([0-9-]+)} \
-                 $line z ts_cet transname user resptime status]} {
+                 $line z ts transname user resptime status]} {
     # [2016-06-15 10:23:22] timestamp incl milliseconds
     # functions.c(377): [2016-06-09 15:52:22.096] trans=CR_UC3_newuser_01_Login_Cras_QQQ, user=3002568887, resptime=-1.000, status=-1, iteration=1 [06/09/16 15:52:22]
-    set sec_cet [parse_cet $ts_cet]
+    set sec_ts [parse_cet $ts]
     regsub -all {,} $resptime "." resptime
     lassign [split_transname $transname] usecase revisit transid transshort searchcrit
-    $db insert trans [vars_to_dict logfile_id vuserid ts_cet sec_cet transname user resptime status usecase \
+    $db insert trans [vars_to_dict logfile_id vuserid ts sec_ts transname user resptime status usecase \
                           revisit transid transshort searchcrit linenr iteration]
-    return [list $user $ts_cet]
+    return [list $user $ts]
   } elseif {[regexp {trans=CR_UC} $line]} {
     breakpoint
   }
@@ -373,17 +355,18 @@ proc split_transname_old {transname} {
 #PDF_Download_UC3.c(16): Continuing after Error -26366: "Text=%PDF" not found for web_reg_find  	[MsgId: MERR-26366]
 #PDF_Download_UC3.c(16): Continuing after Error -26374: The above "not found" error(s) may be explained by header and body byte counts being 0 and 0, respectively.  	[MsgId: MERR-26374]
 
-proc handle_error {line db logfile logfile_id vuserid linenr iteration ts_cet user} {
+proc handle_error {line db logfile logfile_id vuserid linenr iteration ts user} {
   # vullen: user errornr errortype
   # ook: functions.c(427): Error: Previous web_reg_find failed while response bytes > 0: Text=PDF-1.4 [01/19/16 03:18:28] [MsgId: MERR-17999]
-  if {[regexp {^([^ ]+)\((\d+)\): (Continuing after )?Error ?([0-9-]*): (.*)$} $line z srcfile srcline z errornr rest]} {
-    # set ts_cet "" ; # mss later nog af te leiden.
+  if {[regexp {^([^ ]+)\((\d+)\): (Continuing after )?Error ?([0-9-]*): (.*)$} $line z srcfile srclinenr z errornr rest]} {
+    # set ts "" ; # mss later nog af te leiden.
     lassign [det_error_details $rest] errortype user2 level details
     if {$user2 != ""} {
       set user $user2
     }
-    log debug "inserting error: [vars_to_dict logfile logfile_id vuserid linenr iteration srcfile srcline ts_cet user errornr errortype details line]"
-    $db insert error [vars_to_dict logfile logfile_id vuserid linenr iteration srcfile srcline ts_cet user errornr errortype details line]
+    set sec_ts [parse_ts $ts]
+    # log debug "inserting error: [vars_to_dict logfile logfile_id vuserid linenr iteration srcfile srclinenr ts user errornr errortype details line]"
+    $db insert error [vars_to_dict logfile logfile_id vuserid linenr iteration srcfile srclinenr ts sec_ts user errornr errortype details line]
     return [list $errortype $user $level]
   } elseif {[regexp {: Error: } $line]} {
     log error "Error line in log, but could not parse: $line"
@@ -517,28 +500,38 @@ proc get_results_db {db_name ssl} {
 }
 
 proc define_tables {db ssl} {
+  # [2016-07-31 12:01] sec_ts is a representation of a timestamp in seconds since the epoch
+  $db def_datatype {sec_ts resptime} real
+  $db def_datatype {.*id filesize .*linenr.* trans_status iteration.*} integer
+  
+  # default is text, no need to define, just check if it's consistent
+  # [2016-07-31 12:01] do want to define that everything starting with ts is a time stamp/text:
+  $db def_datatype {status ts.*} text
+
   $db add_tabledef read_status {id} {ts status}
   
-  $db add_tabledef logfile {id} {logfile dirname ts_cet {filesize int} \
-                                     {runid int} project script}
+  $db add_tabledef logfile {id} {logfile dirname ts filesize \
+                                     runid project script}
 
-  $db add_tabledef retraccts {id} {logfile_id {vuserid int} {linenr int} \
-                                       ts_cet {sec_cet int} user {naccts int} \
-                                       {resptime real}}
-  # 17-6-2015 NdV transaction is a reserved word in SQLite, so use trans as table name
-  # $db add_tabledef trans {id} {logfile {vuserid int} ts_cet {sec_cet int} transname user {resptime real}}
-  $db add_tabledef trans {id} {logfile_id {vuserid int} {linenr int} ts_cet \
-                                   {sec_cet int} transname user {resptime real} \
-                                   {status int} {iteration int} usecase revisit \
-                                   {transid int} transshort searchcrit}
+  set logfile_fields {logfile_id logfile vuserid}
+  set line_fields {linenr ts sec_ts iteration}
+  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
+  set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
+  set trans_fields {transname user resptime trans_status usecase
+    revisit transid transshort searchcrit}
   
-  $db add_tabledef error {id} {logfile_id logfile {vuserid int} {linenr int} \
-                                   {iteration int} srcfile {srcline int} ts_cet \
-                                   user errornr errortype details line}
+  # 17-6-2015 NdV transaction is a reserved word in SQLite, so use trans as table name
+  $db add_tabledef trans_line {id} [concat $logfile_fields $line_fields $trans_fields]
+  $db add_tabledef trans {id} [concat $logfile_fields $line_start_fields \
+                                   $line_end_fields $trans_fields]
+  
+  $db add_tabledef error {id} [concat $logfile_fields $line_fields \
+                                   srcfile srclinenr user errornr errortype details \
+                                   line]
                    
   # 22-10-2015 NdV ook errors per iteratie, zodat er een hoofd schuldige is aan te wijzen voor het falen.
-  $db add_tabledef error_iter {id} {logfile_id logfile script {vuserid int} \
-                                        {iteration int} user errortype}
+  $db add_tabledef error_iter {id} [concat $logfile_fields script \
+                                        iteration user errortype]
 
   if {$ssl} {
     ssl_define_tables $db  
