@@ -1,5 +1,5 @@
 task check {Perform some checks on sources
-  (eg location of #includes)
+  location of #includes, todo's, comments.
 } {
   set options {
     {includes "Check includes (default)"}
