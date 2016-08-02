@@ -106,6 +106,9 @@ namespace eval ::ndv {
           .Failure {
             font-weight:bold; color:red;
           }
+          .Warning {
+            color:orange;
+          }
         .collapsable1 {
             margin: 1em;
             padding: 1em;
