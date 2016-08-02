@@ -601,6 +601,10 @@ from trans_line order by logfile_id, linenr"
         # synthetic error, just insert.
         insert_trans_error $db $row
       }
+      4 {
+        # functional warning, eg. no FT's available to approve.
+        insert_trans_finished $db $row $started_transactions
+      }
       default {
         error "Unknown transaction status: [:trans_status $row]"
       }
@@ -630,8 +634,14 @@ proc insert_trans_finished {db row started_transactions} {
   set line_fields {linenr ts sec_ts iteration}
   set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
   set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
-  set dstart [dict_rename [dict get $started_transactions [:transname $row]] \
-                  $line_fields $line_start_fields]
+  #set no_start 0
+  set rowstart [dict_get $started_transactions [:transname $row]]
+  if {$rowstart == {}} {
+    # probably a synthetic transaction. Some minor error.
+    set rowstart $row
+    #set no_start 1
+  }
+  set dstart [dict_rename $rowstart $line_fields $line_start_fields]
   set dend [dict_rename $row $line_fields $line_end_fields]
   set d [dict merge $dstart $dend]
   $db insert trans $d
@@ -647,12 +657,13 @@ proc insert_trans_error {db row} {
   $db insert trans $d2
 }
 
-# move to libdict:
+# TODO: move to libdict:
 # rename fields in lfrom to lto and return new dict.
 proc dict_rename {d lfrom lto} {
   set res $d
   foreach f $lfrom t $lto {
-    dict set res $t [dict get $d $f]
+    # [2016-08-02 13:38:19] could be keys in from are not available.
+    dict set res $t [dict_get $d $f]
     dict unset res $f
   }
   return $res

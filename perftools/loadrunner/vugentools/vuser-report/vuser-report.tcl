@@ -9,9 +9,14 @@ proc vuser_report {dir dbname opt} {
   if {[:all $opt]} {
     set opt [dict merge $opt [dict create full 1 summary 1]]
   }
+  set report_made 0
   set db [get_results_db $dbname [:ssl $opt]]
   if {[:full $opt]} {
     vuser_report_full $db $dir
+    set report_made 1
+  }
+  if {!$report_made} {
+    puts "No report made, specify an option (or help)"
   }
 }
 
@@ -48,12 +53,14 @@ proc vuser_report_iter_user {db row hh} {
   # $hh table body ook leuk? Ook vgl clojure/hiccup.
   $hh table_start
   $hh table_header Transaction Result Resp.time Start End
+  # [2016-08-02 13:40:10] + 0 if var is empty
   set query "select transshort, trans_status, resptime, ts_start, ts_end
              from trans
-             where vuserid = [:vuserid $row]
-             and iteration_start = [:iteration_start $row]
+             where vuserid = [:vuserid $row] + 0
+             and iteration_start = [:iteration_start $row] + 0
              and user = '[:user $row]'
              order by ts_start"
+  log debug "Query: $query"
   foreach trow [$db query $query] {
     $hh table_row_class [vuser_row_class $trow] [:transshort $trow] \
         [status_text $trow] \
@@ -63,10 +70,11 @@ proc vuser_report_iter_user {db row hh} {
   $hh table_end
 
   # Check if there were errors in this iteration
+  # [2016-08-02 13:41:59] + 0 for when fields are empty.
   set query "select ts, line
              from error
-             where vuserid = [:vuserid $row]
-             and iteration = [:iteration_start $row]
+             where vuserid = [:vuserid $row] + 0
+             and iteration = [:iteration_start $row] + 0
              and user = '[:user $row]'
              order by ts"
   set res [$db query $query]
@@ -86,6 +94,8 @@ proc vuser_report_iter_user {db row hh} {
 proc vuser_row_class {trow} {
   if {[:trans_status $trow] == 0} {
     return ""
+  } elseif {[:trans_status $trow] == 4} {
+    return "Warning"
   } else {
     return "Failure"
   }
@@ -109,6 +119,9 @@ proc status_text {trow} {
     }
     1 {
       set res "Fail"
+    }
+    4 {
+      set res "Warning"
     }
     default {
       set res "Unknown"
