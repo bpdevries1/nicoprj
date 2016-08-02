@@ -94,10 +94,10 @@ proc make_config_tcl {} {
   }
   write_file $config_name "# config.tcl generated [dt/now]
 global testruns_dir repo_dir repo_lib_dir lr_include_dir
-set testruns_dir \"<FILL IN>\"
+set testruns_dir \{<FILL IN>\}
 set repo_dir [list [file normalize "../repo"]]
 set repo_lib_dir \[file join \$repo_dir libs\]
-set lr_include_dir [det_lr_include_dir]
+set lr_include_dir [list [det_lr_include_dir]]
 "
   
 }
