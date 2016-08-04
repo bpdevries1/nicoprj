@@ -100,7 +100,7 @@ proc add_web_reg_find_group {stmt_grp} {
 
 # sub items like .png and .svg normally don't need web_reg_find
 # TODO: more generic, with regexp-list.
-proc url_needs_find {url} {
+proc url_needs_find_old {url} {
   if {[regexp {\.svg} $url]} {
     return 0
   }
@@ -115,6 +115,15 @@ proc url_needs_find {url} {
   }
   if {[regexp {dynaTraceMonitor} $url]} {
     return 0
+  }
+  return 1
+}
+
+proc url_needs_find {url} {
+  foreach re {{\.svg} {\.png} {\.jpg} {\.gif} {\.ico} {dynaTraceMonitor}} {
+    if {[regexp $re $url]} {
+      return 0
+    }
   }
   return 1
 }
