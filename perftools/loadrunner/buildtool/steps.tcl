@@ -5,7 +5,7 @@ task find_step {Find t<xx>.inf with the step as in source
   foreach filename [glob -nocomplain -directory "result1/iteration1" *.inf] {
     set text [read_file $filename]
     # StepName=Url: System Features
-    if {[regexp -line "^StepName=\[^:\]+: $step.*$" $text line]} {
+    if {[regexp -nocase -line "^StepName=\[^:\]+: $step.*$" $text line]} {
       set ref_file [get_ref_file $filename]
       puts "[file tail $filename]: $line -> $ref_file"
     }
