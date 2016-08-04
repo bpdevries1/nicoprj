@@ -1,4 +1,4 @@
-#!/usr/bin/env tclsh861
+#!/usr/bin/env tclsh
 
 # [2016-03-29 16:37:40] Dit is waarsch nieuwe versie, oude in perftoolset/tools/excel2db.
 
