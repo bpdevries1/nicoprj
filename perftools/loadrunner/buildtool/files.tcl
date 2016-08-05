@@ -99,6 +99,7 @@ proc create_action_file {action} {
 \}
 "
     close $f
+    commit_file $filename
   }
 }
 
