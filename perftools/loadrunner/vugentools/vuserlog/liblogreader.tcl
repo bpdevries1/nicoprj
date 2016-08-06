@@ -83,7 +83,8 @@ proc handle_parsers {to_publish logfile line linenr} {
                  [:topic $parser] $logfile $linenr]
     # result should be a dict, including a topic field for pub/sub (coroutine?)
     # channels. Also, more than one parser could produce a result. A parser produces
-    # max 1 result for 1 topic, handlers could split these.
+    # max 1 result for 1 topic, handlers could split these into multiple results,
+    # check for this.
     if {$res != ""} {
       $to_publish put $res
     }
@@ -99,10 +100,20 @@ proc handle_to_publish {to_publish } {
     # could be there are no handlers for a topic, eg eof-topic. So use dict_get.
     foreach handler [dict_get $handlers $topic] {
       # log debug "Handling with handler: $handler"
-      set res [add_topic [[:coro_name $handler] $item] [:topic $handler]]
+      # set res [add_topic [[:coro_name $handler] $item] [:topic $handler]]
+      set res [[:coro_name $handler] $item]
       # log debug "result of handler: $res"
       if {$res != ""} {
-        $to_publish put $res
+        if {[:multi $res] != ""} {
+          # puts "=== PUTTING MULTIPLE RESULTS BACK ON QUEUE!!"
+          foreach el [:multi $res] {
+            # TODO: do add_topic for each element.
+            $to_publish put [add_topic $el [:topic $handler]]
+          }
+        } else {
+          # $to_publish put $res
+          $to_publish put [add_topic $res [:topic $handler]]
+        }
       }
     };                      # end-of-foreach
   };                        # end-of-while to-publish

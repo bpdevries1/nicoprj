@@ -54,7 +54,18 @@ proc def_handlers {} {
         if {$nitems % 2 == 0} {
           set res [dict merge $item [dict create nitems $nitems]]
         } else {
-          set res ""
+          if {$nitems == 3} {
+            # generate 3 results
+            set el [dict merge $item [dict create nitems $nitems]]
+            set l [list]
+            foreach i {1 2 3} {
+              lappend l $el
+            }
+            set res [dict create multi $l]
+            # puts "yielding MULTI: $res"
+          } else {
+            set res ""            
+          }
         }
       }
       set item [yield $res]
@@ -72,6 +83,8 @@ proc def_handlers {} {
       } else {
         #puts "********************************"
         puts "*** Even handler item: $item, db: $db ***"
+        #set m [:multi $item]
+        #puts "*** m: $m ***"
         #puts "********************************"
       }
       set item [yield]
