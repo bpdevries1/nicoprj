@@ -3,7 +3,7 @@
 package require ndv
 package require tdbc::sqlite3
 
-ndv::source_once ssl.tcl pubsub.tcl
+ndv::source_once ssl.tcl pubsub.tcl read-vuserlogs-db-coro.tcl
 
 # [2016-07-09 10:09] for parse_ts and now:
 use libdatetime
@@ -41,6 +41,10 @@ proc main {argv} {
 
 proc read_logfile_dir {logdir dbname ssl {split_proc split_transname}} {
   global pubsub
+
+  # [2016-08-06 12:09] main is not always entry-point, so call define here.
+  define_logreader_handlers
+  
   # TODO mss pubsub nog eerder zetten als je read-vuserlogs-dir.tcl gebruikt.
   set pubsub [PubSub new]
   set db [get_results_db $dbname $ssl]
@@ -54,7 +58,13 @@ proc read_logfile_dir {logdir dbname ssl {split_proc split_transname}} {
   $pg set_items_total [:# $logfiles]
   $pg start
   foreach logfile $logfiles {
-    readlogfile $logfile $db $ssl $split_proc
+    # old with all functionality:
+    # readlogfile $logfile $db $ssl $split_proc
+
+    # new with coroutines:
+    readlogfile_new_coro $logfile $db $ssl $split_proc
+    
+    # just for testing:
     # readlogfile_trans $logfile $db
     incr nread
     $pg at_item $nread

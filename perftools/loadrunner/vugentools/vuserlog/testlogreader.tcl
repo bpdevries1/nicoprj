@@ -15,7 +15,7 @@ proc main {argv} {
   def_parsers
   def_handlers
   log info "Calling readlogfile"
-  readlogfile $testfilename [dict create db "my-db-object"]
+  readlogfile_coro $testfilename [dict create db "my-db-object"]
   log info "Finished readlogfile"
 }
 

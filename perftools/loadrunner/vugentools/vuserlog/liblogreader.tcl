@@ -21,6 +21,7 @@ proc def_handler {in_topics out_topic body} {
   global handlers; # dict key=in-topic, value = list of [dict topic coro-name]
 
   set coro_name "coro_make_${out_topic}"
+  # log debug "def_handler: coro_name: $coro_name"
   foreach in_topic $in_topics {
     dict lappend handlers $in_topic [dict create coro_name $coro_name topic $out_topic]
   }
@@ -32,8 +33,8 @@ proc def_handler {in_topics out_topic body} {
 # main proc
 # [2016-08-05 20:39] Another go at readlogfile, with knowledge of coroutines.
 # specs could be a set of procs to handle reading the file.
-# TODO: where to pass db object?
-proc readlogfile {logfile {opt ""}} {
+# opt: dict with extra options, like db object.
+proc readlogfile_coro {logfile {opt ""}} {
   global parsers ;              # list of proc-names.
   global handlers; # dict key=in-topic, value = list of [dict topic coro-name]
   set to_publish [struct::queue]
@@ -45,10 +46,11 @@ proc readlogfile {logfile {opt ""}} {
     set linenr 0
     while {[gets $f line] >= 0} {
       incr linenr
-      log debug "read line: $line"
+      #log debug "read line: $line"
       handle_parsers $to_publish $logfile $line $linenr
-      log debug "after parsers, #q: [$to_publish size]"
-      log debug "top q item: [$to_publish peek]"
+      set sz [$to_publish size]
+      #log debug "after parsers, #q: $sz"
+      if {$sz > 0} {# log debug "top q item: [$to_publish peek]"}
       handle_to_publish $to_publish
     }
   }
@@ -62,6 +64,8 @@ proc handle_parsers {to_publish logfile line linenr} {
   # first put through all parsers, and put in queue to_pub
   # to_publish is empty here.
   assert {[$to_publish size] == 0}
+  # log debug "new line, nr = $linenr"
+
   foreach parser $parsers {
     # set res [$parser $line]
     # TODO: maybe also add full line as a key in the dict?
@@ -80,13 +84,13 @@ proc handle_to_publish {to_publish } {
   global handlers; # dict key=in-topic, value = list of [dict topic coro_name]
   while {[$to_publish size] > 0} {
     set item [$to_publish get]
-    log debug "handle_to_publish: item: $item"
+    # log debug "handle_to_publish: item: $item"
     set topic [:topic $item]
     # could be there are no handlers for a topic, eg eof-topic. So use dict_get.
     foreach handler [dict_get $handlers $topic] {
-      log debug "Handling with handler: $handler"
+      # log debug "Handling with handler: $handler"
       set res [add_topic [[:coro_name $handler] $item] [:topic $handler]]
-      log debug "result of handler: $res"
+      # log debug "result of handler: $res"
       if {$res != ""} {
         $to_publish put $res
       }
