@@ -81,6 +81,7 @@ proc add_read_status {db status} {
 #                   usecase revisit {transid int} transshort searchcrit}
 # functions.c(343): [2015-09-02 05:51:41] [1441165901] trans=CR_UC1_revisit_11_Expand_transactions_DEP, user=u_lpt-rtsec_cr_tso_tso1_000005, resptime=0.156, status=0 [09/02/15 05:51:41]	[MsgId: MMSG-17999]
 # Transaction "CR_UC1_ -> deze wordt niet geparsed.
+# @param split_proc - for splitting a full transaction name into parts (in a dict)
 proc readlogfile {logfile db ssl split_proc} {
   log info "Reading: $logfile"
   if {[is_logfile_read $db $logfile]} {
