@@ -19,8 +19,12 @@ proc def_parser {topic body} {
 # in_topics needed to decide which handlers to call for a topic.
 proc def_handler {in_topics out_topic body} {
   global handlers; # dict key=in-topic, value = list of [dict topic coro-name]
-
-  set coro_name "coro_make_${out_topic}"
+  if {$out_topic == ""} {
+    set coro_name [unique_name coro_make_]
+  } else {
+    # set coro_name "coro_make_${out_topic}"
+    set coro_name [unique_name coro_make_$out_topic]
+  }
   # log debug "def_handler: coro_name: $coro_name"
   foreach in_topic $in_topics {
     dict lappend handlers $in_topic [dict create coro_name $coro_name topic $out_topic]
@@ -28,6 +32,12 @@ proc def_handler {in_topics out_topic body} {
   # now not a normal proc-def, but a coroutine.
   # apply is the way to convert a body to a command/'proc'.
   coroutine $coro_name apply [list {} $body]
+}
+
+proc unique_name {prefix} {
+  global __unique_counter__
+  incr __unique_counter__
+  return "$prefix$__unique_counter__"
 }
 
 # main proc

@@ -21,6 +21,7 @@ proc define_logreader_handlers {} {
   # of toch een losse namespace waar deze dingen in hangen?
   def_parsers
   def_handlers
+  # breakpoint
 }
 
 proc def_parsers {} {
@@ -41,7 +42,6 @@ proc def_parsers {} {
     # TODO: define
     return ""
   }
-
   
 }
 
@@ -58,6 +58,66 @@ proc log2nvpairs {line} {
 }
 
 proc def_handlers {} {
+
+  def_handler {bof eof transline} trans {
+    set user ""; set iteration 0; set split_proc "<none>"
+
+    set item [yield]
+    # keep on running, even after eof, could be >1 logfile.
+    while 1 {
+      set res ""
+      switch [:topic $item] {
+        bof {
+          set started_transactions [dict create]
+          dict_to_vars $item ;    # set db, split_proc, ssl
+        }
+        eof {
+          # TODO: maybe return/yield more than one item. How to do?
+          log warn "TODO: handle eof!"
+          log warn "unfinished transactions: [dict values $started_transactions]"
+        }
+        transline {
+          # TODO: in separate proc?
+          if {[new_user_iteration? $item $user $iteration]} {
+            log warn "TODO: return/yield unfinished transactions"
+            # insert_trans_not_finished $db $started_transactions
+            set started_transactions [dict create]
+            set user [:user $item]
+            set iteration [:iteration $item]
+            # dict_assign $item user iteration
+          }
+          set item [dict merge $item [$split_proc [:transname $item]]]
+          switch [:trans_status $item] {
+            -1 {
+              # start of a transaction, keep data for now.
+              dict set started_transactions [:transname $item] $item
+            }
+            0 {
+              # succesful end of a transaction, find start data and insert item.
+              # insert_trans_finished $db $item $started_transactions
+              dict unset started_transactions [:transname $item]
+            }
+            1 {
+              # synthetic error, just insert.
+              # insert_trans_error $db $item
+              set res [make_trans_error $item]
+            }
+            4 {
+              # functional warning, eg. no FT's available to approve.
+              # insert_trans_finished $db $item $started_transactions
+            }
+            default {
+              error "Unknown transaction status: [:trans_status $item]"
+            }
+          }
+        }
+        
+      }
+
+      set item [yield $res]
+    }
+  }
+  
   # 'inserter' handler, just for side effects, yields no new results.
   def_handler {bof transline} {} {
     # log debug "puts-handler: started"
@@ -67,22 +127,35 @@ proc def_handlers {} {
     while 1 {
       if {[:topic $item] == "bof"} {
         dict_to_vars $item ;    # set db, split_proc, ssl
-        #set db [:db $item]
-        #set split_proc [:split_proc $item]
         set file_item $item
       } else {
         # log debug "transline handler item: $item, db: $db ***"
         $db insert trans_line [dict merge $file_item $item \
                                    [$split_proc [:transname $item]]]
-
-        #bof: logfile
-        #item: ts sec_ts transname user resptime trans_status
-        #todo: logfile_id vuserid iteration
       }
       set item [yield];         # this one never returns anything.
     }
   }
 
+  # another inserter, for trans records
+  def_handler {bof trans} {} {
+    # log debug "puts-handler: started"
+    set db "<none>"
+    set file_item "<none>"
+    set item [yield]
+    while 1 {
+      if {[:topic $item] == "bof"} {
+        dict_to_vars $item ;    # set db, split_proc, ssl
+        set file_item $item
+      } else {
+        # log debug "transline handler item: $item, db: $db ***"
+        $db insert trans [dict merge $file_item $item]
+      }
+      set item [yield];         # this one never returns anything.
+    }
+  }
+
+  
 }
 
 proc readlogfile_new_coro {logfile db ssl split_proc} {

@@ -590,6 +590,7 @@ proc fill_table_trans {db} {
 from trans_line order by logfile_id, linenr"
   set user ""; set iteration 0
   set started_transactions [dict create]
+  # TODO: gaat dit goed met >1 file? Mss niet meer relevant als coroutine versie compleet is.
   foreach row [$db query $query] {
     if {[new_user_iteration? $row $user $iteration]} {
       insert_trans_not_finished $db $started_transactions
@@ -658,7 +659,7 @@ proc insert_trans_finished {db row started_transactions} {
   $db insert trans $d
 }
 
-proc insert_trans_error {db row} {
+proc insert_trans_error_old {db row} {
   # geen start velden, dus alleen row-waarden naar end velden omzetten.
   set line_fields {linenr ts sec_ts iteration}
   set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]  
@@ -666,6 +667,21 @@ proc insert_trans_error {db row} {
   set d [dict_rename $row $line_fields $line_end_fields]
   set d2 [dict merge $d [dict_rename $row $line_fields $line_start_fields]]
   $db insert trans $d2
+}
+
+proc insert_trans_error {db row} {
+  # $db insert trans $d2
+  $db insert trans [make_trans_error $row]
+}
+
+proc make_trans_error {row} {
+  set line_fields {linenr ts sec_ts iteration}
+  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]  
+  set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
+  set d [dict_rename $row $line_fields $line_end_fields]
+  set d2 [dict merge $d [dict_rename $row $line_fields $line_start_fields]]
+  # breakpoint
+  return $d2
 }
 
 # TODO: move to libdict:
