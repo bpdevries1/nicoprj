@@ -15,7 +15,7 @@ proc main {argv} {
   def_parsers
   def_handlers
   log info "Calling readlogfile"
-  readlogfile $testfilename
+  readlogfile $testfilename [dict create db "my-db-object"]
   log info "Finished readlogfile"
 }
 
@@ -51,7 +51,6 @@ proc def_handlers {} {
         set res ""
       } else {
         incr nitems
-        # TODO: handle eof item
         if {$nitems % 2 == 0} {
           set res [dict merge $item [dict create nitems $nitems]]
         } else {
@@ -63,13 +62,18 @@ proc def_handlers {} {
   }
 
   # 'inserter' handler, just for side effects, yields no new results.
-  def_handler even {} {
+  def_handler {bof even} {} {
     log debug "puts-handler: started"
+    set db "<none>"
     set item [yield]
     while 1 {
-      #puts "********************************"
-      puts "*** Even handler item: $item ***"
-      #puts "********************************"
+      if {[:topic $item] == "bof"} {
+        set db [:db $item]
+      } else {
+        #puts "********************************"
+        puts "*** Even handler item: $item, db: $db ***"
+        #puts "********************************"
+      }
       set item [yield]
     }
   }

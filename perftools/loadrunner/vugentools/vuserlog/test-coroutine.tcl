@@ -450,3 +450,13 @@ proc handle_to_publish {to_publish } {
     };                      # end-of-foreach
   };                        # end-of-while to-publish
 }
+
+# DB object passen, opties:
+
+* bij het definieren, dus param in def_handler
+  handlers zijn algemeen, bij def is de db nog niet bekend?
+* als event voor de handler, met specifiek topic.
+  bv bof, als tegenhanger van eof. En deze dan params meegeven.
+
+
+

@@ -16,7 +16,7 @@ proc def_parser {topic body} {
 }
 
 # out_topic is identifying, key.
-# but in_topics needed to decide which handlers to call for a topic.
+# in_topics needed to decide which handlers to call for a topic.
 proc def_handler {in_topics out_topic body} {
   global handlers; # dict key=in-topic, value = list of [dict topic coro-name]
 
@@ -33,12 +33,15 @@ proc def_handler {in_topics out_topic body} {
 # [2016-08-05 20:39] Another go at readlogfile, with knowledge of coroutines.
 # specs could be a set of procs to handle reading the file.
 # TODO: where to pass db object?
-proc readlogfile {logfile} {
+proc readlogfile {logfile {opt ""}} {
   global parsers ;              # list of proc-names.
   global handlers; # dict key=in-topic, value = list of [dict topic coro-name]
+  set to_publish [struct::queue]
+  $to_publish put [dict merge [dict create topic bof logfile $logfile] $opt]
+  handle_to_publish $to_publish
+  
   io/with_file f [open $logfile rb] {
     # still line based for now
-    set to_publish [struct::queue]
     set linenr 0
     while {[gets $f line] >= 0} {
       incr linenr
