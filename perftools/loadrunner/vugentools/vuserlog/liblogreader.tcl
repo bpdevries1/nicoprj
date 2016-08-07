@@ -104,22 +104,18 @@ proc handle_to_publish {to_publish } {
       set res [[:coro_name $handler] $item]
       # log debug "result of handler: $res"
       if {$res != ""} {
-        if {[:multi $res] != ""} {
+        if {[dict exists $res multi]} {
           # puts "=== PUTTING MULTIPLE RESULTS BACK ON QUEUE!!"
           foreach el [:multi $res] {
-            # TODO: do add_topic for each element.
             $to_publish put [add_topic $el [:topic $handler]]
           }
         } else {
-          # $to_publish put $res
           $to_publish put [add_topic $res [:topic $handler]]
         }
       }
     };                      # end-of-foreach
   };                        # end-of-while to-publish
 }
-
-
 
 # post process all parser results to add topic, logfile and linenr
 proc add_topic_file_linenr {item topic logfile linenr} {

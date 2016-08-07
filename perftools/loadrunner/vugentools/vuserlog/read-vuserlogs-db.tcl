@@ -642,7 +642,19 @@ proc insert_trans_not_finished {db started_transactions} {
   }
 }
 
-proc insert_trans_finished {db row started_transactions} {
+proc make_trans_not_finished {started_transactions} {
+  set res [list]
+  set line_fields {linenr ts sec_ts iteration}
+  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
+  foreach row [dict values $started_transactions] {
+    set d [dict_rename $row $line_fields $line_start_fields]
+    # $db insert trans $d
+    lappend res $d
+  }
+  return $res
+}
+
+proc insert_trans_finished_old {db row started_transactions} {
   set line_fields {linenr ts sec_ts iteration}
   set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
   set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
@@ -658,6 +670,28 @@ proc insert_trans_finished {db row started_transactions} {
   set d [dict merge $dstart $dend]
   $db insert trans $d
 }
+
+proc insert_trans_finished {db row started_transactions} {
+  $db insert trans [make_trans_finished $row $started_transactions]
+}
+
+proc make_trans_finished {row started_transactions} {
+  set line_fields {linenr ts sec_ts iteration}
+  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
+  set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
+  #set no_start 0
+  set rowstart [dict_get $started_transactions [:transname $row]]
+  if {$rowstart == {}} {
+    # probably a synthetic transaction. Some minor error.
+    set rowstart $row
+    #set no_start 1
+  }
+  set dstart [dict_rename $rowstart $line_fields $line_start_fields]
+  set dend [dict_rename $row $line_fields $line_end_fields]
+  set d [dict merge $dstart $dend]
+  return $d
+}
+
 
 proc insert_trans_error_old {db row} {
   # geen start velden, dus alleen row-waarden naar end velden omzetten.

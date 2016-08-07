@@ -14,7 +14,12 @@ ndv::source_once liblogreader.tcl
 require libdatetime dt
 require libio io
 
-set_log_global debug {showfilename 0}
+# [2016-08-07 13:29] deze zorgt er nu voor dat global (zoals de naam zegt) overal loglevel
+# op debug komt, wil je in het algemeen niet. 2 opties:
+# * de set_log_global doet alleen wat als de log nog niet gezet is.
+# * iets met namespaces, log object per namespace. De log proc moet dan de goede pakken.
+
+# set_log_global debug {showfilename 0}
 
 proc define_logreader_handlers {} {
   log info "define_logreader_handlers: start"
@@ -39,15 +44,23 @@ proc def_parsers {} {
   }
 
   def_parser errorline {
-    # TODO: define
-    return ""
+    if {[regexp {^([^ ]+)\((\d+)\): (Continuing after )?Error ?([0-9-]*): (.*)$} $line z srcfile srclinenr z errornr rest]} {
+      # [2016-08-07 13:24] ignore user field returned from det_error_details, too specific and already have in transline.
+      lassign [det_error_details $rest] errortype z_user level details
+      return [vars_to_dict srcfile srclinenr errornr errortype details line]
+    } elseif {[regexp {: Error: } $line]} {
+      log error "Error line in log, but could not parse: $line"
+      breakpoint
+    } else {
+      return ""      
+    }
   }
-  
 }
 
 # functions.c(377): [2016-07-29 16:48:22.368] trans=maker_landing, user=Silver3, resptime=-1.000, status=-1, iteration=1 [07/29/16 16:48:22]
 # trans=maker_landing, user=Silver3, resptime=-1.000, status=-1, iteration=1
-# return dict with key=name, val=val.
+# @return dict with key=name, val=val.
+# [2016-08-07 12:12] for now, line is already the part that needs to be split, not the whole logline.
 proc log2nvpairs {line} {
   set d [dict create]
   foreach nv [split $line ", "] {
@@ -66,6 +79,7 @@ proc def_handlers {} {
     # keep on running, even after eof, could be >1 logfile.
     while 1 {
       set res ""
+      set old_res [list];           # unfinished transaction from earlier, combine at the end.
       switch [:topic $item] {
         bof {
           set started_transactions [dict create]
@@ -73,14 +87,25 @@ proc def_handlers {} {
         }
         eof {
           # TODO: maybe return/yield more than one item. How to do?
-          log warn "TODO: handle eof!"
-          log warn "unfinished transactions: [dict values $started_transactions]"
+          #log warn "TODO: handle eof!"
+          #log warn "unfinished transactions: [dict values $started_transactions]"
+          set old_res [make_trans_not_finished $started_transactions]; # list
+
+          # evt zelfs res niet meegeven, maar gaat wat ver.
+          # add_res res [make_trans_not_finished $started_transactions]
+
+          # functioneel (FP), maar past hier niet zo, je doet toch een inplace update.
+          # set res [add_res $res [make_trans_not_finished $started_transactions]]
+
+
+          
         }
         transline {
           # TODO: in separate proc?
           if {[new_user_iteration? $item $user $iteration]} {
-            log warn "TODO: return/yield unfinished transactions"
+            # log warn "TODO: return/yield unfinished transactions"
             # insert_trans_not_finished $db $started_transactions
+            set old_res [make_trans_not_finished $started_transactions]; # list
             set started_transactions [dict create]
             set user [:user $item]
             set iteration [:iteration $item]
@@ -95,25 +120,43 @@ proc def_handlers {} {
             0 {
               # succesful end of a transaction, find start data and insert item.
               # insert_trans_finished $db $item $started_transactions
+              set res [make_trans_finished $item $started_transactions]
               dict unset started_transactions [:transname $item]
             }
             1 {
               # synthetic error, just insert.
-              # insert_trans_error $db $item
               set res [make_trans_error $item]
             }
             4 {
               # functional warning, eg. no FT's available to approve.
               # insert_trans_finished $db $item $started_transactions
+              set res [make_trans_finished $item $started_transactions]
             }
             default {
               error "Unknown transaction status: [:trans_status $item]"
             }
-          }
+          };                    # end-of-switch-status
         }
-        
-      }
+      };                        # end-of-switch-topic
+      set res [combine_res_old_res $res $old_res]
+      set item [yield $res]
+    };                          # end-of-while-1
+  };                            # end-of-define-handler
 
+  # make error object from errorline and transline
+  def_handler {transline errorline} error {
+    set transline_item {}
+    set item [yield]
+    while 1 {
+      set res ""
+      switch [:topic $item] {
+        transline {
+          set transline_item $item
+        }
+        errorline {
+          set res [dict merge $transline_item $item]
+        }
+      }
       set item [yield $res]
     }
   }
@@ -148,6 +191,7 @@ proc def_handlers {} {
         dict_to_vars $item ;    # set db, split_proc, ssl
         set file_item $item
       } else {
+        assert {[:linenr_start $item] > 0}
         # log debug "transline handler item: $item, db: $db ***"
         $db insert trans [dict merge $file_item $item]
       }
@@ -155,7 +199,47 @@ proc def_handlers {} {
     }
   }
 
+  # inserter for error records
+  def_handler {bof error} {} {
+    # log debug "puts-handler: started"
+    set db "<none>"
+    set file_item "<none>"
+    set item [yield]
+    while 1 {
+      if {[:topic $item] == "bof"} {
+        dict_to_vars $item ;    # set db, split_proc, ssl
+        set file_item $item
+      } else {
+        $db insert error [dict merge $file_item $item]
+      }
+      set item [yield];         # this one never returns anything.
+    }
+  }
   
+
+  
+}
+
+# combine old results (list in old_res) with new result in res (dict)
+# if result contains more than 1 item, put it in a list under the multi key in the main
+# result dict
+proc combine_res_old_res {res old_res} {
+  if {$res == ""} {
+    # just put old-res list in multi part
+    if {$old_res == {}} {
+      set combined_res ""
+    } else {
+      set combined_res [dict create multi $old_res]      
+    }
+  } else {
+    if {$old_res == {}} {
+      set combined_res $res
+    } else {
+      set combined_res [dict create multi [concat $old_res [list $res]]]
+    }
+  }
+  # log debug "combined_res: $combined_res"
+  return $combined_res
 }
 
 proc readlogfile_new_coro {logfile db ssl split_proc} {
