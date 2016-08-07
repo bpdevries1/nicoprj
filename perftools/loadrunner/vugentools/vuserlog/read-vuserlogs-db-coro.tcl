@@ -79,7 +79,7 @@ proc def_handlers {} {
     # keep on running, even after eof, could be >1 logfile.
     while 1 {
       set res ""
-      set old_res [list];           # unfinished transaction from earlier, combine at the end.
+      # set old_res [list];           # unfinished transaction from earlier, combine at the end.
       switch [:topic $item] {
         bof {
           set started_transactions [dict create]
@@ -89,24 +89,21 @@ proc def_handlers {} {
           # TODO: maybe return/yield more than one item. How to do?
           #log warn "TODO: handle eof!"
           #log warn "unfinished transactions: [dict values $started_transactions]"
-          set old_res [make_trans_not_finished $started_transactions]; # list
-
+          # set old_res [make_trans_not_finished $started_transactions]; # list
+          res_add res {*}[make_trans_not_finished $started_transactions]
           # evt zelfs res niet meegeven, maar gaat wat ver.
           # door varargs kun je gemakkelijk een enkele doen, maar ook een list vrij ok.
           # add_res res {*}[make_trans_not_finished $started_transactions]
 
           # functioneel (FP), maar past hier niet zo, je doet toch een inplace update.
           # set res [add_res $res [make_trans_not_finished $started_transactions]]
-
-
           
         }
         transline {
           # TODO: in separate proc?
           if {[new_user_iteration? $item $user $iteration]} {
-            # log warn "TODO: return/yield unfinished transactions"
-            # insert_trans_not_finished $db $started_transactions
-            set old_res [make_trans_not_finished $started_transactions]; # list
+            # set old_res [make_trans_not_finished $started_transactions]; # list
+            res_add res {*}[make_trans_not_finished $started_transactions]
             set started_transactions [dict create]
             set user [:user $item]
             set iteration [:iteration $item]
@@ -121,17 +118,17 @@ proc def_handlers {} {
             0 {
               # succesful end of a transaction, find start data and insert item.
               # insert_trans_finished $db $item $started_transactions
-              set res [make_trans_finished $item $started_transactions]
+              res_add res [make_trans_finished $item $started_transactions]
               dict unset started_transactions [:transname $item]
             }
             1 {
               # synthetic error, just insert.
-              set res [make_trans_error $item]
+              res_add res [make_trans_error $item]
             }
             4 {
               # functional warning, eg. no FT's available to approve.
               # insert_trans_finished $db $item $started_transactions
-              set res [make_trans_finished $item $started_transactions]
+              res_add res [make_trans_finished $item $started_transactions]
             }
             default {
               error "Unknown transaction status: [:trans_status $item]"
@@ -139,7 +136,7 @@ proc def_handlers {} {
           };                    # end-of-switch-status
         }
       };                        # end-of-switch-topic
-      set res [combine_res_old_res $res $old_res]
+      # set res [combine_res_old_res $res $old_res]
       set item [yield $res]
     };                          # end-of-while-1
   };                            # end-of-define-handler
@@ -224,7 +221,7 @@ proc def_handlers {} {
 # combine old results (list in old_res) with new result in res (dict)
 # if result contains more than 1 item, put it in a list under the multi key in the main
 # result dict
-proc combine_res_old_res {res old_res} {
+proc combine_res_old_res__old {res old_res} {
   if {$res == ""} {
     # just put old-res list in multi part
     if {$old_res == {}} {
