@@ -78,7 +78,7 @@ proc def_handlers {} {
         set db [:db $item]
       } else {
         #puts "********************************"
-        puts "*** Even handler item: $item, db: $db ***"
+        # puts "*** Even handler item: $item, db: $db ***"
         #set m [:multi $item]
         #puts "*** m: $m ***"
         #puts "********************************"
@@ -87,6 +87,18 @@ proc def_handlers {} {
     }
   }
 
+  # of voor inserter:
+  def_handler2 {bof even} {} {set x 12} {
+    if {[:topic $item] == "bof"} {
+      set db [:db $item]
+    } else {
+      #puts "********************************"
+      puts "*** Even handler2 item: $item, x=$x, db: $db ***"
+      #set m [:multi $item]
+      #puts "*** m: $m ***"
+      #puts "********************************"
+    }
+  }
 }
 
 if {[this_is_main]} {

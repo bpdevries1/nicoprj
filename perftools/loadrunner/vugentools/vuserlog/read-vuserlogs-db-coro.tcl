@@ -72,52 +72,43 @@ proc log2nvpairs {line} {
 
 proc def_handlers {} {
 
+  # TODO: helper or replacement for def_handler so default code will be generated:
+  # initialisation
+  # set item [yield]
+  # while 1 {
+  #   set res ""
+  #   $body
+  #   set item [yield $res]
+  # }
+  
   def_handler {bof eof transline} trans {
     set user ""; set iteration 0; set split_proc "<none>"
-
     set item [yield]
     # keep on running, even after eof, could be >1 logfile.
     while 1 {
       set res ""
-      # set old_res [list];           # unfinished transaction from earlier, combine at the end.
       switch [:topic $item] {
         bof {
           set started_transactions [dict create]
           dict_to_vars $item ;    # set db, split_proc, ssl
         }
         eof {
-          # TODO: maybe return/yield more than one item. How to do?
-          #log warn "TODO: handle eof!"
-          #log warn "unfinished transactions: [dict values $started_transactions]"
-          # set old_res [make_trans_not_finished $started_transactions]; # list
           res_add res {*}[make_trans_not_finished $started_transactions]
-          # evt zelfs res niet meegeven, maar gaat wat ver.
-          # door varargs kun je gemakkelijk een enkele doen, maar ook een list vrij ok.
-          # add_res res {*}[make_trans_not_finished $started_transactions]
-
-          # functioneel (FP), maar past hier niet zo, je doet toch een inplace update.
-          # set res [add_res $res [make_trans_not_finished $started_transactions]]
-          
         }
         transline {
-          # TODO: in separate proc?
           if {[new_user_iteration? $item $user $iteration]} {
-            # set old_res [make_trans_not_finished $started_transactions]; # list
             res_add res {*}[make_trans_not_finished $started_transactions]
             set started_transactions [dict create]
-            set user [:user $item]
-            set iteration [:iteration $item]
-            # dict_assign $item user iteration
+            dict_to_vars $item; # user, iteration
           }
           set item [dict merge $item [$split_proc [:transname $item]]]
           switch [:trans_status $item] {
             -1 {
-              # start of a transaction, keep data for now.
+              # start of a transaction, keep data to combine with end-of-trans.
               dict set started_transactions [:transname $item] $item
             }
             0 {
               # succesful end of a transaction, find start data and insert item.
-              # insert_trans_finished $db $item $started_transactions
               res_add res [make_trans_finished $item $started_transactions]
               dict unset started_transactions [:transname $item]
             }
@@ -127,7 +118,6 @@ proc def_handlers {} {
             }
             4 {
               # functional warning, eg. no FT's available to approve.
-              # insert_trans_finished $db $item $started_transactions
               res_add res [make_trans_finished $item $started_transactions]
             }
             default {
@@ -136,7 +126,6 @@ proc def_handlers {} {
           };                    # end-of-switch-status
         }
       };                        # end-of-switch-topic
-      # set res [combine_res_old_res $res $old_res]
       set item [yield $res]
     };                          # end-of-while-1
   };                            # end-of-define-handler
@@ -216,28 +205,6 @@ proc def_handlers {} {
   
 
   
-}
-
-# combine old results (list in old_res) with new result in res (dict)
-# if result contains more than 1 item, put it in a list under the multi key in the main
-# result dict
-proc combine_res_old_res__old {res old_res} {
-  if {$res == ""} {
-    # just put old-res list in multi part
-    if {$old_res == {}} {
-      set combined_res ""
-    } else {
-      set combined_res [dict create multi $old_res]      
-    }
-  } else {
-    if {$old_res == {}} {
-      set combined_res $res
-    } else {
-      set combined_res [dict create multi [concat $old_res [list $res]]]
-    }
-  }
-  # log debug "combined_res: $combined_res"
-  return $combined_res
 }
 
 proc readlogfile_new_coro {logfile db ssl split_proc} {
