@@ -92,7 +92,8 @@ proc def_handlers {} {
           set old_res [make_trans_not_finished $started_transactions]; # list
 
           # evt zelfs res niet meegeven, maar gaat wat ver.
-          # add_res res [make_trans_not_finished $started_transactions]
+          # door varargs kun je gemakkelijk een enkele doen, maar ook een list vrij ok.
+          # add_res res {*}[make_trans_not_finished $started_transactions]
 
           # functioneel (FP), maar past hier niet zo, je doet toch een inplace update.
           # set res [add_res $res [make_trans_not_finished $started_transactions]]

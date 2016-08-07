@@ -46,28 +46,24 @@ proc def_handlers {} {
     set eof 0
     while {!$eof} {
       log debug "even-handler: item: $item"
+      set res {}
       if {[:topic $item] == "eof"} {
         set eof 1
-        set res ""
       } else {
         incr nitems
         if {$nitems % 2 == 0} {
-          set res [dict merge $item [dict create nitems $nitems]]
+          res_add res [dict merge $item [dict create nitems $nitems]]
         } else {
           if {$nitems == 3} {
             # generate 3 results
             set el [dict merge $item [dict create nitems $nitems]]
-            set l [list]
-            foreach i {1 2 3} {
-              lappend l $el
-            }
-            set res [dict create multi $l]
-            # puts "yielding MULTI: $res"
+            res_add res $el $el $el
           } else {
-            set res ""            
+            # nothing
           }
         }
       }
+      log debug "even, yield res: [res_tostring $res]"
       set item [yield $res]
     }
   }

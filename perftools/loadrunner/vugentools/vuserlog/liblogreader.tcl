@@ -127,8 +127,72 @@ proc add_topic_file_linenr {item topic logfile linenr} {
 
 # post process all handler/maker results to add just topic
 proc add_topic {item topic} {
+  log debug "add_topic: $item --- $topic"
   if {$item == ""} {
     return ""
   }
   dict merge $item [dict create topic $topic]
+}
+
+# helper for multiple results
+# result is either:
+# - empty string, nothing.
+# - a dict with a single item
+# - a dict with one key: multi, with has a list of dicts as values.
+# @param resname - name of the var to add to
+# @param args - list of values to add, all dicts.
+proc res_add {resname args} {
+  upvar $resname res
+  set lst [res_items $res];     # list of current items, with 0, 1 or more items
+  foreach el $args {
+    lappend lst $el
+  }
+  switch [llength $lst] {
+    0 {set res ""}
+    1 {set res [:0 $lst]}
+    default {set res [dict create multi $lst]}
+  }
+  log debug "add res result: [res_tostring $res]"
+  return $res
+}
+
+proc res_items {res} {
+  if {$res == {}} {
+    return {}
+  } else {
+    if {[dict exists $res multi]} {
+      return [:multi $res]
+    } else {
+      return [list $res]
+    }
+  }
+}
+
+proc res_tostring {res} {
+  set tp [res_type $res]
+  switch $tp {
+    empty {return empty}
+    single {return "single: $res"}
+    multi {
+      set str "multi:"
+      foreach el [:multi $res] {
+        append str "\n-> $el"
+      }
+      return $str
+    }
+  }
+}
+
+proc res_type {res} {
+  if {$res == {}} {
+    return empty
+  } else {
+    if {[dict exists $res multi]} {
+      return multi
+    } else {
+      return single
+    }
+  }
+
+  
 }
