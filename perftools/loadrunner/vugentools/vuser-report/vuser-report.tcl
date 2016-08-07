@@ -4,6 +4,8 @@
 # TODO: call directly, for PC/ALM tests.
 # first only based on output.txt in vugen script dir.
 
+require libio io
+
 proc vuser_report {dir dbname opt} {
   puts "TODO - make report in dir: $dir with opt: $opt"
   if {[:all $opt]} {
@@ -31,7 +33,7 @@ proc vuser_report_full {db dir} {
   if {[file exists $html_name]} {
     # return ; # or maybe a clean option to start anew
   }
-  with_file f [open $html_name w] {
+  io/with_file f [open $html_name w] {
     set hh [ndv::CHtmlHelper::new]
     $hh set_channel $f
     $hh write_header "Vuser log report" 0
