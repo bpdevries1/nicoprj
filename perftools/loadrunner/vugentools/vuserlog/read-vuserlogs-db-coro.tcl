@@ -187,7 +187,8 @@ proc def_handlers {} {
   }
 
   # inserter for error records
-  def_handler {bof error} {} {
+  # old one, should not get called.
+  def_handler {bofxx errorxx} {} {
     # log debug "puts-handler: started"
     set db "<none>"
     set file_item "<none>"
@@ -202,8 +203,16 @@ proc def_handlers {} {
       set item [yield];         # this one never returns anything.
     }
   }
-  
 
+  # maybe create def_insert_handler, but is specific to this project, not in liblogreader.
+  def_handler2 {bof error} {} {
+    if {[:topic $item] == "bof"} {
+      dict_to_vars $item ;    # set db, split_proc, ssl
+      set file_item $item
+    } else {
+      $db insert error [dict merge $file_item $item]
+    }
+  }
   
 }
 
