@@ -205,7 +205,7 @@ proc def_handlers {} {
   }
 
   # maybe create def_insert_handler, but is specific to this project, not in liblogreader.
-  def_handler2 {bof error} {} {
+  def_handler2 {bofxx errorxx} {} {
     if {[:topic $item] == "bof"} {
       dict_to_vars $item ;    # set db, split_proc, ssl
       set file_item $item
@@ -213,8 +213,40 @@ proc def_handlers {} {
       $db insert error [dict merge $file_item $item]
     }
   }
+
+  def_insert_handler error
   
 }
+
+proc def_insert_handler {table} {
+  def_handler2 [list bof $table] {} "if {\[:topic \$item\] == \"bof\"} {
+      dict_to_vars \$item ;    # set db, split_proc, ssl
+      set file_item \$item
+    } else {
+      \$db insert $table \[dict merge \$file_item \$item\]
+    }"
+}
+
+# eigenlijk iets als:
+# evt de macro` zelfs alleen ` noemen, maar is mss te onduidelijk.
+# heeft deze in clojure een naam?
+# https://github.com/brandonbloom/backtick
+# syntax-quote heet deze, wel ok naam.
+# ge-un-quote dingen moeten in uplevel beschikbaar zijn. Zie ook mijn closure dingetje
+# in FP.
+if 0 {
+  proc def_insert_handler {table} {
+    def_handler2 [list bof $table] {} [syntax_quote {
+      if {[:topic $item] == "bof"} {
+        dict_to_vars $item ;    # set db, split_proc, ssl
+        set file_item $item
+      } else {
+        $db insert ~$table [dict merge $file_item $item]
+      }
+    }]
+  }
+}
+
 
 proc readlogfile_new_coro {logfile db ssl split_proc} {
   # some prep with inserting record in db for logfile, also do with handler?
