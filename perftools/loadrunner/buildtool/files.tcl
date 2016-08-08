@@ -183,17 +183,17 @@ proc split_action {action} {
       lappend new_actions $transname
       #set foa [open "${transname}.c" w]
       #fconfigure $foa -translation crlf
-      set foa [open_temp_w "${transname}.c"]
-      puts $foa "$transname\(\) \{"
-      set foc $foa
       puts $fo "\t$transname\(\);"
+      set foa [open_temp_w "${transname}.c"]
+      set foc $foa
+      puts $foc "$transname\(\) \{"
       puts $foc $line
     } elseif {[regexp {_end_transaction} $line]} {
-      puts $foa $line
-      puts $foa "\treturn 0;\n\}\n"
+      puts $foc $line
+      puts $foc "\treturn 0;\n\}\n"
       close $foa
-      commit_file "${transname}.c"
       set foc $fo
+      commit_file "${transname}.c"
     } else {
       puts $foc $line
     }
