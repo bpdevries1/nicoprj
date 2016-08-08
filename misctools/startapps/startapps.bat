@@ -2,6 +2,8 @@
 setlocal
 rem startapps.bat - start apps like , lync, 
 rem start from standard command prompt.
+rem source - nicoprj/misctools/startapps
+rem target - c:/PCC/nico/util/startapps
 
 rem [2016-05-17 09:59:37] deze zou automatisch moeten kunnen
 set workingdir=c:\pcc\nico\util\startapps
@@ -44,6 +46,7 @@ start c:\PCC\util\4nt\4nt.exe /c start-typeperf.bat
 
 rem AHK shortcuts, first only F8 for timestamp insertion.
 rem start c:\PCC\Nico\AHK-Demo\demo\send-timestamp.exe
+rem source - nicoprj/misctools/ahkmacro/send-timestamp.ahk
 start c:\PCC\Nico\util\ahkmacro\send-timestamp.exe
 
 rem activitylog
@@ -51,7 +54,6 @@ c:\PCC\util\4nt\4nt.exe /c C:\pcc\nico\nicoprj\misctools\activitylog\start-activ
 
 rem utils folder met shortcuts
 start explorer C:\Users\vreezen\Desktop\utils
-
 
 goto end
 

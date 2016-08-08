@@ -32,3 +32,8 @@ return
 ^+F9::
 send_ts()
 return
+
+;; [2016-08-08 09:29:33] In outlook - Alt-Shift-m - move to folder sub menu.
+!+m::
+Send, {AppsKey}m
+return
