@@ -1,17 +1,14 @@
 package require struct::queue
+package require ndv
 
 require libio io
+use libmacro
 
 proc def_parser {topic body} {
   global parsers ;              # list of [dict topic proc_name]
-  # zo geen meerdere parsers die hetzelfde topic opleveren, maar kan later in een
-  # handler naar meerdere topics luisteren, en wil dan mss ook wel weten welke topic
-  # het precies is.
-  # evt check of je dit topic al hebt, kan later nog.
-  set proc_name "parse_$topic"
-  # lappend parsers [dict create topic $topic proc_name $proc_name]
+  # [2016-08-09 21:08] unique_name - multiple parsers for same topic are possible.
+  set proc_name [unique_name parse_$topic]
   lappend parsers [vars_to_dict topic proc_name]
-  # set body "$body1\n"
   proc $proc_name {line linenr} $body
 }
 
@@ -19,6 +16,27 @@ proc def_parser {topic body} {
 # at start of body, res is set to empty, item contains item/dict just received.
 # at end of body, res should be set to 0, 1 or more result items.
 proc def_handler2 {in_topics out_topic args} {
+  if {[:# $args] == 2} {
+    lassign $args init body
+  } else {
+    lassign $args body
+    set init {}
+  }
+  # iets met backtick, escape_body of zo zou aardig zijn, vgl clojure macro.
+  set body2 [syntax_quote {~@$init
+    set item [yield]
+    while 1 {
+      set res ""
+      ~@$body
+      set item [yield $res]
+    }
+  }]
+  log debug "body2: $body2"
+  # breakpoint
+  def_handler $in_topics $out_topic $body2
+}
+
+proc def_handler2_old {in_topics out_topic args} {
   if {[:# $args] == 2} {
     lassign $args init body
   } else {

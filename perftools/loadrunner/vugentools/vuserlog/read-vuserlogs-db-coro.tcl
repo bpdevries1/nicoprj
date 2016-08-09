@@ -13,6 +13,7 @@ ndv::source_once liblogreader.tcl
 
 require libdatetime dt
 require libio io
+use libmacro;                   # syntax_quote
 
 # [2016-08-07 13:29] deze zorgt er nu voor dat global (zoals de naam zegt) overal loglevel
 # op debug komt, wil je in het algemeen niet. 2 opties:
@@ -218,7 +219,7 @@ proc def_handlers {} {
   
 }
 
-proc def_insert_handler {table} {
+proc def_insert_handler_old {table} {
   def_handler2 [list bof $table] {} "if {\[:topic \$item\] == \"bof\"} {
       dict_to_vars \$item ;    # set db, split_proc, ssl
       set file_item \$item
@@ -234,7 +235,7 @@ proc def_insert_handler {table} {
 # syntax-quote heet deze, wel ok naam.
 # ge-un-quote dingen moeten in uplevel beschikbaar zijn. Zie ook mijn closure dingetje
 # in FP.
-if 0 {
+if 1 {
   proc def_insert_handler {table} {
     def_handler2 [list bof $table] {} [syntax_quote {
       if {[:topic $item] == "bof"} {
