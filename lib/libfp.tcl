@@ -214,7 +214,7 @@ proc fn_alt1 {params body} { list ::apply [list $params [list expr $body] ::] }
 # TODO: [2016-07-22 10:52] when a string with spaces is replaced, something is needed.
 # TODO: This probably fails if body is more complicated, and contains another method call with closure.
 proc eval_closure {params body} {
-  set indices [regexp -all -indices -inline {\$([a-z0-9_]+)} $body]
+  set indices [regexp -all -indices -inline {\$([A-Za-z0-9_]+)} $body]
   # begin at the end, so when changing parts at the end, the indices at the start stay the same.
   # instead of checking if var usage in body occurs in param list, could also try to eval the var and if it succeeds, take the value. However, the current method seems more right.
   foreach {range_name range_total} [lreverse $indices] {
