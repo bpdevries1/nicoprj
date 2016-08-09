@@ -168,44 +168,13 @@ proc def_handlers {} {
     }
   }
 
-  # another inserter, for trans records
-  def_handler {bof trans} {} {
-    # log debug "puts-handler: started"
-    set db "<none>"
-    set file_item "<none>"
-    set item [yield]
-    while 1 {
-      if {[:topic $item] == "bof"} {
-        dict_to_vars $item ;    # set db, split_proc, ssl
-        set file_item $item
-      } else {
-        assert {[:linenr_start $item] > 0}
-        # log debug "transline handler item: $item, db: $db ***"
-        $db insert trans [dict merge $file_item $item]
-      }
-      set item [yield];         # this one never returns anything.
-    }
-  }
+  def_insert_handler trans
+  def_insert_handler error
+  
+}
 
-  # inserter for error records
-  # old one, should not get called.
-  def_handler {bofxx errorxx} {} {
-    # log debug "puts-handler: started"
-    set db "<none>"
-    set file_item "<none>"
-    set item [yield]
-    while 1 {
-      if {[:topic $item] == "bof"} {
-        dict_to_vars $item ;    # set db, split_proc, ssl
-        set file_item $item
-      } else {
-        $db insert error [dict merge $file_item $item]
-      }
-      set item [yield];         # this one never returns anything.
-    }
-  }
-
-  # maybe create def_insert_handler, but is specific to this project, not in liblogreader.
+if 0 {
+  # [2016-08-09 22:16] keep for now as an example how to call def_handler2
   def_handler2 {bofxx errorxx} {} {
     if {[:topic $item] == "bof"} {
       dict_to_vars $item ;    # set db, split_proc, ssl
@@ -214,40 +183,20 @@ proc def_handlers {} {
       $db insert error [dict merge $file_item $item]
     }
   }
-
-  def_insert_handler error
-  
 }
 
-proc def_insert_handler_old {table} {
-  def_handler2 [list bof $table] {} "if {\[:topic \$item\] == \"bof\"} {
-      dict_to_vars \$item ;    # set db, split_proc, ssl
-      set file_item \$item
+# Specific to this project, not in liblogreader.
+# combination of item and file_item
+proc def_insert_handler {table} {
+  def_handler2 [list bof $table] {} [syntax_quote {
+    if {[:topic $item] == "bof"} { # 
+      dict_to_vars $item ;    # set db, split_proc, ssl
+      set file_item $item
     } else {
-      \$db insert $table \[dict merge \$file_item \$item\]
-    }"
+      $db insert ~$table [dict merge $file_item $item]
+    }
+  }]
 }
-
-# eigenlijk iets als:
-# evt de macro` zelfs alleen ` noemen, maar is mss te onduidelijk.
-# heeft deze in clojure een naam?
-# https://github.com/brandonbloom/backtick
-# syntax-quote heet deze, wel ok naam.
-# ge-un-quote dingen moeten in uplevel beschikbaar zijn. Zie ook mijn closure dingetje
-# in FP.
-if 1 {
-  proc def_insert_handler {table} {
-    def_handler2 [list bof $table] {} [syntax_quote {
-      if {[:topic $item] == "bof"} {
-        dict_to_vars $item ;    # set db, split_proc, ssl
-        set file_item $item
-      } else {
-        $db insert ~$table [dict merge $file_item $item]
-      }
-    }]
-  }
-}
-
 
 proc readlogfile_new_coro {logfile db ssl split_proc} {
   # some prep with inserting record in db for logfile, also do with handler?
@@ -270,8 +219,5 @@ proc readlogfile_new_coro {logfile db ssl split_proc} {
                                             filesize runid project script]]
     readlogfile_coro $logfile [vars_to_dict db ssl split_proc logfile_id vuserid]  
   }
-  
-
-  
 }
 
