@@ -65,6 +65,9 @@ source [file join [file dirname [info script]] libcsv.tcl]
 # 6-9-2013 added libcyg.tcl
 source [file join [file dirname [info script]] libcyg.tcl]
 
+# [2016-08-09 21:35] libmacro.tcl, first only with syntax_quote
+source [file join [file dirname [info script]] libmacro.tcl]
+
 # 12-10-2013 added libfp.tcl (test needed that functions do not overlap/name clash)
 source [file join [file dirname [info script]] libfp.tcl]
 
