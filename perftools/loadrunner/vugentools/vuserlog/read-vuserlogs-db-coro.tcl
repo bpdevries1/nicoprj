@@ -32,7 +32,7 @@ proc define_logreader_handlers {} {
 
 proc def_parsers {} {
 
-  def_parser transline {
+  def_parser trans_line {
     if {[regexp {: \[([0-9 :.-]+)\] (trans=.+?)( \[[0-9/ :-]+])} $line z ts fields]} {
       set nvpairs [log2nvpairs $fields]; # possiply give whole line to log2nvpairs
       dict set nvpairs ts $ts
@@ -46,7 +46,7 @@ proc def_parsers {} {
 
   def_parser errorline {
     if {[regexp {^([^ ]+)\((\d+)\): (Continuing after )?Error ?([0-9-]*): (.*)$} $line z srcfile srclinenr z errornr rest]} {
-      # [2016-08-07 13:24] ignore user field returned from det_error_details, too specific and already have in transline.
+      # [2016-08-07 13:24] ignore user field returned from det_error_details, too specific and already have in trans_line.
       lassign [det_error_details $rest] errortype z_user level details
       return [vars_to_dict srcfile srclinenr errornr errortype details line]
     } elseif {[regexp {: Error: } $line]} {
@@ -82,7 +82,7 @@ proc def_handlers {} {
   #   set item [yield $res]
   # }
   
-  def_handler {bof eof transline} trans {
+  def_handler {bof eof trans_line} trans {
     set user ""; set iteration 0; set split_proc "<none>"
     set item [yield]
     # keep on running, even after eof, could be >1 logfile.
@@ -96,7 +96,7 @@ proc def_handlers {} {
         eof {
           res_add res {*}[make_trans_not_finished $started_transactions]
         }
-        transline {
+        trans_line {
           if {[new_user_iteration? $item $user $iteration]} {
             res_add res {*}[make_trans_not_finished $started_transactions]
             set started_transactions [dict create]
@@ -131,43 +131,28 @@ proc def_handlers {} {
     };                          # end-of-while-1
   };                            # end-of-define-handler
 
-  # make error object from errorline and transline
-  def_handler {transline errorline} error {
-    set transline_item {}
+  # make error object from errorline and trans_line
+  def_handler {trans_line errorline} error {
+    set trans_line_item {}
     set item [yield]
     while 1 {
       set res ""
       switch [:topic $item] {
-        transline {
-          set transline_item $item
+        trans_line {
+          set trans_line_item $item
         }
         errorline {
-          set res [dict merge $transline_item $item]
+          set res [dict merge $trans_line_item $item]
         }
       }
       set item [yield $res]
     }
   }
   
-  # 'inserter' handler, just for side effects, yields no new results.
-  def_handler {bof transline} {} {
-    # log debug "puts-handler: started"
-    set db "<none>"; set split_proc "<none"; set ssl "<none>"
-    set file_item "<none>"
-    set item [yield]
-    while 1 {
-      if {[:topic $item] == "bof"} {
-        dict_to_vars $item ;    # set db, split_proc, ssl
-        set file_item $item
-      } else {
-        # log debug "transline handler item: $item, db: $db ***"
-        $db insert trans_line [dict merge $file_item $item \
-                                   [$split_proc [:transname $item]]]
-      }
-      set item [yield];         # this one never returns anything.
-    }
-  }
-
+  # [2016-08-09 22:29] introduced a bug here by not calling split_proc in insert-trans_line
+  # but in trans split_proc is called, and this is used in report. Could also remove fields
+  # in trans_line, also split_proc still is somewhat of a hack now.
+  def_insert_handler trans_line
   def_insert_handler trans
   def_insert_handler error
   
