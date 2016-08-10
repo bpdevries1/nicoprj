@@ -1,4 +1,4 @@
-#!/usr/bin/env tclsh861
+#!/usr/bin/env tclsh
 
 # minimise search regions in AutoHotkey script based on current search regions and locations found (as logged in logfile)
 
@@ -32,12 +32,18 @@ proc read_image_locations {logdir} {
   set linenr 0
   while {[gets $f line] >= 0} {
     incr linenr
-    if {[regexp {imagefile: ([^;]+); posfound: (\d+),(\d+)$} $line z image_path x y]} {
+    if {[regexp {imagefile: ([^;]+); posfound: ([-0-9]+),([-0-9]+)$} $line z image_path x y]} {
       # negative values for x and y will not be found, should be good for -1,-1 found pos.
       # TODO: check if image was already found, possibly at different location.
       # Maybe within different transactions search region needs to be different
-      dict set d [file tail $image_path] [dict create path $image_path x $x y $y]
+      if {$x >= 0} {
+        dict set d [file tail $image_path] [dict create path $image_path x $x y $y]  
+      } else {
+        # image not found, negative result.
+      }
     } elseif {[regexp {posfound} $line]} {
+      puts "posfound in line, but not whole imagefile logline"
+      puts $line
       breakpoint
     } else {
       # breakpoint
@@ -94,7 +100,9 @@ proc is_comment {line} {
 
 proc min_region {dargv img_found fo line prefix x1 y1 x2 y2 imgname postfix} {
   set margin [:margin $dargv]
-  set dimg [dict_get $img_found $imgname]
+  # log debug "imgname to look for in img_found: $imgname"
+  # set dimg [dict_get $img_found $imgname]
+  set dimg [find_image $img_found $imgname]
   if {$dimg == ""} {
     log warn "Ref to image in script not found in log: $imgname"
     puts $fo $line
@@ -119,6 +127,24 @@ proc min_region {dargv img_found fo line prefix x1 y1 x2 y2 imgname postfix} {
   puts $fo "$prefix$x1, $y1, $x2, $y2, \[\"$imgname\"\]$postfix"
   
   return 1
+}
+
+# @param img_found - dict: key=filename, value=dict: image full path, x, y
+# @param imgname - login*.png
+proc find_image {img_found imgname} {
+  if {[regexp {\*} $imgname]} {
+    # special handling
+    set ks [dict keys $img_found $imgname]
+    if {$ks == {}} {
+      return ""
+    } else {
+      dict get $img_found [:0 $ks]
+    }
+  } else {
+    # just return from dict
+    dict_get $img_found $imgname
+  }
+  
 }
 
 if {[this_is_main]} {
