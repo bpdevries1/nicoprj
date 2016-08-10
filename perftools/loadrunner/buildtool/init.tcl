@@ -91,6 +91,7 @@ proc make_config_tcl {} {
     return
   }
   # TODO: also with syntax_quote, is cleaner.
+  # [2016-08-10 22:55] TODO: global not needed anymore, source is done at global level now.
   write_file $config_name "# config.tcl generated [dt/now]
 global testruns_dir repo_dir repo_lib_dir lr_include_dir
 set testruns_dir \{<FILL IN>\}

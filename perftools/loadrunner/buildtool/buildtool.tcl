@@ -1,11 +1,7 @@
 #!/usr/bin/env tclsh
 
 # Build tool, mainly for VuGen scripts and libraries
-
-# TODO general
-# create deftask proc, which includes documentation and possibly other settings
-# like if task can be done at project scope or not.
-# also include long and short comment (or use first line for short)
+# [2016-08-10 22:53] Starting to be useful for other kinds of projects (ahk, tcl, clj)
 
 package require term
 package require term::ansi::code::attr
@@ -22,39 +18,16 @@ ndv::source_once task.tcl configs.tcl prjgroup.tcl prjtype.tcl selectfiles.tcl b
     vuser_init.tcl globals_h.tcl checks.tcl clean.tcl trans.tcl \
     steps.tcl report.tcl
 
-# TODO:
-# help task als eerste checken, hoef je niet in goede dir te zitten.
-# als je command-naam met dashes ipv underscores intypt, moet het ook goed zijn,
-# dus gewoon een regsub van - naar _ uitvoeren en dan de rest.
-
-# TODO: split this main proc, separate one for project actions.
 proc main {argv} {
-  # global repodir repolibdir as_project lr_include_dir
-  # set lr_include_dir [det_lr_include_dir]
-  
-  # maybe add some checks
-  if {($argv == "") || [:0 $argv] == "help"} {
-    task_help {*}[lrange $argv 1 end]
-    exit 1
-  }
   set dir [file normalize .]
   set tname [task_name [lindex $argv 0]]
+  if {$tname == ""} {set tname help}
   set trest [lrange $argv 1 end]
 
-  if 0 {
-    if {[is_script_dir $dir]} {
-      handle_script_dir $dir $tname $trest
-    } elseif {[is_project_dir $dir]} {
-      handle_project_dir $dir $tname $trest
-    } else {
-      # puts "Not a vugen script dir: $dir"
-      handle_default_dir $dir $tname $trest
-    }
-  }
   if {[is_prjgroup_dir $dir]} {
     handle_prjgroup_dir $dir $tname $trest
   } else {
-    # [2016-08-10 21:11] TODO: later call this one handle_project_dir. Now now, still confusing name.
+    # [2016-08-10 21:11] TODO: later call this one 'handle_project_dir'. Not now, still confusing name.
     handle_script_dir $dir $tname $trest
   }
 }
@@ -66,7 +39,8 @@ proc handle_script_dir {dir tname trest} {
     #set repodir [file normalize "../repo"]
     #set repolibdir [file join $repodir libs]
     if {$tname != "init"} {
-      source [config_tcl_name]      
+      uplevel #0 {source [config_tcl_name]}
+      source_prjtype
     }
     set as_prjgroup 0
     set_origdir ; # to use by all subsequent tasks.
@@ -75,6 +49,20 @@ proc handle_script_dir {dir tname trest} {
     check_temp_files
   } else {
     puts "Update config version with init -update"
+  }
+}
+
+# source all tcl files in bldprjlib iff defined.
+proc source_prjtype {} {
+  global bldprjlib
+  if {![info exists bldprjlib]} {
+    log info "No prjtype specific build lib"
+    return
+  }
+  # use lsort to have option to source in specific order if needed
+  foreach libfile [lsort [glob -nocomplain -directory $bldprjlib *.tcl]] {
+    # ndv::source_once?
+    source $libfile
   }
 }
 
