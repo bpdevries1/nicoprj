@@ -21,7 +21,6 @@ task2 init {Initialise project/script
   if {[current_version] == 0} {
     puts "Ok, initialise from scratch"
     init_from_scratch
-
     return
   }
   if {[current_version] == 1} {
@@ -34,7 +33,6 @@ task2 init {Initialise project/script
     init_update [current_version] [latest_version]
     return
   }
-
   puts "Error: unknown versions: [current_version] <-> [latest_version]"
 }
 
@@ -92,6 +90,7 @@ proc make_config_tcl {} {
     puts "Config file already exists: $config_name"
     return
   }
+  # TODO: also with syntax_quote, is cleaner.
   write_file $config_name "# config.tcl generated [dt/now]
 global testruns_dir repo_dir repo_lib_dir lr_include_dir
 set testruns_dir \{<FILL IN>\}

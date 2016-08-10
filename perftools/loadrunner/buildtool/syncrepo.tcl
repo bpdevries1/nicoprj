@@ -2,7 +2,7 @@
 task libs {Overview of lib files, including status
   Show status of all library files, with respect to repository.
 } {
-  global as_project
+  global as_prjgroup
   file mkdir [base_dir]
   set repo_libs [get_repo_libs]
   # puts "repo_libs: $repo_libs"
@@ -39,7 +39,7 @@ task libs {Overview of lib files, including status
   if {$diff_found} {
     puts "\n*** FOUND DIFFERENCES ***"
   } else {
-    if {!$as_project} {
+    if {!$as_prjgroup} {
       puts "\nEverything up to date"  
     }
   }
@@ -47,7 +47,7 @@ task libs {Overview of lib files, including status
 
 # @param libfile: relative, just file name.
 proc show_status {libfile} {
-  global repo_lib_dir as_project
+  global repo_lib_dir as_prjgroup
   #set repofile [file join $repo_lib_dir $libfile]
   set repofile [repofile $libfile]
   set basefile [basefile $libfile]
@@ -85,7 +85,7 @@ proc show_status {libfile} {
     }
   }
   # in project scope zo weinig mogelijk uitvoer naar stdout.
-  if {$status != "ok" || !$as_project} {
+  if {$status != "ok" || !$as_prjgroup} {
     puts "\[$status\] $libfile"  
   }
 

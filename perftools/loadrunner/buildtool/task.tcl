@@ -17,10 +17,19 @@ proc task {name desc body} {
 }
 
 # [2016-07-30 12:24] new version to automatically set options.
-# TODO: maybe make options/params optional, then need to use args as param
-# proc task2 {name desc options params body} {}
-# params: name desc [options [params]] body
-# so name, desc and body are mandatory. Options and params are optional. If params are given, options should also be given.
+# params: name desc [options [params2]] body
+# so name, desc and body are mandatory. Options and params2 are optional. If params2 are given, options should also be given.
+# options: list of lists, see cmdline::getopt.
+# params2: extra parameters after options, eg filename. (not used yet)
+#
+# examples:
+# task2 init {Initialise project/script
+#    Also update config to latest version.  
+# } {{update "Update project/script from old config version to latest"}
+#    {version "Show config version"} 
+# } <body>
+
+
 proc task2 {args} {
   global _tasks
   set args [lassign $args name desc]

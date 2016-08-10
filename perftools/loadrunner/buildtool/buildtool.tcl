@@ -16,7 +16,7 @@ package require ndv
 
 set_log_global info
 
-ndv::source_once task.tcl configs.tcl selectfiles.tcl backup.tcl \
+ndv::source_once task.tcl configs.tcl prjgroup.tcl selectfiles.tcl backup.tcl \
     inifile.tcl init.tcl lr_params.tcl templates.tcl parse.tcl \
     syncrepo.tcl regsub.tcl files.tcl text.tcl comment.tcl domains.tcl \
     vuser_init.tcl globals_h.tcl checks.tcl clean.tcl trans.tcl \
@@ -40,18 +40,27 @@ proc main {argv} {
   set dir [file normalize .]
   set tname [task_name [lindex $argv 0]]
   set trest [lrange $argv 1 end]
-  if {[is_script_dir $dir]} {
-    handle_script_dir $dir $tname $trest
-  } elseif {[is_project_dir $dir]} {
-    handle_project_dir $dir $tname $trest
+
+  if 0 {
+    if {[is_script_dir $dir]} {
+      handle_script_dir $dir $tname $trest
+    } elseif {[is_project_dir $dir]} {
+      handle_project_dir $dir $tname $trest
+    } else {
+      # puts "Not a vugen script dir: $dir"
+      handle_default_dir $dir $tname $trest
+    }
+  }
+  if {[is_prjgroup_dir $dir]} {
+    handle_prjgroup_dir $dir $tname $trest
   } else {
-    # puts "Not a vugen script dir: $dir"
-    handle_default_dir $dir $tname $trest
+    # [2016-08-10 21:11] TODO: later call this one handle_project_dir. Now now, still confusing name.
+    handle_script_dir $dir $tname $trest
   }
 }
 
 proc handle_script_dir {dir tname trest} {
-  global as_project
+  global as_prjgroup
   if {($tname == "init") || ([current_version] == [latest_version])} {
     # TODO: repodir en repolibdir zetten vanuit config.tcl in .bld dir.
     #set repodir [file normalize "../repo"]
@@ -59,7 +68,7 @@ proc handle_script_dir {dir tname trest} {
     if {$tname != "init"} {
       source [config_tcl_name]      
     }
-    set as_project 0
+    set as_prjgroup 0
     set_origdir ; # to use by all subsequent tasks.
     task_$tname {*}$trest
     mark_backup $tname $trest
@@ -71,7 +80,8 @@ proc handle_script_dir {dir tname trest} {
 
 # [2016-07-31 12:07] Also handle non-vugen dirs, eg to do regsub.
 # TODO: for most actions, performing on non-vugen dir makes no sense.
-proc handle_default_dir {dir tname trest} {
+# [2016-08-10 21:13] TODO: this one is the same as handle_script_dir, remove soon.
+proc handle_default_dir_old {dir tname trest} {
   global as_project
   if {($tname == "init") || ([current_version] == [latest_version])} {
     # TODO: repodir en repolibdir zetten vanuit config.tcl in .bld dir.
@@ -90,7 +100,7 @@ proc handle_default_dir {dir tname trest} {
   }
 }
 
-proc handle_project_dir {dir tname trest} {
+proc handle_project_dir_old {dir tname trest} {
   global as_project
   # in a container dir with script dirs as subdirs.
   #set repodir [file normalize "repo"]
@@ -166,15 +176,6 @@ proc main_old {argv} {
 }
 
 
-proc get_current_script_dirs {dir} {
-  set prj_filename [file join $dir "current.prj"]
-  if {[file exists $prj_filename]} {
-    split [string trim [read_file $prj_filename]] ";"  
-  } else {
-    log warn "No current.prj found in dir: $dir"
-    return {}
-  }
-}
 
 # project functions, set and setcurrent
 task project {Define and use projects
@@ -200,7 +201,7 @@ task project {Define and use projects
 }
 
 # project dir iff it contains minimal one script dir
-proc is_project_dir {dir} {
+proc is_project_dir_old {dir} {
   set res 0
   foreach subdir [glob -nocomplain -directory $dir -type d *] {
     if {[is_script_dir $subdir]} {
@@ -213,7 +214,7 @@ proc is_project_dir {dir} {
 
 # A script dir is a VuGen script dir, which contains vuser_init.c
 # TODO: could also be a TruClient dir which (maybe) does not have vuser_init.c?
-proc is_script_dir {dir} {
+proc is_script_dir_old {dir} {
   if {[file exists [file join $dir vuser_init.c]]} {
     return 1
   }
