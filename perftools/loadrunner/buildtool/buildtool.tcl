@@ -16,7 +16,7 @@ package require ndv
 
 set_log_global info
 
-ndv::source_once task.tcl configs.tcl prjgroup.tcl selectfiles.tcl backup.tcl \
+ndv::source_once task.tcl configs.tcl prjgroup.tcl prjtype.tcl selectfiles.tcl backup.tcl \
     inifile.tcl init.tcl lr_params.tcl templates.tcl parse.tcl \
     syncrepo.tcl regsub.tcl files.tcl text.tcl comment.tcl domains.tcl \
     vuser_init.tcl globals_h.tcl checks.tcl clean.tcl trans.tcl \
@@ -244,6 +244,16 @@ proc puts_colour {colour str} {
   # ::term::ansi::send::sda_reset - alles op orig, wil je dit?
   # ::term::ansi::send::sda_fgdefault - zet 'em op zwart, wil je niet.
   send::sda_fgwhite
+}
+
+proc buildtool_dir {} {
+  global argv0
+  # set res [file dirname [file normalize [info script]]]
+  # [2016-08-10 22:31] info script does not work now, because this proc is called from
+  # .bld/config.tcl, and returns .bld dir.
+  set res [file dirname [file normalize $argv0]]
+  log debug "buildtool_dir: $res"
+  return $res
 }
 
 if {[this_is_main]} {

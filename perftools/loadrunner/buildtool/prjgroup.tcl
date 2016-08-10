@@ -1,5 +1,7 @@
 # project groups - groups/sets of projects/scripts
 
+# TODO: maybe support recursive project groups.
+
 # project functions, set and setcurrent
 task2 prjgroup {Define and use project groups
   Syntax:
