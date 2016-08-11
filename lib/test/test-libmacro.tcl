@@ -41,6 +41,14 @@ proc test_splice2 {x} [syntax_quote {~@$init2
 
 testndv {test_splice2 12} 13
 
+# TODO: also unquote procs, needed as below:
+# syntax_quote {set generated_datetime ~[dt/now]}
+# should then find corresponding end-bracket, might be hard, need a full parser then?
+# workaround is to call proc before the syntax quote and save result in a var.
+
+# TODO: maybe format returned code, always start at 0 indent?
+# if it's just to be executed, doesnt't really matter, so should be separate function.
+# separate function could have start-index parameter.
 
 cleanupTests
 
