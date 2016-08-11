@@ -171,7 +171,9 @@ proc split_action {action} {
   #fconfigure $fo -translation crlf
   set fo [open_temp_w $fn]
   set foc $fo
+  set linenr 0
   while {[gets $fi line] >= 0} {
+    incr linenr
     if {[regexp {_start_transaction\(\"(.+)\"\);} $line z transname]} {
       if {[file exists "${transname}.c"]} {
         log warn "transaction file already exists: ${transname}.c"
@@ -191,9 +193,15 @@ proc split_action {action} {
     } elseif {[regexp {_end_transaction} $line]} {
       puts $foc $line
       puts $foc "\treturn 0;\n\}\n"
+      # [2016-08-11 14:39:52] close $foa gives exception: can't read foa.
+      if {[info vars foa] == {}} {
+        error "Error: cannot close foa, not defined. Line=$linenr, action=$action"
+      }
       close $foa
       set foc $fo
       commit_file "${transname}.c"
+    } elseif {[regexp rb_start_transaction $line]} {
+      error "Should do split_action before rb_trans!"
     } else {
       puts $foc $line
     }
