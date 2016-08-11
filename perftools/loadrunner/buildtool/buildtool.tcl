@@ -23,7 +23,10 @@ proc main {argv} {
   set tname [task_name [lindex $argv 0]]
   if {$tname == ""} {set tname help}
   set trest [lrange $argv 1 end]
-
+  if {[in_bld_subdir? $dir]} {
+    puts "In buildtool subdir, exiting: $dir"
+    return
+  }
   if {[is_prjgroup_dir $dir]} {
     handle_prjgroup_dir $dir $tname $trest
   } else {
@@ -33,11 +36,18 @@ proc main {argv} {
 }
 
 proc handle_script_dir {dir tname trest} {
-  global as_prjgroup
+  global as_prjgroup buildtool_env
   if {($tname == "init") || ([current_version] == [latest_version])} {
     # TODO: repodir en repolibdir zetten vanuit config.tcl in .bld dir.
     #set repodir [file normalize "../repo"]
     #set repolibdir [file join $repodir libs]
+    if {[file exists [buildtool_env_tcl_name]]} {
+      uplevel #0 {source [buildtool_env_tcl_name]}
+    } else {
+      puts "do bld init-env!"
+      return
+    }
+    puts "env: $buildtool_env"
     if {$tname != "init"} {
       uplevel #0 {source [config_tcl_name]}
       source_prjtype
@@ -242,6 +252,16 @@ proc buildtool_dir {} {
   set res [file dirname [file normalize $argv0]]
   log debug "buildtool_dir: $res"
   return $res
+}
+
+# return true iff dir is .bld dir or subdir of this.
+proc in_bld_subdir? {dir} {
+  foreach el [file split $dir] {
+    if {$el == ".bld"} {
+      return 1
+    }
+  }
+  return 0
 }
 
 if {[this_is_main]} {

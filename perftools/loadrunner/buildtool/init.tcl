@@ -4,6 +4,8 @@
 
 require libdatetime dt
 
+use libmacro
+
 task2 init {Initialise project/script
   Also update config to latest version.  
 } {{update "Update project/script from old config version to latest"}
@@ -23,21 +25,18 @@ task2 init {Initialise project/script
     init_from_scratch
     return
   }
-  if {[current_version] == 1} {
-    # dependent on -update param
-    if {![:update $opt]} {
-      puts "Already initialised, use init -update to set to latest version"
-      return
-    }
-    puts "Ok, update from 1 to 2"
-    init_update [current_version] [latest_version]
+  # here current >=1 and != latest
+  if {![:update $opt]} {
+    puts "Already initialised, use init -update to set to latest version"
     return
   }
-  puts "Error: unknown versions: [current_version] <-> [latest_version]"
+  init_update [current_version] [latest_version]
+  
+  # puts "Error: unknown versions: [current_version] <-> [latest_version]"
 }
 
 proc latest_version {} {
-  return 2
+  return 3
 }
 
 proc current_version {} {
@@ -66,14 +65,17 @@ proc init_from_scratch {} {
   set cfgdir [config_dir]
   file mkdir $cfgdir
   make_config_tcl
-  set_config_version 2
+  set_config_version [latest_version]
 }
 
 proc init_update {from to} {
-  if {($from != 1) || ($to != 2)} {
-    puts "Don't know how to upgrade from $from to $to"
-    return
+  while {$from < $to} {
+    set from [init_update_from_$from]
   }
+  set_config_version $to
+}
+
+proc init_update_from1 {} {
   init_from_scratch
   if {[file exists ".base"]} {
     file rename ".base" [file join [config_dir] ".base"]
@@ -81,10 +83,65 @@ proc init_update {from to} {
   foreach orig [glob -nocomplain -type d _orig*] {
     file rename $orig [file join [config_dir] $orig]
   }
-  set_config_version 2
+  return 2
 }
 
+proc init_update_from_2 {} {
+  # TODO: read config, add env parts
+  set config_name [config_tcl_name]
+  set text [read_file $config_name]
+  set config_v3 [get_config_v3]
+  set text "$text\n$config_v3"
+  write_file $config_name $text
+
+  make_config_env_tcl
+  return 3
+}
+
+# TODO: set to v3, source env things
 proc make_config_tcl {} {
+  set config_name [config_tcl_name]
+  if {[file exists $config_name]} {
+    puts "Config file already exists: $config_name"
+    return
+  }
+  # TODO: also with syntax_quote, is cleaner.
+  # [2016-08-10 22:55] TODO: global not needed anymore, source is done at global level now.
+  set now [dt/now]
+  set config_v3 [get_config_v3]
+  write_file $config_name [syntax_quote {# config.tcl generated ~$now
+    # set testruns_dir {<FILL IN>}
+    set repo_dir [file normalize "../repo"]
+    set repo_lib_dir [file join $repo_dir libs]
+    # dynamically determine lr_include_dir!? Override if needed
+    # set lr_include_dir [det_lr_include_dir]
+    ~@$config_v3
+  }]
+  make_config_env_tcl
+}
+
+proc make_config_env_tcl {} {
+  set filename [config_env_tcl_name]
+  if {[file exists $filename]} {
+    puts "File already exists: $filename"
+    return
+  }
+  write_file $filename {set testruns_dir {<FILL IN>}
+set lr_include_dir [det_lr_include_dir]
+  }
+}
+
+# TODO: need code formatting tool.
+# simple code format by counting braces per line might work.
+proc get_config_v3 {} {
+  return {set config_env_tcl_name [config_env_tcl_name]
+if {[file exists $config_env_tcl_name]} {
+  source $config_env_tcl_name
+}
+  }
+}
+
+proc make_config_tcl_old {} {
   set config_name [config_tcl_name]
   if {[file exists $config_name]} {
     puts "Config file already exists: $config_name"
@@ -95,7 +152,7 @@ proc make_config_tcl {} {
   write_file $config_name "# config.tcl generated [dt/now]
 global testruns_dir repo_dir repo_lib_dir lr_include_dir
 set testruns_dir \{<FILL IN>\}
-set repo_dir [list [file normalize "../repo"]]
+set repo_dir \[file normalize "../repo"\]
 set repo_lib_dir \[file join \$repo_dir libs\]
 set lr_include_dir [list [det_lr_include_dir]]
 "
@@ -103,8 +160,14 @@ set lr_include_dir [list [det_lr_include_dir]]
 }
 
 proc config_tcl_name {} {
-  return [file join [config_dir] "config.tcl"]
+  file join [config_dir] "config.tcl"
 }
+
+proc config_env_tcl_name {} {
+  global buildtool_env
+  file join [config_dir] "config-${buildtool_env}.tcl"
+}
+
 
 proc set_config_version {version} {
   write_file [version_file] $version
@@ -127,4 +190,23 @@ proc det_lr_include_dir {} {
     }
   }
   return ""
+}
+
+task2 init_env {initialise environment
+  by creating a ~/.config/buildtool/env.tcl file,
+  with buildtool_env var default set to hostname
+} {
+  set filename [buildtool_env_tcl_name]
+  if {[file exists $filename]} {
+    puts "Already exists: $filename"
+    return
+  }
+  file mkdir [file dirname $filename]
+  set hostname [det_hostname]
+  write_file $filename [syntax_quote {set buildtool_env ~$hostname}]
+}
+
+
+proc buildtool_env_tcl_name {} {
+  file normalize [file join ~ .config buildtool env.tcl]
 }
