@@ -1,4 +1,4 @@
-puts "Sourcing vugen_task.tcl..."
+# puts "Sourcing vugen_task.tcl..."
 
 task2 vugen_task {Example task for prjtype
 
