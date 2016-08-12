@@ -7,7 +7,7 @@ package require ndv
 
 set_log_global info
 
-ndv::source_once task.tcl prjgroup.tcl prjtype.tcl selectfiles.tcl \
+ndv::source_once task.tcl prjgroup.tcl prjtype.tcl \
     lib/inifile.tcl lib/misc.tcl init.tcl
 
 proc main {argv} {
@@ -44,6 +44,10 @@ proc handle_script_dir {dir tname trest} {
     }
     set as_prjgroup 0
     set_origdir ; # to use by all subsequent tasks.
+    if {[info proc task_$tname] == {}} {
+      puts "Unknown task: $tname"
+      return
+    }
     task_$tname {*}$trest
     mark_backup $tname $trest
     check_temp_files
