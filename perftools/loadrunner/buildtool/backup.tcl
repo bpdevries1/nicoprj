@@ -18,7 +18,6 @@ proc open_temp_w {filename {translation ""}} {
 
 proc set_origdir {} {
   global _origdir
-  # set _origdir "_orig.[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"]"
   set _origdir [file join [config_dir] "_orig.[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"]"]
 }
 
@@ -55,17 +54,14 @@ proc commit_file {filename} {
     return
   }
   # if temp does not exist, this is an error.
-  
   if {[read_file $filename] == [read_file [tempname $filename]]} {
     # files are the same, no changes, delete temp file.
     log debug "Unchanged file: $filename"
     file delete [tempname $filename]
   } else {
     log debug "File changed: $filename"
-
     # Files are different, do update.
     file mkdir $_origdir
-    
     if {[file exists $backupname]} {
       # Earlier backup within same main action, keep the earliest one.
       file delete $filename
@@ -88,6 +84,7 @@ task backup {Backup complete project (source files) to .orig dir
 } {
   global _origdir
   file mkdir $_origdir
+  # TODO: files to backup dependent on type of project!
   foreach filename [get_project_files] {
     set backupname [file join $_origdir $filename]
     if {[file exists $filename]} {

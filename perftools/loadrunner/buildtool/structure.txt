@@ -7,22 +7,21 @@ buildtool.tcl - [2016-08-12 10:09] done
 init.tcl [2016-08-12 10:12] ok
 prjgroup.tcl [2016-08-12 10:13] ok
 prjtype.tcl [2016-08-12 10:14] ok
-task.tcl
+task.tcl [2016-08-12 13:21] ok, met wat omwegen.
 
 
 Core tasks:
-backup.tcl
-regsub.tcl
-text.tcl
+backup.tcl [2016-08-12 13:36] ok, maar backup task get_project_files moet prjtype specific!
+regsub.tcl [2016-08-12 13:30] ok
+text.tcl [2016-08-12 13:37] totabs:get_source_files, afh prjtype. fixcrlf: afh prjtype. Bv .c files in Vugen = windows, normaal = unix.
 
 Lib:
-inifile.tcl - library, evt ook buiten buildtool project.
+inifile.tcl - library, evt ook buiten buildtool project. [2016-08-12 13:22] ok
 
 
 Generic te maken, dan naar core tasks:
-report.tcl
-selectfiles.tcl - [2016-08-12 12:56] bv in regsub gebruikt.
-syncrepo.tcl
+selectfiles.tcl - [2016-08-12 12:56] bv in regsub gebruikt. Of moet deze in lib? Of overrides in prjtype specific?
+syncrepo.tcl - [2016-08-12 13:44] zet in core, maar voorlopig werkt 't alleen met vugen. Voorlopig niet echt nodig om dit elders te hebben.
 
 
 
@@ -36,6 +35,7 @@ globals_h.tcl
 parse.tcl
 domains.tcl
 lr_params.tcl
+report.tcl [2016-08-12 13:40] in eerste instantie prjtype specific, copy maken voor ahk, evt later integreren.
 steps.tcl
 templates.tcl
 trans.tcl
