@@ -1,6 +1,8 @@
 #!/usr/bin/env tclsh861
 
 package require tcltest
+package require Tclx
+
 namespace import -force ::tcltest::*
 
 source [file join [file dirname [info script]] .. libns.tcl]
@@ -49,6 +51,13 @@ testndv {test_splice2 12} 13
 # TODO: maybe format returned code, always start at 0 indent?
 # if it's just to be executed, doesnt't really matter, so should be separate function.
 # separate function could have start-index parameter.
+
+# test format-code on libmacro.tcl itself. Should remain the same
+set srcfile [file join [file dirname [info script]] .. libmacro.tcl]
+set src [read_file -nonewline $srcfile]
+# set src_new [format_code $src]
+# write_file "/tmp/libmacro.tcl" [format_code $src]
+testndv {global src; format_code $src} $src
 
 cleanupTests
 
