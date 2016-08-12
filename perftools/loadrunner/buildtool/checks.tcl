@@ -10,18 +10,11 @@ task test {Perform tests on script
 
 task check {Perform some checks on sources
   location of #includes, todo's, comments.
+} {{includes "Check includes (default)"}
+  {todos "Check todo's"}
+  {comments "Check comments"}
+  {all "Do full check, including todo's and comments"}
 } {
-  set options {
-    {includes "Check includes (default)"}
-    {todos "Check todo's"}
-    {comments "Check comments"}
-    {all "Do full check, including todo's and comments"}
-  }
-  set usage ": regsub \[options] <from> <to>:"
-  set opt [getoptions args $options $usage]
-  #puts "opt: $opt"
-  #breakpoint
-  # lassign [det_full $args] args full
   if {$args != {}} {
     foreach filename $args {
       check_file $filename $opt

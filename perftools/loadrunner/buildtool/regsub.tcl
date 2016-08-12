@@ -15,37 +15,6 @@ task regsub {Regular epression replace} {
   {filenames "Only show filenames with changes, no contents"}
 } {from to} {
   # TODO: all and allrec should be general options, applicable to more tasks.
-  #set options 
-  #set usage ": regsub \[options] <from> <to>:"
-  #set opt [getoptions args $options $usage]
-  set really [:do $opt]
-  lassign $args from to  
-  puts "from: $from, to: $to, args: $args"
-  regsub -all {\\n} $to "\n" to2
-  set filenames [get_filenames $opt]
-  # breakpoint
-  foreach srcfile $filenames	{
-    # regsub_file $srcfile $from $to2 $really
-    regsub_file $srcfile $from $to2 $opt
-  }
-}
-
-task regsub_old {Regular epression replace
-  Syntax: regsub [-do] <from> <to>
-  Without -do, perform a dry run.
-} {
-  # TODO: all and allrec should be general options, applicable to more tasks.
-  set options {
-    {do "Really perform regsub actions"}
-    {action "Only handle action files"}
-    {all "Handle all files (be careful!)"}
-    {allrec "Handle all files; recurse subdirs (except starting with . be very careful!)"}
-    {text "Handle all text files (TBD)"}
-    {pat.arg "" "Handle all files matching glob pattern"}
-    {filenames "Only show filenames with changes, no contents"}
-  }
-  set usage ": regsub \[options] <from> <to>:"
-  set opt [getoptions args $options $usage]
   set really [:do $opt]
   lassign $args from to  
   puts "from: $from, to: $to, args: $args"

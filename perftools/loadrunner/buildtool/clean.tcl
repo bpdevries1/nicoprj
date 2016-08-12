@@ -5,36 +5,17 @@ task clean {Delete non script files
   THIS ACTION CANNOT BE UNDONE (with undo)
   Delete files base on option(s) given.
   Do buildtool clean to see options.
+} {{idx "Delete .idx files"}
+  {log "Delete output.* TransactionData.db, replay.har, shunra.shunra, mdrv.log"}
+  {tmp "Delete .tmp files"}
+  {bak "Delete .bak files"}
+  {orig "Delete _orig directories"}
+  {res "Delete result1/data directories"}
+  {all "delete all of the above"}
 } {
   set dir [file normalize .]
-  if {[is_script_dir $dir]} {
-    clean_script $dir $args
-  } else {
-    puts "Not a vugen script."
-  }
-}
-
-proc clean_script {dir argv} {
-  # breakpoint
-  set options {
-    {idx "Delete .idx files"}
-    {log "Delete output.* TransactionData.db, replay.har, shunra.shunra, mdrv.log"}
-    {tmp "Delete .tmp files"}
-    {bak "Delete .bak files"}
-    {orig "Delete _orig directories"}
-    {res "Delete result1/data directories"}
-    {all "delete all of the above"}
-  }
-  set usage ": clean \[options]"
-  if {$argv == ""} {
-    set argv "-help"
-  }
-  set opt [getoptions argv $options $usage]
-  # breakpoint
-  
-  # set glob_patterns {*.idx *.log git-add-commit.sh output.* *.tmp TransactionsData.db *.bak TransactionsData.db Iteration* result1 data}
   set patterns [det_glob_patterns $opt]
-  puts "Cleaning script dir: [file normalize $dir]"
+  puts "Cleaning dir: [file normalize $dir]"
   foreach pattern $patterns {
     puts "Cleaning pattern: $pattern"
     foreach filename [glob -nocomplain -directory $dir $pattern] {
