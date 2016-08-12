@@ -8,7 +8,7 @@ require libdatetime dt
 use libmacro
 
 # TODO: add type parameter, and only write stuff to config for certain types, eg lr_include_dir.
-task2 init {Initialise project/script
+task init {Initialise project/script
   Also update config to latest version.  
 } {{update "Update project/script from old config version to latest"}
   {version "Show config version"} 
@@ -171,7 +171,7 @@ proc det_lr_include_dir {} {
   return ""
 }
 
-task2 init_env {initialise environment
+task init_env {initialise environment
   by creating a ~/.config/buildtool/env.tcl file,
   with buildtool_env var default set to hostname
 } {

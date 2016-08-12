@@ -2,8 +2,8 @@ set _tasks [dict create]
 
 use libfp
 
-# @deprecated, use task2
-# TODO: change all tasks to use new task2. When done, rename back to task.
+# @deprecated, use task
+# TODO: change all tasks to use new task. When done, rename back to task.
 proc task_old {name desc body} {
   global _tasks
   set proc_name "task_$name"
@@ -23,7 +23,7 @@ proc task_old {name desc body} {
 # params2: extra parameters after options, eg filename. (not used yet)
 #
 # examples:
-# task2 init {Initialise project/script
+# task init {Initialise project/script
 #    Also update config to latest version.  
 # } {{update "Update project/script from old config version to latest"}
 #    {version "Show config version"} 
@@ -47,13 +47,8 @@ proc task {args} {
   # arguments to getoptions.
   set body2 "set opt \[getoptions args [list $options] [list [usage $name $params]]\]\n$body"
   proc $proc_name {args} $body2
-  #log debug "task2 defined: $proc_name"
+  #log debug "task defined: $proc_name"
   #breakpoint
-}
-
-# [2016-08-12 10:16] temp.
-proc task2 {args} {
-  task {*}$args
 }
 
 proc first_line {str} {

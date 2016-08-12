@@ -1,7 +1,7 @@
 # templates - tasks/functions to make script adhere to certain templates and best
 # practices: .config files, set of includes/libs, rb_transaction, text checks.
 
-task2 templates {Make script adhere to templates and best practices
+task templates {Make script adhere to templates and best practices
   .config files,
   set of includes/libs,
   rb_transaction,

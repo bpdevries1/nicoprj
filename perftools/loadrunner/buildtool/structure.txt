@@ -1,0 +1,44 @@
+
+Onderscheid framework en core tasks?
+Sowieso alle tcl files in /core sourcen. De lijst in buildtool.tcl dan wat kleiner.
+
+Generic:
+buildtool.tcl - [2016-08-12 10:09] done
+init.tcl [2016-08-12 10:12] ok
+prjgroup.tcl [2016-08-12 10:13] ok
+prjtype.tcl [2016-08-12 10:14] ok
+task.tcl
+
+
+Core tasks:
+backup.tcl
+regsub.tcl
+text.tcl
+
+Lib:
+inifile.tcl - library, evt ook buiten buildtool project.
+
+
+Generic te maken, dan naar core tasks:
+report.tcl
+selectfiles.tcl - [2016-08-12 12:56] bv in regsub gebruikt.
+syncrepo.tcl
+
+
+
+Vugen:
+checks.tcl
+clean.tcl
+comment.tcl
+configs.tcl [2016-08-12 10:09] ok
+files.tcl
+globals_h.tcl
+parse.tcl
+domains.tcl
+lr_params.tcl
+steps.tcl
+templates.tcl
+trans.tcl
+vuser_init.tcl
+
+

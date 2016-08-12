@@ -1,6 +1,6 @@
 # project types with specific tasks in subdirs of buildtool-dir
 
-task2 set_prjtype {Set type of project
+task set_prjtype {Set type of project
   eg vugen, tcl, clj, ahk
   Syntax: set_prjtype [<prjtype>]
   If prjtype not given, show available types

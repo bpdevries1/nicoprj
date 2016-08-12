@@ -99,7 +99,7 @@ task backup {Backup complete project (source files) to .orig dir
   mark_backup backup [join $args " "]
 }
 
-task2 history {Show history of backups made, also implicit
+task history {Show history of backups made, also implicit
 
 } {
   set lst [lsort [glob -nocomplain -type d -directory [config_dir] _orig.*]]

@@ -7,7 +7,7 @@ proc get_filenames {opt} {
   if {[:action $opt]} {
     set filenames [get_action_files]
   } elseif {[:all $opt]} {
-    set filenames [get_pattern_files]
+    set filenames [get_pattern_files *]
   } elseif {[:pat $opt] != ""} {
     set filenames [get_pattern_files [:pat $opt]]
   } else {
@@ -112,7 +112,7 @@ proc get_project_files {} {
 }
 
 # get all non-hidden files in current directory
-proc get_pattern_files {{pat *}} {
+proc get_pattern_files {pat} {
   glob -nocomplain -type f $pat
 }
 

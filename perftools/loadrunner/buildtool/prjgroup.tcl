@@ -3,7 +3,7 @@
 # TODO: maybe support recursive project groups.
 
 # project functions, set and setcurrent
-task2 prjgroup {Define and use project groups
+task prjgroup {Define and use project groups
   Syntax:
   prjgroup set <prjgroup> <script> [<script> ..] - Define a project including several scripts.
   prjgroup setcurrent <prjgroup>                 - Set a project as current

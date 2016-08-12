@@ -4,7 +4,7 @@ ndv::source_once ../vugentools/vuserlog/read-vuserlogs-db.tcl
 ndv::source_once ../vugentools/vuser-report/vuser-report.tcl
 
 
-task2 report {Create report of output.txt in script dir
+task report {Create report of output.txt in script dir
   Copy output.txt to testruns dir, call vugentools/vuserlog/read-vuserlogs-db.tcl
   and create Html report.
 } {{summary "Create summary report, with aggregate times and errors"}

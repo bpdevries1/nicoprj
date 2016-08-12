@@ -5,7 +5,32 @@
 # TODO: optie om replace wel/niet in libs uit te voeren, of alleen in actions. Default mss ook alleen in actions.
 # TODO: option to only do regsub in one file (or a list) or only action files.
 # Maybe something like -filter, could be used for other tasks as well.
-task regsub {Regular epression replace
+task regsub {Regular epression replace} {
+  {do "Really perform regsub actions (dry run otherwise)"}
+  {action "Only handle action files"}
+  {all "Handle all files (be careful!)"}
+  {allrec "Handle all files; recurse subdirs (except starting with . be very careful!)"}
+  {text "Handle all text files (TBD)"}
+  {pat.arg "" "Handle all files matching glob pattern"}
+  {filenames "Only show filenames with changes, no contents"}
+} {from to} {
+  # TODO: all and allrec should be general options, applicable to more tasks.
+  #set options 
+  #set usage ": regsub \[options] <from> <to>:"
+  #set opt [getoptions args $options $usage]
+  set really [:do $opt]
+  lassign $args from to  
+  puts "from: $from, to: $to, args: $args"
+  regsub -all {\\n} $to "\n" to2
+  set filenames [get_filenames $opt]
+  # breakpoint
+  foreach srcfile $filenames	{
+    # regsub_file $srcfile $from $to2 $really
+    regsub_file $srcfile $from $to2 $opt
+  }
+}
+
+task regsub_old {Regular epression replace
   Syntax: regsub [-do] <from> <to>
   Without -do, perform a dry run.
 } {
@@ -14,7 +39,7 @@ task regsub {Regular epression replace
     {do "Really perform regsub actions"}
     {action "Only handle action files"}
     {all "Handle all files (be careful!)"}
-    {allrec "Handle all files; recurse subdirs (be very careful!)"}
+    {allrec "Handle all files; recurse subdirs (except starting with . be very careful!)"}
     {text "Handle all text files (TBD)"}
     {pat.arg "" "Handle all files matching glob pattern"}
     {filenames "Only show filenames with changes, no contents"}
@@ -58,26 +83,3 @@ proc regsub_file {srcfile from to opt} {
   }
 }
 
-proc regsub_file_old {srcfile from to really} {
-  set text [read_file $srcfile]
-  set nreplaced [regsub -all $from $text $to text2]
-  if {$nreplaced == 0} {
-    # nothing, no replacements done.
-  } else {
-    puts "$srcfile - $nreplaced change(s):"
-    # set tempfile "$srcfile.__TEMP__"
-    set tempfile [tempname $srcfile]
-    #set f [open $tempfile w]
-    #fconfigure $f -translation crlf
-    set f [open_temp_w $srcfile]
-    puts -nonewline $f $text2
-    close $f
-    diff_files $srcfile $tempfile
-    if {$really} {
-      puts "really perform replacement, orig files in _orig dir"
-      commit_file $srcfile
-    } else {
-      rollback_file $srcfile
-    }
-  }
-}
