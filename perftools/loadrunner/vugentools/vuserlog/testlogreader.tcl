@@ -39,65 +39,30 @@ proc def_parsers {} {
 }
 
 proc def_handlers {} {
-  def_handler {nrline eof} even {
-    log debug "even-handler: started"
-    set nitems 0
-    set item [yield]
-    set eof 0
-    while {!$eof} {
-      log debug "even-handler: item: $item"
-      # set res {}
-      res_init res
-      if {[:topic $item] == "eof"} {
-        set eof 1
+  def_handler {nrline eof} even {set nitems 0; set eof 0} {
+    if {[:topic $item] == "eof"} {
+      set eof 1
+    } else {
+      incr nitems
+      if {$nitems % 2 == 0} {
+        res_add res [dict merge $item [dict create nitems $nitems]]
       } else {
-        incr nitems
-        if {$nitems % 2 == 0} {
-          res_add res [dict merge $item [dict create nitems $nitems]]
+        if {$nitems == 3} {
+          # generate 3 results
+          set el [dict merge $item [dict create nitems $nitems]]
+          res_add res $el $el $el
         } else {
-          if {$nitems == 3} {
-            # generate 3 results
-            set el [dict merge $item [dict create nitems $nitems]]
-            res_add res $el $el $el
-          } else {
-            # nothing
-          }
+          # nothing
         }
       }
-      log debug "even, yield res: [res_tostring $res]"
-      set item [yield $res]
     }
   }
 
-  # 'inserter' handler, just for side effects, yields no new results.
-  def_handler {bof even} {} {
-    log debug "puts-handler: started"
-    set db "<none>"
-    set item [yield]
-    while 1 {
-      if {[:topic $item] == "bof"} {
-        set db [:db $item]
-      } else {
-        #puts "********************************"
-        # puts "*** Even handler item: $item, db: $db ***"
-        #set m [:multi $item]
-        #puts "*** m: $m ***"
-        #puts "********************************"
-      }
-      set item [yield]
-    }
-  }
-
-  # of voor inserter:
-  def_handler2 {bof even} {} {set x 12} {
+  def_handler {bof even} {} {set x 12} {
     if {[:topic $item] == "bof"} {
       set db [:db $item]
     } else {
-      #puts "********************************"
-      puts "*** Even handler2 item: $item, x=$x, db: $db ***"
-      #set m [:multi $item]
-      #puts "*** m: $m ***"
-      #puts "********************************"
+      puts "*** Even handler item: $item, x=$x, db: $db ***"
     }
   }
 }
@@ -105,5 +70,4 @@ proc def_handlers {} {
 if {[this_is_main]} {
   main $argv  
 }
-
 

@@ -692,6 +692,16 @@ proc make_trans_finished {row started_transactions} {
   return $d
 }
 
+proc make_trans_error {row} {
+  set line_fields {linenr ts sec_ts iteration}
+  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]  
+  set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
+  set d [dict_rename $row $line_fields $line_end_fields]
+  set d2 [dict merge $d [dict_rename $row $line_fields $line_start_fields]]
+  # breakpoint
+  return $d2
+}
+
 
 proc insert_trans_error_old {db row} {
   # geen start velden, dus alleen row-waarden naar end velden omzetten.
@@ -706,16 +716,6 @@ proc insert_trans_error_old {db row} {
 proc insert_trans_error {db row} {
   # $db insert trans $d2
   $db insert trans [make_trans_error $row]
-}
-
-proc make_trans_error {row} {
-  set line_fields {linenr ts sec_ts iteration}
-  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]  
-  set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
-  set d [dict_rename $row $line_fields $line_end_fields]
-  set d2 [dict merge $d [dict_rename $row $line_fields $line_start_fields]]
-  # breakpoint
-  return $d2
 }
 
 # TODO: move to libdict:

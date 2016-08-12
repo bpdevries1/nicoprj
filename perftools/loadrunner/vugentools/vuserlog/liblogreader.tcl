@@ -38,7 +38,7 @@ proc def_parser {topic body} {
 # args: either init, body or just body
 # at start of body, res is set to empty, item contains item/dict just received.
 # at end of body, res should be set to 0, 1 or more result items.
-proc def_handler2 {in_topics out_topic args} {
+proc def_handler {in_topics out_topic args} {
   if {[:# $args] == 2} {
     lassign $args init body
   } else {
@@ -55,12 +55,12 @@ proc def_handler2 {in_topics out_topic args} {
     }
   }]
   log debug "body2: $body2"
-  def_handler $in_topics $out_topic $body2
+  def_handler_internal $in_topics $out_topic $body2
 }
 
 # out_topic is identifying, key.
 # in_topics needed to decide which handlers to call for a topic.
-proc def_handler {in_topics out_topic body} {
+proc def_handler_internal {in_topics out_topic body} {
   global handlers; # dict key=in-topic, value = list of [dict topic coro-name]
   if {$out_topic == ""} {
     set coro_name [unique_name coro_make_]

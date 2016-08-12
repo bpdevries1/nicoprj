@@ -22,6 +22,7 @@ use libmacro;                   # syntax_quote
 
 # set_log_global debug {showfilename 0}
 
+# separate function, to be called once, even when handling multiple log files.
 proc define_logreader_handlers {} {
   log info "define_logreader_handlers: start"
   # of toch een losse namespace waar deze dingen in hangen?
@@ -30,11 +31,36 @@ proc define_logreader_handlers {} {
   # breakpoint
 }
 
+# main function to be called for each log file.
+proc readlogfile_new_coro {logfile db ssl split_proc} {
+  # some prep with inserting record in db for logfile, also do with handler?
+  if {[is_logfile_read $db $logfile]} {
+    return
+  }
+  set vuserid [det_vuserid $logfile]
+  if {$vuserid == ""} {
+    log warn "Could not determine vuserid from $logfile: continue with next."
+    return
+  }
+  set ts [clock format [file mtime $logfile] -format "%Y-%m-%d %H:%M:%S"]
+  
+  set dirname [file dirname $logfile]
+  set filesize [file size $logfile]
+  lassign [det_project_runid_script $logfile] project runid script
+
+  $db in_trans {
+    set logfile_id [$db insert logfile [vars_to_dict logfile dirname ts \
+                                            filesize runid project script]]
+    # call proc in liblogreader.tcl
+    readlogfile_coro $logfile [vars_to_dict db ssl split_proc logfile_id vuserid]  
+  }
+}
+
 proc def_parsers {} {
 
   def_parser trans_line {
     if {[regexp {: \[([0-9 :.-]+)\] (trans=.+?)( \[[0-9/ :-]+])} $line z ts fields]} {
-      set nvpairs [log2nvpairs $fields]; # possiply give whole line to log2nvpairs
+      set nvpairs [log2nvpairs $fields]; # possibly give whole line to log2nvpairs
       dict set nvpairs ts $ts
       dict set nvpairs sec_ts [parse_ts [:ts $nvpairs]]
       dict set nvpairs resptime [regsub -all {,} [:resptime $nvpairs] "."]
@@ -46,7 +72,7 @@ proc def_parsers {} {
 
   def_parser errorline {
     if {[regexp {^([^ ]+)\((\d+)\): (Continuing after )?Error ?([0-9-]*): (.*)$} $line z srcfile srclinenr z errornr rest]} {
-      # [2016-08-07 13:24] ignore user field returned from det_error_details, too specific and already have in trans_line.
+      # [2016-08-07 13:24] ignore user field (z_user) returned from det_error_details, too specific and already have in trans_line.
       lassign [det_error_details $rest] errortype z_user level details
       return [vars_to_dict srcfile srclinenr errornr errortype details line]
     } elseif {[regexp {: Error: } $line]} {
@@ -73,83 +99,67 @@ proc log2nvpairs {line} {
 
 proc def_handlers {} {
 
-  # TODO: helper or replacement for def_handler so default code will be generated:
-  # initialisation
-  # set item [yield]
-  # while 1 {
-  #   set res ""
-  #   $body
-  #   set item [yield $res]
-  # }
-  
+  # convert trans_line => trans
   def_handler {bof eof trans_line} trans {
+    # init
     set user ""; set iteration 0; set split_proc "<none>"
-    set item [yield]
-    # keep on running, even after eof, could be >1 logfile.
-    while 1 {
-      # set res ""
-      res_init res
-      switch [:topic $item] {
-        bof {
-          set started_transactions [dict create]
-          dict_to_vars $item ;    # set db, split_proc, ssl
-        }
-        eof {
+  } {
+    # body/loop
+    switch [:topic $item] {
+      bof {
+        set started_transactions [dict create]
+        dict_to_vars $item ;    # set db, split_proc, ssl
+      }
+      eof {
+        res_add res {*}[make_trans_not_finished $started_transactions]
+      }
+      trans_line {
+        if {[new_user_iteration? $item $user $iteration]} {
           res_add res {*}[make_trans_not_finished $started_transactions]
+          set started_transactions [dict create]
+          dict_to_vars $item; # user, iteration
         }
-        trans_line {
-          if {[new_user_iteration? $item $user $iteration]} {
-            res_add res {*}[make_trans_not_finished $started_transactions]
-            set started_transactions [dict create]
-            dict_to_vars $item; # user, iteration
+        set item [dict merge $item [$split_proc [:transname $item]]]
+        switch [:trans_status $item] {
+          -1 {
+            # start of a transaction, keep data to combine with end-of-trans.
+            dict set started_transactions [:transname $item] $item
           }
-          set item [dict merge $item [$split_proc [:transname $item]]]
-          switch [:trans_status $item] {
-            -1 {
-              # start of a transaction, keep data to combine with end-of-trans.
-              dict set started_transactions [:transname $item] $item
-            }
-            0 {
-              # succesful end of a transaction, find start data and insert item.
-              res_add res [make_trans_finished $item $started_transactions]
-              dict unset started_transactions [:transname $item]
-            }
-            1 {
-              # synthetic error, just insert.
-              res_add res [make_trans_error $item]
-            }
-            4 {
-              # functional warning, eg. no FT's available to approve.
-              res_add res [make_trans_finished $item $started_transactions]
-            }
-            default {
-              error "Unknown transaction status: [:trans_status $item]"
-            }
-          };                    # end-of-switch-status
-        }
-      };                        # end-of-switch-topic
-      set item [yield $res]
-    };                          # end-of-while-1
-  };                            # end-of-define-handler
+          0 {
+            # succesful end of a transaction, find start data and insert item.
+            res_add res [make_trans_finished $item $started_transactions]
+            dict unset started_transactions [:transname $item]
+          }
+          1 {
+            # synthetic error, just insert.
+            res_add res [make_trans_error $item]
+          }
+          4 {
+            # functional warning, eg. no FT's available to approve.
+            # [2016-08-12 20:46] possibly also call make_trans_error here,
+            # but no logfile to test with here. Check status (should be 4)
+            res_add res [make_trans_finished $item $started_transactions]
+          }
+          default {
+            error "Unknown transaction status: [:trans_status $item]"
+          }
+        };                    # end-of-switch-status
+      }
+    };                        # end-of-switch-topic
+  };                          # end-of-define-handler
 
   # make error object from errorline and trans_line
-  def_handler {trans_line errorline} error {
-    set trans_line_item {}
-    set item [yield]
-    while 1 {
-      # set res ""
-      res_init res
-      switch [:topic $item] {
-        trans_line {
-          set trans_line_item $item
-        }
-        errorline {
-          # set res [dict merge $trans_line_item $item]
-          res_add res [dict merge $trans_line_item $item]
-        }
+  def_handler {trans_line errorline} error {set trans_line_item {}} {
+    switch [:topic $item] {
+      trans_line {
+        set trans_line_item $item
       }
-      set item [yield $res]
+      errorline {
+        # set res [dict merge $trans_line_item $item]
+        res_add res [dict merge $trans_line_item $item]
+      }
     }
+    set item [yield $res]
   }
   
   # [2016-08-09 22:29] introduced a bug here by not calling split_proc in insert-trans_line
@@ -161,22 +171,10 @@ proc def_handlers {} {
   
 }
 
-if 0 {
-  # [2016-08-09 22:16] keep for now as an example how to call def_handler2
-  def_handler2 {bofxx errorxx} {} {
-    if {[:topic $item] == "bof"} {
-      dict_to_vars $item ;    # set db, split_proc, ssl
-      set file_item $item
-    } else {
-      $db insert error [dict merge $file_item $item]
-    }
-  }
-}
-
 # Specific to this project, not in liblogreader.
 # combination of item and file_item
 proc def_insert_handler {table} {
-  def_handler2 [list bof $table] {} [syntax_quote {
+  def_handler [list bof $table] {} [syntax_quote {
     if {[:topic $item] == "bof"} { # 
       dict_to_vars $item ;    # set db, split_proc, ssl
       set file_item $item
@@ -184,29 +182,5 @@ proc def_insert_handler {table} {
       $db insert ~$table [dict merge $file_item $item]
     }
   }]
-}
-
-proc readlogfile_new_coro {logfile db ssl split_proc} {
-  # some prep with inserting record in db for logfile, also do with handler?
-  if {[is_logfile_read $db $logfile]} {
-    return
-  }
-  set vuserid [det_vuserid $logfile]
-  if {$vuserid == ""} {
-    log warn "Could not determine vuserid from $logfile: continue with next."
-    return
-  }
-  set ts [clock format [file mtime $logfile] -format "%Y-%m-%d %H:%M:%S"]
-  
-  set dirname [file dirname $logfile]
-  set filesize [file size $logfile]
-  lassign [det_project_runid_script $logfile] project runid script
-
-  $db in_trans {
-    set logfile_id [$db insert logfile [vars_to_dict logfile dirname ts \
-                                            filesize runid project script]]
-    # call proc in liblogreader.tcl
-    readlogfile_coro $logfile [vars_to_dict db ssl split_proc logfile_id vuserid]  
-  }
 }
 
