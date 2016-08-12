@@ -7,8 +7,8 @@ package require ndv
 
 set_log_global info
 
-ndv::source_once task.tcl prjgroup.tcl prjtype.tcl selectfiles.tcl backup.tcl \
-    lib/inifile.tcl lib/misc.tcl init.tcl syncrepo.tcl regsub.tcl text.tcl
+ndv::source_once task.tcl prjgroup.tcl prjtype.tcl selectfiles.tcl \
+    lib/inifile.tcl lib/misc.tcl init.tcl
 
 proc main {argv} {
   set dir [file normalize .]
@@ -37,6 +37,7 @@ proc handle_script_dir {dir tname trest} {
       return
     }
     puts "env: $buildtool_env"
+    source_dir [file join [buildtool_dir] generic]
     if {$tname != "init"} {
       uplevel #0 {source [config_tcl_name]}
       source_prjtype
@@ -58,10 +59,14 @@ proc source_prjtype {} {
     log info "No prjtype specific build lib"
     return
   }
-  # use lsort to have option to source in specific order if needed
-  foreach libfile [lsort [glob -nocomplain -directory $bldprjlib *.tcl]] {
+  source_dir $bldprjlib
+}
+
+# source all tcl files in dir
+proc source_dir {dir} {
+  foreach libfile [lsort [glob -nocomplain -directory $dir *.tcl]] {
     # ndv::source_once?
-    source $libfile
+    uplevel #0 [list source $libfile]
   }
 }
 
