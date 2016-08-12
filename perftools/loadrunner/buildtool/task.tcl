@@ -2,25 +2,11 @@ set _tasks [dict create]
 
 use libfp
 
-# @deprecated, use task
-# TODO: change all tasks to use new task. When done, rename back to task.
-proc task_old {name desc body} {
-  global _tasks
-  set proc_name "task_$name"
-  if {[dict_get $_tasks $name] != {}} {
-    puts "FATAL: Task already defined: $name"
-    exit ; # hard programming error.
-  }
-  dict set _tasks $name [dict create name $name firstline [first_line $desc] desc $desc]
-
-  proc $proc_name {args} $body
-}
-
 # [2016-07-30 12:24] new version to automatically set options.
 # params: name desc [options [params2]] body
-# so name, desc and body are mandatory. Options and params2 are optional. If params2 are given, options should also be given.
+# so name, desc and body are mandatory. Options and params2 are optional. If params2 is given, options should also be given.
 # options: list of lists, see cmdline::getopt.
-# params2: extra parameters after options, eg filename. (not used yet)
+# params2: extra parameters after options, eg filename.
 #
 # examples:
 # task init {Initialise project/script
@@ -28,8 +14,6 @@ proc task_old {name desc body} {
 # } {{update "Update project/script from old config version to latest"}
 #    {version "Show config version"} 
 # } <body>
-
-
 proc task {args} {
   global _tasks
   set args [lassign $args name desc]
@@ -44,11 +28,9 @@ proc task {args} {
   dict set _tasks $name [dict create name $name firstline [first_line $desc] \
                              desc [make_desc $name $desc $options $params]]
   # [2016-07-30 14:11] Use [list] to ensure options and usage are given as single
-  # arguments to getoptions.
+  # arguments to getoptions. Syntax_quote as alternative?
   set body2 "set opt \[getoptions args [list $options] [list [usage $name $params]]\]\n$body"
   proc $proc_name {args} $body2
-  #log debug "task defined: $proc_name"
-  #breakpoint
 }
 
 proc first_line {str} {
@@ -56,12 +38,9 @@ proc first_line {str} {
 }
 
 # Add a syntax line after first line based on options.
-# TODO: also need a place to add parameters after options, like file(s) or action(s)
 proc make_desc {name desc options params} {
   set optstr [getoptions _ $options [usage $name $params] help]
-  # set helpstr "\nSyntax: $name \[options\] $params\n$optstr\n"
   set helpstr "\nSyntax: $optstr\n"
-  # if {![regsub {\n} $desc $helpstr desc]} {}
   append desc $helpstr
   return $desc
 }

@@ -3,15 +3,14 @@
 # TODO: als -do is meegegeven, dan actie opslaan (in repo, want ook voor andere scripts). dan optie om deze te tonen en te kiezen.
 # en mss ook een naam te geven.
 # TODO: optie om replace wel/niet in libs uit te voeren, of alleen in actions. Default mss ook alleen in actions.
-# TODO: option to only do regsub in one file (or a list) or only action files.
-# Maybe something like -filter, could be used for other tasks as well.
 task regsub {Regular epression replace} {
   {do "Really perform regsub actions (dry run otherwise)"}
-  {action "Only handle action files"}
   {all "Handle all files (be careful!)"}
-  {allrec "Handle all files; recurse subdirs (except starting with . be very careful!)"}
-  {text "Handle all text files (TBD)"}
+  {allrec "Handle all files; recurse subdirs (except starting with . be very careful!, TBD)"}
   {pat.arg "" "Handle all files matching glob pattern"}
+  {patrec.arg "" "Handle all files matching glob pattern (TBD)"}
+  {action "Only handle action files"}  
+  {text "Handle all text files (TBD)"}  
   {filenames "Only show filenames with changes, no contents"}
 } {from to} {
   # TODO: all and allrec should be general options, applicable to more tasks.

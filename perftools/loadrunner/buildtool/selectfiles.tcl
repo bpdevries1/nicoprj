@@ -10,6 +10,10 @@ proc get_filenames {opt} {
     set filenames [get_pattern_files *]
   } elseif {[:pat $opt] != ""} {
     set filenames [get_pattern_files [:pat $opt]]
+  } elseif {[:allrec $opt] != ""} {
+    error "Not implemented yet: allrec"
+  } elseif {[:patrec $opt] != ""} {
+    error "Not implemented yet: patrec"
   } else {
     set filenames [get_source_files]
   }
