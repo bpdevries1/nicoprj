@@ -1,4 +1,5 @@
 # procs for reading and writing (similiar to windows) .ini files, as used in Loadrunner.
+# [2016-08-12 09:37] TODO: move to ndvlib, possibly make OO, seems applicable here.
 
 # return a list, where each item is a dict: header and lines. Lines is a list.
 proc ini_read {filename {fail_on_file_not_found 1}} {
