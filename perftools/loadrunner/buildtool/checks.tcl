@@ -1,3 +1,13 @@
+# perform some tests. For now only show if libs are up-to-date
+task test {Perform tests on script
+  Calls following tasks: libs, check, check_configs, check_lr_params.
+} {
+  task_libs {*}$args
+  task_check {*}$args
+  task_check_configs {*}$args
+  task_check_lr_params {*}$args
+}
+
 task check {Perform some checks on sources
   location of #includes, todo's, comments.
 } {

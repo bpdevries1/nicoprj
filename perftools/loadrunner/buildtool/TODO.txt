@@ -1,0 +1,61 @@
+opdrachten vanaf de cmdline:
+bld run : run vugen test vanaf cmdline, evt met cmdline opties.
+bld lint : checks uitvoeren op source code.
+
+bld deploy : in ALM neerzetten, voor later.
+bld compile : compile uitvoeren zoals binnen vugen
+
+bld new <prjname> - nieuwe dir maken met file scaffolding. Evt met opties voor web ding of iets anders. Deze scaffolding dan wel ergens neerzetten.
+
+  
+  bld check - nog meer doen: ongebruikte params? wil met oude scripts nog wel eens gebeuren.
+  bld check - heb ergens (loadrunner doc?) lijst van uitgangspunten en checks -> deze hier checken dus.
+
+  
+[2016-07-16 14:56] Tasks om oud script om te zetten? Waarsch best lastig.
+  
+bld save-as <nwe script naam> - ook iets wat je nu uit Vugen zelf doet.
+
+Basisidee/uitgangspunt(en):
+* Als een file in repo staat, is het lib, en in principe overal hetzelfde. Een globals.h zet je normaal niet in de repo, hooguit als skeleton.
+* In repo een libs dir, maar ook een skeleton, evt binnen deze meerdere soorten skeletons.
+* Eerst simpel en werkbaar maken, minimal viable workable solution.
+* Uiteindelijk alle Vugen GUI acties via deze tool, maar zeker niet in het begin.
+* Kijken in welk type project je zit: VuGen, AHK, Clojure, Tcl, ???
+* tools om auto correlatie te doen, ook al eerder dingen voor gemaakt. Maar mss wel aardig dat dit een wrapper is, en dat je met bld help al deze dingen kunt zien.
+
+Alle bld regsubs die je nog eens als pattern wilt:
+
+bld regsub "\n([A-Za-z0-9_.,-][A-Za-z0-9_ .,-]+)\n" "\n    rb_web_reg_find(\"Text=\\1\");\n"
+- deze gebruikt om tekst uit een response - gekopieerd in de source - in een rb_web_reg_find te zetten.
+
+Generieke functies voor vervangen lr_*_transaction naar rb_*_transaction:
+bld regsub "lr_start_transaction\(([^())]+)\);" "rb_start_transaction(\\1);"
+bld regsub "lr_end_transaction\(([^()]+), ?LR_AUTO\);" "rb_end_transaction(\\1, TT);"
+bld regsub "lr_think_time\(([^()]+)\);" "// lr_think_time(\\1);"
+
+bld regsub "log_always_trans" "// log_always_trans"
+
+Deze 4 om bestaande dotcom script om te zetten naar rb_trans.
+bld regsub "lr_start_transaction\(lr_eval_string\(\"DotCom_(.+?)_\{cache\}\"\)\);" "rb_start_transaction(tr = trans_name(\"\\1\"));"
+bld regsub "addDynaTraceHeader(".+?");\n" ""
+bld regsub "lr_end_transaction\(lr_eval_string\(\"DotCom_(.+?)_\{cache\}\"\), LR_AUTO\);" "rb_end_transaction(tr, TT);"
+bld regsub "lr_think_time\(TT\);" "// lr_think_time(TT);"
+
+Deze voor RCC/CBW
+bld regsub "lr_start_transaction\(transaction\);" "rb_start_transaction(transaction);"
+bld regsub "lr_start_transaction\(transactie\);" "rb_start_transaction(transactie);"
+
+bld regsub "set_dynatrace_headers\(transaction, vuserId\);" "// set_dynatrace_headers(transaction, vuserId);"
+bld regsub "lr_end_transaction\(transaction, LR_AUTO\);" "rb_end_transaction(transaction, TT);"
+
+bld regsub "lr_think_time\(TT\);" "// lr_think_time(TT);"
+bld regsub "log_always_trans" "// log_always_trans"
+
+# 2e param weg bij rb_start_transaction:
+# rb_start_transaction(tr, vuserId); => rb_start_transaction(tr);
+# bld regsub "rb_start_transaction\(lr_eval_string\(\"DotCom_(.+?)_\{cache\}\"\)\);" "rb_start_transaction(tr = trans_name(\"\\1\"));"
+bld regsub "tr, vuserId" "tr"
+
+# [2016-04-04 09:41:02] Voor RCC, ivm CDN gebruik.
+bld regsub "https://{host}/rcc/DashboardLightThemeStatic/themes/DL2/ext" "https://{cdnhost}/{cdnprefix}"
