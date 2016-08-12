@@ -1,11 +1,13 @@
 # project config versions:
 # 1. original, with _orig* and .base directories directly in main directory.
 # 2. using .bld subdir, with subdirs .base and _orig*
+# 3. using ~/.config/buildtool/env.tcl and prjtype specific settings.
 
 require libdatetime dt
 
 use libmacro
 
+# TODO: add type parameter, and only write stuff to config for certain types, eg lr_include_dir.
 task2 init {Initialise project/script
   Also update config to latest version.  
 } {{update "Update project/script from old config version to latest"}
@@ -60,6 +62,19 @@ proc config_dir {} {
   return ".bld"
 }
 
+proc config_tcl_name {} {
+  file join [config_dir] "config.tcl"
+}
+
+proc config_env_tcl_name {} {
+  global buildtool_env
+  file join [config_dir] "config-${buildtool_env}.tcl"
+}
+
+proc version_file {} {
+  file join [config_dir] .configversion
+}
+
 # TODO: also update .gitignore with .base and _orig paths, but should be in hook for git package.
 proc init_from_scratch {} {
   set cfgdir [config_dir]
@@ -75,7 +90,7 @@ proc init_update {from to} {
   set_config_version $to
 }
 
-proc init_update_from1 {} {
+proc init_update_from_1 {} {
   init_from_scratch
   if {[file exists ".base"]} {
     file rename ".base" [file join [config_dir] ".base"]
@@ -109,7 +124,7 @@ proc make_config_tcl {} {
   # [2016-08-10 22:55] TODO: global not needed anymore, source is done at global level now.
   set now [dt/now]
   set config_v3 [get_config_v3]
-  write_file $config_name [syntax_quote {# config.tcl generated ~$now
+  write_file $config_name [syntax_quote {# config.tcl generated ~@$now
     # set testruns_dir {<FILL IN>}
     set repo_dir [file normalize "../repo"]
     set repo_lib_dir [file join $repo_dir libs]
@@ -141,40 +156,10 @@ if {[file exists $config_env_tcl_name]} {
   }
 }
 
-proc make_config_tcl_old {} {
-  set config_name [config_tcl_name]
-  if {[file exists $config_name]} {
-    puts "Config file already exists: $config_name"
-    return
-  }
-  # TODO: also with syntax_quote, is cleaner.
-  # [2016-08-10 22:55] TODO: global not needed anymore, source is done at global level now.
-  write_file $config_name "# config.tcl generated [dt/now]
-global testruns_dir repo_dir repo_lib_dir lr_include_dir
-set testruns_dir \{<FILL IN>\}
-set repo_dir \[file normalize "../repo"\]
-set repo_lib_dir \[file join \$repo_dir libs\]
-set lr_include_dir [list [det_lr_include_dir]]
-"
-  
-}
-
-proc config_tcl_name {} {
-  file join [config_dir] "config.tcl"
-}
-
-proc config_env_tcl_name {} {
-  global buildtool_env
-  file join [config_dir] "config-${buildtool_env}.tcl"
-}
 
 
 proc set_config_version {version} {
   write_file [version_file] $version
-}
-
-proc version_file {} {
-  file join [config_dir] .configversion
 }
 
 # for now here, should be in package vugen or vugen-rabo
