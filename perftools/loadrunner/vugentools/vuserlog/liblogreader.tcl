@@ -36,25 +36,6 @@ proc def_handler2 {in_topics out_topic args} {
   def_handler $in_topics $out_topic $body2
 }
 
-proc def_handler2_old {in_topics out_topic args} {
-  if {[:# $args] == 2} {
-    lassign $args init body
-  } else {
-    lassign $args body
-    set init {}
-  }
-  # iest met backtick, escape_body of zo zou aardig zijn, vgl clojure macro.
-  set body2 "$init
-set item \[yield\]
-while 1 {
-  set res \"\"
-  $body
-  set item \[yield \$res]
-}"
-  log debug "body2: $body2"
-  def_handler $in_topics $out_topic $body2
-}
-
 # out_topic is identifying, key.
 # in_topics needed to decide which handlers to call for a topic.
 proc def_handler {in_topics out_topic body} {
@@ -143,14 +124,19 @@ proc handle_to_publish {to_publish } {
       # set res [add_topic [[:coro_name $handler] $item] [:topic $handler]]
       set res [[:coro_name $handler] $item]
       # log debug "result of handler: $res"
-      if {$res != ""} {
-        if {[dict exists $res multi]} {
-          # puts "=== PUTTING MULTIPLE RESULTS BACK ON QUEUE!!"
-          foreach el [:multi $res] {
-            $to_publish put [add_topic $el [:topic $handler]]
+      foreach el $res {
+        $to_publish put [add_topic $el [:topic $handler]]
+      }
+      if 0 {
+        if {$res != ""} {
+          if {[dict exists $res multi]} {
+            # puts "=== PUTTING MULTIPLE RESULTS BACK ON QUEUE!!"
+            foreach el [:multi $res] {
+              $to_publish put [add_topic $el [:topic $handler]]
+            }
+          } else {
+            $to_publish put [add_topic $res [:topic $handler]]
           }
-        } else {
-          $to_publish put [add_topic $res [:topic $handler]]
         }
       }
     };                      # end-of-foreach
@@ -174,6 +160,18 @@ proc add_topic {item topic} {
   dict merge $item [dict create topic $topic]
 }
 
+# [2016-08-12 20:04] now res is just a list, mostly with just 1 item.
+proc res_init {resname} {
+  upvar $resname res
+  set res [list]
+}
+
+proc res_add {resname args} {
+  upvar $resname res
+  lappend res {*}$args
+  return $res
+}
+
 # helper for multiple results
 # result is either:
 # - empty string, nothing.
@@ -181,7 +179,7 @@ proc add_topic {item topic} {
 # - a dict with one key: multi, with has a list of dicts as values.
 # @param resname - name of the var to add to
 # @param args - list of values to add, all dicts.
-proc res_add {resname args} {
+proc res_add_old {resname args} {
   upvar $resname res
   set lst [res_items $res];     # list of current items, with 0, 1 or more items
   foreach el $args {
@@ -196,7 +194,7 @@ proc res_add {resname args} {
   return $res
 }
 
-proc res_items {res} {
+proc res_items_old {res} {
   if {$res == {}} {
     return {}
   } else {
@@ -209,6 +207,12 @@ proc res_items {res} {
 }
 
 proc res_tostring {res} {
+  foreach el $res {
+    append str "\n-> $el"
+  }
+}
+
+proc res_tostring_old {res} {
   set tp [res_type $res]
   switch $tp {
     empty {return empty}
@@ -223,7 +227,7 @@ proc res_tostring {res} {
   }
 }
 
-proc res_type {res} {
+proc res_type_old {res} {
   if {$res == {}} {
     return empty
   } else {
@@ -233,6 +237,5 @@ proc res_type {res} {
       return single
     }
   }
-
-  
 }
+

@@ -87,7 +87,8 @@ proc def_handlers {} {
     set item [yield]
     # keep on running, even after eof, could be >1 logfile.
     while 1 {
-      set res ""
+      # set res ""
+      res_init res
       switch [:topic $item] {
         bof {
           set started_transactions [dict create]
@@ -136,13 +137,15 @@ proc def_handlers {} {
     set trans_line_item {}
     set item [yield]
     while 1 {
-      set res ""
+      # set res ""
+      res_init res
       switch [:topic $item] {
         trans_line {
           set trans_line_item $item
         }
         errorline {
-          set res [dict merge $trans_line_item $item]
+          # set res [dict merge $trans_line_item $item]
+          res_add res [dict merge $trans_line_item $item]
         }
       }
       set item [yield $res]
@@ -202,6 +205,7 @@ proc readlogfile_new_coro {logfile db ssl split_proc} {
   $db in_trans {
     set logfile_id [$db insert logfile [vars_to_dict logfile dirname ts \
                                             filesize runid project script]]
+    # call proc in liblogreader.tcl
     readlogfile_coro $logfile [vars_to_dict db ssl split_proc logfile_id vuserid]  
   }
 }

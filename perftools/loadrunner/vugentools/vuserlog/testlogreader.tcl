@@ -46,7 +46,8 @@ proc def_handlers {} {
     set eof 0
     while {!$eof} {
       log debug "even-handler: item: $item"
-      set res {}
+      # set res {}
+      res_init res
       if {[:topic $item] == "eof"} {
         set eof 1
       } else {
