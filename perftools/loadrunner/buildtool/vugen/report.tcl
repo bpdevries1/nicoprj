@@ -1,8 +1,7 @@
-# TODO: need to but this setting/location somewhere. This could be a user
+# TODO: need to put this setting/location somewhere. This could be a user
 # setting in ~/.config/buildtool, next to location of eg R binary.
-ndv::source_once ../vugentools/vuserlog/read-vuserlogs-db.tcl
-ndv::source_once ../vugentools/vuser-report/vuser-report.tcl
-
+ndv::source_once ../../vugentools/vuserlog/read-vuserlogs-db.tcl
+ndv::source_once ../../vugentools/vuser-report/vuser-report.tcl
 
 task report {Create report of output.txt in script dir
   Copy output.txt to testruns dir, call vugentools/vuserlog/read-vuserlogs-db.tcl
