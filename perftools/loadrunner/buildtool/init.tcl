@@ -107,8 +107,7 @@ proc init_update_from_2 {} {
   set text [read_file $config_name]
   set config_v3 [get_config_v3]
   set text "$text\n$config_v3"
-  write_file $config_name $text
-
+  write_file $config_name [format_code $text]
   make_config_env_tcl
   return 3
 }
@@ -124,14 +123,11 @@ proc make_config_tcl {} {
   # [2016-08-10 22:55] TODO: global not needed anymore, source is done at global level now.
   set now [dt/now]
   set config_v3 [get_config_v3]
-  write_file $config_name [syntax_quote {# config.tcl generated ~@$now
-    # set testruns_dir {<FILL IN>}
+  write_file $config_name [format_code [syntax_quote {# config.tcl generated ~@$now
     set repo_dir [file normalize "../repo"]
     set repo_lib_dir [file join $repo_dir libs]
-    # dynamically determine lr_include_dir!? Override if needed
-    # set lr_include_dir [det_lr_include_dir]
     ~@$config_v3
-  }]
+  }]]
   make_config_env_tcl
 }
 
@@ -141,22 +137,20 @@ proc make_config_env_tcl {} {
     puts "File already exists: $filename"
     return
   }
-  write_file $filename {set testruns_dir {<FILL IN>}
-set lr_include_dir [det_lr_include_dir]
-  }
+  write_file $filename [format_code {set testruns_dir {<FILL IN>}
+    set lr_include_dir [det_lr_include_dir]
+  }]
 }
 
 # TODO: need code formatting tool.
 # simple code format by counting braces per line might work.
 proc get_config_v3 {} {
-  return {set config_env_tcl_name [config_env_tcl_name]
-if {[file exists $config_env_tcl_name]} {
-  source $config_env_tcl_name
+  return [format_code {set config_env_tcl_name [config_env_tcl_name]
+    if {[file exists $config_env_tcl_name]} {
+      source $config_env_tcl_name
+    }
+  }]
 }
-  }
-}
-
-
 
 proc set_config_version {version} {
   write_file [version_file] $version
