@@ -4,7 +4,7 @@ use libfp
 
 # @deprecated, use task2
 # TODO: change all tasks to use new task2. When done, rename back to task.
-proc task {name desc body} {
+proc task_old {name desc body} {
   global _tasks
   set proc_name "task_$name"
   if {[dict_get $_tasks $name] != {}} {
@@ -30,7 +30,7 @@ proc task {name desc body} {
 # } <body>
 
 
-proc task2 {args} {
+proc task {args} {
   global _tasks
   set args [lassign $args name desc]
   set body [lindex $args end]
@@ -49,6 +49,11 @@ proc task2 {args} {
   proc $proc_name {args} $body2
   #log debug "task2 defined: $proc_name"
   #breakpoint
+}
+
+# [2016-08-12 10:16] temp.
+proc task2 {args} {
+  task {*}$args
 }
 
 proc first_line {str} {
