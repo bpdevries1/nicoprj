@@ -8,21 +8,27 @@ proc define_logreader_handlers {} {
 proc def_parsers {} {
 
   # TODO: timestamp deel in de regexp los definieren? Alternatief is parser voor logline maken en rest met handlers. Voor beide wat te zeggen.
-  def_parser_regexp iter_start_finish \
-      {\[([0-9 :.-]+)\] \[iter\] ([^ ]+) iteration: (\d+)} \
-      ts start_finish iteration
+  def_parser_regexp_ts iter_start_finish {\[iter\] ([^ ]+) iteration: (\d+)} \
+      start_finish iteration
+  
+  def_parser_regexp_ts trans_start \
+      {\[trans\] Transaction started: ([^,]+)} transname
+  
+  def_parser_regexp_ts trans_finish \
+      {\[trans\] Transaction finished: ([^,]+), success: (\d), transaction time \(sec\): ([-0-9.]+),} transname success resptime
 
-  def_parser_regexp trans_start \
-      {\[([0-9 :.-]+)\] \[trans\] Transaction started: ([^,]+)} ts transname
+  def_parser_regexp_ts errorline {\[error\] (.*)$} line
   
-  def_parser_regexp trans_finish \
-      {\[([0-9 :.-]+)\] \[trans\] Transaction finished: ([^,]+), success: (\d), transaction time \(sec\): ([-0-9.]+),} ts transname success resptime
+  def_parser_regexp_ts user {\[info\] Iteration (\d+), user: (.+)$} \
+      iteration user
+  
+}
 
-  def_parser_regexp errorline {\[([0-9 :.-]+)\] \[error\] (.*)$} ts line
-  
-  def_parser_regexp user {\[([0-9 :.-]+)\] \[info\] Iteration (\d+), user: (.+)$} \
-      ts iteration user
-  
+# [2016-08-13 18:17] for now AHK specific, maybe more generic (also like Splunk with timestamps?).
+# add regexp for ts and ts to re and args
+proc def_parser_regexp_ts {topic re args} {
+  set re_ts {\[([0-9 :.-]+)\]}
+  def_parser_regexp $topic "$re_ts $re" ts {*}$args
 }
 
 proc def_handlers {} {
