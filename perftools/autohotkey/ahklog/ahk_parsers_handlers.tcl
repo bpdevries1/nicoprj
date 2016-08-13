@@ -39,8 +39,8 @@ proc def_parsers {} {
 
   def_parser errorline {
     # [2016-08-09 16:38:22.161] [error] ERROR - image submit-uploaded.png not found
-    if {[regexp {\[([0-9 :.-]+)\] \[error\] (.*)$} $line z ts details]} {
-      vars_to_dict ts details
+    if {[regexp {\[([0-9 :.-]+)\] \[error\] (.*)$} $line z ts line]} {
+      vars_to_dict ts line
     } else {
       return ""
     }
@@ -83,7 +83,23 @@ proc def_handlers {} {
     }
   }
 
-  # TODO: error, based on error_line, iteration and trans_line (started)
+  def_handler {iter_start_finish user errorline} error {
+    set user "NONE"
+  } {
+    switch [:topic $item] {
+      iter_start_finish {
+        if {[:start_finish $item] == "Start"} {
+          set iteration [:iteration $item]
+        }
+      }
+      user {
+        # TODO:
+      }
+      errorline {
+        res_add res [make_error_ahk [add_sec_ts $item] $iteration $user]
+      }
+    }
+  }
   
   # def_insert_handler trans_line
   def_insert_handler trans
@@ -134,6 +150,12 @@ proc success_to_trans_status {success} {
     0 {return 1}
     1 {return 0}
   }
+}
+
+proc make_error_ahk {item iteration user} {
+  dict set item iteration $iteration
+  dict set item user $user
+  return $item
 }
 
 # Specific to this project, not in liblogreader.
