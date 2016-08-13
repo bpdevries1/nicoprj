@@ -5,8 +5,8 @@
 
 package require ndv
 
-# set_log_global info
-set_log_global debug
+set_log_global info
+# set_log_global debug
 
 ndv::source_once task.tcl prjgroup.tcl prjtype.tcl \
     lib/inifile.tcl lib/misc.tcl init.tcl
