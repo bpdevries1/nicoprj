@@ -10,7 +10,8 @@ ndv::source_once ahk_parsers_handlers.tcl
 # [2016-07-09 10:09] for parse_ts and now:
 use libdatetime
 
-set_log_global debug
+# set_log_global debug
+set_log_global info
 
 # Note:
 # [2016-02-08 11:13:55] Bug - when logfile contains 0-bytes (eg in Vugen output.txt with log webregfind for PDF/XLS), the script sees this as EOF and misses transactions and errors. [2016-07-09 10:12] this should be solved by reading as binary.
@@ -157,6 +158,10 @@ proc define_tables {db} {
   $db add_tabledef error {id} [concat $logfile_fields $line_fields \
                                    srcfile srclinenr user errornr errortype details \
                                    line]
+
+  # [2016-08-13 18:48] resource like images, but also html, js, css
+  $db add_tabledef resource {id} [concat $logfile_fields $line_fields user transname resource]
+  
 }
 
 proc delete_database {dbname} {
@@ -178,50 +183,11 @@ proc delete_database {dbname} {
 }
 
 # return 1 iff either old user or old iteration differs from new one in row
-proc new_user_iteration? {row user iteration} {
+proc new_user_iteration?_old {row user iteration} {
   if {($user != [:user $row]) || ($iteration != [:iteration $row])} {
     return 1
   }
   return 0
-}
-
-proc make_trans_not_finished {started_transactions} {
-  set res [list]
-  set line_fields {linenr ts sec_ts iteration}
-  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
-  foreach row [dict values $started_transactions] {
-    set d [dict_rename $row $line_fields $line_start_fields]
-    # $db insert trans $d
-    lappend res $d
-  }
-  return $res
-}
-
-proc make_trans_finished {row started_transactions} {
-  set line_fields {linenr ts sec_ts iteration}
-  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
-  set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
-  #set no_start 0
-  set rowstart [dict_get $started_transactions [:transname $row]]
-  if {$rowstart == {}} {
-    # probably a synthetic transaction. Some minor error.
-    set rowstart $row
-    #set no_start 1
-  }
-  set dstart [dict_rename $rowstart $line_fields $line_start_fields]
-  set dend [dict_rename $row $line_fields $line_end_fields]
-  set d [dict merge $dstart $dend]
-  return $d
-}
-
-proc make_trans_error {row} {
-  set line_fields {linenr ts sec_ts iteration}
-  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]  
-  set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
-  set d [dict_rename $row $line_fields $line_end_fields]
-  set d2 [dict merge $d [dict_rename $row $line_fields $line_start_fields]]
-  # breakpoint
-  return $d2
 }
 
 # TODO: move to libdict:

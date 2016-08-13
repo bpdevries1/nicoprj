@@ -10,18 +10,27 @@ proc def_parsers {} {
   # TODO: timestamp deel in de regexp los definieren? Alternatief is parser voor logline maken en rest met handlers. Voor beide wat te zeggen.
   def_parser_regexp_ts iter_start_finish {\[iter\] ([^ ]+) iteration: (\d+)} \
       start_finish iteration
-  
+
+  # [2016-08-11 11:33:00.126] [trans] Transaction started : FT_Funds_transfer
   def_parser_regexp_ts trans_start \
-      {\[trans\] Transaction started: ([^,]+)} transname
+      {\[trans\] Transaction started ?: ([^,\r\n]+)} transname
   
   def_parser_regexp_ts trans_finish \
       {\[trans\] Transaction finished: ([^,]+), success: (\d), transaction time \(sec\): ([-0-9.]+),} transname success resptime
 
   def_parser_regexp_ts errorline {\[error\] (.*)$} line
-  
-  def_parser_regexp_ts user {\[info\] Iteration (\d+), user: (.+)$} \
+
+  # [2016-08-13 19:34] need to use \S+, just [^ ]+ fails, adds newline/cr?
+  def_parser_regexp_ts user {\[info\] Iteration (\d+), user: (\S+)} \
       iteration user
-  
+
+  def_parser_regexp_ts resource_line \
+      {\[info\] capturing screen to: ([^ ]+) in directory:} resource
+
+  # [2016-08-13 19:58] deze niet, want bestaat niet en heb ook capturing screen
+  # waar 'ie wel in staat.
+  def_parser_regexp_ts resource_linexx \
+      {\[info\] Saved desktop to: ([^ ]+)$} resource
 }
 
 # [2016-08-13 18:17] for now AHK specific, maybe more generic (also like Splunk with timestamps?).
@@ -41,12 +50,12 @@ proc def_handlers {} {
       iter_start_finish {
         if {[:start_finish $item] == "Start"} {
           # TODO: check if all transactions have finished, empty list.
-          assert {[:# $transactions] == 0}
+          # assert {[:# $transactions] == 0}
           set iteration [:iteration $item]
           set transactions [dict create]
         } else {
           # TODO: maybe finish transactions
-          assert {[:# $transactions] == 0}
+          # assert {[:# $transactions] == 0}
           set user "NONE"
         }
       }
@@ -63,7 +72,8 @@ proc def_handlers {} {
         set user [:user $item]
       }
       eof {
-        assert {[:# $transactions] == 0}
+        # TODO: activate assert again.
+        # assert {[:# $transactions] == 0}
       }
     }
   }
@@ -79,9 +89,36 @@ proc def_handlers {} {
       }
       user {
         set user [:user $item]
+        if {$user != [string trim $user]} {
+          breakpoint
+        }
       }
       errorline {
         res_add res [make_error_ahk [add_sec_ts $item] $iteration $user]
+      }
+    }
+  }
+
+  def_handler {iter_start_finish user trans_start resource_line} resource {
+    # [2016-08-13 18:52] start bitmap is saved, before iteration starts.
+    set user "NONE"
+    set iteration 0
+    set transname NONE
+  } {
+    switch [:topic $item] {
+      iter_start_finish {
+        if {[:start_finish $item] == "Start"} {
+          set iteration [:iteration $item]
+        }
+      }
+      user {
+        set user [:user $item]
+      }
+      trans_start {
+        set transname [:transname $item]
+      }
+      resource_line {
+        res_add res [make_resource_ahk [add_sec_ts $item] $iteration $user $transname]
       }
     }
   }
@@ -89,6 +126,7 @@ proc def_handlers {} {
   # def_insert_handler trans_line
   def_insert_handler trans
   def_insert_handler error
+  def_insert_handler resource
 
 }
 
@@ -141,10 +179,18 @@ proc success_to_trans_status {success} {
   }
 }
 
-proc make_error_ahk {item iteration user} {
+proc make_error_ahk_old {item iteration user} {
   dict set item iteration $iteration
   dict set item user $user
   return $item
+}
+
+proc make_error_ahk  {item iteration user} {
+  dict merge $item [vars_to_dict iteration user]
+}
+
+proc make_resource_ahk {item iteration user transname} {
+  dict merge $item [vars_to_dict iteration user transname]
 }
 
 # Specific to this project, not in liblogreader.
