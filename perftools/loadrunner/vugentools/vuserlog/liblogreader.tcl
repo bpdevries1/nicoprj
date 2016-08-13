@@ -4,6 +4,9 @@ package require ndv
 require libio io
 use libmacro
 
+set parsers [list]
+set handlers [dict create]
+
 # main proc
 # [2016-08-05 20:39] Another go at readlogfile, with knowledge of coroutines.
 # opt: dict with extra options, like db object.
