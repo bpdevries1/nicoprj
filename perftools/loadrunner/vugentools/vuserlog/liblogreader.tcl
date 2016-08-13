@@ -29,6 +29,20 @@ proc readlogfile_coro {logfile {opt ""}} { #
   handle_to_publish $to_publish
 }
 
+# define a simple regexp parser (compare Splunk)
+# TODO: put the named args in the regexp, like Splunk? 
+# args contains the keys in dict to save, match with regexp groups.
+# eg def_parser_regexp $re ts start_finish iteration
+proc def_parser_regexp {topic re args} {
+  def_parser $topic [syntax_quote {
+    if {[regexp ~$re $line z ~@$args]} {
+      vars_to_dict ~@$args
+    } else {
+      return ""
+    }
+  }]
+}
+
 # first define parsers and handlers, before calling readlogfile_coro
 proc def_parser {topic body} {
   global parsers ;              # list of [dict topic proc_name]
