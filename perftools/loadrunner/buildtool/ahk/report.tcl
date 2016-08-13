@@ -31,7 +31,9 @@ task report {Create report of output.txt in script dir
     file mkdir $subdir
     file copy $logfilename $to_file
   }
-
+  # [2016-08-13 18:30] while testing keep the logfile in the target dir, so already exists.
+  copy_dir_png output2 $subdir
+  
   # then call read_logfile_dir; idempotency should already be arranged by read_logfile_dir
   set dbname [file join $subdir "ahklog.db"]
   read_logfile_dir $subdir $dbname
@@ -40,3 +42,12 @@ task report {Create report of output.txt in script dir
   vuser_report $subdir $dbname $opt
 }
 
+proc copy_dir_png {from to} {
+  # breakpoint
+  foreach fromfile [glob -nocomplain -directory $from -type f *.png] {
+    set tofile [file join $to [file tail $fromfile]]
+    if {![file exists $tofile]} {
+      file copy $fromfile $tofile
+    }
+  }
+}
