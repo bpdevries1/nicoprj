@@ -7,54 +7,21 @@ proc define_logreader_handlers {} {
 
 proc def_parsers {} {
 
-  # TODO: def_parser_regexp iter_start_finish $re ts start_finish iteration
-  def_parser iter_start_finish {
-    # [2016-08-09 16:37:49.630] [iter] Start iteration: 1
-    # TODO: timestamp deel in de regexp los definieren?
-    # TODO: define simple regexp parser, like Splunk. Just the RE and varnames.
-    if {[regexp {\[([0-9 :.-]+)\] \[iter\] ([^ ]+) iteration: (\d+)} $line z ts start_finish iteration]} {
-      vars_to_dict ts start_finish iteration
-    } else {
-      return ""
-    }
-  }
+  # TODO: timestamp deel in de regexp los definieren? Alternatief is parser voor logline maken en rest met handlers. Voor beide wat te zeggen.
+  def_parser_regexp iter_start_finish \
+      {\[([0-9 :.-]+)\] \[iter\] ([^ ]+) iteration: (\d+)} \
+      ts start_finish iteration
 
-  def_parser trans_start {
-    # [2016-08-09 16:37:49.630] [trans] Transaction started : 01_Start_Internet_Explorer
-    if {[regexp {\[([0-9 :.-]+)\] \[trans\] Transaction started: ([^,]+)} $line z ts transname]} {
-      vars_to_dict ts transname
-    } else {
-      return ""
-    }
-  }
+  def_parser_regexp trans_start \
+      {\[([0-9 :.-]+)\] \[trans\] Transaction started: ([^,]+)} ts transname
+  
+  def_parser_regexp trans_finish \
+      {\[([0-9 :.-]+)\] \[trans\] Transaction finished: ([^,]+), success: (\d), transaction time \(sec\): ([-0-9.]+),} ts transname success resptime
 
-  def_parser trans_finish {
-    # [2016-08-09 16:37:51.034] [trans] Transaction finished: 01_Start_Internet_Explorer, success: 1, transaction time (sec): 0.404, slept (sec): 1.000
-    if {[regexp {\[([0-9 :.-]+)\] \[trans\] Transaction finished: ([^,]+), success: (\d), transaction time \(sec\): ([-0-9.]+),} $line z ts transname success resptime]} {
-      vars_to_dict ts transname success resptime
-    } else {
-      return ""
-    }
-  }
-
-  def_parser errorline {
-    # [2016-08-09 16:38:22.161] [error] ERROR - image submit-uploaded.png not found
-    if {[regexp {\[([0-9 :.-]+)\] \[error\] (.*)$} $line z ts line]} {
-      vars_to_dict ts line
-    } else {
-      return ""
-    }
-  }
-
-  # [2016-08-11 11:30:52.847] [info] Iteration 1, user: STU1
-  def_parser user {
-    # [2016-08-09 16:38:22.161] [error] ERROR - image submit-uploaded.png not found
-    if {[regexp {\[([0-9 :.-]+)\] \[info\] Iteration (\d+), user: (.+)$} $line z ts iteration user]} {
-      vars_to_dict ts iteration user
-    } else {
-      return ""
-    }
-  }
+  def_parser_regexp errorline {\[([0-9 :.-]+)\] \[error\] (.*)$} ts line
+  
+  def_parser_regexp user {\[([0-9 :.-]+)\] \[info\] Iteration (\d+), user: (.+)$} \
+      ts iteration user
   
 }
 
