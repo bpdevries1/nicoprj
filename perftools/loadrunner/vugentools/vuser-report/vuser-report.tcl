@@ -54,9 +54,9 @@ proc vuser_report_iter_user {db row hh} {
   $hh line "[:ts_min $row] => [:ts_max $row]"
   # $hh table body ook leuk? Ook vgl clojure/hiccup.
   $hh table_start
-  $hh table_header Transaction Result Resp.time Start End
+  $hh table_header Transaction Result Resp.time Start End Resources
   # [2016-08-02 13:40:10] + 0 if var is empty
-  set query "select transshort, trans_status, resptime, ts_start, ts_end
+  set query "select transname, transshort, trans_status, resptime, ts_start, ts_end
              from trans
              where vuserid = [:vuserid $row] + 0
              and iteration_start = [:iteration_start $row] + 0
@@ -67,7 +67,9 @@ proc vuser_report_iter_user {db row hh} {
     $hh table_row_class [vuser_row_class $trow] [:transshort $trow] \
         [status_text $trow] \
         [format "%.3f" [:resptime $trow]] \
-        [time_part [:ts_start $trow]] [time_part [:ts_end $trow]]
+        [time_part [:ts_start $trow]] [time_part [:ts_end $trow]] \
+        [href_resources $db $hh [:vuserid $row] [:iteration_start $row] [:user $row] \
+             [:transname $trow]]
   }
   $hh table_end
 
@@ -90,6 +92,29 @@ proc vuser_report_iter_user {db row hh} {
       # $hh reset_colour
     }
     $hh table_end
+  }
+}
+
+# return html representation of references to resources for transaction
+proc href_resources {db hh vuserid iteration user transname} {
+  set query "select resource from resource
+             where vuserid + 0 = $vuserid + 0
+             and iteration + 0 = $iteration + 0
+             and user = '$user'
+             and transname = '$transname'
+             order by ts"
+  set res [$db query $query]
+  set hrefs [list]
+  # TODO: use map? or list comprehension?
+  foreach row $res {
+    set resource [:resource $row]
+    lappend hrefs [$hh get_anchor [file tail $resource] $resource]
+  }
+  if {$hrefs == {}} {
+    # return "No resources for $vuserid/$iteration/$user/$transname: $query"
+    return ""
+  } else {
+    join $hrefs "<br/>"  
   }
 }
 
