@@ -45,6 +45,17 @@ proc def_parsers {} {
       return ""
     }
   }
+
+  # [2016-08-11 11:30:52.847] [info] Iteration 1, user: STU1
+  def_parser user {
+    # [2016-08-09 16:38:22.161] [error] ERROR - image submit-uploaded.png not found
+    if {[regexp {\[([0-9 :.-]+)\] \[info\] Iteration (\d+), user: (.+)$} $line z ts iteration user]} {
+      vars_to_dict ts iteration user
+    } else {
+      return ""
+    }
+  }
+  
 }
 
 proc def_handlers {} {
@@ -63,6 +74,7 @@ proc def_handlers {} {
         } else {
           # TODO: maybe finish transactions
           assert {[:# $transactions] == 0}
+          set user "NONE"
         }
       }
       trans_start {
@@ -75,7 +87,7 @@ proc def_handlers {} {
         dict unset transactions [:transname $item]
       }
       user {
-        # TODO:
+        set user [:user $item]
       }
       eof {
         assert {[:# $transactions] == 0}
@@ -93,7 +105,7 @@ proc def_handlers {} {
         }
       }
       user {
-        # TODO:
+        set user [:user $item]
       }
       errorline {
         res_add res [make_error_ahk [add_sec_ts $item] $iteration $user]
@@ -142,7 +154,11 @@ proc make_trans_finished_ahk {item transactions iteration user} {
 
 proc split_transname {transname} {
   # TODO: straks andere transnames incl usecase, zonder nummers.
-  dict create usecase NONE transshort $transname
+  if {[regexp {^([^_]+)_(.+)$} $transname z usecase transshort]} {
+    vars_to_dict usecase transshort
+  } else {
+    dict create usecase NONE transshort $transname  
+  }
 }
 
 proc success_to_trans_status {success} {
