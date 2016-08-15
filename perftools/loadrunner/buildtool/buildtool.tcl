@@ -30,14 +30,17 @@ proc main {argv} {
 # [2016-08-10 21:11] TODO: later call this one 'handle_project_dir'. Not now, still confusing name.
 proc handle_script_dir {dir tname trest} {
   global as_prjgroup buildtool_env
-  if {($tname == "init") || ([current_version] == [latest_version])} {
+  if {([regexp {^init} $tname]) || ([current_version] == [latest_version])} {
     if {[file exists [buildtool_env_tcl_name]]} {
       uplevel #0 {source [buildtool_env_tcl_name]}
     } else {
-      puts "do bld init-env!"
-      return
+      if {$tname != "init_env"} {
+        puts "do bld init-env!"
+        return
+      }
     }
-    puts "env: $buildtool_env"
+    # [2016-08-15 09:40:44] even weg, bootstrap probleem
+    # puts "env: $buildtool_env"
     source_dir [file join [buildtool_dir] generic]
     if {$tname != "init"} {
       uplevel #0 {source [config_tcl_name]}
