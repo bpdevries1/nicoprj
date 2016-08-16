@@ -13,8 +13,19 @@ proc vuser_report {dir dbname opt} {
   }
   set report_made 0
   set db [get_results_db $dbname [:ssl $opt]]
+  # TODO: lokatie beter bepalen.
+  set conn [$db get_conn]
+  set handle [$conn getDBhandle]
+  $handle enable_load_extension 1
+  set perc_lib [file normalize ../../../nicoprj/lib/sqlite-functions/percentile]
+  log info "Loading percentile lib from: $perc_lib"
+  set res [$db query "select load_extension('$perc_lib')"]
   if {[:full $opt]} {
     vuser_report_full $db $dir
+    set report_made 1
+  }
+  if {[:summary $opt]} {
+    vuser_report_summary $db $dir
     set report_made 1
   }
   if {!$report_made} {
@@ -116,6 +127,79 @@ proc href_resources {db hh vuserid iteration user transname} {
   } else {
     join $hrefs "<br/>"  
   }
+}
+
+# create summary report with statistics.
+# maybe use user/script definitions for report, eg which fields to use as result of
+# split_trans. Could also check which fields have more than 1 different value, or are
+# not empty. Also (with eg newuser/revisit) could check if value varies during this
+# block/iteration: if so, make a column. If not, add above table.
+# TODO: add percentile, add percentile function to db.
+proc vuser_report_summary {db dir} {
+  set html_name [file join $dir "report-summary.html"]
+  if {[file exists $html_name]} {
+    # return ; # or maybe a clean option to start anew
+  }
+  io/with_file f [open $html_name w] {
+    set hh [ndv::CHtmlHelper::new]
+    $hh set_channel $f
+    $hh write_header "Vuser log report" 0
+    # TODO: table per usecase.
+    set query "select usecase, min(ts_start) min_ts from trans group by 1 order by 2"
+    foreach row [$db query $query] {
+      report_summary_usecase $db $hh $row
+    }
+    $hh write_footer
+  }
+}
+
+proc report_summary_usecase {db hh row} {
+  set usecase [:usecase $row]
+  $hh heading 1 "Usecase: $usecase"
+  $hh table_start
+  $hh table_header Transaction Minimum Average 95% Maximum Pass Fail
+  # TODO: first only total count, later diff pass/failed, need melt-function for this.
+  # TODO: make 95% column iff value > requirement (3 sec now). Something with SLA status/req in config.
+  set query "select transname, transshort, min(ts_start) min_ts, min(resptime) resptime_min, avg(resptime) resptime_avg,
+             max(resptime) resptime_max, count(*) trans_count, percentile(resptime, 95) perc95
+             from trans
+             where usecase = '$usecase'
+             and trans_status = 0
+             group by 1,2
+             order by 3, 1"
+  log debug "Query: $query"
+  foreach trow [$db query $query] {
+    $hh table_row [:transshort $trow] \
+        [:resptime_min $trow] \
+        [format %.3f [:resptime_avg $trow]] \
+        [format %.3f [:perc95 $trow]] [:resptime_max $trow] \
+        [:trans_count $trow] [count_trans_error $db $usecase [:transname $trow]]
+  }
+  # Also total for this usecase:
+  set query "select min(ts_start) min_ts, min(resptime) resptime_min, avg(resptime) resptime_avg,
+             max(resptime) resptime_max, count(*) trans_count, percentile(resptime, 95) perc95
+             from trans
+             where usecase = '[:usecase $row]'
+             and trans_status = 0"
+  set trow [:0 [$db query $query]]
+  $hh table_row "TOTAL" \
+      [:resptime_min $trow] \
+      [format %.3f [:resptime_avg $trow]] \
+      [format %.3f [:perc95 $trow]] [:resptime_max $trow] \
+      [:trans_count $trow] [count_trans_error $db $usecase "All"]
+  
+  $hh table_end
+}
+
+proc count_trans_error {db usecase transname} {
+  if {$transname == "All"} {
+    set query "select count(*) cnt from trans where usecase='$usecase' and trans_status <> 0"
+  } else {
+    set query "select count(*) cnt from trans where usecase='$usecase' and transname = '$transname' and trans_status <> 0"   
+  }
+ 
+  set res [$db query $query]
+  :cnt [:0 $res]
 }
 
 proc vuser_row_class {trow} {
