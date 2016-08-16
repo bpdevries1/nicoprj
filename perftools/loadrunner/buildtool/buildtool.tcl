@@ -49,14 +49,14 @@ proc handle_script_dir {dir tname trest} {
   uplevel #0 {source [buildtool_env_tcl_name]}
   if {[current_version] == [latest_version]} {
     # ok, normal situation.
-    if {[info proc task_$tname] == {}} {
-      puts "Unknown task: $tname"
-      return
-    }
     assert {[file exists [config_tcl_name]]}
     source_dir [file join [buildtool_dir] generic]
     uplevel #0 {source [config_tcl_name]}
     source_prjtype;             # load prjtype dependent tasks
+    if {[info proc task_$tname] == {}} {
+      puts "Unknown task: $tname"
+      return
+    }
     set as_prjgroup 0
     set_origdir ; # to use by all subsequent tasks.
     task_$tname {*}$trest
