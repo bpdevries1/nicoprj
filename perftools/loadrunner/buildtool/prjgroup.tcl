@@ -30,6 +30,7 @@ task prjgroup {Define and use project groups
 }
 
 # [2016-08-10 21:07] very simple now, just see if a current.prjgroup exists.
+# independent from config/vars.
 proc is_prjgroup_dir {dir} {
   file exists [file join $dir current.prjgroup]
 }

@@ -7,6 +7,8 @@ require libdatetime dt
 
 use libmacro
 
+# [2016-08-16 20:09] In general, procs here should not be dependent on configfile/var existence. Always check, and do as much as possible without config settings.
+
 # TODO: add type parameter, and only write stuff to config for certain types, eg lr_include_dir.
 task init {Initialise project/script
   Also update config to latest version.  
@@ -41,6 +43,7 @@ proc latest_version {} {
   return 3
 }
 
+# config/vars independent
 proc current_version {} {
   # first try to read it from .bld/.configversion
   set version_filename [version_file]
@@ -58,24 +61,35 @@ proc current_version {} {
 }
 
 # [2016-07-30 12:17] maybe change, if tool name changes, so one place to change then.
+# [2016-08-16 20:17] independent of configs/vars.
 proc config_dir {} {
   return ".bld"
 }
 
+# [2016-08-16 20:17] config/var independent
 proc config_tcl_name {} {
   file join [config_dir] "config.tcl"
 }
 
+# [2016-08-16 20:20] independent of config/vars, but returns empty string when
+# buildtool_env not set.
 proc config_env_tcl_name {} {
   global buildtool_env
-  file join [config_dir] "config-${buildtool_env}.tcl"
+  if {[info exists buildtool_env]} {
+    file join [config_dir] "config-${buildtool_env}.tcl"    
+  } else {
+    puts "WARN: buildtool_env var does not exist, should run bld init"
+    return ""
+  }
 }
 
+# [2016-08-16 20:21] config/vars independent.
 proc version_file {} {
   file join [config_dir] .configversion
 }
 
 # TODO: also update .gitignore with .base and _orig paths, but should be in hook for git package.
+# [2016-08-16 20:13] Independent from config/vars
 proc init_from_scratch {} {
   set cfgdir [config_dir]
   file mkdir $cfgdir
@@ -83,6 +97,7 @@ proc init_from_scratch {} {
   set_config_version [latest_version]
 }
 
+# [2016-08-16 20:13] Independent from config/vars
 proc init_update {from to} {
   while {$from < $to} {
     set from [init_update_from_$from]
@@ -90,6 +105,7 @@ proc init_update {from to} {
   set_config_version $to
 }
 
+# [2016-08-16 20:13] Independent from config/vars
 proc init_update_from_1 {} {
   init_from_scratch
   if {[file exists ".base"]} {
@@ -101,6 +117,7 @@ proc init_update_from_1 {} {
   return 2
 }
 
+# [2016-08-16 20:14] config/vars independent.
 proc init_update_from_2 {} {
   # TODO: read config, add env parts
   set config_name [config_tcl_name]
@@ -112,15 +129,15 @@ proc init_update_from_2 {} {
   return 3
 }
 
-# TODO: set to v3, source env things
+# set to v3, source env things
+# [2016-08-16 20:15] config/vars independent.
 proc make_config_tcl {} {
   set config_name [config_tcl_name]
   if {[file exists $config_name]} {
     puts "Config file already exists: $config_name"
+    # TODO: ? check if config is complete?
     return
   }
-  # TODO: also with syntax_quote, is cleaner.
-  # [2016-08-10 22:55] TODO: global not needed anymore, source is done at global level now.
   set now [dt/now]
   set config_v3 [get_config_v3]
   write_file $config_name [format_code [syntax_quote {# config.tcl generated ~@$now
@@ -131,27 +148,37 @@ proc make_config_tcl {} {
   make_config_env_tcl
 }
 
+# [2016-08-16 20:26] should be config/vars independent now.
+# [2016-08-16 20:31] did some tests with empty env, works now.
 proc make_config_env_tcl {} {
   set filename [config_env_tcl_name]
-  if {[file exists $filename]} {
-    puts "File already exists: $filename"
+  if {$filename != ""} {
+    if {[file exists $filename]} {
+      puts "File already exists: $filename"
+      return
+    }
+    write_file $filename [format_code {set testruns_dir {<FILL IN>}
+      set lr_include_dir [det_lr_include_dir]
+    }]
+  } else {
+    puts "Name of config_env_tcl_name (like .bld/config-<pcname>.tcl) is not set"
+    puts "Run bld init -update"
     return
   }
-  write_file $filename [format_code {set testruns_dir {<FILL IN>}
-    set lr_include_dir [det_lr_include_dir]
-  }]
 }
 
 # TODO: need code formatting tool.
 # simple code format by counting braces per line might work.
+# [2016-08-16 20:23] config/vars independent.
 proc get_config_v3 {} {
   return [format_code {set config_env_tcl_name [config_env_tcl_name]
-    if {[file exists $config_env_tcl_name]} {
+    if {($config_env_tcl_name != "") && [file exists $config_env_tcl_name]} {
       source $config_env_tcl_name
     }
   }]
 }
 
+# [2016-08-16 20:22] config/vars independent.
 proc set_config_version {version} {
   write_file [version_file] $version
 }
@@ -171,6 +198,7 @@ proc det_lr_include_dir {} {
   return ""
 }
 
+# this one should be independent of existing config files or vars.
 task init_env {initialise environment
   by creating a ~/.config/buildtool/env.tcl file,
   with buildtool_env var default set to hostname
@@ -181,11 +209,12 @@ task init_env {initialise environment
     return
   }
   file mkdir [file dirname $filename]
-  set hostname [det_hostname]
+  set hostname [det_hostname];  # in ndv lib, so not dependent on config files/vars.
   write_file $filename [syntax_quote {set buildtool_env ~$hostname}]
+  puts "Wrote env config file: $filename"
 }
 
-
+# this one completely independent of settings and vars.
 proc buildtool_env_tcl_name {} {
   file normalize [file join ~ .config buildtool env.tcl]
 }

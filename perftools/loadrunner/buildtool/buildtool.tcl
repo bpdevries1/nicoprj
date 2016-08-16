@@ -16,6 +16,8 @@ proc main {argv} {
   set tname [task_name [lindex $argv 0]]
   if {$tname == ""} {set tname help}
   set trest [lrange $argv 1 end]
+  handle_init_env $tname $trest
+  # here the env config file is available: ~/.config/buildtool/env.tcl 
   if {[in_bld_subdir? $dir]} {
     puts "In buildtool subdir, exiting: $dir"
     return
@@ -27,8 +29,48 @@ proc main {argv} {
   }
 }
 
+proc handle_init_env {tname trest} {
+  if {![file exists [buildtool_env_tcl_name]]} {
+    if {$tname == "init_env"} {
+      task_init_env 
+    } else {
+      puts "File does not exist: [buildtool_env_tcl_name]"
+      puts "Initialise env with init-env task"
+    }
+    exit
+  }
+}
+
 # [2016-08-10 21:11] TODO: later call this one 'handle_project_dir'. Not now, still confusing name.
+# @pre - [buildtool_env_tcl_name] exists
 proc handle_script_dir {dir tname trest} {
+  global as_prjgroup buildtool_env
+  assert {[file exists [buildtool_env_tcl_name]]}
+  uplevel #0 {source [buildtool_env_tcl_name]}
+  if {[current_version] == [latest_version]} {
+    # ok, normal situation.
+    if {[info proc task_$tname] == {}} {
+      puts "Unknown task: $tname"
+      return
+    }
+    assert {[file exists [config_tcl_name]]}
+    source_dir [file join [buildtool_dir] generic]
+    uplevel #0 {source [config_tcl_name]}
+    source_prjtype;             # load prjtype dependent tasks
+    set as_prjgroup 0
+    set_origdir ; # to use by all subsequent tasks.
+    task_$tname {*}$trest
+    mark_backup $tname $trest
+    check_temp_files
+  } elseif {$tname == "init"} {
+    task_$tname {*}$trest
+  } else {
+    puts "Update config version with init -update"
+    exit
+  }
+}
+
+proc handle_script_dir_old {dir tname trest} {
   global as_prjgroup buildtool_env
   if {([regexp {^init} $tname]) || ([current_version] == [latest_version])} {
     if {[file exists [buildtool_env_tcl_name]]} {
@@ -60,6 +102,7 @@ proc handle_script_dir {dir tname trest} {
   }
 }
 
+
 # source all tcl files in bldprjlib iff defined.
 proc source_prjtype {} {
   global bldprjlib
@@ -89,6 +132,7 @@ proc buildtool_dir {} {
 }
 
 # return true iff dir is .bld dir or subdir of this.
+# independent from config/var.
 proc in_bld_subdir? {dir} {
   foreach el [file split $dir] {
     if {$el == ".bld"} {
