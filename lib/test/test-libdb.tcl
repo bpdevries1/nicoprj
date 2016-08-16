@@ -1,4 +1,4 @@
-#!/usr/bin/env tclsh861
+#!/usr/bin/env tclsh
 
 # test-libdb.tcl - test functionality of libdb.tcl, especially user defined functions in sqlite.
 
@@ -52,8 +52,9 @@ testndv {
   global db handle
   set res [$db query "select val, pi(val) pi from testtbl where val=11"]
   set qpi [:pi [:0 $res]]
-  = $qpi [pi]
-} 1
+  # = $qpi [pi]
+  return $qpi
+} [pi]
 
 # Tcl functions in DB don't work as aggregate functions.
 # [2016-05-27 20:59] this does not work, iden(val) gives 15, val of the last record.
