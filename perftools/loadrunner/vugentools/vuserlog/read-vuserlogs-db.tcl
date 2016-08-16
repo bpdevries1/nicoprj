@@ -541,6 +541,8 @@ proc define_tables {db ssl} {
   $db add_tabledef error_iter {id} [concat $logfile_fields script \
                                         iteration user errortype]
 
+  $db add_tabledef resource {id} [concat $logfile_fields $line_fields user transname resource]
+  
   if {$ssl} {
     ssl_define_tables $db  
   }
