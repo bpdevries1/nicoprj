@@ -101,7 +101,7 @@ proc vuser_report_full {db dir} {
 }
 
 proc vuser_report_iter_user {db row hh} {
-  $hh heading 1 "Logfile: [file tail [:logfile $row]], Iteration: [:iteration_start $row] / usecase: [:usecase $row] / user: [:user $row][vuser_str $row]"
+  $hh heading 1 "Logfile: [file tail [:logfile $row]] / Iteration: [:iteration_start $row] / usecase: [:usecase $row] / user: [:user $row][vuser_str $row]"
   $hh line "[:ts_min $row] => [:ts_max $row]"
   # $hh table body ook leuk? Ook vgl clojure/hiccup.
   $hh table_start
