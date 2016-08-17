@@ -74,9 +74,13 @@ proc def_parsers {} {
     if {[regexp {^([^ ]+)\((\d+)\): (Continuing after )?Error ?([0-9-]*): (.*)$} $line z srcfile srclinenr z errornr rest]} {
       # [2016-08-07 13:24] ignore user field (z_user) returned from det_error_details, too specific and already have in trans_line.
       lassign [det_error_details $rest] errortype z_user level details
+      log debug "Parsed errorline, returning: $srcfile/$srclinenr/$linenr: $line"
       return [vars_to_dict srcfile srclinenr errornr errortype details line]
     } elseif {[regexp {: Error: } $line]} {
       log error "Error line in log, but could not parse: $line"
+      breakpoint
+    } elseif {[regexp {Continuing after Error} $line]} {
+      log error "Continuing after Error found, but could not parse: $line"
       breakpoint
     } else {
       return ""      
@@ -132,13 +136,17 @@ proc def_handlers {} {
           }
           1 {
             # synthetic error, just insert.
+            # [2016-08-17 15:07:08] could also have a start trans (-1) for this, so also dict unset.
             res_add res [make_trans_error $item]
+            dict unset started_transactions [:transname $item]
           }
           4 {
             # functional warning, eg. no FT's available to approve.
             # [2016-08-12 20:46] possibly also call make_trans_error here,
             # but no logfile to test with here. Check status (should be 4)
             res_add res [make_trans_finished $item $started_transactions]
+            # [2016-08-17 15:07:45] also dict unset just to be sure:
+            dict unset started_transactions [:transname $item]
           }
           default {
             error "Unknown transaction status: [:trans_status $item]"
@@ -156,10 +164,11 @@ proc def_handlers {} {
       }
       errorline {
         # set res [dict merge $trans_line_item $item]
+        log debug "def_handler/errorline found: $item"
         res_add res [dict merge $trans_line_item $item]
       }
     }
-    set item [yield $res]
+    # set item [yield $res]
   }
   
   # [2016-08-09 22:29] introduced a bug here by not calling split_proc in insert-trans_line

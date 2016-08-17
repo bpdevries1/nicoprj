@@ -1,5 +1,8 @@
 #!/usr/bin/env tclsh861
 
+# [2016-08-17 09:47:56] Version for vugen logs.
+# TODO: integrate/merge with version for AHK logs (also JMeter?)
+
 package require ndv
 package require tdbc::sqlite3
 
@@ -7,6 +10,7 @@ ndv::source_once ssl.tcl pubsub.tcl read-vuserlogs-db-coro.tcl
 
 # [2016-07-09 10:09] for parse_ts and now:
 use libdatetime
+use libfp
 
 # Note:
 # [2016-02-08 11:13:55] Bug - when logfile contains 0-bytes (eg in Vugen output.txt with log webregfind for PDF/XLS), the script sees this as EOF and misses transactions and errors. [2016-07-09 10:12] this should be solved by reading as binary.
@@ -570,8 +574,17 @@ proc delete_database {dbname} {
 # usecase, revisit, transid, transshort, searchcrit
 # TODO: this one now in two places, also .bld/config.tcl
 proc split_transname {transname} {
-  regexp {^([^_]+)_(.+)$} $transname z usecase transshort
-  dict create usecase $usecase transshort $transshort
+  if {[regexp {^([^_]+)_(.+)$} $transname z usecase transshort]} {
+    if {[regexp {^\d+$} $usecase]} {
+      # [2016-08-17 10:35:22] TODO: hack now: if usecase contains only digits, it probably isn't a usecase, just return as transname
+      dict create usecase "all" transshort $transname
+    } else {
+      dict create usecase $usecase transshort $transshort    
+    }
+  } else {
+    # [2016-08-17 09:53:29] if regexp fails, set transshort to transname.
+    dict create usecase "all" transshort $transname
+  }
 }
 
 # mainly used for quicker testing of fill_table_trans

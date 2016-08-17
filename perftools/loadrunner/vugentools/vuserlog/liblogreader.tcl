@@ -110,17 +110,31 @@ proc handle_parsers {to_publish logfile line linenr} {
       $to_publish put $res
     }
   }
+  if {$linenr == 2279} {
+    puts "Line 2279, error line."
+    # breakpoint
+  }
 }
 
-proc handle_to_publish {to_publish } {
+proc handle_to_publish {to_publish} {
   global handlers; # dict key=in-topic, value = list of [dict topic coro_name]
   while {[$to_publish size] > 0} {
     set item [$to_publish get]
     set topic [:topic $item]
+    if {$topic == "errorline"} {
+      log debug "handling topic errorline: $item"
+    }
     # could be there are no handlers for a topic, eg eof-topic. So use dict_get.
     foreach handler [dict_get $handlers $topic] {
+      if {$topic == "errorline"} {
+        log debug "in foreach handler of errorline."
+        # breakpoint
+      }
       set res [[:coro_name $handler] $item]
       foreach el $res {
+        if {$topic == "errorline"} {
+          log debug "Adding new item: $el"
+        }
         $to_publish put [add_topic $el [:topic $handler]]
       }
     }
