@@ -20,8 +20,13 @@ if {$tcl_version >= 8.6} {
   puts "Don't load sqlite, tcl version too low: $tcl_version"
 }
 
+set libdb_scriptdir [file normalize [file dirname [info script]]]
+
 oo::class create dbwrapper {
 
+  # class var, set when loading class
+  # TODO: [2016-08-17 10:19:21] check how to use class vars, not trivial apparently
+  
   # @doc usage: set conn [dbwrapper new <sqlitefile.db]
   # @doc usage: set conn [dbwrapper new -db <mysqldbname> -user <user> -password <pw>]
   constructor {args} {
@@ -273,6 +278,20 @@ oo::class create dbwrapper {
   method function {fn_name}   {
     [my get_db_handle] function $fn_name $fn_name
   }
+
+  # load external c library. For now, only percentile function
+  # path location (relative) is an issue.
+  method load_percentile {} {
+    global libdb_scriptdir
+    [my get_db_handle] enable_load_extension 1
+    # set ext_path ../sqlite-functions/percentile
+    # set ext_path [file join [file dirname [info script]] sqlite-functions percentile]
+    set ext_path [file join $libdb_scriptdir sqlite-functions percentile]
+    # breakpoint
+    # TODO: ? check if extension already loaded? or keep flag in this db object.
+    my query "select load_extension('$ext_path')"
+  }
+  
 }
 
 # proc breakpoint_dummy {} {

@@ -94,6 +94,7 @@ proc install_to_dir {lib_install} {
   copy_dir $lib_install .
   copy_dir $lib_install db
   copy_dir $lib_install js *
+  copy_dir $lib_install sqlite-functions *
 }
 
 proc get_dropbox_dir {} {
