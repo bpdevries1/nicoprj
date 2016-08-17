@@ -1,10 +1,46 @@
 #!/usr/bin/env tclsh
 
+package require ndv
+
+set_log_global debug
+
 # create html report based on vuser results read into sqlite DB.
 # TODO: call directly, for PC/ALM tests.
 # first only based on output.txt in vugen script dir.
 
+# TODO: move location of tools, then also these source paths.
+ndv::source_once ../vuserlog/read-vuserlogs-db.tcl
+
+# use libns
 require libio io
+
+proc main {argv} {
+  set options {
+    {dir.arg "" "Directory with vuserlog files"}
+    {all "Create all reports (full and summary)"}
+    {full "Create full report"}
+    {summary "Create summary report"}
+    {ssl "Use SSL lines in log (not used)"}
+  }
+  set usage ": [file tail [info script]] \[options] :"
+  set opt [getoptions argv $options $usage]
+
+  set subdir [:dir $opt]
+
+  report_dir $subdir $opt
+}
+
+proc report_dir {dir opt} {
+  set dbname [file join $dir vuserlog.db]
+  if {![file exists $dbname]} {
+    log info "New dir: read logfiles: $dir"
+    # file delete $dbname
+    read_logfile_dir $dir $dbname 0 split_transname
+  } else {
+    log debug "Already read: $dir -> $dbname"
+  }
+  vuser_report $dir $dbname $opt
+}
 
 proc vuser_report {dir dbname opt} {
   puts "TODO - make report in dir: $dir with opt: $opt"
@@ -14,12 +50,15 @@ proc vuser_report {dir dbname opt} {
   set report_made 0
   set db [get_results_db $dbname [:ssl $opt]]
   # TODO: lokatie beter bepalen.
-  set conn [$db get_conn]
-  set handle [$conn getDBhandle]
-  $handle enable_load_extension 1
-  set perc_lib [file normalize ../../../nicoprj/lib/sqlite-functions/percentile]
-  log info "Loading percentile lib from: $perc_lib"
-  set res [$db query "select load_extension('$perc_lib')"]
+  if 0 {
+    set conn [$db get_conn]
+    set handle [$conn getDBhandle]
+    $handle enable_load_extension 1
+    set perc_lib [file normalize ../../../nicoprj/lib/sqlite-functions/percentile]
+    log info "Loading percentile lib from: $perc_lib"
+    set res [$db query "select load_extension('$perc_lib')"]
+  }
+  $db load_percentile
   if {[:full $opt]} {
     vuser_report_full $db $dir
     set report_made 1
@@ -48,11 +87,12 @@ proc vuser_report_full {db dir} {
     set hh [ndv::CHtmlHelper::new]
     $hh set_channel $f
     $hh write_header "Vuser log report" 0
-    set query "select vuserid, iteration_start, usecase, user,
+    # [2016-08-17 12:28:11] check both logfile and vuserid
+    set query "select logfile, vuserid, iteration_start, usecase, user,
                min(ts_start) ts_min, max(ts_end) ts_max
                from trans
-               group by 1,2,3,4
-               order by 1,2,5"
+               group by 1,2,3,4,5
+               order by 1,2,3,6"
     foreach row [$db query $query] {
       vuser_report_iter_user $db $row $hh
     }
@@ -61,7 +101,7 @@ proc vuser_report_full {db dir} {
 }
 
 proc vuser_report_iter_user {db row hh} {
-  $hh heading 1 "Iteration: [:iteration_start $row] / usecase: [:usecase $row] / user: [:user $row][vuser_str $row]"
+  $hh heading 1 "Logfile: [file tail [:logfile $row]], Iteration: [:iteration_start $row] / usecase: [:usecase $row] / user: [:user $row][vuser_str $row]"
   $hh line "[:ts_min $row] => [:ts_max $row]"
   # $hh table body ook leuk? Ook vgl clojure/hiccup.
   $hh table_start
@@ -72,6 +112,7 @@ proc vuser_report_iter_user {db row hh} {
              where vuserid = [:vuserid $row] + 0
              and iteration_start = [:iteration_start $row] + 0
              and user = '[:user $row]'
+             and logfile = '[:logfile $row]'
              order by ts_start"
   log debug "Query: $query"
   foreach trow [$db query $query] {
@@ -91,6 +132,7 @@ proc vuser_report_iter_user {db row hh} {
              where vuserid = [:vuserid $row] + 0
              and iteration = [:iteration_start $row] + 0
              and user = '[:user $row]'
+             and logfile = '[:logfile $row]'
              order by ts"
   set res [$db query $query]
   if {[:# $res] > 0} {
@@ -243,4 +285,8 @@ proc status_text {trow} {
 
 proc time_part {ts} {
   lindex [split $ts " "] 1
+}
+
+if {[this_is_main]} {
+  main $argv
 }
