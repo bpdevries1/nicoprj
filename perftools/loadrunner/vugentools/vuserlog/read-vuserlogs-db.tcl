@@ -3,6 +3,8 @@
 # [2016-08-17 09:47:56] Version for vugen logs.
 # TODO: integrate/merge with version for AHK logs (also JMeter?)
 
+# bla generate error
+
 package require ndv
 package require tdbc::sqlite3
 
@@ -42,6 +44,8 @@ proc main {argv} {
 
   read_logfile_dir $logdir $dbname $ssl
 }
+
+log debug "Defining read_logfile_dir, vugen version."
 
 proc read_logfile_dir {logdir dbname ssl {split_proc split_transname}} {
   global pubsub

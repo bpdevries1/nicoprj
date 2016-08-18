@@ -3,12 +3,15 @@
 ndv::source_once ../../../autohotkey/ahklog/read-ahklogs-db.tcl
 ndv::source_once ../../vugentools/vuser-report/vuser-report.tcl
 
+# [2016-08-18 15:02:30] Version for AHK
+
 task report {Create report of output.txt in script dir
   Copy output.txt to testruns dir, call perftools/autohotkey/ahklog/read-ahklogs-db.tcl
   and create html report.
 } {{summary "Create summary report, with aggregate times and errors"}
   {full "Create full report, with each iteration/transaction."}
   {all "Both summary and full"}
+  {ssl "SSL report (unused)"}
 } {
   global testruns_dir
   if {[regexp {<FILL IN>} $testruns_dir]} {
@@ -16,7 +19,8 @@ task report {Create report of output.txt in script dir
     return
   }
   # opt available
-
+  log debug "Report for AHK"
+  
   # first copy output.txt to restruns dirs, iff not already done.
   set logfilename output2/logfile.txt
   if {![file exists $logfilename]} {
@@ -36,7 +40,7 @@ task report {Create report of output.txt in script dir
   
   # then call read_logfile_dir; idempotency should already be arranged by read_logfile_dir
   set dbname [file join $subdir "ahklog.db"]
-  read_logfile_dir $subdir $dbname
+  read_logfile_dir_ahk $subdir $dbname
 
   # and finally make the report.
   vuser_report $subdir $dbname $opt

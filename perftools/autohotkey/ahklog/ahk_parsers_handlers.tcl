@@ -1,11 +1,11 @@
 # separate function, to be called once, even when handling multiple log files.
-proc define_logreader_handlers {} {
+proc define_logreader_handlers_ahk {} {
   log info "define_logreader_handlers: start"
-  def_parsers
-  def_handlers
+  def_parsers_ahk
+  def_handlers_ahk
 }
 
-proc def_parsers {} {
+proc def_parsers_ahk {} {
 
   # TODO: timestamp deel in de regexp los definieren? Alternatief is parser voor logline maken en rest met handlers. Voor beide wat te zeggen.
   def_parser_regexp_ts iter_start_finish {\[iter\] ([^ ]+) iteration: (\d+)} \
@@ -40,7 +40,7 @@ proc def_parser_regexp_ts {topic re args} {
   def_parser_regexp $topic "$re_ts $re" ts {*}$args
 }
 
-proc def_handlers {} {
+proc def_handlers_ahk {} {
 
   def_handler {iter_start_finish user trans_start trans_finish eof} trans {
     set transactions [dict create]

@@ -3,6 +3,8 @@
 package require ndv
 package require tdbc::sqlite3
 
+# [2016-08-18 15:06:00] AHK version, as stated in name.
+
 # TODO: move this lib to a more central place: perftools/logreader?
 ndv::source_once ../../loadrunner/vugentools/vuserlog/liblogreader.tcl
 ndv::source_once ahk_parsers_handlers.tcl
@@ -37,19 +39,21 @@ proc main {argv} {
     delete_database $dbname
   }
 
-  read_logfile_dir $logdir $dbname
+  read_logfile_dir_ahk $logdir $dbname
 }
 
-proc read_logfile_dir {logdir dbname} {
+log debug "Define read_logfile_dir, AHK version"
+
+proc read_logfile_dir_ahk {logdir dbname} {
   # [2016-08-06 12:09] main is not always entry-point, so call define here.
-  define_logreader_handlers
+  define_logreader_handlers_ahk
   
   # TODO mss pubsub nog eerder zetten als je read-vuserlogs-dir.tcl gebruikt.
-  set db [get_results_db $dbname]
+  set db [get_results_db_ahk $dbname]
   # $db insert read_status [dict create ts [now] status "starting"]
   add_read_status $db "starting"
   set nread 0
-  set db [get_results_db $dbname]
+  set db [get_results_db_ahk $dbname]
   set logfiles [concat [glob -nocomplain -directory $logdir *.log] \
                     [glob -nocomplain -directory $logdir *.txt]]
   set pg [CProgressCalculator::new_instance]
@@ -110,12 +114,12 @@ proc det_project_runid_script {logfile} {
 
 # deze mogelijk in libdb:
 # args needed for call from vugen vuser_report proc.
-proc get_results_db {db_name args} {
+proc get_results_db_ahk {db_name args} {
   global pubsub
   #breakpoint
   set existing_db [file exists $db_name]
   set db [dbwrapper new $db_name]
-  define_tables $db
+  define_tables_ahk $db
   $db create_tables 0 ; # 0: don't drop tables first. Always do create, eg for new table defs. 1: drop tables first.
   if {!$existing_db} {
     log info "New db: $db_name, create tables"
@@ -129,7 +133,7 @@ proc get_results_db {db_name args} {
 }
 
 # [2016-08-12 21:21] define as similar as possible to vugen log db.
-proc define_tables {db} {
+proc define_tables_ahk {db} {
   # [2016-07-31 12:01] sec_ts is a representation of a timestamp in seconds since the epoch
   $db def_datatype {sec_ts resptime} real
   $db def_datatype {.*id filesize .*linenr.* trans_status iteration.*} integer

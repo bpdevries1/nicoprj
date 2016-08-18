@@ -1,5 +1,8 @@
 # TODO: need to put this setting/location somewhere. This could be a user
 # setting in ~/.config/buildtool, next to location of eg R binary.
+
+# [2016-08-18 15:01:52] Version for VuGen
+
 ndv::source_once ../../vugentools/vuserlog/read-vuserlogs-db.tcl
 ndv::source_once ../../vugentools/vuser-report/vuser-report.tcl
 
@@ -17,7 +20,8 @@ task report {Create report of output.txt in script dir
     return
   }
   # opt available
-
+  log debug "Report for VuGen"
+  
   # first copy output.txt to restruns dirs, iff not already done.
   if {![file exists output.txt]} {
     puts "WARN: no output.txt found"
