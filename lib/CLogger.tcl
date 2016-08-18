@@ -185,8 +185,17 @@ namespace eval ::ndv {
 # set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 # set log [::ndv::CLogger::new_logger [file tail $argv0] debug]
 
+# set global log object to be used by global log proc.
+# if already set, don't set again.
 proc set_log_global {level {options {}}} {
   global log tcl_platform
+  puts "set_log_global called with level: $level"
+  # info vars cannot be used to check for existency, as it is already visible by using global log
+  if {![catch {set log}]} {
+    #puts "set_log_global already done, returning."
+    #puts "info vars log: [info vars log]"
+    return
+  }
   if {[:showfilename $options] == 0} {
     set log [::ndv::CLogger::new_logger "" $level]
   } else {
