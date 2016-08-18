@@ -1,5 +1,7 @@
 #!/usr/bin/env tclsh
 
+# TODO: [2016-08-18 13:15:36] version for vugen, integrate with version for AHK.
+
 # [2016-08-06 11:31] At first a new file with coroutine implementation for reading logs.
 # for now keep side-by-side with orig (working!) version.
 
@@ -86,6 +88,17 @@ proc def_parsers {} {
       return ""      
     }
   }
+
+  def_parser errorline {
+    # functions.c(399): [2016-08-18 13:11:19.310] ERROR - Did not find: Text=XXXhas been saved but not released to the bank [08/18/16 13:11:19]
+    if {[regexp {^([^ ]+)\((\d+)\): .* ERROR - (.+)$} $line z srcfile srclinenr details]} {
+      return [vars_to_dict srcfile srclinenr details line]
+    } else {
+      return ""
+    }
+  
+  }
+
 }
 
 # functions.c(377): [2016-07-29 16:48:22.368] trans=maker_landing, user=Silver3, resptime=-1.000, status=-1, iteration=1 [07/29/16 16:48:22]
