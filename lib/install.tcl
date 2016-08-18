@@ -108,7 +108,7 @@ proc get_dropbox_dir {} {
 
 proc copy_dir {lib_install subdir {pattern *.tcl}} {
   file mkdir [file join $lib_install $subdir]
-  foreach filename [glob -directory $subdir $pattern] {
+  foreach filename [glob -directory $subdir -type f $pattern] {
     puts "copy $filename => $lib_install/$subdir"
     file copy -force $filename [file join $lib_install $subdir]
   }
