@@ -200,15 +200,14 @@ proc report_summary_usecase {db hh row} {
   $hh heading 1 "Usecase: $usecase"
   $hh table_start
   $hh table_header Transaction Minimum Average 95% Maximum Pass Fail
-  # TODO: first only total count, later diff pass/failed, need melt-function for this.
-  # TODO: make 95% column iff value > requirement (3 sec now). Something with SLA status/req in config.
+  # TODO: make 95% column red iff value > requirement (3 sec now). Something with SLA status/req in config.
   set query "select transname, transshort, min(ts_start) min_ts, min(resptime) resptime_min, avg(resptime) resptime_avg,
              max(resptime) resptime_max, count(*) trans_count, percentile(resptime, 95) perc95
              from trans
              where usecase = '$usecase'
              and trans_status = 0
              group by 1,2
-             order by 3, 1"
+             order by 3,1"
   log debug "Query: $query"
   foreach trow [$db query $query] {
     $hh table_row [:transshort $trow] \
@@ -216,6 +215,23 @@ proc report_summary_usecase {db hh row} {
         [format %.3f [:resptime_avg $trow]] \
         [format %.3f [:perc95 $trow]] [:resptime_max $trow] \
         [:trans_count $trow] [count_trans_error $db $usecase [:transname $trow]]
+  }
+  # Transactions with only errors, mostly synthetic transactions
+  set query "select transname, transshort, min(ts_start) min_ts, count(*) nerror
+             from trans t1
+             where usecase = '$usecase'
+             and trans_status <> 0
+             and not transname in (
+               select transname
+               from trans
+               where usecase = '$usecase'
+               and trans_status = 0
+             )
+             group by 1,2
+             order by 3,1"
+
+  foreach trow [$db query $query] {
+    $hh table_row [:transshort $trow] 0 0 0 0 0 [:nerror $trow]
   }
   # Also total for this usecase:
   set query "select min(ts_start) min_ts, min(resptime) resptime_min, avg(resptime) resptime_avg,
