@@ -19,7 +19,7 @@ namespace eval ::ndv {
     # processing to support the -rsrc and -encoding options
     # that [::source] provides (or will in Tcl 8.5)
     variable sources
-    
+    set res ""
     # debugging info
     # puts "source_once: info script: [info script]"
     # [2016-08-19 12:59] ok, put whole path in sources list/array.
@@ -33,10 +33,11 @@ namespace eval ::ndv {
       # We don't know what command is [source] in the caller's context,
       # so fully qualify to get the [::source] we want.
       # uplevel 1 [list ::source $file_norm]
-      uplevel $uplevel [list ::source $file_norm]
+      set res [uplevel $uplevel [list ::source $file_norm]]
       # mark it as loaded since it was source'd with no error...
       set sources($file_norm) 1
     }
+    return $res
   }
 
   proc source_once_old {file} {
