@@ -189,7 +189,7 @@ namespace eval ::ndv {
 # if already set, don't set again.
 proc set_log_global {level {options {}}} {
   global log tcl_platform
-  puts "set_log_global called with level: $level"
+  # puts "set_log_global called with level: $level"
   # info vars cannot be used to check for existency, as it is already visible by using global log
   if {![catch {set log}]} {
     #puts "set_log_global already done, returning."
