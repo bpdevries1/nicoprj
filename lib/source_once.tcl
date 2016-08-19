@@ -22,6 +22,7 @@ namespace eval ::ndv {
     
     # debugging info
     # puts "source_once: info script: [info script]"
+    # [2016-08-19 12:59] ok, put whole path in sources list/array.
     set file_norm [file normalize [file join [file dirname [info script]] $file]]
     
     if {![info exists sources($file_norm)]} {
