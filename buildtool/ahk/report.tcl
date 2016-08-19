@@ -5,7 +5,10 @@
 
 # call read_report_run_dir
 # TODO: better way to find perftools_dir, maybe in config-env.
-set perftools_dir [file normalize [file join [file dirname [info script]] .. .. ..]]
+# TODO: maybe a lib tool to find it relative somewhere to the script dir.
+set perftools_dir [file normalize [file join \
+                                       [file dirname [info script]] .. .. perftools]]
+
 source [file join $perftools_dir report read-report-dir.tcl]
 # [2016-08-18 15:02:30] Version for AHK
 

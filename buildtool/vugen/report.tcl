@@ -7,7 +7,8 @@
 #ndv::source_once ../../vugentools/vuser-report/vuser-report.tcl
 
 # TODO: better way to find perftools_dir, maybe in config-env.
-set perftools_dir [file normalize [file join [file dirname [info script]] .. .. ..]]
+set perftools_dir [file normalize [file join \
+                                       [file dirname [info script]] .. .. perftools]]
 source [file join $perftools_dir report read-report-dir.tcl]
 
 task report {Create report of output.txt in script dir
