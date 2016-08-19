@@ -11,7 +11,14 @@
 #   - this one calls readlogfile_coro, as defined in liblogreader.tcl, not here.
 
 package require ndv
-ndv::source_once liblogreader.tcl
+# ndv::source_once liblogreader.tcl
+
+set perftools_dir [file normalize [file join [file dirname [info script]] .. ..]]
+
+# TODO: use source_once with absolute path?
+source [file join $perftools_dir logdb liblogreader.tcl]
+source [file join $perftools_dir logdb librunlogreader.tcl]
+
 
 require libdatetime dt
 require libio io
