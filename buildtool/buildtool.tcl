@@ -12,6 +12,11 @@ ndv::source_once task.tcl prjgroup.tcl prjtype.tcl \
     lib/inifile.tcl lib/misc.tcl init.tcl
 
 proc main {argv} {
+  global log
+  if {[lsearch -exact $argv "-debug"] >= 0} {
+    $log set_log_level debug
+    lremove argv -debug
+  }
   set dir [file normalize .]
   set tname [task_name [lindex $argv 0]]
   if {$tname == ""} {set tname help}
@@ -28,6 +33,15 @@ proc main {argv} {
     handle_script_dir $dir $tname $trest
   }
 }
+
+# TODO: move to ndv lib.
+# 8-5-2016 from tclhelp
+proc lremove {listVariable value} {
+  upvar 1 $listVariable var
+  set idx [lsearch -exact $var $value]
+  set var [lreplace $var $idx $idx]
+}
+
 
 proc handle_init_env {tname trest} {
   if {![file exists [buildtool_env_tcl_name]]} {
