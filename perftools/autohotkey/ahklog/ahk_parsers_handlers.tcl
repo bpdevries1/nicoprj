@@ -47,6 +47,8 @@ proc def_handlers_ahk {} {
     set transactions [dict create]
     set user "NONE"
   } {
+    log debug "Doing assert for empty key for topic [:topic $item], item: $item"
+    assert {[lsearch -exact [dict keys $item] ""] < 0}  
     switch [:topic $item] {
       iter_start_finish {
         if {[:start_finish $item] == "Start"} {
@@ -65,6 +67,8 @@ proc def_handlers_ahk {} {
       }
       trans_finish {
         # TODO: remove res name here, is always the same, just res_add is enough
+        # TODO: should use generic make_trans_finished (not _ahk), but these don't use
+        #       iteration and user.
         res_add res [make_trans_finished_ahk [add_sec_ts $item] $transactions \
                          $iteration $user]
         dict unset transactions [:transname $item]
@@ -74,7 +78,7 @@ proc def_handlers_ahk {} {
       }
       eof {
         # TODO: activate assert again.
-        # assert {[:# $transactions] == 0}
+        assert {[:# $transactions] == 0}
       }
     }
   }
@@ -136,6 +140,8 @@ proc add_sec_ts {item} {
 }
 
 # TODO: [2016-08-13 11:24] name clash with vugen version, so renamed for now.
+# TODO: should be deleted, and generic version used, but need to do something with
+#       iteration and user first, not given in generic version.
 proc make_trans_finished_ahk {item transactions iteration user} {
   assert {$iteration > 0}
   log debug "iteration: $iteration"

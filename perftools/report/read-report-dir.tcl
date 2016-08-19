@@ -5,8 +5,8 @@
 
 package require ndv
 
-# set_log_global perf {showfilename 0}
-set_log_global debug {showfilename 0}
+set_log_global perf {showfilename 0}
+# set_log_global debug {showfilename 0}
 
 # source read-vuserlogs-db.tcl
 # ndv::source_once vuser-report.tcl
@@ -27,7 +27,7 @@ lappend reader_namespaces [source [file join $perftools_dir loadrunner \
 # * ook level dieper kijken, dat je meteen in alle subdirs van testruns kijkt, zowel RCC, Transact, etc.
 # * now expect DB in subdir, also put html reports there.
 proc main {argv} {
-  global argv0
+  global argv0 log
   log info "$argv0 called with options: $argv"
   set options {
     {dir.arg "" "Directory with subdirs with vuserlog files and sqlite db's"}
@@ -35,14 +35,19 @@ proc main {argv} {
     {full "Create full report"}
     {summary "Create summary report"}
     {ssl "Use SSL lines in log (not used)"}
+    {debug "set loglevel debug"}
   }
   set usage ": [file tail [info script]] \[options] :"
   set opt [getoptions argv $options $usage]
 
+  if {[:debug $opt]} {
+    $log set_log_level debug  
+  }
+  
   set logdir [:dir $opt]
   # lassign $argv logdir
   log debug "logdir: $logdir"
-  foreach subdir [glob -directory $logdir -type d *] {
+  foreach subdir [glob -nocomplain -directory $logdir -type d *] {
     if {[ignore_dir $subdir]} {
       log info "Ignore dir: $subdir"
       continue
@@ -52,9 +57,12 @@ proc main {argv} {
     # TODO: use correct logreader (ahk and vugen for now), first only vugen
     read_report_run_dir $subdir $opt
   }
+  # also handle root dir, could be just 1 dir
+  read_report_run_dir $logdir $opt
 }
 
 proc ignore_dir {dir} {
+  set dir [file normalize $dir]
   log debug "ignore_dir called: $dir"
   if {[regexp {jmeter} $dir]} {
     return 1
@@ -93,15 +101,16 @@ proc read_run_dir {rundir dbname opt} {
   # TODO: check if dir already read.
   set db [get_run_db $dbname $opt]
   add_read_status $db "starting"
-  set nread 0
+  set nread 0;      # number of actually read files.
+  set nhandled 0;   # All files, for handling with progress calculator
   set logfiles [glob -nocomplain -directory $rundir -type f *]
   set pg [CProgressCalculator::new_instance]
   $pg set_items_total [:# $logfiles]
   $pg start
   foreach filename $logfiles {
-    read_run_logfile $filename $db $opt
-    incr nread
-    $pg at_item $nread
+    incr nread [read_run_logfile $filename $db $opt]
+    incr nhandled
+    $pg at_item $nhandled
   }
   add_read_status $db "complete"
   log info "set read_status, closing DB"

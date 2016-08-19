@@ -27,7 +27,12 @@ proc make_trans_not_finished {started_transactions} {
 }
 
 # make trans(action) record/item based on end-line and started transactions.
+# don't want empty keys (and some other keys) in dict.
 proc make_trans_finished {row started_transactions} {
+  foreach key {"" db ssl split_proc} {
+    log debug "mtf - check key: $key"
+    assert {[lsearch -exact [dict keys $row] $key] < 0}  
+  }
   set line_fields {linenr ts sec_ts iteration}
   set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
   set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
@@ -41,6 +46,10 @@ proc make_trans_finished {row started_transactions} {
   set dstart [dict_rename $rowstart $line_fields $line_start_fields]
   set dend [dict_rename $row $line_fields $line_end_fields]
   set d [dict merge $dstart $dend]
+  foreach key {"" db ssl split_proc} {
+    log debug "mtfr - check key: $key"
+    assert {[lsearch -exact [dict keys $d] $key] < 0}  
+  }
   return $d
 }
 

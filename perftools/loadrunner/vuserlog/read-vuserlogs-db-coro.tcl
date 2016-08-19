@@ -76,7 +76,10 @@ proc def_parsers {} {
       dict set nvpairs ts $ts
       dict set nvpairs sec_ts [parse_ts [:ts $nvpairs]]
       dict set nvpairs resptime [regsub -all {,} [:resptime $nvpairs] "."]
-      return [dict_rename $nvpairs {trans status} {transname trans_status}]
+      log debug "assert nvpairs: $nvpairs"
+      assert {[lsearch -exact [dict keys $nvpairs] ""] < 0}  
+      set res [dict_rename $nvpairs {trans status} {transname trans_status}] 
+      return $res
     } else {
       return ""
     }
@@ -116,9 +119,12 @@ proc def_parsers {} {
 # @return dict with key=name, val=val.
 # [2016-08-07 12:12] for now, line is already the part that needs to be split, not the whole logline.
 proc log2nvpairs {line} {
+  log debug "log2nvpairs: $line"
   set d [dict create]
-  foreach nv [split $line ", "] {
-    lassign [split $nv "="] nm val
+  # [2016-08-19 21:00] split works with characters, not string, so only check comma and equals, and use string trim.
+  foreach nv [split $line ","] {
+    lassign [split [string trim $nv] "="] nm val
+    log debug "log2nvpairs: $nm->$val"
     dict set d $nm $val
   }
   return $d
@@ -132,6 +138,8 @@ proc def_handlers {} {
     set user ""; set iteration 0; set split_proc "<none>"
   } {
     # body/loop
+    log debug "trans-handler - assert topic [:topic $item], item: $item"
+    assert {[lsearch -exact [dict keys $item] ""] < 0}  
     switch [:topic $item] {
       bof {
         set started_transactions [dict create]
@@ -208,10 +216,12 @@ proc def_handlers {} {
 proc def_insert_handler {table} {
   def_handler [list bof $table] {} [syntax_quote {
     if {[:topic $item] == "bof"} { # 
-      dict_to_vars $item ;    # set db, split_proc, ssl
-      set file_item $item
+      # dict_to_vars $item ;    # set db, split_proc, ssl
+      # set file_item $item
+      set db [:db $item]
+      set file_item [dict remove $item db split_proc ssl]
     } else {
-      $db insert ~$table [dict merge $file_item $item]
+      $db insert ~$table [dict remove [dict merge $file_item $item] topic]
     }
   }]
 }

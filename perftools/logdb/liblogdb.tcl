@@ -63,13 +63,16 @@ proc define_tables {db opt} {
   set line_fields {linenr ts sec_ts iteration}
   set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
   set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
-  set trans_fields {transname user resptime trans_status usecase
-    revisit transid transshort searchcrit}
+
+  # [2016-08-19 19:07] transshort weg, moet dynamisch added worden.
+  set trans_fields {transname user resptime trans_status}
+  # [2016-08-19 21:10] fields below will be added dynamically
+  # usecase revisit transid searchcrit
   
   # 17-6-2015 NdV transaction is a reserved word in SQLite, so use trans as table name
   $db add_tabledef trans_line {id} [concat $logfile_fields $line_fields $trans_fields]
   $db add_tabledef trans {id} [concat $logfile_fields $line_start_fields \
-                                   $line_end_fields $trans_fields]
+                                   $line_end_fields $trans_fields] {flex 1}
   
   $db add_tabledef error {id} [concat $logfile_fields $line_fields \
                                    srcfile srclinenr user errornr errortype details \
@@ -80,7 +83,9 @@ proc define_tables {db opt} {
                                         iteration user errortype]
 
   $db add_tabledef resource {id} [concat $logfile_fields $line_fields user transname resource]
-  
+
+  # flex tables can have extra fields/columns added, depending on dict's given to
+  # insert proc.
   if {$ssl} {
     # ssl_define_tables $db  ; # [2016-08-19 12:38] not now/here.
   }
