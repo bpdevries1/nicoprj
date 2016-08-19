@@ -29,6 +29,17 @@ namespace forget now
 require libtestns t
 testndv {t/now} "now"
 
+# test sourcing 2 files and using return var, a namespace
+set lns [list]
+set srcdir [file normalize [file dirname [info script]]]
+puts "srcdir for source: $srcdir"
+lappend lns [source $srcdir/test-libns-file1.tcl]
+lappend lns [source $srcdir/test-libns-file2.tcl]
+
+foreach ns $lns {
+  set res [${ns}::can_read logfile.txt]
+  puts "Result of canread for $ns -> $res"
+}
 
 cleanupTests
 
