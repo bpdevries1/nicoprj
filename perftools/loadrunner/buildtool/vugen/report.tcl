@@ -3,8 +3,12 @@
 
 # [2016-08-18 15:01:52] Version for VuGen
 
-ndv::source_once ../../vugentools/vuserlog/read-vuserlogs-db.tcl
-ndv::source_once ../../vugentools/vuser-report/vuser-report.tcl
+#ndv::source_once ../../vugentools/vuserlog/read-vuserlogs-db.tcl
+#ndv::source_once ../../vugentools/vuser-report/vuser-report.tcl
+
+# TODO: better way to find perftools_dir, maybe in config-env.
+set perftools_dir [file normalize [file join [file dirname [info script]] .. .. ..]]
+source [file join $perftools_dir report read-report-dir.tcl]
 
 task report {Create report of output.txt in script dir
   Copy output.txt to testruns dir, call vugentools/vuserlog/read-vuserlogs-db.tcl
@@ -35,12 +39,12 @@ task report {Create report of output.txt in script dir
     file mkdir $subdir
     file copy output.txt $to_file
   }
-
+  read_report_run_dir $subdir $opt
   # then call read_logfile_dir; idempotency should already be arranged by read_logfile_dir
-  set dbname [file join $subdir "vuserlog.db"]
-  read_logfile_dir $subdir $dbname [:ssl $opt] split_transname
+  #set dbname [file join $subdir "vuserlog.db"]
+  #read_logfile_dir $subdir $dbname [:ssl $opt] split_transname
 
   # and finally make the report.
-  vuser_report $subdir $dbname $opt
+  #vuser_report $subdir $dbname $opt
 }
 

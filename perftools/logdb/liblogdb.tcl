@@ -1,0 +1,107 @@
+#!/usr/bin/env tclsh861
+
+# [2016-08-17 09:47:56] Version for vugen logs.
+# TODO: integrate/merge with version for AHK logs (also JMeter?)
+
+# bla generate error
+
+package require ndv
+package require tdbc::sqlite3
+
+# [2016-07-09 10:09] for parse_ts and now:
+use libdatetime
+use libfp
+
+
+
+# deze mogelijk in libdb:
+proc get_run_db {db_name opt} {
+  global pubsub
+  set ssl [:ssl $opt]
+  #breakpoint
+  set existing_db [file exists $db_name]
+  set db [dbwrapper new $db_name]
+  define_tables $db $opt
+  if {$ssl} {
+    # TODO: deze eigenlijk op zelfde niveau als waar je handle_ssl_global_end aanroept.
+    # maar wat lastig omdat table defs hier moeten.
+    # [2016-08-19 12:36] niet hier in loblogdb.
+    # handle_ssl_global_start $db $pubsub
+  }
+  $db create_tables 0 ; # 0: don't drop tables first. Always do create, eg for new table defs. 1: drop tables first.
+  if {!$existing_db} {
+    log info "New db: $db_name, create tables"
+    # create_indexes $db
+  } else {
+    log info "Existing db: $db_name, don't create tables"
+  }
+  # TODO: maybe call prepare just before (or within) first insert call.
+  $db prepare_insert_statements
+  #breakpoint
+
+  $db load_percentile
+  
+  return $db
+}
+
+proc define_tables {db opt} {
+  # [2016-07-31 12:01] sec_ts is a representation of a timestamp in seconds since the epoch
+  set ssl [:ssl $opt]
+  $db def_datatype {sec_ts resptime} real
+  $db def_datatype {.*id filesize .*linenr.* trans_status iteration.*} integer
+  
+  # default is text, no need to define, just check if it's consistent
+  # [2016-07-31 12:01] do want to define that everything starting with ts is a time stamp/text:
+  $db def_datatype {status ts.*} text
+
+  $db add_tabledef read_status {id} {ts status}
+  
+  $db add_tabledef logfile {id} {logfile dirname ts filesize \
+                                     runid project script}
+
+  set logfile_fields {logfile_id logfile vuserid}
+  set line_fields {linenr ts sec_ts iteration}
+  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
+  set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
+  set trans_fields {transname user resptime trans_status usecase
+    revisit transid transshort searchcrit}
+  
+  # 17-6-2015 NdV transaction is a reserved word in SQLite, so use trans as table name
+  $db add_tabledef trans_line {id} [concat $logfile_fields $line_fields $trans_fields]
+  $db add_tabledef trans {id} [concat $logfile_fields $line_start_fields \
+                                   $line_end_fields $trans_fields]
+  
+  $db add_tabledef error {id} [concat $logfile_fields $line_fields \
+                                   srcfile srclinenr user errornr errortype details \
+                                   line]
+                   
+  # 22-10-2015 NdV ook errors per iteratie, zodat er een hoofd schuldige is aan te wijzen voor het falen.
+  $db add_tabledef error_iter {id} [concat $logfile_fields script \
+                                        iteration user errortype]
+
+  $db add_tabledef resource {id} [concat $logfile_fields $line_fields user transname resource]
+  
+  if {$ssl} {
+    # ssl_define_tables $db  ; # [2016-08-19 12:38] not now/here.
+  }
+
+}
+
+proc delete_database {dbname} {
+  log info "delete database: $dbname"
+  # error nietgoed
+  set ok 0
+  catch {
+    file delete $dbname
+    set ok 1
+  }
+  if {!$ok} {
+    set db [dbwrapper new $dbname]
+    foreach table {error trans retraccts logfile} {
+      # $db exec "delete from $table"
+      $db exec "drop table $table"
+    }
+    $db close
+  }
+}
+

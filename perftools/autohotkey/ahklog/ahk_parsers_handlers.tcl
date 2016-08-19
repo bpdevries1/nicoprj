@@ -1,6 +1,7 @@
 # separate function, to be called once, even when handling multiple log files.
 proc define_logreader_handlers_ahk {} {
   log info "define_logreader_handlers: start"
+  reset_parsers_handlers;       # to clean up possible readers/handlers for vugen logs.
   def_parsers_ahk
   def_handlers_ahk
 }

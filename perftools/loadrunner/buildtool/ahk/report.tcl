@@ -1,8 +1,12 @@
 # TODO: need to put this setting/location somewhere. This could be a user
 # setting in ~/.config/buildtool, next to location of eg R binary.
-ndv::source_once ../../../autohotkey/ahklog/read-ahklogs-db.tcl
-ndv::source_once ../../vugentools/vuser-report/vuser-report.tcl
+#ndv::source_once ../../../autohotkey/ahklog/read-ahklogs-db.tcl
+#ndv::source_once ../../vugentools/vuser-report/vuser-report.tcl
 
+# call read_report_run_dir
+# TODO: better way to find perftools_dir, maybe in config-env.
+set perftools_dir [file normalize [file join [file dirname [info script]] .. .. ..]]
+source [file join $perftools_dir report read-report-dir.tcl]
 # [2016-08-18 15:02:30] Version for AHK
 
 task report {Create report of output.txt in script dir
@@ -37,13 +41,13 @@ task report {Create report of output.txt in script dir
   }
   # [2016-08-13 18:30] while testing keep the logfile in the target dir, so already exists.
   copy_dir_png output2 $subdir
-  
+  read_report_run_dir $subdir $opt
   # then call read_logfile_dir; idempotency should already be arranged by read_logfile_dir
-  set dbname [file join $subdir "ahklog.db"]
-  read_logfile_dir_ahk $subdir $dbname
+  #set dbname [file join $subdir "ahklog.db"]
+  #read_logfile_dir_ahk $subdir $dbname
 
   # and finally make the report.
-  vuser_report $subdir $dbname $opt
+  #vuser_report $subdir $dbname $opt
 }
 
 proc copy_dir_png {from to} {

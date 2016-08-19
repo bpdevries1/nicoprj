@@ -28,9 +28,6 @@ use libmacro;                   # syntax_quote
 proc define_logreader_handlers {} {
   log info "define_logreader_handlers: start"
   # of toch een losse namespace waar deze dingen in hangen?
-
-  reset_parsers_handlers
-  
   def_parsers
   def_handlers
   # breakpoint
@@ -207,82 +204,5 @@ proc def_insert_handler {table} {
       $db insert ~$table [dict merge $file_item $item]
     }
   }]
-}
-
-proc det_vuserid {logfile} {
-  if {[regexp {_(\d+).log} $logfile z vuser]} {
-    return $vuser
-  } elseif {[file tail $logfile] == "output.txt"} {
-    # Vugenlog file, vuser=-1
-    return -1
-  } else {
-    log warn "Could not determine vuser from logfile: $logfile"
-    return ""
-  }
-}
-
-proc det_project_runid_script {logfile} {
-  # [-> $logfile {file dirname} {file dirname} {file tail}]
-  set project [file tail [file dirname [file dirname $logfile]]]
-  if {[regexp {run(\d+)} [file tail [file dirname $logfile]] z id]} {
-    set runid $id
-  } else {
-    set runid ""
-  }
-  if {[regexp {^(.+)_\d+\.log$} [file tail $logfile] z scr]} {
-    set script $scr
-  } else {
-    set script ""
-  }
-  
-  list $project $runid $script
-}
-
-# return 1 iff either old user or old iteration differs from new one in row
-proc new_user_iteration? {row user iteration} {
-  if {($user != [:user $row]) || ($iteration != [:iteration $row])} {
-    return 1
-  }
-  return 0
-}
-
-# TODO: should put this in own namespace.
-set error_res {
-  {Text=Uw pas is niet correct} pas_niet_correct 10
-
-  {HTTP Status-Code=500} http500 9
-  {Er is een technisch probleem opgetreden} tech_problem 9
-  {A technical error has occurred at} tech_error 9
-  {Gateway Time-out} gateway_timeout 9
-  {Connection reset by peer} conn_reset 9
-  {has shut down the connection prematurely} conn_shutdown 9
-  {SSL protocol error when attempting to connect} ssl_error 9
-  
-  {Step download timeout} step_timeout 8
-  {Connection timed out} connection_timeout 8
-
-  {may be explained by header and body byte counts being} explained_header_body 3
-  
-  {No match found for the requested parameter} no_match 0
-  {not found for web_reg_find} web_reg_find 0
-}
-
-proc det_error_details {rest} {
-  global error_res
-  set user ""
-  set errortype ""
-  set details ""
-  set level -1
-  regexp {User:(\d+) pas} $rest z user
-  regexp {No match found for the requested parameter \"([^ ]+)\"} $rest z details
-  regexp {\"Text=(.+)\" not found for web_reg_find} $rest z details
-  foreach {re tp lv} $error_res {
-    if {[regexp $re $rest]} {
-      set errortype $tp
-      set level $lv
-      break
-    }
-  }
-  list $errortype $user $level $details
 }
 

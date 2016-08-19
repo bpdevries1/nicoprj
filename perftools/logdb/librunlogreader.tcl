@@ -1,0 +1,65 @@
+package require ndv
+package require tdbc::sqlite3
+
+# This lib is more specific to performance run logs and specific tables to be filled.
+
+# TODO: activate ssl/pubsub again?
+# ndv::source_once ssl.tcl pubsub.tcl read-vuserlogs-db-coro.tcl
+
+# [2016-07-09 10:09] for parse_ts and now:
+use libdatetime
+use libfp
+
+# specific for vugen?
+# set VUSER_END_ITERATION 1000
+
+# return list of all started transactions where no end transaction was seen.
+proc make_trans_not_finished {started_transactions} {
+  set res [list]
+  set line_fields {linenr ts sec_ts iteration}
+  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
+  foreach row [dict values $started_transactions] {
+    set d [dict_rename $row $line_fields $line_start_fields]
+    # $db insert trans $d
+    lappend res $d
+  }
+  return $res
+}
+
+# make trans(action) record/item based on end-line and started transactions.
+proc make_trans_finished {row started_transactions} {
+  set line_fields {linenr ts sec_ts iteration}
+  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
+  set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
+  #set no_start 0
+  set rowstart [dict_get $started_transactions [:transname $row]]
+  if {$rowstart == {}} {
+    # probably a synthetic transaction. Some minor error.
+    set rowstart $row
+    #set no_start 1
+  }
+  set dstart [dict_rename $rowstart $line_fields $line_start_fields]
+  set dend [dict_rename $row $line_fields $line_end_fields]
+  set d [dict merge $dstart $dend]
+  return $d
+}
+
+# TODO: merge with make_trans_finished?
+proc make_trans_error {row} {
+  set line_fields {linenr ts sec_ts iteration}
+  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]  
+  set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
+  set d [dict_rename $row $line_fields $line_end_fields]
+  set d2 [dict merge $d [dict_rename $row $line_fields $line_start_fields]]
+  # breakpoint
+  return $d2
+}
+
+proc add_read_status {db status} {
+  $db insert read_status [dict create ts [now] status $status]
+}
+
+proc is_logfile_read {db logfile} {
+  # if query returns 1 record, return 1=true, otherwise 0=false.
+  :# [$db query "select 1 from logfile where logfile='$logfile'"]
+}
