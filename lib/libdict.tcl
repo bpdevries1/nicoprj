@@ -233,3 +233,15 @@ proc dict_merge_fn {fn d1 d2 args} {
     return $res
   }
 }
+
+# rename fields in lfrom to lto and return new dict.
+proc dict_rename {d lfrom lto} {
+  set res $d
+  foreach f $lfrom t $lto {
+    # [2016-08-02 13:38:19] could be keys in from are not available.
+    dict set res $t [dict_get $d $f]
+    dict unset res $f
+  }
+  return $res
+}
+
