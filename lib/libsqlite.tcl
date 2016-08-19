@@ -2,6 +2,8 @@
 # in Tcl 8.5, use sqlite directly
 # in Tcl 8.6, use tdbc::sqlite, for named parameters in queries.
 
+use libmacro
+
 if {$tcl_version == "8.5"} {
 
   # puts stderr "Creating tcl 8.5 sqlite helper procs (none for now)"
@@ -70,8 +72,10 @@ if {$tcl_version == "8.5"} {
   }
 
   #  set table_def [make_table_def_keys curlgetheader {ts_start ts fieldvalue param iter} {exitcode resulttext msec cacheheaders akamai_env cacheable expires expiry cachetype maxage cachekey akamaiserver}]
-  proc make_table_def_keys {tablename keyfields valuefields} {
-    dict create table $tablename keyfields $keyfields valuefields $valuefields fields [concat $keyfields $valuefields] 
+  # options is (another) dict. For now only one key 'flex' is used. If set to 1,
+  # columns/fields can be dynamically added to the table. These are always value fields.
+  proc make_table_def_keys {tablename keyfields valuefields {options ""}} {
+    dict create table $tablename keyfields $keyfields valuefields $valuefields fields [concat $keyfields $valuefields] options $options 
   }
 
   proc create_table {conn table_def {dropfirst 0}} {
@@ -82,6 +86,14 @@ if {$tcl_version == "8.5"} {
       db_eval_try $conn [drop_table_sql $table_def]
     }
     db_eval_try $conn [create_table_sql $table_def]
+  }
+
+  proc add_field {conn table_def fieldname {datatype text}} {
+    db_eval_try $conn [add_field_sql $table_def $fieldname $datatype]
+  }
+
+  proc add_field_sql {table_def fieldname datatype} {
+    return "alter table [dict get $table_def table] add $fieldname $datatype" 
   }
   
   proc drop_table_sql {table_def} {
@@ -174,9 +186,13 @@ if {$tcl_version == "8.5"} {
     incr prepare_insert_td_proc_proc_id
     set proc_name "stmt_insert_$prepare_insert_td_proc_proc_id"
     # @todo probably need to use some quoting, compare clojure macro and closure.
-    proc $proc_name {dct {return_id 0}} "
-      stmt_exec $conn $stmt \$dct \$return_id
-    "
+    proc $proc_name {dct {return_id 0}} [syntax_quote {
+      if {$dct == "close"} {
+        ~$stmt close
+      } else {
+        stmt_exec ~$conn ~$stmt $dct $return_id  
+      }
+    }]
     return $proc_name
   }
   

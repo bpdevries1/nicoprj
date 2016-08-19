@@ -20,6 +20,14 @@ proc test_log {} {
 # there are some inter dependencies, so explicitly source other files in the right order.
 source [file join [file dirname [info script]] source_once.tcl]
 
+# [2016-07-09 09:49] namespace functions, compare Clojure
+# [2016-08-19 20:04] add libns to the top, used by libdb.tcl/libsqlite.tcl
+source [file join [file dirname [info script]] libns.tcl]
+
+# [2016-08-09 21:35] libmacro.tcl, first only with syntax_quote
+# [2016-08-19 20:05] move more to top, used by libsqlite
+source [file join [file dirname [info script]] libmacro.tcl]
+
 source [file join [file dirname [info script]] CLogger.tcl]
 
 source [file join [file dirname [info script]] liboptions.tcl]
@@ -65,9 +73,6 @@ source [file join [file dirname [info script]] libcsv.tcl]
 # 6-9-2013 added libcyg.tcl
 source [file join [file dirname [info script]] libcyg.tcl]
 
-# [2016-08-09 21:35] libmacro.tcl, first only with syntax_quote
-source [file join [file dirname [info script]] libmacro.tcl]
-
 # 12-10-2013 added libfp.tcl (test needed that functions do not overlap/name clash)
 source [file join [file dirname [info script]] libfp.tcl]
 
@@ -79,9 +84,6 @@ source [file join [file dirname [info script]] CProgressCalculator.tcl]
 
 # [2016-06-15 10:45:26] add date/time functions
 source [file join [file dirname [info script]] libdatetime.tcl]
-
-# [2016-07-09 09:49] namespace functions, compare Clojure
-source [file join [file dirname [info script]] libns.tcl]
 
 source [file join [file dirname [info script]] libio.tcl]
 
