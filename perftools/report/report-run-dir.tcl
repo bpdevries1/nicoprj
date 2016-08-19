@@ -5,7 +5,7 @@ package require ndv
 set_log_global debug
 
 set perftools_dir [file normalize [file join [file dirname [info script]] ..]]
-puts "perftools_dir: $perftools_dir"
+# puts "perftools_dir: $perftools_dir"
 
 source [file join $perftools_dir logdb liblogdb.tcl]
 

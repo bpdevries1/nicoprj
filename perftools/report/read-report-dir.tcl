@@ -15,7 +15,7 @@ set_log_global debug {showfilename 0}
 # first in global namespace:
 set reader_namespaces [list]
 set perftools_dir [file normalize [file join [file dirname [info script]] ..]]
-puts "perftools_dir: $perftools_dir"
+# puts "perftools_dir: $perftools_dir"
 ndv::source_once report-run-dir.tcl
 
 lappend reader_namespaces [source [file join $perftools_dir autohotkey \
