@@ -11,6 +11,15 @@ set_log_global info
 ndv::source_once task.tcl prjgroup.tcl prjtype.tcl \
     lib/inifile.tcl lib/misc.tcl init.tcl
 
+proc trace_callback {nm idx action} {
+  upvar $nm var
+  log debug "Trace callback: $nm/$idx/$action: new value: $var"
+  # log debug "Trace callback: level: [info level]" ; # level is always 1. So not on the stack where the change occured.
+}
+    
+# debug - add trace for lr_include_dir
+# trace add variable lr_include_dir write trace_callback
+    
 proc main {argv} {
   global log
   if {[lsearch -exact $argv "-debug"] >= 0} {

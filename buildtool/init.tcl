@@ -188,14 +188,21 @@ proc set_config_version {version} {
 # if none exists, return empty string.
 # [2016-07-24 18:54] this one should be set in a project/repo config task.
 proc det_lr_include_dir {} {
-  set dirs {{C:\Program Files (x86)\HP\Virtual User Generator\include}
-    /home/ymor/RABO/VuGen/lr_include}
-  foreach dir $dirs {
-    if {[file exists $dir]} {
-      return $dir
+  global lr_include_dir
+  if {[catch {set lr_include_dir}]} {
+    # not already set, continue.
+    set dirs {{C:\Program Files (x86)\HP\Virtual User Generator\include}
+      /home/ymor/RABO/VuGen/lr_include}
+    foreach dir $dirs {
+      if {[file exists $dir]} {
+        return $dir
+      }
     }
+    return ""
+  } else {
+    # already set, leave unchanged
+    return $lr_include_dir
   }
-  return ""
 }
 
 # this one should be independent of existing config files or vars.
