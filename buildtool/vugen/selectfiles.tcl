@@ -69,7 +69,9 @@ proc det_includes_file {source_file} {
 
 proc in_lr_include {srcfile} {
   global lr_include_dir
-  file exists [file join $lr_include_dir $srcfile]
+  set res [file exists [file join $lr_include_dir $srcfile]]
+  log debug "in_lr_include: $srcfile: $res (lr_include_dir: $lr_include_dir)"
+  return $res
 }
 
 # get filename for script
