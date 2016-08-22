@@ -8,7 +8,6 @@ proc define_logreader_handlers_ahk {} {
 
 proc def_parsers_ahk {} {
 
-  # TODO: timestamp deel in de regexp los definieren? Alternatief is parser voor logline maken en rest met handlers. Voor beide wat te zeggen.
   def_parser_regexp_ts iter_start_finish {\[iter\] ([^ ]+) iteration: (\d+)} \
       start_finish iteration
 
@@ -32,6 +31,11 @@ proc def_parsers_ahk {} {
   # waar 'ie wel in staat.
   def_parser_regexp_ts resource_linexx \
       {\[info\] Saved desktop to: ([^ ]+)$} resource
+      
+  # transaction/iteration parameters
+  # [2016-08-22 15:48:37] for now in AHK without a specifier, strictly check for FTUpload.
+  # [2016-08-18 15:34:44.136] [perf] FTBulk_nrecords: 46
+  def_parser_regexp_ts iteration_param {\[perf\] (FTBulk_nrecords): (.*)$} paramname paramvalue
 }
 
 # [2016-08-13 18:17] for now AHK specific, maybe more generic (also like Splunk with timestamps?).
@@ -43,7 +47,9 @@ proc def_parser_regexp_ts {topic re args} {
 
 proc def_handlers_ahk {} {
 
-  def_handler {iter_start_finish user trans_start trans_finish eof} trans {
+# def_parser_regexp_ts iteration_param {\[perf\] (FTBulk_nrecords): (.*)$} paramname paramvalue
+
+  def_handler {iter_start_finish user trans_start trans_finish iteration_param eof} trans {
     set transactions [dict create]
     set user "NONE"
   } {
@@ -56,11 +62,17 @@ proc def_handlers_ahk {} {
           # assert {[:# $transactions] == 0}
           set iteration [:iteration $item]
           set transactions [dict create]
+          set iteration_params [dict create]
         } else {
           # TODO: maybe finish transactions
           # assert {[:# $transactions] == 0}
           set user "NONE"
+          set iteration_params [dict create]
         }
+      }
+      iteration_param {
+        # sla name en value plat tot key=name, val=value
+        dict set iteration_params [:paramname $item] [:paramvalue $item]
       }
       trans_start {
         dict set transactions [:transname $item] [add_sec_ts $item]
@@ -69,9 +81,10 @@ proc def_handlers_ahk {} {
         # TODO: remove res name here, is always the same, just res_add is enough
         # TODO: should use generic make_trans_finished (not _ahk), but these don't use
         #       iteration and user.
-        res_add res [make_trans_finished_ahk [add_sec_ts $item] $transactions \
-                         $iteration $user]
+        res_add res [dict merge $iteration_params [make_trans_finished_ahk [add_sec_ts $item] $transactions \
+                         $iteration $user]]
         dict unset transactions [:transname $item]
+        # set iteration_params [dict create] ; # only reset at the end of iteration.
       }
       user {
         set user [:user $item]
