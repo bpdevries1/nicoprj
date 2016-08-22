@@ -65,7 +65,8 @@ proc define_tables {db opt} {
   set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
 
   # [2016-08-19 19:07] transshort weg, moet dynamisch added worden.
-  set trans_fields {transname user resptime trans_status}
+  # [2016-08-22 10:03:55] fields usecase and transshort used in reports for now, so make sure they always exist.
+  set trans_fields {transname user resptime trans_status usecase transshort}
   # [2016-08-19 21:10] fields below will be added dynamically
   # usecase revisit transid searchcrit
   
