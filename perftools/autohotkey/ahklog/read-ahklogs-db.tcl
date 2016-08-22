@@ -54,9 +54,11 @@ namespace eval ::ahklog {
     log debug "Calling ahk::can_read? for: $filename"
     # regexp {ahk} [file tail $filename]
     # logfile.txt could be in any dir, eg. combination of ahk/vugen
-    if {[regexp {logfile.txt} [file tail $filename]]} {
-      log debug "can_read? (ahk) - YES, can read!"
-      return 1
+    foreach re {{logfile.txt} {ahk}} {
+      if {[regexp $re $filename]} {
+        log debug "can_read? (ahk) - YES, can read!"
+        return 1
+      }
     }
     return 0
   }
