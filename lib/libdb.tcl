@@ -207,7 +207,7 @@ oo::class create dbwrapper {
     my variable db_tabledefs
     log debug "Add tabledef for flexfields"
     if {[:flexfields $db_tabledefs] == ""} {
-      my add_tabledef flexfields {id} {flextable flexfield}
+      my add_tabledef flexfields {id} {flextable flexfield flexdatatype notes}
     }
   }
   
@@ -303,13 +303,16 @@ oo::class create dbwrapper {
     set fields [:fields $tabledef]
     dict for {k v} $dct {
       if {[lsearch -exact $fields $k] < 0} {
+        # breakpoint
         log debug "flex - add field: $k (val=$v)"
-        add_field $conn $tabledef $k
+        # [2016-08-22 16:43:38] use integer as default. If it is a text field, sqlite will manage.
+        my def_datatype [list $k] integer
+        add_field $conn $tabledef $k integer
         dict lappend tabledef fields $k
         dict lappend tabledef valuefields $k
         dict set db_tabledefs $table $tabledef
         log debug "Insert record into flexfield: $table/$k"
-        my insert flexfields [dict create flextable $table flexfield $k]
+        my insert flexfields [dict create flextable $table flexfield $k flexdatatype integer]
       }
     }
     log debug "Added fields, preparing again..."

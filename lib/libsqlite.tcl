@@ -88,6 +88,7 @@ if {$tcl_version == "8.5"} {
     db_eval_try $conn [create_table_sql $table_def]
   }
 
+  # [2016-08-22 16:55:38] no error if field already added before.
   proc add_field {conn table_def fieldname {datatype text}} {
     db_eval_try $conn [add_field_sql $table_def $fieldname $datatype]
   }
