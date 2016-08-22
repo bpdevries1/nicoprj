@@ -196,7 +196,19 @@ oo::class create dbwrapper {
   # @todo idea determine tabledef's from actual table definitions in the (sqlite) db.
   method add_tabledef {table args} {
     my variable db_tabledefs
-    dict set db_tabledefs $table [make_table_def_keys $table {*}$args]  
+    set ks [make_table_def_keys $table {*}$args]
+    dict set db_tabledefs $table $ks
+    if {[:flex [:options $ks]] == 1} {
+      my add_tabledef_flexfields
+    }
+  }
+
+  method add_tabledef_flexfields {} {
+    my variable db_tabledefs
+    log debug "Add tabledef for flexfields"
+    if {[:flexfields $db_tabledefs] == ""} {
+      my add_tabledef flexfields {id} {flextable flexfield}
+    }
   }
   
   method create_tables {args} {
@@ -296,6 +308,8 @@ oo::class create dbwrapper {
         dict lappend tabledef fields $k
         dict lappend tabledef valuefields $k
         dict set db_tabledefs $table $tabledef
+        log debug "Insert record into flexfield: $table/$k"
+        my insert flexfields [dict create flextable $table flexfield $k]
       }
     }
     log debug "Added fields, preparing again..."
