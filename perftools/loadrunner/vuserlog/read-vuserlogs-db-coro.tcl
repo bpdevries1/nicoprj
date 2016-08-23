@@ -71,15 +71,26 @@ proc readlogfile_new_coro {logfile db ssl split_proc} {
 proc def_parsers {} {
 
   def_parser trans_line {
+    # [2016-08-23 17:11:14] wil achter (ignored) ts aan het einde een ? in de regexp zetten, maar dan meegenomen in de vorige, en timestamp
+    # aan iteration vastgeplakt.
     if {[regexp {: \[([0-9 :.-]+)\] (trans=.+?)( \[[0-9/ :-]+])} $line z ts fields]} {
       set nvpairs [log2nvpairs $fields]; # possibly give whole line to log2nvpairs
       dict set nvpairs ts $ts
       dict set nvpairs sec_ts [parse_ts [:ts $nvpairs]]
       dict set nvpairs resptime [regsub -all {,} [:resptime $nvpairs] "."]
-      log debug "assert nvpairs: $nvpairs"
-      assert {[lsearch -exact [dict keys $nvpairs] ""] < 0}  
-      set res [dict_rename $nvpairs {trans status} {transname trans_status}] 
-      return $res
+      return [dict_rename $nvpairs {trans status} {transname trans_status}]
+    } else {
+      return ""
+    }
+  }
+
+  # functions.c(399): [2016-08-23 14:20:16.134] Trans param: nrecords = 200 [08/23/16 14:20:16]
+
+def_parser trans_param {
+    # TODO: [2016-08-23 17:17:15] wil ? achter optional time aan het einde, maar dan wordt 'ie bij paramvalue meegenomen.
+    if {[regexp {: \[([0-9 :.-]+)\] Trans param: ([^= ]+) = (.*)( \[[0-9/ :-]+])} $line z ts paramname paramvalue]} {
+      log debug "Found trans_param: $paramname = $paramvalue"
+      return [dict create ts $ts sec_ts [parse_ts $ts] paramname $paramname paramvalue $paramvalue]
     } else {
       return ""
     }
@@ -133,7 +144,7 @@ proc log2nvpairs {line} {
 proc def_handlers {} {
 
   # convert trans_line => trans
-  def_handler {bof eof trans_line} trans {
+  def_handler {bof eof trans_line trans_param} trans {
     # init
     set user ""; set iteration 0; set split_proc "<none>"
   } {
@@ -148,6 +159,10 @@ proc def_handlers {} {
       eof {
         res_add res {*}[make_trans_not_finished $started_transactions]
       }
+      trans_param {
+        log debug "in trans handler, got trans_param: $item"
+        dict set trans_params [:paramname $item] [:paramvalue $item]
+      }
       trans_line {
         if {[new_user_iteration? $item $user $iteration]} {
           res_add res {*}[make_trans_not_finished $started_transactions]
@@ -159,10 +174,15 @@ proc def_handlers {} {
           -1 {
             # start of a transaction, keep data to combine with end-of-trans.
             dict set started_transactions [:transname $item] $item
+            # TODO: reset trans_params on new transaction, will fail for nested transactions. Will also fail when done at end transaction,
+            # need concept of nested transactions here (and record nesting level)
+            set trans_params [dict create]
           }
           0 {
             # succesful end of a transaction, find start data and insert item.
-            res_add res [make_trans_finished $item $started_transactions]
+            set tr [dict merge $trans_params [make_trans_finished $item $started_transactions]]
+            log debug "trans handler: adding trans: $tr"
+            res_add res $tr
             dict unset started_transactions [:transname $item]
           }
           1 {
