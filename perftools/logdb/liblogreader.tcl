@@ -121,10 +121,6 @@ proc handle_parsers {to_publish logfile line linenr} {
       $to_publish put $res
     }
   }
-  if {$linenr == 2279} {
-    puts "Line 2279, error line."
-    # breakpoint
-  }
 }
 
 proc handle_to_publish {to_publish} {
