@@ -190,8 +190,9 @@ proc report_summary_usecase {db hh row} {
              and trans_status = 0
              group by 1,2
              order by 3,1"
-  log debug "Query: $query"
+  log debug "Query**: $query"
   foreach trow [$db query $query] {
+    log debug "summary trow: $trow"
     $hh table_row [:transshort $trow] \
         [:resptime_min $trow] \
         [format %.3f [:resptime_avg $trow]] \
@@ -222,11 +223,16 @@ proc report_summary_usecase {db hh row} {
              where usecase = '[:usecase $row]'
              and trans_status = 0"
   set trow [:0 [$db query $query]]
-  $hh table_row "TOTAL" \
-      [:resptime_min $trow] \
-      [format %.3f [:resptime_avg $trow]] \
-      [format %.3f [:perc95 $trow]] [:resptime_max $trow] \
-      [:trans_count $trow] [count_trans_error $db $usecase "All"]
+  log debug "Total trow: $trow"
+  if {[:trans_count $trow] == 0} {
+    $hh table_row "TOTAL" 0 0 0 0 [:trans_count $trow] [count_trans_error $db $usecase "All"]
+  } else {
+    $hh table_row "TOTAL" \
+        [:resptime_min $trow] \
+        [format %.3f [:resptime_avg $trow]] \
+        [format %.3f [:perc95 $trow]] [:resptime_max $trow] \
+        [:trans_count $trow] [count_trans_error $db $usecase "All"]
+  }
   
   $hh table_end
 }
