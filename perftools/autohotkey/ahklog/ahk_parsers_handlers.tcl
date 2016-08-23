@@ -1,6 +1,6 @@
 # separate function, to be called once, even when handling multiple log files.
 proc define_logreader_handlers_ahk {} {
-  log info "define_logreader_handlers: start"
+  log debug "define_logreader_handlers: start"
   reset_parsers_handlers;       # to clean up possible readers/handlers for vugen logs.
   def_parsers_ahk
   def_handlers_ahk
@@ -35,7 +35,10 @@ proc def_parsers_ahk {} {
   # transaction/iteration parameters
   # [2016-08-22 15:48:37] for now in AHK without a specifier, strictly check for FTUpload.
   # [2016-08-18 15:34:44.136] [perf] FTBulk_nrecords: 46
+  # [2016-08-23 16:10:59] NdV voorlopig nog even allebei, Trans param is de nieuwe.
+  # TODO: hernoemen naar Iteration param, onderscheid met Trans param, scope anders.
   def_parser_regexp_ts iteration_param {\[perf\] (FTBulk_nrecords): (.*)$} paramname paramvalue
+  def_parser_regexp_ts iteration_param {\[perf] Iteration param: ([^= ]+) = (.*)$} paramname paramvalue
 }
 
 # [2016-08-13 18:17] for now AHK specific, maybe more generic (also like Splunk with timestamps?).
@@ -90,8 +93,9 @@ proc def_handlers_ahk {} {
         set user [:user $item]
       }
       eof {
-        # TODO: activate assert again.
-        assert {[:# $transactions] == 0}
+        # [2016-08-23 13:34:15] switched off assert wrt testruns ended prematurely.
+        # activate assert again.
+        # assert {[:# $transactions] == 0}
       }
     }
   }
