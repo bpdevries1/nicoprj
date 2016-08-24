@@ -85,6 +85,10 @@ proc define_tables {db opt} {
 
   $db add_tabledef resource {id} [concat $logfile_fields $line_fields user transname resource]
 
+  # summary table, per usecase and transaction. resptime fields already defined als real.
+  $db def_datatype {npass nfail} integer
+  $db add_tabledef summary {id} {usecase resulttype transshort min_ts resptime_min resptime_avg resptime_max resptime_p95 npass nfail}
+  
   # flex tables can have extra fields/columns added, depending on dict's given to
   # insert proc.
   if {$ssl} {

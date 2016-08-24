@@ -154,12 +154,133 @@ proc href_resources {db hh vuserid iteration user transname} {
   }
 }
 
+# starting point, also called from buildtool/ahk and /vugen.
+proc report_summary {db dir} {
+  # call orig for now
+  insert_report_summary $db $dir
+  report_summary_html $db $dir
+}
+
+# create summary in DB, in table summary
+proc insert_report_summary {db dir} {
+  $db exec "delete from summary"
+  set query "select usecase, min(ts_start) min_ts from trans group by 1 order by 2"
+  foreach row [$db query $query] {
+    insert_report_summary_usecase $db $row
+  }
+}
+
+proc insert_report_summary_usecase {db row} {
+  set usecase [:usecase $row]
+  # TODO: make 95% column red iff value > requirement (3 sec now). Something with SLA status/req in config.
+  set query "select transname, '1-Standard' resulttype, transshort, min(ts_start) min_ts, min(resptime) resptime_min, avg(resptime) resptime_avg,
+             max(resptime) resptime_max, count(*) npass, percentile(resptime, 95) resptime_p95
+             from trans
+             where usecase = '$usecase'
+             and trans_status = 0
+             group by 1,2
+             order by 3,1"
+  log debug "Query**: $query"
+  foreach trow [$db query $query] {
+    log debug "summary trow: $trow"
+    $db insert summary [dict merge $row $trow [dict create nfail [count_trans_error $db $usecase [:transname $trow]]]]
+  }
+  # Transactions with only errors, mostly synthetic transactions
+  set query "select transname, '2-Fail' resulttype, transshort, min(ts_start) min_ts, count(*) nfail
+             from trans t1
+             where usecase = '$usecase'
+             and trans_status <> 0
+             and not transname in (
+               select transname
+               from trans
+               where usecase = '$usecase'
+               and trans_status = 0
+             )
+             group by 1,2
+             order by 3,1"
+
+  foreach trow [$db query $query] {
+    $db insert summary [dict merge $row $trow [dict_setvals 0 resptime_min resptime_avg resptime_p95 resptime_max npass]]
+  }
+  
+  # Also total for this usecase:
+  set query "select 'Total' transshort, '3-Total' resulttype, min(ts_start) min_ts, min(resptime) resptime_min, avg(resptime) resptime_avg,
+             max(resptime) resptime_max, count(*) npass, percentile(resptime, 95) resptime_p95
+             from trans
+             where usecase = '[:usecase $row]'
+             and trans_status = 0"
+  set trow [:0 [$db query $query]]
+  log debug "Total trow: $trow"
+  set dct_error [dict create nfail [count_trans_error $db $usecase "All"]]
+  if {[:trans_count $trow] == 0} {
+    $db insert summary [dict merge $row $trow $dct_error \
+                            [dict_setvals 0 resptime_min resptime_avg resptime_p95 resptime_max]]
+  } else {
+    $db insert summary [dict merge $row $trow $dct_error]
+  }
+}
+
+# create a dict with all values set to val for keys in args
+proc dict_setvals {val args} {
+  set res [dict create]
+  foreach k $args {
+    dict set res $k $val
+  }
+  return $res
+}
+
 # create summary report with statistics.
 # maybe use user/script definitions for report, eg which fields to use as result of
 # split_trans. Could also check which fields have more than 1 different value, or are
 # not empty. Also (with eg newuser/revisit) could check if value varies during this
 # block/iteration: if so, make a column. If not, add above table.
-proc report_summary {db dir} {
+proc report_summary_html {db dir} {
+  set html_name [file join $dir "report-summary.html"]
+  if {[file exists $html_name]} {
+    # return ; # or maybe a clean option to start anew
+  }
+  io/with_file f [open $html_name w] {
+    set hh [ndv::CHtmlHelper::new]
+    $hh set_channel $f
+    $hh write_header "Vuser log report" 0
+    # TODO: table per usecase.
+    # set query "select usecase, min(ts_start) min_ts from trans group by 1 order by 2"
+    set query "select usecase, min(min_ts) min_ts from summary group by 1 order by 2"
+    foreach row [$db query $query] {
+      report_summary_html_usecase $db $hh $row
+    }
+    $hh write_footer
+  }
+}
+
+proc report_summary_html_usecase {db hh row} {
+  #return;                       # for now.
+  set usecase [:usecase $row]
+  $hh heading 1 "Usecase: $usecase"
+  $hh table_start
+  $hh table_header Transaction Minimum Average 95% Maximum Pass Fail
+  set query "select transshort, resptime_min, resptime_avg, resptime_p95, resptime_max, npass, nfail
+             from summary
+             where usecase = '[:usecase $row]'
+             order by resulttype, min_ts"
+  log debug "Query**: $query"
+  foreach trow [$db query $query] {
+    log debug "summary trow: $trow"
+    $hh table_row [:transshort $trow] \
+        [:resptime_min $trow] \
+        [format %.3f [:resptime_avg $trow]] \
+        [format %.3f [:resptime_p95 $trow]] [:resptime_max $trow] \
+        [:npass $trow] [:nfail $trow]
+  }
+  $hh table_end
+}
+
+# create summary report with statistics.
+# maybe use user/script definitions for report, eg which fields to use as result of
+# split_trans. Could also check which fields have more than 1 different value, or are
+# not empty. Also (with eg newuser/revisit) could check if value varies during this
+# block/iteration: if so, make a column. If not, add above table.
+proc report_summary_old {db dir} {
   set html_name [file join $dir "report-summary.html"]
   if {[file exists $html_name]} {
     # return ; # or maybe a clean option to start anew
@@ -177,7 +298,7 @@ proc report_summary {db dir} {
   }
 }
 
-proc report_summary_usecase {db hh row} {
+proc report_summary_usecase_old {db hh row} {
   set usecase [:usecase $row]
   $hh heading 1 "Usecase: $usecase"
   $hh table_start
