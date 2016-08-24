@@ -170,6 +170,11 @@ proc insert_report_summary {db dir} {
   }
 }
 
+# create summary report table with statistics.
+# maybe use user/script definitions for report, eg which fields to use as result of
+# split_trans. Could also check which fields have more than 1 different value, or are
+# not empty. Also (with eg newuser/revisit) could check if value varies during this
+# block/iteration: if so, make a column. If not, add in header in html above table (as iteration, user, usecase)
 proc insert_report_summary_usecase {db row} {
   set usecase [:usecase $row]
   # TODO: make 95% column red iff value > requirement (3 sec now). Something with SLA status/req in config.
@@ -243,8 +248,6 @@ proc report_summary_html {db dir} {
     set hh [ndv::CHtmlHelper::new]
     $hh set_channel $f
     $hh write_header "Vuser log report" 0
-    # TODO: table per usecase.
-    # set query "select usecase, min(ts_start) min_ts from trans group by 1 order by 2"
     set query "select usecase, min(min_ts) min_ts from summary group by 1 order by 2"
     foreach row [$db query $query] {
       report_summary_html_usecase $db $hh $row
@@ -254,7 +257,6 @@ proc report_summary_html {db dir} {
 }
 
 proc report_summary_html_usecase {db hh row} {
-  #return;                       # for now.
   set usecase [:usecase $row]
   $hh heading 1 "Usecase: $usecase"
   $hh table_start
@@ -275,11 +277,6 @@ proc report_summary_html_usecase {db hh row} {
   $hh table_end
 }
 
-# create summary report with statistics.
-# maybe use user/script definitions for report, eg which fields to use as result of
-# split_trans. Could also check which fields have more than 1 different value, or are
-# not empty. Also (with eg newuser/revisit) could check if value varies during this
-# block/iteration: if so, make a column. If not, add above table.
 proc report_summary_old {db dir} {
   set html_name [file join $dir "report-summary.html"]
   if {[file exists $html_name]} {
@@ -296,66 +293,6 @@ proc report_summary_old {db dir} {
     }
     $hh write_footer
   }
-}
-
-proc report_summary_usecase_old {db hh row} {
-  set usecase [:usecase $row]
-  $hh heading 1 "Usecase: $usecase"
-  $hh table_start
-  $hh table_header Transaction Minimum Average 95% Maximum Pass Fail
-  # TODO: make 95% column red iff value > requirement (3 sec now). Something with SLA status/req in config.
-  set query "select transname, transshort, min(ts_start) min_ts, min(resptime) resptime_min, avg(resptime) resptime_avg,
-             max(resptime) resptime_max, count(*) trans_count, percentile(resptime, 95) perc95
-             from trans
-             where usecase = '$usecase'
-             and trans_status = 0
-             group by 1,2
-             order by 3,1"
-  log debug "Query**: $query"
-  foreach trow [$db query $query] {
-    log debug "summary trow: $trow"
-    $hh table_row [:transshort $trow] \
-        [:resptime_min $trow] \
-        [format %.3f [:resptime_avg $trow]] \
-        [format %.3f [:perc95 $trow]] [:resptime_max $trow] \
-        [:trans_count $trow] [count_trans_error $db $usecase [:transname $trow]]
-  }
-  # Transactions with only errors, mostly synthetic transactions
-  set query "select transname, transshort, min(ts_start) min_ts, count(*) nerror
-             from trans t1
-             where usecase = '$usecase'
-             and trans_status <> 0
-             and not transname in (
-               select transname
-               from trans
-               where usecase = '$usecase'
-               and trans_status = 0
-             )
-             group by 1,2
-             order by 3,1"
-
-  foreach trow [$db query $query] {
-    $hh table_row [:transshort $trow] 0 0 0 0 0 [:nerror $trow]
-  }
-  # Also total for this usecase:
-  set query "select min(ts_start) min_ts, min(resptime) resptime_min, avg(resptime) resptime_avg,
-             max(resptime) resptime_max, count(*) trans_count, percentile(resptime, 95) perc95
-             from trans
-             where usecase = '[:usecase $row]'
-             and trans_status = 0"
-  set trow [:0 [$db query $query]]
-  log debug "Total trow: $trow"
-  if {[:trans_count $trow] == 0} {
-    $hh table_row "TOTAL" 0 0 0 0 [:trans_count $trow] [count_trans_error $db $usecase "All"]
-  } else {
-    $hh table_row "TOTAL" \
-        [:resptime_min $trow] \
-        [format %.3f [:resptime_avg $trow]] \
-        [format %.3f [:perc95 $trow]] [:resptime_max $trow] \
-        [:trans_count $trow] [count_trans_error $db $usecase "All"]
-  }
-  
-  $hh table_end
 }
 
 proc count_trans_error {db usecase transname} {
