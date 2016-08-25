@@ -3,7 +3,12 @@ package require TclOO
 package require struct::set
 package require ndv
 
-ndv::source_once [file join [info script] .. .. .. lib CExecLimit.tcl]
+# have procs like '=' and ifp available at global namespace.
+use libfp
+
+# CExecLimit gewoon in ndv lib?
+
+# ndv::source_once [file join [info script] .. .. .. lib CExecLimit.tcl]
 
 # @todo filefacet: filename ook als soort facet doen: voor bepaalde kolom een graph/file per kolom-waarde, soort facet dus.
 # @todo in theorie ook meerdere kolommen: dan voor elke combi van waarden een file.
@@ -69,6 +74,7 @@ oo::class create Rwrapper {
     set fcmd [open [file join $dir $cmdfilename] w]
     set Routput "R-output${a_file_addition}-[my format_now_filename].txt"
     set Rlatest "R-latest${a_file_addition}.R"
+	# TODO: heb naast deze pprint nu ook format_code of zo (ivm buildtool). Vergelijkbaar?
     my write [my pprint "setwd('$dir')
       zz = file('$Routput', open = 'wt')
       # sink('$Routput')
@@ -76,7 +82,8 @@ oo::class create Rwrapper {
       sink(zz)
       # cannot split the message stderr stream (, split=TRUE)
       sink(zz, type = 'message')
-      source('~/nicoprj/R/lib/ndvlib.R')
+      # source('~/nicoprj/R/lib/ndvlib.R')
+	  source('[my find_file ndvlib.R ~/nicoprj/R/lib {C:\PCC\Nico\nicoprj\perftools\graph\R\lib}]')
       print.log('R started')
       load.def.libs()
       db = db.open('$db')"]
@@ -447,13 +454,13 @@ oo::class create Rwrapper {
     set dct [dict_flatten $dct "."] ; # so height {min 5 max 7} can be used.
     if {[:x $dct] == "date"} {
       # my dset dct xvar "date_psx"
-      my dset dct xvar "date_Date"
+      my dset dct xvar "date.Date"
       my dset dct xdatatype "dt/date"
     } elseif {[:x $dct] == "ts"} {
-      my dset dct xvar "ts_psx"
+      my dset dct xvar "ts.psx"
       my dset dct xdatatype "dt/ts"
     } elseif {[:x $dct] == "time"} {
-      my dset dct xvar "time_psx"
+      my dset dct xvar "time.psx"
       my dset dct xdatatype "dt/time"
     } else {
       my dset dct xvar [:x $dct]
@@ -589,9 +596,21 @@ oo::class create Rwrapper {
     # windows {return "c:/develop/R/R-2.15.3/bin/i386/Rscript.exe"}
     switch $tcl_platform(platform) {
       unix {return "/usr/bin/Rscript"}
-      windows {return "c:/develop/R/R-2.15.3/bin/x64/Rscript.exe"}
+      windows {
+		return [my find_file Rscript.exe "c:/develop/R/R-2.15.3/bin/x64" {C:\PCC\Util\R\R-3.1.1\bin\x64}]
+	  }
       default {error "Don't know how to find R binary for platform: $tcl_platform(platform)"} 
     }
+  }
+  
+  # TODO: - something similar already somewhere else...
+  method find_file {name args} {
+	foreach dir $args {
+	  if {[file exists [file join $dir $name]]} {
+		 return [file join $dir $name]
+	  }
+	}
+	error "$name not found in: $args"
   }
   
   method cleanup {} {
