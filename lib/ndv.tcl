@@ -92,3 +92,6 @@ source [file join [file dirname [info script]] libio.tcl]
 
 source [file join [file dirname [info script]] CLogger.tcl]
 
+# [2016-08-25 15:45:04] add, surprised not already in here.
+source [file join [file dirname [info script]] CExecLimit.tcl]
+
