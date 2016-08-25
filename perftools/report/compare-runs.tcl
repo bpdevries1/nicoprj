@@ -41,8 +41,9 @@ proc compare_dirs {opt} {
   set todir [file join $rootdir [:todir $opt]]
   file mkdir $todir
   set db [get_compare_db [file join $todir "run-compare.db"] $opt]
-  $db exec "delete from summary"
-  $db exec "delete from testrun"
+  foreach table {summary testrun trans error} {
+    $db exec "delete from $table"
+  }
   set compare_order 0
   foreach dir [split [:dirs $opt] ":"] {
     incr compare_order
@@ -57,16 +58,37 @@ proc copy_run_data {db fromdir compare_order} {
   set fromdbname [file join $fromdir testrunlog.db]
   $db exec "attach database '$fromdbname' as fromDB"
   $db in_trans {
-    set table summary
     set run [file tail $fromdir]
-    log info "Copying table $table"
-    # TODO: fields afleiden uit tabledef van todb.
-    set fields "usecase, resulttype, transshort, min_ts, resptime_min, resptime_avg, resptime_max, resptime_p95, npass, nfail"
-    $db exec "insert into $table (run, $fields) select '$run' run, $fields from fromDB.$table"
+    set tabledefs [$db get_tabledefs]
+    foreach table {summary trans error} {
+      log info "Copying table $table"
+      set flds [:valuefields [dict get $tabledefs $table]]
+      lremove flds run
+      set fields [join $flds ", "]
+      $db exec "insert into $table (run, $fields) select '$run' run, $fields from fromDB.$table"
+    }
     $db insert testrun [vars_to_dict run compare_order]    
+    # set table summary
+
+    # TODO: fields afleiden uit tabledef van todb.
+    # breakpoint
+    # run usecase resulttype transshort min_ts resptime_min resptime_avg resptime_max resptime_p95 npass nfail
+    #set v [:valuefields [dict get $defs summary]]
+    
+    #set fields "usecase, resulttype, transshort, min_ts, resptime_min, resptime_avg, resptime_max, resptime_p95, npass, nfail"
+    #$db exec "insert into $table (run, $fields) select '$run' run, $fields from fromDB.$table"
+    #$db insert testrun [vars_to_dict run compare_order]    
   }
   $db exec "detach database fromDB"
 }
+
+# TODO: to ndv lib.
+proc lremove {listVariable value} {
+  upvar 1 $listVariable var
+  set idx [lsearch -exact $var $value]
+  set var [lreplace $var $idx $idx]
+}
+
 
 proc get_compare_db {db_name opt} {
   set existing_db [file exists $db_name]
@@ -83,6 +105,7 @@ proc get_compare_db {db_name opt} {
   return $db
 }
 
+# TODO: some overlap with liblogdb.
 proc define_tables_compare {db opt} {
   # [2016-07-31 12:01] sec_ts is a representation of a timestamp in seconds since the epoch, no timezone influence.
   $db def_datatype {sec_ts resptime} real
@@ -95,6 +118,27 @@ proc define_tables_compare {db opt} {
   $db def_datatype {npass nfail} integer
   $db add_tabledef summary {id} {run usecase resulttype transshort min_ts resptime_min resptime_avg resptime_max resptime_p95 npass nfail}
   $db add_tabledef testrun {id} {run compare_order}
+
+  set logfile_fields {run logfile_id logfile vuserid}
+  set line_fields {linenr ts sec_ts iteration}
+  set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
+  set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
+
+  # [2016-08-19 19:07] transshort weg, moet dynamisch added worden.
+  # [2016-08-22 10:03:55] fields usecase and transshort used in reports for now, so make sure they always exist.
+  set trans_fields {transname user resptime trans_status usecase transshort}
+
+  # TODO: extra_fields afleiden uit bron-tabellen. Dan in phase 1 de lijst bepalen; daarna tabledef en db/table create, dan in phase 2 data kopieren.
+  $db def_datatype {FTBulk_nrecords	success ntablerows nrecords	submit_count pdf_filesize	pdf_downloadsize} integer
+  set extra_fields {FTBulk_nrecords	success ntablerows nrecords	submit_count pdf_filesize	pdf_downloadsize}
+  
+  
+  $db add_tabledef trans {id} [concat $logfile_fields $line_start_fields \
+                                   $line_end_fields $trans_fields $extra_fields] {flex 1}
+  
+  $db add_tabledef error {id} [concat $logfile_fields $line_fields \
+                                   srcfile srclinenr user errornr errortype details \
+                                   line]
 }
 
 proc report_compare_summary_html {db dir} {
@@ -137,21 +181,11 @@ proc report_compare_summary_html_usecase {db hh row} {
       $hh table_row_start
       $hh table_data [:transshort $trow]
       $hh table_data [:run $trrow]
-      if 0 {
-        $hh table_data [:resptime_min $trrow]
-        $hh table_data [format %.3f [:resptime_avg $trrow]]
-        set clazz [p95_class [:transshort $trrow] [:resptime_p95 $trrow]]
-        $hh table_data [format %.3f [:resptime_p95 $trrow]] 0 "class=\"$clazz\""
-        $hh table_data [:resptime_max $trrow]
-        $hh table_data [:npass $trrow] 
-        $hh table_data [:nfail $trrow]
-      } else {
-        foreach key {:resptime_min :resptime_avg :resptime_p95 :resptime_max} {
-          table_data_comp $hh $atfirst $key $firstrow $trrow
-        }
-        $hh table_data [:npass $trrow] 
-        $hh table_data [:nfail $trrow]
+      foreach key {:resptime_min :resptime_avg :resptime_p95 :resptime_max} {
+        table_data_comp $hh $atfirst $key $firstrow $trrow
       }
+      $hh table_data [:npass $trrow] 
+      $hh table_data [:nfail $trrow]
       $hh table_data {*}[perc_failed [:npass $trrow] [:nfail $trrow]]      
       $hh table_row_end
       set atfirst 0
@@ -183,6 +217,7 @@ proc calc_diff {key firstrow row} {
   format "%+.1f" $diff
 }
 
+# TODO: SLA afh van transactie instelbaar. Ofwel met user-functie zoals onder, ofwel andere specs. Ook de 45 en 3 sec, en de p95.
 proc p95_class {transshort resptime_p95} {
   switch $transshort {
     "Do_upload" {
@@ -208,6 +243,7 @@ proc perc_failed {npass nfail} {
     return [list "0%" 0 ""]
   }
   set perc [expr 100.0 * $nfail / ($npass + $nfail)]
+  # TODO: 5% instelbaar maken.
   if {$perc >= 5.0} {
     set clazz Failure
   } else {
