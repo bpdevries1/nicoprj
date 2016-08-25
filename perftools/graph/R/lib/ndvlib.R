@@ -228,18 +228,19 @@ db.query.dt = function(db, query) {
 # for met evt ook filter erbij.
 df.add.dt = function(df) {
   for (colname in colnames(df)[grep("^ts", colnames(df))]) {
-    df[,paste0(colname,".psx")] = as.POSIXct(strptime(df[,colname], format="%Y-%m-%d %H:%M:%S"))
+    # :%OS - also milliseconds.
+    df[,paste0(colname,".psx")] = as.POSIXct(strptime(df[,colname], format="%Y-%m-%d %H:%M:%OS"))
   }
   if ("date" %in% colnames(df)) {
     # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d"))
     # df$date_date = as.Date(df$date, "%Y-%m-%d")
     # @todo rename field to date_parsed, and ts_parsed, cause format is not Posix always.
-    df$date_Date = as.Date(df$date, "%Y-%m-%d")
+    df$date.Date = as.Date(df$date, "%Y-%m-%d")
     # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d", tz="UTC"))
     # df$date_psx = as.POSIXct(strptime(df$date, format="%Y-%m-%d", tz="GMT"))
   }
   if ("time" %in% colnames(df)) {
-    df$time_psx = as.POSIXct(strptime(df$time, format="%H:%M:%S"))
+    df$time.psx = as.POSIXct(strptime(df$time, format="%H:%M:%S"))
   }
   df
 }
