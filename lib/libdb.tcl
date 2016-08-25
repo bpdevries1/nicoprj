@@ -203,6 +203,12 @@ oo::class create dbwrapper {
     }
   }
 
+  # return all tabledefs for inspection by client code.
+  method get_tabledefs {} {
+    my variable db_tabledefs
+    return $db_tabledefs
+  }
+  
   method add_tabledef_flexfields {} {
     my variable db_tabledefs
     log debug "Add tabledef for flexfields"
