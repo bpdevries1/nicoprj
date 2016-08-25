@@ -167,7 +167,7 @@ proc report_compare_summary_html_usecase {db hh row} {
   # first select transactions ordered by min_ts. Then for each, select data from all runs.
   set query "select distinct transshort from summary order by resulttype, min_ts"
   foreach trow [$db query $query] {
-    set query "select s.run, resptime_min, resptime_avg, resptime_p95, resptime_max, npass, nfail
+    set query "select s.transshort, s.run, resptime_min, resptime_avg, resptime_p95, resptime_max, npass, nfail
              from summary s join testrun t on s.run = t.run
              where usecase = '[:usecase $row]'
              and transshort = '[:transshort $trow]'
@@ -219,6 +219,10 @@ proc calc_diff {key firstrow row} {
 
 # TODO: SLA afh van transactie instelbaar. Ofwel met user-functie zoals onder, ofwel andere specs. Ook de 45 en 3 sec, en de p95.
 proc p95_class {transshort resptime_p95} {
+  assert {$transshort != ""}
+  if {$resptime_p95 > 100} {
+    # breakpoint
+  }
   switch $transshort {
     "Do_upload" {
       if {$resptime_p95 > 45} {

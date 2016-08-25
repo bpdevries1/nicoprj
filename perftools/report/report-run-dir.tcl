@@ -190,11 +190,12 @@ proc insert_report_summary_usecase {db row} {
     log debug "summary trow: $trow"
     $db insert summary [dict merge $row $trow [dict create nfail [count_trans_error $db $usecase [:transname $trow]]]]
   }
-  # Transactions with only errors, mostly synthetic transactions
+  # Transactions with only errors, mostly synthetic transactions.
+  # so not 0 (ok) or 4 (warning, eg no items found)
   set query "select transname, '2-Fail' resulttype, transshort, min(ts_start) min_ts, count(*) nfail
              from trans t1
              where usecase = '$usecase'
-             and trans_status <> 0
+             and trans_status not in (0,4)
              and not transname in (
                select transname
                from trans
@@ -277,29 +278,11 @@ proc report_summary_html_usecase {db hh row} {
   $hh table_end
 }
 
-proc report_summary_old {db dir} {
-  set html_name [file join $dir "report-summary.html"]
-  if {[file exists $html_name]} {
-    # return ; # or maybe a clean option to start anew
-  }
-  io/with_file f [open $html_name w] {
-    set hh [ndv::CHtmlHelper::new]
-    $hh set_channel $f
-    $hh write_header "Vuser log report" 0
-    # TODO: table per usecase.
-    set query "select usecase, min(ts_start) min_ts from trans group by 1 order by 2"
-    foreach row [$db query $query] {
-      report_summary_usecase $db $hh $row
-    }
-    $hh write_footer
-  }
-}
-
 proc count_trans_error {db usecase transname} {
   if {$transname == "All"} {
-    set query "select count(*) cnt from trans where usecase='$usecase' and trans_status <> 0"
+    set query "select count(*) cnt from trans where usecase='$usecase' and trans_status not in (0,4)"
   } else {
-    set query "select count(*) cnt from trans where usecase='$usecase' and transname = '$transname' and trans_status <> 0"   
+    set query "select count(*) cnt from trans where usecase='$usecase' and transname = '$transname' and trans_status not in (0,4)"   
   }
  
   set res [$db query $query]
