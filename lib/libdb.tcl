@@ -325,6 +325,28 @@ oo::class create dbwrapper {
     my prepare_insert_statements
     log debug "Prepared statement"
   }
+
+  # return dict: (k:table, v:fielddefs as list) determined from source DB's
+  # a fielddef is either just a fieldname, or a fieldname/datatype tuple, as in
+  # add_tabledef.
+  # use table flex_fields (persistent), not the in-memory tabledef structure, is
+  # not up-to-date.
+  #
+  # TODO: determine invariants for flexfields, in table as well as in field defs.
+  # currently both do not always reflect current state.
+  method flex_fields {} {
+    if {![my table_exists flexfields]} {
+      return [dict create]
+    }
+    set query "select flextable, flexfield, flexdatatype from flexfields order by 1,2"
+    set rows [my query $query]
+    # TODO: could use FP to put in right return format. But hard to beat this lappend.
+    set res [dict create]
+    foreach row $rows {
+      dict lappend res [:flextable $row] [list [:flexfield $row] [:flexdatatype $row]]
+    }
+    return $res
+  }
   
   # some helpers/info
   # @note this one works only for the main DB, not for attached DB's.
