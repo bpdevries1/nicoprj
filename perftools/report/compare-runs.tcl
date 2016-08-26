@@ -37,10 +37,11 @@ proc main {argv} {
 }
 
 proc compare_dirs {opt} {
+  set flex_fields [det_flex_fields $opt]
   set rootdir [:rootdir $opt]
   set todir [file join $rootdir [:todir $opt]]
   file mkdir $todir
-  set db [get_compare_db [file join $todir "run-compare.db"] $opt]
+  set db [get_compare_db [file join $todir "run-compare.db"] $opt $flex_fields]
   foreach table {summary testrun trans error} {
     $db exec "delete from $table"
   }
@@ -49,12 +50,22 @@ proc compare_dirs {opt} {
     incr compare_order
     copy_run_data $db [file join $rootdir $dir] $compare_order
   }
-  # TODO: make summary html with all results.
   report_compare_summary_html $db $todir
 }
 
+proc det_flex_fields {opt} {
+  set rootdir [:rootdir $opt]
+  set res [dict create]
+  foreach dir [split [:dirs $opt] ":"] {
+    set fromdbname [file join $rootdir $dir testrunlog.db]
+    set db [dbwrapper new $fromdbname]
+    set res [dict merge $res [$db flex_fields]]
+    $db close
+  }
+  return $res
+}
+
 proc copy_run_data {db fromdir compare_order} {
-  # attach other db.
   set fromdbname [file join $fromdir testrunlog.db]
   $db exec "attach database '$fromdbname' as fromDB"
   $db in_trans {
@@ -64,36 +75,30 @@ proc copy_run_data {db fromdir compare_order} {
       log info "Copying table $table"
       set flds [:valuefields [dict get $tabledefs $table]]
       lremove flds run
-      set fields [join $flds ", "]
-      $db exec "insert into $table (run, $fields) select '$run' run, $fields from fromDB.$table"
+      set fields [join [field_names_only $flds] ", "]
+      set query "insert into $table (run, $fields) select '$run' run, $fields
+                 from fromDB.$table"
+      log debug "query: $query"
+      $db exec $query
     }
     $db insert testrun [vars_to_dict run compare_order]    
-    # set table summary
-
-    # TODO: fields afleiden uit tabledef van todb.
-    # breakpoint
-    # run usecase resulttype transshort min_ts resptime_min resptime_avg resptime_max resptime_p95 npass nfail
-    #set v [:valuefields [dict get $defs summary]]
-    
-    #set fields "usecase, resulttype, transshort, min_ts, resptime_min, resptime_avg, resptime_max, resptime_p95, npass, nfail"
-    #$db exec "insert into $table (run, $fields) select '$run' run, $fields from fromDB.$table"
-    #$db insert testrun [vars_to_dict run compare_order]    
   }
   $db exec "detach database fromDB"
 }
 
-# TODO: to ndv lib.
-proc lremove {listVariable value} {
-  upvar 1 $listVariable var
-  set idx [lsearch -exact $var $value]
-  set var [lreplace $var $idx $idx]
+# remove datatype defs from fields, just return names.
+proc field_names_only {fields} {
+  set res [list]
+  foreach el $fields {
+    lappend res [:0 $el]
+  }
+  return $res
 }
 
-
-proc get_compare_db {db_name opt} {
+proc get_compare_db {db_name opt flex_fields} {
   set existing_db [file exists $db_name]
   set db [dbwrapper new $db_name]
-  define_tables_compare $db $opt
+  define_tables_compare $db $opt $flex_fields
   $db create_tables 0 ; # 0: don't drop tables first. Always do create, eg for new table defs. 1: drop tables first.
   if {!$existing_db} {
     log info "New db: $db_name, create tables"
@@ -105,8 +110,11 @@ proc get_compare_db {db_name opt} {
   return $db
 }
 
-# TODO: some overlap with liblogdb.
-proc define_tables_compare {db opt} {
+# TODO: some overlap with liblogdb. Tables here include a run field.
+# @param extrafields is a dict (k:table, v:fielddefs as list) determined from source DB's
+# a fielddef is either just a fieldname, or a fieldname/datatype tuple, as in add_tabledef.
+# for now, only extra fields for trans table.
+proc define_tables_compare {db opt flex_fields} {
   # [2016-07-31 12:01] sec_ts is a representation of a timestamp in seconds since the epoch, no timezone influence.
   $db def_datatype {sec_ts resptime} real
   $db def_datatype {.*id filesize .*linenr.* trans_status iteration.* compare_order} integer
@@ -127,14 +135,11 @@ proc define_tables_compare {db opt} {
   # [2016-08-19 19:07] transshort weg, moet dynamisch added worden.
   # [2016-08-22 10:03:55] fields usecase and transshort used in reports for now, so make sure they always exist.
   set trans_fields {transname user resptime trans_status usecase transshort}
-
-  # TODO: extra_fields afleiden uit bron-tabellen. Dan in phase 1 de lijst bepalen; daarna tabledef en db/table create, dan in phase 2 data kopieren.
-  $db def_datatype {FTBulk_nrecords	success ntablerows nrecords	submit_count pdf_filesize	pdf_downloadsize} integer
-  set extra_fields {FTBulk_nrecords	success ntablerows nrecords	submit_count pdf_filesize	pdf_downloadsize}
-  
-  
+  set trans_flex_fields [dict_get $flex_fields trans]
+    
   $db add_tabledef trans {id} [concat $logfile_fields $line_start_fields \
-                                   $line_end_fields $trans_fields $extra_fields] {flex 1}
+                                   $line_end_fields $trans_fields $trans_flex_fields] \
+      {flex 1}
   
   $db add_tabledef error {id} [concat $logfile_fields $line_fields \
                                    srcfile srclinenr user errornr errortype details \
