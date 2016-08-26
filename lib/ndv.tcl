@@ -17,6 +17,11 @@ proc test_log {} {
   puts "res: $res"
 }
 
+# TODO: source all files in this dir with a glob/source_once.
+# problem is order, some need to go first. Should be solved by using source_once
+# in those files.
+# should also do CLogger at the end again, for log-proc also defined in math::functions
+
 # there are some inter dependencies, so explicitly source other files in the right order.
 source [file join [file dirname [info script]] source_once.tcl]
 
@@ -95,3 +100,5 @@ source [file join [file dirname [info script]] CLogger.tcl]
 # [2016-08-25 15:45:04] add, surprised not already in here.
 source [file join [file dirname [info script]] CExecLimit.tcl]
 
+# [2016-08-25 22:30] source_once is included at the first, so available here.
+::ndv::source_once libmisc.tcl
