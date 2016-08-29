@@ -88,6 +88,9 @@ proc define_tables {db opt} {
   # summary table, per usecase and transaction. resptime fields already defined als real.
   $db def_datatype {npass nfail} integer
   $db add_tabledef summary {id} {usecase resulttype transshort min_ts resptime_min resptime_avg resptime_max resptime_p95 npass nfail}
+
+  # percentile table, for transactions, usecases and total. Only successful transactions. Transshort and usecase can be 'Total'
+  $db add_tabledef percentiles {id} {usecase transshort perc resptime}
   
   # flex tables can have extra fields/columns added, depending on dict's given to
   # insert proc.
