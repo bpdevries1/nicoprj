@@ -158,6 +158,7 @@ proc href_resources {db hh vuserid iteration user transname} {
 proc report_summary {db dir} {
   # call orig for now
   insert_report_summary $db $dir
+  insert_report_percentiles $db $dir
   report_summary_html $db $dir
 }
 
@@ -167,6 +168,50 @@ proc insert_report_summary {db dir} {
   set query "select usecase, min(ts_start) min_ts from trans group by 1 order by 2"
   foreach row [$db query $query] {
     insert_report_summary_usecase $db $row
+  }
+}
+
+proc insert_report_percentiles {db dir} {
+  $db exec "delete from percentiles"
+  set query "select distinct usecase, transshort from trans where trans_status = 0"
+  set usecase ""
+  $db in_trans {
+    foreach row [$db query $query] {
+      log debug "insert percentile for row: $row"
+      insert_report_percentiles_usecase_trans $db $row [:usecase $row] [:transshort $row]
+      if {[:usecase $row] != $usecase} {
+        insert_report_percentiles_usecase_trans $db $row [:usecase $row] "Total"
+        set usecase [:usecase $row]
+      }
+    }
+    insert_report_percentiles_usecase_trans $db $row "Total" "Total"
+  }
+}
+
+# options:
+# * both usecase, trans filled in: calc percentiles for specific trans within usecase
+# * usecase filled in, trans is 'Total': calc percentiles for usecase, over all transactions.
+# * both usecase and trans are 'Total': calc percentiles over all usecases and transactions.
+# use percentile function (embedded C function). Could be more efficient with own query.
+proc insert_report_percentiles_usecase_trans {db dir usecase transshort} {
+  set perc 5
+  while {$perc <= 100} {
+    set query "select percentile(resptime, $perc) resptime
+               from trans
+               where usecase like '[to_like $usecase]' and transshort like '[to_like $transshort]'
+               and trans_status = 0"
+    set res [$db query $query]
+    set resptime [:resptime [:0 $res]]
+    $db insert percentiles [vars_to_dict usecase transshort perc resptime]
+    incr perc 5
+  }
+}
+
+proc to_like {str} {
+  if {$str == "Total"} {
+    return "%"
+  } else {
+    return $str
   }
 }
 

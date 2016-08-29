@@ -18,5 +18,9 @@ rem del c:\PCC\Nico\Testruns\MCPv3\vugen-2016-08-23--14-26-23\*.html
 rem tclsh read-report-dir.tcl -all -debug -dir c:/PCC/Nico/Testruns/MCPv3/vugen-2016-08-23--14-26-23
 
 rem tclsh read-report-dir.tcl -summary -debug -dir c:/PCC/Nico/Testruns/MCPv3/run670
-tclsh read-report-dir.tcl -summary -dir c:/PCC/Nico/Testruns/MCPv3/run677-uat
-tclsh read-report-dir.tcl -summary -dir c:/PCC/Nico/Testruns/MCPv3/run674-uatv3
+rem tclsh read-report-dir.tcl -summary -dir c:/PCC/Nico/Testruns/MCPv3/run677-uat
+rem tclsh read-report-dir.tcl -summary -dir c:/PCC/Nico/Testruns/MCPv3/run674-uatv3
+
+
+rem tclsh read-report-dir.tcl -debug -summary -dir c:/PCC/Nico/Testruns/MCPv3-2/run677-uat
+tclsh read-report-dir.tcl -debug -summary -dir c:/PCC/Nico/Testruns/MCPv3-2/run674-uatv3
