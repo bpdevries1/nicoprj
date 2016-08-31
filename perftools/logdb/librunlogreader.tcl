@@ -14,13 +14,16 @@ use libfp
 # set VUSER_END_ITERATION 1000
 
 # return list of all started transactions where no end transaction was seen.
+# set both start and end fields to start row, so time stamps are always filled.
 proc make_trans_not_finished {started_transactions} {
   set res [list]
   set line_fields {linenr ts sec_ts iteration}
   set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
+  set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
   foreach row [dict values $started_transactions] {
-    set d [dict_rename $row $line_fields $line_start_fields]
-    # $db insert trans $d
+    set dstart [dict_rename $row $line_fields $line_start_fields]
+    set dend [dict_rename $row $line_fields $line_end_fields]
+    set d [dict merge $dstart $dend]
     lappend res $d
   }
   return $res
