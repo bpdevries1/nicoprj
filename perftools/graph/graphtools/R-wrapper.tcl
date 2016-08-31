@@ -357,7 +357,7 @@ oo::class create Rwrapper {
     switch $datatype {
       dt/date {str "%Y-%m-%d"}
       dt/time {str "%H:%M:%S"}
-      dt/ts {str "%Y-%m-%d %H:%M:%S"}
+      dt/ts {str "%Y-%m-%d\n%H:%M:%S"}
     }
   }
   
