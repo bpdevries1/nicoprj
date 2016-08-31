@@ -18,6 +18,7 @@ use libfp
 proc get_run_db {db_name opt} {
   global pubsub
   set ssl [:ssl $opt]
+  if {$ssl == ""} {set ssl 0}
   #breakpoint
   set existing_db [file exists $db_name]
   set db [dbwrapper new $db_name]
@@ -47,6 +48,7 @@ proc get_run_db {db_name opt} {
 proc define_tables {db opt} {
   # [2016-07-31 12:01] sec_ts is a representation of a timestamp in seconds since the epoch
   set ssl [:ssl $opt]
+  if {$ssl == ""} {set ssl 0}
   $db def_datatype {sec_ts resptime} real
   $db def_datatype {.*id filesize .*linenr.* trans_status iteration.*} integer
   
