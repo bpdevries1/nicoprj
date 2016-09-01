@@ -178,13 +178,13 @@ proc insert_report_percentiles {db dir} {
   $db in_trans {
     foreach row [$db query $query] {
       log debug "insert percentile for row: $row"
-      insert_report_percentiles_usecase_trans $db $row [:usecase $row] [:transshort $row]
+      insert_report_percentiles_usecase_trans $db [:usecase $row] [:transshort $row]
       if {[:usecase $row] != $usecase} {
-        insert_report_percentiles_usecase_trans $db $row [:usecase $row] "Total"
+        insert_report_percentiles_usecase_trans $db [:usecase $row] "Total"
         set usecase [:usecase $row]
       }
     }
-    insert_report_percentiles_usecase_trans $db $row "Total" "Total"
+    insert_report_percentiles_usecase_trans $db "Total" "Total"
   }
 }
 
@@ -193,7 +193,7 @@ proc insert_report_percentiles {db dir} {
 # * usecase filled in, trans is 'Total': calc percentiles for usecase, over all transactions.
 # * both usecase and trans are 'Total': calc percentiles over all usecases and transactions.
 # use percentile function (embedded C function). Could be more efficient with own query.
-proc insert_report_percentiles_usecase_trans {db dir usecase transshort} {
+proc insert_report_percentiles_usecase_trans {db usecase transshort} {
   set perc 5
   while {$perc <= 100} {
     set query "select percentile(resptime, $perc) resptime
@@ -263,10 +263,14 @@ proc insert_report_summary_usecase {db row} {
   set trow [:0 [$db query $query]]
   log debug "Total trow: $trow"
   set dct_error [dict create nfail [count_trans_error $db $usecase "All"]]
-  if {[:trans_count $trow] == 0} {
+  if {($trow == {}) || ([:npass $trow] == 0)} {
+    #log debug "Empty trow"
+    #breakpoint
     $db insert summary [dict merge $row $trow $dct_error \
                             [dict_setvals 0 resptime_min resptime_avg resptime_p95 resptime_max]]
   } else {
+    #log debug "Non-empty trow"
+    #breakpoint
     $db insert summary [dict merge $row $trow $dct_error]
   }
 }
