@@ -98,6 +98,12 @@ proc ini_add_no_dups {ini header line} {
   return $ini
 }
 
+proc ini_headers {ini} {
+  # find_proc has trouble with proc names starting with :
+  make_dict_accessor get_header header
+  map get_header $ini
+}
+
 proc ini_lines {ini header} {
   foreach d $ini {
     if {[:header $d] == $header} {

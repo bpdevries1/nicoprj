@@ -150,9 +150,13 @@ proc check_script {} {
     }
   }
   set ini [ini_read default.cfg]
-  check_setting $ini WEB FailNonCriticalItem 1
-  check_setting $ini WEB ProxyUseProxy 0
-  check_setting $ini WEB ProxyUseProxyServer 0
+  set headers [ini_headers $ini]
+  if {[lsearch -exact $headers "WEB"] >= 0} {
+    # Only check for WEB scripts, so with a [WEB] header
+    check_setting $ini WEB FailNonCriticalItem 1
+    check_setting $ini WEB ProxyUseProxy 0
+    check_setting $ini WEB ProxyUseProxyServer 0
+  }
 }
 
 proc check_setting {ini header key value} {
