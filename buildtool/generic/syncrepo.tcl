@@ -272,8 +272,9 @@ task get {Get a repo lib file to local dir
 # if backup==1, create a backup of the lib (in .orig) before getting new repo version.
 proc file_copy_base {src target base {backup 0}} {
   if {$backup} {
+    # breakpoint
     file copy -force $src [tempname $target]
-    commit_file $target
+    commit_file $target {mtime 1}
   } else {
     file copy -force $src $target    
   }

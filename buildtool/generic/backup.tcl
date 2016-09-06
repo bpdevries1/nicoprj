@@ -36,7 +36,8 @@ set EMPTY_CONTENTS "*** EMPTY ***"
 # check if filename is different from temp version:
 # different -> do action as described
 # same -> remove temp file.
-proc commit_file {filename} {
+# opt: dict, can contain key: mtime, value 1: if set, also check mtimes and copy/backup iff different. This is used for get -force.
+proc commit_file {filename {opt {}}} {
   global _origdir EMPTY_CONTENTS
   if {$filename == ""} {
     error "Empty filename: $filename"
@@ -54,7 +55,8 @@ proc commit_file {filename} {
     return
   }
   # if temp does not exist, this is an error.
-  if {[read_file $filename] == [read_file [tempname $filename]]} {
+  # if {[read_file $filename] == [read_file [tempname $filename]]} {}
+  if {![file_changed $filename $opt]} {
     # files are the same, no changes, delete temp file.
     log debug "Unchanged file: $filename"
     file delete [tempname $filename]
@@ -71,6 +73,23 @@ proc commit_file {filename} {
       file rename $filename $backupname
     }
     file rename [tempname $filename] $filename
+  }
+}
+
+proc file_changed {filename {opt {}}} {
+  set mtime [:mtime $opt]
+  if {[read_file $filename] == [read_file [tempname $filename]]} {
+    if {$mtime == 1} {
+      if {[file mtime $filename] == [file mtime [tempname $filename]]} {
+        return 0
+      } else {
+        return 1
+      }
+    } else {
+      return 0
+    }
+  } else {
+    return 1
   }
 }
 
