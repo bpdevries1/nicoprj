@@ -29,7 +29,7 @@ namespace path {::tcl::mathop}
 namespace eval ::libfp {
   namespace export = != and or ifp seq empty? cond_1 cond not not= \
       str identity fn lstride regsub_fn map filter reduce repeat range \
-      lambda_to_proc proc_to_lambda
+      lambda_to_proc proc_to_lambda find_proc
 
   # namespace path {::tcl::mathop ::tcl::mathfunc}
   namespace path {::tcl::mathop}
