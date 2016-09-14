@@ -29,7 +29,7 @@ namespace path {::tcl::mathop}
 namespace eval ::libfp {
   namespace export = != and or ifp seq empty? cond_1 cond not not= \
       str identity fn lstride regsub_fn map filter reduce repeat range \
-      lambda_to_proc proc_to_lambda find_proc
+      lambda_to_proc proc_to_lambda find_proc first second count rest
 
   # namespace path {::tcl::mathop ::tcl::mathfunc}
   namespace path {::tcl::mathop}
@@ -156,6 +156,24 @@ proc str {args} {
 # clj fn is also called identity, not iden or id
 proc identity {a} {
   return $a 
+}
+
+# [2016-07-30 10:06] TODO: add clj sequence functions like first, rest, second, count.
+# those instead of current :# :0 and :1 as defined in libdict.tcl.
+proc count {l} {
+  llength $l
+}
+
+proc first {l} {
+  lindex $l 0
+}
+
+proc second {l} {
+  lindex $l 1
+}
+
+proc rest {l} {
+  lrange $l 1 end
 }
 
 # @todo functies om een lambda naar een proc om te zetten en vice versa

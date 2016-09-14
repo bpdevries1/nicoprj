@@ -184,6 +184,7 @@ proc unknown args {
 
 # 26-2-2014 also some list helpers here. Should be in separate lib, but keep here, because names also start with :
 # don't use #, 0, 1 without : => # is a comment, others would be too confusing.
+# [2016-09-14 21:43] those should be deprecated, use count, first in libfp, similar to clojure.
 proc :# {l} {
   llength $l
 }
