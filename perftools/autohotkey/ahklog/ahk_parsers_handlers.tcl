@@ -61,13 +61,15 @@ proc def_handlers_ahk {} {
     switch [:topic $item] {
       iter_start_finish {
         if {[:start_finish $item] == "Start"} {
-          # TODO: check if all transactions have finished, empty list.
+          # TODO: check if all transactions have finished, empty list. Like:
+          # res_add res {*}[make_trans_not_finished $started_transactions]
+          # preferably generic code, share with vugen code.
           # assert {[:# $transactions] == 0}
           set iteration [:iteration $item]
           set transactions [dict create]
           set iteration_params [dict create]
         } else {
-          # TODO: maybe finish transactions
+          # TODO: maybe also finish transactions here.
           # assert {[:# $transactions] == 0}
           set user "NONE"
           set iteration_params [dict create]
