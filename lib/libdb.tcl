@@ -347,6 +347,12 @@ oo::class create dbwrapper {
     }
     return $res
   }
+
+  # return list of all known tables in database
+  method tables {} {
+    my variable conn
+    $conn tables
+  }
   
   # some helpers/info
   # @note this one works only for the main DB, not for attached DB's.
