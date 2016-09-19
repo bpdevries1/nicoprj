@@ -156,6 +156,7 @@ proc check_script {} {
     check_setting $ini WEB FailNonCriticalItem 1
     check_setting $ini WEB ProxyUseProxy 0
     check_setting $ini WEB ProxyUseProxyServer 0
+    check_setting $ini General ContinueOnError 0
   }
 }
 
