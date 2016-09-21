@@ -68,17 +68,30 @@ proc readlogfile_new_coro {logfile db ssl split_proc} {
   }
 }
 
+# replace resptime=1,642, status= with resptime=1.642, status=
+# so <digit>,<digit>
+# [2016-09-20 14:21:05] nog niet goed, zie laatste logfile.
+proc replace_decimal_comma {fields} {
+  regsub {resptime=-?(\d+),(\d+),} $fields {resptime=\1.\2,} fields2
+  return $fields2
+}
+
 proc def_parsers {} {
 
   def_parser trans_line {
     # [2016-08-23 17:11:14] wil achter (ignored) ts aan het einde een ? in de regexp zetten, maar dan meegenomen in de vorige, en timestamp
     # aan iteration vastgeplakt.
-    if {[regexp {: \[([0-9 :.-]+)\] (trans=.+?)( \[[0-9/ :-]+])} $line z ts fields]} {
+    # functions.c(399): [2016-09-21 13:36:59.379] trans=RCC_IncorrectPass_newuser, user=3002867492, resptime=0.000, status=1, iteration=2 [Time:2016-09-21 13:36:59]
+    if {[regexp {: \[([0-9 :.-]+)\] (trans=.+?)( \[[Time0-9/ :-]+])} $line z ts fields]} {
+      set fields [replace_decimal_comma $fields]
       set nvpairs [log2nvpairs $fields]; # possibly give whole line to log2nvpairs
       dict set nvpairs ts $ts
       dict set nvpairs sec_ts [parse_ts [:ts $nvpairs]]
+      # [2016-09-21 16:24:52] Vraag of onderstaande wel zin heeft, als eerder al op comma de velden/waarden bepaald zijn.
       dict set nvpairs resptime [regsub -all {,} [:resptime $nvpairs] "."]
       return [dict_rename $nvpairs {trans status} {transname trans_status}]
+    } elseif {[regexp {trans=} $line]} {
+      breakpoint
     } else {
       return ""
     }
