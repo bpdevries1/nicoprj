@@ -3,6 +3,7 @@
 # TODO: als -do is meegegeven, dan actie opslaan (in repo, want ook voor andere scripts). dan optie om deze te tonen en te kiezen.
 # en mss ook een naam te geven.
 # TODO: optie om replace wel/niet in libs uit te voeren, of alleen in actions. Default mss ook alleen in actions.
+# TODO: zonder opties lijkt allrec gekozen te worden, en dan foutmelding op nog implemented (dus schade is beperkt)
 task regsub {Regular epression replace} {
   {do "Really perform regsub actions (dry run otherwise)"}
   {all "Handle all files (be careful!)"}
