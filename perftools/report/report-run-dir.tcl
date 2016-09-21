@@ -116,7 +116,7 @@ proc report_iter_user {db row hh} {
              and iteration = [:iteration_start $row] + 0
              and user = '[:user $row]'
              and logfile = '[:logfile $row]'
-             order by ts"
+             order by ts, srclinenr, linenr"
   set res [$db query $query]
   if {[:# $res] > 0} {
     $hh table_start
