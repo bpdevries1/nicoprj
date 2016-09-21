@@ -8,7 +8,7 @@ $log set_file "logs/[file tail [info script]]-[clock format [clock seconds] -for
 
 proc main {argv} {
   set options {
-    {dir.arg "c:/PCC/Nico/VuGen" "Directory with VuGen scripts"}
+    {dir.arg "c:/PCC/Nico/raboprj/VuGen" "Directory with VuGen scripts"}
     {db.arg "" "SQLite DB location with run results (pas_niet_correct)"}
   }
   set usage ": [file tail [info script]] \[options] :"
