@@ -33,7 +33,7 @@ use libmacro;                   # syntax_quote
 
 # separate function, to be called once, even when handling multiple log files.
 proc define_logreader_handlers {} {
-  log info "define_logreader_handlers: start"
+  log debug "define_logreader_handlers: start"
   # of toch een losse namespace waar deze dingen in hangen?
 
   reset_parsers_handlers
@@ -91,11 +91,34 @@ proc def_parsers {} {
       dict set nvpairs resptime [regsub -all {,} [:resptime $nvpairs] "."]
       return [dict_rename $nvpairs {trans status} {transname trans_status}]
     } elseif {[regexp {trans=} $line]} {
-      breakpoint
+      # [2016-09-22 09:50:38] nu 2 varianten, dus geen breakpoint.
+      # breakpoint
     } else {
       return ""
     }
   }
+
+  # [2016-09-22 09:47:49] deze nog even voor oude logs, maar deprecated.
+  def_parser trans_line {
+    # [2016-08-23 17:11:14] wil achter (ignored) ts aan het einde een ? in de regexp zetten, maar dan meegenomen in de vorige, en timestamp
+    # aan iteration vastgeplakt.
+    # functions.c(335): [2016-04-04 13:38:34] [1459769914] trans=RCC_Login_newuser, user=3002305652, resptime=3.369, status=0, iteration=1 [04/04/16 13:38:34] \r [MsgId: MMSG-17999]
+    if {[regexp {: \[([0-9 :.-]+)\] \[\d+\] (trans=.+?)( \[[Time0-9/ :-]+])} $line z ts fields]} {
+      set fields [replace_decimal_comma $fields]
+      set nvpairs [log2nvpairs $fields]; # possibly give whole line to log2nvpairs
+      dict set nvpairs ts $ts
+      dict set nvpairs sec_ts [parse_ts [:ts $nvpairs]]
+      # [2016-09-21 16:24:52] Vraag of onderstaande wel zin heeft, als eerder al op comma de velden/waarden bepaald zijn.
+      dict set nvpairs resptime [regsub -all {,} [:resptime $nvpairs] "."]
+      return [dict_rename $nvpairs {trans status} {transname trans_status}]
+    } elseif {[regexp {trans=} $line]} {
+      # [2016-09-22 09:50:38] nu 2 varianten, dus geen breakpoint.
+      # breakpoint
+    } else {
+      return ""
+    }
+  }
+
 
   # functions.c(399): [2016-08-23 14:20:16.134] Trans param: nrecords = 200 [08/23/16 14:20:16]
 
@@ -159,7 +182,7 @@ proc def_handlers {} {
   # convert trans_line => trans
   def_handler {bof eof trans_line trans_param} trans {
     # init
-    set user ""; set iteration 0; set split_proc "<none>"
+    set user ""; set iteration 0; set split_proc "<none>"; set trans_params [dict create]
   } {
     # body/loop
     log debug "trans-handler - assert topic [:topic $item], item: $item"
@@ -197,6 +220,7 @@ proc def_handlers {} {
             log debug "trans handler: adding trans: $tr"
             res_add res $tr
             dict unset started_transactions [:transname $item]
+            # TODO: also unset trans_params? Only if they really are trans params, not iteration params.
           }
           1 {
             # synthetic error, just insert.
