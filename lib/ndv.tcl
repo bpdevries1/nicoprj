@@ -92,6 +92,8 @@ source [file join [file dirname [info script]] libdatetime.tcl]
 
 source [file join [file dirname [info script]] libio.tcl]
 
+source [file join [file dirname [info script]] libinifile.tcl]
+
 # [2016-07-23 21:31] CLogger as the last one, because ir defines proc log, which is
 # defined before in Tclx.
 
