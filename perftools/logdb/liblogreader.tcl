@@ -32,12 +32,20 @@ proc readlogfile_coro {logfile {opt ""}} { #
     set linenr 0
     while {[gets $f line] >= 0} {
       incr linenr
+      set line [remove_cr $line]; # remove windows \r from end of line
       handle_parsers $to_publish $logfile $line $linenr
       handle_to_publish $to_publish
     }
   }
   $to_publish put [dict create topic eof logfile $logfile]; # handle eof topic
   handle_to_publish $to_publish
+}
+
+proc remove_cr {line} {
+  if {[regexp {^(.*)\r$} $line z line2]} {
+    return $line2
+  }
+  return $line
 }
 
 # define a simple regexp parser (compare Splunk)
@@ -113,7 +121,7 @@ proc handle_parsers {to_publish logfile line linenr} {
   foreach parser $parsers {
     # TODO: maybe also add full line as a key in the dict?
     set res [add_topic_file_linenr [[:proc_name $parser] $line $linenr] \
-                 [:topic $parser] $logfile $linenr]
+                 [:topic $parser] $logfile $linenr $line]
     # result should be a dict, including a topic field for pub/sub (coroutine)
     # channels. Also, more than one parser could produce a result. A parser produces
     # max 1 result for 1 topic, handlers could split these into multiple results.
@@ -149,11 +157,13 @@ proc handle_to_publish {to_publish} {
 }
 
 # post process all parser results to add topic, logfile and linenr
-proc add_topic_file_linenr {item topic logfile linenr} {
+proc add_topic_file_linenr {item topic logfile linenr line} {
   if {$item == ""} {
     return ""
   }
-  dict merge $item [vars_to_dict topic logfile linenr]
+  #log debug "add_topic_file_linenr"
+  #breakpoint
+  dict merge $item [vars_to_dict topic logfile linenr line]
 }
 
 # post process all handler/maker results to add just topic
