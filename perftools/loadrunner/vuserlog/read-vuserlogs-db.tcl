@@ -55,7 +55,7 @@ namespace eval ::vuserlog {
   log debug "Defining read_logfile_dir, vugen version."
 
   proc can_read? {filename} {
-    log debug "Calling ahk::can_read? for: $filename"
+    log debug "Calling vuserlog::can_read? for: $filename"
     # regexp {ahk} [file tail $filename]
     # logfile.txt could be in any dir, eg. combination of ahk/vugen
     if {[regexp {output.txt} [file tail $filename]]} {
