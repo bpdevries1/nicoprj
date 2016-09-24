@@ -18,7 +18,7 @@ proc use {ns {what *}} {
 
 # should be able to find all exported commands in a namespace.
 # until then:
-proc require {ns as} {
+proc require_old {ns as} {
   namespace import ::${ns}::*
   foreach el [namespace import] {
     set el_org [namespace origin $el]
@@ -31,5 +31,28 @@ proc require {ns as} {
       # puts "From other package, ignoring: $el_org"
     }
   }
+}
+
+proc require {ns as} {
+  foreach el [get_ns_imports $ns] {
+    interp alias {} "${as}/$el" {} ${ns}::${el}
+  }
+}
+
+
+# [2016-09-24 12:12] 
+# get names of exported commands in namespace.
+# namespace import should support this, but have not found a way to just query
+proc get_ns_imports {ns} {
+  namespace eval ::__TEMPNS__ [syntax_quote {
+    namespace import ::~$ns::*
+    #set l [namespace import]
+    #puts "l: $l"
+    set ::__TEMP_IMPORT__ [namespace import]
+    # return $l
+  }]
+  # puts "abc"
+  namespace delete ::__TEMPNS__
+  return $::__TEMP_IMPORT__
 }
 
