@@ -45,7 +45,6 @@ namespace eval ::vugensource {
     set name [file tail $path]
     set language "C"
 
-    # TODO: read lines
     $db in_trans {
       set sourcefile_id [$db insert sourcefile [vars_to_dict path name mtime \
                                                     size language]]
