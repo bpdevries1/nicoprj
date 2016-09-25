@@ -284,7 +284,7 @@ namespace eval ::ndv {
       return $text			
     }
 		
-    # 30-6-2010 NdV even niet duidelijk waar deze voor is.
+    # [2016-09-25 20:38] lijkt ervoor om .js voor collapse e.d. te kopieren.
     public method copy_files_to_output {output_path} {
       foreach filename [glob -directory [file join $::ndv::lib_path js] *] {
         file copy -force $filename $output_path 
