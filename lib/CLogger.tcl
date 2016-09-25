@@ -232,6 +232,8 @@ proc assert_callback {args} {
   set str [join $args " "]
   catch {log error $str}
   puts stderr $str
+  # TODO: make conditional on some setting, don't want this in production, would stop processing.
+  breakpoint
   return -code error
 }
 
