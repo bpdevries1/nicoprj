@@ -4,7 +4,7 @@ package require ndv
 
 require libinifile ini
 
-ndv::source_once sourcedepdb.tcl
+ndv::source_once sourcedepdb.tcl htmloutput.tcl
 
 use libfp
 
@@ -37,15 +37,17 @@ proc sourcedep {opt} {
   file mkdir $targetdir
   set dbname [file join $targetdir [:db $opt]]
   # [2016-09-24 10:34] voorlopig altijd db delete.
-  delete_database $dbname
-  set db [get_sourcedep_db $dbname $opt]
-  read_sources $db $opt
-  det_calls $db $opt
-  det_include_refs $db
-  # TODO: and then make a graphviz/dot
+  if 0 {
+    delete_database $dbname
+    set db [get_sourcedep_db $dbname $opt]
+    read_sources $db $opt
+    det_calls $db $opt
+    det_include_refs $db
+  } else {
+    set db [get_sourcedep_db $dbname $opt]
+  }
   graph_include_refs $db $opt
-  # TODO: 2nd fase here too: after all proc names are known, read files again and check if procs are used.
-  
+  html_output $db $opt
 }
 
 proc read_sources {db opt} {
@@ -123,8 +125,8 @@ proc read_source_file {db filename} {
 # insert ref-records based on include statements, from file to file.
 # also a phase 2 action.
 proc det_include_refs {db} {
-  set query "insert into ref (from_file_id, to_file_id, reftype)
-select st.sourcefile_id, tf.id, 'include' reftype
+  set query "insert into ref (from_file_id, to_file_id, reftype, from_statement_id)
+select st.sourcefile_id, tf.id, 'include' reftype, st.id
 from statement st 
 join sourcefile tf on st.callees = tf.name"
   $db exec $query
