@@ -60,13 +60,32 @@ namespace eval ::vugensource {
 
 proc def_parsers {} {
 
-  def_parser_regexp include_line {^#include "([^\"\"]+)"} {callee}
+  def_parser_regexp include_line {^#include "([^\"\"]+)"} callees
   
   # TODO: include function definitions, including lines.
   # Also parts outside of function definitions, to determine calls.
 
+  # def_parser_regexp proc-start {^(\S[^\(\)]+)\(([^\(\)]+)\)} ret_type proc_name params
 
-
+  def_parser proc-start {
+    if {[regexp {^\s*//} $line]} {
+      return ""
+    }
+    # TODO: iets met comment-start/end.
+    if {[regexp {^(\S[^\(\)]+)\(([^\(\)]*)\)} $line z prefix params]} {
+      if {[regexp {^(.*?)\s?([^ *]+)$} $prefix z ret_type proc_name]} {
+        vars_to_dict ret_type proc_name params
+      } else {
+        return ""
+      }
+    } else {
+      return ""
+    }
+  }
+  
+  # \x7D is right/close brace
+  def_parser_regexp proc-end {^\x7D$} {}
+  
 }
 
 proc def_handlers {} {
@@ -95,11 +114,50 @@ proc def_handlers {} {
       }
     }
   }
+
+  def_handler {bof eof proc-start proc-end} proc {
+    # init code
+    set proc_current ""
+    set file_item [dict create]
+  } {
+     switch [:topic $item] {
+       bof {
+         set file_item $item
+         set proc_current ""
+       }
+       eof {
+         set proc_current ""
+       }
+       proc-start {
+         if {$proc_current != ""} {
+           log warn "Already in proc: $proc_current, $item"
+         }
+         set proc_current $item
+       }
+       proc-end {
+         if {$proc_current == ""} {
+           log warn "No current proc: $item"
+         } else {
+           set proctype "C-function"
+           set name [:proc_name $proc_current]
+           set linenr_start [:linenr $proc_current]
+           set linenr_end [:linenr $item]
+           set text [:line $proc_current]
+           # breakpoint
+           res_add res [dict merge $file_item [vars_to_dict proctype name \
+                                                   linenr_start linenr_end text]]
+           set proc_current ""
+         }
+       }
+     }
+  }
   
   # [2016-08-09 22:29] introduced a bug here by not calling split_proc in insert-trans_line
   # but in trans split_proc is called, and this is used in report. Could also remove fields
   # in trans_line, also split_proc still is somewhat of a hack now.
   def_insert_handler statement
+  def_insert_handler proc
+  
   #def_insert_handler trans
   #def_insert_handler error
   

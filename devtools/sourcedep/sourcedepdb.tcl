@@ -33,7 +33,7 @@ proc define_tables {db opt} {
   $db add_tabledef sourcefile {id} {path name mtime size language notes}
   $db add_tabledef proc {id} {sourcefile_id namespace class proctype name linenr_start linenr_end text}
   # project table eerst niet.
-  $db add_tabledef statement {id} {proc_id sourcefile_id linenr_start linenr_end text stmt_type callee }
+  $db add_tabledef statement {id} {proc_id sourcefile_id linenr_start linenr_end text stmt_type callees}
   # fill ref in phase 2.
   $db add_tabledef ref {id} {from_file_id to_file_id from_proc_id to_proc_id from_statement_id reftype notes}
 }

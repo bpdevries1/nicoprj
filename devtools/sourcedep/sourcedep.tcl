@@ -6,6 +6,8 @@ require libinifile ini
 
 ndv::source_once sourcedepdb.tcl
 
+use libfp
+
 set_log_global info
 
 set reader_namespaces [list]
@@ -38,7 +40,7 @@ proc sourcedep {opt} {
   delete_database $dbname
   set db [get_sourcedep_db $dbname $opt]
   read_sources $db $opt
-  
+  det_calls $db $opt
   det_include_refs $db
   # TODO: and then make a graphviz/dot
   graph_include_refs $db $opt
@@ -58,9 +60,7 @@ proc read_sources {db opt} {
   read_vugen_usr $db $rootdir
 }
 
-# TODO:
-# * buildtool - use ndvlib/libinifile
-# * require/namespace - don't use import in current namespace.
+# TODO: find correct place and where to call for this one.
 proc read_vugen_usr {db rootdir} {
   $db in_trans {
     set usrfile [file join $rootdir "[file tail $rootdir].usr"]
@@ -69,15 +69,27 @@ proc read_vugen_usr {db rootdir} {
     set usrfile_id [$db insert sourcefile [dict create path $usrfile name [file tail $usrfile] language vugen]]
     foreach line [ini/lines $usr Actions] {
       if {[regexp {=(.+)$} $line z filename]} {
-        $db insert statement [dict create sourcefile_id $usrfile_id stmt_type include callee $filename]
+        insert_vugen_refs $db $usrfile_id $filename
       }
     }
     foreach line [ini/lines $usr ExtraFiles] {
       if {[regexp {^(.+)=$} $line z filename]} {
-        $db insert statement [dict create sourcefile_id $usrfile_id stmt_type include callee $filename]
+        insert_vugen_refs $db $usrfile_id $filename
       }
     }
   }
+}
+
+proc insert_vugen_refs {db usrfile_id filename} {
+  foreach stmt_type {include call} {
+    $db insert statement [dict create sourcefile_id $usrfile_id stmt_type $stmt_type callees $filename text "Ref from vugen.usr"]
+  }
+  # create a ref for the call, includes are handled elsewhere.
+  set query "select id from sourcefile where name = '$filename'"
+  set to_file_id [:id [first [$db query $query]]]
+  assert {$to_file_id > 0}
+  $db insert ref [dict create from_file_id $usrfile_id to_file_id $to_file_id \
+                      reftype "call"]
 }
 
 proc read_source_dir {db dir} {
@@ -109,14 +121,159 @@ proc read_source_file {db filename} {
 }
 
 # insert ref-records based on include statements, from file to file.
+# also a phase 2 action.
 proc det_include_refs {db} {
   set query "insert into ref (from_file_id, to_file_id, reftype)
 select st.sourcefile_id, tf.id, 'include' reftype
 from statement st 
-join sourcefile tf on st.callee = tf.name"
+join sourcefile tf on st.callees = tf.name"
   $db exec $query
 }
 
+# phase 2 - determine calls from one proc to the other:
+# - get all proc names from db
+# - read each source file again, per line:
+# - break up into words and finds refs to procs.
+# - if found, insert records statement and ref in db.
+proc det_calls {db opt} {
+  set proc_info [det_proc_info $db]
+  foreach sourcefile [get_files_recursive [:rootdir $opt]] {
+    det_calls_sourcefile $db $proc_info [file normalize $sourcefile]
+  }
+}
+
+# return dict: key = procname, value = dict: sourcefile_id, name, linenr_start, linenr_end.
+# TODO: handle namespaces and classes (in Tcl)
+proc det_proc_info {db} {
+  set d [dict create]
+  foreach row [$db query "select * from proc"] {
+    dict set d [:name $row] $row
+  }
+  return $d
+}
+
+# determine inside which proc def the line/linenr resides.
+# TODO: ? don't use DB?
+# return dict: proc_id, sourcefile_id, in_body
+# in_body: 1 iff in body of proc, not in header/def.
+proc det_inside_proc {db sourcefile_id linenr} {
+  assert {$sourcefile_id > 0}
+  assert {[count $sourcefile_id] == 1}
+  set query "select id proc_id, linenr_start
+             from proc
+             where sourcefile_id = $sourcefile_id
+             and $linenr between linenr_start and linenr_end"
+  set rows [$db query $query]
+  if {[count $rows] == 1} {
+    set res [first $rows]
+    if {[:linenr_start $res] == $linenr} {
+      dict set res in_body 0
+    } else {
+      dict set res in_body 1
+    }
+  } else {
+    set res [get_sourcefile_rootproc $db $sourcefile_id]
+  }
+  return $res
+}
+
+# get dummy proc which is inside a sourcefile, but outside any proc definitions.
+# could already exist, otherwise create.
+# return dict same as det_inside_proc
+proc get_sourcefile_rootproc {db sourcefile_id} {
+  set name "__FILE__"
+  set query "select id proc_id, sourcefile_id, 1 in_body
+             from proc
+             where sourcefile_id = $sourcefile_id
+             and name = '$name'"
+  set rows [$db query $query]
+  if {[count $rows] == 1} {
+    return [first $rows]
+  } else {
+    set proc_id [$db insert proc [vars_to_dict sourcefile_id name]]
+    set in_body 1
+    return [vars_to_dict proc_id sourcefile_id in_body]
+  }
+}
+
+# return a list of all files within dir.
+# TODO: library function.
+proc get_files_recursive {dir} {
+  set todo [list $dir]
+  set res [list]
+  while {[count $todo] > 0} {
+    set dir [first $todo]
+    set todo [rest $todo]
+    lappend todo {*}[glob -nocomplain -directory $dir -type d *]
+    lappend res {*}[glob -nocomplain -directory $dir -type f *]
+  }
+  return $res
+}
+
+# determine which calls are being done from within sourcefile to which other (library) procs and insert in DB.
+proc det_calls_sourcefile {db proc_info sourcefile} {
+  log info "phase 2 - handle $sourcefile"
+  set sourcefile_id [:id [first [$db query "select id from sourcefile where path='$sourcefile'"]]]
+  if {$sourcefile_id == ""} {
+    return; # source file not read in phase 1, also ignore in phase 2.
+  }
+  assert {$sourcefile_id > 0}
+  with_file f [open $sourcefile r] {
+    set linenr 0
+    while {[gets $f line] >= 0} {
+      incr linenr
+      if {[is_comment $sourcefile $line]} {continue}
+      set inside_proc [det_inside_proc $db $sourcefile_id $linenr]
+      if {![:in_body $inside_proc]} {continue}; # in header, procname match is of no use.
+      set words [get_words $line]
+      set stmt_id 0
+      foreach word $words {
+        set pi [dict_get $proc_info $word]
+        if {$pi != ""} {
+          assert {[:id $pi] > 0}
+          if {$stmt_id == 0} {
+            set proc_id [:proc_id $inside_proc]
+            set linenr_start $linenr
+            set linenr_end $linenr
+            set text [string trim $line]
+            set stmt_type "call"
+            set stmt_id [$db insert statement \
+                             [vars_to_dict sourcefile_id proc_id \
+                                 linenr_start linenr_end text stmt_type]]
+          }
+          set notes "[file tail $sourcefile]/$linenr -> $pi"
+          $db insert ref [dict create from_file_id $sourcefile_id \
+                              to_file_id [:sourcefile_id $pi] \
+                              from_proc_id $proc_id \
+                              to_proc_id [:id $pi] \
+                              from_statement_id $stmt_id \
+                              reftype "call" notes $notes]
+        }
+      }
+    }
+  }
+}
+
+# split line into words, which might be proc names
+# return list
+# TODO: dependent on programming language.
+proc get_words {line} {
+  set l [split $line " \t{}\[\]()*^\$\\;:?\""]
+  # set res [filter {x {not [empty? $x]}} $l]
+  set res [filter [comp not empty?] $l]
+  return $res
+}
+
+# TODO: dependent on programming language
+# TODO: multi-line comments.
+proc is_comment {sourcefile line} {
+  if {[regexp {^\s*//} $line]} {
+    return 1
+  }
+  return 0
+}
+
+# TODO: naar losse file/module, output/graph.
 proc graph_include_refs {db opt} {
   set targetdir [file join [:rootdir $opt] [:targetdir $opt]]
   set dotfile [file join $targetdir "includes.dot"]
@@ -125,13 +282,32 @@ proc graph_include_refs {db opt} {
   foreach row [$db query "select * from sourcefile"] {
     dict set nodes [:id $row] [puts_node_stmt $f [:name $row]]
   }
-  foreach row [$db query "select * from ref where reftype = 'include'"] {
+  if 0 {
+    foreach row [$db query "select * from ref where reftype = 'include'"] {
+      puts $f [edge_stmt [dict get $nodes [:from_file_id $row]] \
+                   [dict get $nodes [:to_file_id $row]]]
+    }
+  }
+  # also include calls from one source file proc/statement to another.
+  set query "select distinct from_file_id, to_file_id, reftype
+             from ref
+             where from_file_id <> to_file_id"
+  foreach row [$db query $query] {
     puts $f [edge_stmt [dict get $nodes [:from_file_id $row]] \
-                [dict get $nodes [:to_file_id $row]]]
+                 [dict get $nodes [:to_file_id $row]] color [det_color $row]]
+    
   }
   write_dot_footer $f
   close $f
   do_dot $dotfile [file join $targetdir "includes.png"]
+}
+
+proc det_color {row} {
+  if {[:reftype $row] == "include"} {
+    return "black";             # include is the default
+  } else {
+    return "red";               # call without include is an error, should add include.
+  }
 }
 
 if {[this_is_main]} {
