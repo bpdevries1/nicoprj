@@ -12,6 +12,9 @@ source [file join [file dirname [info script]] .. libdot.tcl]
 # sometimes useful for debugging.
 source [file join [file dirname [info script]] .. breakpoint.tcl]
 
+source [file join [file dirname [info script]] .. CLogger.tcl]
+set_log_global debug
+
 use libio
 
 # [2016-07-22 10:13] Two arguments to the test function should be enough: expression and expected result.
@@ -30,15 +33,15 @@ proc test_make_dot {} {
   set node1 [puts_node_stmt $f "node1"]
   set node2 [puts_node_stmt $f "node2"]
   set node3 [puts_node_stmt $f "node3"]
-  puts $f [edge_stmt $node1 $node2]
-  puts $f [edge_stmt $node1 $node3]
+  puts $f [edge_stmt $node1 $node2 color red]
+  puts $f [edge_stmt $node1 $node3 label label1]
   write_dot_footer $f
   close $f
   do_dot $dotfilename $pngfilename
   return [file size $pngfilename]
 }
 
-testndv {test_make_dot} 10253
+testndv {test_make_dot} 11598
 
 cleanupTests
 
