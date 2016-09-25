@@ -228,4 +228,6 @@ testndv {regsub_fn {.(.)(.)} "abcdefgh" sub_value_grp 1} "a=b=cd=e=fgh"
 # also test if this one still works when no subgroups are given
 testndv {regsub_fn {.{1,3}} "abcdefgh" [fn x {string length $x}]} "332"
 
+testndv {filter [comp not empty?] {1 2 "" 3 {} 4}} {1 2 3 4}
+
 cleanupTests

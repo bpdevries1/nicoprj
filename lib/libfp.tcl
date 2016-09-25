@@ -28,7 +28,7 @@ namespace path {::tcl::mathop}
 
 namespace eval ::libfp {
   namespace export = != and or ifp seq empty? cond_1 cond not not= \
-      str identity fn lstride regsub_fn map filter reduce repeat range \
+      str identity fn comp lstride regsub_fn map filter reduce repeat range \
       lambda_to_proc proc_to_lambda find_proc first second count rest
 
   # namespace path {::tcl::mathop ::tcl::mathfunc}
@@ -222,6 +222,15 @@ proc fn {params body} {
 # benefit could be the absence of need to create a proc, and it's smaller.
 proc fn_alt1 {params body} { list ::apply [list $params [list expr $body] ::] }
 
+# comp(ose) as in clojure
+# TODO: more than 2 procs, also 0 or 1 procs. 0=identity?
+proc comp {pr1 pr2} {
+  # fn args {pr1 [pr2 args]}
+  # fn args [list $pr1 [list $pr2 \$args]]
+  fn args [syntax_quote {~$pr1 [~$pr2 {*}$args]}]
+}
+
+
 # http://wiki.tcl.tk/17475 - [2016-07-22 14:28] Monads, could also be useful.
 
 # eval vars in closure of the proc, leave params alone.
@@ -403,5 +412,7 @@ proc range {start end {step 1}} {
   }
   return $res
 }
+
+
 
 } ; # end-of-namespace
