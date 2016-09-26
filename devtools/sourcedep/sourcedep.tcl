@@ -37,7 +37,7 @@ proc sourcedep {opt} {
   file mkdir $targetdir
   set dbname [file join $targetdir [:db $opt]]
   # [2016-09-24 10:34] voorlopig altijd db delete.
-  if 0 {
+  if 1 {
     delete_database $dbname
     set db [get_sourcedep_db $dbname $opt]
     read_sources $db $opt
@@ -59,10 +59,14 @@ proc read_sources {db opt} {
   } else {
     read_source_dir $db $rootdir
   }
+  #log info "read_sources done, check sourcefiles:"
+  #breakpoint
+  
   read_vugen_usr $db $rootdir
 }
 
 # TODO: find correct place and where to call for this one.
+# TODO: includes determined correctly, but calls are not always the same: check which actions are active, and called from project. Normally only Action.c (and vuser_init/end)
 proc read_vugen_usr {db rootdir} {
   $db in_trans {
     set usrfile [file join $rootdir "[file tail $rootdir].usr"]
@@ -95,8 +99,24 @@ proc insert_vugen_refs {db usrfile_id filename} {
 }
 
 proc read_source_dir {db dir} {
+  # [2016-09-26 10:41:08] ignore hidden dirs, starting with . Was under the assumption that glob did not return these.
+  if {[regexp {^\.} [file tail $dir]]} {
+    log debug "Ignoring dir: $dir"
+    return
+  }
+  # TODO: add project/sourcetype specific function to determine to-be-ignored files
+  
   foreach filename [glob -nocomplain -directory $dir -type f *] {
-    read_source_file $db $filename
+    set ignore 0
+    foreach re {{^pre_cci} {^combined_}} {
+      if {[regexp $re [file tail $filename]]} {
+        log debug "Ignoring file: $filename"
+        set ignore 1
+      }
+    }
+    if {!$ignore} {
+      read_source_file $db $filename  
+    }
   }
   foreach subdir [glob -nocomplain -directory $dir -type d *] {
     read_source_dir $db $subdir
@@ -118,6 +138,8 @@ proc read_source_file {db filename} {
   }
   if {$nread == 0} {
     log debug "Could not read (no ns): $filename"
+  } else {
+    log info "Read sourcefile finished: $filename"
   }
   return $nread
 }
@@ -249,11 +271,18 @@ proc det_calls_sourcefile {db proc_info sourcefile} {
                               from_proc_id $proc_id \
                               to_proc_id [:id $pi] \
                               from_statement_id $stmt_id \
-                              reftype "call" notes $notes]
+                              reftype [det_reftype $line] notes $notes]
         }
       }
     }
   }
+}
+
+proc det_reftype {line} {
+  if {[regexp {\#define} $line]} {
+    return "#define"
+  }
+  return "call"
 }
 
 # split line into words, which might be proc names
@@ -293,7 +322,8 @@ proc graph_include_refs {db opt} {
   # also include calls from one source file proc/statement to another.
   set query "select distinct from_file_id, to_file_id, reftype
              from ref
-             where from_file_id <> to_file_id"
+             where from_file_id <> to_file_id
+             and reftype not in ('#define')"
   foreach row [$db query $query] {
     puts $f [edge_stmt [dict get $nodes [:from_file_id $row]] \
                  [dict get $nodes [:to_file_id $row]] color [det_color $row]]
@@ -301,6 +331,7 @@ proc graph_include_refs {db opt} {
   }
   write_dot_footer $f
   close $f
+  log debug "Before do_dot"
   do_dot $dotfile [file join $targetdir "includes.png"]
 }
 
