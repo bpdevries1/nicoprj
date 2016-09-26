@@ -25,7 +25,7 @@ proc set_dot_exe {exe} {
   set DOT_EXE $exe
 }
 
-# @todo work for linux
+# TODO: find DOT_EXE iff not set. For now, set in buildtool system specific file.
 proc do_dot {dot_file png_file} {
   global tcl_platform DOT_EXE
   #global log ar_argv
