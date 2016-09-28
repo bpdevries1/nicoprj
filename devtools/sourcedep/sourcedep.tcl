@@ -161,8 +161,11 @@ join sourcefile tf on st.callees = tf.name"
 # - if found, insert records statement and ref in db.
 proc det_calls {db opt} {
   set proc_info [det_proc_info $db]
-  foreach sourcefile [get_files_recursive [:rootdir $opt]] {
-    det_calls_sourcefile $db $proc_info [file normalize $sourcefile]
+  # [2016-09-28 21:03] Handling should be faster if everything is within a transaction.
+  $db in_trans {
+    foreach sourcefile [get_files_recursive [:rootdir $opt]] {
+      det_calls_sourcefile $db $proc_info [file normalize $sourcefile]
+    }
   }
 }
 
@@ -236,6 +239,84 @@ proc get_files_recursive {dir} {
 
 # determine which calls are being done from within sourcefile to which other (library) procs and insert in DB.
 proc det_calls_sourcefile {db proc_info sourcefile} {
+  log info "phase 2 - handle $sourcefile"
+  set sourcefile_id [:id [first [$db query "select id from sourcefile where path='$sourcefile'"]]]
+  if {$sourcefile_id == ""} {
+    return; # source file not read in phase 1, also ignore in phase 2.
+  }
+  assert {$sourcefile_id > 0}
+  with_file f [open $sourcefile r] {
+    set lines [split [read $f] "\n"]
+  }
+  set linenr 0
+  set lines [remove_comments $lines]
+  foreach line $lines {
+    incr linenr
+    # if {[is_comment $sourcefile $line]} {continue}
+    set inside_proc [det_inside_proc $db $sourcefile_id $linenr]
+    if {![:in_body $inside_proc]} {continue}; # in header, procname match is of no use.
+    set words [get_words $line]
+    set stmt_id 0
+    foreach word $words {
+      set pi [dict_get $proc_info $word]
+      if {$pi != ""} {
+        assert {[:id $pi] > 0}
+        if {$stmt_id == 0} {
+          set proc_id [:proc_id $inside_proc]
+          set linenr_start $linenr
+          set linenr_end $linenr
+          set text [string trim $line]
+          set stmt_type "call"
+          set stmt_id [$db insert statement \
+                           [vars_to_dict sourcefile_id proc_id \
+                                linenr_start linenr_end text stmt_type]]
+        }
+        set notes "[file tail $sourcefile]/$linenr -> $pi"
+        $db insert ref [dict create from_file_id $sourcefile_id \
+                            to_file_id [:sourcefile_id $pi] \
+                            from_proc_id $proc_id \
+                            to_proc_id [:id $pi] \
+                            from_statement_id $stmt_id \
+                            reftype [det_reftype $line] notes $notes]
+      }
+    }
+  }
+}
+
+# remove both // and /* */ style comments from lines.
+# keep resulting blank lines, so calculated line numbers stay the same.
+# for this reason, handle by lines, not as complete block.
+# nested comments are not allowed, this is C code.
+# TODO: assume for now no multiple comments in a line, only one of //, /* or */ occurs in a line.
+proc remove_comments {lines} {
+  set in_comment 0;             # if we are in commented block at end-of-line
+  set res [list]
+  foreach line $lines {
+    if {$in_comment} {
+      if {[regexp {^(.*?)\*/(.*)$} $line z pre post]} {
+        # pre is within comment, post after the comment.
+        lappend res $post
+        set in_comment 0
+      } else {
+        lappend res "";         # in_comment stays 1
+      }
+    } else {            # not in comment
+      # // and /* can also occur after regular code.
+      if {[regexp {^(.*?)//(.*)$} $line z pre post]} {
+        lappend res $pre;       # in_comment stays 0
+      } elseif {[regexp {^(.*?)/\*(.*)$} $line z pre post]} {
+        lappend res $pre
+        set in_comment 1
+      } else {
+        lappend res $line;      # in comment stays 0
+      }
+    }
+  }
+  return $res
+}
+
+# determine which calls are being done from within sourcefile to which other (library) procs and insert in DB.
+proc det_calls_sourcefile_old {db proc_info sourcefile} {
   log info "phase 2 - handle $sourcefile"
   set sourcefile_id [:id [first [$db query "select id from sourcefile where path='$sourcefile'"]]]
   if {$sourcefile_id == ""} {
