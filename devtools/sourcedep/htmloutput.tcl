@@ -6,6 +6,7 @@ proc html_output {db opt} {
 }
 
 proc html_index {db targetdir} {
+  delete_htmls $targetdir
   set f [open [file join $targetdir index.html] w]
   set hh [ndv::CHtmlHelper::new]
   $hh set_channel $f
@@ -21,6 +22,12 @@ proc html_index {db targetdir} {
   $hh table_end
   $hh write_footer
   close $f
+}
+
+proc delete_htmls {targetdir} {
+  foreach filename [glob -nocomplain -directory $targetdir *.html] {
+    file delete $filename
+  }
 }
 
 proc html_sourcefile {db targetdir row} {
