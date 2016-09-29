@@ -12,7 +12,7 @@ use libfp
 proc get_sourcedep_db {db_name opt} {
   set existing_db [file exists $db_name]
   set db [dbwrapper new $db_name]
-  define_tables $db $opt
+  define_tables_sourcedep $db $opt
   $db create_tables 0 ; # 0: don't drop tables first. Always do create, eg for new table defs. 1: drop tables first.
   if {!$existing_db} {
     log info "New db: $db_name, create tables"
@@ -26,7 +26,9 @@ proc get_sourcedep_db {db_name opt} {
   return $db
 }
 
-proc define_tables {db opt} {
+# [2016-09-27 17:27:44] zelfde naam als die voor logdb, gaat fout, daarom deze nu anders.
+# TODO: met namespaces oplossen.
+proc define_tables_sourcedep {db opt} {
 
   $db def_datatype {.*id .*linenr.*} integer
   
