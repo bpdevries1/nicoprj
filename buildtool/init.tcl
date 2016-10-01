@@ -21,7 +21,11 @@ task init {Initialise project/script
     return
   }
   if {[latest_version] == [current_version]} {
-    puts "Version already set to latest: [current_version]"
+    if {[check_build_dir] == 0} {
+      puts "Version already set to latest: [current_version]"  
+    } else {
+      puts "Fixed some issues in latest version: [current_version]"
+    }
     return
   }
   if {[current_version] == 0} {
@@ -225,3 +229,23 @@ task init_env {initialise environment
 proc buildtool_env_tcl_name {} {
   file normalize [file join ~ .config buildtool env.tcl]
 }
+
+# check if all items in build-dir are ok (and return 0), or fix if not and return 1
+proc check_build_dir {} {
+  set res 0
+  if {![file exists [config_tcl_name]]} {
+    make_config_tcl
+    set res 1
+  }
+  if {![file exists [version_file]]} {
+    log warn "Version file does not exist, do bld init: [version_file]"
+    set res 1
+  }
+  if {![file exists [config_env_tcl_name]]} {
+    log warn "Config env file does not exist: [config_env_tcl_name]"
+    log warn "Run bld init"
+    set res 1
+  }
+  return $res
+}
+

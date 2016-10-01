@@ -70,7 +70,16 @@ proc handle_script_dir {dir tname trest} {
   global as_prjgroup buildtool_env
   assert {[file exists [buildtool_env_tcl_name]]}
   uplevel #0 {source [buildtool_env_tcl_name]}
-  if {[current_version] == [latest_version]} {
+  # [2016-10-01 21:38] first check if task = init, to fix project errors.
+  if {$tname == "init"} {
+    task_$tname {*}$trest
+  } elseif {[current_version] == [latest_version]} {
+    if {![file exists [config_tcl_name]]} {
+      # [2016-10-01 21:35] maybe .bld/config.tcl is not under version control.
+      log warn "File not found: [config_tcl_name]"
+      log warn "Run bld init -update"
+      return
+    }
     # ok, normal situation.
     assert {[file exists [config_tcl_name]]}
     source_dir [file join [buildtool_dir] generic]
@@ -85,8 +94,6 @@ proc handle_script_dir {dir tname trest} {
     task_$tname {*}$trest
     mark_backup $tname $trest
     check_temp_files
-  } elseif {$tname == "init"} {
-    task_$tname {*}$trest
   } else {
     puts "Update config version with init -update"
     exit
