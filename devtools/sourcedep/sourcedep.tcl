@@ -1,5 +1,8 @@
 #!/usr/bin/env tclsh
 
+# TODO:
+# Checks of procs worden geraakt vanuit de root. Ook over alle projecten heen, verdenk nu bv set_cmdline_var_long, omdat in configfile.c andere procs staan.
+
 package require ndv
 
 require libinifile ini

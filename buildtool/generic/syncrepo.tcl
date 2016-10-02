@@ -131,14 +131,18 @@ proc mtime_status {libfile} {
 task diff {Show differences between local version and repo version
   Syntax: diff <filename>
   Show date/time, size, and differences between local and repo version.
-} {
+} {{min "Show minimal diff only"}} {
   lassign $args libfile
   set st [show_status $libfile]
   puts "1:local: [file_info $libfile]"
   puts "2:base : [file_info [basefile $libfile]]"
   puts "3:repo : [file_info [repofile $libfile]]"
   if {[regexp {new} $st]} {
-    diff_files $libfile [repofile $libfile] [basefile $libfile]
+    if {[:min $opt]} {
+      # log info "min: only show minimal diff"
+    } else {
+      diff_files $libfile [repofile $libfile] [basefile $libfile]
+    }
   } else {
     # no use to do diff
   }
