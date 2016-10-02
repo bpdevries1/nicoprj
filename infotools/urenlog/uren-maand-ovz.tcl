@@ -75,11 +75,18 @@ proc maak_uren_maand_ovz {hh} {
     }  
     # handle last maand.    
     # output prev date if this is a friday
-    if {[is_new_month $prev_date $date]} {
-      make_maand_report $hh $prev_date ar_projects ar_days ar_prj_day
-      # make_table_row $hh $prev_date $delta_verlof $verlof $delta_deeltijd $deeltijd $lst_notes
-      # $hh table_row $date {*}[format_values [list $delta_verlof $verlof $delta_deeltijd $deeltijd [expr $verlof+$deeltijd] [expr ($verlof+$deeltijd)/7.2]]] [notes_to_html $lst_notes]
-    }
+	if 0 {
+		if {[is_new_month $prev_date $date]} {
+		  make_maand_report $hh $prev_date ar_projects ar_days ar_prj_day
+		  # make_table_row $hh $prev_date $delta_verlof $verlof $delta_deeltijd $deeltijd $lst_notes
+		  # $hh table_row $date {*}[format_values [list $delta_verlof $verlof $delta_deeltijd $deeltijd [expr $verlof+$deeltijd] [expr ($verlof+$deeltijd)/7.2]]] [notes_to_html $lst_notes]
+		} else {
+		  log info "Geen nieuwe maand aan het einde."
+		  breakpoint
+		}
+	}
+	# [2016-10-02 17:48:58] sowieso aan het einde de laatste maand nog doen, ook al is het een halve.
+	make_maand_report $hh $prev_date ar_projects ar_days ar_prj_day
     
     # $hh table_end
   } {
