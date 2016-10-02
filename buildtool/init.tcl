@@ -13,11 +13,17 @@ use libmacro
 task init {Initialise project/script
   Also update config to latest version.  
 } {{update "Update project/script from old config version to latest"}
-  {version "Show config version"} 
+  {version "Show config version"}
+  {info "Show project info"}
+  {contents "Show config contents alongside info"}
 } {
   # opt dict now available.
   if {[:version $opt]} {
     puts "Current config version: [current_version]"
+    return
+  }
+  if {[:info $opt]} {
+    show_project_info $opt
     return
   }
   if {[latest_version] == [current_version]} {
@@ -249,3 +255,25 @@ proc check_build_dir {} {
   return $res
 }
 
+# show project information: location/contents of config files, prjtype
+proc show_project_info {opt} {
+  puts "Current config version: [current_version]"
+  set filename [buildtool_env_tcl_name]
+  puts "System env config file: $filename"
+  if {[:contents $opt]} {show_contents $filename}
+  set filename [config_tcl_name]
+  puts "Config file: $filename"
+  if {[:contents $opt]} {show_contents $filename}
+  set filename [config_env_tcl_name]
+  puts "Config env file: $filename"
+  if {[:contents $opt]} {show_contents $filename}
+  source [config_tcl_name]
+  puts "Project type: $prjtype"
+}
+
+proc show_contents {filename} {
+  set text [read_file $filename]
+  puts "=="
+  puts $text
+  puts "======="
+}
