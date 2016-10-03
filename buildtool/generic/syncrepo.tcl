@@ -1,3 +1,5 @@
+# TODO: [2016-09-29 08:58:32] check if the lib to get #include's files not already in repo: then warning or also get those libs.
+
 # args are ignored, but needed for task_check.
 task libs {Overview of lib files, including status
   Show status of all library files, with respect to repository.
