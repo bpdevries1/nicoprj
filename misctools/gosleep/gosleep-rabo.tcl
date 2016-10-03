@@ -15,7 +15,7 @@ proc main {} {
 	  unison -auto projecten2h
 	  unison -auto -batch backup2g
 	  unison -auto -batch vugen2h
-	  zip_vugens
+	  # zip_vugens ; # [2016-09-29 09:10:09] niet meer nodig.
 	  zip_alm_dbs
 	  zip_notes_org
 	  # cleanup
@@ -40,7 +40,8 @@ proc unison {args} {
 #perftoolset/tools - 17.8 MB, moet kunnen, zeker gezipt.
 
 proc zip_projects {} {
-  zip_project {c:\PCC\nico\nicoprj} /c/PCC/Nico/zips/nicoprj.zip
+  # [2016-09-29 09:09:55] niet meer nodig om source projects te zippen.
+  # zip_project {c:\PCC\nico\nicoprj} /c/PCC/Nico/zips/nicoprj.zip
   # zip_project {c:\PCC\nico\perftoolset\tools} /c/PCC/Nico/zips/perftoolset-tools.zip
 }
 
