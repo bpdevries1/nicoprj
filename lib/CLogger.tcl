@@ -169,7 +169,11 @@ namespace eval ::ndv {
         } else {
           set brackets_name "\[$name\] "
         }
-        set str_log "\[[clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S %z"]\] $brackets_name\[$level\] $str" 
+        # set str_log "\[[clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S %z"]\] $brackets_name\[$level\] $str"
+        set msec [clock milliseconds]
+        set sec [expr $msec / 1000]
+        set msec1 [expr $msec % 1000]
+        set str_log "\[[clock format $sec -format "%Y-%m-%d %H:%M:%S.[format %03d $msec1] %z"]\] $brackets_name\[$level\] $str"
         puts stderr $str_log
 				flush stderr ; # could be that stderr is redirected.
         if {$f_log != -1} {
@@ -232,8 +236,6 @@ proc assert_callback {args} {
   set str [join $args " "]
   catch {log error $str}
   puts stderr $str
-  # TODO: make conditional on some setting, don't want this in production, would stop processing.
-  breakpoint
   return -code error
 }
 
