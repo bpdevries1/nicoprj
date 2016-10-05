@@ -1,4 +1,6 @@
 # TODO: [2016-09-29 08:58:32] check if the lib to get #include's files not already in repo: then warning or also get those libs.
+# TODO: [2016-10-05 20:21] different way of determining different or updated files, because git always sets the current timestamp when updating a local file, not the time of the repo. This means local and base can change, while repo version stays the same. Possibly local and base version a bit different timestamp, both changed is the message. So could diff by content iff timestamps differ.
+# TODO: [2016-10-05 20:21] maybe should not put .base in git after all. Then it will not change because of git, only when an explicit sync action is done. Local and repo should still be in git, does not matter if repo's are different or the same, moments of commit/push can differ.
 
 # args are ignored, but needed for task_check.
 task libs {Overview of lib files, including status
