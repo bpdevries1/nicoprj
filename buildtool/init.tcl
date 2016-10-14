@@ -202,12 +202,14 @@ proc det_lr_include_dir {} {
   if {[catch {set lr_include_dir}]} {
     # not already set, continue.
     set dirs {{C:\Program Files (x86)\HP\Virtual User Generator\include}
+	  {d:\HPPC\include}
       /home/ymor/RABO/VuGen/lr_include}
     foreach dir $dirs {
       if {[file exists $dir]} {
         return $dir
       }
     }
+	log warn "No LR include dir found, return empty string."
     return ""
   } else {
     # already set, leave unchanged
