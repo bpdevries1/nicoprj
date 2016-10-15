@@ -32,6 +32,10 @@ task init {Initialise project/script
     } else {
       puts "Fixed some issues in latest version: [current_version]"
     }
+    # [2016-10-15 19:28] Check if config files exist. If not, create them:
+    if {![file exists [config_env_tcl_name]]} {
+      make_config_env_tcl    
+    }
     return
   }
   if {[current_version] == 0} {
@@ -265,20 +269,6 @@ proc show_project_info {opt} {
   }
   source [config_tcl_name]
   puts "Project type: $prjtype"
-
-  return
-  
-  set filename [buildtool_env_tcl_name]
-  puts "System env config file: $filename"
-  if {[:contents $opt]} {show_contents $filename}
-
-  set filename [config_tcl_name]
-  puts "Config file: $filename"
-  if {[:contents $opt]} {show_contents $filename}
-
-  set filename [config_env_tcl_name]
-  puts "Config env file: $filename"
-  if {[:contents $opt]} {show_contents $filename}
 }
 
 proc show_config_info {proc_name opt} {
