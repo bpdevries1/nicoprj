@@ -260,17 +260,37 @@ proc check_build_dir {} {
 # show project information: location/contents of config files, prjtype
 proc show_project_info {opt} {
   puts "Current config version: [current_version]"
+  foreach proc_name {buildtool_env_tcl_name config_tcl_name config_env_tcl_name} {
+    show_config_info $proc_name $opt
+  }
+  source [config_tcl_name]
+  puts "Project type: $prjtype"
+
+  return
+  
   set filename [buildtool_env_tcl_name]
   puts "System env config file: $filename"
   if {[:contents $opt]} {show_contents $filename}
+
   set filename [config_tcl_name]
   puts "Config file: $filename"
   if {[:contents $opt]} {show_contents $filename}
+
   set filename [config_env_tcl_name]
   puts "Config env file: $filename"
   if {[:contents $opt]} {show_contents $filename}
-  source [config_tcl_name]
-  puts "Project type: $prjtype"
+}
+
+proc show_config_info {proc_name opt} {
+  set filename [$proc_name]
+  if {[file exists $filename]} {
+    puts "$proc_name: $filename \[Ok\]"
+    if {[:contents $opt]} {
+      show_contents $filename
+    }
+  } else {
+    puts "$proc_name: $filename - DOES NOT EXIST"
+  }
 }
 
 proc show_contents {filename} {
