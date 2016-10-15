@@ -230,4 +230,19 @@ testndv {regsub_fn {.{1,3}} "abcdefgh" [fn x {string length $x}]} "332"
 
 testndv {filter [comp not empty?] {1 2 "" 3 {} 4}} {1 2 3 4}
 
+# [2016-10-15 16:12] Combination of map and dict accessor
+# set rows {{Depth 5895 QueueName error} {Depth 0 QueueName Col}}
+
+testndv {:QueueName [first {{Depth 5895 QueueName error} {Depth 0 QueueName Col}}]} error
+
+testndv {make_dict_accessor get_qn QueueName; map get_qn {{Depth 5895 QueueName error} {Depth 0 QueueName Col}}} {error Col}
+
+testndv {map [make_dict_accessor get_qn2 QueueName] {{Depth 5895 QueueName error} {Depth 0 QueueName Col}}} {error Col}
+
+testndv {map [make_dict_accessor QueueName] {{Depth 5895 QueueName error} {Depth 0 QueueName Col}}} {error Col}
+
+
+# testndv {map :QueueName {{Depth 5895 QueueName error} {Depth 0 QueueName Col}}} {error Col}
+
 cleanupTests
+

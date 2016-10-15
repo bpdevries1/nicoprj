@@ -146,6 +146,8 @@ proc make_dict_accessor {args} {
   proc $procname {dct {default {}}} "
     dict_get \$dct $attname \$default
   "
+
+  return $procname
 }
 
 # Save the original one so we can chain to it
