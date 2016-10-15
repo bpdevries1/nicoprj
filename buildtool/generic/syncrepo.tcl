@@ -1,8 +1,7 @@
 # TODO: [2016-09-29 08:58:32] check if the lib to get #include's files not already in repo: then warning or also get those libs.
-# TODO: [2016-10-05 20:21] different way of determining different or updated files, because git always sets the current timestamp when updating a local file, not the time of the repo. This means local and base can change, while repo version stays the same. Possibly local and base version a bit different timestamp, both changed is the message. So could diff by content iff timestamps differ.
-# TODO: [2016-10-05 20:21] maybe should not put .base in git after all. Then it will not change because of git, only when an explicit sync action is done. Local and repo should still be in git, does not matter if repo's are different or the same, moments of commit/push can differ.
+# [2016-10-05 20:21] different way of determining different or updated files, because git always sets the current timestamp when updating a local file, not the time of the repo. This means local and base can change, while repo version stays the same. Possibly local and base version a bit different timestamp, both changed is the message. So could diff by content iff timestamps differ.
+# TODO: [2016-10-05 20:21] maybe should not put .base in git after all. Then it will not change because of git, only when an explicit sync action is done. Local and repo should still be in git, does not matter if repo's are different or the same, moments of commit/push can differ. [2016-10-15 19:51] First get some experience on the content check, just made.
 
-# args are ignored, but needed for task_check.
 task libs {Overview of lib files, including status
   Show status of all library files, with respect to repository.
 } {
@@ -63,8 +62,13 @@ proc show_status {libfile} {
   set status_ex "$lib_ex-$repo_ex-$base_ex"
   switch  $status_ex {
     1-1-1 {
-      # all exist, check mtimes
-      set status [mtime_status $libfile]
+      # [2016-10-15 19:41] Git sets time to current time for changed files, so check contents first. (Idea behind this git action is that files should be compiled, make will be confused otherwise)
+      if {[contents_same? $libfile]} {
+        set status "ok"
+      } else {
+        # all exist, but different, check mtimes
+        set status [mtime_status $libfile]  
+      }
     }
     1-1-0 {
       # no base, check mtimes as before
@@ -94,6 +98,23 @@ proc show_status {libfile} {
   }
 
   return $status
+}
+
+# @pre: alle 3 versions exist.
+# @post: return 1 iff all 3 versions are the same by content (mtimes may differ)
+# @note: could set all mtimes to the oldest iff all files are the same, but this would
+#        be working against the git timestamps. Or maybe the newest, also strange.
+proc contents_same? {libfile} {
+  global repo_lib_dir
+  set repofile [file join $repo_lib_dir $libfile]
+  set basefile [file join [base_dir] $libfile]
+  set contents [read_file $libfile]
+  if {[read_file $basefile] == $contents} {
+    if {[read_file $repofile] == $contents} {
+      return 1
+    }
+  }
+  return 0
 }
 
 # @pre all 3 versions of libfile exists: local, repo and base
