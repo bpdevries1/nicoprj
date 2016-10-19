@@ -20,9 +20,6 @@
 # * ns  : so + can be used directly, although ::+ also fails.
 # namespace path {::tcl::mathop ::tcl::mathfunc}
 
-# [2016-07-30 10:06] TODO: add clj sequence functions like first, rest, second, count.
-# those instead of current :# :0 and :1 as defined in libdict.tcl.
-
 # [2016-07-23 16:12] only mathop, don't want log function as a proc.
 namespace path {::tcl::mathop}
 

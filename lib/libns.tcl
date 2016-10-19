@@ -33,6 +33,8 @@ proc require_old {ns as} {
   }
 }
 
+# TODO: possibly use info command ${ns}::*
+# there was/is no namespace sub command to provide this info.
 proc require {ns as} {
   foreach el [get_ns_imports $ns] {
     interp alias {} "${as}/$el" {} ${ns}::${el}
