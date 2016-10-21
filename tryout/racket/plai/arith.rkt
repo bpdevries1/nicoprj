@@ -13,13 +13,13 @@
   [eqC (l : ExprC) (r : ExprC)]
   [ifC (c : ExprC) (t : ExprC) (e : ExprC)])
 
-(appC 'double (numC 5))
+;;(appC 'double (numC 5))
 
 ;; [2016-10-21 18:52] Add functions, first with one parameter.
 (define-type FunDefC
   [fdC (name : symbol) (arg : symbol) (body : ExprC)])
 
-(fdC 'double 'x (plusC (idC 'x) (idC 'x)))
+;; (fdC 'double 'x (plusC (idC 'x) (idC 'x)))
 
 (define-type ExprS
   [numS (n : number)]
@@ -46,12 +46,11 @@
 
 
 ;; [2016-10-21 19:05] new version including functions.
-;; TODO: wat doet 'ie met appC zonder local, alleen define of een let?
-;;  maar pas nadat alles werkt.
 ;; vraag wordt gesteld wat je bij idC zou moeten doen: lijkt dat dit niet voor mag komen,
 ;; een unbound identifier, zowel in de hoofdexpressie e als in de body van definitions waarbij
 ;; de identifier niet subst-ed is. Kan nu een error geven, kijken wat 'ie doet.
-(define (interp [e : ExprC] [fds : (listof FunDefC)]) : number
+;; [2016-10-21 21:49] Door inter-subst bij appC wordt eager application gedaan.
+#;(define (interp [e : ExprC] [fds : (listof FunDefC)]) : number
   (type-case ExprC e
     [numC (n) n]
     ;; <idC-interp-case>
@@ -67,6 +66,26 @@
     [eqC (l r) (if (= (interp l fds) (interp r fds)) 1 0)]
     [ifC (c t e) (if (= 0 (interp c fds)) (interp e fds) (interp t fds))]))
 
+;; in appC (begin (define)) gebruiken -> define not allowed in expression context.
+;; met let -> werkt prima zo te zien.
+;; mss moet je local gebruiken zodat je niet (meer) in expression context zit.
+(define (interp [e : ExprC] [fds : (listof FunDefC)]) : number
+  (type-case ExprC e
+    [numC (n) n]
+    ;; <idC-interp-case>
+    ;; [2016-10-21 20:17] zelf wel goed verzonnen, moet idd fout gaan!
+    [idC (s) (error 'id "Unbound identifier")]
+    [appC (f a) (let ([fd (get-fundef f fds)])
+                  (interp (subst (interp a fds)
+                                 (fdC-arg fd)
+                                 (fdC-body fd))
+                          fds))]
+    [plusC (l r) (+ (interp l fds) (interp r fds))]
+    [multC (l r) (* (interp l fds) (interp r fds))]
+    [eqC (l r) (if (= (interp l fds) (interp r fds)) 1 0)]
+    [ifC (c t e) (if (= 0 (interp c fds)) (interp e fds) (interp t fds))]))
+
+
 ;; [2016-10-21 19:09] helper function, waar is * voor? Of beetje CT achtig, dat je
 ;; de domeinen vermenigvuldigt.
 
@@ -77,6 +96,8 @@
 ;; een soort regsub -all $for $in $what in2
 ;; hier zouden ook weer eqC en ifC gechecked moeten worden. Ook dit lijkt wat omslachtig,
 ;;  moet ook beter kunnen. Soort 'recur' patroon.
+;; [2016-10-21 21:55] name-capture zou hier nog fout zijn, maar wordt hierin
+;; blijkbaar niet zichtbaar.
 (define (subst [what : number] [for : symbol] [in : ExprC]) : ExprC
   (type-case ExprC in
     [numC (n) in]
@@ -163,10 +184,27 @@ three example functions above. What should it produce?
 ;; [2016-10-21 20:10] desugar en parse moeten nog bijgewerkt worden.
 ;; dus eerst direct ExprC variant.
 
-(define fds (list (fdC 'double 'x (plusC (idC 'x) (idC 'x)))))
+;; [2016-10-21 22:18] zowaar mogelijk hiermee een werkende fac functie te maken!
+(define fds (list (fdC 'double 'x (plusC (idC 'x) (idC 'x)))
+                  (fdC 'fac 'x (ifC (eqC (idC 'x) (numC 1))
+                                    (numC 1)
+                                    ; else
+                                    (multC (idC 'x)
+                                           (appC 'fac (plusC (numC -1)
+                                                             (idC 'x))))))))
 
 (test (interp (appC 'double (numC 5)) fds) 10)
 (test (interp (appC 'double (plusC (numC 2) (numC 4))) fds) 12)
+
+(test (interp (appC 'fac (numC 1)) fds) 1)
+(test (interp (appC 'fac (numC 2)) fds) 2)
+(test (interp (appC 'fac (numC 3)) fds) 6)
+(test (interp (appC 'fac (numC 6)) fds) 720)
+
+;; deze gaat waarsch een stack overflow opleveren.
+;; maar het duurt wel even...
+;; ... maar gestopt, fans gingen blazen.
+;; (test (interp (appC 'fac (numC 0)) fds) 1)
 
 ;; deze 2 leveren exceptie op zoals verwacht: unbound identifier, zowel voor 'a als 'x.
 ;; (test (interp (appC 'double (idC 'a)) fds) 10)
