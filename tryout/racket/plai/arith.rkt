@@ -1,32 +1,116 @@
 #lang plai-typed
 
-;; ArithC is de C van Core.
-(define-type ArithC
+;; [2016-10-21 18:57] of deze ter vervanging van ArithC.
+;; idd melding dat numC nu dubbel is.
+;; [2016-10-21 19:00] Deze manier van definieren lijkt wel ok, vergelijkbaar met Grammar.
+;;   desugar en interp ook wel ok, alleen parse nog vrij omslachtig.
+(define-type ExprC
   [numC (n : number)]
-  [plusC (l : ArithC) (r : ArithC)]
-  [multC (l : ArithC) (r : ArithC)]
-  [eqC (l : ArithC) (r : ArithC)]
-  [ifC (c : ArithC) (t : ArithC) (e : ArithC)])
+  [idC (s : symbol)]
+  [appC (fun : symbol) (arg : ExprC)]
+  [plusC (l : ExprC) (r : ExprC)]
+  [multC (l : ExprC) (r : ExprC)]
+  [eqC (l : ExprC) (r : ExprC)]
+  [ifC (c : ExprC) (t : ExprC) (e : ExprC)])
 
-;; [2016-10-21 14:55] Surface syntax, tegenhanger van Core. Deze met minus.
-(define-type ArithS
+(appC 'double (numC 5))
+
+;; [2016-10-21 18:52] Add functions, first with one parameter.
+(define-type FunDefC
+  [fdC (name : symbol) (arg : symbol) (body : ExprC)])
+
+(fdC 'double 'x (plusC (idC 'x) (idC 'x)))
+
+(define-type ExprS
   [numS (n : number)]
-  [plusS (l : ArithS) (r : ArithS)]
-  [bminusS (l : ArithS) (r : ArithS)]
-  [uminusS (l : ArithS)]
-  [multS (l : ArithS) (r : ArithS)]
-  [eqS (l : ArithS) (r : ArithS)]
-  [ifS (c : ArithS) (t : ArithS) (e : ArithS)])
+  [plusS (l : ExprS) (r : ExprS)]
+  [bminusS (l : ExprS) (r : ExprS)]
+  [uminusS (l : ExprS)]
+  [multS (l : ExprS) (r : ExprS)]
+  [eqS (l : ExprS) (r : ExprS)]
+  [ifS (c : ExprS) (t : ExprS) (e : ExprS)])
 
-;; [2016-10-21 13:34] ok, dit werkt hierboven, maar BR manier lijkt handiger, met een grammar.
-(define (interp [a : ArithC]) : number
-  (type-case ArithC a
+;; [2016-10-21 19:57] for now return the double function.
+;; [2016-10-21 20:18] deze def ging goed, ook al is 'ie niet typed.
+#;(define (get-fundef name lofundefs)
+  (fdC 'double 'x (plusC (idC 'x) (idC 'x))))
+
+;; [2016-10-21 20:21] had gehoopt dat dit met iets meer higher-level functie kon:
+;; bv direct met een hashmap.
+(define (get-fundef [n : symbol] [fds : (listof FunDefC)]) : FunDefC
+  (cond
+    [(empty? fds) (error 'get-fundef "reference to undefined function")]
+    [(cons? fds) (cond
+                   [(equal? n (fdC-name (first fds))) (first fds)]
+                   [else (get-fundef n (rest fds))])]))
+
+
+;; [2016-10-21 19:05] new version including functions.
+;; TODO: wat doet 'ie met appC zonder local, alleen define of een let?
+;;  maar pas nadat alles werkt.
+;; vraag wordt gesteld wat je bij idC zou moeten doen: lijkt dat dit niet voor mag komen,
+;; een unbound identifier, zowel in de hoofdexpressie e als in de body van definitions waarbij
+;; de identifier niet subst-ed is. Kan nu een error geven, kijken wat 'ie doet.
+(define (interp [e : ExprC] [fds : (listof FunDefC)]) : number
+  (type-case ExprC e
     [numC (n) n]
-    [plusC (l r) (+ (interp l) (interp r))]
-    [multC (l r) (* (interp l) (interp r))]
-    [eqC (l r) (if (= (interp l) (interp r)) 1 0)]
-    ;; note: then and else clause switch because of = 0 check.
-    [ifC (c t e) (if (= 0 (interp c)) (interp e) (interp t))]))
+    ;; <idC-interp-case>
+    ;; [2016-10-21 20:17] zelf wel goed verzonnen, moet idd fout gaan!
+    [idC (s) (error 'id "Unbound identifier")]
+    [appC (f a) (local ([define fd (get-fundef f fds)])
+                  (interp (subst (interp a fds)
+                                 (fdC-arg fd)
+                                 (fdC-body fd))
+                          fds))]
+    [plusC (l r) (+ (interp l fds) (interp r fds))]
+    [multC (l r) (* (interp l fds) (interp r fds))]
+    [eqC (l r) (if (= (interp l fds) (interp r fds)) 1 0)]
+    [ifC (c t e) (if (= 0 (interp c fds)) (interp e fds) (interp t fds))]))
+
+;; [2016-10-21 19:09] helper function, waar is * voor? Of beetje CT achtig, dat je
+;; de domeinen vermenigvuldigt.
+
+;; get-fundef : symbol * (listof FunDefC) -> FunDefC
+
+;; subst : ExprC * symbol * ExprC -> ExprC
+;; 'what' lijkt expression, 'in' lijkt de functie-def body.
+;; een soort regsub -all $for $in $what in2
+;; hier zouden ook weer eqC en ifC gechecked moeten worden. Ook dit lijkt wat omslachtig,
+;;  moet ook beter kunnen. Soort 'recur' patroon.
+(define (subst [what : number] [for : symbol] [in : ExprC]) : ExprC
+  (type-case ExprC in
+    [numC (n) in]
+    [idC (s) (cond
+               [(symbol=? s for) (numC what)]
+               [else in])]
+    [appC (f a) (appC f (subst what for a))]
+    [plusC (l r) (plusC (subst what for l)
+                        (subst what for r))]
+    [multC (l r) (multC (subst what for l)
+                        (subst what for r))]
+    [eqC (l r) (eqC (subst what for l) (subst what for r))]
+    [ifC (c t e) (ifC (subst what for c) (subst what for t)
+                      (subst what for e))]))
+
+#|
+• (fdC 'double 'x (plusC (idC 'x) (idC 'x)))
+• (fdC 'quadruple 'x (appC 'double (appC 'double (idC 'x))))
+• (fdC 'const5 '_ (numC 5))
+
+Suppose we want to substitute 3 for the identifier x in the bodies of the
+three example functions above. What should it produce?
+
+• (fdC 'double 'x (plusC (idC 'x) (idC 'x)))
+=>
+• (fdC 'double 'x (plusC (numC 3) (numC 3)))
+
+• (fdC 'quadruple 'x (appC 'double (appC 'double (idC 'x))))
+• (fdC 'const5 '_ (numC 5))
+
+(idC 'x) => (numC 3)
+
+|#
+
 
 ;; idee is dan van s-expr via Surface naar Core datatype.
 ;; van s-expr naar Surface via parse functie.
@@ -34,7 +118,7 @@
 ;; en van Core->uitkomst (number hier) nog steeds in interp, verandert niet.
 ;; vraag of je (interp (desugar (parse))) wilt, of dat desugar bv bij parse inzit.
 ;; voorlopig los houden.
-(define (parse [s : s-expression]) : ArithS
+(define (parse [s : s-expression]) : ExprS
   (cond
     [(s-exp-number? s) (numS (s-exp->number s))]
     [(s-exp-list? s)
@@ -52,8 +136,18 @@
 
 ;; [2016-10-21 15:51] ok, dit werkt. Dan ook met type case / pattern match.
 ;; [2016-10-21 16:06] grappig: else case is unreachable nu.
-(define (desugar [s : ArithS]) : ArithC
-  (type-case ArithS s ; waarom beide nodig? s om aan te geven over welke param het gaat. ArithS: dat je 'em op dit niveau in de class-tree wilt bekijken.
+#;(define (desugar [s : ArithS]) : ArithC
+    (type-case ArithS s ; waarom beide nodig? s om aan te geven over welke param het gaat. ArithS: dat je 'em op dit niveau in de class-tree wilt bekijken.
+      [numS (n) (numC n)]
+      [plusS (l r) (plusC (desugar l) (desugar r))]
+      [multS (l r) (multC (desugar l) (desugar r))]
+      [bminusS (l r) (plusC (desugar l) (multC (numC -1) (desugar r)))]
+      [uminusS (l) (multC (numC -1) (desugar l))]
+      [eqS (l r) (eqC (desugar l) (desugar r))]
+      [ifS (c t e) (ifC (desugar c) (desugar t) (desugar e))]))
+
+(define (desugar [s : ExprS]) : ExprC
+  (type-case ExprS s ; waarom beide nodig? s om aan te geven over welke param het gaat. ArithS: dat je 'em op dit niveau in de class-tree wilt bekijken.
     [numS (n) (numC n)]
     [plusS (l r) (plusC (desugar l) (desugar r))]
     [multS (l r) (multC (desugar l) (desugar r))]
@@ -62,8 +156,23 @@
     [eqS (l r) (eqC (desugar l) (desugar r))]
     [ifS (c t e) (ifC (desugar c) (desugar t) (desugar e))]))
 
+
 ;; [2016-10-21 16:21] ook unary minus erbij:
-(test (interp (desugar (parse '0))) 0)
+(test (interp (desugar (parse '0)) (list)) 0)
+
+;; [2016-10-21 20:10] desugar en parse moeten nog bijgewerkt worden.
+;; dus eerst direct ExprC variant.
+
+(define fds (list (fdC 'double 'x (plusC (idC 'x) (idC 'x)))))
+
+(test (interp (appC 'double (numC 5)) fds) 10)
+(test (interp (appC 'double (plusC (numC 2) (numC 4))) fds) 12)
+
+;; deze 2 leveren exceptie op zoals verwacht: unbound identifier, zowel voor 'a als 'x.
+;; (test (interp (appC 'double (idC 'a)) fds) 10)
+;; (test (interp (appC 'double (idC 'x)) fds) 10)
+
+#|
 (test (interp (desugar (parse '23))) 23)
 (test (interp (desugar (parse '(+ 1 2)))) 3)
 (test (interp (desugar (parse '(* 3 2)))) 6)
@@ -85,3 +194,6 @@
 (test (interp (desugar (parse '(if 4 2 3)))) 2)
 (test (interp (desugar (parse '(if 0 2 3)))) 3)
 (test (interp (desugar (parse '(if (= 1 8) 2 3)))) 3)
+(test (interp (desugar (parse '(* 5 (if (= 1 8) 2 3))))) 15)
+
+|#
