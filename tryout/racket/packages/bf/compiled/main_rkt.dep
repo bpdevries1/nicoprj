@@ -1,0 +1,1 @@
+("6.6" ("a70b3dcbd6e8b3800e4f30353e9703c4969cf444" . "f8a08450074b75b54c82786187ee8e704d714020") (collects #"bf" #"reader.rkt") (collects #"br" #"main.rkt") (collects #"br" #"quicklang.rkt") (collects #"racket" #"runtime-config.rkt"))
