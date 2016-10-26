@@ -29,7 +29,7 @@ proc excel2db_main {argv} {
   global fill_blanks
   
   set options {
-    {dir.arg "" "Directory with vuserlog files"}
+    {dir.arg "" "Directory with log files"}
     {db.arg "auto" "SQLite DB location (auto=create in dir)"}
     {table.arg "auto" "Tablename (prefix) to use"}
     {config.arg "" "Config.tcl file"}
