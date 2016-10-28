@@ -30,6 +30,7 @@ proc excel2db_main {argv} {
   
   set options {
     {dir.arg "" "Directory with log files"}
+	{filespecs.arg "*.csv:*.tsv" "File specs of files to import"}
     {db.arg "auto" "SQLite DB location (auto=create in dir)"}
     {table.arg "auto" "Tablename (prefix) to use"}
     {config.arg "" "Config.tcl file"}
@@ -39,32 +40,32 @@ proc excel2db_main {argv} {
     {commitlines.arg "100000" "Perform commit after reading n lines"}
   }
   set usage ": [file tail [info script]] \[options] \[dirname\]:"
-  set dargv [getoptions argv $options $usage]
+  set opt [getoptions argv $options $usage]
 	
-  set fill_blanks [:fillblanks $dargv] 
-  set config_tcl [:config $dargv]
+  set fill_blanks [:fillblanks $opt] 
+  set config_tcl [:config $opt]
   # lassign $argv dirname config_tcl
-  if {[:dir $dargv] == ""} {
+  if {[:dir $opt] == ""} {
     # final argument after options
 	set dirname [:0 $argv]
   } else {
-    set dirname [:dir $dargv]
+    set dirname [:dir $opt]
   }
   log info "Handle dir: $dirname"
   if {$config_tcl != ""} {
     source $config_tcl 
   }
-  handle_dir $dirname [:db $dargv] [:table $dargv] [:deletedb $dargv] $dargv
+  handle_dir $dirname [:db $opt] [:table $opt] [:deletedb $opt] $opt
 }
 
-proc handle_dir {dirname db table deletedb dargv} {
+proc handle_dir {dirname db table deletedb opt} {
   global tcl_platform
   if {$tcl_platform(platform) == "windows"} {
     make_csvs $dirname
   } else {
     log warn "System != windows, cannot extract csv's from Excel" 
   }
-  file2sqlite $dirname $db $table $deletedb $dargv
+  files2sqlite $dirname $db $table $deletedb $opt
 }
 
 proc make_csvs {dirname} {
@@ -89,7 +90,7 @@ proc delete_old_csv {targetroot} {
   }
 }
 
-proc file2sqlite {dirname db table deletedb dargv} {
+proc files2sqlite {dirname db table deletedb opt} {
   if {$db == "auto"} {
     set basename [file join $dirname [file tail $dirname]]
     set dbname "$basename.db"
@@ -98,7 +99,7 @@ proc file2sqlite {dirname db table deletedb dargv} {
     set basename $table
   }
   
-  # log info "file2sqlite: $basename"
+  # log info "files2sqlite: $basename"
   if {$deletedb} {
     delete_database $dbname
   }
@@ -110,13 +111,14 @@ proc file2sqlite {dirname db table deletedb dargv} {
   
 
   set idx 0
-  foreach filespec {*.csv *.tsv} {
+  set filespecs [split [:filespecs $opt] ":"]
+  foreach filespec $filespecs {
     foreach filename [glob -nocomplain -directory $dirname $filespec] {
       # [2016-07-06 17:00:29] sowieso per file een transaction.
       db_eval $conn "begin transaction"      
       incr idx
       try_eval {
-        file2sqlite_table $conn $basename $filename $table $idx $dargv
+        file2sqlite_table $conn $basename $filename $table $idx $opt
       } {
         log warn "Failed to convert: $filename" 
         log warn "Error: $errorResult"
@@ -127,7 +129,7 @@ proc file2sqlite {dirname db table deletedb dargv} {
   
 }
 
-proc file2sqlite_table {conn basename filename table idx dargv} {
+proc file2sqlite_table {conn basename filename table idx opt} {
   if {$table == "auto"} {
     set tablename [det_tablename $basename $filename]
   } else {
@@ -137,7 +139,7 @@ proc file2sqlite_table {conn basename filename table idx dargv} {
       set tablename "$table$idx"
     }
   }
-  set commit_lines [:commitlines $dargv]
+  set commit_lines [:commitlines $opt]
   log info "file2sqlite_table: basename=$basename, filename=$filename" 
   log info "tablename to create: $tablename"
   set sep_char [det_sep_char $filename]
@@ -151,8 +153,8 @@ proc file2sqlite_table {conn basename filename table idx dargv} {
     db_eval $conn "create table $tablename ([join $fields ", "])"
     set stmt_insert [prepare_insert $conn $tablename {*}$fields]
     log info "stmt_insert: $stmt_insert"
-    if {[:singlelines $dargv]} {
-      read_single_lines $f $conn $stmt_insert $tablename $fields $sep_char $dargv
+    if {[:singlelines $opt]} {
+      read_single_lines $f $conn $stmt_insert $tablename $fields $sep_char $opt
     } else {
       set lines ""
       set dct_prev {}
@@ -195,10 +197,10 @@ proc close_resultsets {stmt} {
   }
 }
 
-proc read_single_lines {f conn stmt_insert tablename fields sep_char dargv} {
+proc read_single_lines {f conn stmt_insert tablename fields sep_char opt} {
   log info "reading single lines for $tablename"
   set linenr 1;                 # already read header line.
-  set commit_lines [:commitlines $dargv]
+  set commit_lines [:commitlines $opt]
   while {![eof $f]} {
     gets $f line
     incr linenr
