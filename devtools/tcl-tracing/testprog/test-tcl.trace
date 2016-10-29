@@ -4,334 +4,376 @@
 {global auto_index}	1	4
 {uplevel namespace current}	1	4
 {namespace current}	0	5
+::tcl::namespace::current	0	6
 {set ns ::}	1	4
 {auto_qualify ::itcl::builtin::* ::}	1	4
 {regsub -all ::+ ::itcl::builtin::* :: cmd}	2	5
 {set n 3}	2	5
-{if {[string match ::* $cmd]} {  if {$n > 1} {      # ( ::foo::bar , * ) -> ::foo::bar      return [list $cmd]  } else {      # ( ::global , * ) -> global      return [list [string range $cmd 2 end]]  }     }}	2	5
-{string match ::* ::itcl::builtin::*}	2	5
-{::tcl::string::match ::* ::itcl::builtin::*}	2	6
-{if {$n > 1} {      # ( ::foo::bar , * ) -> ::foo::bar      return [list $cmd]  } else {      # ( ::global , * ) -> global      return [list [string range $cmd 2 end]]  }}	2	6
+{if {[string match ::* $cmd]} {  if {$n > 1} {      # (::foo::bar , *) -> ::foo::bar      return [list $cmd]  } else {      # (::global , *) -> global      return [list [string range $cmd 2 end]]  }     }}	2	5
+{string match ::* ::itcl::builtin::*}	2	6
+{::tcl::string::match ::* ::itcl::builtin::*}	2	7
+{if {$n > 1} {      # (::foo::bar , *) -> ::foo::bar      return [list $cmd]  } else {      # (::global , *) -> global      return [list [string range $cmd 2 end]]  }}	2	6
 {list ::itcl::builtin::*}	2	7
 {return ::itcl::builtin::*}	2	7
 {set patternList ::itcl::builtin::*}	1	4
 auto_load_index	1	4
 {global auto_index auto_oldpath auto_path errorInfo errorCode}	2	5
 {if {[info exists auto_oldpath] && ($auto_oldpath == $auto_path)} {  return 0     }}	2	5
-{info exists auto_oldpath}	2	5
-{::tcl::info::exists auto_oldpath}	2	6
-{set auto_oldpath {C:/NICO/UTIL/TCL8.5/lib/tcl8.5 C:/NICO/UTIL/TCL8.5/lib {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib} {c:/documents and settings/vreen00/teapot/repository/package/tcl/lib} {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib/Tclx-8.4}}}	2	5
+{info exists auto_oldpath}	2	6
+{::tcl::info::exists auto_oldpath}	2	7
+{set auto_oldpath {/opt/ActiveTcl-8.6.1/lib/tcl8.6 /opt/ActiveTcl-8.6.1/lib /home/nico/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/tcl/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib/Tclx8.4}}	2	5
 {interp issafe}	2	5
 {set issafe 0}	2	5
 {for {set i [expr {[llength $auto_path] - 1}]} {$i >= 0} {incr i -1} {  set dir [lindex $auto_path $i]         tclx_load_tndxs $dir  set f ""  if {$issafe} {      catch {source [file join $dir tclIndex]}  } elseif {[catch {set f [open [file join $dir tclIndex]]}]} {      continue  } else {      set error [catch {   set id [gets $f]   if {$id == "# Tcl autoload index file, version 2.0"} {       eval [read $f]   } elseif {$id ==  "# Tcl autoload index file: each line identifies a Tcl"} {       while {[gets $f line] >= 0} {    if {([string index $line 0] == "#")     || ([llength $line] != 2)} {        continue    }    set name [lindex $line 0]    set auto_index($name)  "source [file join $dir [lindex $line 1]]"       }   } else {       error  "[file join $dir tclIndex] isn't a proper Tcl index file"   }      } msg]      if {[string compare $f ""]} {   close $f      }      if {$error} {   error $msg $errorInfo $errorCode      }  }     }}	2	5
 {expr {[llength $auto_path] - 1}}	2	6
-{llength {C:/NICO/UTIL/TCL8.5/lib/tcl8.5 C:/NICO/UTIL/TCL8.5/lib {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib} {c:/documents and settings/vreen00/teapot/repository/package/tcl/lib} {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib/Tclx-8.4}}}	2	6
-{set i 4}	2	6
-{lindex {C:/NICO/UTIL/TCL8.5/lib/tcl8.5 C:/NICO/UTIL/TCL8.5/lib {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib} {c:/documents and settings/vreen00/teapot/repository/package/tcl/lib} {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib/Tclx-8.4}} 4}	2	6
-{set dir {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib/Tclx-8.4}}	2	6
-{tclx_load_tndxs {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib/Tclx-8.4}}	2	6
+{llength {/opt/ActiveTcl-8.6.1/lib/tcl8.6 /opt/ActiveTcl-8.6.1/lib /home/nico/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/tcl/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib/Tclx8.4}}	2	7
+{set i 5}	2	6
+{lindex {/opt/ActiveTcl-8.6.1/lib/tcl8.6 /opt/ActiveTcl-8.6.1/lib /home/nico/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/tcl/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib/Tclx8.4} 5}	2	6
+{set dir /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib/Tclx8.4}	2	6
+{tclx_load_tndxs /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib/Tclx8.4}	2	6
 {set f {}}	2	6
 {if {$issafe} {      catch {source [file join $dir tclIndex]}  } elseif {[catch {set f [open [file join $dir tclIndex]]}]} {      continue  } else {      set error [catch {   set id [gets $f]   if {$id == "# Tcl autoload index file, version 2.0"} {       eval [read $f]   } elseif {$id ==  "# Tcl autoload index file: each line identifies a Tcl"} {       while {[gets $f line] >= 0} {    if {([string index $line 0] == "#")     || ([llength $line] != 2)} {        continue    }    set name [lindex $line 0]    set auto_index($name)  "source [file join $dir [lindex $line 1]]"       }   } else {       error  "[file join $dir tclIndex] isn't a proper Tcl index file"   }      } msg]      if {[string compare $f ""]} {   close $f      }      if {$error} {   error $msg $errorInfo $errorCode      }  }}	2	6
-{catch {set f [open [file join $dir tclIndex]]}}	2	6
-{file join {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib/Tclx-8.4} tclIndex}	2	7
-{open {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib/Tclx-8.4/tclIndex}}	2	7
+{catch {set f [open [file join $dir tclIndex]]}}	2	7
+{file join /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib/Tclx8.4 tclIndex}	2	8
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib/Tclx8.4 tclIndex}	2	9
+{open /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib/Tclx8.4/tclIndex}	2	8
 continue	2	7
 {incr i -1}	2	6
-{lindex {C:/NICO/UTIL/TCL8.5/lib/tcl8.5 C:/NICO/UTIL/TCL8.5/lib {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib} {c:/documents and settings/vreen00/teapot/repository/package/tcl/lib} {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib/Tclx-8.4}} 3}	2	6
-{set dir {c:/documents and settings/vreen00/teapot/repository/package/tcl/lib}}	2	6
-{tclx_load_tndxs {c:/documents and settings/vreen00/teapot/repository/package/tcl/lib}}	2	6
+{lindex {/opt/ActiveTcl-8.6.1/lib/tcl8.6 /opt/ActiveTcl-8.6.1/lib /home/nico/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/tcl/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib/Tclx8.4} 4}	2	6
+{set dir /opt/ActiveTcl-8.6.1/lib/teapot/package/tcl/lib}	2	6
+{tclx_load_tndxs /opt/ActiveTcl-8.6.1/lib/teapot/package/tcl/lib}	2	6
 {set f {}}	2	6
 {if {$issafe} {      catch {source [file join $dir tclIndex]}  } elseif {[catch {set f [open [file join $dir tclIndex]]}]} {      continue  } else {      set error [catch {   set id [gets $f]   if {$id == "# Tcl autoload index file, version 2.0"} {       eval [read $f]   } elseif {$id ==  "# Tcl autoload index file: each line identifies a Tcl"} {       while {[gets $f line] >= 0} {    if {([string index $line 0] == "#")     || ([llength $line] != 2)} {        continue    }    set name [lindex $line 0]    set auto_index($name)  "source [file join $dir [lindex $line 1]]"       }   } else {       error  "[file join $dir tclIndex] isn't a proper Tcl index file"   }      } msg]      if {[string compare $f ""]} {   close $f      }      if {$error} {   error $msg $errorInfo $errorCode      }  }}	2	6
-{catch {set f [open [file join $dir tclIndex]]}}	2	6
-{file join {c:/documents and settings/vreen00/teapot/repository/package/tcl/lib} tclIndex}	2	7
-{open {c:/documents and settings/vreen00/teapot/repository/package/tcl/lib/tclIndex}}	2	7
+{catch {set f [open [file join $dir tclIndex]]}}	2	7
+{file join /opt/ActiveTcl-8.6.1/lib/teapot/package/tcl/lib tclIndex}	2	8
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/teapot/package/tcl/lib tclIndex}	2	9
+{open /opt/ActiveTcl-8.6.1/lib/teapot/package/tcl/lib/tclIndex}	2	8
 continue	2	7
 {incr i -1}	2	6
-{lindex {C:/NICO/UTIL/TCL8.5/lib/tcl8.5 C:/NICO/UTIL/TCL8.5/lib {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib} {c:/documents and settings/vreen00/teapot/repository/package/tcl/lib} {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib/Tclx-8.4}} 2}	2	6
-{set dir {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib}}	2	6
-{tclx_load_tndxs {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib}}	2	6
+{lindex {/opt/ActiveTcl-8.6.1/lib/tcl8.6 /opt/ActiveTcl-8.6.1/lib /home/nico/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/tcl/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib/Tclx8.4} 3}	2	6
+{set dir /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib}	2	6
+{tclx_load_tndxs /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib}	2	6
 {set f {}}	2	6
 {if {$issafe} {      catch {source [file join $dir tclIndex]}  } elseif {[catch {set f [open [file join $dir tclIndex]]}]} {      continue  } else {      set error [catch {   set id [gets $f]   if {$id == "# Tcl autoload index file, version 2.0"} {       eval [read $f]   } elseif {$id ==  "# Tcl autoload index file: each line identifies a Tcl"} {       while {[gets $f line] >= 0} {    if {([string index $line 0] == "#")     || ([llength $line] != 2)} {        continue    }    set name [lindex $line 0]    set auto_index($name)  "source [file join $dir [lindex $line 1]]"       }   } else {       error  "[file join $dir tclIndex] isn't a proper Tcl index file"   }      } msg]      if {[string compare $f ""]} {   close $f      }      if {$error} {   error $msg $errorInfo $errorCode      }  }}	2	6
-{catch {set f [open [file join $dir tclIndex]]}}	2	6
-{file join {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib} tclIndex}	2	7
-{open {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib/tclIndex}}	2	7
+{catch {set f [open [file join $dir tclIndex]]}}	2	7
+{file join /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib tclIndex}	2	8
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib tclIndex}	2	9
+{open /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib/tclIndex}	2	8
 continue	2	7
 {incr i -1}	2	6
-{lindex {C:/NICO/UTIL/TCL8.5/lib/tcl8.5 C:/NICO/UTIL/TCL8.5/lib {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib} {c:/documents and settings/vreen00/teapot/repository/package/tcl/lib} {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib/Tclx-8.4}} 1}	2	6
-{set dir C:/NICO/UTIL/TCL8.5/lib}	2	6
-{tclx_load_tndxs C:/NICO/UTIL/TCL8.5/lib}	2	6
+{lindex {/opt/ActiveTcl-8.6.1/lib/tcl8.6 /opt/ActiveTcl-8.6.1/lib /home/nico/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/tcl/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib/Tclx8.4} 2}	2	6
+{set dir /home/nico/lib}	2	6
+{tclx_load_tndxs /home/nico/lib}	2	6
 {set f {}}	2	6
 {if {$issafe} {      catch {source [file join $dir tclIndex]}  } elseif {[catch {set f [open [file join $dir tclIndex]]}]} {      continue  } else {      set error [catch {   set id [gets $f]   if {$id == "# Tcl autoload index file, version 2.0"} {       eval [read $f]   } elseif {$id ==  "# Tcl autoload index file: each line identifies a Tcl"} {       while {[gets $f line] >= 0} {    if {([string index $line 0] == "#")     || ([llength $line] != 2)} {        continue    }    set name [lindex $line 0]    set auto_index($name)  "source [file join $dir [lindex $line 1]]"       }   } else {       error  "[file join $dir tclIndex] isn't a proper Tcl index file"   }      } msg]      if {[string compare $f ""]} {   close $f      }      if {$error} {   error $msg $errorInfo $errorCode      }  }}	2	6
-{catch {set f [open [file join $dir tclIndex]]}}	2	6
-{file join C:/NICO/UTIL/TCL8.5/lib tclIndex}	2	7
-{open C:/NICO/UTIL/TCL8.5/lib/tclIndex}	2	7
+{catch {set f [open [file join $dir tclIndex]]}}	2	7
+{file join /home/nico/lib tclIndex}	2	8
+{::tcl::file::join /home/nico/lib tclIndex}	2	9
+{open /home/nico/lib/tclIndex}	2	8
 continue	2	7
 {incr i -1}	2	6
-{lindex {C:/NICO/UTIL/TCL8.5/lib/tcl8.5 C:/NICO/UTIL/TCL8.5/lib {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib} {c:/documents and settings/vreen00/teapot/repository/package/tcl/lib} {c:/documents and settings/vreen00/teapot/repository/package/win32-ix86/lib/Tclx-8.4}} 0}	2	6
-{set dir C:/NICO/UTIL/TCL8.5/lib/tcl8.5}	2	6
-{tclx_load_tndxs C:/NICO/UTIL/TCL8.5/lib/tcl8.5}	2	6
+{lindex {/opt/ActiveTcl-8.6.1/lib/tcl8.6 /opt/ActiveTcl-8.6.1/lib /home/nico/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/tcl/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib/Tclx8.4} 1}	2	6
+{set dir /opt/ActiveTcl-8.6.1/lib}	2	6
+{tclx_load_tndxs /opt/ActiveTcl-8.6.1/lib}	2	6
 {set f {}}	2	6
 {if {$issafe} {      catch {source [file join $dir tclIndex]}  } elseif {[catch {set f [open [file join $dir tclIndex]]}]} {      continue  } else {      set error [catch {   set id [gets $f]   if {$id == "# Tcl autoload index file, version 2.0"} {       eval [read $f]   } elseif {$id ==  "# Tcl autoload index file: each line identifies a Tcl"} {       while {[gets $f line] >= 0} {    if {([string index $line 0] == "#")     || ([llength $line] != 2)} {        continue    }    set name [lindex $line 0]    set auto_index($name)  "source [file join $dir [lindex $line 1]]"       }   } else {       error  "[file join $dir tclIndex] isn't a proper Tcl index file"   }      } msg]      if {[string compare $f ""]} {   close $f      }      if {$error} {   error $msg $errorInfo $errorCode      }  }}	2	6
-{catch {set f [open [file join $dir tclIndex]]}}	2	6
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 tclIndex}	2	7
-{open C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tclIndex}	2	7
-{set f file9567d0}	2	7
+{catch {set f [open [file join $dir tclIndex]]}}	2	7
+{file join /opt/ActiveTcl-8.6.1/lib tclIndex}	2	8
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib tclIndex}	2	9
+{open /opt/ActiveTcl-8.6.1/lib/tclIndex}	2	8
+continue	2	7
+{incr i -1}	2	6
+{lindex {/opt/ActiveTcl-8.6.1/lib/tcl8.6 /opt/ActiveTcl-8.6.1/lib /home/nico/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/tcl/lib /opt/ActiveTcl-8.6.1/lib/teapot/package/linux-glibc2.3-x86_64/lib/Tclx8.4} 0}	2	6
+{set dir /opt/ActiveTcl-8.6.1/lib/tcl8.6}	2	6
+{tclx_load_tndxs /opt/ActiveTcl-8.6.1/lib/tcl8.6}	2	6
+{set f {}}	2	6
+{if {$issafe} {      catch {source [file join $dir tclIndex]}  } elseif {[catch {set f [open [file join $dir tclIndex]]}]} {      continue  } else {      set error [catch {   set id [gets $f]   if {$id == "# Tcl autoload index file, version 2.0"} {       eval [read $f]   } elseif {$id ==  "# Tcl autoload index file: each line identifies a Tcl"} {       while {[gets $f line] >= 0} {    if {([string index $line 0] == "#")     || ([llength $line] != 2)} {        continue    }    set name [lindex $line 0]    set auto_index($name)  "source [file join $dir [lindex $line 1]]"       }   } else {       error  "[file join $dir tclIndex] isn't a proper Tcl index file"   }      } msg]      if {[string compare $f ""]} {   close $f      }      if {$error} {   error $msg $errorInfo $errorCode      }  }}	2	6
+{catch {set f [open [file join $dir tclIndex]]}}	2	7
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tclIndex}	2	8
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tclIndex}	2	9
+{open /opt/ActiveTcl-8.6.1/lib/tcl8.6/tclIndex}	2	8
+{set f file6}	2	8
 {catch {   set id [gets $f]   if {$id == "# Tcl autoload index file, version 2.0"} {       eval [read $f]   } elseif {$id ==  "# Tcl autoload index file: each line identifies a Tcl"} {       while {[gets $f line] >= 0} {    if {([string index $line 0] == "#")     || ([llength $line] != 2)} {        continue    }    set name [lindex $line 0]    set auto_index($name)  "source [file join $dir [lindex $line 1]]"       }   } else {       error  "[file join $dir tclIndex] isn't a proper Tcl index file"   }      } msg}	2	7
-{gets file9567d0}	2	8
+{gets file6}	2	8
 {set id {# Tcl autoload index file, version 2.0}}	2	8
 {if {$id == "# Tcl autoload index file, version 2.0"} {       eval [read $f]   } elseif {$id ==  "# Tcl autoload index file: each line identifies a Tcl"} {       while {[gets $f line] >= 0} {    if {([string index $line 0] == "#")     || ([llength $line] != 2)} {        continue    }    set name [lindex $line 0]    set auto_index($name)  "source [file join $dir [lindex $line 1]]"       }   } else {       error  "[file join $dir tclIndex] isn't a proper Tcl index file"   }}	2	8
-{read file9567d0}	2	9
-{eval {# This file is generated by the "auto_mkindex" command # and sourced to set up indexing information for one or # more commands.  Typically each line is a command that # sets an element in the auto_index array, where the # element name is the name of a command and the value is # a script that loads the command.  set auto_index(auto_reset) [list source [file join $dir auto.tcl]] set auto_index(tcl_findLibrary) [list source [file join $dir auto.tcl]] set auto_index(auto_mkindex) [list source [file join $dir auto.tcl]] set auto_index(auto_mkindex_old) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::init) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::cleanup) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::mkindex) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::hook) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::slavehook) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::command) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::commandInit) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::fullname) [list source [file join $dir auto.tcl]] set auto_index(history) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistAdd) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistKeep) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistClear) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistInfo) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistRedo) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistIndex) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistEvent) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistChange) [list source [file join $dir history.tcl]] set auto_index(tclLdAout) [list source [file join $dir ldAout.tcl]] set auto_index(pkg_mkIndex) [list source [file join $dir package.tcl]] set auto_index(tclPkgSetup) [list source [file join $dir package.tcl]] set auto_index(tclPkgUnknown) [list source [file join $dir package.tcl]] set auto_index(::tcl::MacOSXPkgUnknown) [list source [file join $dir package.tcl]] set auto_index(::pkg::create) [list source [file join $dir package.tcl]] set auto_index(parray) [list source [file join $dir parray.tcl]] set auto_index(::safe::InterpStatics) [list source [file join $dir safe.tcl]] set auto_index(::safe::InterpNested) [list source [file join $dir safe.tcl]] set auto_index(::safe::interpCreate) [list source [file join $dir safe.tcl]] set auto_index(::safe::interpInit) [list source [file join $dir safe.tcl]] set auto_index(::safe::CheckInterp) [list source [file join $dir safe.tcl]] set auto_index(::safe::interpConfigure) [list source [file join $dir safe.tcl]] set auto_index(::safe::InterpCreate) [list source [file join $dir safe.tcl]] set auto_index(::safe::InterpSetConfig) [list source [file join $dir safe.tcl]] set auto_index(::safe::interpFindInAccessPath) [list source [file join $dir safe.tcl]] set auto_index(::safe::interpAddToAccessPath) [list source [file join $dir safe.tcl]] set auto_index(::safe::InterpInit) [list source [file join $dir safe.tcl]] set auto_index(::safe::AddSubDirs) [list source [file join $dir safe.tcl]] set auto_index(::safe::interpDelete) [list source [file join $dir safe.tcl]] set auto_index(::safe::setLogCmd) [list source [file join $dir safe.tcl]] set auto_index(::safe::SyncAccessPath) [list source [file join $dir safe.tcl]] set auto_index(::safe::InterpStateName) [list source [file join $dir safe.tcl]] set auto_index(::safe::IsInterp) [list source [file join $dir safe.tcl]] set auto_index(::safe::PathToken) [list source [file join $dir safe.tcl]] set auto_index(::safe::PathListName) [list source [file join $dir safe.tcl]] set auto_index(::safe::VirtualPathListName) [list source [file join $dir safe.tcl]] set auto_index(::safe::PathNumberName) [list source [file join $dir safe.tcl]] set auto_index(::safe::StaticsOkName) [list source [file join $dir safe.tcl]] set auto_index(::safe::NestedOkName) [list source [file join $dir safe.tcl]] set auto_index(::safe::Toplevel) [list source [file join $dir safe.tcl]] set auto_index(::safe::Set) [list source [file join $dir safe.tcl]] set auto_index(::safe::Lappend) [list source [file join $dir safe.tcl]] set auto_index(::safe::Unset) [list source [file join $dir safe.tcl]] set auto_index(::safe::Exists) [list source [file join $dir safe.tcl]] set auto_index(::safe::GetAccessPath) [list source [file join $dir safe.tcl]] set auto_index(::safe::StaticsOk) [list source [file join $dir safe.tcl]] set auto_index(::safe::NestedOk) [list source [file join $dir safe.tcl]] set auto_index(::safe::DeleteHookName) [list source [file join $dir safe.tcl]] set auto_index(::safe::TranslatePath) [list source [file join $dir safe.tcl]] set auto_index(::safe::Log) [list source [file join $dir safe.tcl]] set auto_index(::safe::CheckFileName) [list source [file join $dir safe.tcl]] set auto_index(::safe::AliasSource) [list source [file join $dir safe.tcl]] set auto_index(::safe::AliasLoad) [list source [file join $dir safe.tcl]] set auto_index(::safe::FileInAccessPath) [list source [file join $dir safe.tcl]] set auto_index(::safe::Subset) [list source [file join $dir safe.tcl]] set auto_index(::safe::AliasSubset) [list source [file join $dir safe.tcl]] set auto_index(::safe::AliasEncoding) [list source [file join $dir safe.tcl]] set auto_index(tcl_wordBreakAfter) [list source [file join $dir word.tcl]] set auto_index(tcl_wordBreakBefore) [list source [file join $dir word.tcl]] set auto_index(tcl_endOfWord) [list source [file join $dir word.tcl]] set auto_index(tcl_startOfNextWord) [list source [file join $dir word.tcl]] set auto_index(tcl_startOfPreviousWord) [list source [file join $dir word.tcl]] set auto_index(::tcl::tm::add) [list source [file join $dir tm.tcl]] set auto_index(::tcl::tm::remove) [list source [file join $dir tm.tcl]] set auto_index(::tcl::tm::list) [list source [file join $dir tm.tcl]] set auto_index(::tcl::tm::UnknownHandler) [list source [file join $dir tm.tcl]] set auto_index(::tcl::tm::roots) [list source [file join $dir tm.tcl]] set auto_index(::tcl::tm::path) [list source [file join $dir tm.tcl]] }}	2	9
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}	2	11
-{set auto_index(auto_reset) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}	2	11
-{set auto_index(tcl_findLibrary) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}	2	11
-{set auto_index(auto_mkindex) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}	2	11
-{set auto_index(auto_mkindex_old) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}	2	11
-{set auto_index(::auto_mkindex_parser::init) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}	2	11
-{set auto_index(::auto_mkindex_parser::cleanup) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}	2	11
-{set auto_index(::auto_mkindex_parser::mkindex) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}	2	11
-{set auto_index(::auto_mkindex_parser::hook) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}	2	11
-{set auto_index(::auto_mkindex_parser::slavehook) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}	2	11
-{set auto_index(::auto_mkindex_parser::command) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}	2	11
-{set auto_index(::auto_mkindex_parser::commandInit) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 auto.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}	2	11
-{set auto_index(::auto_mkindex_parser::fullname) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/auto.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}	2	11
-{set auto_index(history) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}	2	11
-{set auto_index(::tcl::HistAdd) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}	2	11
-{set auto_index(::tcl::HistKeep) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}	2	11
-{set auto_index(::tcl::HistClear) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}	2	11
-{set auto_index(::tcl::HistInfo) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}	2	11
-{set auto_index(::tcl::HistRedo) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}	2	11
-{set auto_index(::tcl::HistIndex) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}	2	11
-{set auto_index(::tcl::HistEvent) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 history.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}	2	11
-{set auto_index(::tcl::HistChange) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/history.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 ldAout.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/ldAout.tcl}	2	11
-{set auto_index(tclLdAout) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/ldAout.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 package.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/package.tcl}	2	11
-{set auto_index(pkg_mkIndex) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/package.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 package.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/package.tcl}	2	11
-{set auto_index(tclPkgSetup) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/package.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 package.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/package.tcl}	2	11
-{set auto_index(tclPkgUnknown) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/package.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 package.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/package.tcl}	2	11
-{set auto_index(::tcl::MacOSXPkgUnknown) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/package.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 package.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/package.tcl}	2	11
-{set auto_index(::pkg::create) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/package.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 parray.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/parray.tcl}	2	11
-{set auto_index(parray) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/parray.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::InterpStatics) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::InterpNested) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::interpCreate) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::interpInit) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::CheckInterp) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::interpConfigure) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::InterpCreate) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::InterpSetConfig) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::interpFindInAccessPath) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::interpAddToAccessPath) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::InterpInit) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::AddSubDirs) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::interpDelete) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::setLogCmd) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::SyncAccessPath) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::InterpStateName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::IsInterp) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::PathToken) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::PathListName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::VirtualPathListName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::PathNumberName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::StaticsOkName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::NestedOkName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::Toplevel) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::Set) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::Lappend) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::Unset) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::Exists) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::GetAccessPath) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::StaticsOk) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::NestedOk) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::DeleteHookName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::TranslatePath) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::Log) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::CheckFileName) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::AliasSource) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::AliasLoad) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::FileInAccessPath) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::Subset) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::AliasSubset) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 safe.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}	2	11
-{set auto_index(::safe::AliasEncoding) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/safe.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 word.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/word.tcl}	2	11
-{set auto_index(tcl_wordBreakAfter) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/word.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 word.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/word.tcl}	2	11
-{set auto_index(tcl_wordBreakBefore) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/word.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 word.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/word.tcl}	2	11
-{set auto_index(tcl_endOfWord) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/word.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 word.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/word.tcl}	2	11
-{set auto_index(tcl_startOfNextWord) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/word.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 word.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/word.tcl}	2	11
-{set auto_index(tcl_startOfPreviousWord) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/word.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 tm.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl}	2	11
-{set auto_index(::tcl::tm::add) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 tm.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl}	2	11
-{set auto_index(::tcl::tm::remove) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 tm.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl}	2	11
-{set auto_index(::tcl::tm::list) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 tm.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl}	2	11
-{set auto_index(::tcl::tm::UnknownHandler) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 tm.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl}	2	11
-{set auto_index(::tcl::tm::roots) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl}}	2	10
-{file join C:/NICO/UTIL/TCL8.5/lib/tcl8.5 tm.tcl}	2	12
-{list source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl}	2	11
-{set auto_index(::tcl::tm::path) {source C:/NICO/UTIL/TCL8.5/lib/tcl8.5/tm.tcl}}	2	10
+{read file6}	2	9
+{eval {# -*- tcl -*- # This file is generated by the "auto_mkindex" command # and sourced to set up indexing information for one or # more commands.  Typically each line is a command that # sets an element in the auto_index array, where the # element name is the name of a command and the value is # a script that loads the command.  set auto_index(auto_reset) [list source [file join $dir auto.tcl]] set auto_index(tcl_findLibrary) [list source [file join $dir auto.tcl]] set auto_index(auto_mkindex) [list source [file join $dir auto.tcl]] set auto_index(auto_mkindex_old) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::init) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::cleanup) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::mkindex) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::hook) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::slavehook) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::command) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::commandInit) [list source [file join $dir auto.tcl]] set auto_index(::auto_mkindex_parser::fullname) [list source [file join $dir auto.tcl]] set auto_index(history) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistAdd) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistKeep) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistClear) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistInfo) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistRedo) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistIndex) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistEvent) [list source [file join $dir history.tcl]] set auto_index(::tcl::HistChange) [list source [file join $dir history.tcl]] set auto_index(pkg_mkIndex) [list source [file join $dir package.tcl]] set auto_index(tclPkgSetup) [list source [file join $dir package.tcl]] set auto_index(tclPkgUnknown) [list source [file join $dir package.tcl]] set auto_index(::tcl::MacOSXPkgUnknown) [list source [file join $dir package.tcl]] set auto_index(::pkg::create) [list source [file join $dir package.tcl]] set auto_index(parray) [list source [file join $dir parray.tcl]] set auto_index(::safe::InterpStatics) [list source [file join $dir safe.tcl]] set auto_index(::safe::InterpNested) [list source [file join $dir safe.tcl]] set auto_index(::safe::interpCreate) [list source [file join $dir safe.tcl]] set auto_index(::safe::interpInit) [list source [file join $dir safe.tcl]] set auto_index(::safe::CheckInterp) [list source [file join $dir safe.tcl]] set auto_index(::safe::interpConfigure) [list source [file join $dir safe.tcl]] set auto_index(::safe::InterpCreate) [list source [file join $dir safe.tcl]] set auto_index(::safe::InterpSetConfig) [list source [file join $dir safe.tcl]] set auto_index(::safe::interpFindInAccessPath) [list source [file join $dir safe.tcl]] set auto_index(::safe::interpAddToAccessPath) [list source [file join $dir safe.tcl]] set auto_index(::safe::InterpInit) [list source [file join $dir safe.tcl]] set auto_index(::safe::AddSubDirs) [list source [file join $dir safe.tcl]] set auto_index(::safe::interpDelete) [list source [file join $dir safe.tcl]] set auto_index(::safe::setLogCmd) [list source [file join $dir safe.tcl]] set auto_index(::safe::SyncAccessPath) [list source [file join $dir safe.tcl]] set auto_index(::safe::PathToken) [list source [file join $dir safe.tcl]] set auto_index(::safe::TranslatePath) [list source [file join $dir safe.tcl]] set auto_index(::safe::Log) [list source [file join $dir safe.tcl]] set auto_index(::safe::CheckFileName) [list source [file join $dir safe.tcl]] set auto_index(::safe::AliasGlob) [list source [file join $dir safe.tcl]] set auto_index(::safe::AliasSource) [list source [file join $dir safe.tcl]] set auto_index(::safe::AliasLoad) [list source [file join $dir safe.tcl]] set auto_index(::safe::FileInAccessPath) [list source [file join $dir safe.tcl]] set auto_index(::safe::DirInAccessPath) [list source [file join $dir safe.tcl]] set auto_index(::safe::Subset) [list source [file join $dir safe.tcl]] set auto_index(::safe::AliasSubset) [list source [file join $dir safe.tcl]] set auto_index(::safe::AliasEncoding) [list source [file join $dir safe.tcl]] set auto_index(tcl_wordBreakAfter) [list source [file join $dir word.tcl]] set auto_index(tcl_wordBreakBefore) [list source [file join $dir word.tcl]] set auto_index(tcl_endOfWord) [list source [file join $dir word.tcl]] set auto_index(tcl_startOfNextWord) [list source [file join $dir word.tcl]] set auto_index(tcl_startOfPreviousWord) [list source [file join $dir word.tcl]] set auto_index(::tcl::tm::add) [list source [file join $dir tm.tcl]] set auto_index(::tcl::tm::remove) [list source [file join $dir tm.tcl]] set auto_index(::tcl::tm::list) [list source [file join $dir tm.tcl]] set auto_index(::tcl::tm::Defaults) [list source [file join $dir tm.tcl]] set auto_index(::tcl::tm::UnknownHandler) [list source [file join $dir tm.tcl]] set auto_index(::tcl::tm::roots) [list source [file join $dir tm.tcl]] set auto_index(::tcl::tm::path) [list source [file join $dir tm.tcl]] }}	2	9
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}	2	10
+{set auto_index(auto_reset) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}	2	10
+{set auto_index(tcl_findLibrary) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}	2	10
+{set auto_index(auto_mkindex) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}	2	10
+{set auto_index(auto_mkindex_old) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}	2	10
+{set auto_index(::auto_mkindex_parser::init) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}	2	10
+{set auto_index(::auto_mkindex_parser::cleanup) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}	2	10
+{set auto_index(::auto_mkindex_parser::mkindex) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}	2	10
+{set auto_index(::auto_mkindex_parser::hook) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}	2	10
+{set auto_index(::auto_mkindex_parser::slavehook) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}	2	10
+{set auto_index(::auto_mkindex_parser::command) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}	2	10
+{set auto_index(::auto_mkindex_parser::commandInit) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 auto.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}	2	10
+{set auto_index(::auto_mkindex_parser::fullname) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/auto.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}	2	10
+{set auto_index(history) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}	2	10
+{set auto_index(::tcl::HistAdd) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}	2	10
+{set auto_index(::tcl::HistKeep) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}	2	10
+{set auto_index(::tcl::HistClear) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}	2	10
+{set auto_index(::tcl::HistInfo) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}	2	10
+{set auto_index(::tcl::HistRedo) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}	2	10
+{set auto_index(::tcl::HistIndex) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}	2	10
+{set auto_index(::tcl::HistEvent) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 history.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}	2	10
+{set auto_index(::tcl::HistChange) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/history.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 package.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 package.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/package.tcl}	2	10
+{set auto_index(pkg_mkIndex) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/package.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 package.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 package.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/package.tcl}	2	10
+{set auto_index(tclPkgSetup) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/package.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 package.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 package.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/package.tcl}	2	10
+{set auto_index(tclPkgUnknown) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/package.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 package.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 package.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/package.tcl}	2	10
+{set auto_index(::tcl::MacOSXPkgUnknown) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/package.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 package.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 package.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/package.tcl}	2	10
+{set auto_index(::pkg::create) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/package.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 parray.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 parray.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/parray.tcl}	2	10
+{set auto_index(parray) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/parray.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::InterpStatics) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::InterpNested) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::interpCreate) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::interpInit) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::CheckInterp) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::interpConfigure) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::InterpCreate) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::InterpSetConfig) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::interpFindInAccessPath) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::interpAddToAccessPath) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::InterpInit) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::AddSubDirs) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::interpDelete) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::setLogCmd) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::SyncAccessPath) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::PathToken) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::TranslatePath) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::Log) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::CheckFileName) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::AliasGlob) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::AliasSource) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::AliasLoad) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::FileInAccessPath) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::DirInAccessPath) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::Subset) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::AliasSubset) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 safe.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}	2	10
+{set auto_index(::safe::AliasEncoding) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/safe.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 word.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 word.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/word.tcl}	2	10
+{set auto_index(tcl_wordBreakAfter) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/word.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 word.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 word.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/word.tcl}	2	10
+{set auto_index(tcl_wordBreakBefore) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/word.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 word.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 word.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/word.tcl}	2	10
+{set auto_index(tcl_endOfWord) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/word.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 word.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 word.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/word.tcl}	2	10
+{set auto_index(tcl_startOfNextWord) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/word.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 word.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 word.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/word.tcl}	2	10
+{set auto_index(tcl_startOfPreviousWord) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/word.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tm.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tm.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/tm.tcl}	2	10
+{set auto_index(::tcl::tm::add) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/tm.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tm.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tm.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/tm.tcl}	2	10
+{set auto_index(::tcl::tm::remove) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/tm.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tm.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tm.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/tm.tcl}	2	10
+{set auto_index(::tcl::tm::list) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/tm.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tm.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tm.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/tm.tcl}	2	10
+{set auto_index(::tcl::tm::Defaults) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/tm.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tm.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tm.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/tm.tcl}	2	10
+{set auto_index(::tcl::tm::UnknownHandler) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/tm.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tm.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tm.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/tm.tcl}	2	10
+{set auto_index(::tcl::tm::roots) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/tm.tcl}}	2	10
+{file join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tm.tcl}	2	10
+{::tcl::file::join /opt/ActiveTcl-8.6.1/lib/tcl8.6 tm.tcl}	2	11
+{list source /opt/ActiveTcl-8.6.1/lib/tcl8.6/tm.tcl}	2	10
+{set auto_index(::tcl::tm::path) {source /opt/ActiveTcl-8.6.1/lib/tcl8.6/tm.tcl}}	2	10
 {set error 0}	2	7
 {if {[string compare $f ""]} {   close $f      }}	2	7
-{string compare file9567d0 {}}	2	7
-{::tcl::string::compare file9567d0 {}}	2	8
-{close file9567d0}	2	8
+{string compare file6 {}}	2	8
+{::tcl::string::compare file6 {}}	2	9
+{close file6}	2	8
 {if {$error} {   error $msg $errorInfo $errorCode      }}	2	7
 {incr i -1}	2	6
 {return 1}	2	5
 {foreach pattern ::itcl::builtin::* {         foreach name [array names auto_index $pattern] {             if {"" == [info commands $name]} {                 ::itcl::import::stub create $name             }         }     }}	1	4
 {array names auto_index ::itcl::builtin::*}	1	5
+{::tcl::array::names auto_index ::itcl::builtin::*}	1	6
 {foreach name {} {             if {"" == [info commands $name]} {                 ::itcl::import::stub create $name             }         }}	1	5
 {private common CLASSNAME ClassB}	1	3
 {public proc new_instance {} {   # return [ClassB #auto]   # set res [ClassB #auto]   set res [$CLASSNAME #auto]   puts "res: $res"   set res2 [itcl::code $res]   puts "res2: $res2"   puts "nw: [namespace which $res]"   return $res2  }}	1	3
@@ -345,25 +387,27 @@ continue	2	7
 {global auto_index}	1	4
 {uplevel namespace current}	1	4
 {namespace current}	0	5
+::tcl::namespace::current	0	6
 {set ns ::}	1	4
 {auto_qualify ::itcl::builtin::* ::}	1	4
 {regsub -all ::+ ::itcl::builtin::* :: cmd}	2	5
 {set n 3}	2	5
-{if {[string match ::* $cmd]} {  if {$n > 1} {      # ( ::foo::bar , * ) -> ::foo::bar      return [list $cmd]  } else {      # ( ::global , * ) -> global      return [list [string range $cmd 2 end]]  }     }}	2	5
-{string match ::* ::itcl::builtin::*}	2	5
-{::tcl::string::match ::* ::itcl::builtin::*}	2	6
-{if {$n > 1} {      # ( ::foo::bar , * ) -> ::foo::bar      return [list $cmd]  } else {      # ( ::global , * ) -> global      return [list [string range $cmd 2 end]]  }}	2	6
+{if {[string match ::* $cmd]} {  if {$n > 1} {      # (::foo::bar , *) -> ::foo::bar      return [list $cmd]  } else {      # (::global , *) -> global      return [list [string range $cmd 2 end]]  }     }}	2	5
+{string match ::* ::itcl::builtin::*}	2	6
+{::tcl::string::match ::* ::itcl::builtin::*}	2	7
+{if {$n > 1} {      # (::foo::bar , *) -> ::foo::bar      return [list $cmd]  } else {      # (::global , *) -> global      return [list [string range $cmd 2 end]]  }}	2	6
 {list ::itcl::builtin::*}	2	7
 {return ::itcl::builtin::*}	2	7
 {set patternList ::itcl::builtin::*}	1	4
 auto_load_index	1	4
 {global auto_index auto_oldpath auto_path errorInfo errorCode}	2	5
 {if {[info exists auto_oldpath] && ($auto_oldpath == $auto_path)} {  return 0     }}	2	5
-{info exists auto_oldpath}	2	5
-{::tcl::info::exists auto_oldpath}	2	6
+{info exists auto_oldpath}	2	6
+{::tcl::info::exists auto_oldpath}	2	7
 {return 0}	2	6
 {foreach pattern ::itcl::builtin::* {         foreach name [array names auto_index $pattern] {             if {"" == [info commands $name]} {                 ::itcl::import::stub create $name             }         }     }}	1	4
 {array names auto_index ::itcl::builtin::*}	1	5
+{::tcl::array::names auto_index ::itcl::builtin::*}	1	6
 {foreach name {} {             if {"" == [info commands $name]} {                 ::itcl::import::stub create $name             }         }}	1	5
 {public method method1 ref {   puts "ref: $ref"   puts [$ref get_value]   ClassB::proc1 abc  }}	1	3
 {itcl::class ClassA {   public method main {} {    set cl3 [ClassC #auto]     set ref [ClassB::new_instance]    $cl3 method1 $ref     set ref2 [ClassB::new_instance2]    $cl3 method1 $ref2        puts "class van ClassA: [info class]"   ; # werkt wel: ::ClassA      uplevel #0 testproc  } }}	0	1
@@ -371,43 +415,182 @@ auto_load_index	1	4
 {global auto_index}	1	3
 {uplevel namespace current}	1	3
 {namespace current}	0	4
+::tcl::namespace::current	0	5
 {set ns ::}	1	3
 {auto_qualify ::itcl::builtin::* ::}	1	3
 {regsub -all ::+ ::itcl::builtin::* :: cmd}	2	4
 {set n 3}	2	4
-{if {[string match ::* $cmd]} {  if {$n > 1} {      # ( ::foo::bar , * ) -> ::foo::bar      return [list $cmd]  } else {      # ( ::global , * ) -> global      return [list [string range $cmd 2 end]]  }     }}	2	4
-{string match ::* ::itcl::builtin::*}	2	4
-{::tcl::string::match ::* ::itcl::builtin::*}	2	5
-{if {$n > 1} {      # ( ::foo::bar , * ) -> ::foo::bar      return [list $cmd]  } else {      # ( ::global , * ) -> global      return [list [string range $cmd 2 end]]  }}	2	5
+{if {[string match ::* $cmd]} {  if {$n > 1} {      # (::foo::bar , *) -> ::foo::bar      return [list $cmd]  } else {      # (::global , *) -> global      return [list [string range $cmd 2 end]]  }     }}	2	4
+{string match ::* ::itcl::builtin::*}	2	5
+{::tcl::string::match ::* ::itcl::builtin::*}	2	6
+{if {$n > 1} {      # (::foo::bar , *) -> ::foo::bar      return [list $cmd]  } else {      # (::global , *) -> global      return [list [string range $cmd 2 end]]  }}	2	5
 {list ::itcl::builtin::*}	2	6
 {return ::itcl::builtin::*}	2	6
 {set patternList ::itcl::builtin::*}	1	3
 auto_load_index	1	3
 {global auto_index auto_oldpath auto_path errorInfo errorCode}	2	4
 {if {[info exists auto_oldpath] && ($auto_oldpath == $auto_path)} {  return 0     }}	2	4
-{info exists auto_oldpath}	2	4
-{::tcl::info::exists auto_oldpath}	2	5
+{info exists auto_oldpath}	2	5
+{::tcl::info::exists auto_oldpath}	2	6
 {return 0}	2	5
 {foreach pattern ::itcl::builtin::* {         foreach name [array names auto_index $pattern] {             if {"" == [info commands $name]} {                 ::itcl::import::stub create $name             }         }     }}	1	3
 {array names auto_index ::itcl::builtin::*}	1	4
+{::tcl::array::names auto_index ::itcl::builtin::*}	1	5
 {foreach name {} {             if {"" == [info commands $name]} {                 ::itcl::import::stub create $name             }         }}	1	4
 {public method main {} {    set cl3 [ClassC #auto]     set ref [ClassB::new_instance]    $cl3 method1 $ref     set ref2 [ClassB::new_instance2]    $cl3 method1 $ref2        puts "class van ClassA: [info class]"   ; # werkt wel: ::ClassA      uplevel #0 testproc  }}	1	2
 {proc testproc {} {  puts "calling at level 0"  }}	0	1
 {proc main {} {  set cl1 [ClassA #auto]  $cl1 main }}	0	1
 main	0	1
 {ClassA #auto}	1	2
+::oo::Helpers::self	2	3
+{set mySelf ::ClassA}	2	3
+{if {[::itcl::is class $mySelf]} {         set namespace [uplevel 1 namespace current]         set my_namespace $namespace         if {$my_namespace ne "::"} {             set my_namespace ${my_namespace}::         }         set my_class [::itcl::find classes ${my_namespace}$m]         if {[string length $my_class] > 0} {             # class already exists, it is a redefinition, so delete old class first      ::itcl::delete class $my_class         }         set cmd [uplevel 1 ::info command ${my_namespace}$m]         if {[string length $cmd] > 0} {             error "command \"$m\" already exists in namespace \"$namespace\""         }     }}	2	3
+{::itcl::is class ::ClassA}	2	4
+{::itcl::internal::commands::ensembles::3::class ::ClassA}	2	5
+{uplevel 1 namespace current}	2	4
+{namespace current}	1	5
+::tcl::namespace::current	1	6
+{set namespace ::}	2	4
+{set my_namespace ::}	2	4
+{if {$my_namespace ne "::"} {             set my_namespace ${my_namespace}::         }}	2	4
+{::itcl::find classes ::#auto}	2	4
+{::itcl::internal::commands::ensembles::1::classes ::#auto}	2	5
+{set my_class {}}	2	4
+{if {[string length $my_class] > 0} {             # class already exists, it is a redefinition, so delete old class first      ::itcl::delete class $my_class         }}	2	4
+{string length {}}	2	5
+{::tcl::string::length {}}	2	6
+{uplevel 1 ::info command ::#auto}	2	4
+{::info command ::#auto}	1	5
+{::tcl::info::commands ::#auto}	1	6
+{set cmd {}}	2	4
+{if {[string length $cmd] > 0} {             error "command \"$m\" already exists in namespace \"$namespace\""         }}	2	4
+{string length {}}	2	5
+{::tcl::string::length {}}	2	6
+{uplevel namespace current}	2	3
+{namespace current}	1	4
+::tcl::namespace::current	1	5
+{set myns ::}	2	3
+{if {$myns ne "::"} {        set myns ${myns}::     }}	2	3
+{::info level 0}	2	3
+{::tcl::info::level 0}	2	4
+{lindex {ClassA #auto} 0}	2	3
+{set myObj ClassA}	2	3
+{list {}}	2	3
+{list uplevel 1 ::itcl::parser::handleClass ClassA ::ClassA #auto {}}	2	3
+{set cmd {uplevel 1 ::itcl::parser::handleClass ClassA ::ClassA #auto {}}}	2	3
+{set myErrorInfo {}}	2	3
+{set obj {}}	2	3
+{if {[catch {         eval $cmd     } obj myErrorInfo]} {  return -code error -errorinfo $::errorInfo $obj     }}	2	3
+{catch {         eval $cmd     } obj myErrorInfo}	2	4
+{eval {uplevel 1 ::itcl::parser::handleClass ClassA ::ClassA #auto {}}}	2	5
+{uplevel 1 ::itcl::parser::handleClass ClassA ::ClassA #auto {}}	2	6
+{::itcl::parser::handleClass ClassA ::ClassA #auto}	1	7
+{return classA0}	2	3
 {set cl1 classA0}	1	2
 {classA0 main}	1	2
 {ClassC #auto}	2	3
+::oo::Helpers::self	3	4
+{set mySelf ::ClassC}	3	4
+{if {[::itcl::is class $mySelf]} {         set namespace [uplevel 1 namespace current]         set my_namespace $namespace         if {$my_namespace ne "::"} {             set my_namespace ${my_namespace}::         }         set my_class [::itcl::find classes ${my_namespace}$m]         if {[string length $my_class] > 0} {             # class already exists, it is a redefinition, so delete old class first      ::itcl::delete class $my_class         }         set cmd [uplevel 1 ::info command ${my_namespace}$m]         if {[string length $cmd] > 0} {             error "command \"$m\" already exists in namespace \"$namespace\""         }     }}	3	4
+{::itcl::is class ::ClassC}	3	5
+{::itcl::internal::commands::ensembles::3::class ::ClassC}	3	6
+{uplevel 1 namespace current}	3	5
+{namespace current}	2	6
+::tcl::namespace::current	2	7
+{set namespace ::ClassA}	3	5
+{set my_namespace ::ClassA}	3	5
+{if {$my_namespace ne "::"} {             set my_namespace ${my_namespace}::         }}	3	5
+{set my_namespace ::ClassA::}	3	6
+{::itcl::find classes ::ClassA::#auto}	3	5
+{::itcl::internal::commands::ensembles::1::classes ::ClassA::#auto}	3	6
+{set my_class {}}	3	5
+{if {[string length $my_class] > 0} {             # class already exists, it is a redefinition, so delete old class first      ::itcl::delete class $my_class         }}	3	5
+{string length {}}	3	6
+{::tcl::string::length {}}	3	7
+{uplevel 1 ::info command ::ClassA::#auto}	3	5
+{::info command ::ClassA::#auto}	2	6
+{::tcl::info::commands ::ClassA::#auto}	2	7
+{set cmd {}}	3	5
+{if {[string length $cmd] > 0} {             error "command \"$m\" already exists in namespace \"$namespace\""         }}	3	5
+{string length {}}	3	6
+{::tcl::string::length {}}	3	7
+{uplevel namespace current}	3	4
+{namespace current}	2	5
+::tcl::namespace::current	2	6
+{set myns ::ClassA}	3	4
+{if {$myns ne "::"} {        set myns ${myns}::     }}	3	4
+{set myns ::ClassA::}	3	5
+{::info level 0}	3	4
+{::tcl::info::level 0}	3	5
+{lindex {ClassC #auto} 0}	3	4
+{set myObj ClassC}	3	4
+{list {}}	3	4
+{list uplevel 1 ::itcl::parser::handleClass ClassC ::ClassC #auto {}}	3	4
+{set cmd {uplevel 1 ::itcl::parser::handleClass ClassC ::ClassC #auto {}}}	3	4
+{set myErrorInfo {}}	3	4
+{set obj {}}	3	4
+{if {[catch {         eval $cmd     } obj myErrorInfo]} {  return -code error -errorinfo $::errorInfo $obj     }}	3	4
+{catch {         eval $cmd     } obj myErrorInfo}	3	5
+{eval {uplevel 1 ::itcl::parser::handleClass ClassC ::ClassC #auto {}}}	3	6
+{uplevel 1 ::itcl::parser::handleClass ClassC ::ClassC #auto {}}	3	7
+{::itcl::parser::handleClass ClassC ::ClassC #auto}	2	8
+{return classC0}	3	4
 {set cl3 classC0}	2	3
 ClassB::new_instance	2	3
 {ClassB #auto}	3	4
+::oo::Helpers::self	4	5
+{set mySelf ::ClassB}	4	5
+{if {[::itcl::is class $mySelf]} {         set namespace [uplevel 1 namespace current]         set my_namespace $namespace         if {$my_namespace ne "::"} {             set my_namespace ${my_namespace}::         }         set my_class [::itcl::find classes ${my_namespace}$m]         if {[string length $my_class] > 0} {             # class already exists, it is a redefinition, so delete old class first      ::itcl::delete class $my_class         }         set cmd [uplevel 1 ::info command ${my_namespace}$m]         if {[string length $cmd] > 0} {             error "command \"$m\" already exists in namespace \"$namespace\""         }     }}	4	5
+{::itcl::is class ::ClassB}	4	6
+{::itcl::internal::commands::ensembles::3::class ::ClassB}	4	7
+{uplevel 1 namespace current}	4	6
+{namespace current}	3	7
+::tcl::namespace::current	3	8
+{set namespace ::ClassB}	4	6
+{set my_namespace ::ClassB}	4	6
+{if {$my_namespace ne "::"} {             set my_namespace ${my_namespace}::         }}	4	6
+{set my_namespace ::ClassB::}	4	7
+{::itcl::find classes ::ClassB::#auto}	4	6
+{::itcl::internal::commands::ensembles::1::classes ::ClassB::#auto}	4	7
+{set my_class {}}	4	6
+{if {[string length $my_class] > 0} {             # class already exists, it is a redefinition, so delete old class first      ::itcl::delete class $my_class         }}	4	6
+{string length {}}	4	7
+{::tcl::string::length {}}	4	8
+{uplevel 1 ::info command ::ClassB::#auto}	4	6
+{::info command ::ClassB::#auto}	3	7
+{::tcl::info::commands ::ClassB::#auto}	3	8
+{set cmd {}}	4	6
+{if {[string length $cmd] > 0} {             error "command \"$m\" already exists in namespace \"$namespace\""         }}	4	6
+{string length {}}	4	7
+{::tcl::string::length {}}	4	8
+{uplevel namespace current}	4	5
+{namespace current}	3	6
+::tcl::namespace::current	3	7
+{set myns ::ClassB}	4	5
+{if {$myns ne "::"} {        set myns ${myns}::     }}	4	5
+{set myns ::ClassB::}	4	6
+{::info level 0}	4	5
+{::tcl::info::level 0}	4	6
+{lindex {ClassB #auto} 0}	4	5
+{set myObj ClassB}	4	5
+{list {}}	4	5
+{list uplevel 1 ::itcl::parser::handleClass ClassB ::ClassB #auto {}}	4	5
+{set cmd {uplevel 1 ::itcl::parser::handleClass ClassB ::ClassB #auto {}}}	4	5
+{set myErrorInfo {}}	4	5
+{set obj {}}	4	5
+{if {[catch {         eval $cmd     } obj myErrorInfo]} {  return -code error -errorinfo $::errorInfo $obj     }}	4	5
+{catch {         eval $cmd     } obj myErrorInfo}	4	6
+{eval {uplevel 1 ::itcl::parser::handleClass ClassB ::ClassB #auto {}}}	4	7
+{uplevel 1 ::itcl::parser::handleClass ClassB ::ClassB #auto {}}	4	8
+{::itcl::parser::handleClass ClassB ::ClassB #auto}	3	9
+{return classB0}	4	5
 {set res classB0}	3	4
 {puts {res: classB0}}	3	4
 {itcl::code classB0}	3	4
 {set res2 {namespace inscope ::ClassB classB0}}	3	4
 {puts {res2: namespace inscope ::ClassB classB0}}	3	4
 {namespace which classB0}	3	4
+{::tcl::namespace::which classB0}	3	5
 {puts {nw: ::ClassB::classB0}}	3	4
 {return {namespace inscope ::ClassB classB0}}	3	4
 {set ref {namespace inscope ::ClassB classB0}}	2	3
@@ -415,44 +598,73 @@ ClassB::new_instance	2	3
 {puts {ref: namespace inscope ::ClassB classB0}}	3	4
 {::unknown {namespace inscope ::ClassB classB0} get_value}	3	5
 {variable ::tcl::UnknownPending}	4	6
-{global auto_noexec auto_noload env tcl_interactive}	4	6
+{global auto_noexec auto_noload env tcl_interactive errorInfo errorCode}	4	6
+{if {[info exists errorInfo]} {  set savedErrorInfo $errorInfo     }}	4	6
+{info exists errorInfo}	4	7
+{::tcl::info::exists errorInfo}	4	8
+{set savedErrorInfo {couldn't open "/opt/ActiveTcl-8.6.1/lib/tclIndex": no such file or directory     while executing "open [file join $dir tclIndex]"}}	4	7
+{if {[info exists errorCode]} {  set savedErrorCode $errorCode     }}	4	6
+{info exists errorCode}	4	7
+{::tcl::info::exists errorCode}	4	8
+{set savedErrorCode {POSIX ENOENT {no such file or directory}}}	4	7
 {lindex {{namespace inscope ::ClassB classB0} get_value} 0}	4	6
-{set cmd {namespace inscope ::ClassB classB0}}	4	6
-{if {[regexp "^:*namespace\[ \t\n\]+inscope" $cmd] && [llength $cmd] == 4} {  #return -code error "You need an {*}"         set arglist [lrange $args 1 end]  set ret [catch {uplevel 1 ::$cmd $arglist} result opts]  dict unset opts -errorinfo  dict incr opts -level  return -options $opts $result     }}	4	6
-{regexp {^:*namespace[   ]+inscope} {namespace inscope ::ClassB classB0}}	4	6
-{llength {namespace inscope ::ClassB classB0}}	4	6
-{lrange {{namespace inscope ::ClassB classB0} get_value} 1 end}	4	7
-{set arglist get_value}	4	7
-{catch {uplevel 1 ::$cmd $arglist} result opts}	4	7
-{uplevel 1 {::namespace inscope ::ClassB classB0} get_value}	4	8
-{::namespace inscope ::ClassB classB0 get_value}	3	9
-{classB0 get_value}	4	10
-{return 4242}	5	11
+{set name {namespace inscope ::ClassB classB0}}	4	6
+{if {![info exists auto_noload]} {  #  # Make sure we're not trying to load the same proc twice.  #  if {[info exists UnknownPending($name)]} {      return -code error "self-referential recursion in \"unknown\" for command \"$name\""  }  set UnknownPending($name) pending  set ret [catch {   auto_load $name [uplevel 1 {::namespace current}]  } msg opts]  unset UnknownPending($name)  if {$ret != 0} {      dict append opts -errorinfo "\n    (autoloading \"$name\")"      return -options $opts $msg  }  if {![array size UnknownPending]} {      unset UnknownPending  }  if {$msg} {      if {[info exists savedErrorCode]} {   set ::errorCode $savedErrorCode      } else {   unset -nocomplain ::errorCode      }      if {[info exists savedErrorInfo]} {   set errorInfo $savedErrorInfo      } else {   unset -nocomplain errorInfo      }      set code [catch {uplevel 1 $args} msg opts]      if {$code ==  1} {   #   # Compute stack trace contribution from the [uplevel].   # Note the dependence on how Tcl_AddErrorInfo, etc.   # construct the stack trace.   #   set errInfo [dict get $opts -errorinfo]   set errCode [dict get $opts -errorcode]   set cinfo $args   if {[string bytelength $cinfo] > 150} {       set cinfo [string range $cinfo 0 150]       while {[string bytelength $cinfo] > 150} {    set cinfo [string range $cinfo 0 end-1]       }       append cinfo ...   }   append cinfo "\"\n    (\"uplevel\" body line 1)"   append cinfo "\n    invoked from within"   append cinfo "\n\"uplevel 1 \$args\""   #   # Try each possible form of the stack trace   # and trim the extra contribution from the matching case   #   set expect "$msg\n    while executing\n\"$cinfo"   if {$errInfo eq $expect} {       #       # The stack has only the eval from the expanded command       # Do not generate any stack trace here.       #       dict unset opts -errorinfo       dict incr opts -level       return -options $opts $msg   }   #   # Stack trace is nested, trim off just the contribution   # from the extra "eval" of $args due to the "catch" above.   #   set expect "\n    invoked from within\n\"$cinfo"   set exlen [string length $expect]   set eilen [string length $errInfo]   set i [expr {$eilen - $exlen - 1}]   set einfo [string range $errInfo 0 $i]   #   # For now verify that $errInfo consists of what we are about   # to return plus what we expected to trim off.   #   if {$errInfo ne "$einfo$expect"} {       error "Tcl bug: unexpected stack trace in \"unknown\"" {}  [list CORE UNKNOWN BADTRACE $einfo $expect $errInfo]   }   return -code error -errorcode $errCode  -errorinfo $einfo $msg      } else {   dict incr opts -level   return -options $opts $msg      }  }     }}	4	6
+{info exists auto_noload}	4	7
+{::tcl::info::exists auto_noload}	4	8
+{if {[info exists UnknownPending($name)]} {      return -code error "self-referential recursion in \"unknown\" for command \"$name\""  }}	4	7
+{info exists {UnknownPending(namespace inscope ::ClassB classB0)}}	4	8
+{::tcl::info::exists {UnknownPending(namespace inscope ::ClassB classB0)}}	4	9
+{set {UnknownPending(namespace inscope ::ClassB classB0)} pending}	4	7
+{catch {   auto_load $name [uplevel 1 {::namespace current}]  } msg opts}	4	7
+{uplevel 1 {::namespace current}}	4	8
+{::namespace current}	3	9
+::tcl::namespace::current	3	10
+{auto_load {namespace inscope ::ClassB classB0} ::ClassC}	4	8
+{global auto_index auto_path}	5	9
+{if {$namespace eq ""} {  set namespace [uplevel 1 [list ::namespace current]]     }}	5	9
+{auto_qualify {namespace inscope ::ClassB classB0} ::ClassC}	5	9
+{regsub -all ::+ {namespace inscope ::ClassB classB0} :: cmd}	6	10
+{set n 1}	6	10
+{if {[string match ::* $cmd]} {  if {$n > 1} {      # (::foo::bar , *) -> ::foo::bar      return [list $cmd]  } else {      # (::global , *) -> global      return [list [string range $cmd 2 end]]  }     }}	6	10
+{string match ::* {namespace inscope ::ClassB classB0}}	6	11
+{::tcl::string::match ::* {namespace inscope ::ClassB classB0}}	6	12
+{if {$n == 0} {  if {$namespace eq "::"} {      # (nocolons , ::) -> nocolons      return [list $cmd]  } else {      # (nocolons , ::sub) -> ::sub::nocolons nocolons      return [list ${namespace}::$cmd $cmd]  }     } elseif {$namespace eq "::"} {  #  (foo::bar , ::) -> ::foo::bar  return [list ::$cmd]     } else {  # (foo::bar , ::sub) -> ::sub::foo::bar ::foo::bar  return [list ${namespace}::$cmd ::$cmd]     }}	6	10
+{list {::ClassC::namespace inscope ::ClassB classB0} {::namespace inscope ::ClassB classB0}}	6	11
+{return {{::ClassC::namespace inscope ::ClassB classB0} {::namespace inscope ::ClassB classB0}}}	6	11
+{set nameList {{::ClassC::namespace inscope ::ClassB classB0} {::namespace inscope ::ClassB classB0}}}	5	9
+{lappend nameList {namespace inscope ::ClassB classB0}}	5	9
+{foreach name {{::ClassC::namespace inscope ::ClassB classB0} {::namespace inscope ::ClassB classB0} {namespace inscope ::ClassB classB0}} {  if {[info exists auto_index($name)]} {      namespace eval :: $auto_index($name)      # There's a couple of ways to look for a command of a given      # name.  One is to use      #    info commands $name      # Unfortunately, if the name has glob-magic chars in it like *      # or [], it may not match.  For our purposes here, a better      # route is to use      #    namespace which -command $name      if {[namespace which -command $name] ne ""} {   return 1      }  }     }}	5	9
+{if {[info exists auto_index($name)]} {      namespace eval :: $auto_index($name)      # There's a couple of ways to look for a command of a given      # name.  One is to use      #    info commands $name      # Unfortunately, if the name has glob-magic chars in it like *      # or [], it may not match.  For our purposes here, a better      # route is to use      #    namespace which -command $name      if {[namespace which -command $name] ne ""} {   return 1      }  }}	5	10
+{info exists {auto_index(::ClassC::namespace inscope ::ClassB classB0)}}	5	11
+{::tcl::info::exists {auto_index(::ClassC::namespace inscope ::ClassB classB0)}}	5	12
+{if {[info exists auto_index($name)]} {      namespace eval :: $auto_index($name)      # There's a couple of ways to look for a command of a given      # name.  One is to use      #    info commands $name      # Unfortunately, if the name has glob-magic chars in it like *      # or [], it may not match.  For our purposes here, a better      # route is to use      #    namespace which -command $name      if {[namespace which -command $name] ne ""} {   return 1      }  }}	5	10
+{info exists {auto_index(::namespace inscope ::ClassB classB0)}}	5	11
+{::tcl::info::exists {auto_index(::namespace inscope ::ClassB classB0)}}	5	12
+{if {[info exists auto_index($name)]} {      namespace eval :: $auto_index($name)      # There's a couple of ways to look for a command of a given      # name.  One is to use      #    info commands $name      # Unfortunately, if the name has glob-magic chars in it like *      # or [], it may not match.  For our purposes here, a better      # route is to use      #    namespace which -command $name      if {[namespace which -command $name] ne ""} {   return 1      }  }}	5	10
+{info exists {auto_index(namespace inscope ::ClassB classB0)}}	5	11
+{::tcl::info::exists {auto_index(namespace inscope ::ClassB classB0)}}	5	12
+{if {![info exists auto_path]} {  return 0     }}	5	9
+{info exists auto_path}	5	10
+{::tcl::info::exists auto_path}	5	11
+{if {![auto_load_index]} {  return 0     }}	5	9
+auto_load_index	5	10
+{global auto_index auto_oldpath auto_path errorInfo errorCode}	6	11
+{if {[info exists auto_oldpath] && ($auto_oldpath == $auto_path)} {  return 0     }}	6	11
+{info exists auto_oldpath}	6	12
+{::tcl::info::exists auto_oldpath}	6	13
+{return 0}	6	12
+{return 0}	5	10
 {set ret 0}	4	7
-{dict unset opts -errorinfo}	4	7
-{::tcl::dict::unset opts -errorinfo}	4	8
-{dict incr opts -level}	4	7
-{::tcl::dict::incr opts -level}	4	8
-{return -options {-code 0 -level 1} 4242}	4	7
-{puts 4242}	3	4
-{ClassB::proc1 abc}	3	4
-{puts {proc1 called: abc}}	4	5
-ClassB::new_instance2	2	3
-{uplevel {namespace which [ClassB #auto]}}	3	4
-{ClassB #auto}	2	6
-{namespace which classB1}	2	5
-{return ::ClassA::classB1}	3	4
-{set ref2 ::ClassA::classB1}	2	3
-{classC0 method1 ::ClassA::classB1}	2	3
-{puts {ref: ::ClassA::classB1}}	3	4
-{::ClassA::classB1 get_value}	3	4
-{return 4242}	4	5
-{puts 4242}	3	4
-{ClassB::proc1 abc}	3	4
-{puts {proc1 called: abc}}	4	5
-{info class}	2	3
-{puts {class van ClassA: ::ClassA}}	2	3
-{uplevel #0 testproc}	2	3
-testproc	0	4
-{puts {calling at level 0}}	1	5
-{cmdtrace off}	0	1
+{unset {UnknownPending(namespace inscope ::ClassB classB0)}}	4	7
+{if {$ret != 0} {      dict append opts -errorinfo "\n    (autoloading \"$name\")"      return -options $opts $msg  }}	4	7
+{if {![array size UnknownPending]} {      unset UnknownPending  }}	4	7
+{array size UnknownPending}	4	8
+{::tcl::array::size UnknownPending}	4	9
+{unset UnknownPending}	4	8
+{if {$msg} {      if {[info exists savedErrorCode]} {   set ::errorCode $savedErrorCode      } else {   unset -nocomplain ::errorCode      }      if {[info exists savedErrorInfo]} {   set errorInfo $savedErrorInfo      } else {   unset -nocomplain errorInfo      }      set code [catch {uplevel 1 $args} msg opts]      if {$code ==  1} {   #   # Compute stack trace contribution from the [uplevel].   # Note the dependence on how Tcl_AddErrorInfo, etc.   # construct the stack trace.   #   set errInfo [dict get $opts -errorinfo]   set errCode [dict get $opts -errorcode]   set cinfo $args   if {[string bytelength $cinfo] > 150} {       set cinfo [string range $cinfo 0 150]       while {[string bytelength $cinfo] > 150} {    set cinfo [string range $cinfo 0 end-1]       }       append cinfo ...   }   append cinfo "\"\n    (\"uplevel\" body line 1)"   append cinfo "\n    invoked from within"   append cinfo "\n\"uplevel 1 \$args\""   #   # Try each possible form of the stack trace   # and trim the extra contribution from the matching case   #   set expect "$msg\n    while executing\n\"$cinfo"   if {$errInfo eq $expect} {       #       # The stack has only the eval from the expanded command       # Do not generate any stack trace here.       #       dict unset opts -errorinfo       dict incr opts -level       return -options $opts $msg   }   #   # Stack trace is nested, trim off just the contribution   # from the extra "eval" of $args due to the "catch" above.   #   set expect "\n    invoked from within\n\"$cinfo"   set exlen [string length $expect]   set eilen [string length $errInfo]   set i [expr {$eilen - $exlen - 1}]   set einfo [string range $errInfo 0 $i]   #   # For now verify that $errInfo consists of what we are about   # to return plus what we expected to trim off.   #   if {$errInfo ne "$einfo$expect"} {       error "Tcl bug: unexpected stack trace in \"unknown\"" {}  [list CORE UNKNOWN BADTRACE $einfo $expect $errInfo]   }   return -code error -errorcode $errCode  -errorinfo $einfo $msg      } else {   dict incr opts -level   return -options $opts $msg      }  }}	4	7
+{if {([info level] == 1) && ([info script] eq "")       && [info exists tcl_interactive] && $tcl_interactive} {  if {![info exists auto_noexec]} {      set new [auto_execok $name]      if {$new ne ""} {   set redir ""   if {[namespace which -command console] eq ""} {       set redir ">&@stdout <@stdin"   }   uplevel 1 [list ::catch  [concat exec $redir $new [lrange $args 1 end]]  ::tcl::UnknownResult ::tcl::UnknownOptions]   dict incr ::tcl::UnknownOptions -level   return -options $::tcl::UnknownOptions $::tcl::UnknownResult      }  }  if {$name eq "!!"} {      set newcmd [history event]  } elseif {[regexp {^!(.+)$} $name -> event]} {      set newcmd [history event $event]  } elseif {[regexp {^\^([^^]*)\^([^^]*)\^?$} $name -> old new]} {      set newcmd [history event -1]      catch {regsub -all -- $old $newcmd $new newcmd}  }  if {[info exists newcmd]} {      tclLog $newcmd      history change $newcmd 0      uplevel 1 [list ::catch $newcmd  ::tcl::UnknownResult ::tcl::UnknownOptions]      dict incr ::tcl::UnknownOptions -level      return -options $::tcl::UnknownOptions $::tcl::UnknownResult  }   set ret [catch {set candidates [info commands $name*]} msg]  if {$name eq "::"} {      set name ""  }  if {$ret != 0} {      dict append opts -errorinfo  "\n    (expanding command prefix \"$name\" in unknown)"      return -options $opts $msg  }  # Filter out bogus matches when $name contained  # a glob-special char [Bug 946952]  if {$name eq ""} {      # Handle empty $name separately due to strangeness      # in [string first] (See RFE 1243354)      set cmds $candidates  } else {      set cmds [list]      foreach x $candidates {   if {[string first $name $x] == 0} {       lappend cmds $x   }      }  }  if {[llength $cmds] == 1} {      uplevel 1 [list ::catch [lreplace $args 0 0 [lindex $cmds 0]]  ::tcl::UnknownResult ::tcl::UnknownOptions]      dict incr ::tcl::UnknownOptions -level      return -options $::tcl::UnknownOptions $::tcl::UnknownResult  }  if {[llength $cmds]} {      return -code error "ambiguous command name \"$name\": [lsort $cmds]"  }     }}	4	6
+{info level}	4	7
+::tcl::info::level	4	8
+{return -code error {invalid command name "namespace inscope ::ClassB classB0"}}	4	6
+{exit 1}	0	1
