@@ -1,3 +1,4 @@
+package require ndv
 
 # import procs from namespace into the main/global namespace.
 # what can be a list of items/procs to import
@@ -10,6 +11,9 @@ proc use {ns {what *}} {
     }
   }
 }
+
+# [2016-10-29 15:13] not really needed, package require ndv also takes care of this.
+use libmacro
 
 # example: require libdatetime dt
 # makes all commands in ns available as <as>/command
