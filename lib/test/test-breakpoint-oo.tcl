@@ -5,6 +5,10 @@
 # 5-5-2016 made working with a simple catch.
 package require ndv
 
+# [2016-10-29 14:38] only test from test-all.tcl when manual option is set:
+# for now only check if value is full or something else. Default is not-full, so always.
+#@test manual
+
 proc test_no_class {par1} {
   puts "In test_no_class, par1: $par1"
   set x 1

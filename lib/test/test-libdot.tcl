@@ -13,7 +13,7 @@ source [file join [file dirname [info script]] .. libdot.tcl]
 source [file join [file dirname [info script]] .. breakpoint.tcl]
 
 source [file join [file dirname [info script]] .. CLogger.tcl]
-set_log_global debug
+set_log_global info
 
 use libio
 
