@@ -6,6 +6,10 @@ require libdatetime dt
 
 source ../excel2db.tcl
 
+# [2016-10-29 14:38] only test from test-all.tcl when full option is set:
+# for now only check if value is full or something else. Default is not-full, so always.
+#@test full
+
 proc test_main {} {
   set dir "/tmp/test-excel2db"
   create_big_file $dir
