@@ -25,12 +25,16 @@ package require csv
 
 set_log_global info
 
+namespace eval ::excel2db {
+
+  namespace export excel2db_main handle_dir files2sqlite file2sqlite_table
+  
 proc excel2db_main {argv} {
   global fill_blanks
   
   set options {
     {dir.arg "" "Directory with log files"}
-	{filespecs.arg "*.csv:*.tsv" "File specs of files to import"}
+    {filespecs.arg "*.csv:*.tsv" "File specs of files to import"}
     {db.arg "auto" "SQLite DB location (auto=create in dir)"}
     {table.arg "auto" "Tablename (prefix) to use"}
     {config.arg "" "Config.tcl file"}
@@ -323,7 +327,10 @@ proc delete_database {dbname} {
   }
 }
 
+};                              # namespace eval
+
 if {[this_is_main]} {
-  excel2db_main $argv  
+  # excel2db_main $argv
+  excel2db::excel2db_main $argv  
 }
 
