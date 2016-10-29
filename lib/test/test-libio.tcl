@@ -14,6 +14,7 @@ source [file join [file dirname [info script]] .. libio.tcl]
 source [file join [file dirname [info script]] .. breakpoint.tcl]
 
 use libio
+use libfp
 
 # [2016-07-22 10:13] Two arguments to the test function should be enough: expression and expected result.
 proc testndv {args} {
@@ -43,6 +44,14 @@ proc test_read_file {par} {
 testndv {test_read_file 1} "abc-def-"
 # TODO: test with errors/catch.
 # testndv {test_read_file 2} "abc-def-"
+
+testndv {glob_rec [file dirname [info script]] \
+             [fn {path} {
+               if {[file type $path] == "file"} {
+                 regexp -- {^test-libio} [file tail $path]
+               } else {
+                 return 1;      # all subdirs
+               }}]} [list [file normalize [info script]]]
 
 cleanupTests
 
