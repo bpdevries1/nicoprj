@@ -18,28 +18,24 @@
   [eqC (l : ExprC) (r : ExprC)]
   [ifC (c : ExprC) (t : ExprC) (e : ExprC)]
   ;; [2016-10-22 20:56] function type take 1, hier zit nog een name in.
-  [fdC (name : symbol) (arg : symbol) (body : ExprC)]
+  ;; [fdC (name : symbol) (arg : symbol) (body : ExprC)]
+  ;; [2016-10-23 12:13] bovenstaande fdC niet meer geldig.
+  [lamC (arg : symbol) (body : ExprC)]
   )
 
-;;(appC 'double (numC 5))
-
-;; [2016-10-21 18:52] Add functions, first with one parameter.
-;; [2016-10-22 21:03] deze voorlopig weg.
-#;(define-type FunDefC
-    [fdC (name : symbol) (arg : symbol) (body : ExprC)])
-
+;; (fdC 'double 'x (plusC (idC 'x) (idC 'x)))
+(define-type Binding
+  [bind (name : symbol) (val : Value)])
 
 (define-type-alias Env (listof Binding))
 (define mt-env empty)
 (define extend-env cons)
 
+;; [2016-10-23 12:11] vanaf nu is het geen funV meer, maar een closure.
 (define-type Value
   [numV (n : number)]
-  [funV (name : symbol) (arg : symbol) (body : ExprC)])
+  [closV (arg : symbol) (body : ExprC) (env : Env)])
 
-;; (fdC 'double 'x (plusC (idC 'x) (idC 'x)))
-(define-type Binding
-  [bind (name : symbol) (val : Value)])
 
 
 ;; [2016-10-22 21:09] deze inmiddels beetje oud voor Surface expression. Weg?
@@ -52,45 +48,6 @@
   [eqS (l : ExprS) (r : ExprS)]
   [ifS (c : ExprS) (t : ExprS) (e : ExprS)])
 
-;; [2016-10-21 19:57] for now return the double function.
-;; [2016-10-21 20:18] deze def ging goed, ook al is 'ie niet typed.
-#;(define (get-fundef name lofundefs)
-    (fdC 'double 'x (plusC (idC 'x) (idC 'x))))
-
-;; [2016-10-21 20:21] had gehoopt dat dit met iets meer higher-level functie kon:
-;; bv direct met een hashmap.
-;; [2016-10-22 21:04] deze voorlopig ook niet nodig.
-#;(define (get-fundef [n : symbol] [fds : (listof FunDefC)]) : FunDefC
-    (cond
-      [(empty? fds) (error 'get-fundef "reference to undefined function")]
-      [(cons? fds) (cond
-                     [(equal? n (fdC-name (first fds))) (first fds)]
-                     [else (get-fundef n (rest fds))])]))
-
-;; [2016-10-22 19:50] nieuwe interp met gebruik van Env (=listof Binding)
-;; [2016-10-22 21:11] inmiddels de oude, hier klopt nu weinig meer van.
-#;(define (interp [expr : ExprC] [env : Env]) : number
-    (type-case ExprC expr
-      [numC (n) n]
-      [idC (n) (lookup n env)]
-      [fdC (n a b) expr] ; gaat voorlopig niet goed, je moet een number opleveren.
-      ;; deferral of substitution betekent hier in de env zetten.
-      ;; [2016-10-22 21:07] willen we deze nog ondersteunen? of alleen in place definitions?
-      [appC (f a) (local ([define fd (get-fundef f fds)])
-                    ; (interp <body> (extend-env (bind <arg> < a of (interp a)>)) fds
-                    ; a is ExprC, dus ook hier interp nodig.
-                    ; bij functie applicatie weer met empty env beginnen.
-                    (interp (fdC-body fd)
-                            (extend-env (bind (fdC-arg fd)
-                                              (interp a env fds))
-                                        mt-env)
-                            fds))]
-      
-      [plusC (l r) (+ (interp l env fds) (interp r env fds))]
-      [multC (l r) (* (interp l env fds) (interp r env fds))]
-      [eqC (l r) (if (= (interp l env fds) (interp r env fds)) 1 0)]
-      [ifC (c t e) (if (= 0 (interp c env fds)) (interp e env fds) (interp t env fds))]))
-
 ;; [2016-10-22 21:11] start van een nieuwe, die met in-place function defs en values
 ;; om kan gaan.
 ;; [2016-10-22 21:35] wel weer forward ref naar de desugar-er.
@@ -98,31 +55,34 @@
   (type-case ExprC expr
     [numC (n) (numV n)]
     [idC (n) (lookup n env)]
-    ; check dat f een functie-def is: met geneste type-case weer:
-    ; wel opmerking dat je ofwel de f checkt op zijnde een fdC, ofwel het resultaat
-    ; is een funV. Laatste waarsch beter, flexibeler. Vraag of je een situatie kunt
-    ; verzinnen waarbij het ene wel waar is, maar het andere niet. Kan dus 2 kanten op.
-    ; denk dat een fdC wel altijd een funV oplevert (zie onder), dus kan een funV ook
-    ; anders worden opgeleverd? Iets met een fdC doorgeven als param naar een functie?
-    #;[appC (f a) (local ([define fd f])
-                    (interp (fdC-body fd)
-                            (extend-env (bind (fdC-arg fd)
-                                              (interp a env))
-                                        mt-env)))]
+    [lamC (a b) (closV a b env)]
+    
     ; take 2 hieronder: geen expliciete check, maar zal falen als funV-body niet kunt gebruiken.
-    [appC (f a) (local ([define fd (interp f env)])
+    #;[appC (f a) (local ([define fd (interp f env)])
                   (interp (funV-body fd)
                           (extend-env (bind (funV-arg fd)
                                             (interp a env))
                                       mt-env)))]
+    ;; [2016-10-23 12:23] ipv laatste regel env uit closure te pakken, kun je ook orig env pakken.
+    ;; wat betekent dit? -> dan gebruik je closV-env helemaal niet, dus waarom heb je 'em dan aangemaakt?
+    ;; verwachting dan dat de testcase alsnog fout gaat.
+    ;; [2016-10-23 22:03] testcase blijft goed gaan, ook met alleen env, wel beetje raar.
+    ;; ook hier zou het dan helpen precies te kijken wat er wanneer wordt aangemaakt, vgl memoize.
+    ;; env wordt hier trouwens de dynamic environment genoemd. Kan zijn dat vorige dan weer onterecht
+    ;; goed gaat, met losse functie definities.
+    [appC (f a) (local ([define f-value (interp f env)])
+                  (interp (closV-body f-value)
+                          (extend-env (bind (closV-arg f-value)
+                                            (interp a env))
+                                      ;env
+                                      (closV-env f-value))))]
     
     ; (numV (+ (interp l env) (interp r env))) werkt niet, want je moet Value naar number omzetten.
     [plusC (l r) (num+ (interp l env) (interp r env))]
     [multC (l r) (num* (interp l env) (interp r env))]
     
-    ;; eqC en ifC er ook bij. Blijft op zich goede oefening.
     ;; [2016-10-22 21:14] hieronder waarschijnlijk de function definition.
-    [fdC (n a b) (funV n a b)]
+    #;[fdC (n a b) (funV n a b)]
     [else (error 'interp "if and = not supported now")]
     ))
 
@@ -254,25 +214,57 @@ three example functions above. What should it produce?
 
 ;; [2016-10-23 11:49] doet het voorlopig niet, ook geen tijd aan besteed in boek laatste hoofdstukken.
 #;(define (desugar [s : ExprS]) : ExprC
-  (type-case ExprS s ; waarom beide nodig? s om aan te geven over welke param het gaat. ArithS: dat je 'em op dit niveau in de class-tree wilt bekijken.
-    [numS (n) (numC n)]
-    [plusS (l r) (plusC (desugar l) (desugar r))]
-    [multS (l r) (multC (desugar l) (desugar r))]
-    [bminusS (l r) (plusC (desugar l) (multC (numC -1) (desugar r)))]
-    [uminusS (l) (multC (numC -1) (desugar l))]
-    [eqS (l r) (eqC (desugar l) (desugar r))]
-    [ifS (c t e) (ifC (desugar c) (desugar t) (desugar e))]))
+    (type-case ExprS s ; waarom beide nodig? s om aan te geven over welke param het gaat. ArithS: dat je 'em op dit niveau in de class-tree wilt bekijken.
+      [numS (n) (numC n)]
+      [plusS (l r) (plusC (desugar l) (desugar r))]
+      [multS (l r) (multC (desugar l) (desugar r))]
+      [bminusS (l r) (plusC (desugar l) (multC (numC -1) (desugar r)))]
+      [uminusS (l) (multC (numC -1) (desugar l))]
+      [eqS (l r) (eqC (desugar l) (desugar r))]
+      [ifS (c t e) (ifC (desugar c) (desugar t) (desugar e))]))
 
 ;; [2016-10-23 11:46] Tests with inline function def version:
-(test (interp (plusC (numC 10) (appC (fdC 'const5 '_ (numC 5)) (numC 10)))
+(test (interp (plusC (numC 10) (appC (lamC '_ (numC 5)) (numC 10)))
               mt-env)
       (numV 15))
 
 ;; [2016-10-23 11:50] en zo test je dus of een expressie een exceptie oplevert:
-(test/exn (interp (appC (fdC 'f1 'x (appC (fdC 'f2 'y (plusC (idC 'x) (idC 'y)))
+;; [2016-10-23 11:52] nu een geneste def. Met closure zou je nu kunnen zeggen dat deze wel
+;;   goed zou moeten gaan.
+(test (interp (appC (lamC 'x (appC (lamC 'y (plusC (idC 'x) (idC 'y)))
                                           (numC 4)))
                         (numC 3))
                   mt-env)
-          "lookup: Cannot find symbol in env")
+          (numV 7))
 
+;; [2016-10-23 11:58] Verdere testen/probeersels vanaf par 7.2:
+#;(appC (fdC 'f1 'x
+           (fdC 'f2 'y
+                (plusC (idC 'x) (idC 'y))))
+      (numC 4))
+
+;; [2016-10-23 12:00] deze vult nog niet de 4 in op de plek van de x. Mogelijk omdat
+;; deze genest is en bij aanroep van fdC 'f2 wordt env weer gereset.
+#;(interp (appC (fdC 'f1 'x
+                   (fdC 'f2 'y
+                        (plusC (idC 'x) (idC 'y))))
+              (numC 4))
+        mt-env)
+
+;; [2016-10-23 12:02] en dan levert deze idd een fout op:
+;; we zijn idd op zoek naar een closure!
+#;(interp (appC (appC (fdC 'f1 'x
+                         (fdC 'f2 'y
+                              (plusC (idC 'x) (idC 'y))))
+                    (numC 4))
+              (numC 5))
+        mt-env)
+
+;; [2016-10-26 22:24] Had net een let-macro gemaakt voor clojure, nu weg. Deze werkt
+;#(defmacro let2 [nm val body]
+  `((fn [~nm]
+      ~body)
+    ~val))
+
+;#(let2 c 12 (+ c c))
 
