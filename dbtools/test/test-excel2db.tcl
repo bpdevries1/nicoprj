@@ -18,7 +18,7 @@ proc from_tsv {} {
   puts $f "java\t3.14\tthat's pi"
   close $f
 
-  handle_dir $dir auto auto 1
+  handle_dir $dir auto auto 1 {}
 
   # TODO: code om te testen of DB is gemaakt, en evt ook een query uitvoeren.
 
