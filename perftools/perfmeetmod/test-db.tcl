@@ -1,12 +1,27 @@
+#! /usr/bin/env tclsh
+
 # test database connection with perftoolset like CDatabase etc.
+
+# [2016-11-01 21:40] deze ook oud, werkt niet meer. Toont maar weer aan dat testsuite handig is,
+# als 'ie regelmatig draait.
+#@test never
 
 package require ndv
 package require Tclx
 
-::ndv::source_once [file join [file dirname [info script]] PerfMeetModSchemaDef.tcl]
-::ndv::source_once [file join [file dirname [info script]] lib CDatabase.tcl]
-::ndv::source_once [file join [file dirname [info script]] logreader LogReaderFactory.tcl]
-::ndv::source_once [file join [file dirname [info script]] graphmaker TaskGraph.tcl]
+if 0 {
+  # [2016-11-01 21:32] oude lokaties.
+  ::ndv::source_once [file join [file dirname [info script]] PerfMeetModSchemaDef.tcl]
+  ::ndv::source_once [file join [file dirname [info script]] lib CDatabase.tcl]
+  ::ndv::source_once [file join [file dirname [info script]] logreader LogReaderFactory.tcl]
+  ::ndv::source_once [file join [file dirname [info script]] graphmaker TaskGraph.tcl]
+}
+
+::ndv::source_once [file join [info script] .. PerfMeetModSchemaDef.tcl]
+::ndv::source_once [file join [info script] .. .. .. lib db CDatabase.tcl]
+::ndv::source_once [file join [info script] .. logreader LogReaderFactory.tcl]
+::ndv::source_once [file join [info script] .. graphmaker TaskGraph.tcl]
+
 
 set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 
@@ -71,7 +86,7 @@ proc make_task_graph {testrun_id} {
   # set db [CDatabase::get_database PerfMeetModSchemaDef]
   set output_dir "/media/nas/ITX/input/logtest/output"
   set gm [TaskGraph::get_instance]
-  $gm set_database [CDatabase::get_database PerfMeetModSchemaDef]
+  $gm set_database [ndv::CDatabase::get_database PerfMeetModSchemaDef]
   $gm make_graph $testrun_id $output_dir
 }
 
