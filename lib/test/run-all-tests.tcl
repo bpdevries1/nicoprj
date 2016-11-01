@@ -17,6 +17,7 @@ proc main {argv} {
     {full "Run full testsuite, including long running tests"}
     {manual "Also run tests defined as manual/interactive"}
     {coe "Continue on error"}
+    {nopopup "Don't show Tk popup when a test fails"}
   }
   set usage ": [file tail [info script]] \[options]:"
   set opt [getoptions argv $options $usage]
@@ -32,6 +33,7 @@ proc test_all {opt} {
   log info "Running all tests in: $root"
   set lst [libio::glob_rec $root is_test]
   set nfiles_with_errors 0
+  set files_with_errors [list]
   foreach path $lst {
     log debug "Run tests in: $path"
     if {[should_test $path $opt]} {
@@ -45,6 +47,7 @@ proc test_all {opt} {
         if {[:coe $opt]} {
           # continue-on-error
           incr nfiles_with_errors
+          lappend files_with_errors $path
         } else {
           exit
         }
@@ -56,11 +59,21 @@ proc test_all {opt} {
     }
     # puts "============================="
   };                            # end-of-foreach file
+
+  # for testing popup:
+  #incr nfiles_with_errors
+  #lappend files_with_errors a bc.def en nog een paar
+  
   if {$nfiles_with_errors > 0} {
-    log warn "WARNING: files with errors found!"
+    set warn_msg "WARNING: Tcl test suite: $nfiles_with_errors file(s) with errors found!:\n[join $files_with_errors "\n"]"
+    log warn $warn_msg
+    if {![:nopopup $opt]} {
+      popup_warning $warn_msg
+    }
   } else {
     log info "Everything ok!"
   }
+  exit;                         # to quit from Tk.
 }
 
 proc is_test {path} {
@@ -108,6 +121,14 @@ proc test_spec {path} {
   } else {
     return "always"
   }
+}
+
+proc popup_warning {text} {
+  package require Tk
+  wm withdraw .
+  set answer [::tk::MessageBox -message "Warning!" \
+                  -icon info -type ok \
+                  -detail $text]
 }
 
 main $argv
