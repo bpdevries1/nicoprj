@@ -1,5 +1,7 @@
 set fn [function/lambda {args} {body}]
 
+#@test never
+
 keuze:
 set res [fn $args]
 set res [apply $fn $args]
