@@ -2,6 +2,8 @@ package require ndv
 
 # when uplevel body is used, a return in this body will return 'too much', so use identity as a 'return-function'
 
+use libfp
+
 proc main {} {
   puts "start-of-main"
   run_body "note1" {
