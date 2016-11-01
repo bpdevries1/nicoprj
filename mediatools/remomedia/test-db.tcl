@@ -1,5 +1,7 @@
 # test database connection with perftoolset like CDatabase etc.
 
+#@test never
+
 # source all C*.tcl files in the same dir
 foreach filename [glob -directory [file dirname [info script]] C*.tcl] {
   source $filename 
