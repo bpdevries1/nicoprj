@@ -1,3 +1,5 @@
+#! /usr/bin/env tclsh
+
 # [2016-08-04 20:58] some tryouts for coroutine based log reading.
 # specs could be a set of procs to handle reading the file.
 proc readlogfile {logname db specs} {
@@ -57,15 +59,15 @@ proc apply2 {fun args} {
 apply2 {x {expr 2 * $x}} 12
 # -> 24, ok.
 
-set c 42
-apply2 {x {expr 2 * $x + $c}} 2
+#set c 42
+#apply2 {x {expr 2 * $x + $c}} 2
 # -> can't read c
 # dus niet auto capture van de vars, als in closure.
 
 # rename is om een proc te renamen of te deleten.
 # dus deze hier gaat wat deleten.
-deleting proc: _unique6
-info level 0: _unique6 12
+# deleting proc: _unique6
+# info level 0: _unique6 12
 
 # dus in de net gemaakt proc _unique6 wordt deze zelfde proc gedelete.
 # ofwel mapping van naam naar geheugen-code-adres wordt gedelete. exec ptr staat al
@@ -79,20 +81,20 @@ proc map {lambda list} {
   return $result
 }
 map {x {return [string length $x]:$x}} {a bb ccc dddd}
-→ 1:a 2:bb 3:ccc 4:dddd
+# → 1:a 2:bb 3:ccc 4:dddd
 map {x {expr {$x**2 + 3*$x - 2}}} {-4 -3 -2 -1 0 1 2 3 4}
-→ 2 -2 -4 -4 -2 2 8 16 26
+# → 2 -2 -4 -4 -2 2 8 16 26
 
 # lijkt dus dat deze map functie voor elk element in de lijst opnieuw een proc aanmaakt,
 # en meteen weer verwijdert! Niet efficient, maar is ook een voorbeeld.
 
 # echte apply heeft ook geen context?
-set c 42
-apply2 {x {expr 2 * $x + $c}} 2
+#set c 42
+#apply2 {x {expr 2 * $x + $c}} 2
 # -> can't read c
 
-set c 42
-apply {x {expr 2 * $x + $c}} 2
+#set c 42
+#apply {x {expr 2 * $x + $c}} 2
 # -> can't read c
 # inderdaad, de echte ook niet.
 
@@ -133,16 +135,20 @@ puts "=== end of the whole thing ==="
 # [2016-08-05 21:37] check if apply is needed, or body can be added directly:
 puts "=== start of the whole thing ==="
 
-set cores [coroutine accumulator {
-  puts "Start of accumulator"
-  set x 0
-  while 1 {
-    puts "in while of accumulator, x=$x"
-    set y [yield $x]
-    puts "after yield, y = $y"
-    incr x $y
-  }
-}]
+# [2016-11-01 21:26] Ook een testje voor syntax, maar deze niet goed:
+if 0 {
+  set cores [coroutine accumulator {
+    puts "Start of accumulator"
+    set x 0
+    while 1 {
+      puts "in while of accumulator, x=$x"
+      set y [yield $x]
+      puts "after yield, y = $y"
+      incr x $y
+    }
+  }]
+  
+}
 
 puts "cores: $cores"
 
@@ -307,23 +313,10 @@ proc parse_transline {line} {
   return ""
 }
 
-def_parser parse_transline
 
-of ineens:
+# of voor simpele regexp based parsers:
 
-def_parser transline {
-  if {[regexp {} $line z f1 f2 f3]} {
-    # return [dict create f1 $f1 f2 $f2 f3 $f3]
-    set res [vars_to_dict f1 f2 f3]
-  }
-  # return ""
-  set res ""
-}
-# deze definieert dan proc en zet 'em in de parser-lijst
-
-of voor simpele regexp based parsers:
-
-def_parser_regexp transline <regexp> {f1 f2 f3}
+# def_parser_regexp transline <regexp> {f1 f2 f3}
 # maar later voor transline wel iets spannend, met ook name-value pairs, is meer dan
 # een regexp. Dus deze def_parser_regexp eerst niet.
 
@@ -335,9 +328,24 @@ proc def_parser {topic body} {
   # evt check of je dit topic al hebt, kan later nog.
   set proc_name "parse_$topic"
   lappend parsers $proc_name
-  set body "$body1\n"
+  # set body "$body1\n"
   proc $proc_name {line linenr} $body
 }
+
+# def_parser parse_transline
+
+# of ineens:
+
+def_parser transline {
+  if {[regexp {} $line z f1 f2 f3]} {
+    # return [dict create f1 $f1 f2 $f2 f3 $f3]
+    set res [vars_to_dict f1 f2 f3]
+  }
+  # return ""
+  set res ""
+}
+# deze definieert dan proc en zet 'em in de parser-lijst
+
 
 # post process all parser results to add topic, logfile and linenr
 proc add_topic_file_linenr {item topic logfile linenr} {
@@ -378,11 +386,14 @@ proc make_trans {} {
   # them with status = -1 (see fill_table_trans)
 }
 
-def_handler {transline eof} trans {
-  # make_trans
-  ..
-  set res [dict create ..]
-  set input [yield $res]
+if 0 {
+  def_handler {transline eof} trans {
+    # make_trans
+    ..
+    set res [dict create ..]
+    set input [yield $res]
+  }
+  
 }
 
 # out_topic is identifying, key.
@@ -453,10 +464,13 @@ proc handle_to_publish {to_publish } {
 
 # DB object passen, opties:
 
-* bij het definieren, dus param in def_handler
+if 0 {
+  * bij het definieren, dus param in def_handler
   handlers zijn algemeen, bij def is de db nog niet bekend?
-* als event voor de handler, met specifiek topic.
+  * als event voor de handler, met specifiek topic.
   bv bof, als tegenhanger van eof. En deze dan params meegeven.
+  
+}
 
 
 
