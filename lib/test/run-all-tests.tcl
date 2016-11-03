@@ -1,3 +1,6 @@
+#! /home/nico/bin/tclsh
+
+# [2016-11-03 21:02] onderstaande werkt blijkbaar niet vanuit gosleep.tcl
 #! /usr/bin/env tclsh
 
 # Run all test scripts in repo (may other repo's too?)
@@ -34,6 +37,7 @@ proc test_all {opt} {
   set lst [libio::glob_rec $root is_test]
   set nfiles_with_errors 0
   set files_with_errors [list]
+  set tclsh [info nameofexecutable]; # want sub-processes to use the same tclsh.
   foreach path $lst {
     log debug "Run tests in: $path"
     if {[should_test $path $opt]} {
@@ -41,7 +45,7 @@ proc test_all {opt} {
       set old_pwd [pwd]
       cd [file dirname $path]
       try_eval {
-        exec -ignorestderr tclsh $path  
+        exec -ignorestderr $tclsh $path  
       } {
         log warn "Found error(s) in $path: $errorCode"
         if {[:coe $opt]} {
@@ -61,8 +65,8 @@ proc test_all {opt} {
   };                            # end-of-foreach file
 
   # for testing popup:
-  #incr nfiles_with_errors
-  #lappend files_with_errors a bc.def en nog een paar
+  # incr nfiles_with_errors
+  # lappend files_with_errors a bc.def en nog een paar
   
   if {$nfiles_with_errors > 0} {
     set warn_msg "WARNING: Tcl test suite: $nfiles_with_errors file(s) with errors found!:\n[join $files_with_errors "\n"]"
@@ -123,12 +127,26 @@ proc test_spec {path} {
   }
 }
 
-proc popup_warning {text} {
+proc popup_warning_old {text} {
   package require Tk
   wm withdraw .
   set answer [::tk::MessageBox -message "Warning!" \
                   -icon info -type ok \
                   -detail $text]
+}
+
+# start a new process which shows warnings, so this one can stop, and gosleep can continue.
+proc popup_warning {text} {
+  # TODO: find script binary (tclsh) of current process and reuse for this one.
+  set popup [file normalize [file join [info script] .. popupmsg.tcl]]
+  log info "popup: $popup"
+  # [2016-11-03 21:31] TODO: met deze blijft gosleep nog steeds wachten totdat op ok geklikt is.
+  # Opties:
+  # * testen worden snel genoeg gedaan zodat je het ziet en op ok kunt klikken.
+  # * testen duren te lang, monitor al uitgezet. Dan geen sleep, niet heel erg, moet toch weinig voorkomen.
+  # * resultaten wegschrijven naar file. Bij volgende gosleep eerst de file tonen (kan heel snel). Maar nogal houtje/touwtje oplossing.
+  # Eerst maar zo laten.
+  exec -ignorestderr nohup $popup $text &
 }
 
 main $argv

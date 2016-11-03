@@ -38,14 +38,17 @@ proc main {argv} {
   }
   
   # go to sleep
+  puts "DO_SLEEP: $DO_SLEEP"
   if {$DO_SLEEP} {
     log "GO TO SLEEP!"
     go_sleep
+  } else {
+    log "Don't really go to sleep."
   }
 }
 
 proc do_crons {} {
-  global USER cron_jobs
+  global USER cron_jobs DO_SLEEP
   # set user_config [file join /home $USER .config gosleep gosleep.tcl]
   set user_config [file join [config_dir $USER] gosleep.tcl]
   if {![file exists $user_config]} {

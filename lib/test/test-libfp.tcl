@@ -6,6 +6,17 @@
 
 # this one could interfere with the source-cmd below.
 # [2016-07-21 20:54] but it does seem to work
+
+# [2016-11-03 21:56] code below used to determine why package require ndv fails under gosleep.
+# reason is another tclsh (/usr/bin/tclsh) is used.
+#set who [exec whoami]
+#puts "user executing test: $who"
+#puts "pwd: [pwd]"
+#puts "tcl_pkgPath: $tcl_pkgPath"
+#puts "auto_path: $auto_path"
+#puts "executable: [info nameofexecutable]"
+# parray env
+
 package require ndv
 
 package require tcltest
