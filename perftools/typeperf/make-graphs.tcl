@@ -15,7 +15,10 @@ catch {set log [::ndv::CLogger::new_logger [file tail [info script]] debug]}
 
 proc main {argc argv} {
   global R_binary env ar_argv
-  set R_binary [find_R "c:/develop/R/R-2.13.0/bin/Rscript.exe" "d:/develop/R/R-2.9.0/bin/Rscript.exe" "d:/apps/R/R-2.11.1/bin/Rscript.exe" {*}[split $env(PATH) ";"]]
+  # [2016-10-31 11:29:14] add location to search.
+  set R_binary [find_R "c:/develop/R/R-2.13.0/bin/Rscript.exe" "d:/develop/R/R-2.9.0/bin/Rscript.exe" \
+    {C:\PCC\Util\R\R-3.1.1\bin\Rscript.exe} \
+	"d:/apps/R/R-2.11.1/bin/Rscript.exe" {*}[split $env(PATH) ";"]]
 
   set options {
     {dir.arg "*typeperf*.csv" "Directory with typeperf files."}  
