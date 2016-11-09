@@ -129,6 +129,7 @@ oo::class create Rwrapper {
     my write "print.log('Query - finished')"
   }
   
+  # replace fields in value_vars with new rows, each with a name/value pair. The name field is called 'variable', the value field 'value'.
   method melt {value_vars} {
     my variable stacked_cmds
     # my write "df = melt(df, measure.vars=c("resp_bytes", "element_count", "domain_count", "content_errors", "connection_count"))
