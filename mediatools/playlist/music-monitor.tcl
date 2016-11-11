@@ -1,3 +1,6 @@
+#!/home/nico/bin/tclsh
+
+# [2016-11-11 22:50] tclsh861 not yet in env when @reboot in crontab.
 #!/usr/bin/env tclsh861
 
 # #!/home/nico/bin/tclsh
