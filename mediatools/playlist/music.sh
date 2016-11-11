@@ -9,7 +9,11 @@ rm "$MEDIA_PLAYLISTS/music-r.m3u"
 # met $* worden params doorgegeven aan tcl script.
 # tclsh maak_album_playlist.tcl -pl "$MEDIA_PLAYLISTS/music-r.m3u" $*
 ./maak_album_playlist.tcl -pl "$MEDIA_PLAYLISTS/music-r.m3u" $*
-amarok "$MEDIA_PLAYLISTS/music-r.m3u" &
+
+# [2016-11-11 19:33] amarok werkt niet op Lubuntu 16.10, audacious wel
+audacious -e "$MEDIA_PLAYLISTS/music-r.m3u" &
+
+# amarok "$MEDIA_PLAYLISTS/music-r.m3u" &
 DATETIME=`date +%Y-%m-%d-%H-%M-%S`
 # 31-1-2010 voorlopig ook nog even kopietje maken, kan geen kwaad.
 cp $MEDIA_PLAYLISTS/music-r.m3u $MEDIA_PLAYLISTS/music-r-$DATETIME.m3u

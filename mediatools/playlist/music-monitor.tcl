@@ -15,7 +15,7 @@ package require struct::list
 set_log_global info
 
 
-proc main {argc argv} {
+proc main {argv} {
   # 14-1-2012 keep db and conn as global, their values can changes with a reconnect.
   global log db conn stderr argv0 SINGLES_ON_SD
   # global log stderr argv0 SINGLES_ON_SD
@@ -25,6 +25,7 @@ proc main {argc argv} {
   set options {
     {np "Don't mark selected files as played in database"}
     {wait.arg "5000" "Polling interval in msec"}
+    {debug "Show debug output"}
     {loglevel.arg "info" "Set loglevel for all (debug, info, ...)"}
   }
   set usage ": [file tail [info script]] \[options] :"
@@ -108,7 +109,7 @@ proc add_to_logfile {path} {
 # GetStatus
 # qdbus --literal org.kde.amarok /Player GetStatus
 # [Argument: (iiii) 1, 0, 0, 0] -> paused, allemaal 0 is playing.
-proc det_playing {} {
+proc det_playing_old {} {
   try_eval {  
     set res [exec qdbus --literal org.kde.amarok /Player GetStatus]
     if {[regexp {Argument: \(iiii\) 0, 0, 0, 0} $res]} {
@@ -120,7 +121,40 @@ proc det_playing {} {
   return 0
 }
 
-proc det_playing_path {} {
+# audtool returns some strange exitcodes: only when playing returns 0 and paused
+# returns 1 it is actually playing. Other options:
+# Status        playing    paused
+# -------------------------------
+# not started   1          1
+# playing       0          1
+# paused        0          0
+# stopped       1          1
+#
+proc det_playing {} {
+  if {[exec_cmd_exitcode audtool --playback-playing] == 0} {
+    if {[exec_cmd_exitcode audtool --playback-paused] == 1} {
+      return 1
+    }
+  }
+  return 0
+}
+
+
+proc exec_cmd_exitcode {args} {
+  try {
+    set results [exec {*}$args]
+    set status 0
+    puts "No errors, exitcode=0"
+  } trap CHILDSTATUS {results options} {
+    puts "results: $results"
+    puts "options: $options"
+    set status [lindex [dict get $options -errorcode] 2]
+  }
+  return $status
+}
+
+
+proc det_playing_path_old {} {
   set res ""  
   try_eval {
     set res [exec qdbus org.kde.amarok /Player org.freedesktop.MediaPlayer.GetMetadata]  
@@ -131,6 +165,24 @@ proc det_playing_path {} {
   } else {
     return ""
   }
+}
+
+# pre - actually playing, so don't expect an error.
+proc det_playing_path {} {
+  set res ""  
+  try_eval {
+    # set res [exec qdbus org.kde.amarok /Player org.freedesktop.MediaPlayer.GetMetadata]
+    set res [exec audtool --current-song-filename]
+  } {}
+  if {$res != ""} {
+    if {[file exists $res]} {
+      return $res
+    } else {
+      error "Got current-playing file, but does not exist: $res"
+      
+    }
+  }
+  return ""
 }
 
 proc url_to_filename {url} {
@@ -196,5 +248,5 @@ proc det_generic_ids {db conn path} {
   pg_query_flatlist $conn "select generic from musicfile where path = '[$db str_to_db [det_path_in_db $path]]' or realpath = '[$db str_to_db $path]'"
 }
 
-main $argc $argv
+main $argv
 
