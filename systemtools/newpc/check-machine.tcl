@@ -1,18 +1,57 @@
 #! /usr/bin/env tclsh
 
-package require ndv
-
-set_log_global info
+source libnewpc.tcl
 
 proc main {argv} {
+    check_executable
+    
+    check_package_ndv
+    
+    set_log_global info
+
+    
   set options {
     {install "Install new packages (using apt-get, use sudo)"}
     {extra.arg "" "Check extra stuff, eg for PC or laptop. use 'list' to show options"}
-    {config "Check config with repo using configrepo.tcl"}
+      {config "Check config with repo using configrepo.tcl"}
   }
   set usage ": [file tail [info script]] \[options]"
-  set opt [getoptions argv $options $usage]
+    set my_argv $argv ; # so only my_argv changes, not main/global argv
+    set opt [getoptions my_argv $options $usage]
   check_machine $opt
+}
+
+# check if the tclsh is ActiveTcl. If not, (try to) restart with ActiveTcl
+proc check_executable {} {
+    global argv0 argv
+    
+    if {[regexp {Active} [file_link_final [info nameofexecutable]]]} {
+	log "Already ActiveTcl, continue"
+    } else {
+	set exe "~/bin/tclsh"
+	if {[file exists $exe]} {
+	    log "Calling tclsh recursive: $exe"
+	    set res [exec -ignorestderr $exe $argv0 {*}$argv]
+	    puts "res of rec exec: \n$res"
+	   
+	    exit 0 ; # don't continue in this exe/script.
+	} else {
+	    log "No ~/bin/tclsh found, run bootstrap.tcl"
+	    exit 1
+	}
+    }
+}
+
+proc check_package_ndv {} {
+    set res 0
+    catch {
+	package require ndv
+	set res 1
+    }
+    if {$res == 0} {
+	puts "Could not load package ndv, run bootstrap.tcl"
+	exit 1
+    }
 }
 
 proc check_machine {opt} {
@@ -102,45 +141,5 @@ proc check_os_windows {opt} {
   
 }
 
-proc exec_sudo {args} {
-  do_exec sudo {*}$args
-}
-
-proc do_exec {args} {
-  log debug "executing: $args"
-  set res -1
-  catch {
-    set res [exec {*}$args]
-  } result options
-  log debug "res: $res"
-  log debug "result: $result"
-  log debug "options: $options"
-  set exitcode [det_exitcode $options]
-  log debug "exitcode: $exitcode"
-  return $exitcode
-}
-
-proc det_exitcode {options} {
-  if {[dict exists $options -errorcode]} {
-    set details [dict get $options -errorcode]
-  } else {
-    set details ""
-  }
-  if {[lindex $details 0] eq "CHILDSTATUS"} {
-    set status [lindex $details 2]
-    return $status
-  } else {
-    # No errorcode, return 0, as no error has been detected.
-    return 0
-  }
-}
-
-proc which {binary} {
-  set res ""
-  catch {
-    set res [exec which $binary]
-  }
-  return $res
-}
 
 main $argv
