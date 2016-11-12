@@ -81,6 +81,8 @@ proc sync_file {opt config_filename home_filename fo} {
           puts $fo "# diff $config_filename $home_filename"
           puts $fo "# rm $config_filename"
           puts $fo "# cp $home_filename $config_filename"
+          puts $fo "# => to forget local changes, and get file from repo:"
+          puts $fo "# cp $config_filename $home_filename"
           puts $fo "# -------------------"
         }
       }
