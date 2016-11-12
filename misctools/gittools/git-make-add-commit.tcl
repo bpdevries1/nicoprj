@@ -1,4 +1,4 @@
-#!/usr/bin/env tclsh861
+#! /usr/bin/env tclsh
 
 package require ndv
 
