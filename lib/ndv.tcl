@@ -25,13 +25,14 @@ proc test_log {} {
 # there are some inter dependencies, so explicitly source other files in the right order.
 source [file join [file dirname [info script]] source_once.tcl]
 
+# [2016-08-09 21:35] libmacro.tcl, first only with syntax_quote
+# [2016-08-19 20:05] move more to top, used by libsqlite
+# 12-11-2016 used by libns.tcl, got error on Lubuntu laptop, so move before libns.tcl.
+source [file join [file dirname [info script]] libmacro.tcl]
+
 # [2016-07-09 09:49] namespace functions, compare Clojure
 # [2016-08-19 20:04] add libns to the top, used by libdb.tcl/libsqlite.tcl
 source [file join [file dirname [info script]] libns.tcl]
-
-# [2016-08-09 21:35] libmacro.tcl, first only with syntax_quote
-# [2016-08-19 20:05] move more to top, used by libsqlite
-source [file join [file dirname [info script]] libmacro.tcl]
 
 source [file join [file dirname [info script]] CLogger.tcl]
 

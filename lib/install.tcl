@@ -11,9 +11,12 @@
 set package_name ndv
 set package_version 0.1.1
 
-source libns.tcl
-source libfp.tcl
-use libfp
+catch {
+    # 12-11-2016 use catch wrt bootstrapping, when first install would fail.
+    source libns.tcl
+    source libfp.tcl
+    use libfp
+}
 
 # history
 # version date     notes
@@ -28,8 +31,9 @@ proc main {} {
   global package_name package_version
 
   # [2016-07-23 11:35] create file with installation timestamp
-  # don't use ndv library procedures here.
-  set latest_file [det_latest_file]
+    # don't use ndv library procedures here.
+    set latest_file "Could not determine latest file"
+    catch {set latest_file [det_latest_file]}
   set f [open _installed_message.tcl w]
   puts $f "set _ndv_version \"package ndv installed on: [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S %z"] - $latest_file\""
   close $f
@@ -91,10 +95,26 @@ proc latest_ignore {path} {
 }
 
 proc install_to_dir {lib_install} {
+  check_writable $lib_install  
   copy_dir $lib_install .
   copy_dir $lib_install db
   copy_dir $lib_install js *
   copy_dir $lib_install sqlite-functions *
+}
+
+proc check_writable {dir} {
+    set res 0
+    catch {
+	file mkdir $dir
+	set res 1
+    }
+    if {!$res} {
+	puts "Could not create dir: $dir"
+	puts "Retry with sudo:"
+	exec sudo mkdir $dir
+	exec sudo chmod a+rwx $dir
+	# exit 1
+    }
 }
 
 proc get_dropbox_dir {} {
