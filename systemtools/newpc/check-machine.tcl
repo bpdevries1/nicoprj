@@ -70,7 +70,8 @@ proc check_machine {opt} {
     }
   }
   if {[:config $opt]} {
-    exec -ignorestderr ../configrepo/configrepo.tcl
+    exec -ignorestderr ~/bin/tclsh ../configrepo/configrepo.tcl
+    logger "Possibly need to logout/login, to add ~/bin to the path (in .profile)"
   }
 }
 
