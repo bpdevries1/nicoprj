@@ -64,7 +64,7 @@ proc check_machine {opt} {
       puts "Extra checks: pc, laptop"
     } else {
       set extras [split [:extra $opt] ","]
-      foreach extra $extra {
+      foreach extra $extras {
         check_os_${os}_${extra} $opt  
       }
     }
