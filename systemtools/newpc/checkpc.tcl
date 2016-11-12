@@ -1,5 +1,6 @@
-# check of alles op pc is geinstalleerd.
-# Versie: $Id$
+#! /usr/bin/env tclsh
+
+# check of alles op pc is geinstalleerd. Windows en Linux.
 
 # 13-7-2011 hier staan best specifieke dingen in, dus mogelijk dit script aanpassen bij elke nieuwe install.
 # nu niet direct reden om generieke en specifieke te splitsen. Zou wel zo zijn als ik meerdere windows pc's zou hebben.

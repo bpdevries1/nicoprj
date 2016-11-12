@@ -1,3 +1,10 @@
 Tooling om te checken of nieuwe PC volledig en goed is geinstalleerd. Checks zoveel mogelijk automatisch, maar deels ook handmatig. Het regelen is vooral handmaige actie.
 
 NdV, 3-10-2009.
+
+[2016-11-12 10:38] weer reden hiernaar te kijken, nu wel voor Linux. Iets met config files, checks (zoals hier) en bootstrap (hoe te starten).
+[2016-11-12 10:41] Ook checks periodiek uitvoeren (met gosleep), werkt alles nog. Bv eerder hield R er wel eens mee op, na upgrade moeten ook package ge-upgrade worden.
+
+Bootstrap:
+* Ofwel bitbucket repo, ofwel een USB stick, ofwel een web-lokatie (op ndv.nl). Kan deploy naar diverse plekken doen. Evt via mail, als werk-PC onhandig blijkt te zijn, niet alle web en niet USB ondersteunt.
+
