@@ -30,6 +30,8 @@ proc main {argv} {
   }
   sync_dirs $opt [file normalize [:configroot $opt]] [file normalize [:home $opt]] $fo
   if {$fo != ""} {
+    puts $fo "# Remove file after executing"
+    puts $fo "rm [:shell $opt]"
     close $fo
     exec chmod +x [:shell $opt]    
   }
