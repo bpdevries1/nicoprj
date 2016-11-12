@@ -26,17 +26,17 @@ proc check_executable {} {
     global argv0 argv
     
     if {[regexp {Active} [file_link_final [info nameofexecutable]]]} {
-	log "Already ActiveTcl, continue"
+	logger "Already ActiveTcl, continue"
     } else {
 	set exe "~/bin/tclsh"
 	if {[file exists $exe]} {
-	    log "Calling tclsh recursive: $exe"
+	    logger "Calling tclsh recursive: $exe"
 	    set res [exec -ignorestderr $exe $argv0 {*}$argv]
-	    puts "res of rec exec: \n$res"
+	    logger "res of rec exec: \n$res"
 	   
 	    exit 0 ; # don't continue in this exe/script.
 	} else {
-	    log "No ~/bin/tclsh found, run bootstrap.tcl"
+	    logger "No ~/bin/tclsh found, run bootstrap.tcl"
 	    exit 1
 	}
     }
@@ -49,7 +49,7 @@ proc check_package_ndv {} {
 	set res 1
     }
     if {$res == 0} {
-	puts "Could not load package ndv, run bootstrap.tcl"
+	logger "Could not load package ndv, run bootstrap.tcl"
 	exit 1
     }
 }
@@ -61,7 +61,7 @@ proc check_machine {opt} {
 
   if {[:extra $opt] != ""} {
     if {[:extra $opt] == "list"} {
-      puts "Extra checks: pc, laptop"
+      logger "Extra checks: pc, laptop"
     } else {
       set extras [split [:extra $opt] ","]
       foreach extra $extras {
@@ -107,18 +107,18 @@ proc check_apt_get {opt tools_aptget} {
   foreach {tool aptlist} $tools_aptget {
     set path [which $tool]
     if {$path == ""} {
-      puts "Not found: $tool"
+      logger "Not found: $tool"
       if {[:install $opt]} {
         foreach apt $aptlist {
-          puts "sudo apt-get install $apt"
-          set res [exec_sudo apt-get install $apt]
+          logger "sudo apt-get install $apt"
+          set res [exec_sudo apt-get --yes install $apt]
           if {$res != 0} {
-            puts "result: $res"
-            puts "Install probably failed: $apt"
+            logger "result: $res"
+            logger "Install probably failed: $apt"
           }
         }
       } else {
-        puts "Use -install to install: $aptlist"
+        logger "Use -install to install: $aptlist"
       }
     } else {
       log debug "Ok: $tool found in $path"

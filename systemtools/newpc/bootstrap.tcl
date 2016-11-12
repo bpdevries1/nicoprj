@@ -8,23 +8,23 @@ source libnewpc.tcl
 
 proc main {argv} {
     global argv0
-    init_log $argv
+    init_logger $argv
     # first make sure we are using ActiveTcl
     #puts "argv0: $argv0"
     set exe [info nameofexecutable]
-    log "Exe: $exe"
+    logger "Exe: $exe"
     set exe_final [file_link_final $exe]
-    log "Exe final: $exe_final"
+    logger "Exe final: $exe_final"
     if {[regexp {Active} $exe_final]} {
-	log "Already have ActiveTcl: $exe_final"
+	logger "Already have ActiveTcl: $exe_final"
     } else {
 	handle_active_tcl $exe_final
 	# only once recur, so check --recursive here.
 	if {[lsearch $argv "--recursive"] >= 0} {
-	    log "Already called recursive, don't do again"
+	    logger "Already called recursive, don't do again"
 	    exit 1
 	} else {
-	    log "Calling tclsh recursive: ~/bin/tclsh"
+	    logger "Calling tclsh recursive: ~/bin/tclsh"
 	    set res [exec -ignorestderr ~/bin/tclsh $argv0 {*}$argv --recursive]
 	    puts "res of rec exec: \n$res"
 	    exit ; # niet na terugkomst hierin nog dingen uitvoeren.
@@ -42,13 +42,13 @@ proc handle_active_tcl {exe_final} {
     # log "Handle active tcl: TODO"
     set l [glob -nocomplain -directory /opt -type d ActiveTcl*]
     if {[llength $l] == 0} {
-	log "Manually install ActiveTcl in /opt"
+	logger "Manually install ActiveTcl in /opt"
 	exit 1
     }
     set dir [lindex [lsort $l] end]
     set exe [file join $dir bin tclsh]
     if {![file exists $exe]} {
-	log "Cannot find tcl executable: $exe, solve manually"
+	logger "Cannot find tcl executable: $exe, solve manually"
 	exit 1
     }
     file mkdir ~/bin
@@ -70,15 +70,15 @@ proc install_package {pkg} {
 	set res 1
     }
     if {$res} {
-	log "Tcl package ok: $pkg"
+	logger "Tcl package ok: $pkg"
     } else {
-	log "Installing Tcl package: $pkg"
+	logger "Installing Tcl package: $pkg"
 	set exe [file_link_final [info nameofexecutable]]
 	set teacup [file normalize [file join $exe .. teacup]]
 	set res ""
 	catch {set res [exec -ignorestderr sudo $teacup install $pkg]} error_msg
-	log "result of install: $res"
-	log "error_msg: $error_msg"
+	logger "result of install: $res"
+	logger "error_msg: $error_msg"
     }
 }
 
@@ -92,11 +92,11 @@ proc install_package_ndv {} {
 	set res 1
     } error_res
     if {!$res} {
-	log "error: $error_res"
-	log "package ndv not installed yet, do now:"
+	logger "error: $error_res"
+	logger "package ndv not installed yet, do now:"
 	# exec ~/bin/tclsh ~/nicoprj/lib/install.tcl
 	set install_tcl [file normalize [file join $argv0 .. .. .. lib install.tcl]]
-	log "install_tcl: $install_tcl"
+	logger "install_tcl: $install_tcl"
 	set old_dir [pwd]
 	cd [file dirname $install_tcl]
 	exec -ignorestderr ~/bin/tclsh $install_tcl

@@ -24,7 +24,7 @@ proc file_link {linkname} {
     }
 }
 
-proc init_log {argv} {
+proc init_logger {argv} {
     if {[lsearch $argv "--recursive"] >= 0} {
 	# don't delete log
     } else {
@@ -32,7 +32,7 @@ proc init_log {argv} {
     }
 }
 
-proc log {args} {
+proc logger {args} {
     set f [open bootstrap.log a]
     puts $f "\[[pid]\] [join $args " "]"
     puts "\[[pid]\] [join $args " "]"
