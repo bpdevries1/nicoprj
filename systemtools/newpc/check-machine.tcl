@@ -99,6 +99,7 @@ proc check_os_linux {opt} {
     nmon nmon
     inotifywait inotify-tools
     sqlite3 sqlite3
+    okular okular
   }
   #     bladibla bladibal
   check_apt_get $opt $tools_aptget
