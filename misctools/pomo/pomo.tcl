@@ -1,4 +1,6 @@
-#!/usr/bin/env wish861
+#! /usr/bin/env wish861
+
+# TODO: replace by just wish.
 
 package require ndv
 package require Tclx
@@ -31,6 +33,13 @@ proc main {argv} {
   log info FINISHED
 }
 
+# https://groups.google.com/forum/#!topic/comp.lang.tcl/jCyx9cupdvw
+# So there are two solutions:
+# * use a newer snack package that is build with alsa support
+# * enable the oss emulation layer for alsa with 'sudo modprobe snd-pcm-oss' 
+# $ sudo modprobe snd-pcm-oss modprobe: FATAL: Module snd-pcm-oss not found in directory /lib/modules/4.8.0-27-generic
+# [2016-11-13 16:20] werkt ook niet, niet zo belangrijk nu.
+
 proc alarm {} {
   # global s f ar_argv log
   global dargv task
@@ -47,16 +56,14 @@ proc alarm {} {
   
   # [2016-05-15 13:21] Amarok stoppen mss niet nodig, meestal bij actieve pomo geen
   # muziek draaiend.
-  set f [snack::filter generator 440.0 30000 0.0 sine 8000]
-  snack::sound s
-  $f configure 440
-  s stop
-  s play -filter $f
-
+  # [2016-11-13 16:20] Op Lubuntu 16.10 doet Snack het niet, zie ook hierboven. Nu niet zo belangrijk.
+  catch {play_sound}
+  
   # tk_messageBox
+  set elapsed [clock format [:after $dargv] -format "%Mm%Ss"]
   set answer [::tk::MessageBox -message "Alarm!" \
                   -icon info -type ok \
-                  -detail "[:after $dargv] seconds have elapsed."]
+                  -detail "$elapsed have elapsed."]
   set repeat_sec [:repeat $dargv]
   if {$repeat_sec > 0} {
     log info "Starting pomo again, now for $repeat_sec seconds."
@@ -64,6 +71,14 @@ proc alarm {} {
   } else {
     exit
   }
+}
+
+proc play_sound {} {
+  set f [snack::filter generator 440.0 30000 0.0 sine 8000]
+  snack::sound s
+  $f configure 440
+  s stop
+  s play -filter $f
 }
 
 main $argv
