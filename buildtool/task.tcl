@@ -67,6 +67,7 @@ task help {Help for tasks
     foreach task [lsort [dict keys $_tasks]] {
       puts [format "%-${len}s   %s" [task_str $task] [:firstline [dict get $_tasks $task]]]          
     }
+	puts "-debug to log debugging statements"
   } elseif {$taskname == "all"} {
     puts "Tasks:"
     foreach task [lsort [dict keys $_tasks]] {
