@@ -16,6 +16,7 @@ set_log_global info
 set reader_namespaces [list]
 set sourcedep_dir [file normalize [file dirname [info script]]]
 
+# [2016-11-16 13:36:33] deze ook weer bij echte aanroep van sourcedep.
 lappend reader_namespaces [source [file join $sourcedep_dir vugenreader.tcl]]
 
 proc main {argv} {
@@ -36,6 +37,8 @@ proc main {argv} {
 }
 
 proc sourcedep {opt} {
+  sourcedep_set_namespaces
+
   set targetdir [file join [:rootdir $opt] [:targetdir $opt]]
   file mkdir $targetdir
   set dbname [file join $targetdir [:db $opt]]
@@ -426,6 +429,17 @@ proc det_color {row} {
     return "red";               # call without include is an error, should add include.
   }
 }
+
+proc sourcedep_set_namespaces {} {
+	global reader_namespaces sourcedep_dir
+	
+	set reader_namespaces [list]
+	
+	# set sourcedep_dir [file normalize [file dirname [info script]]]
+
+	lappend reader_namespaces [source [file join $sourcedep_dir vugenreader.tcl]]
+}
+
 
 if {[this_is_main]} {
   main $argv  

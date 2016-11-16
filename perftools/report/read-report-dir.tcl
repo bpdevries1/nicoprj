@@ -11,6 +11,7 @@ set_log_global perf {showfilename 0}
 # source read-vuserlogs-db.tcl
 # ndv::source_once vuser-report.tcl
 
+# [2016-11-16 13:23:31] reader_namespaces overschreven door versie in 
 # this scripts knows the readers:
 # first in global namespace:
 set reader_namespaces [list]
@@ -85,6 +86,9 @@ proc ignore_dir {dir} {
 
 # read logs from a single run (ahk/vugen/both) into one DB.
 proc read_report_run_dir {rundir opt} {
+  # [2016-11-16 13:28:34] zet de namespaces hier opnieuw, kunnen overschreven zijn door bv sourcedep.tcl
+  read_report_set_namespaces
+  
   set dbname [file join $rundir testrunlog.db]
   if {![file exists $dbname]} {
     log info "New dir: read logfiles: $rundir"
@@ -132,6 +136,9 @@ proc read_run_logfile {filename db opt} {
   }
   if {$nread == 0} {
     log debug "Could not read (no ns): $filename"
+	if {[regexp {output.txt} $filename]} {
+	  breakpoint
+	}
   }
   return $nread
 }
@@ -147,6 +154,23 @@ proc is_dir_fully_read {dbname ssl} {
   set res [:# [$db query "select 1 from read_status where status='complete'"]]
   $db close
   return $res
+}
+
+proc read_report_set_namespaces {} {
+	global reader_namespaces perftools_dir
+	
+	set reader_namespaces [list]
+	# set perftools_dir [file normalize [file join [file dirname [info script]] ..]]
+	# puts "perftools_dir: $perftools_dir"
+	
+	# [2016-11-16 13:27:51] deze hier waarsch niet nodig.
+	# ndv::source_once report-run-dir.tcl
+
+	lappend reader_namespaces [source [file join $perftools_dir autohotkey \
+										   ahklog read-ahklogs-db.tcl]]
+	lappend reader_namespaces [source [file join $perftools_dir loadrunner \
+										   vuserlog read-vuserlogs-db.tcl]]
+
 }
 
 if {[this_is_main]} {
