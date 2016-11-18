@@ -38,10 +38,11 @@ proc test_make_dot {} {
   write_dot_footer $f
   close $f
   do_dot $dotfilename $pngfilename
-  return [file size $pngfilename]
+  # [2016-11-18 11:48] size is 11598, or 11623, or ...
+  return [expr [file size $pngfilename] >= 11000]
 }
 
-testndv {test_make_dot} 11598
+testndv {test_make_dot} 1
 
 cleanupTests
 
