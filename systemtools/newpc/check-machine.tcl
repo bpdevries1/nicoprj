@@ -3,55 +3,52 @@
 source libnewpc.tcl
 
 proc main {argv} {
-    check_executable
-    
-    check_package_ndv
-    
-    set_log_global info
+  check_executable
+  check_package_ndv
+  set_log_global info
 
-    
   set options {
     {install "Install new packages (using apt-get, use sudo)"}
     {extra.arg "" "Check extra stuff, eg for PC or laptop. use 'list' to show options"}
-      {config "Check config with repo using configrepo.tcl"}
+    {config "Check config with repo using configrepo.tcl"}
   }
   set usage ": [file tail [info script]] \[options]"
-    set my_argv $argv ; # so only my_argv changes, not main/global argv
-    set opt [getoptions my_argv $options $usage]
+  set my_argv $argv ; # so only my_argv changes, not main/global argv
+  set opt [getoptions my_argv $options $usage]
   check_machine $opt
 }
 
 # check if the tclsh is ActiveTcl. If not, (try to) restart with ActiveTcl
 proc check_executable {} {
-    global argv0 argv
-    
-    if {[regexp {Active} [file_link_final [info nameofexecutable]]]} {
-	logger "Already ActiveTcl, continue"
-    } else {
-	set exe "~/bin/tclsh"
-	if {[file exists $exe]} {
+  global argv0 argv
+
+  if {[regexp {Active} [file_link_final [info nameofexecutable]]]} {
+    logger "Already ActiveTcl, continue"; # 
+  } else {
+    set exe "~/bin/tclsh"
+    if {[file exists $exe]} {
 	    logger "Calling tclsh recursive: $exe"
 	    set res [exec -ignorestderr $exe $argv0 {*}$argv]
 	    logger "res of rec exec: \n$res"
-	   
+
 	    exit 0 ; # don't continue in this exe/script.
-	} else {
+    } else {
 	    logger "No ~/bin/tclsh found, run bootstrap.tcl"
 	    exit 1
-	}
     }
+  }
 }
 
 proc check_package_ndv {} {
-    set res 0
-    catch {
-	package require ndv
-	set res 1
-    }
-    if {$res == 0} {
-	logger "Could not load package ndv, run bootstrap.tcl"
-	exit 1
-    }
+  set res 0
+  catch {
+    package require ndv
+    set res 1
+  }
+  if {$res == 0} {
+    logger "Could not load package ndv, run bootstrap.tcl"
+    exit 1
+  }
 }
 
 proc check_machine {opt} {
