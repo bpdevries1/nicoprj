@@ -18,6 +18,7 @@ task report {Create report of output.txt in script dir
   {full "Create full report, with each iteration/transaction."}
   {all "Both summary and full"}
   {ssl "Read SSL logs into DB"}
+  {logdotpng "Create PNG for read log process"}
 } {
   global testruns_dir
   if {[regexp {<FILL IN>} $testruns_dir]} {

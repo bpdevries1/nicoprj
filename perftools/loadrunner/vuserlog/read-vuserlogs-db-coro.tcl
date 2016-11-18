@@ -33,7 +33,7 @@ use libmacro;                   # syntax_quote
 
 # separate function, to be called once, even when handling multiple log files.
 proc define_logreader_handlers {} {
-  log debug "define_logreader_handlers: start"
+  log info "define_logreader_handlers (vuserlogs): start"
   # of toch een losse namespace waar deze dingen in hangen?
 
   reset_parsers_handlers
@@ -78,7 +78,7 @@ proc replace_decimal_comma {fields} {
 
 proc def_parsers {} {
 
-  def_parser trans_line {
+  def_parser trans_line trans_line {
     # [2016-08-23 17:11:14] wil achter (ignored) ts aan het einde een ? in de regexp zetten, maar dan meegenomen in de vorige, en timestamp
     # aan iteration vastgeplakt.
     # functions.c(399): [2016-09-21 13:36:59.379] trans=RCC_IncorrectPass_newuser, user=3002867492, resptime=0.000, status=1, iteration=2 [Time:2016-09-21 13:36:59]
@@ -99,7 +99,7 @@ proc def_parsers {} {
   }
 
   # [2016-09-22 09:47:49] deze nog even voor oude logs, maar deprecated.
-  def_parser trans_line {
+  def_parser trans_line trans_line_old {
     # [2016-08-23 17:11:14] wil achter (ignored) ts aan het einde een ? in de regexp zetten, maar dan meegenomen in de vorige, en timestamp
     # aan iteration vastgeplakt.
     # functions.c(335): [2016-04-04 13:38:34] [1459769914] trans=RCC_Login_newuser, user=3002305652, resptime=3.369, status=0, iteration=1 [04/04/16 13:38:34] \r [MsgId: MMSG-17999]
@@ -122,7 +122,7 @@ proc def_parsers {} {
 
   # functions.c(399): [2016-08-23 14:20:16.134] Trans param: nrecords = 200 [08/23/16 14:20:16]
 
-def_parser trans_param {
+def_parser trans_param trans_param {
     # TODO: [2016-08-23 17:17:15] wil ? achter optional time aan het einde, maar dan wordt 'ie bij paramvalue meegenomen.
     if {[regexp {: \[([0-9 :.-]+)\] Trans param: ([^= ]+) = (.*)( \[[0-9/ :-]+])} $line z ts paramname paramvalue]} {
       log debug "Found trans_param: $paramname = $paramvalue"
@@ -132,7 +132,7 @@ def_parser trans_param {
     }
   }
 
-  def_parser errorline {
+  def_parser errorline errorline1 {
     if {[regexp {^([^ ]+)\((\d+)\): (Continuing after )?Error ?([0-9-]*): (.*)$} $line z srcfile srclinenr z errornr rest]} {
       # [2016-08-07 13:24] ignore user field (z_user) returned from det_error_details, too specific and already have in trans_line.
       lassign [det_error_details $rest] errortype z_user level details
@@ -149,7 +149,7 @@ def_parser trans_param {
     }
   }
 
-  def_parser errorline {
+  def_parser errorline errorline2 {
     # functions.c(399): [2016-08-18 13:11:19.310] ERROR - Did not find: Text=XXXhas been saved but not released to the bank [08/18/16 13:11:19]
     if {[regexp {^([^ ]+)\((\d+)\): .* ERROR - (.+)$} $line z srcfile srclinenr details]} {
       return [vars_to_dict srcfile srclinenr details line]
@@ -180,7 +180,7 @@ proc log2nvpairs {line} {
 proc def_handlers {} {
 
   # convert trans_line => trans
-  def_handler {bof eof trans_line trans_param} trans {
+  def_handler trans {bof eof trans_line trans_param} trans {
     # init
     set user ""; set iteration 0; set split_proc "<none>"; set trans_params [dict create]
   } {
@@ -245,7 +245,7 @@ proc def_handlers {} {
   };                          # end-of-define-handler
 
   # make error object from errorline and trans_line
-  def_handler {trans_line errorline} error {set trans_line_item {}} {
+  def_handler error {trans_line errorline} error {set trans_line_item {}} {
     switch [:topic $item] {
       trans_line {
         set trans_line_item $item
@@ -271,7 +271,7 @@ proc def_handlers {} {
 # Specific to this project, not in liblogreader.
 # combination of item and file_item
 proc def_insert_handler {table} {
-  def_handler [list bof $table] {} [syntax_quote {
+  def_handler "i:$table" [list bof $table] {} [syntax_quote {
     if {[:topic $item] == "bof"} { # 
       # dict_to_vars $item ;    # set db, split_proc, ssl
       # set file_item $item

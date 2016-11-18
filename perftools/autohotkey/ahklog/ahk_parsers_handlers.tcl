@@ -8,51 +8,51 @@ proc define_logreader_handlers_ahk {} {
 
 proc def_parsers_ahk {} {
 
-  def_parser_regexp_ts iter_start_finish {\[iter\] ([^ ]+) iteration: (\d+)} \
+  def_parser_regexp_ts iter_start_finish it_start_finish {\[iter\] ([^ ]+) iteration: (\d+)} \
       start_finish iteration
 
   # [2016-08-11 11:33:00.126] [trans] Transaction started : FT_Funds_transfer
-  def_parser_regexp_ts trans_start \
+  def_parser_regexp_ts trans_start trans_start \
       {\[trans\] Transaction started ?: ([^,\r\n]+)} transname
   
-  def_parser_regexp_ts trans_finish \
+  def_parser_regexp_ts trans_finish trans_finish \
       {\[trans\] Transaction finished: ([^,]+), success: (\d), transaction time \(sec\): ([-0-9.]+),} transname success resptime
 
-  def_parser_regexp_ts errorline {\[error\] (.*)$} line
+  def_parser_regexp_ts errorline errorline {\[error\] (.*)$} line
 
   # [2016-08-13 19:34] need to use \S+, just [^ ]+ fails, adds newline/cr?
-  def_parser_regexp_ts user {\[info\] Iteration (\d+), user: (\S+)} \
+  def_parser_regexp_ts user user {\[info\] Iteration (\d+), user: (\S+)} \
       iteration user
 
-  def_parser_regexp_ts resource_line \
+  def_parser_regexp_ts resource_line resource_line \
       {\[info\] capturing screen to: ([^ ]+) in directory:} resource
 
   # [2016-08-13 19:58] deze niet, want bestaat niet en heb ook capturing screen
   # waar 'ie wel in staat.
-  def_parser_regexp_ts resource_linexx \
-      {\[info\] Saved desktop to: ([^ ]+)$} resource
+  # def_parser_regexp_ts resource_linexx \
+    #  {\[info\] Saved desktop to: ([^ ]+)$} resource
       
   # transaction/iteration parameters
   # [2016-08-22 15:48:37] for now in AHK without a specifier, strictly check for FTUpload.
   # [2016-08-18 15:34:44.136] [perf] FTBulk_nrecords: 46
   # [2016-08-23 16:10:59] NdV voorlopig nog even allebei, Trans param is de nieuwe.
   # TODO: hernoemen naar Iteration param, onderscheid met Trans param, scope anders.
-  def_parser_regexp_ts iteration_param {\[perf\] (FTBulk_nrecords): (.*)$} paramname paramvalue
-  def_parser_regexp_ts iteration_param {\[perf] Iteration param: ([^= ]+) = (.*)$} paramname paramvalue
+  def_parser_regexp_ts iteration_param it_param1 {\[perf\] (FTBulk_nrecords): (.*)$} paramname paramvalue
+  def_parser_regexp_ts iteration_param it_param2 {\[perf] Iteration param: ([^= ]+) = (.*)$} paramname paramvalue
 }
 
 # [2016-08-13 18:17] for now AHK specific, maybe more generic (also like Splunk with timestamps?).
 # add regexp for ts and ts to re and args
-proc def_parser_regexp_ts {topic re args} {
+proc def_parser_regexp_ts {topic label re args} {
   set re_ts {\[([0-9 :.-]+)\]}
-  def_parser_regexp $topic "$re_ts $re" ts {*}$args
+  def_parser_regexp $topic $label "$re_ts $re" ts {*}$args
 }
 
 proc def_handlers_ahk {} {
 
 # def_parser_regexp_ts iteration_param {\[perf\] (FTBulk_nrecords): (.*)$} paramname paramvalue
 
-  def_handler {iter_start_finish user trans_start trans_finish iteration_param eof} trans {
+  def_handler trans {iter_start_finish user trans_start trans_finish iteration_param eof} trans {
     set transactions [dict create]
     set user "NONE"
   } {
@@ -102,7 +102,7 @@ proc def_handlers_ahk {} {
     }
   }
 
-  def_handler {iter_start_finish user errorline} error {
+  def_handler error {iter_start_finish user errorline} error {
     set user "NONE"
   } {
     switch [:topic $item] {
@@ -123,7 +123,7 @@ proc def_handlers_ahk {} {
     }
   }
 
-  def_handler {iter_start_finish user trans_start resource_line} resource {
+  def_handler resource {iter_start_finish user trans_start resource_line} resource {
     # [2016-08-13 18:52] start bitmap is saved, before iteration starts.
     set user "NONE"
     set iteration 0
@@ -223,7 +223,7 @@ proc make_resource_ahk {item iteration user transname} {
 # combination of item and file_item
 # TODO: maybe generic after all, directly usable for AHK log?
 proc def_insert_handler {table} {
-  def_handler [list bof $table] {} [syntax_quote {
+  def_handler "i:$table" [list bof $table] {} [syntax_quote {
     if {[:topic $item] == "bof"} { # 
       dict_to_vars $item ;    # set db, split_proc, ssl
       set file_item $item
