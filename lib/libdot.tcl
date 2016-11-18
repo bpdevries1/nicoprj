@@ -10,6 +10,7 @@ proc write_dot_header {f {rankdir TB}} {
 		edge \[fontname=Arial,fontsize=16\];
 */
     "
+  init_dot_lines_once
 }
 
 proc write_dot_footer {f} {
@@ -86,10 +87,17 @@ proc node_stmt {label args} {
 
 # create one arrow/line from->to, even if called with these params more than once.
 # return empty string if called before
-set dot_lines_once [dict create]
+proc init_dot_lines_once {} {
+  global dot_lines_once
+  set dot_lines_once [dict create]                          
+}
+
 proc edge_stmt_once {from to args} {
   global dot_lines_once
   if {[dict exists $dot_lines_once "$from/$to"]} {
+    if {[regexp trans $from] && [regexp trans $to]} {
+      log info "$from->$to already there, not again."
+    }
     return ""
   } else {
     dict set dot_lines_once "$from/$to" 1
