@@ -97,6 +97,10 @@ proc check_os_linux {opt} {
     inotifywait inotify-tools
     sqlite3 sqlite3
     okular okular
+    kdiff3 kdiff3
+    strings binutils
+    dot graphviz
+    eog eog
   }
   #     bladibla bladibal
   check_apt_get $opt $tools_aptget
