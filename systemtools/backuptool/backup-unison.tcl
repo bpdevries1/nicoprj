@@ -1,12 +1,16 @@
 #!/home/nico/bin/tclsh861
 
 proc main {argv} {
+  set options {
+    {nomedia "Don't sync/backup media folders/drives"}
+  }
+  set opt [getoptions argv $options ""]
   if {[unison_running]} {
     log "WARN: Unison already running, exit."
     exit 1
   }
   set unison_dir "/home/nico/.unison"
-  set projects [det_projects $unison_dir]
+  set projects [det_projects $unison_dir $opt]
   puts "projects: $projects"
   # exit
   # projects is list of: project, freq_hours, prio
@@ -39,7 +43,7 @@ proc unison_running {} {
 
 # result (projects) is list of: project, freq_hours, prio
 # only add profile to result (without .prf) iff it has frequency and priority settings
-proc det_projects {unison_dir} {
+proc det_projects {unison_dir opt} {
   set res {}
   foreach prf [glob -directory $unison_dir *.prf] {
     set freq ""
@@ -47,6 +51,14 @@ proc det_projects {unison_dir} {
     set f [open $prf r]
     set txt [read $f]
     close $f
+
+    if {[:nomedia $opt]} {
+      if {[is_media $prf $txt]} {
+        log "-nomedia set, ignore: $prf"
+        continue
+      }
+    }
+    
     if {[regexp {\n#!frequency_hours *= *(\d+)} $txt z fr]} {
       set freq $fr
     }
@@ -60,6 +72,15 @@ proc det_projects {unison_dir} {
     }
   }
   return $res
+}
+
+proc is_media {prf txt} {
+  foreach re {{root\s*=\s*/media/nas5tb_\d} {root\s*=\s*/media/nas/}} {
+    if {[regexp $re $txt]} {
+      return 1
+    }  
+  }
+  return 0
 }
 
 # if a succesful backup has been done longer than 3 days ago, try a new one.
