@@ -84,6 +84,19 @@ proc node_stmt {label args} {
   list $name "  $name [det_dot_args [concat [list label $label] $args]];"
 }
 
+# create one arrow/line from->to, even if called with these params more than once.
+# return empty string if called before
+set dot_lines_once [dict create]
+proc edge_stmt_once {from to args} {
+  global dot_lines_once
+  if {[dict exists $dot_lines_once "$from/$to"]} {
+    return ""
+  } else {
+    dict set dot_lines_once "$from/$to" 1
+    return [edge_stmt $from $to {*}$args]
+  }
+}
+
 # @example: edge_stmt from to color red label abc
 proc edge_stmt {from to args} {
   # possible args: label, color, fontcolor
