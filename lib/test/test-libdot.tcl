@@ -32,7 +32,7 @@ proc test_make_dot {} {
   write_dot_header $f
   set node1 [puts_node_stmt $f "node1"]
   set node2 [puts_node_stmt $f "node2"]
-  set node3 [puts_node_stmt $f "node3"]
+  set node3 [puts_node_stmt $f "node3" style filled fillcolor lightblue shape rectangle]
   # wat als je 2 nodes met dezelfde naam maakt?
   # [2016-11-18 12:11] lijkt idd maar 1 node te worden, mooi.
   set node3a [puts_node_stmt $f "node3"]
