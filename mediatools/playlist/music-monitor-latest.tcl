@@ -14,7 +14,7 @@ package require struct::list
 ::ndv::source_once [file join [file dirname [info script]] .. lib libmusic.tcl]
 
 # [2016-11-17 21:25] wil bij deze geen subdir logs: dus ofwel expliciet aangeven, ofwel geen log.
-set_log_global warn {filename /home/nico/log/music-monitor-tcl.log append 1}
+set_log_global warn
 
 proc main {argv} {
   # 14-1-2012 keep db and conn as global, their values can changes with a reconnect.
