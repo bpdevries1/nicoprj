@@ -49,5 +49,8 @@ proc test_make_dot {} {
 
 testndv {test_make_dot} 1
 
+# [2016-11-18 20:20] kleine test om popup te krijgen.
+# testndv {expr 0} 1
+
 cleanupTests
 
