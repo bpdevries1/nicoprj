@@ -74,7 +74,7 @@ namespace eval ::libdatetime {
       set msec [clock milliseconds]
       set sec [expr $msec / 1000]
       set msec1 [expr $msec % 1000]
-	  clock format $sec -format "%Y-%m-%d %H:%M:%S.[format %03d $msec1] %z"
+      clock format $sec -format "%Y-%m-%d %H:%M:%S.[format %03d $msec1] %z"
     }
   }
 

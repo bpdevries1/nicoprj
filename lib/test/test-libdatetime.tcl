@@ -65,7 +65,8 @@ testndv {parse_ts "2016-06-09 15:52:22.096 +0200"} $sec_msec
 testndv {parse_ts "2016-06-09 13:52:22.096 +0000"} $sec_msec
 
 # [2016-07-16 11:45] just check if now can be called.
-testndv {string length [now]} 25
+# [2016-11-19 15:38] now includes msec, so 4 chars more.
+testndv {string length [now]} 29
 testndv {string length [now -filename]} 20
 
 cleanupTests
