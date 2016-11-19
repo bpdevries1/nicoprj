@@ -103,5 +103,8 @@ source [file join [file dirname [info script]] CLogger.tcl]
 # [2016-08-25 15:45:04] add, surprised not already in here.
 source [file join [file dirname [info script]] CExecLimit.tcl]
 
-# [2016-08-25 22:30] source_once is included at the first, so available here.
+# [2016-11-19 11:58] add popupmsg
+source [file join [file dirname [info script]] popupmsg.tcl]
+
+# [2016-08-25 22:30] source_once is included at the top, so available here.
 ::ndv::source_once libmisc.tcl
