@@ -77,9 +77,12 @@ proc set_env_dbus {} {
   global env
   set dbus_name DBUS_SESSION_BUS_ADDRESS
   if {[array names env $dbus_name] == ""} {
-    set pid [exec pidof audacious]
+    set pid ""
+    catch {set pid [exec pidof audacious]} msg
+    log_once info "result of pidof audacious: $msg"
     log_once info "pid of audacious: $pid"
     if {$pid != ""} {
+      # [2016-11-19 11:10] verwacht niet dat strings en grep fout gaan, dus deze voorlopig niet in catch.
       set res [exec strings /proc/$pid/environ | grep $dbus_name]
       if {[regexp {^(.+)=(.+)$} $res z nm val]} {
         set env($nm) $val
