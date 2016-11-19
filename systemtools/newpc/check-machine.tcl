@@ -101,6 +101,7 @@ proc check_os_linux {opt} {
     strings binutils
     dot graphviz
     eog eog
+    curl curl
   }
   #     bladibla bladibal
   check_apt_get $opt $tools_aptget
