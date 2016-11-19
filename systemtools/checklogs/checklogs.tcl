@@ -7,7 +7,7 @@
 
 package require ndv
 
-set_log_global debug
+set_log_global info
 
 use libfp
 
@@ -84,13 +84,42 @@ proc det_basename {file} {
   }
 }
 
+# TODO: possibly delete old log, if older than 90 days. But only if newer log exists.
 proc check_log {opt file} {
   global warnings
   log debug "Checking log: $file"
-  set treshold 1e6
-  if {[file size $file] > $treshold} {
-    lappend warnings "File > $treshold: $file"
+  set treshold_size 1e6
+  if {[file size $file] > $treshold_size} {
+    add_warning "File > $treshold_size" $file
   }
+  set treshold_age_days 90
+  if {[expr [clock seconds] - [file mtime $file]] > [expr $treshold_age_days * 24 * 3600]} {
+    add_warning "File is older than $treshold_age_days day" $file
+  }
+  check_log_contents $opt $file
+}
+
+# pre: file is not too big (>1MB) and not too old (>90 days)
+# TODO: for now only generic checks, maybe add type specific checks.
+set re_generic {
+  {while executing}
+  {invoked from within}
+  {failed: }
+}
+proc check_log_contents {opt file} {
+  global re_generic warnings
+  set text [read_file $file]
+  foreach re $re_generic {
+    if {[regexp $re $text]} {
+      # lappend warnings "'$re' found in file: $file"
+      add_warning "'$re' found" $file
+    }
+  }
+}
+
+proc add_warning {msg file} {
+  global warnings
+  lappend warnings "$msg; file: $file"
 }
 
 proc ignore_path {opt path} {
