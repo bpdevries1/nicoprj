@@ -31,6 +31,7 @@ proc main {argv} {
     } else {
       cd ~/nicoprj 
     }
+    set commit_msg check
   }
   # set res [exec git status]
   set res [exec $git_exe status]
