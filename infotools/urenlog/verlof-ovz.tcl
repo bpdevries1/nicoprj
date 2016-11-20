@@ -19,7 +19,7 @@ proc main {argv} {
   puts "created htmlhelper object"
   $hh set_channel $f
   puts "set channel done"
-  $hh write_header "Header" 0
+  $hh write_header "Verlof overzicht" 0
   puts "wrote header"
   maak_verlof_ovz $hh
   $hh write_footer  
