@@ -97,6 +97,8 @@ proc backup_unison {prj freq_hours} {
     if {$exitcode <= 2} {
       # code 1 en 2 zijn kleine fouten, ook markeren als ok.
       write_last_ok $prj $started
+    } else {
+      log "backup $prj caused some errors, exitcode: $exitcode"
     }
     log "backup finished"
   } else {
@@ -113,16 +115,20 @@ if 0 {
   3: a fatal error occurred, or the execution was interrupted.
 }
 
+# [2016-11-20 19:41] for now only log result when exitcode > 2
+# some minor errors cannot be helped, such as changed files.
 proc do_exec {args} {
   set res -1
   catch {
     set res [exec {*}$args]
   } result options
-  log "res: $res"
-  log "result: $result"
-  log "options: $options"
   set exitcode [det_exitcode $options]
-  log "exitcode: $exitcode"
+  if {$exitcode > 2} {
+    log "exitcode: $exitcode"
+    log "res: $res"
+    log "result: $result"
+    log "options: $options"
+  }
   return $exitcode
 }
 
