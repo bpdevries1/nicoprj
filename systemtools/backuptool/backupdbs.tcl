@@ -5,7 +5,8 @@
 
 package require ndv
 
-set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+# set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
+set_log_global info {filename /home/nico/log/backupdbs.log}
 
 proc main {argv} {
   set options {
