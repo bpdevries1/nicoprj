@@ -10,6 +10,7 @@ package require ndv
 set_log_global info
 
 use libfp
+use libio
 
 proc main {argv} {
   global log
@@ -104,15 +105,64 @@ proc check_log {opt file} {
 set re_generic {
   {while executing}
   {invoked from within}
-  {failed: }
+}
+
+set re_log_procs {
+  {/log/unison/.*\.log} check_unison_log
 }
 proc check_log_contents {opt file} {
-  global re_generic warnings
+  global re_generic warnings re_log_procs
   set text [read_file $file]
   foreach re $re_generic {
     if {[regexp $re $text]} {
       # lappend warnings "'$re' found in file: $file"
       add_warning "'$re' found" $file
+    }
+  }
+  foreach {re logproc} $re_log_procs {
+    if {[regexp $re $file]} {
+      $logproc $file
+    }
+  }
+}
+
+#   {failed: }
+if 0 {
+  
+
+
+[2016-11-20 19:34:52.686 +0100] [checklogs.tcl] [debug] changed: /home/nico/.thunderbird/7k25h674.default/Mail/pop.xs4all.nl/Junk.msf
+
+failed: .thunderbird/7k25h674.default/Mail/pop.xs4all.nl/Junk.msf; file: /home/nico/log/unison/home-nico.log
+
+
+}
+
+proc check_unison_log {file} {
+  # first keep list of files that changed during sync, not really an error.
+  # then with failed items, check if reason is a change, or not.
+  log debug "check_unison_log: $file"
+  set changed [dict create]
+  with_file f [open $file r] {
+    while {[gets $f line] >= 0} {
+      if {[regexp {^\s*failed: (.+)$} $line z filename]} {
+        if {[dict exists $changed "/home/nico/$filename"]} {
+          log debug "failed, but changed: $filename"
+        } else {
+          # breakpoint
+          add_warning $line $file
+        }
+      } elseif {[regexp {Failed: The source file (.+?)$} $line z filename]} {
+        set line2 [gets $f]
+        if {[regexp {has been modified during synchronization} $line2]} {
+          dict set changed $filename 1
+          log debug "changed: $filename"
+        } else {
+          log debug "Failed on file, but not a change: $line/$line2"
+        }
+      } elseif {[regexp {Failed:} $line]} {
+        breakpoint
+      }
     }
   }
 }
@@ -124,6 +174,9 @@ proc add_warning {msg file} {
 
 proc ignore_path {opt path} {
   set res 0
+  if {[regexp {checklogs} $path]} {
+    set res 1
+  }
   return $res
 }
 
