@@ -6,7 +6,9 @@ package require Tclx
 package require sqlite3
 
 # set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
-set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+# set log [::ndv::CLogger::new_logger [file tail [info script]] info]
+set_log_global info {filename ~/log/activitylog.log}
+
 # $log set_file "[file tail [info script]].log"
 # $log set_file "[info script].log"
 
@@ -26,21 +28,29 @@ proc main {argv iter} {
 
   set options {
     {i.arg "5" "Interval in seconds"}
-    {l.arg "activitylog" "Logfile name basename/prefix"}
+    {l.arg "~/log/activitylog/activ" "Logfile name basename/prefix"}
     {dir.arg "c:/projecten" "Directory to monitor for changes (empty for none)"}
+    {debug "Set loglevel to debug"}
+    {display.arg ":0" "Display to use for xprop"}
   }
   set usage ": [file tail [info script]] \[options] :"
-  array set ar_argv [::cmdline::getoptions argv $options $usage]
+  set opt [::cmdline::getoptions argv $options $usage]
+  array set ar_argv $opt
 
-	set logfile $ar_argv(l)
+  if {[:debug $opt]} {
+    $log set_log_level debug
+  }
+	set logfile [file normalize [:l $opt]]
   set sec_interval $ar_argv(i)
 	set msec_interval [expr $sec_interval * 1000]
 
+  set display [:display $opt]
+
   # logfile in same dir as sqlite files.
-  set logfilename "[file join [file dirname $logfile] [file tail [info script]]].log"
-  $log set_file $logfilename
-  $log info "Set log output file to: $logfilename"
-  $log info "Iteration: $iter"
+  # set logfilename "[file join [file dirname $logfile] [file tail [info script]]].log"
+  # $log set_file $logfilename
+  $log debug "Set log output file to: $logfile"
+  $log debug "Iteration: $iter"
 	# breakpoint
   init_filechanges $ar_argv(dir)
 	
@@ -54,7 +64,7 @@ proc main {argv iter} {
 	set prev_timestamp_day "<unknown>"
 	while {1} {
 		set init_vars 0
-		set title [$get_active_window_title]
+		set title [$get_active_window_title $display]
 		set timestamp [clock seconds]
 		set timestamp_day [det_timestamp_day $timestamp]
 		if {$timestamp_day != $prev_timestamp_day} {
@@ -158,7 +168,7 @@ proc format_ts {ts} {
 	return [clock format $ts -format "%Y-%m-%d %H:%M:%S"]	
 }
 
-proc get_active_window_title_windows {} {
+proc get_active_window_title_windows {display} {
 	try_eval {
 	  set hwnd [twapi::get_foreground_window]
     if {$hwnd == ""} {
@@ -172,18 +182,23 @@ proc get_active_window_title_windows {} {
   }
 }
 
-proc get_active_window_title_unix {} {
+proc get_active_window_title_unix {display} {
+  log debug "Display: $display"
   try_eval {
-    set res [exec xprop -root]
+    set res [exec xprop -root -display $display]
     if {[regexp {_NET_ACTIVE_WINDOW\(WINDOW\): window id # (0x[0-9a-fA-F]+)[^0-9a-fA-F]} $res z id]} {
-      set res2 [exec xwininfo -id $id]
+      set res2 [exec xwininfo -id $id -display $display]
       if {[regexp {xwininfo: Window id: .+"(.*)"\n} $res2 z title]} {
+        log debug "Active window: $title"
         return $title 
       }
     }
   } {
+    log debug "Returning NONE because of error."
+    log debug "errorResult: $errorResult"
     return "{NONE}"
   }
+  log debug "Returning NONE because not returned before"
   return "{NONE}"
 }
 
