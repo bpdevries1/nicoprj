@@ -201,6 +201,7 @@ proc set_config_version {version} {
 # return the first of a list of loadrunner include dirs that exists
 # if none exists, return empty string.
 # [2016-07-24 18:54] this one should be set in a project/repo config task.
+# [2016-11-15 13:01:00] Look for HP/LoadRunner/Include dir in all program files dirs on all drives.
 proc det_lr_include_dir {} {
   global lr_include_dir
   if {[catch {set lr_include_dir}]} {
@@ -208,6 +209,8 @@ proc det_lr_include_dir {} {
     set dirs {{C:\Program Files (x86)\HP\Virtual User Generator\include}
 	  {d:\HPPC\include}
       /home/ymor/RABO/VuGen/lr_include}
+	lappend dirs {*}[find_loadrunner_dirs]  
+	# breakpoint
     foreach dir $dirs {
       if {[file exists $dir]} {
         return $dir
@@ -219,6 +222,27 @@ proc det_lr_include_dir {} {
     # already set, leave unchanged
     return $lr_include_dir
   }
+}
+
+# Look for loadrunner in both 'Program Files (x86)' and 'Program Files' on all drives.
+# [2016-11-15 12:57:57] TODO: maybe exclude network drives if this is too slow.
+# [2016-11-15 13:25:34] drive Y: too slow now. For now hardcoded to only check c: and d:
+proc find_loadrunner_dirs {} {
+  set res [list]
+  log debug "Determining volumes"
+  # set volumes [file volumes]
+  set volumes {c:/ d:/}
+  foreach volume $volumes {
+    log debug "Check volume: $volume"
+	foreach progdir [glob -nocomplain -directory $volume -type d "Prog*"] {
+	  set inc_dir [file join $progdir HP LoadRunner include]
+	  if {[file exists $inc_dir]} {
+		lappend res $inc_dir
+	  }
+	}
+  }
+  log debug "Checked all volumes"
+  return $res
 }
 
 # this one should be independent of existing config files or vars.

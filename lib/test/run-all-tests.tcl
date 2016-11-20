@@ -15,15 +15,20 @@ package require ndv
 set_log_global info
 
 proc main {argv} {
+  global log
   set options {
     {root.arg "auto" "Root of files to test"}
     {full "Run full testsuite, including long running tests"}
     {manual "Also run tests defined as manual/interactive"}
     {coe "Continue on error"}
     {nopopup "Don't show Tk popup when a test fails"}
+    {debug "Set loglevel to debug"}
   }
   set usage ": [file tail [info script]] \[options]:"
   set opt [getoptions argv $options $usage]
+  if {[:debug $opt]} {
+    $log set_log_level debug
+  }
   test_all $opt 
 }
 
@@ -34,7 +39,7 @@ proc test_all {opt} {
     set root [file normalize [:root $opt]]
   }
   log info "Running all tests in: $root"
-  set lst [libio::glob_rec $root is_test]
+  set lst [lsort [libio::glob_rec $root is_test]]
   set nfiles_with_errors 0
   set files_with_errors [list]
   set tclsh [info nameofexecutable]; # want sub-processes to use the same tclsh.
@@ -44,10 +49,24 @@ proc test_all {opt} {
       log debug "Running tests in: $path"
       set old_pwd [pwd]
       cd [file dirname $path]
+      #set res [exec $tclsh $path]
+      #log debug "res: $res"
+      set res "<none>"
+      set has_error 0
+      set errCode "<none>"
       try_eval {
-        exec -ignorestderr $tclsh $path  
+        set res [exec -ignorestderr $tclsh $path]
+        # exec $tclsh $path  
       } {
-        log warn "Found error(s) in $path: $errorCode"
+        set has_error 1
+        set errCode $errorCode
+      }
+      log debug "res: $res"
+      if {[regexp {FAILED} $res]} {
+        set has_error 1
+      }
+      if {$has_error} {
+        log warn "Found error(s) in $path: $errCode"
         if {[:coe $opt]} {
           # continue-on-error
           incr nfiles_with_errors
@@ -56,7 +75,6 @@ proc test_all {opt} {
           exit
         }
       }
-      
       cd $old_pwd
     } else {
       log debug "-> Don't run tests"
@@ -136,9 +154,9 @@ proc popup_warning_old {text} {
 }
 
 # start a new process which shows warnings, so this one can stop, and gosleep can continue.
-proc popup_warning {text} {
+proc popup_warning_old {text} {
   # TODO: find script binary (tclsh) of current process and reuse for this one.
-  set popup [file normalize [file join [info script] .. popupmsg.tcl]]
+  set popup [file normalize [file join [info script] .. .. popupmsg.tcl]]
   log info "popup: $popup"
   # [2016-11-03 21:31] TODO: met deze blijft gosleep nog steeds wachten totdat op ok geklikt is.
   # Opties:

@@ -52,8 +52,8 @@ proc remove_cr {line} {
 # TODO: put the named args in the regexp, like Splunk? 
 # args contains the keys in dict to save, match with regexp groups.
 # eg def_parser_regexp $re ts start_finish iteration
-proc def_parser_regexp {topic re args} {
-  def_parser $topic [syntax_quote {
+proc def_parser_regexp {topic label re args} {
+  def_parser $topic $label [syntax_quote {
     if {[regexp ~$re $line z ~@$args]} {
       vars_to_dict ~@$args
     } else {
@@ -63,18 +63,20 @@ proc def_parser_regexp {topic re args} {
 }
 
 # first define parsers and handlers, before calling readlogfile_coro
-proc def_parser {topic body} {
+proc def_parser {topic label body} {
   global parsers ;              # list of [dict topic proc_name]
   # [2016-08-09 21:08] unique_name - multiple parsers for same topic are possible.
   set proc_name [unique_name parse_$topic]
-  lappend parsers [vars_to_dict topic proc_name]
+  # set label parse_$topic
+  set label "p:$label"
+  lappend parsers [vars_to_dict topic proc_name label]
   proc $proc_name {line linenr} $body
 }
 
 # args: either init, body or just body
 # at start of body, res is set to empty, item contains item/dict just received.
 # at end of body, res should be set to 0, 1 or more result items.
-proc def_handler {in_topics out_topic args} {
+proc def_handler {label in_topics out_topic args} {
   if {[:# $args] == 2} {
     lassign $args init body
   } else {
@@ -91,22 +93,24 @@ proc def_handler {in_topics out_topic args} {
     }
   }]
   log debug "body2: $body2"
-  def_handler_internal $in_topics $out_topic $body2
+  def_handler_internal $label $in_topics $out_topic $body2
 }
 
 # out_topic is identifying, key.
 # in_topics needed to decide which handlers to call for a topic.
-proc def_handler_internal {in_topics out_topic body} {
+proc def_handler_internal {label in_topics out_topic body} {
   global handlers; # dict key=in-topic, value = list of [dict topic coro-name]
   if {$out_topic == ""} {
-    set coro_name [unique_name coro_make_]
+    # set coro_name [unique_name coro_make_]
+    set coro_name [unique_name make_]
   } else {
     # set coro_name "coro_make_${out_topic}"
-    set coro_name [unique_name coro_make_$out_topic]
+    set coro_name [unique_name make_$out_topic]
   }
   # log debug "def_handler: coro_name: $coro_name"
   foreach in_topic $in_topics {
-    dict lappend handlers $in_topic [dict create coro_name $coro_name topic $out_topic]
+    dict lappend handlers $in_topic [dict create coro_name $coro_name topic $out_topic \
+                                        label h:$label]
   }
   # now not a normal proc-def, but a coroutine.
   # apply is the way to convert a body to a command/'proc'.

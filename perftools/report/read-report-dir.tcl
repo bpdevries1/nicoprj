@@ -11,6 +11,7 @@ set_log_global perf {showfilename 0}
 # source read-vuserlogs-db.tcl
 # ndv::source_once vuser-report.tcl
 
+# [2016-11-16 13:23:31] reader_namespaces overschreven door versie in 
 # this scripts knows the readers:
 # first in global namespace:
 set reader_namespaces [list]
@@ -85,6 +86,9 @@ proc ignore_dir {dir} {
 
 # read logs from a single run (ahk/vugen/both) into one DB.
 proc read_report_run_dir {rundir opt} {
+  # [2016-11-16 13:28:34] zet de namespaces hier opnieuw, kunnen overschreven zijn door bv sourcedep.tcl
+  read_report_set_namespaces $rundir $opt
+  
   set dbname [file join $rundir testrunlog.db]
   if {![file exists $dbname]} {
     log info "New dir: read logfiles: $rundir"
@@ -132,6 +136,9 @@ proc read_run_logfile {filename db opt} {
   }
   if {$nread == 0} {
     log debug "Could not read (no ns): $filename"
+	if {[regexp {output.txt} $filename]} {
+	  breakpoint
+	}
   }
   return $nread
 }
@@ -147,6 +154,79 @@ proc is_dir_fully_read {dbname ssl} {
   set res [:# [$db query "select 1 from read_status where status='complete'"]]
   $db close
   return $res
+}
+
+# iff opt contains logdotpng, create a dot/png of the readlog process.
+# one dot/png per source type.
+proc read_report_set_namespaces {rundir opt} {
+	global reader_namespaces perftools_dir
+	
+	set reader_namespaces [list]
+	# set perftools_dir [file normalize [file join [file dirname [info script]] ..]]
+	# puts "perftools_dir: $perftools_dir"
+	
+	# [2016-11-16 13:27:51] deze hier waarsch niet nodig.
+	# ndv::source_once report-run-dir.tcl
+
+	lappend reader_namespaces [source [file join $perftools_dir autohotkey \
+										   ahklog read-ahklogs-db.tcl]]
+	lappend reader_namespaces [source [file join $perftools_dir loadrunner \
+										   vuserlog read-vuserlogs-db.tcl]]
+
+  if {[:logdotpng $opt]} {
+    foreach ns $reader_namespaces {
+      create_dot_png $ns $rundir
+    }
+    # [2016-11-18 11:22] for now, only vugenlog
+    #create_dot_png ::vuserlog $rundir
+  }
+  
+}
+
+proc create_dot_png {ns rundir} {
+  global parsers handlers
+  log info "Create dot/png for: $ns in dir: $rundir"
+  # ${ns}::define_logreader_handlers
+  if {$ns == "::vuserlog"} {
+    define_logreader_handlers
+    set prefix vugen
+  } elseif {$ns == "::ahklog"} {
+    define_logreader_handlers_ahk
+    set prefix ahk
+  } else {
+    error "Don't know define_logreader_handlers for $ns"
+  }
+
+  set dotfilename [file join $rundir $prefix-readlog.dot]
+  set pngfilename [file join $rundir $prefix-readlog.png]
+  set f [open $dotfilename w]
+  write_dot_header $f LR
+  # [2016-11-18 12:12] can add nodes multiple times, will just be one node, so ok for topics.
+  set filled_blue {style filled fillcolor lightblue shape note}
+  set filled_red {style filled fillcolor coral3}
+  foreach p $parsers {
+    log info "Parser: [:proc_name $p] -> [:topic $p]/[:label $p]"
+    # set nd_proc [puts_node_stmt $f [:proc_name $p]]
+    set nd_proc [puts_node_stmt $f [:label $p] {*}$filled_red]
+    set nd_topic [puts_node_stmt $f [:topic $p] {*}$filled_blue]
+    puts $f [edge_stmt $nd_proc $nd_topic]
+  }
+  dict for {in_topic lst} $handlers {
+    set nd_topic_in [puts_node_stmt $f $in_topic {*}$filled_blue]; # mss niet eens nodig, in_topic moet je al hebben. Maar bof/eof waarsch niet.
+    foreach el $lst {
+      log info "Handler: $in_topic -> [:coro_name $el]/[:label $el] -> [:topic $el]"
+      # set nd_coro [puts_node_stmt $f [:coro_name $el]]
+      set nd_coro [puts_node_stmt $f [:label $el] {*}$filled_red]
+      set nd_topic_out [puts_node_stmt $f [:topic $el] {*}$filled_blue]
+      puts $f [edge_stmt $nd_topic_in $nd_coro]
+      puts $f [edge_stmt_once $nd_coro $nd_topic_out]
+      # puts $f [edge_stmt $nd_coro $nd_topic_out]
+    }
+  }
+  write_dot_footer $f
+  close $f
+  do_dot $dotfilename $pngfilename
+  # breakpoint
 }
 
 if {[this_is_main]} {

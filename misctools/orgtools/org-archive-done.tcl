@@ -21,6 +21,9 @@ proc main {argv} {
   archive_org $orgfilename $orgnewname $archivename
   set ts [clock format [clock seconds] -format "%Y-%m-%dT%H-%M-%S"]
   file copy $orgfilename "$orgfilename.$ts"
+  # [2016-11-15 10:20:23] then remove orig, and move new to orig
+  file delete $orgfilename
+  file rename $orgnewname $orgfilename
 }
 
 proc append_filename {filename suffix} {
@@ -36,6 +39,10 @@ proc archive_org {orgfilename orgnewname archivename} {
   set fi [open $orgfilename r]
   set fn [open $orgnewname w]
   set fa [open $archivename a]
+  # [2016-11-15 10:22:45] set line endings to unix, otherwise ^M shown at end of each line.
+  fconfigure $fn -translation lf
+  fconfigure $fa -translation lf
+  
   set fcurr $fn
   set pathi {}
   set pathn {}

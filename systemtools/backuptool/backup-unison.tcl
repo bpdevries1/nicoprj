@@ -1,12 +1,18 @@
-#!/home/nico/bin/tclsh861
+#! /home/nico/bin/tclsh861
+
+package require ndv
 
 proc main {argv} {
+  set options {
+    {nomedia "Don't sync/backup media folders/drives"}
+  }
+  set opt [getoptions argv $options ""]
   if {[unison_running]} {
     log "WARN: Unison already running, exit."
     exit 1
   }
   set unison_dir "/home/nico/.unison"
-  set projects [det_projects $unison_dir]
+  set projects [det_projects $unison_dir $opt]
   puts "projects: $projects"
   # exit
   # projects is list of: project, freq_hours, prio
@@ -39,7 +45,7 @@ proc unison_running {} {
 
 # result (projects) is list of: project, freq_hours, prio
 # only add profile to result (without .prf) iff it has frequency and priority settings
-proc det_projects {unison_dir} {
+proc det_projects {unison_dir opt} {
   set res {}
   foreach prf [glob -directory $unison_dir *.prf] {
     set freq ""
@@ -47,6 +53,14 @@ proc det_projects {unison_dir} {
     set f [open $prf r]
     set txt [read $f]
     close $f
+
+    if {[:nomedia $opt]} {
+      if {[is_media $prf $txt]} {
+        log "-nomedia set, ignore: $prf"
+        continue
+      }
+    }
+    
     if {[regexp {\n#!frequency_hours *= *(\d+)} $txt z fr]} {
       set freq $fr
     }
@@ -62,6 +76,15 @@ proc det_projects {unison_dir} {
   return $res
 }
 
+proc is_media {prf txt} {
+  foreach re {{root\s*=\s*/media/nas5tb_\d} {root\s*=\s*/media/nas/}} {
+    if {[regexp $re $txt]} {
+      return 1
+    }  
+  }
+  return 0
+}
+
 # if a succesful backup has been done longer than 3 days ago, try a new one.
 # check unison exit-codes, possibly not all drives are mounted (eg laptop)
 proc backup_unison {prj freq_hours} {
@@ -74,6 +97,8 @@ proc backup_unison {prj freq_hours} {
     if {$exitcode <= 2} {
       # code 1 en 2 zijn kleine fouten, ook markeren als ok.
       write_last_ok $prj $started
+    } else {
+      log "backup $prj caused some errors, exitcode: $exitcode"
     }
     log "backup finished"
   } else {
@@ -90,16 +115,20 @@ if 0 {
   3: a fatal error occurred, or the execution was interrupted.
 }
 
+# [2016-11-20 19:41] for now only log result when exitcode > 2
+# some minor errors cannot be helped, such as changed files.
 proc do_exec {args} {
   set res -1
   catch {
     set res [exec {*}$args]
   } result options
-  log "res: $res"
-  log "result: $result"
-  log "options: $options"
   set exitcode [det_exitcode $options]
-  log "exitcode: $exitcode"
+  if {$exitcode > 2} {
+    log "exitcode: $exitcode"
+    log "res: $res"
+    log "result: $result"
+    log "options: $options"
+  }
   return $exitcode
 }
 

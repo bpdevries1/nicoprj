@@ -15,14 +15,15 @@ package require struct::list
 
 # set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 # set log [::ndv::CLogger::new_logger [file tail [info script]] info]
-set_log_global info
 
+# [2016-11-17 21:25] wil bij deze geen subdir logs: dus ofwel expliciet aangeven, ofwel geen log.
+set_log_global info {filename /home/nico/log/music-monitor-tcl.log append 1}
 
 proc main {argv} {
   # 14-1-2012 keep db and conn as global, their values can changes with a reconnect.
-  global log db conn stderr argv0 SINGLES_ON_SD
+  global db conn stderr argv0 SINGLES_ON_SD
   # global log stderr argv0 SINGLES_ON_SD
-	$log info "Starting"
+	log info "Starting"
 
   # 20-6-2015 np is also really used here, as in maak_album_playlist.tcl etc.
   set options {
@@ -42,14 +43,15 @@ proc main {argv} {
  
   monitor_loop $ar_argv(wait) $ar_argv(np)
   
-	$log info "Finished" ; # should never be reached.
+	log info "Finished" ; # should never be reached.
 }
 
 proc monitor_loop {wait np} {
   global log db conn
-  $log info "Entering main loop"
+  log info "Entering main loop"
   set prev_path ""
   while {1} {
+    set_env_dbus;               # set env(DBUS_SESSION_BUS_ADDRESS) iff not set.
     if {[det_playing]} {
       set path [det_playing_path]
       if {$path != $prev_path} {
@@ -57,15 +59,40 @@ proc monitor_loop {wait np} {
         if {!$np} {
           mark_played $path
         } else {
-          $log debug "Don't mark as played in database (-np param): $path" 
+          log debug "Don't mark as played in database (-np param): $path" 
         }
       }
     } else {
-      $log debug "det_playing: 0" 
+      log debug "det_playing: 0" 
     }
     # after $ar_argv(wait)
     after $wait
   }  
+}
+
+# [2016-11-17 22:25] Deze truc obv http://redmine.audacious-media-player.org/boards/1/topics/1581
+# werkt bij gestarte sessie, en dan hierbinnen via crontab, wat eerder niet werkte.
+# nog testen via @reboot. Deze zou als eerst sessie niet gezet is, of audacious niet gestart, nog niets moeten doen, en pas aan de slag nadat audacious gestart is.
+proc set_env_dbus {} {
+  global env
+  set dbus_name DBUS_SESSION_BUS_ADDRESS
+  if {[array names env $dbus_name] == ""} {
+    set pid ""
+    catch {set pid [exec pidof audacious]} msg
+    log_once info "result of pidof audacious: $msg"
+    log_once info "pid of audacious: $pid"
+    if {$pid != ""} {
+      # [2016-11-19 11:10] verwacht niet dat strings en grep fout gaan, dus deze voorlopig niet in catch.
+      set res [exec strings /proc/$pid/environ | grep $dbus_name]
+      if {[regexp {^(.+)=(.+)$} $res z nm val]} {
+        set env($nm) $val
+        log info "set env($nm) to $val"
+      }
+    }
+  } else {
+    log_once info "env already set: env($dbus_name) = $env($dbus_name)"
+    # env already set, do nothing.
+  }
 }
 
 proc mark_played {path} {
@@ -74,12 +101,12 @@ proc mark_played {path} {
     # possible error in determining playing path.
     return
   }
-  $log debug "Mark as played in database: $path" 
+  log debug "Mark as played in database: $path" 
   try_eval {
     # set lst_generic_ids [::mysql::sel $conn "select generic from musicfile where path = '[$db str_to_db [det_path_in_db $path]]'" -flatlist]
     set lst_generic_ids [det_generic_ids $db $conn $path] 
   } {
-    $log warn "DB error: $errorResult, trying again..."
+    log warn "DB error: $errorResult, trying again..."
     # 8-1-2011 possible db connection has timed out after idle, so reconnect
     # lassign [db_connect] db conn
     db_connect_with_retry
@@ -88,7 +115,7 @@ proc mark_played {path} {
   }
 
   if {$lst_generic_ids == {}} {
-    $log warn "Not found in DB: $path, inserting new record"
+    log warn "Not found in DB: $path, inserting new record"
     lassign [det_realpath $path] realpath is_symlink    
     set generic_id [$db insert_object generic -gentype "musicfile" -freq 1.0 -play_count 0]
     set musicfile_id [$db insert_object musicfile -generic $generic_id \
@@ -144,18 +171,36 @@ proc det_playing {} {
 
 
 proc exec_cmd_exitcode {args} {
+  # [2016-11-17 21:35] don't puts to stdout, will end up in music-monitor.log, way too big then.
   try {
     set results [exec {*}$args]
     set status 0
-    puts "No errors, exitcode=0"
+    log_once info "No errors, exitcode=0"
   } trap CHILDSTATUS {results options} {
-    puts "results: $results"
-    puts "options: $options"
+    log_once warn "results: $results"
+    log_once warn "options: [clean_exec_options $options]"
     set status [lindex [dict get $options -errorcode] 2]
   }
   return $status
 }
 
+# [2016-11-17 21:54] remove pid from child process, after CHILDSTATUS
+proc clean_exec_options {msg} {
+  regsub {CHILDSTATUS \d+} $msg {CHILDSTATUS xxxxx} msg
+  return $msg
+}
+
+# [2016-11-17 21:46] log a specific message only once, to prevent large log files.
+set logged [dict create]
+proc log_once {level msg} {
+  global logged
+  if {[dict exists $logged $msg]} {
+    # nothing
+  } else {
+    log $level $msg
+    dict set logged $msg 1
+  }
+}
 
 proc det_playing_path_old {} {
   set res ""  
@@ -223,12 +268,12 @@ proc db_connect_with_retry {{max_try 3}} {
   while {!$ok && ($i < $max_try)} {
     incr i
     try_eval {
-      $log info "Trying to connect to db"
+      log info "Trying to connect to db"
       set res [db_connect]
       set ok 1
     } {
-      $log warn "connect failed: $errorResult"
-      $log info "trying again after 10 seconds"
+      log warn "connect failed: $errorResult"
+      log info "trying again after 10 seconds"
       after 10000
     }
   }
@@ -239,11 +284,11 @@ proc db_connect_with_retry {{max_try 3}} {
 proc db_connect {} {
   global db conn log
   set db [get_db_from_schemadef]
-  $log debug "before get_connection"
+  log debug "before get_connection"
   set conn [$db get_connection]
-  #$log debug "before set names utf8"
+  #log debug "before set names utf8"
   #::mysql::exec $conn "set names utf8"
-  $log debug "finished"
+  log debug "finished"
   # list $db $conn 
 }
 

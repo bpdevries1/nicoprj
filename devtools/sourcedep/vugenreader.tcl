@@ -60,14 +60,14 @@ namespace eval ::vugensource {
 
 proc def_parsers {} {
 
-  def_parser_regexp include_line {^#include "([^\"\"]+)"} callees
+  def_parser_regexp include_line include {^#include "([^\"\"]+)"} callees
   
   # TODO: include function definitions, including lines.
   # Also parts outside of function definitions, to determine calls.
 
   # def_parser_regexp proc-start {^(\S[^\(\)]+)\(([^\(\)]+)\)} ret_type proc_name params
 
-  def_parser proc-start {
+  def_parser proc-start proc-start {
     if {[regexp {^\s*//} $line]} {
       return ""
     }
@@ -84,13 +84,13 @@ proc def_parsers {} {
   }
   
   # \x7D is right/close brace
-  def_parser_regexp proc-end {^\x7D$} {}
+  def_parser_regexp proc-end proc-end {^\x7D$} {}
   
 }
 
 proc def_handlers {} {
 
-  def_handler {bof eof include_line} statement {
+  def_handler stmt {bof eof include_line} statement {
     # init code
     set file_item [dict create]
   } {
@@ -115,7 +115,7 @@ proc def_handlers {} {
     }
   }
 
-  def_handler {bof eof proc-start proc-end} proc {
+  def_handler proc {bof eof proc-start proc-end} proc {
     # init code
     set proc_current ""
     set file_item [dict create]
@@ -166,7 +166,7 @@ proc def_handlers {} {
 # Specific to this project, not in liblogreader.
 # combination of item and file_item
 proc def_insert_handler {table} {
-  def_handler [list bof $table] {} [syntax_quote {
+  def_handler "i:$table" [list bof $table] {} [syntax_quote {
     if {[:topic $item] == "bof"} { # 
       set db [:db $item]
       set file_item [dict remove $item db]

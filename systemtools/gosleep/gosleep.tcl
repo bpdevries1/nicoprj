@@ -24,6 +24,10 @@ proc main {argv} {
       exit 1
     }
   }
+
+  #test_popup_msg
+  #exit;                         # for now, testing.
+  
   # call unison with normal user account
   # TODO: this code is specific, put in config file. Zou moeten kunnen, freq op 24h zetten.
   # do_exec_user $USER /home/nico/nicoprj/systemtools/backuptool/backup-unison.tcl
@@ -45,6 +49,19 @@ proc main {argv} {
   } else {
     log "Don't really go to sleep."
   }
+}
+
+proc test_popup_msg {} {
+  # try both from root and from nico.
+  set popup [file normalize [file join [info script] .. .. .. lib test popupmsg.tcl]]
+  log "popup: $popup"
+  catch {exec -ignorestderr nohup $popup "Popup with root" &} msg
+  log "catch msg root: $msg"
+
+  catch {exec -ignorestderr sudo -u nico nohup $popup "Popup with nico" &} msg
+  log "catch msg nico: $msg"
+
+  log "finished popups"
 }
 
 proc do_crons {} {
@@ -121,6 +138,7 @@ proc do_exec {args} {
   log "executing: $args"
   set res -1
   catch {
+    # [2016-11-19 10:55] deze exec blijft hangen. Mss omdat niet alle child processes al klaar zijn, mss dus & aan het einde.
     set res [exec {*}$args]
   } result options
   log "res: $res"
