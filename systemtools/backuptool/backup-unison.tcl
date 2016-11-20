@@ -1,4 +1,6 @@
-#!/home/nico/bin/tclsh861
+#! /home/nico/bin/tclsh861
+
+package require ndv
 
 proc main {argv} {
   set options {
