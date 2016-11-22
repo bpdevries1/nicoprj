@@ -4,7 +4,7 @@
 # vraag of je alle packages meteen wilt gebruiken hier, toch een soort bootstrap.
 package require ndv
 
-set_log_global debug
+set_log_global debug {filename -}
 
 # default is een dry run, niets doen.
 proc main {argv} {
