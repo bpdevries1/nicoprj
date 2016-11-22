@@ -206,7 +206,11 @@ proc set_log_global {level {options {}}} {
     set log [::ndv::CLogger::new_logger [file tail [info script]] $level]  
   }
   set append 0
-  if {[:filename $options] != ""} {
+
+  if {[:filename $options] == "-"} {
+    # [2016-11-22 21:13] don't make a log file, just log to console.
+    set logfile_name ""
+  } elseif {[:filename $options] != ""} {
     set logfile_name [:filename $options]
     if {[:append $options] > 0} {
       set append 1
@@ -215,20 +219,21 @@ proc set_log_global {level {options {}}} {
     set logfile_name "logs/[file tail [info script]]-[clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"].log"
     set append 0
   }
-  $log set_file $logfile_name $append
-  
-  # create symlink, maybe also do in set_file.
-  if {$tcl_platform(platform) == "unix"} {
-    if {[:filename $options] == ""} {
-      set symlink_name "logs/[file tail [info script]]-latest.log"
-      file delete $symlink_name
-      # puts stderr "point $symlink_name -> $logfile_name"
-      file link -symbolic $symlink_name [file tail $logfile_name]
+  if {$logfile_name != ""} {
+    $log set_file $logfile_name $append
+    # create symlink, maybe also do in set_file.
+    if {$tcl_platform(platform) == "unix"} {
+      if {[:filename $options] == ""} {
+        set symlink_name "logs/[file tail [info script]]-latest.log"
+        file delete $symlink_name
+        # puts stderr "point $symlink_name -> $logfile_name"
+        file link -symbolic $symlink_name [file tail $logfile_name]
+      } else {
+        # fixed logname, no need to make symlink.
+      }
     } else {
-      # fixed logname, no need to make symlink.
+      # check: voor windows nu ook mogelijk? of nog steeds alleen voor dirs?
     }
-  } else {
-    # check: voor windows nu ook mogelijk? of nog steeds alleen voor dirs?
   }
 }
 
