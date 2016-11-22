@@ -5,7 +5,7 @@ package require ndv
 # history
 # 2015-08-11 NdV ook delete uit status halen en git rm maken.
 
-set_log_global debug
+set_log_global info {filename -}
 
 proc main {argv} {
   # eerst alleen nicoprj
@@ -26,12 +26,16 @@ proc main {argv} {
     }
     cd $dir
   } else {
-    if {$os == "windows"} {
-      cd "c:/nico/nicoprj"
-    } else {
-      cd ~/nicoprj 
+    # [2016-11-22 20:52] maybe below from time I had only one repo.
+    if 0 {
+      if {$os == "windows"} {
+        cd "c:/nico/nicoprj"
+      } else {
+        cd ~/nicoprj 
+      }
     }
     set commit_msg check
+    set dir .
   }
   # set res [exec git status]
   set res [exec $git_exe status]
@@ -43,6 +47,8 @@ proc main {argv} {
   puts $f "# $filename"
   puts $f "# Adding files to git and commit"
   set has_changes [puts_changes $f $res $commit_msg]
+  puts $f "# remove file after executing"
+  puts $f "rm $filename"
   puts $f "# name of file to exec: $filename"
   close $f
   if {$os == "windows"} {
