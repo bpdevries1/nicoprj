@@ -159,7 +159,18 @@ def_parser trans_param trans_param {
   
   }
 
+def_parser_regexp_srcline step_start step_start {(web_url|web_submit_data|web_custom_request|web_rest|web_submit_form)\("(.+?)"\) started} step_type step_name
+
+def_parser_regexp_srcline request_start request_start {: (\d+)-byte request headers for "(.+?)" \(RelFrameId} reqheaderbytes url
+
 }
+
+# Most log lines in vugen/vuserlog start with sourcefile/sourceline, include those in topic-items.
+proc def_parser_regexp_srcline {topic label re args} {
+  # set re_ts {\[([0-9 :.-]+)\]}
+  set re_srcline {^(.+?\.c)\((\d+)\): .*?}
+  def_parser_regexp $topic $label "$re_srcline$re" srcfile srclinenr {*}$args
+} 
 
 # functions.c(377): [2016-07-29 16:48:22.368] trans=maker_landing, user=Silver3, resptime=-1.000, status=-1, iteration=1 [07/29/16 16:48:22]
 # trans=maker_landing, user=Silver3, resptime=-1.000, status=-1, iteration=1
@@ -258,6 +269,31 @@ proc def_handlers {} {
     }
     # set item [yield $res]
   }
+
+  def_handler step {trans_line step_start} step {set trans_line_item {}} {
+    switch [:topic $item] {
+      trans_line {
+        set trans_line_item $item
+      }
+      step_start {
+        res_add res [dict merge $trans_line_item $item]
+      }
+    }
+  }
+
+  def_handler request {trans_line step_start request_start} request {set trans_line_item {}; set step_start_item {}} {
+    switch [:topic $item] {
+      trans_line {
+        set trans_line_item $item
+      }
+      step_start {
+        set step_start_item $item
+      }
+      request_start {
+        res_add res [dict merge $trans_line_item $step_start_item $item]
+      }
+    }
+  }
   
   # [2016-08-09 22:29] introduced a bug here by not calling split_proc in insert-trans_line
   # but in trans split_proc is called, and this is used in report. Could also remove fields
@@ -265,6 +301,9 @@ proc def_handlers {} {
   def_insert_handler trans_line
   def_insert_handler trans
   def_insert_handler error
+  def_insert_handler step
+  def_insert_handler request
+  
   
 }
 

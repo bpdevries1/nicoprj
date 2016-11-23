@@ -65,7 +65,8 @@ proc define_tables {db opt} {
   set line_fields {linenr ts sec_ts iteration}
   set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]
   set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
-
+  set srcline_fields {srcfile srclinenr}
+  
   # [2016-08-19 19:07] transshort weg, moet dynamisch added worden.
   # [2016-08-22 10:03:55] fields usecase and transshort used in reports for now, so make sure they always exist.
   set trans_fields {transname user resptime trans_status usecase transshort}
@@ -73,13 +74,12 @@ proc define_tables {db opt} {
   # usecase revisit transid searchcrit
   
   # 17-6-2015 NdV transaction is a reserved word in SQLite, so use trans as table name
-  $db add_tabledef trans_line {id} [concat $logfile_fields $line_fields $trans_fields]
+  $db add_tabledef trans_line {id} [concat $logfile_fields $line_fields $srcline_fields $trans_fields]
   $db add_tabledef trans {id} [concat $logfile_fields $line_start_fields \
-                                   $line_end_fields $trans_fields] {flex 1}
-  
-  $db add_tabledef error {id} [concat $logfile_fields $line_fields \
-                                   srcfile srclinenr user errornr errortype details \
-                                   line]
+                                   $line_end_fields $srcline_fields $trans_fields] {flex 1}
+
+  $db add_tabledef error {id} [concat $logfile_fields $line_fields $srcline_fields \
+                                   {user errornr errortype details line}]
                    
   # 22-10-2015 NdV ook errors per iteratie, zodat er een hoofd schuldige is aan te wijzen voor het falen.
   $db add_tabledef error_iter {id} [concat $logfile_fields script \
@@ -87,6 +87,15 @@ proc define_tables {db opt} {
 
   $db add_tabledef resource {id} [concat $logfile_fields $line_fields user transname resource]
 
+  # [2016-11-23 15:29:08] step, part of LR transaction, like web_url
+  # [2016-11-23 15:58:02] TODO: split in line_start_fields/line_end_fields.
+  set step_fields {step_name step_type}
+  $db add_tabledef step {id} [concat $logfile_fields $line_fields $srcline_fields $trans_fields $step_fields]
+
+  # [2016-11-23 16:30:22] request within step within transaction
+  set request_fields {url reqheaderbytes}
+  $db add_tabledef request {id} [concat $logfile_fields $line_fields $srcline_fields $trans_fields $step_fields $request_fields]
+  
   # summary table, per usecase and transaction. resptime fields already defined als real.
   $db def_datatype {npass nfail} integer
   $db add_tabledef summary {id} {usecase resulttype transshort min_ts resptime_min resptime_avg resptime_max resptime_p95 npass nfail}

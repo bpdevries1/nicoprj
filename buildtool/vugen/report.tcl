@@ -16,6 +16,7 @@ task report {Create report of output.txt in script dir
   and create Html report.
 } {{summary "Create summary report, with aggregate times and errors"}
   {full "Create full report, with each iteration/transaction."}
+  {step "Include all steps in full report"}
   {all "Both summary and full"}
   {ssl "Read SSL logs into DB"}
   {logdotpng "Create PNG for read log process"}

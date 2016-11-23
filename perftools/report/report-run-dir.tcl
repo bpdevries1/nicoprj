@@ -43,11 +43,11 @@ proc report_run_dir {dir dbname opt} {
   set db [get_run_db $dbname $opt]
   # $db load_percentile ; # do in get_run_dn
   if {[:full $opt]} {
-    report_full $db $dir
+    report_full $db $dir $opt
     set report_made 1
   }
   if {[:summary $opt]} {
-    report_summary $db $dir
+    report_summary $db $dir $opt
     set report_made 1
   }
   if {!$report_made} {
@@ -61,7 +61,7 @@ proc report_run_dir {dir dbname opt} {
 # split_trans. Could also check which fields have more than 1 different value, or are
 # not empty. Also (with eg newuser/revisit) could check if value varies during this
 # block/iteration: if so, make a column. If not, add above table.
-proc report_full {db dir} {
+proc report_full {db dir opt} {
   set html_name [file join $dir "report-full.html"]
   if {[file exists $html_name]} {
     # return ; # or maybe a clean option to start anew
@@ -78,6 +78,9 @@ proc report_full {db dir} {
                order by 1,2,3,6"
     foreach row [$db query $query] {
       report_iter_user $db $row $hh
+    }
+    if {[:step $opt]} {
+      report_steps $db $hh $opt
     }
     $hh write_footer
   }
@@ -154,8 +157,19 @@ proc href_resources {db hh vuserid iteration user transname} {
   }
 }
 
+proc report_steps {db hh opt} {
+  $hh heading 1 "All steps within transactions"
+  $hh table_start
+  $hh table_header linenr transname step_name step_type
+  set query "select linenr, transname, step_name, step_type from step order by linenr"
+  foreach row [$db query $query] {
+    $hh table_row [:linenr $row] [:transname $row] [:step_name $row] [:step_type $row]
+  }
+  $hh table_end
+}
+
 # starting point, also called from buildtool/ahk and /vugen.
-proc report_summary {db dir} {
+proc report_summary {db dir opt} {
   # call orig for now
   insert_report_summary $db $dir
   insert_report_percentiles $db $dir
