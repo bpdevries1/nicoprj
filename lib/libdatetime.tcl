@@ -65,8 +65,25 @@ namespace eval ::libdatetime {
   # default - the timestamp as can be inserted in sqlite
   # maybe use getoptions processing, but want to keep it fast
   # args - -filename to generate time string to be used in filename.
+  #        -gmt to use GMT/UTC time. Can be combined with -filename
   # [2016-10-12 10:36:53] also use milliseconds.
   proc now {args} {
+    set options {
+	  {filename "Return current time usable in filename"}
+	  {gmt "Use GMT/UTC time"}
+	}
+	set opt [getoptions args $options ""]
+    if {[:filename $opt]} {
+      clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S" -gmt [:gmt $opt]
+    } else {
+      set msec [clock milliseconds]
+      set sec [expr $msec / 1000]
+      set msec1 [expr $msec % 1000]
+      clock format $sec -format "%Y-%m-%d %H:%M:%S.[format %03d $msec1] %z" -gmt [:gmt $opt]
+    }
+  }
+
+  proc now_old {args} {
     lassign $args arg1 arg2
     if {$arg1 == "-filename"} {
       clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"
@@ -76,21 +93,6 @@ namespace eval ::libdatetime {
       set msec1 [expr $msec % 1000]
       clock format $sec -format "%Y-%m-%d %H:%M:%S.[format %03d $msec1] %z"
     }
-  }
-
-  proc now_old2 {args} {
-    lassign $args arg1 arg2
-    if {$arg1 == "-filename"} {
-      clock format [clock seconds] -format "%Y-%m-%d--%H-%M-%S"
-    } else {
-      clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S %z"      
-    }
-  }
-  
-  
-  proc now_old {args} {
-    # for now, the timestamp as can be inserted in sqlite
-    clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S %z"
   }
 
   

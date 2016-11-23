@@ -49,6 +49,7 @@ namespace eval ::ndv {
 			set result [uplevel {namespace which [::ndv::CLogger \#auto]}]
 			$result set_name $a_name
 			$result set_log_level $a_log_level
+			$result set_gmt 0
 			lappend lst_loggers $result
       return $result
 		}
@@ -63,6 +64,7 @@ namespace eval ::ndv {
 		private variable log_level
 		private variable filename
 		private variable f_log
+		private variable gmt
 	
 		# 22-8-2014 NdV public is needed for Tcl8.6.1/Itcl4.0b7.
 		public constructor {} {
@@ -82,6 +84,14 @@ namespace eval ::ndv {
 	
 		public method get_log_level {} {
 			return $log_level
+		}
+		
+		public method set_gmt {val} {
+			set gmt $val
+		}
+		
+		public method get_gmt {} {
+			return $gmt
 		}
 		
     # @param append: should logfile be appended to, default it is overwritten.
@@ -173,7 +183,7 @@ namespace eval ::ndv {
         set msec [clock milliseconds]
         set sec [expr $msec / 1000]
         set msec1 [expr $msec % 1000]
-        set str_log "\[[clock format $sec -format "%Y-%m-%d %H:%M:%S.[format %03d $msec1] %z"]\] $brackets_name\[$level\] $str"
+        set str_log "\[[clock format $sec -format "%Y-%m-%d %H:%M:%S.[format %03d $msec1] %z" -gmt $gmt]\] $brackets_name\[$level\] $str"
         puts stderr $str_log
 				flush stderr ; # could be that stderr is redirected.
         if {$f_log != -1} {
@@ -234,6 +244,9 @@ proc set_log_global {level {options {}}} {
     } else {
       # check: voor windows nu ook mogelijk? of nog steeds alleen voor dirs?
     }
+  }
+  if {[:gmt $options] == 1} {
+	$log set_gmt 1
   }
 }
 
