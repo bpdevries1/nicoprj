@@ -129,6 +129,11 @@ namespace eval ::ndv {
         flush_channel
     }
 
+	public method write {str} {
+	  puts $channel $str
+	  flush_channel
+	}
+	
     public method write_footer {} {
         puts $channel "</body></html>"
         flush_channel
