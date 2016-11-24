@@ -6,6 +6,50 @@ package require ndv
 # have procs like '=' and ifp available at global namespace.
 use libfp
 
+if 0 {
+
+Init:
+set r [Rwrapper new $opt]
+$r init $dir [:db $opt] [:Rfileadd $opt]
+# $r set_outputroot [file normalize [file join [from_cygwin [:outrootdir $opt]] [file tail $dir]]]
+$r set_outformat [:outformat $opt]
+
+Methods:
+query: a SQL query, where a ts field denotes a timestamp
+
+melt: a list of value fields,eg $r melt {error CollateralisationQueue }
+
+qplot: main plotting function, calling GGPlot/qplot with named parameters:
+- title            - also used for graph file name
+- geom             - geometry (line, point, line-point, NOT point-line)
+- x                - field to use for x-axis
+- xlab             - label for x-axis
+- y                - field to use for y-axis  
+- ylab             - label for y-axis
+- colour           - field to use for colours and shapes
+- colourlabel      - name to use in legend for colours
+- maxcolours       - ? (automatic?)
+- facet            - field to use for (vertical) facetting 
+- width            - width of the graph in inches (with 100 DPI)
+- height.min       - minimum height of graph in inches
+- height.max       - maximum height of graph in inches
+- height.base      - base height (excluding facets) of graph in inches
+- height.perfacet  - height of each facet in inches.
+- height.percolour - height for each colour in legend (automatic?)
+- legend.avgtype   - add average of values to legend
+- legend.avgdec    - number of decimals in average in legend.
+- legend.position  - where to put legend (bottom)
+- legend.direction - layout of legend (vertical, horizontal)
+- legend.keyheight - height per key (automatic?)
+- legend.ncol      - fix number of columns in legend, calculate number of rows needed.
+- legend.nrow      - fix number of rows in legend, calculate number of columns needed.
+- extra            - free format extra commands for qplot
+- hline            - write horizontal line at y-value.
+
+myplot command - free format, TODO.
+
+}
+
 # CExecLimit gewoon in ndv lib?
 
 # ndv::source_once [file join [info script] .. .. .. lib CExecLimit.tcl]
