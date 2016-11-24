@@ -1,0 +1,37 @@
+digraph G {
+		rankdir = BT
+/*
+		size="40,40";
+		ratio=fill;
+		node [fontname=Arial,fontsize=20];
+		edge [fontname=Arial,fontsize=16];
+*/
+    
+  _count_change_2 [label="count_change 2",shape="rectangle"];
+  _cc_2_5 [label="cc 2 5",shape="rectangle"];
+  _cc_2_4 [label="cc 2 4",shape="rectangle"];
+  _cc_2_3 [label="cc 2 3",shape="rectangle"];
+  _cc_2_2 [label="cc 2 2",shape="rectangle"];
+  _cc_2_1 [label="cc 2 1",shape="rectangle"];
+  _cc_2_0 [label="cc 2 0",shape="rectangle"];
+  _cc_1_1 [label="cc 1 1",shape="rectangle"];
+  _cc_1_0 [label="cc 1 0",shape="rectangle"];
+  _cc_0_1 [label="cc 0 1",shape="rectangle"];
+  _cc_1_0 -> _cc_1_1 [label="0"];
+  _cc_0_1 -> _cc_1_1 [label="1"];
+  _cc_2_0 -> _cc_2_1 [label="0"];
+  _cc_1_1 -> _cc_2_1 [label="1"];
+  _cc__3_2 [label="cc -3 2",shape="rectangle"];
+  _cc_2_1 -> _cc_2_2 [label="1"];
+  _cc__3_2 -> _cc_2_2 [label="0"];
+  _cc__8_3 [label="cc -8 3",shape="rectangle"];
+  _cc_2_2 -> _cc_2_3 [label="1"];
+  _cc__8_3 -> _cc_2_3 [label="0"];
+  _cc__23_4 [label="cc -23 4",shape="rectangle"];
+  _cc_2_3 -> _cc_2_4 [label="1"];
+  _cc__23_4 -> _cc_2_4 [label="0"];
+  _cc__48_5 [label="cc -48 5",shape="rectangle"];
+  _cc_2_4 -> _cc_2_5 [label="1"];
+  _cc__48_5 -> _cc_2_5 [label="0"];
+  _cc_2_5 -> _count_change_2 [label="1"];
+}
