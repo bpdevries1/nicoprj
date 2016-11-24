@@ -12,7 +12,7 @@ proc main {argv} {
   set os [det_os]
   if {$os == "windows"} {
     # set git_exe "c:/util/GitHub/cmd/git.exe"
-	set git_exe [which_git c:/util/GitHub/cmd c:/PCC/util/cygwin/bin]
+    set git_exe [which_git c:/util/GitHub/cmd c:/PCC/util/cygwin/bin]
   } else {
     set git_exe "git"
   }
