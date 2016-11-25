@@ -177,8 +177,9 @@ proc exec_cmd_exitcode {args} {
     set status 0
     log_once info "No errors, exitcode=0"
   } trap CHILDSTATUS {results options} {
-    log_once warn "results: $results"
-    log_once warn "options: [clean_exec_options $options]"
+    # [2016-11-23 21:55] log at debug level, don't want these in logs for now.
+    log_once debug "results: $results"
+    log_once debug "options: [clean_exec_options $options]"
     set status [lindex [dict get $options -errorcode] 2]
   }
   return $status
