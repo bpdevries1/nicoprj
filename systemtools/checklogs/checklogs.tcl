@@ -112,6 +112,10 @@ set re_log_procs {
 }
 proc check_log_contents {opt file} {
   global re_generic warnings re_log_procs
+  if {![file_readable $file]} {
+    log debug "Cannot read file: $file"
+    return 
+  }
   set text [read_file $file]
   foreach re $re_generic {
     if {[regexp $re $text]} {
@@ -126,23 +130,25 @@ proc check_log_contents {opt file} {
   }
 }
 
-#   {failed: }
-if 0 {
-  
-
-
-[2016-11-20 19:34:52.686 +0100] [checklogs.tcl] [debug] changed: /home/nico/.thunderbird/7k25h674.default/Mail/pop.xs4all.nl/Junk.msf
-
-failed: .thunderbird/7k25h674.default/Mail/pop.xs4all.nl/Junk.msf; file: /home/nico/log/unison/home-nico.log
-
-
+proc file_readable {file} {
+  set readable 0
+  catch {
+    set f [open $file r]
+    close $f
+    set readable 1
+  }
+  return $readable
 }
 
 proc check_unison_log {file} {
   # first keep list of files that changed during sync, not really an error.
   # then with failed items, check if reason is a change, or not.
   log debug "check_unison_log: $file"
-  set changed [dict create]
+  if {![file_readable $file]} {
+    log debug "Cannot read file: $file"
+    return 
+  }
+  set changed [dict create]  
   with_file f [open $file r] {
     while {[gets $f line] >= 0} {
       if {[regexp {^\s*failed: (.+)$} $line z filename]} {
