@@ -102,7 +102,7 @@ proc get_action_files {} {
   return $res
 }
 
-# return list of all project files, ie. all files which will be uploaden to ALM/PC
+# return list of all project files, ie. all files which will be uploaded to ALM/PC
 # use ScriptUploadMetadata.xml and check filters, 2 or 4.
 #    <FileEntry Name="default.usp" Filter="4" />
 #    <FileEntry Name="globals.h" Filter="2" />
