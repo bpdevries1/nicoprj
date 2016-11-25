@@ -141,11 +141,12 @@ proc do_exec {args} {
     # [2016-11-19 10:55] deze exec blijft hangen. Mss omdat niet alle child processes al klaar zijn, mss dus & aan het einde.
     set res [exec {*}$args]
   } result options
-  log "res: $res"
-  log "result: $result"
-  log "options: $options"
+  # [2016-11-23 22:02] lijkt dat een van deze logs een 'while executing' geeft, dus details erbij.
+  log "res: $res (do_exec {*}$args)"
+  log "result: $result (do_exec {*}$args)"
+  log "options: $options (do_exec {*}$args)"
   set exitcode [det_exitcode $options]
-  log "exitcode: $exitcode"
+  log "exitcode: $exitcode (do_exec {*}$args)"
   return $exitcode
 }
 
