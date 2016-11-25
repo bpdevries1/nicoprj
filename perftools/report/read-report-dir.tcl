@@ -90,6 +90,10 @@ proc read_report_run_dir {rundir opt} {
   read_report_set_namespaces $rundir $opt
   
   set dbname [file join $rundir testrunlog.db]
+  if {[:clean $opt]} {
+    log info "Deleting DB: $dbname"
+    file delete $dbname
+  }
   if {![file exists $dbname]} {
     log info "New dir: read logfiles: $rundir"
     # file delete $dbname

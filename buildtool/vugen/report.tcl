@@ -14,7 +14,9 @@ source [file join $perftools_dir report read-report-dir.tcl]
 task report {Create report of output.txt in script dir
   Copy output.txt to testruns dir, call vugentools/vuserlog/read-vuserlogs-db.tcl
   and create Html report.
-} {{summary "Create summary report, with aggregate times and errors"}
+} {
+  {clean "Delete DB and generated reports before starting"}
+  {summary "Create summary report, with aggregate times and errors"}
   {full "Create full report, with each iteration/transaction."}
   {step "Include all steps in full report"}
   {all "Both summary and full"}
@@ -43,11 +45,5 @@ task report {Create report of output.txt in script dir
     file copy output.txt $to_file
   }
   read_report_run_dir $subdir $opt
-  # then call read_logfile_dir; idempotency should already be arranged by read_logfile_dir
-  #set dbname [file join $subdir "vuserlog.db"]
-  #read_logfile_dir $subdir $dbname [:ssl $opt] split_transname
-
-  # and finally make the report.
-  #vuser_report $subdir $dbname $opt
 }
 
