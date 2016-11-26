@@ -105,10 +105,11 @@ proc remove_double_empty_lines {filename} {
   set text3 [regsub -all {\n{3,}} $text2 "\n\n"]
   if {$text != $text3} {
     # write_file [temp_name $filename] $text3 ; # should also work.
-    # [2016-07-30 17:10] but leave one below for one, to also use it elsewhere.
+    # [2016-07-30 17:10] but leave one below for now, to also use it elsewhere.
     with_file f [open_temp_w $filename] {
       puts -nonewline $f $text3
     }
     commit_file $filename
   }
 }
+
