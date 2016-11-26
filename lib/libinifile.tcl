@@ -36,10 +36,15 @@ proc read {filename {fail_on_file_not_found 1}} {
 }
 
 # also make backup
+# [2016-11-26 15:45] This probably won't work outside of buildtool, open_temp_w not available; commit_file neither.
+# [2016-11-26 16:00] caller should provide tempname and call commit, outside of scope of this library.
 proc write {filename ini {translation crlf}} {
-  #set f [open [tempname $filename] w]
-  #fconfigure $f -translation $translation
-  set f [open_temp_w $filename]
+  # puts "ini/write called: $filename"
+  # set f [open [tempname $filename] w]
+  set f [open $filename w]
+  fconfigure $f -translation $translation
+  # set f [open_temp_w $filename]
+  
   foreach d $ini {
     puts $f "\[[:header $d]\]"
     # don't put empty lines
@@ -51,7 +56,7 @@ proc write {filename ini {translation crlf}} {
     # puts $f [join [:lines $d] "\n"]
   }
   close $f
-  commit_file $filename
+  # commit_file $filename
 }
 
 # add header/line combination to ini
