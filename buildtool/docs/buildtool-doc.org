@@ -5,6 +5,32 @@ After creating a recording there are the following possible goals:
 ** Use as basis for completely new script
 bld init
 bld set-prjtype vugen
+bld saveas <newdir>
+** In newly created dir
+gac -> add to git source control
+bld init
+bld set-prjtype vugen
+Edit .bld/config-<machine> and set testruns dir.
+bld split-action
+bld templates
+bld rb-trans
+bld domains
+Edit domains.ini
+bld domains (to comment out domains to be ignored)
+bld param-domain <main-domain>
+bld remove-comment
+bld remove-empty-lines
+gac -> Put result of these automatic actions in git.
+bld test -> check for errors and inconsistencies
+
+** Manual actions 25-11-2016
+bld get logger.c -> not automatically done correctly yet.
+bld put configfile.c -> possibly some whitespace changes
+bld put dynatrace.c -> same
+bld put functions.c -> same
+bld put vugen.h -> same
+bld put wrr_functions.c -> same
+bld put y_core.c -> same
 ** Add actions to existing script
 * org-mode configuration
 #+STARTUP: indent
