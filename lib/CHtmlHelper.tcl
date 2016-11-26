@@ -17,6 +17,24 @@ if {0} {
 
 }
 
+if 0 {
+  [2016-11-26 12:27] TODO:
+  Meer zoals hiccup:
+
+  $hh table {
+    Foreach xx
+    $hh table_row {
+      $hh table_data ..
+    }
+  }
+
+  En per kolom extra attributen instellen, bv align=right.
+
+  En ofwel juxt functie gebruiken voor velden van tabel, of dict values gebruiken, maar dan wel goede volgorde. Dict_get_multi heb ik al.
+
+  En dan ook start met een test suite. Gewoon file aanmaken en kijken of deze nog steeds gelijk is aan eerder gemaakte file.
+}
+
 namespace eval ::ndv {
 	# class maar eenmalig definieren
 	if {[llength [itcl::find classes CHtmlHelper]] > 0} {
