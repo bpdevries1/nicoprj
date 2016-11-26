@@ -28,6 +28,7 @@ task templates {Make script adhere to templates and best practices
   add_param_iteration
   # proxy_config_loc only used within set_proxy, so no var or param
   # proxy_config_loc = g:\config\proxy.config
+  set_web_settings
 }
 
 # get .config files from repo/templates iff they do not exist in project yet.
@@ -98,27 +99,6 @@ proc add_web_reg_find_group {stmt_grp} {
   return $stmt_grp
 }
 
-# sub items like .png and .svg normally don't need web_reg_find
-# TODO: more generic, with regexp-list.
-proc url_needs_find_old {url} {
-  if {[regexp {\.svg} $url]} {
-    return 0
-  }
-  if {[regexp {\.png} $url]} {
-    return 0
-  }
-  if {[regexp {\.jpg} $url]} {
-    return 0
-  }
-  if {[regexp {\.gif} $url]} {
-    return 0
-  }
-  if {[regexp {dynaTraceMonitor} $url]} {
-    return 0
-  }
-  return 1
-}
-
 proc url_needs_find {url} {
   foreach re {{\.svg} {\.png} {\.jpg} {\.gif} {\.ico} {dynaTraceMonitor}} {
     if {[regexp $re $url]} {
@@ -129,9 +109,29 @@ proc url_needs_find {url} {
 }
 
 proc get_std_libs {} {
-  foreach libname {vugen.h y_core.c functions.c configfile.c wrr_functions.c dynatrace.c} {
+  foreach libname {vugen.h y_core.c functions.c configfile.c wrr_functions.c dynatrace.c logger.c} {
     if {![file exists $libname]} {
       task_get $libname  
     }
   }
 }
+
+# set web settings which are checked in task checks
+proc set_web_settings {} {
+  #puts "set_web_settings: default.cfg"
+  set ini [ini/read default.cfg]
+  set headers [ini/headers $ini]
+  if {[lsearch -exact $headers "WEB"] >= 0} {
+    # Only check for WEB scripts, so with a [WEB] header
+    set ini [ini/set_param $ini WEB FailNonCriticalItem 1]
+    set ini [ini/set_param $ini WEB ProxyUseProxy 0]
+    set ini [ini/set_param $ini WEB ProxyUseProxyServer 0]
+    set ini [ini/set_param $ini General ContinueOnError 0]
+  }
+  ini/write [tempname default.cfg] $ini
+  #puts "ini/write default.cfg done"
+  #breakpoint;                   # expect temp file to be written, and source still the same.
+  commit_file default.cfg
+}
+
+
