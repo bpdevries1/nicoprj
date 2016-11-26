@@ -4,10 +4,10 @@ task domains {get/update domains
   Use remove_comments to really delete those statements.
 } {
   if {[file exists domains.ini]} {
-    set domains_ini [ini_read domains.ini]
+    set domains_ini [ini/read domains.ini]
   } else {
-    set domains_ini [ini_add_no_dups {} keep ""]
-    set domains_ini [ini_add_no_dups $domains_ini ignore ""]
+    set domains_ini [ini/add_no_dups {} keep ""]
+    set domains_ini [ini/add_no_dups $domains_ini ignore ""]
   }
 
   foreach filename [get_action_files] {
@@ -24,7 +24,9 @@ task domains {get/update domains
     domain_write_source_statements $filename $stmt_groups $domains_ini
     commit_file $filename
   }
-  ini_write domains.ini $domains_ini
+  ini/write [tempname domains.ini] $domains_ini
+  commit_file domains.ini
+  
   vuser_init_update_domains $domains_ini
 }
 
@@ -78,7 +80,7 @@ proc is_ignore_domain {ini domain} {
   if {$domain == ""} {
     return 0
   } else {
-    ini_exists $ini ignore [domain_suffix $domain]  
+    ini/exists $ini ignore [domain_suffix $domain]  
   }
 }
 
@@ -94,19 +96,19 @@ proc update_domains_ini {ini stmt_groups} {
       # nothing, brace in domain, could be {domain}
     } else {
       set suffix [domain_suffix $domain]
-      if {[ini_exists $ini keep $suffix] ||
-          [ini_exists $ini ignore $suffix]} {
+      if {[ini/exists $ini keep $suffix] ||
+          [ini/exists $ini ignore $suffix]} {
         # nothing
       } else {
         # log debug "Adding suffix to ini/keep: $suffix (domain=$domain)"
-        set ini [ini_add $ini keep $suffix]
+        set ini [ini/add $ini keep $suffix]
       }
     }
   }
 
   # sort lines under headers.
-  set ini [ini_set_lines $ini keep [lsort [ini_lines $ini keep]]]
-  set ini [ini_set_lines $ini ignore [lsort [ini_lines $ini ignore]]]
+  set ini [ini/set_lines $ini keep [lsort [ini/lines $ini keep]]]
+  set ini [ini/set_lines $ini ignore [lsort [ini/lines $ini ignore]]]
   
   return $ini
 }

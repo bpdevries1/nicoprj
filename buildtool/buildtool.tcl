@@ -9,7 +9,9 @@ set_log_global info
 # set_log_global debug
 
 ndv::source_once task.tcl prjgroup.tcl prjtype.tcl \
-    lib/inifile.tcl lib/misc.tcl init.tcl
+    lib/misc.tcl init.tcl
+
+require libinifile ini
 
 proc trace_callback {nm idx action} {
   upvar $nm var

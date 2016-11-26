@@ -31,9 +31,10 @@ proc add_file_usr {filename} {
   }
   # maybe use project dir instead of current dir?
   set usr_file "[file tail [file normalize .]].usr"
-  set ini [ini_read $usr_file]
-  set ini [ini_add_no_dups $ini ManuallyExtraFiles "$filename="]
-  ini_write $usr_file $ini
+  set ini [ini/read $usr_file]
+  set ini [ini/add_no_dups $ini ManuallyExtraFiles "$filename="]
+  ini/write [tempname $usr_file] $ini
+  commit_file $usr_file
 }
 
 # add file to ScriptUploadMetadata.xml, also crlf endings
@@ -139,14 +140,15 @@ proc merge_actions {orig new} {
 proc add_action_usr {action} {
   # maybe use project dir instead of current dir?
   set usr_file "[file tail [file normalize .]].usr"
-  set ini [ini_read $usr_file]
+  set ini [ini/read $usr_file]
 
-  set ini [ini_add_no_dups $ini "Actions" "$action=${action}.c"]
-  set ini [ini_add_no_dups $ini "Modified Actions" "$action=0"]
-  set ini [ini_add_no_dups $ini "Recorded Actions" "$action=0"]
-  set ini [ini_add_no_dups $ini "Interpreters" "$action=cci"]
+  set ini [ini/add_no_dups $ini "Actions" "$action=${action}.c"]
+  set ini [ini/add_no_dups $ini "Modified Actions" "$action=0"]
+  set ini [ini/add_no_dups $ini "Recorded Actions" "$action=0"]
+  set ini [ini/add_no_dups $ini "Interpreters" "$action=cci"]
 
-  ini_write $usr_file $ini  
+  ini/write [tempname $usr_file] $ini
+  commit_file $usr_file
 }
 
 # split files named in args by transaction names

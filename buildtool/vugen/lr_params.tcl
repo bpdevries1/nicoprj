@@ -85,21 +85,23 @@ proc add_param_iteration {} {
   # .usr: set ParameterFile=<script>.prm
   set prm_file [script_filename prm]
   set usr_file [script_filename usr]
-  set ini [ini_read $usr_file]
-  ini_set_param $ini General ParameterFile $prm_file
-  ini_write $usr_file $ini
-
+  set ini [ini/read $usr_file]
+  ini/set_param $ini General ParameterFile $prm_file
+  ini/write [tempname $usr_file] $ini
+  commit_file $usr_file
+  
   # add param in .prm file
-  set ini [ini_read $prm_file 0]
+  set ini [ini/read $prm_file 0]
   set header "parameter:iteration"
-  if {[:# [ini_lines $ini $header]] == 0} {
+  if {[:# [ini/lines $ini $header]] == 0} {
     set lines "Format=\"%d\"
 OriginalValue=\"\"
 Type=\"CurrentIteration\"
 ParamName=\"iteration\""
-    set ini [ini_set_lines $ini $header $lines] 
+    set ini [ini/set_lines $ini $header $lines] 
   }
-  ini_write $prm_file $ini
+  ini/write [tempname $prm_file] $ini
+  commit_file $prm_file
   
   add_file_metadata $prm_file
 }

@@ -33,7 +33,7 @@ proc vuser_init_update_domains {domains_ini} {
 
 # this proc also belongs to domains.tcl
 proc puts_ignore_domain_lines {fo ini} {
-  foreach line [lsort [ini_lines $ini ignore]] {
+  foreach line [lsort [ini/lines $ini ignore]] {
     if {$line != ""} {
       puts $fo "\tweb_add_auto_filter\(\"Action=Exclude\", \"HOSTSUFFIX=${line}\", LAST);"      
     }

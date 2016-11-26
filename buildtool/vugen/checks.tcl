@@ -27,19 +27,6 @@ task check {Perform some checks on sources
   }
 }
 
-proc det_full_old {lst} {
-  set full 0
-  set res {}
-  foreach el $lst {
-    if {$el == "-full"} {
-      set full 1
-    } else {
-      lappend res $el
-    }
-  }
-  list $res $full
-}
-
 proc check_file {srcfile opt} {
   if {[:all $opt]} {
     set opt [dict merge $opt [dict create includes 1 todos 1 comments 1]]
@@ -149,8 +136,8 @@ proc check_script {} {
       # puts "Ok: $src_file found in script.usr"
     }
   }
-  set ini [ini_read default.cfg]
-  set headers [ini_headers $ini]
+  set ini [ini/read default.cfg]
+  set headers [ini/headers $ini]
   if {[lsearch -exact $headers "WEB"] >= 0} {
     # Only check for WEB scripts, so with a [WEB] header
     check_setting $ini WEB FailNonCriticalItem 1
@@ -161,7 +148,7 @@ proc check_script {} {
 }
 
 proc check_setting {ini header key value} {
-  set val [ini_get_param $ini $header $key "<none>"]
+  set val [ini/get_param $ini $header $key "<none>"]
   if {$val == $value} {
     # ok, no worries
   } else {
