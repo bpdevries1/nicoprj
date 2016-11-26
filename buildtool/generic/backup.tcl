@@ -2,6 +2,7 @@
 
 require libdatetime dt
 
+# [2016-11-26 15:39] assert to prevent tempname is not called on an (already) temp file.
 proc tempname {filename} {
   assert {![regexp __TEMP__ $filename]}
   return "$filename.__TEMP__"
@@ -39,9 +40,6 @@ set EMPTY_CONTENTS "*** EMPTY ***"
 # opt: dict, can contain key: mtime, value 1: if set, also check mtimes and copy/backup iff different. This is used for get -force.
 proc commit_file {filename {opt {}}} {
   global _origdir EMPTY_CONTENTS
-  if {$filename == ""} {
-    error "Empty filename: $filename"
-  }
   assert {$filename != ""}
   set backupname [file join $_origdir $filename]
   if {![file exists $filename]} {
@@ -50,11 +48,12 @@ proc commit_file {filename {opt {}}} {
     set f [open $backupname w]
     puts -nonewline $f $EMPTY_CONTENTS
     close $f
-    file rename [tempname $filename] $filename
+    file_rename [tempname $filename] $filename
     puts "new file: $filename"
     return
   }
-  # if temp does not exist, this is an error.
+  # OLD: if temp does not exist, this is an error.
+  # [2016-11-26 15:49] NEW: if temp does not exist, there is no change.
   # if {[read_file $filename] == [read_file [tempname $filename]]} {}
   if {![file_changed $filename $opt]} {
     # files are the same, no changes, delete temp file.
@@ -70,14 +69,24 @@ proc commit_file {filename {opt {}}} {
     } else {
       # puts here, so will only be done once per file.
       puts "changed file: $filename"      
-      file rename $filename $backupname
+      file_rename $filename $backupname
     }
-    file rename [tempname $filename] $filename
+    file_rename [tempname $filename] $filename
   }
+}
+
+# rename src->target as in file rename.
+# make create dir for target if needed
+proc file_rename {src target} {
+  file mkdir [file dirname $target]
+  file rename $src $target
 }
 
 proc file_changed {filename {opt {}}} {
   set mtime [:mtime $opt]
+  if {![file exists [tempname $filename]]} {
+    return 0;                   # no temp version exists, so no change.
+  }
   if {[read_file $filename] == [read_file [tempname $filename]]} {
     if {$mtime == 1} {
       if {[file mtime $filename] == [file mtime [tempname $filename]]} {
