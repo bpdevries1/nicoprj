@@ -33,7 +33,7 @@ proc check_all_logs {opt} {
   set warnings [list]
   check_all_logs_dir $opt [file normalize [:root $opt]]
   if {[count $warnings] > 0} {
-    set warn_msg "WARNING: check logs: [count $warnings] log files with errors:\n[join $warnings "\n"]"
+    set warn_msg "WARNING: check logs: [count $warnings] log file(s) with errors:\n[join $warnings "\n"]"
     log warn $warn_msg
     if {![:nopopup $opt]} {
       popup_warning $warn_msg
