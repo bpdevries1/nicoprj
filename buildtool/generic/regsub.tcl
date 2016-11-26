@@ -7,9 +7,9 @@
 task regsub {Regular epression replace} {
   {do "Really perform regsub actions (dry run otherwise)"}
   {all "Handle all files (be careful!)"}
-  {allrec "Handle all files; recurse subdirs (except starting with . be very careful!, TBD)"}
+  {allrec "Handle all files; recurse subdirs (except starting with . be very careful!"}
   {pat.arg "" "Handle all files matching glob pattern"}
-  {patrec.arg "" "Handle all files matching glob pattern (TBD)"}
+  {patrec.arg "" "Handle all files matching glob pattern"}
   {action "Only handle action files"}  
   {text "Handle all text files (TBD)"}  
   {filenames "Only show filenames with changes, no contents"}
@@ -20,6 +20,7 @@ task regsub {Regular epression replace} {
   puts "from: $from, to: $to, args: $args"
   regsub -all {\\n} $to "\n" to2
   set filenames [get_filenames $opt]
+  log debug "Files to search/replace: $filenames"
   # breakpoint
   foreach srcfile $filenames	{
     # regsub_file $srcfile $from $to2 $really

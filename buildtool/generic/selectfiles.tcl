@@ -1,6 +1,7 @@
 # Generic version of select files.
 
-proc get_repo_libs {} {
+# TODO: remove here, specific for VuGen
+proc get_repo_libs_old {} {
   global repo_lib_dir
   glob -nocomplain -tails -directory $repo_lib_dir -type f *
 }
@@ -10,10 +11,12 @@ proc get_filenames {opt} {
     set filenames [get_pattern_files *]
   } elseif {[:pat $opt] != ""} {
     set filenames [get_pattern_files [:pat $opt]]
-  } elseif {[:allrec $opt] != ""} {
-    error "Not implemented yet: allrec"
+  } elseif {[:allrec $opt]} {
+    # error "Not implemented yet: allrec"
+    set filenames [get_pattern_files_rec . *]
   } elseif {[:patrec $opt] != ""} {
-    error "Not implemented yet: patrec"
+    # error "Not implemented yet: patrec"
+    set filenames [get_pattern_files_rec . [:patrec $opt]]
   } else {
     set filenames [get_source_files]
   }
@@ -47,5 +50,18 @@ proc get_project_files {} {
 # get all non-hidden files in current directory
 proc get_pattern_files {pat} {
   glob -nocomplain -type f $pat
+}
+
+# get all non-hidden files in current directory and below matching pattern.
+# pat is only for files, all non-hidden subdirs will be searched.
+proc get_pattern_files_rec {dir pat} {
+  log debug "get_pattern_files_rec: $dir, $pat"
+  set res [list]
+  foreach subdir [glob -nocomplain -directory $dir -type d *] {
+    lappend res {*}[get_pattern_files_rec $subdir $pat]
+  }
+  lappend res {*}[glob -nocomplain -directory $dir -type f $pat]
+  log debug "get_pattern_files_rec: $dir, $pat -> $res"
+  return $res
 }
 

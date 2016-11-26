@@ -1,8 +1,11 @@
+# Vugen version of select files, overwrite some procs.
+
 proc get_repo_libs {} {
   global repo_lib_dir
   glob -nocomplain -tails -directory $repo_lib_dir -type f *
 }
 
+# Override generic version to include action option.
 proc get_filenames {opt} {
   if {[:action $opt]} {
     set filenames [get_action_files]
@@ -11,9 +14,11 @@ proc get_filenames {opt} {
   } elseif {[:pat $opt] != ""} {
     set filenames [get_pattern_files [:pat $opt]]
   } elseif {[:allrec $opt] != ""} {
-    error "Not implemented yet: allrec"
+    #error "XXNot implemented yet: allrec"
+    set filenames [get_pattern_files_rec . *]
   } elseif {[:patrec $opt] != ""} {
-    error "Not implemented yet: patrec"
+    #error "XXNot implemented yet: patrec"
+    set filenames [get_pattern_files_rec . [:patrec $opt]]
   } else {
     set filenames [get_source_files]
   }
@@ -24,6 +29,7 @@ proc get_filenames {opt} {
 # so no config files etc.
 # [2016-07-17 09:12] filter_ignore_files was always called in combination with this one,
 # so make it standard.
+# This one overrides generic version.
 proc get_source_files {} {
   set lst [concat [glob -nocomplain -tails -directory . -type f "*.c"] \
                [glob -nocomplain -tails -directory . -type f "*.h"]]
@@ -32,6 +38,7 @@ proc get_source_files {} {
 
 # delete combined_* files from list.
 # maybe later use FP filter command
+# this one overrides generic version.
 proc filter_ignore_files {source_files} {
   set res {}
   foreach src $source_files {
@@ -59,7 +66,7 @@ proc det_includes_file {source_file} {
   set f [open $source_file r]
   while {[gets $f line] >= 0} {
     if {[regexp {^#include "(.+)"} $line z include]} {
-      # uts "FOUND include stmt: $include, line=$line"
+      # puts "FOUND include stmt: $include, line=$line"
       lappend res $include
     }
   }
@@ -87,8 +94,8 @@ proc script_filename {spec} {
 proc get_action_files {} {
   # set usr_file "[file tail [file normalize .]].usr"
   set usr_file [script_filename usr]
-  set ini [ini_read $usr_file]
-  set lines [ini_lines $ini Actions]
+  set ini [ini/read $usr_file]
+  set lines [ini/lines $ini Actions]
   set res {}
   foreach line $lines {
     set filename [:1 [split $line "="]]
@@ -117,8 +124,9 @@ proc get_project_files {} {
   return $res
 }
 
-# get all non-hidden files in current directory
-proc get_pattern_files {pat} {
+# get all non-hidden files in current directory matching pattern.
+# TODO: remove this one, same as generic one.
+proc get_pattern_files_old {pat} {
   glob -nocomplain -type f $pat
 }
 
