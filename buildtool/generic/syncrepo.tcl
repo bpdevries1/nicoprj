@@ -63,8 +63,17 @@ proc show_status {libfile} {
   switch  $status_ex {
     1-1-1 {
       # [2016-10-15 19:41] Git sets time to current time for changed files, so check contents first. (Idea behind this git action is that files should be compiled, make will be confused otherwise)
-      if {[contents_same? $libfile]} {
+      if {[contents_all_same? $libfile]} {
         set status "ok"
+      } elseif {[contents_same? $libfile $repofile]} {
+        set status "ok"
+        log info "$libfile: lib == repo, copy to base"
+        # [2016-11-26 14:19] file already exists, use -force
+        file copy -force $libfile $basefile
+      } elseif {[contents_same? $libfile $basefile]} {
+        set status "repo-new"
+      } elseif {[contents_same? $repofile $basefile]} {
+        set status "local-new"
       } else {
         # all exist, but different, check mtimes
         set status [mtime_status $libfile]  
@@ -104,7 +113,7 @@ proc show_status {libfile} {
 # @post: return 1 iff all 3 versions are the same by content (mtimes may differ)
 # @note: could set all mtimes to the oldest iff all files are the same, but this would
 #        be working against the git timestamps. Or maybe the newest, also strange.
-proc contents_same? {libfile} {
+proc contents_all_same? {libfile} {
   global repo_lib_dir
   set repofile [file join $repo_lib_dir $libfile]
   set basefile [file join [base_dir] $libfile]
@@ -115,6 +124,11 @@ proc contents_same? {libfile} {
     }
   }
   return 0
+}
+
+# pre: both files exist
+proc contents_same? {file1 file2} {
+  = [read_file $file1] [read_file $file2]
 }
 
 # @pre all 3 versions of libfile exists: local, repo and base
