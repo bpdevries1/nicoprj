@@ -1,3 +1,5 @@
+package require json
+
 require libio io
 
 task show_requests {Create a HTML report of all requests in script
@@ -47,18 +49,66 @@ proc show_request_html {hh stmt} {
 }
 
 # return list of url params
-# each element is a tuple: name, value
+# each element is a tuple: type,name,value,valuetype as dict
 # package uri can only provide full query string, so not really helpful here.
 proc url->params {url} {
   if {[regexp {^[^?]+\?(.*)$} $url z params]} {
     set res [list]
     foreach pair [split $params "&"] {
-      lappend res [split $pair "="]
+      # lappend res [split $pair "="]
+      lassign [split $pair "="] nm val
+      lappend res [dict create type namevalue name $nm value $val \
+                      valuetype [det_valuetype $val]]
     }
     return $res
   } else {
     return [list]
   }
+}
+
+proc det_valuetype {val} {
+  set base64_min_length 32;     # should test, maybe configurable.
+  if {$val == ""} {
+    return empty
+  }
+  if {[regexp {^\d+$} $val]} {
+    # integer, check if it could be an epoch time.
+    if {($val > "1400000000") && ($val < "3000000000")} {
+      return "epochsec: [clock format $val]"
+    }
+    if {($val > "1400000000000") && ($val < "3000000000000")} {
+      return "epochmsec: [clock format [string range $val 0 end-3]]"
+    }
+    return integer
+  }
+  foreach stringtype {boolean xdigit double} {
+    if {[string is $stringtype $val]} {
+      return $stringtype
+    }
+  }
+  # still here, so look deeper.
+  # json
+  if {![catch {json::json2dict $val}]} {
+    return json
+  }
+
+  # TODO: should check, not working yet, something with escaping backslashes and quotes.
+  if {[regexp TradingEntityReportedRegimes $val]} {
+    # log debug "Check jsonexi"
+    # breakpoint
+  }
+  
+  # base64 - val should have minimal length
+  if {[string length $val] >= $base64_min_length} {
+    if {[regexp {^[A-Za-z0-9+/]+$} $val]} {
+      return base64
+    }
+  }
+
+
+  # url and/or html encoded?
+
+  return string;              # default, if nothing else.
 }
 
 proc params->html {params} {
@@ -67,11 +117,24 @@ proc params->html {params} {
 
 # param is a tuple: name, value
 proc param->html {param} {
-  lassign $param name value
-  return [wordwrap_html "$name = $value"]
+  # lassign $param name value
+  dict_to_vars $param;          # type, name, value, valuetype
+  switch $type {
+    name {
+      return [wordwrap_html $name]  
+    }
+    namevalue {
+      return [wordwrap_html "$name = $value \[$valuetype\]"]    
+    }
+    else {
+      error "Unknown type: $type for: $param"
+    }
+  }  
 }
 
-# return list of tuples: name,value
+# return list of tuples: type,name,value,valuetype as dict
+# type: namevalue or name
+# valuetype: integer, hex, base64, json, ...
 # TODO: multi line string parameters, then possibly two quotes straight after each other.
 proc stmt_params {stmt} {
   set text ""
@@ -83,9 +146,12 @@ proc stmt_params {stmt} {
     set res [list]
     foreach el $l {
       if {[regexp {^(.+?)=(.*)$} $el z nm val]} {
-        lappend res [list $nm $val]
+        # lappend res [list $nm $val]
+        lappend res [dict create type namevalue name $nm value $val \
+                         valuetype [det_valuetype $val]]
       } else {
-        lappend res [list $el "{NO-VALUE}"]
+        # lappend res [list $el "{NO-VALUE}"]
+        lappend res [dict create type name name $el]
       }     
     }
     return $res
