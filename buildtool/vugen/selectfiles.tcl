@@ -91,6 +91,7 @@ proc script_filename {spec} {
   error "Unknown spec: $spec"
 }
 
+# return list of all action files in script dir.
 proc get_action_files {} {
   # set usr_file "[file tail [file normalize .]].usr"
   set usr_file [script_filename usr]
