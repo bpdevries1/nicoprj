@@ -39,6 +39,15 @@ proc stmt_det_url {stmt} {
   return ""
 }
 
+proc stmt_det_referer {stmt} {
+  foreach line [:lines $stmt] {
+    if {[regexp {\"(Referer)=(https?://([^/]+)/[^\"]+)\"} $line z z referer domain]} {
+      return $referer
+    }
+  }
+  return ""
+}
+
 proc det_domain {url} {
   if {[regexp {https?://([^/]+)/} $url z domain]} {
     return $domain
