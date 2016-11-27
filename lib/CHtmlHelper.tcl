@@ -157,6 +157,14 @@ namespace eval ::ndv {
         flush_channel
     }
 
+    # body is the last item of args
+    public method table {args} {
+      table_start {*}[lrange $args 0 end-1]
+      set body [lindex $args end]
+      uplevel $body
+      table_end
+    }
+    
     public method table_start {args} {
       # first set default values
       set lst_def [list cellspacing 2 cellpadding 5 border 0 class details]
