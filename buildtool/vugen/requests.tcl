@@ -24,7 +24,7 @@ proc show_requests_file {hh filename} {
   # $hh write "TODO"
   set stmts [read_source_statements $filename]
   $hh table {
-    $hh table_header Lines Url Referer
+    $hh table_header Lines Url Params Referer
     foreach stmt $stmts {
       if {[:type $stmt] == "main-req"} {
         show_request_html $hh $stmt
@@ -36,8 +36,10 @@ proc show_requests_file {hh filename} {
 proc show_request_html {hh stmt} {
   set url [stmt_det_url $stmt]
   set referer [stmt_det_referer $stmt]
+  set params [url->params $url]; # maybe also set from POST body.
   $hh table_row [lines->html [:lines $stmt]] \
-      [wordwrap_html $url] [wordwrap_html $referer]
+      [wordwrap_html $url] [params->html $params] \
+      [wordwrap_html $referer]
   #            "[:linenr_start $stmt]-[:linenr_end $stmt]"
   
 }
@@ -88,4 +90,27 @@ proc wordwrap_generic {str {wordwrap 60} {splitchars " "}} {
   return $result
 }
 
+# return list of url params
+# each element is a tuple: name, value
+# package uri can only provide full query string, so not really helpful here.
+proc url->params {url} {
+  if {[regexp {^[^?]+\?(.*)$} $url z params]} {
+    set res [list]
+    foreach pair [split $params "&"] {
+      lappend res [split $pair "="]
+    }
+    return $res
+  } else {
+    return [list]
+  }
+}
 
+proc params->html {params} {
+  join [map param->html $params] "<br/>"
+}
+
+# param is a tuple: name, value
+proc param->html {param} {
+  lassign $param name value
+  return "$name = $value"
+}
