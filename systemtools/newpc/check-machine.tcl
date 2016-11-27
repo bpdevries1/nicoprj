@@ -102,6 +102,7 @@ proc check_os_linux {opt} {
     dot graphviz
     eog eog
     curl curl
+    uuencode sharutils
   }
   #     bladibla bladibal
   check_apt_get $opt $tools_aptget
