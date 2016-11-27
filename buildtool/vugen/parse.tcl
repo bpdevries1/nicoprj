@@ -1,5 +1,8 @@
 # TODO: (ooit) use a real parser.
 # comment and empty lines should just be added to the current statement, so no special handling.
+# @result list of statements.
+#   statement: dict with keys: lines type linenr_start linenr_end
+#   type: eg main-req, for web_url etc.
 proc read_source_statements {filename} {
   set f [open $filename r]
   set linenr 0
@@ -237,3 +240,5 @@ proc line_type {line} {
   return other
 }
 
+# determine url within web_url etc statement.
+# stmt_det_url is in domains.tcl
