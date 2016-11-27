@@ -24,7 +24,7 @@ proc show_requests_file {hh filename} {
   # $hh write "TODO"
   set stmts [read_source_statements $filename]
   $hh table {
-    $hh table_header Lines Url Params Referer
+    $hh table_header Lines Parameters Url URL-Params Referer
     foreach stmt $stmts {
       if {[:type $stmt] == "main-req"} {
         show_request_html $hh $stmt
@@ -35,14 +35,77 @@ proc show_requests_file {hh filename} {
 
 proc show_request_html {hh stmt} {
   set url [stmt_det_url $stmt]
+  set stmt_params [stmt_params $stmt]
   set referer [stmt_det_referer $stmt]
-  set params [url->params $url]; # maybe also set from POST body.
+  set url_params [url->params $url]; # maybe also set from POST body.
   $hh table_row [lines->html [:lines $stmt]] \
-      [wordwrap_html $url] [params->html $params] \
+      [stmt_params->html $stmt_params] \
+      [wordwrap_html $url] [params->html $url_params] \
       [wordwrap_html $referer]
   #            "[:linenr_start $stmt]-[:linenr_end $stmt]"
   
 }
+
+# return list of url params
+# each element is a tuple: name, value
+# package uri can only provide full query string, so not really helpful here.
+proc url->params {url} {
+  if {[regexp {^[^?]+\?(.*)$} $url z params]} {
+    set res [list]
+    foreach pair [split $params "&"] {
+      lappend res [split $pair "="]
+    }
+    return $res
+  } else {
+    return [list]
+  }
+}
+
+proc params->html {params} {
+  join [map param->html $params] "<br/>"
+}
+
+# param is a tuple: name, value
+proc param->html {param} {
+  lassign $param name value
+  return [wordwrap_html "$name = $value"]
+}
+
+# return list of tuples: name,value
+# TODO: multi line string parameters, then possibly two quotes straight after each other.
+proc stmt_params {stmt} {
+  set text ""
+  foreach line [:lines $stmt] {
+    append text [string trim $line]
+  }
+  if {[regexp {^.+?\((.*)\);} $text z param_text]} {
+    set l [csv::split $param_text]
+    set res [list]
+    foreach el $l {
+      if {[regexp {^(.+?)=(.*)$} $el z nm val]} {
+        lappend res [list $nm $val]
+      } else {
+        lappend res [list $el "{NO-VALUE}"]
+      }     
+    }
+    return $res
+  } else {
+    error "Cannot parse statement text: $text"
+  }
+}
+
+
+# parameters: list of name,value pairs
+proc stmt_params->html {parameters} {
+  params->html $parameters;     # for now, they seem the same.
+}
+
+
+
+
+##########################################################
+# Library stuff, not specific to statements and URL's    #
+##########################################################
 
 # lines - list of lines
 # result lines, separated by <br/> elements
@@ -90,27 +153,3 @@ proc wordwrap_generic {str {wordwrap 60} {splitchars " "}} {
   return $result
 }
 
-# return list of url params
-# each element is a tuple: name, value
-# package uri can only provide full query string, so not really helpful here.
-proc url->params {url} {
-  if {[regexp {^[^?]+\?(.*)$} $url z params]} {
-    set res [list]
-    foreach pair [split $params "&"] {
-      lappend res [split $pair "="]
-    }
-    return $res
-  } else {
-    return [list]
-  }
-}
-
-proc params->html {params} {
-  join [map param->html $params] "<br/>"
-}
-
-# param is a tuple: name, value
-proc param->html {param} {
-  lassign $param name value
-  return "$name = $value"
-}
