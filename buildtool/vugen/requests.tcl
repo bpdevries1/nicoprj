@@ -88,8 +88,16 @@ proc det_valuetype {val} {
   }
   # still here, so look deeper.
   # json
+  if 0 {
+    [2016-11-29 12:36:21] now one body like below, not matched as json, something with backslashes and quotes.
+    Body = {\TradingEntities\:null,\RegimeEligibilities\:null,\P }
+    and much more.
+  }
   if {![catch {json::json2dict $val}]} {
-    return json
+    # also no catch with eg Snapshot = t8.inf [json], so check it is at least surrounded with braces
+    if {[regexp {^\{.*\}$} $val]} {
+      return json  
+    }
   }
 
   # TODO: should check, not working yet, something with escaping backslashes and quotes.
