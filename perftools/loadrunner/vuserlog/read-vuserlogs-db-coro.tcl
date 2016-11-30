@@ -82,7 +82,8 @@ proc def_parsers {} {
     # [2016-08-23 17:11:14] wil achter (ignored) ts aan het einde een ? in de regexp zetten, maar dan meegenomen in de vorige, en timestamp
     # aan iteration vastgeplakt.
     # functions.c(399): [2016-09-21 13:36:59.379] trans=RCC_IncorrectPass_newuser, user=3002867492, resptime=0.000, status=1, iteration=2 [Time:2016-09-21 13:36:59]
-    if {[regexp {: \[([0-9 :.-]+)\] (trans=.+?)( \[[Time0-9/ :-]+])} $line z ts fields]} {
+    # [2016-11-30 21:29] changed regexp again, now with literal iteration.
+    if {[regexp {: \[([0-9 :.-]+)\] (trans=.+?iteration=\d+)( \[[Time0-9/ :-]+])?} $line z ts fields]} {
       set fields [replace_decimal_comma $fields]
       set nvpairs [log2nvpairs $fields]; # possibly give whole line to log2nvpairs
       dict set nvpairs ts $ts
@@ -92,7 +93,7 @@ proc def_parsers {} {
       return [dict_rename $nvpairs {trans status} {transname trans_status}]
     } elseif {[regexp {trans=} $line]} {
       # [2016-09-22 09:50:38] nu 2 varianten, dus geen breakpoint.
-      # breakpoint
+      breakpoint
     } else {
       return ""
     }
