@@ -11,9 +11,13 @@
 task add_file {Add an extra file to prj
   Syntax: add_file <file> [<file> ..]
   Adds files (create if needed) to the extra files part of the project.
+  Can you glob wildcards (if shell does not expand those)
 } {
-  foreach filename $args {
-    add_file $filename
+  foreach filename_pat $args {
+    # -tails not needed if not using directory
+    foreach filename [glob $filename_pat] {
+      add_file $filename  
+    }
   }  
 }
 
@@ -72,14 +76,28 @@ task add_action {Add action to project
   Syntax: add_acion <action> [<action> ..]
   Add actions to project.
 } {
-  foreach action $args {
-    add_action $action
+  #breakpoint
+  foreach action_pat $args {
+    # -tails not needed if not using -directory
+    set files [glob -nocomplain $action_pat]
+    if {[count $files] > 0} {
+      foreach filename $files {
+        #breakpoint
+        add_action $filename
+      }
+    } else {
+      #breakpoint
+      add_action $action_pat;   # not really a pattern, so just add.
+    }
   }
 }
 
 # create $action.c and add to project: default.usp, <prj>.usr, ScriptUploadMetadata.xml
 proc add_action {action} {
   if {[regexp {^(.+)\.c$} $action z act]} {
+    if {![file exists $action]} {
+      error ".c file given, but does not exist: $action"
+    }
     set action $act
   }
   create_action_file $action
