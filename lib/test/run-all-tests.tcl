@@ -17,7 +17,7 @@ set_log_global info
 proc main {argv} {
   global log
   set options {
-    {root.arg "auto" "Root of files to test"}
+    {roots.arg "auto" ": separated list of roots to check for test_*.tcl files (use auto for this library)"}
     {full "Run full testsuite, including long running tests"}
     {manual "Also run tests defined as manual/interactive"}
     {coe "Continue on error"}
@@ -33,11 +33,16 @@ proc main {argv} {
 }
 
 proc test_all {opt} {
-  if {[:root $opt] == "auto"} {
-    set root [file normalize [file join [info script] .. .. ..]]  
-  } else {
-    set root [file normalize [:root $opt]]
+  foreach root [split [:roots $opt] ":"] {
+    if {$root == "auto"} {
+      test_root $opt [file normalize [file join [info script] .. .. ..]]  
+    } else {
+      test_root $opt [file normalize $root]  
+    }
   }
+}
+
+proc test_root {opt root} {
   log info "Running all tests in: $root"
   set lst [lsort [libio::glob_rec $root is_test]]
   set nfiles_with_errors 0
