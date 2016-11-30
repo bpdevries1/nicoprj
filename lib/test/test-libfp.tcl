@@ -202,7 +202,7 @@ testndv {+ 4 5 6} 15
 testndv {+ 1} 1
 testndv {+} 0
 
-# matches should not overlap, so this one returns 2 groups of 3 items each:
+# matches should not overlap, so this one returns 2 groups of 3 items each, flattened:
 testndv {regexp -all -indices -inline {.(.)(.)} "abcdefgh"} \
     {{0 2} {1 1} {2 2} {3 5} {4 4} {5 5}}
 
