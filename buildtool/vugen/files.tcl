@@ -177,6 +177,8 @@ proc split_action {action} {
   while {[gets $fi line] >= 0} {
     incr linenr
     if {[regexp {_start_transaction\(\"(.+)\"\);} $line z transname]} {
+      # [2016-11-30 12:35:02] this regsub not tested yet.
+      regsub -all -- {-} $transname "_" transname; # replace - by _, need for C function names.
       if {[file exists "${transname}.c"]} {
         log warn "transaction file already exists: ${transname}.c"
         # error "transaction file already exists: ${transname}.c"
