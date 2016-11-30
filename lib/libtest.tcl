@@ -13,7 +13,9 @@ namespace eval ::libtest {
   proc testndv {args} {
     global testndv_index
     incr testndv_index
-    test test-$testndv_index test-$testndv_index {*}$args
+    # test test-$testndv_index test-$testndv_index {*}$args
+    # [2016-11-30 21:14] with this one we can use vars at parent level.
+    uplevel tcltest::test test-$testndv_index test-$testndv_index $args
   }
 
 }
