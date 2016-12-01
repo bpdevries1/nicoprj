@@ -10,7 +10,6 @@
 # 2. A unique node for each application, so can have duplicates. This is more the actual way it works (without memoisation). Show order of application in nodes.
 
 # TODO
-# * Implement option 2 (use cmdline options)
 # * pass parent node to callee, to draw, seems less intrusive.
 # * Generalise, possibly using a special version of proc.
 #   - maybe need to use special 'apply' function, maybe the special procs can 'sense' they call another special proc or are called from it.
@@ -28,8 +27,13 @@ package require ndv
 use libfp
 
 proc main {argv} {
-  global fd
-
+  global fd opt
+  set options {
+    {unique "Draw unique node for each function application"}
+    {amount.arg "11" "Amount to split"}
+  }
+  set opt [getoptions argv $options ""] 
+  set amount [:amount $opt]
   if {[count $argv] == 0} {
     set amount 11
   } else {
@@ -62,8 +66,13 @@ proc count_change {amount} {
 
 # create a node for one functional application
 proc application_node {args} {
-  global fd
-  set node [puts_node_stmt $fd [join $args " "] shape rectangle]
+  global fd nodenr opt
+  incr nodenr
+  if {[:unique $opt]} {
+    set node [puts_node_stmt $fd "[join $args " "] \[$nodenr\]" shape rectangle]
+  } else {
+    set node [puts_node_stmt $fd [join $args " "] shape rectangle]
+  }
   return $node
 }
 
@@ -71,7 +80,8 @@ proc application_node {args} {
 # Monad could work here?
 proc cc {amount koc} {
   global fd
-  set node [cc_node $amount $koc]
+  # set node [cc_node $amount $koc]
+  set node [application_node $amount $koc]
   if {$amount == 0} {
     list 1 $node
   } elseif {($amount < 0) || ($koc == 0)} {
@@ -83,12 +93,6 @@ proc cc {amount koc} {
     cc_return $node $right
     list [expr [first $left] + [first $right]] $node
   }
-}
-
-proc cc_node {amount koc} {
-  global fd
-  set node [puts_node_stmt $fd "cc $amount $koc" shape rectangle]
-  return $node
 }
 
 # draw from caller to callee, otherwise graph upside down.
