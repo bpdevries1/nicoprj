@@ -127,6 +127,22 @@ proc set_web_settings {} {
     set ini [ini/set_param $ini WEB ProxyUseProxy 0]
     set ini [ini/set_param $ini WEB ProxyUseProxyServer 0]
     set ini [ini/set_param $ini General ContinueOnError 0]
+
+    # [2016-12-01 09:16:16] some settings for logging. Log more when creating script, don't check later.
+    set ini [ini/set_param $ini Log AutoLog 0]
+    set ini [ini/set_param $ini Log AutoLogBufferSize 1]
+    set ini [ini/set_param $ini Log IncludeEnvInfo 1]
+    set ini [ini/set_param $ini Log LogDetail 1]
+    set ini [ini/set_param $ini Log LogOptions LogExtended]
+    set ini [ini/set_param $ini Log MsgClassData 1]
+    set ini [ini/set_param $ini Log MsgClassParameters 1]
+    set ini [ini/set_param $ini Log PrintTimeStamp 1]
+
+    # [2016-12-01 14:00:01] and some more
+    set ini [ini/set_param $ini General AutomaticTransactions 0]
+    set ini [ini/set_param $ini General AutomaticTransactionsPerFunc 0]
+    set ini [ini/set_param $ini General FailTransOnErrorMsg 0]
+    set ini [ini/set_param $ini WEB SnapshotOnErrorActive 0]
   }
   ini/write [tempname default.cfg] $ini
   #puts "ini/write default.cfg done"

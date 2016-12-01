@@ -81,6 +81,7 @@ task param_domain {set domain param and replace within requests in action files
 }
 
 # add iteration parameter to the script, iff it does not exist yet (idempotent)
+# [2016-12-01 12:50:01] also set ref to .prm file in .usr file and add to ScriptUploadMetadata.xml
 proc add_param_iteration {} {
   # .usr: set ParameterFile=<script>.prm
   set prm_file [script_filename prm]
@@ -93,7 +94,7 @@ proc add_param_iteration {} {
   # add param in .prm file
   set ini [ini/read $prm_file 0]
   set header "parameter:iteration"
-  if {[:# [ini/lines $ini $header]] == 0} {
+  if {[count [ini/lines $ini $header]] == 0} {
     set lines "Format=\"%d\"
 OriginalValue=\"\"
 Type=\"CurrentIteration\"
