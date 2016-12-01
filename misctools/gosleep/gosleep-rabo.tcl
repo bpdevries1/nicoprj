@@ -9,15 +9,16 @@ set UNISON_BINARY {c:\PCC\Util\Unison\Unison-2.40.102-Text.exe}
 # TODO mss toch periodiek uitvoeren, niet elke dag?
 
 proc main {} {
-  zip_projects
+  # zip_projects ; # [2016-12-01 10:30:10] niet meer nodig, git (github/bitbucket)
   # zip_vugens
   if 1 {
-	  unison -auto projecten2h
-	  unison -auto -batch backup2g
-	  unison -auto -batch vugen2h
+	  unison -auto projecten2h ; # [2016-12-01 10:28:27] deze nog wel belangrijk.
+	  unison -auto sync-c-g ; # [2016-12-01 10:29:39] kijken hoe automatisch dit gaat.
+	  # unison -auto -batch backup2g ; # [2016-12-01 10:28:46] deze vervangen door sync-c-g (om daarna ook op laptop te zetten)
+	  # unison -auto -batch vugen2h ; # [2016-12-01 10:28:13] niet echt nodig, scripts in git/bitbucket.
 	  # zip_vugens ; # [2016-09-29 09:10:09] niet meer nodig.
-	  zip_alm_dbs
-	  zip_notes_org
+	  # zip_alm_dbs ; # [2016-12-01 10:27:45] voorlopig niet nodig, hier al tijd niets mee gedaan.
+	  # zip_notes_org ; # [2016-12-01 10:27:16] niet meer nodig, deze zitten in sync-c-g project.
 	  # cleanup
   }
 }
