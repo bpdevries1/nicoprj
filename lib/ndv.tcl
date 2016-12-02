@@ -109,5 +109,9 @@ source [file join [file dirname [info script]] popupmsg.tcl]
 # [2016-11-30 20:32] testing library
 source [file join [file dirname [info script]] libtest.tcl]
 
+# [2016-12-02 15:09] url encode/decode.
+# previously used in FB/genvugen
+source [file join [file dirname [info script]] liburl.tcl]
+
 # [2016-08-25 22:30] source_once is included at the top, so available here.
 ::ndv::source_once libmisc.tcl
