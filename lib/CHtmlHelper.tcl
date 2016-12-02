@@ -262,13 +262,13 @@ namespace eval ::ndv {
         flush_channel
     }
 
-    public method get_heading {level text} {
-      return "<h$level>$text</h$level>"
+    public method get_heading {level text {extra_attributes ""}} {
+      return "<h$level $extra_attributes>$text</h$level>"
     }
 
-    public method heading {level text} {
+    public method heading {level text {extra_attributes ""}} {
         # puts $channel "<h$level>$text</h$level>"
-        puts $channel [get_heading $level $text]
+        puts $channel [get_heading $level $text $extra_attributes]
         flush_channel
     }
 
