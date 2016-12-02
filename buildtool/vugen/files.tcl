@@ -44,9 +44,11 @@ proc add_file_usr {filename} {
 # add file to ScriptUploadMetadata.xml, also crlf endings
 # [2016-07-31 13:11] could be that this proc adds a newline once at the end of the file.
 # calling a second time will not add another newline, so still idempotent.
-proc add_file_metadata {filename} {
+# [2016-12-02 11:42] add optional second parameter for non-default metadata file, e.g. in saveas task.
+proc add_file_metadata {filename {metadatafile ScriptUploadMetadata.xml}} {
   # puts "add_file_meta: $filename"
-  set meta ScriptUploadMetadata.xml
+  # set meta ScriptUploadMetadata.xml
+  set meta $metadatafile
   set fi [open $meta r]
   #set fo [open [tempname $meta] w]
   #fconfigure $fo -translation crlf
