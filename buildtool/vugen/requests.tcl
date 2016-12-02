@@ -51,7 +51,7 @@ proc show_request_html {hh stmt} {
   set stmt_params [stmt_params $stmt]
   set referer [stmt_det_referer $stmt]
   set url_params [url->params $url]; # maybe also set from POST body.
-  $hh heading 2 $url
+  $hh heading 2 "Request - $url"
   paragraph $hh [lines_heading $stmt] [lines->html [:lines $stmt]]
   paragraph $hh "Statement Parameters" [stmt_params->html $stmt_params]
   paragraph $hh "URL Parameters" [params->html $url_params]
@@ -205,8 +205,9 @@ proc stmt_params->html {parameters} {
 # lines - list of lines
 # result lines, separated by <br/> elements
 proc lines->html {lines} {
-  set lines2 [map wordwrap_html $lines]
-  join $lines2 "<br/>"
+  # [2016-12-02 14:32] no word wrap for now.
+  # set lines2 [map wordwrap_html $lines]
+  join $lines "<br/>"
 }
 
 
