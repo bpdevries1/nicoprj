@@ -9,6 +9,7 @@ task check_lr_params {Check LR parameter settings
   foreach filename [glob -nocomplain *.prm] {
     check_lr_params_file $filename
   }
+  check_lr_params_generic;      # check if .prm file exists and if so, done correctly
 }
 
 proc check_lr_params_file {filename} {
@@ -28,6 +29,31 @@ proc check_lr_params_file {filename} {
     }
   }
   close $f
+}
+
+proc check_lr_params_generic {} {
+  foreach prm_file [glob -nocomplain *.prm] {
+    if {[script_filename prm] != $prm_file} {
+      # if {[file rootname $prm_file] != [file tail [pwd]]} {}
+      puts "WARNING: parameter file has wrong name: $prm_file"
+    } else {
+      # puts "Ok: $prm_file"
+      # check value in .usr file
+      set usr_file [script_filename usr]
+      set ini [ini/read $usr_file]
+      if {[ini/get_param $ini General ParameterFile] != $prm_file} {
+        puts "WARNING: $prm_file not set correctly in .usr file"
+      } else {
+        # puts "Ok: $usr_file"
+      }
+      # check occurs in metadata file
+      if {![metadata_includes? $prm_file]} {
+        puts "WARNING: $prm_file not included in ScriptUploadMetadata.xml"
+      } else {
+        # puts "Ok: metadata"
+      }
+    }
+  }
 }
 
 task add_param {Add var/param to script
@@ -81,7 +107,7 @@ task param_domain {set domain param and replace within requests in action files
 }
 
 # add iteration parameter to the script, iff it does not exist yet (idempotent)
-# [2016-12-01 12:50:01] also set ref to .prm file in .usr file and add to ScriptUploadMetadata.xml
+# [2016-12-01 12:50:01] also set ref to .prm file in .usr file and add to ScriptUploadMetadata.xml (was already implemented)
 proc add_param_iteration {} {
   # .usr: set ParameterFile=<script>.prm
   set prm_file [script_filename prm]

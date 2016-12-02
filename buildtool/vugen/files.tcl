@@ -71,6 +71,15 @@ proc add_file_metadata {filename} {
   commit_file $meta
 }
 
+# check if filename occurs in ScriptUploadMetadata.xml
+proc metadata_includes? {filename} {
+  if {[string first $filename [read_file ScriptUploadMetadata.xml]] >= 0} {
+    return 1
+  } else {
+    return 0
+  }
+}
+
 # add actions. Similar to add_file, but add to action part of hierarchy.
 task add_action {Add action to project
   Syntax: add_acion <action> [<action> ..]
