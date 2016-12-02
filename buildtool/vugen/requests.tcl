@@ -6,6 +6,7 @@ task show_requests {Create a HTML report of all requests in script
   Check if requests have dynamic items, which should be correlated.
 } {
   {clean "Delete DB and generated reports before starting"}
+  {all "Show info about all request (default: only requests where action is needed)"}
 } {
   #log info "show-requests: TODO"
   file mkdir requests
@@ -14,25 +15,35 @@ task show_requests {Create a HTML report of all requests in script
     set hh [ndv::CHtmlHelper::new]
     $hh set_channel $f
     $hh write_header "All requests in $script" 0
+    show_toc $hh
     foreach filename [get_action_files] {
-      show_requests_file $hh $filename
+      show_requests_file $opt $hh $filename
     }
   }
 }
 
+# TODO: when opt != all, only show relevant items.
+proc show_toc {hh} {
+  $hh heading 1 "Table of contents"
+  foreach filename [get_action_files] {
+    $hh href $filename "#$filename"
+    $hh br
+  }
+}
+
 # Add requests in filename to html (hh)
-proc show_requests_file {hh filename} {
+proc show_requests_file {opt hh filename} {
+  $hh anchor_name [file tail $filename]
   $hh heading 1 "Requests in [file tail $filename]"
   # $hh write "TODO"
   set stmts [read_source_statements $filename]
-  $hh table {
-    $hh table_header Lines Parameters Url URL-Params Referer
-    foreach stmt $stmts {
-      if {[:type $stmt] == "main-req"} {
-        show_request_html $hh $stmt
-      }
+
+  foreach stmt $stmts {
+    if {[:type $stmt] == "main-req"} {
+      show_request_html $hh $stmt
     }
   }
+
 }
 
 proc show_request_html {hh stmt} {
@@ -40,12 +51,21 @@ proc show_request_html {hh stmt} {
   set stmt_params [stmt_params $stmt]
   set referer [stmt_det_referer $stmt]
   set url_params [url->params $url]; # maybe also set from POST body.
-  $hh table_row [lines->html [:lines $stmt]] \
-      [stmt_params->html $stmt_params] \
-      [wordwrap_html $url] [params->html $url_params] \
-      [wordwrap_html $referer]
-  #            "[:linenr_start $stmt]-[:linenr_end $stmt]"
-  
+  $hh heading 2 $url
+  paragraph $hh [lines_heading $stmt] [lines->html [:lines $stmt]]
+  paragraph $hh "Statement Parameters" [stmt_params->html $stmt_params]
+  paragraph $hh "URL Parameters" [params->html $url_params]
+  paragraph $hh Url $url
+  paragraph $hh Referer $referer
+}
+
+proc paragraph {hh title content} {
+  $hh heading 3 "${title}:"
+  $hh text $content
+}
+
+proc lines_heading {stmt} {
+  return "Lines ([:linenr_start $stmt] to [:linenr_end $stmt])"
 }
 
 # return list of url params
@@ -66,6 +86,7 @@ proc url->params {url} {
   }
 }
 
+# TODO: several date/time formats.
 proc det_valuetype {val} {
   set base64_min_length 32;     # should test, maybe configurable.
   if {$val == ""} {
