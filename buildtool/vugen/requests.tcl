@@ -2,11 +2,15 @@ package require json
 
 require libio io
 
+use libfp
+use liburl
+
 task show_requests {Create a HTML report of all requests in script
   Check if requests have dynamic items, which should be correlated.
 } {
   {clean "Delete DB and generated reports before starting"}
   {all "Show info about all request (default: only requests where action is needed)"}
+  {treshold.arg "0.5" "Treshold above which requests are marked Red"}
 } {
   #log info "show-requests: TODO"
   file mkdir requests
@@ -15,7 +19,7 @@ task show_requests {Create a HTML report of all requests in script
     set hh [ndv::CHtmlHelper::new]
     $hh set_channel $f
     $hh write_header "All requests in $script" 0
-    show_toc $hh
+    show_toc $opt $hh
     foreach filename [get_action_files] {
       show_requests_file $opt $hh $filename
     }
@@ -23,16 +27,21 @@ task show_requests {Create a HTML report of all requests in script
 }
 
 # TODO: when opt != all, only show relevant items.
-proc show_toc {hh} {
+proc show_toc {opt hh} {
   $hh heading 1 "Table of contents"
   foreach filename [get_action_files] {
-    $hh href $filename "#$filename"
-    $hh br
+    if {[show_requests_file? $opt $filename]} {
+      $hh href $filename "#$filename"
+      $hh br
+    }
   }
 }
 
 # Add requests in filename to html (hh)
 proc show_requests_file {opt hh filename} {
+  if {![show_requests_file? $opt $filename]} {
+    return
+  }
   $hh anchor_name [file tail $filename]
   $hh heading 1 "Requests in [file tail $filename]"
   # $hh write "TODO"
@@ -40,23 +49,75 @@ proc show_requests_file {opt hh filename} {
 
   foreach stmt $stmts {
     if {[:type $stmt] == "main-req"} {
-      show_request_html $hh $stmt
+      show_request_html $opt $hh $stmt
     }
   }
 
 }
 
-proc show_request_html {hh stmt} {
+# return 1 iff requests in file should be shown, based on options and requests in file.
+proc show_requests_file? {opt filename} {
+  set stmts [read_source_statements $filename]
+  # set stmts2 [filter [fn x {[:type $x] == "main-req"}] $stmts]
+  set stmts2 [filter [fn x {= [:type $x] "main-req"}] $stmts]
+  set stmts3 [filter [fn x {show_request_html? $opt $x}] $stmts2]
+  # breakpoint
+  if {[count $stmts3] > 0} {
+    return 1
+  }
+  return 0
+}
+
+proc show_request_html {opt hh stmt} {
+  if {![show_request_html? $opt $stmt]} {
+    return
+  }
   set url [stmt_det_url $stmt]
   set stmt_params [stmt_params $stmt]
   set referer [stmt_det_referer $stmt]
   set url_params [url->params $url]; # maybe also set from POST body.
-  $hh heading 2 "Request - $url"
+  # $hh heading 2 "Request - $url" "class=Failure"
+  $hh heading 2 "Request - $url (corr=[det_request_correlation $stmt])" "class=[det_request_class $opt $stmt]"
   paragraph $hh [lines_heading $stmt] [lines->html [:lines $stmt]]
   paragraph $hh "Statement Parameters" [stmt_params->html $stmt_params]
   paragraph $hh "URL Parameters" [params->html $url_params]
   paragraph $hh Url $url
   paragraph $hh Referer $referer
+}
+
+# return 1 iff request should be shown with given opt(ions)
+proc show_request_html? {opt stmt} {
+  if {[:all $opt]} {
+    return 1
+  }
+  if {[det_request_correlation $stmt] >= [:treshold $opt]} {
+    return 1
+  }
+  return 0
+}
+
+# return either Failure or an empty string, based on the chance we need to do some
+# correlation and the treshold set in opt.
+proc det_request_class {opt stmt} {
+  if {[det_request_correlation $stmt] >= [:treshold $opt]} {
+    return Failure
+  } else {
+    return ""
+  }
+}
+
+# return value between 0 and 1 inclusive with chance we need to do some correlation
+# on this item
+proc det_request_correlation {stmt} {
+  # return 0.6
+  set url [stmt_det_url $stmt]
+  set ext [string tolower [file extension $url]]
+  # less chance that images need to be correlated, but this could depend on the script/project.
+  if {[lsearch -exact {.gif .jpg .jpeg .png .js .css} $ext] >= 0} {
+    return 0.1
+  }
+
+  return 0.9
 }
 
 proc paragraph {hh title content} {
@@ -68,77 +129,21 @@ proc lines_heading {stmt} {
   return "Lines ([:linenr_start $stmt] to [:linenr_end $stmt])"
 }
 
-# return list of url params
-# each element is a tuple: type,name,value,valuetype as dict
-# package uri can only provide full query string, so not really helpful here.
-proc url->params {url} {
-  if {[regexp {^[^?]+\?(.*)$} $url z params]} {
-    set res [list]
-    foreach pair [split $params "&"] {
-      # lappend res [split $pair "="]
-      lassign [split $pair "="] nm val
-      lappend res [dict create type namevalue name $nm value $val \
-                      valuetype [det_valuetype $val]]
+# return dict with keys protocol, domain, port, path, params.
+# params as in url->params
+proc url->parts {url} {
+  if {[regexp {^(.+?)://([^/]+)(:\d+)?/([^?]*)(.*)$} $url z protocol domain port path rest]} {
+    if {$rest != ""} {
+      set params [url->params $rest]; # could use $url as well.
+    } else {
+      set params [list]
     }
-    return $res
+    vars_to_dict protocol domain port path params
   } else {
-    return [list]
+    error "Could not parse URL: $url"
   }
 }
 
-# TODO: several date/time formats.
-proc det_valuetype {val} {
-  set base64_min_length 32;     # should test, maybe configurable.
-  if {$val == ""} {
-    return empty
-  }
-  if {[regexp {^\d+$} $val]} {
-    # integer, check if it could be an epoch time.
-    if {($val > "1400000000") && ($val < "3000000000")} {
-      return "epochsec: [clock format $val]"
-    }
-    if {($val > "1400000000000") && ($val < "3000000000000")} {
-      return "epochmsec: [clock format [string range $val 0 end-3]]"
-    }
-    return integer
-  }
-  foreach stringtype {boolean xdigit double} {
-    if {[string is $stringtype $val]} {
-      return $stringtype
-    }
-  }
-  # still here, so look deeper.
-  # json
-  if 0 {
-    [2016-11-29 12:36:21] now one body like below, not matched as json, something with backslashes and quotes.
-    Body = {\TradingEntities\:null,\RegimeEligibilities\:null,\P }
-    and much more.
-  }
-  if {![catch {json::json2dict $val}]} {
-    # also no catch with eg Snapshot = t8.inf [json], so check it is at least surrounded with braces
-    if {[regexp {^\{.*\}$} $val]} {
-      return json  
-    }
-  }
-
-  # TODO: should check, not working yet, something with escaping backslashes and quotes.
-  if {[regexp TradingEntityReportedRegimes $val]} {
-    # log debug "Check jsonexi"
-    # breakpoint
-  }
-  
-  # base64 - val should have minimal length
-  if {[string length $val] >= $base64_min_length} {
-    if {[regexp {^[A-Za-z0-9+/]+$} $val]} {
-      return base64
-    }
-  }
-
-
-  # url and/or html encoded?
-
-  return string;              # default, if nothing else.
-}
 
 proc params->html {params} {
   join [map param->html $params] "<br/>"
@@ -150,10 +155,12 @@ proc param->html {param} {
   dict_to_vars $param;          # type, name, value, valuetype
   switch $type {
     name {
-      return [wordwrap_html $name]  
+      # return [wordwrap_html $name]
+      return $name;             # no wordwrap for now
     }
     namevalue {
-      return [wordwrap_html "$name = $value \[$valuetype\]"]    
+      # return [wordwrap_html "$name = $value \[$valuetype\]"]
+      return "$name = $value \[$valuetype\]"
     }
     else {
       error "Unknown type: $type for: $param"
