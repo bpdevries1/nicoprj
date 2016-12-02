@@ -1,13 +1,13 @@
 # procs for reading and writing (similiar to windows) .ini files, as used in Loadrunner.
 namespace eval ::libinifile {
   # namespace export read write add set_lines add_no_dups headers lines exists set_param get_param
-  namespace export read write add set_lines add_no_dups headers lines exists set_param get_param
+  namespace export read create write add set_lines add_no_dups headers lines exists set_param get_param
 
 # return a list, where each item is a dict: header and lines. Lines is a list.
 proc read {filename {fail_on_file_not_found 1}} {
-  set ini {}
+  set ini [list]
   set header ""
-  set lines {}
+  set lines [list]
   if {[file exists $filename]} {
     set f [open $filename r]
     while {[gets $f line] >= 0} {
@@ -16,7 +16,7 @@ proc read {filename {fail_on_file_not_found 1}} {
           lappend ini [dict create header $header lines $lines]
         }
         set header $h
-        set lines {}
+        set lines [list]
       } else {
         lappend lines $line
       }
@@ -33,6 +33,11 @@ proc read {filename {fail_on_file_not_found 1}} {
     }
   }
   return $ini
+}
+
+# create an empty ini 'object'
+proc create {} {
+  return [list]
 }
 
 # also make backup
