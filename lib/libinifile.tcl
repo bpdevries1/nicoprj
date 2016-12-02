@@ -130,6 +130,7 @@ proc exists {ini header line} {
 }
 
 # set value for name under header, create iff new.
+# return new ini 'object'
 proc set_param {ini header name value} {
   set lines [lines $ini $header]
   set ndx [lsearch -regexp $lines "^$name\\s*="]
