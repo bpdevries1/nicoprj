@@ -15,15 +15,21 @@ task show_requests {Create a HTML report of all requests in script
   #log info "show-requests: TODO"
   file mkdir requests
   set script [file tail [file normalize .]]
+  corr_ini_init
   io/with_file f [open requests/requests.html w] {
     set hh [ndv::CHtmlHelper::new]
     $hh set_channel $f
-    $hh write_header "All requests in $script" 0
+    if {[:all $opt]} {
+      $hh write_header "All requests in $script" 0  
+    } else {
+      $hh write_header "Selected requests in $script" 0
+    }
     show_toc $opt $hh
     foreach filename [get_action_files] {
       show_requests_file $opt $hh $filename
     }
   }
+  corr_ini_write
 }
 
 # TODO: when opt != all, only show relevant items.
@@ -116,8 +122,71 @@ proc det_request_correlation {stmt} {
   if {[lsearch -exact {.gif .jpg .jpeg .png .js .css} $ext] >= 0} {
     return 0.1
   }
+  set parts [url->parts $url]
 
+  # TODO: correlation value is sum of three things: corr(url), corr(url-get-params), corr(url-post-params). For now only the url-path part.
+
+  return [expr [det_path_correlation [:path $parts]] + \
+              [det_get_params_correlation [:params $parts]] + \
+             [det_post_params_correlation [stmt_params $stmt]]]
+  
   return 0.9
+}
+
+# Request - https://{domain}/RRS2/Content/Files/UpdatUtiUsiTemplate.xlsx (corr=2.375)
+proc det_path_correlation {path} {
+  # return 0.9
+  # expr 1.0 * [max {*}[map [fn x {string length $x}] [split $path "/"]]] / 40
+
+  # / 8 so max consec of 4 will result in 0.5.
+  set res [expr 1.0 * [max {*}[map max_consecutive_chargroup [split $path "/"]]] / 8]
+  if {$res > 2.0} {
+    log warn "res: $res"
+    breakpoint
+  }
+  return $res
+}
+
+# return max number of consecutive characters of the same group.
+# group is hardcoded here as: vowels, consonants, digits and other characters.
+proc max_consecutive_chargroup {str} {
+  set max 0
+  set i 0
+  set prev_group ""
+  foreach char [split $str ""] {
+    set group [char_group $char]
+    # puts "group of $char: $group"
+    if {$group == $prev_group} {
+      incr i
+    } else {
+      if {$i > $max} {set max $i}
+      set i 1
+      set prev_group $group
+    }
+  }
+  return $max
+}
+
+proc char_group {char} {
+  if {[string first [string tolower $char] "aeiouy"] >= 0} {
+    return "vowel"
+  } elseif {[regexp {[a-z]} [string tolower $char]]} {
+    return "consonant"
+  } elseif {[regexp {[0-9]} $char]} {
+    return "digit"
+  } else {
+    return "other"
+  }
+}
+
+# params: GET parameters
+proc det_get_params_correlation {params} {
+  return 0;                     # TODO: for now
+}
+
+# params: statement parameters, including POST parameters (after ITEMDATA element)
+proc det_post_params_correlation {params} {
+  return 0;                     # TODO: for now.
 }
 
 proc paragraph {hh title content} {
@@ -239,5 +308,35 @@ proc wordwrap_generic {str {wordwrap 60} {splitchars " "}} {
   }
   lappend result $curr_line
   return $result
+}
+
+################################################################
+# set of functions for handling ignore items for correlations. #
+################################################################
+
+proc corr_ini_init {} {
+  global corr_ini
+  set corr_ini [ini/read correlations.ini 0]
+}
+
+proc corr_ini_write {} {
+  global corr_ini
+  ini/write correlations.ini $corr_ini
+}
+
+# add a request or parameter to correlations list/ini
+proc corr_ini_add {type name notes} {
+  global corr_ini
+  set header "${type}-${name}"
+  set corr_ini [ini/set_param $ini $header ignore 0]
+  set corr_ini [ini/set_param $ini $header notes $notes]
+  set corr_ini [ini/set_param $ini $header reason ""]; # to be filled in by user.
+}
+
+# check if request or parameter is marked as ignore in list/ini
+proc corr_ini_ignore? {type name} {
+  global corr_ini
+  set header "${type}-${name}"
+  ini/get_param $ini $header ignore 0
 }
 
