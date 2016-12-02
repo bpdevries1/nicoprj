@@ -108,12 +108,13 @@ task param_domain {set domain param and replace within requests in action files
 
 # add iteration parameter to the script, iff it does not exist yet (idempotent)
 # [2016-12-01 12:50:01] also set ref to .prm file in .usr file and add to ScriptUploadMetadata.xml (was already implemented)
+# [2016-12-02 11:38] Bugfix - result of ini_set_param not used.
 proc add_param_iteration {} {
   # .usr: set ParameterFile=<script>.prm
   set prm_file [script_filename prm]
   set usr_file [script_filename usr]
   set ini [ini/read $usr_file]
-  ini/set_param $ini General ParameterFile $prm_file
+  set ini [ini/set_param $ini General ParameterFile $prm_file]
   ini/write [tempname $usr_file] $ini
   commit_file $usr_file
   
