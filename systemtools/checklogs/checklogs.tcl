@@ -35,6 +35,10 @@ proc check_all_logs {opt} {
   if {[count $warnings] > 0} {
     set warn_msg "WARNING: check logs: [count $warnings] log file(s) with errors:\n[join $warnings "\n"]"
     log warn $warn_msg
+    log warn "The warnings:"
+    foreach warn $warnings {
+      log warn $warn
+    }
     if {![:nopopup $opt]} {
       popup_warning $warn_msg
     }
