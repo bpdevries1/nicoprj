@@ -7,7 +7,7 @@ namespace eval ::libtest {
   # tcltest procedures should be available within libtest.
   namespace import -force ::tcltest::*
   
-  namespace export testndv
+  namespace export testndv cleanupTests
 
   # [2016-07-22 10:13] Two arguments to the test function should be enough: expression and expected result.
   proc testndv {args} {
@@ -18,4 +18,8 @@ namespace eval ::libtest {
     uplevel tcltest::test test-$testndv_index test-$testndv_index $args
   }
 
+  proc cleanupTests {} {
+    tcltest::cleanupTests
+  }
+  
 }
