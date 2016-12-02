@@ -274,7 +274,7 @@ namespace eval ::ndv {
 
     public method line {text} {
         # puts $channel "$text<br>"
-        text "$text<br>"
+        text "$text<br/>"
         flush_channel
     }
     
@@ -283,7 +283,11 @@ namespace eval ::ndv {
         flush_channel
     }
     
-
+    public method br {} {
+      puts $channel "<br/>"
+      flush_channel
+    }
+    
     public method anchor_name {name} {
         puts $channel "<a name=\"$name\"/>"
         flush_channel
