@@ -129,21 +129,6 @@ proc lines_heading {stmt} {
   return "Lines ([:linenr_start $stmt] to [:linenr_end $stmt])"
 }
 
-# return dict with keys protocol, domain, port, path, params.
-# params as in url->params
-proc url->parts {url} {
-  if {[regexp {^(.+?)://([^/]+)(:\d+)?/([^?]*)(.*)$} $url z protocol domain port path rest]} {
-    if {$rest != ""} {
-      set params [url->params $rest]; # could use $url as well.
-    } else {
-      set params [list]
-    }
-    vars_to_dict protocol domain port path params
-  } else {
-    error "Could not parse URL: $url"
-  }
-}
-
 
 proc params->html {params} {
   join [map param->html $params] "<br/>"
