@@ -50,6 +50,21 @@ proc url-decode str {
     return [subst -novar -nocommand $str]
 }
 
+# return dict with keys protocol, domain, port, path, params.
+# params as in url->params
+proc url->parts {url} {
+  if {[regexp {^(.+?)://([^/:]+?)(:(\d+))?/([^?]*)(.*)$} $url z protocol domain z port path rest]} {
+    if {$rest != ""} {
+      set params [url->params $rest]; # could use $url as well.
+    } else {
+      set params [list]
+    }
+    vars_to_dict protocol domain port path params
+  } else {
+    error "Could not parse URL: $url"
+  }
+}
+
 # return list of url params
 # each element is a tuple: type,name,value,valuetype as dict
 # package uri can only provide full query string, so not really helpful here.
