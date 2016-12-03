@@ -1,10 +1,4 @@
 # Misc functions, move to other files when patterns/groups emerge.
-
-# from tclhelp in lreplace.
-# counter-proc to lappend.
-proc lremove {listVariable value} {
-  upvar 1 $listVariable var
-  set idx [lsearch -exact $var $value]
-  set var [lreplace $var $idx $idx]
-}
+# [2016-12-03 20:58] This does some not seem to work, made liblist.tcl with this
+# function too, so remove 'lremove' here.
 

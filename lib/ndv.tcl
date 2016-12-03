@@ -113,5 +113,8 @@ source [file join [file dirname [info script]] libtest.tcl]
 # previously used in FB/genvugen
 source [file join [file dirname [info script]] liburl.tcl]
 
+# [2016-12-03 20:55] added.
+source [file join [file dirname [info script]] liblist.tcl]
+
 # [2016-08-25 22:30] source_once is included at the top, so available here.
 ::ndv::source_once libmisc.tcl
