@@ -328,9 +328,9 @@ proc corr_ini_write {} {
 proc corr_ini_add {type name notes} {
   global corr_ini
   set header "${type}-${name}"
-  set corr_ini [ini/set_param $ini $header ignore 0]
-  set corr_ini [ini/set_param $ini $header notes $notes]
-  set corr_ini [ini/set_param $ini $header reason ""]; # to be filled in by user.
+  set corr_ini [ini/set_param $corr_ini $header ignore 0]
+  set corr_ini [ini/set_param $corr_ini $header notes $notes]
+  set corr_ini [ini/set_param $corr_ini $header reason ""]; # to be filled in by user.
 }
 
 # check if request or parameter is marked as ignore in list/ini
