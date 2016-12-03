@@ -394,7 +394,7 @@ proc reduce {args} {
 # similar to non-official clojure version, only have not-any?, some and some?,
 # which are all slightly different.
 proc any? {f lst} {
-  > [filter $f $lst] 0
+  > [count [filter $f $lst]] 0
 }
 
 # lib function, could also use struct::list repeat

@@ -276,6 +276,7 @@ proc even? {x} {
 }
 testndv {any? even? {1 2 3}} 1
 testndv {any? even? {1 3 5}} 0
+testndv {any? [fn x {= 0 [expr $x % 2]}] {1 2 3}} 1
 
 
 cleanupTests
