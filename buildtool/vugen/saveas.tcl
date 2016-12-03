@@ -5,7 +5,7 @@ task saveas {Save a newly recorded script to another directory
   Syntax: saveas <new-prj-dir} {
 } {
   lassign $args target
-  # puts "TODO: save-as: $target"
+  # puts "FIXME: save-as: $target"
   if {$target == ""} {
     puts "Syntax: saveas <new-prj-dir>"
     return

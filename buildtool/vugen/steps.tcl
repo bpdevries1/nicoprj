@@ -23,5 +23,5 @@ proc get_ref_file {filename} {
   }
 }
 
-# TODO: use this for generating a (HTML) table with srcfile/srcline, stepname, stepnr (t<xx) and ref to main (html,js,json) file and maybe supporting file.
+# FIXME: use this for generating a (HTML) table with srcfile/srcline, stepname, stepnr (t<xx) and ref to main (html,js,json) file and maybe supporting file.
 

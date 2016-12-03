@@ -1,6 +1,6 @@
 # project groups - groups/sets of projects/scripts
 
-# TODO: maybe support recursive project groups.
+# FIXME: maybe support recursive project groups.
 
 # project functions, set and setcurrent
 task prjgroup {Define and use project groups
@@ -43,8 +43,8 @@ proc handle_prjgroup_dir {dir tname trest} {
   # [2016-07-30 15:30] not sure if source is needed here.
   source [config_tcl_name]
   set as_prjgroup 1
-  # TODO: check of task wel in project scope gedaan kan/mag worden. put iig niet.
-  # TODO: zou generieker opgelost moeten worden.
+  # FIXME: check of task wel in project scope gedaan kan/mag worden. put iig niet.
+  # FIXME: zou generieker opgelost moeten worden.
   if {$tname == "put"} {
     puts "Put action cannot be done in project scope, only script scope"
     exit 1

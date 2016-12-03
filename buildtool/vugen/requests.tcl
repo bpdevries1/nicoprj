@@ -5,7 +5,7 @@ require libio io
 use libfp
 use liburl
 
-# TODO: tresholds etc should be settable per script/project.
+# FIXME: tresholds etc should be settable per script/project.
 
 task show_requests {Create a HTML report of all requests in script
   Check if requests have dynamic items, which should be correlated.
@@ -14,7 +14,7 @@ task show_requests {Create a HTML report of all requests in script
   {all "Show info about all request (default: only requests where action is needed)"}
   {treshold.arg "0.9" "Treshold above which requests are marked Red"}
 } {
-  #log info "show-requests: TODO"
+  #log info "show-requests: FIXME"
   file mkdir requests
   set script [file tail [file normalize .]]
   corr_ini_init
@@ -100,12 +100,12 @@ proc show_request_html {opt hh stmt} {
 }
 
 # return 1 iff request should be shown with given opt(ions)
-# TODO: check correlations file too.
+# FIXME: check correlations file too.
 proc show_request_html? {opt stmt} {
   if {[:all $opt]} {
     return 1
   }
-  # TODO: only ignore if should be ignored on all accounts.
+  # FIXME: only ignore if should be ignored on all accounts.
   # eg. if path can be ignored, but params not, stmt should still be displayed!
   if {[stmt_ignore? $stmt]} {
     return 0
@@ -117,7 +117,7 @@ proc show_request_html? {opt stmt} {
   return 0
 }
 
-# TODO: also check GET and POST params.
+# FIXME: also check GET and POST params.
 proc stmt_ignore? {stmt} {
   # Use Clojure threading operator. Both statements below are equivalent.
   # corr_ini_ignore? path [:path [url->parts [stmt->url $stmt]]]
@@ -155,7 +155,7 @@ proc det_request_correlation {stmt} {
   }
   set parts [url->parts $url]
 
-  # TODO: correlation value is sum of three things: corr(url), corr(url-get-params), corr(url-post-params). For now only the url-path part.
+  # FIXME: correlation value is sum of three things: corr(url), corr(url-get-params), corr(url-post-params). For now only the url-path part.
 
   return [expr [det_path_correlation [:path $parts]] + \
               [det_get_params_correlation [:params $parts]] + \
@@ -212,12 +212,12 @@ proc char_group {char} {
 
 # params: GET parameters
 proc det_get_params_correlation {params} {
-  return 0;                     # TODO: for now
+  return 0;                     # FIXME: for now
 }
 
 # params: statement parameters, including POST parameters (after ITEMDATA element)
 proc det_post_params_correlation {params} {
-  return 0;                     # TODO: for now.
+  return 0;                     # FIXME: for now.
 }
 
 proc paragraph {hh title content} {
@@ -256,7 +256,7 @@ proc param->html {param} {
 # return list of tuples: type,name,value,valuetype as dict
 # type: namevalue or name
 # valuetype: integer, hex, base64, json, ...
-# TODO: multi line string parameters, then possibly two quotes straight after each other.
+# FIXME: multi line string parameters, then possibly two quotes straight after each other.
 proc stmt_params {stmt} {
   set text ""
   foreach line [:lines $stmt] {
@@ -316,7 +316,7 @@ proc wordwrap_html {str {line_length 60} {splitchars " /&?"}} {
 
 # algoritme van http://en.wikipedia.org/wiki/Word_wrap
 # return list of lines as split up.
-# TODO: deze werkt niet, splitchars raken kwijt.
+# FIXME: deze werkt niet, splitchars raken kwijt.
 proc wordwrap_generic {str {wordwrap 60} {splitchars " "}} {
   # global wordwrap
   if {$wordwrap == ""} {

@@ -9,7 +9,7 @@ use libmacro
 
 # [2016-08-16 20:09] In general, procs here should not be dependent on configfile/var existence. Always check, and do as much as possible without config settings.
 
-# TODO: add type parameter, and only write stuff to config for certain types, eg lr_include_dir.
+# FIXME: add type parameter, and only write stuff to config for certain types, eg lr_include_dir.
 task init {Initialise project/script
   Also update config to latest version.  
 } {{update "Update project/script from old config version to latest"}
@@ -102,7 +102,7 @@ proc version_file {} {
   file join [config_dir] .configversion
 }
 
-# TODO: also update .gitignore with .base and _orig paths, but should be in hook for git package.
+# FIXME: also update .gitignore with .base and _orig paths, but should be in hook for git package.
 # [2016-08-16 20:13] Independent from config/vars
 proc init_from_scratch {} {
   set cfgdir [config_dir]
@@ -133,7 +133,7 @@ proc init_update_from_1 {} {
 
 # [2016-08-16 20:14] config/vars independent.
 proc init_update_from_2 {} {
-  # TODO: read config, add env parts
+  # FIXME: read config, add env parts
   set config_name [config_tcl_name]
   set text [read_file $config_name]
   set config_v3 [get_config_v3]
@@ -149,7 +149,7 @@ proc make_config_tcl {} {
   set config_name [config_tcl_name]
   if {[file exists $config_name]} {
     puts "Config file already exists: $config_name"
-    # TODO: ? check if config is complete?
+    # FIXME: ? check if config is complete?
     return
   }
   set now [dt/now]
@@ -181,7 +181,7 @@ proc make_config_env_tcl {} {
   }
 }
 
-# TODO: need code formatting tool.
+# FIXME: need code formatting tool.
 # simple code format by counting braces per line might work.
 # [2016-08-16 20:23] config/vars independent.
 proc get_config_v3 {} {
@@ -225,7 +225,7 @@ proc det_lr_include_dir {} {
 }
 
 # Look for loadrunner in both 'Program Files (x86)' and 'Program Files' on all drives.
-# [2016-11-15 12:57:57] TODO: maybe exclude network drives if this is too slow.
+# [2016-11-15 12:57:57] FIXME: maybe exclude network drives if this is too slow.
 # [2016-11-15 13:25:34] drive Y: too slow now. For now hardcoded to only check c: and d:
 proc find_loadrunner_dirs {} {
   set res [list]

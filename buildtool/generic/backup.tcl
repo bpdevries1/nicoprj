@@ -112,7 +112,7 @@ task backup {Backup complete project (source files) to .orig dir
 } {
   global _origdir
   file mkdir $_origdir
-  # TODO: files to backup dependent on type of project!
+  # FIXME: files to backup dependent on type of project!
   foreach filename [get_project_files] {
     set backupname [file join $_origdir $filename]
     if {[file exists $filename]} {
@@ -150,7 +150,7 @@ proc mark_backup {tname trest} {
   }
 }
 
-# TODO: should check for dir mtime instead of name, sometimes a functional rename is done,
+# FIXME: should check for dir mtime instead of name, sometimes a functional rename is done,
 # and this _will_ mess things up.
 task undo {undo last task
   Undo the last task which resulted in a backup directory with files.

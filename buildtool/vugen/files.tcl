@@ -5,7 +5,7 @@
 
 # args: 1 or more files to add.
 
-# TODO: task_add maken die ofwel add_file ofwel add_action aanroept.
+# FIXME: task_add maken die ofwel add_file ofwel add_action aanroept.
 # dit dan obv name: als deze een extensie heeft (.h of .c) dan is het file, anders action.
 
 task add_file {Add an extra file to prj

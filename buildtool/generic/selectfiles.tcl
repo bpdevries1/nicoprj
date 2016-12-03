@@ -1,6 +1,6 @@
 # Generic version of select files.
 
-# TODO: remove here, specific for VuGen
+# FIXME: remove here, specific for VuGen
 proc get_repo_libs_old {} {
   global repo_lib_dir
   glob -nocomplain -tails -directory $repo_lib_dir -type f *

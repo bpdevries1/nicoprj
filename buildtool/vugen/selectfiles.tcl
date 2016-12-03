@@ -126,7 +126,7 @@ proc get_project_files {} {
 }
 
 # get all non-hidden files in current directory matching pattern.
-# TODO: remove this one, same as generic one.
+# FIXME: remove this one, same as generic one.
 proc get_pattern_files_old {pat} {
   glob -nocomplain -type f $pat
 }

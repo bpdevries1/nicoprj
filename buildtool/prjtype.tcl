@@ -7,7 +7,7 @@ task set_prjtype {Set type of project
 } {
   lassign $args prjtype
   if {$prjtype == ""} {
-    puts "TODO: project types"
+    puts "FIXME: project types"
     # check subdirs. For now, each subdir is a project type.
     return
   }

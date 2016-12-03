@@ -6,7 +6,7 @@ task vugen_task {Example task for prjtype
   puts "vugen_task!"
 }
 
-# TODO: each prjtype subdir should have a hooks.tcl file with things like:
+# FIXME: each prjtype subdir should have a hooks.tcl file with things like:
 # get_source_files
 # get_config_files
 # get_lib_files  - for diff/test/put/get
