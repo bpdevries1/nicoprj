@@ -3,7 +3,7 @@ package provide ndv 0.1.1
 # TODO: maybe det_valuetype is too specific, and should be extracted from url->params.
 
 namespace eval ::liburl {
-  namespace export url-encode url-decode url->parts url->params det_valuetype
+  namespace export url-encode url-decode url->parts url->params url->domain det_valuetype
 
 # source: http://wiki.tcl.tk/14144
 proc init-url-encode {} {
@@ -52,6 +52,7 @@ proc url-decode str {
 
 # return dict with keys protocol, domain, port, path, params.
 # params as in url->params
+# return empty dict iff url cannot be parsed.
 proc url->parts {url} {
   if {[regexp {^(.+?)://([^/:]+?)(:(\d+))?/([^?]*)(.*)$} $url z protocol domain z port path rest]} {
     if {$rest != ""} {
@@ -61,8 +62,15 @@ proc url->parts {url} {
     }
     vars_to_dict protocol domain port path params
   } else {
-    error "Could not parse URL: $url"
+    # error "Could not parse URL: ${url}."
+    log warn "Could not parse URL: ${url}."
+    dict create;                # empty dict
   }
+}
+
+# some syntactic sugar on url->parts:
+proc url->domain {url} {
+  :domain [url->parts $url]
 }
 
 # return list of url params
