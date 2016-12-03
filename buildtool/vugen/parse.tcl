@@ -152,10 +152,14 @@ proc group_statements {statements} {
     # [2016-07-27 22:02] This line below supposedly gave error before:
     if {[regexp {^main} [:type $stmt]]} {
       # log debug "tp=main, create new group and put in res"
-      # TODO: maybe determining domain should be a separate step.
-      set url [stmt->url $stmt]
-      lappend res [dict create statements $stmts domain [url/url->domain $url]\
-                       url $url]
+      if {[:type $stmt] == "main-req"} {
+        set url [stmt->url $stmt]
+        lappend res [dict create statements $stmts domain [url/url->domain $url]\
+                         url $url]
+      } else {
+        # [2016-12-03 20:36] nog a main-request, so no url and domain here.
+        lappend res [dict create statements $stmts]
+      }
       set stmts {}
     } else {
       # nothing
