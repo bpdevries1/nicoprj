@@ -270,5 +270,13 @@ testndv {-> 12} 12
 testndv {-> 1234 [fn x {string length $x}]} 4
 testndv {-> 1234 [fn x {string length $x}] [fn x {+ $x $x}]} 8
 
+# any? operator
+proc even? {x} {
+  = 0 [expr $x % 2]
+}
+testndv {any? even? {1 2 3}} 1
+testndv {any? even? {1 3 5}} 0
+
+
 cleanupTests
 

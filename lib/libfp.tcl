@@ -25,7 +25,7 @@ namespace path {::tcl::mathop}
 
 namespace eval ::libfp {
   namespace export = != and or ifp seq empty? cond_1 cond not not= \
-      str identity fn comp lstride regsub_fn map filter reduce repeat range \
+      str identity fn comp lstride regsub_fn map filter any? reduce repeat range \
       lambda_to_proc proc_to_lambda find_proc first second count rest ->
 
   # namespace path {::tcl::mathop ::tcl::mathfunc}
@@ -348,7 +348,7 @@ proc map {args} {
   }
 }
 
-# filter is vergelijkbaar aan map, toch soort van dubbele code, voorlopig ok.
+# filter is vergelijkbaar met map, toch soort van dubbele code, voorlopig ok.
 proc filter {args} {
   # puts "filter called: $args"
   if {[llength $args] == 2} {
@@ -388,6 +388,13 @@ proc reduce {args} {
   } else {
     error "!= 2 args not supported: $args"
   }
+}
+
+# return 1 iff [$f $el] returns != 0 for at least one el in lst
+# similar to non-official clojure version, only have not-any?, some and some?,
+# which are all slightly different.
+proc any? {f lst} {
+  > [filter $f $lst] 0
 }
 
 # lib function, could also use struct::list repeat
