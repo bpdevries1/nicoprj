@@ -26,7 +26,7 @@ namespace path {::tcl::mathop}
 namespace eval ::libfp {
   namespace export = != and or ifp seq empty? cond_1 cond not not= \
       str identity fn comp lstride regsub_fn map filter reduce repeat range \
-      lambda_to_proc proc_to_lambda find_proc first second count rest
+      lambda_to_proc proc_to_lambda find_proc first second count rest ->
 
   # namespace path {::tcl::mathop ::tcl::mathfunc}
   namespace path {::tcl::mathop}
@@ -408,6 +408,16 @@ proc range {start end {step 1}} {
     lappend res $i 
   }
   return $res
+}
+
+# Threading operators, start very simple, only functions with one argument.
+proc -> {startval args} {
+  set val $startval
+  foreach f $args {
+    # maybe use uplevel?
+    set val [$f $val]
+  }
+  return $val
 }
 
 

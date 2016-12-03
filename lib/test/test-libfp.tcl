@@ -19,8 +19,10 @@
 
 package require ndv
 
-package require tcltest
-namespace import -force ::tcltest::*
+#package require tcltest
+#namespace import -force ::tcltest::*
+
+use libtest
 
 source [file join [file dirname [info script]] .. libns.tcl]
 
@@ -35,59 +37,67 @@ use libfp ; # should be idempotent.
 
 ## test easy, basic functions
 # test add-1 {simple addition} {add 3 4} 7
-test eq-1 {equals 1} {= 1 1} 1
-test eq-2 {equals 2} {= abc abc} 1
-test eq-3 {equals 3} {= {abc def} [list abc def]} 1
+tcltest::test eq-1 {equals 1} {= 1 1} 1
+tcltest::test eq-2 {equals 2} {= abc abc} 1
+tcltest::test eq-3 {equals 3} {= {abc def} [list abc def]} 1
 
-test eq-4 {equals 4} {= 1 2} 0
-test eq-5 {equals 5} {= abc abcd} 0
-test eq-6 {equals 6} {= {abc def ghi} [list abc def]} 0
+tcltest::test eq-4 {equals 4} {= 1 2} 0
+tcltest::test eq-5 {equals 5} {= abc abcd} 0
+tcltest::test eq-6 {equals 6} {= {abc def ghi} [list abc def]} 0
 
 # should = handle or less than 2 arguments?
-test eq-7 {equals 7} -body {=} -returnCodes error -result {wrong # args: should be "= a b"}
-test eq-8 {equals 8} -body {= 1} -returnCodes error -result {wrong # args: should be "= a b"}
-test eq-9 {equals 9} -body {= 1 1 1} -returnCodes error -result {wrong # args: should be "= a b"}
-test eq-10 {equals 10} -body {= 1 1 13} -returnCodes error -result {wrong # args: should be "= a b"}
+tcltest::test eq-7 {equals 7} -body {=} -returnCodes error -result {wrong # args: should be "= a b"}
+tcltest::test eq-8 {equals 8} -body {= 1} -returnCodes error -result {wrong # args: should be "= a b"}
+tcltest::test eq-9 {equals 9} -body {= 1 1 1} -returnCodes error -result {wrong # args: should be "= a b"}
+tcltest::test eq-10 {equals 10} -body {= 1 1 13} -returnCodes error -result {wrong # args: should be "= a b"}
 
-test not-1 {not 1} {not 1} 0
-test not-2 {not 2} {not 0} 1
-test not-3 {not 3} {not nil} 1
+tcltest::test not-1 {not 1} {not 1} 0
+tcltest::test not-2 {not 2} {not 0} 1
+tcltest::test not-3 {not 3} {not nil} 1
 
-test not-eq-1 {not equals 1} {not= 0 0} 0
-test not-eq-1 {not equals 1} {not= 0 1} 1
+tcltest::test not-eq-1 {not equals 1} {not= 0 0} 0
+tcltest::test not-eq-1 {not equals 1} {not= 0 1} 1
 
-test str-1 {str 1} {str a b} ab
-test str-2 {str 2} {str} ""
-test str-3 {str 3} {str "abc"} "abc"
-test str-4 {str 4} {str 12 "abc" 3} "12abc3"
+tcltest::test str-1 {str 1} {str a b} ab
+tcltest::test str-2 {str 2} {str} ""
+tcltest::test str-3 {str 3} {str "abc"} "abc"
+tcltest::test str-4 {str 4} {str 12 "abc" 3} "12abc3"
 
-test iden-1 {iden 1} {identity 42} 42
-test iden-2 {iden 2} {identity {}} {}
-test iden-3 {iden 3} {identity ""} ""
+tcltest::test iden-1 {iden 1} {identity 42} 42
+tcltest::test iden-2 {iden 2} {identity {}} {}
+tcltest::test iden-3 {iden 3} {identity ""} ""
 
-test ifp-1 {ifp 1} {ifp 0 1 2} 2
-test ifp-1 {ifp 1} {ifp 1 1 2} 1
-test ifp-1 {ifp 1} {ifp nil 1 2} 2
+tcltest::test ifp-1 {ifp 1} {ifp 0 1 2} 2
+tcltest::test ifp-1 {ifp 1} {ifp 1 1 2} 1
+tcltest::test ifp-1 {ifp 1} {ifp nil 1 2} 2
 
-test seq-1 {seq 1} {seq {}} nil
-test seq-2 {seq 2} {seq {a b c}} {a b c}
+tcltest::test seq-1 {seq 1} {seq {}} nil
+tcltest::test seq-2 {seq 2} {seq {a b c}} {a b c}
 
-test empty-1 {empty 1} {empty? nil} 1
-test empty-2 {empty 2} {empty? {}} 1
-test empty-3 {empty 3} {empty? {a b}} 0
+tcltest::test empty-1 {empty 1} {empty? nil} 1
+tcltest::test empty-2 {empty 2} {empty? {}} 1
+tcltest::test empty-3 {empty 3} {empty? {a b}} 0
 
-test cond-1 {cond 1} {cond} 0
-test cond-3 {cond 3} {cond 1 2} 2
-test cond-4 {cond 4} {cond 0 2} 0
-test cond-5 {cond 5} {cond 1 2 3 4} 2
-test cond-6 {cond 6} {cond 0 2 3 4} 4
-test cond-2 {cond 2} -body {cond 1} -returnCodes error -result {cond should be called with an even number of arguments, got 1}
+tcltest::test cond-1 {cond 1} {cond} 0
+tcltest::test cond-3 {cond 3} {cond 1 2} 2
+tcltest::test cond-4 {cond 4} {cond 0 2} 0
+tcltest::test cond-5 {cond 5} {cond 1 2 3 4} 2
+tcltest::test cond-6 {cond 6} {cond 0 2 3 4} 4
+tcltest::test cond-2 {cond 2} -body {cond 1} -returnCodes error -result {cond should be called with an even number of arguments, got 1}
 
 # [2016-07-22 10:13] Two arguments to the test function should be enough: expression and expected result.
-proc testndv {args} {
+proc testndv_old {args} {
   global testndv_index
   incr testndv_index
+  # test test-$testndv_index test-$testndv_index {*}$args
   test test-$testndv_index test-$testndv_index {*}$args
+}
+
+proc testndv_old2 {body result} {
+  global testndv_index
+  incr testndv_index
+  # test test-$testndv_index test-$testndv_index {*}$args
+  test test-$testndv_index test-$testndv_index -body $body -result $result
 }
 
 testndv {= 1 1} 1
@@ -254,6 +264,11 @@ testndv {map [make_dict_accessor QueueName] {{Depth 5895 QueueName error} {Depth
 
 
 # testndv {map :QueueName {{Depth 5895 QueueName error} {Depth 0 QueueName Col}}} {error Col}
+
+# threading operator
+testndv {-> 12} 12
+testndv {-> 1234 [fn x {string length $x}]} 4
+testndv {-> 1234 [fn x {string length $x}] [fn x {+ $x $x}]} 8
 
 cleanupTests
 
