@@ -1,3 +1,5 @@
+require liburl url
+
 # TODO: (ooit) use a real parser.
 # comment and empty lines should just be added to the current statement, so no special handling.
 # @result list of statements.
@@ -17,7 +19,7 @@ proc read_source_statements {filename} {
       set linenr_start $linenr
     }
     lappend lines $line
-    if {[is_statement_end $line]} {
+    if {[statement_end? $line]} {
       #puts "before add 1"
       lappend stmts [dict create lines $lines type [stmt_type $lines] \
                          linenr_start $linenr_start linenr_end $linenr]
@@ -36,39 +38,6 @@ proc read_source_statements {filename} {
   return $stmts
 }
 
-proc read_source_statements_old {filename} {
-  set f [open $filename r]
-  set linenr 0
-  set lines {}
-  set linenr_start -1
-  while {[gets $f line] >= 0} {
-    incr linenr
-    if {([string trim $line] == "") || [regexp {^\s*//} $line]} {
-      # do want those lines in output again
-      lappend stmts [dict create lines [list $line] type comment \
-                         linenr_start $linenr linenr_end $linenr]
-      continue
-    }
-    if {$lines == {}} {
-      set linenr_start $linenr
-    }
-    lappend lines $line
-    if {[is_statement_end $line]} {
-      lappend stmts [dict create lines $lines type [stmt_type $lines] \
-                         linenr_start $linenr_start linenr_end $linenr]
-      set lines {}
-    } else {
-      # nothing.
-    }
-  } ; # end-of-while gets
-  if {$lines != {}} {
-    lappend stmts [dict create lines $lines type [stmt_type $lines] \
-                       linenr_start $linenr_start linenr_end $linenr]
-  }
-  close $f
-  return $stmts
-}
-
 # new statement for single line
 proc stmt_new {line {type ""} {linenr_start 0} {linenr_end 0}} {
   dict create lines [list $line] type $type linenr_start $linenr_start \
@@ -76,6 +45,7 @@ proc stmt_new {line {type ""} {linenr_start 0} {linenr_end 0}} {
 }
 
 proc is_statement_end {line} {
+  error "Deprecated, use statement_end?"
   # [2016-07-31 15:13] comment lines are never statement end!
   if {[regexp {^\s*//} $line]} {
     return 0
@@ -89,6 +59,22 @@ proc is_statement_end {line} {
   }
   return 0
 }
+
+proc statement_end? {line} {
+  # [2016-07-31 15:13] comment lines are never statement end!
+  if {[regexp {^\s*//} $line]} {
+    return 0
+  }
+  if {[regexp {;$} [string trim $line]]} {
+    return 1
+  }
+  # begin en einde file ook als statements zien.
+  if {[regexp {[\{\}]$} [string trim $line]]} {
+    return 1
+  }
+  return 0
+}
+
 
 # just check first lines, so Action()\n<brace> will not be recognised.
 # by checking on ending on just a paren, it should work too.
@@ -137,13 +123,12 @@ proc first_statement_line {lines} {
   }
   # [2016-07-31 14:45] could be (at the eof) that only empty/comment lines exist.
   return ""
-  #breakpoint
-  #error "No non-empty/comment lines found in: $lines"
 }
 
 # return list of statement-groups: each group is a dict with a list of statements and
 # a domain.
 # for now, assume that sub-types only occur before a main type, not after.
+# [2016-12-03 20:22] i.e. the group is created as soon as a main statement is found.
 proc group_statements {statements} {
   set res {}
   set stmts {}
@@ -168,8 +153,8 @@ proc group_statements {statements} {
     if {[regexp {^main} [:type $stmt]]} {
       # log debug "tp=main, create new group and put in res"
       # TODO: maybe determining domain should be a separate step.
-      set url [stmt_det_url $stmt]
-      lappend res [dict create statements $stmts domain [det_domain $url]\
+      set url [stmt->url $stmt]
+      lappend res [dict create statements $stmts domain [url/url->domain $url]\
                        url $url]
       set stmts {}
     } else {
@@ -178,9 +163,12 @@ proc group_statements {statements} {
     }
   }
   if {$stmts != {}} {
-    set url [stmt_det_url $stmt]
-    lappend res [dict create statements $stmts domain [det_domain $url]\
-                     url $url]
+    # [2016-12-03 20:23] Some non-main statements after the last main statement, so url is empty, and therefore domain too.
+    # [2016-12-03 20:15] TODO: hieronder stmt gebruikt, maar bestaat niet hier.
+    #set url [stmt->url $stmt]
+    #lappend res [dict create statements $stmts domain [url/url->domain $url]\
+    #                  url $url]
+    lappend res [dict create statements $stmts]
   }
   return $res
 }
@@ -206,6 +194,7 @@ proc write_source_statements {filename stmt_groups {opt {debug 0}}} {
 # return 1 iff there is at least one statement in group with the given type
 # TODO: could use FP or list comprehension.
 proc stmt_grp_has {stmt_grp type} {
+  error "Deprecated, use stmt_grp_has_type?"
   set found 0
   foreach stmt [:statements $stmt_grp] {
     if {[:type $stmt] == $type} {
@@ -214,6 +203,17 @@ proc stmt_grp_has {stmt_grp type} {
   }
   return $found
 }
+
+proc stmt_grp_has_type? {stmt_grp type} {
+  set found 0
+  foreach stmt [:statements $stmt_grp] {
+    if {[:type $stmt] == $type} {
+      set found 1
+    }
+  }
+  return $found
+}
+
 
 # TODO: multiline comment blocks
 proc line_type {line} {
@@ -240,5 +240,25 @@ proc line_type {line} {
   return other
 }
 
+# [2016-12-03 20:06] For now keep stmt->x procs in parse.tcl
 # determine url within web_url etc statement.
-# stmt_det_url is in domains.tcl
+proc stmt->url {stmt} {
+  foreach line [:lines $stmt] {
+    if {[regexp {\"(URL|Action)=(https?://([^/]+)/[^\"]+)\"} $line z z url domain]} {
+      return $url
+    }
+  }
+  return ""
+}
+
+proc stmt->referer {stmt} {
+  foreach line [:lines $stmt] {
+    if {[regexp {\"(Referer)=(https?://([^/]+)/[^\"]+)\"} $line z z referer domain]} {
+      return $referer
+    }
+  }
+  return ""
+}
+
+
+

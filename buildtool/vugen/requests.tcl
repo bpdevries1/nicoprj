@@ -5,12 +5,14 @@ require libio io
 use libfp
 use liburl
 
+# TODO: tresholds etc should be settable per script/project.
+
 task show_requests {Create a HTML report of all requests in script
   Check if requests have dynamic items, which should be correlated.
 } {
   {clean "Delete DB and generated reports before starting"}
   {all "Show info about all request (default: only requests where action is needed)"}
-  {treshold.arg "0.5" "Treshold above which requests are marked Red"}
+  {treshold.arg "0.9" "Treshold above which requests are marked Red"}
 } {
   #log info "show-requests: TODO"
   file mkdir requests
@@ -30,9 +32,9 @@ task show_requests {Create a HTML report of all requests in script
     }
   }
   corr_ini_write
+  # breakpoint
 }
 
-# TODO: when opt != all, only show relevant items.
 proc show_toc {opt hh} {
   $hh heading 1 "Table of contents"
   foreach filename [get_action_files] {
@@ -50,7 +52,6 @@ proc show_requests_file {opt hh filename} {
   }
   $hh anchor_name [file tail $filename]
   $hh heading 1 "Requests in [file tail $filename]"
-  # $hh write "TODO"
   set stmts [read_source_statements $filename]
 
   foreach stmt $stmts {
@@ -78,9 +79,9 @@ proc show_request_html {opt hh stmt} {
   if {![show_request_html? $opt $stmt]} {
     return
   }
-  set url [stmt_det_url $stmt]
+  set url [stmt->url $stmt]
   set stmt_params [stmt_params $stmt]
-  set referer [stmt_det_referer $stmt]
+  set referer [stmt->referer $stmt]
   set url_params [url->params $url]; # maybe also set from POST body.
   # $hh heading 2 "Request - $url" "class=Failure"
   $hh heading 2 "Request - $url (corr=[det_request_correlation $stmt])" "class=[det_request_class $opt $stmt]"
@@ -89,17 +90,47 @@ proc show_request_html {opt hh stmt} {
   paragraph $hh "URL Parameters" [params->html $url_params]
   paragraph $hh Url $url
   paragraph $hh Referer $referer
+
+  # iff request is shown, add it to correlations file
+  set parts [url->parts $url]
+  corr_ini_add path [:path $parts] [det_request_correlation $stmt] ""
+
+  # Show possible correlations
+  paragraph $hh Correlations [correlations $stmt]
 }
 
 # return 1 iff request should be shown with given opt(ions)
+# TODO: check correlations file too.
 proc show_request_html? {opt stmt} {
   if {[:all $opt]} {
     return 1
   }
+  # TODO: only ignore if should be ignored on all accounts.
+  # eg. if path can be ignored, but params not, stmt should still be displayed!
+  if {[stmt_ignore? $stmt]} {
+    return 0
+  }
+  
   if {[det_request_correlation $stmt] >= [:treshold $opt]} {
     return 1
   }
   return 0
+}
+
+# TODO: also check GET and POST params.
+proc stmt_ignore? {stmt} {
+  # Use Clojure threading operator. Both statements below are equivalent.
+  # corr_ini_ignore? path [:path [url->parts [stmt->url $stmt]]]
+  corr_ini_ignore? path [-> $stmt stmt->url url->parts :path]
+}
+
+proc old-> {startval args} {
+  set val $startval
+  foreach f $args {
+    # maybe use uplevel?
+    set val [$f $val]
+  }
+  return $val
 }
 
 # return either Failure or an empty string, based on the chance we need to do some
@@ -116,7 +147,7 @@ proc det_request_class {opt stmt} {
 # on this item
 proc det_request_correlation {stmt} {
   # return 0.6
-  set url [stmt_det_url $stmt]
+  set url [stmt->url $stmt]
   set ext [string tolower [file extension $url]]
   # less chance that images need to be correlated, but this could depend on the script/project.
   if {[lsearch -exact {.gif .jpg .jpeg .png .js .css} $ext] >= 0} {
@@ -135,16 +166,16 @@ proc det_request_correlation {stmt} {
 
 # Request - https://{domain}/RRS2/Content/Files/UpdatUtiUsiTemplate.xlsx (corr=2.375)
 proc det_path_correlation {path} {
-  # return 0.9
-  # expr 1.0 * [max {*}[map [fn x {string length $x}] [split $path "/"]]] / 40
+  set res1 [expr 1.0 * [max {*}[map [fn x {string length $x}] [split $path "/"]]] / 50]
 
   # / 8 so max consec of 4 will result in 0.5.
-  set res [expr 1.0 * [max {*}[map max_consecutive_chargroup [split $path "/"]]] / 8]
-  if {$res > 2.0} {
+  set res2 [expr 1.0 * [max {*}[map max_consecutive_chargroup [split $path "/"]]] / 8]
+  if {$res2 > 2.0} {
     log warn "res: $res"
     breakpoint
   }
-  return $res
+  # expr $res1 + $res2]
+  + $res1 $res2
 }
 
 # return max number of consecutive characters of the same group.
@@ -325,9 +356,10 @@ proc corr_ini_write {} {
 }
 
 # add a request or parameter to correlations list/ini
-proc corr_ini_add {type name notes} {
+proc corr_ini_add {type name corr notes} {
   global corr_ini
   set header "${type}-${name}"
+  set corr_ini [ini/set_param $corr_ini $header corr $corr]
   set corr_ini [ini/set_param $corr_ini $header ignore 0]
   set corr_ini [ini/set_param $corr_ini $header notes $notes]
   set corr_ini [ini/set_param $corr_ini $header reason ""]; # to be filled in by user.
@@ -337,6 +369,6 @@ proc corr_ini_add {type name notes} {
 proc corr_ini_ignore? {type name} {
   global corr_ini
   set header "${type}-${name}"
-  ini/get_param $ini $header ignore 0
+  ini/get_param $corr_ini $header ignore 0
 }
 

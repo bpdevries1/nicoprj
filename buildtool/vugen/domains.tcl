@@ -30,16 +30,8 @@ task domains {get/update domains
   vuser_init_update_domains $domains_ini
 }
 
-proc stmt_det_url {stmt} {
-  foreach line [:lines $stmt] {
-    if {[regexp {\"(URL|Action)=(https?://([^/]+)/[^\"]+)\"} $line z z url domain]} {
-      return $url
-    }
-  }
-  return ""
-}
-
 proc stmt_det_referer {stmt} {
+  error "Deprecated, use stmt->referer"
   foreach line [:lines $stmt] {
     if {[regexp {\"(Referer)=(https?://([^/]+)/[^\"]+)\"} $line z z referer domain]} {
       return $referer
@@ -49,6 +41,10 @@ proc stmt_det_referer {stmt} {
 }
 
 proc det_domain {url} {
+  error "Deprecated, use url->domain or url->parts (in ndv lib)"
+}
+
+proc det_domain_old2 {url} {
   if {[regexp {https?://([^/]+)/} $url z domain]} {
     return $domain
   }
@@ -70,7 +66,7 @@ proc domain_write_source_statements {filename stmt_groups domains_ini} {
   #fconfigure $f -translation crlf
   set f [open_temp_w $filename]
   foreach grp $stmt_groups {
-    set ignore [is_ignore_domain $domains_ini [:domain $grp]]
+    set ignore [ignore_domain? $domains_ini [:domain $grp]]
     # puts $f "// domain: [:domain $grp]"
     foreach stmt [:statements $grp] {
       if {$ignore} {
@@ -86,12 +82,22 @@ proc domain_write_source_statements {filename stmt_groups domains_ini} {
 }
 
 proc is_ignore_domain {ini domain} {
+  error "Deprecated, use ignore_domain?"
   if {$domain == ""} {
     return 0
   } else {
     ini/exists $ini ignore [domain_suffix $domain]  
   }
 }
+
+proc ignore_domain? {ini domain} {
+  if {$domain == ""} {
+    return 0
+  } else {
+    ini/exists $ini ignore [domain_suffix $domain]  
+  }
+}
+
 
 # return new domains_ini.
 # foreach set domain in stmt_grp: check if suffix already exists in ini.
