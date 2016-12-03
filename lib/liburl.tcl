@@ -64,6 +64,7 @@ proc url->parts {url} {
   } else {
     # error "Could not parse URL: ${url}."
     log warn "Could not parse URL: ${url}."
+    breakpoint
     dict create;                # empty dict
   }
 }
