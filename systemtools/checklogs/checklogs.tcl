@@ -144,6 +144,19 @@ proc file_readable {file} {
   return $readable
 }
 
+# [2016-12-03 14:33] some issues:
+# [BGN] Copying raboprj/VuGen/RRS-rec-20161117a/data/logs from /home/nico to /media/nico/Iomega HDD/backups/home-nico
+# Failed: The source file /home/nico/raboprj/VuGen/RRS-rec-20161117a/data/logs/run-all-tests.tcl-2016-11-30--07-59-12.log
+# has been modified during synchronization.  Transfer aborted.
+# later:
+#   failed: raboprj/VuGen/RRS-rec-20161117a/data/logs
+# so failed is (can be?) mentioned on dir level, while has been modified can be mentioned on a file level. Not always, mostly they are the same.
+# 
+# Options:
+# * when adding file to changed list, also add directory.
+#   [2016-12-03 14:39] added, works for now.
+# * better than: when a failed is found, check if dir is prefix of any of the file names.
+# * keep a DB of the issues: per issue: logfilename, loglinenr, timestamp of log, actual error. Check later in this DB if error happened once, or is consistent.
 proc check_unison_log {file} {
   # first keep list of files that changed during sync, not really an error.
   # then with failed items, check if reason is a change, or not.
@@ -166,6 +179,9 @@ proc check_unison_log {file} {
         set line2 [gets $f]
         if {[regexp {has been modified during synchronization} $line2]} {
           dict set changed $filename 1
+          # also set changed for dir of filename:
+          dict set changed [file dirname $filename] 1
+          
           log debug "changed: $filename"
         } else {
           log debug "Failed on file, but not a change: $line/$line2"
