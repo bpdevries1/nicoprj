@@ -12,6 +12,7 @@ ndv::source_once task.tcl prjgroup.tcl prjtype.tcl \
     lib/misc.tcl init.tcl
 
 require libinifile ini
+use liblist
 
 proc trace_callback {nm idx action} {
   upvar $nm var
@@ -44,15 +45,6 @@ proc main {argv} {
     handle_script_dir $dir $tname $trest
   }
 }
-
-# FIXME: move to ndv lib.
-# 8-5-2016 from tclhelp
-proc lremove {listVariable value} {
-  upvar 1 $listVariable var
-  set idx [lsearch -exact $var $value]
-  set var [lreplace $var $idx $idx]
-}
-
 
 proc handle_init_env {tname trest} {
   if {![file exists [buildtool_env_tcl_name]]} {
