@@ -95,8 +95,17 @@ proc show_request_html {opt hh stmt} {
   corr_ini_add path [:path $parts] [det_request_correlation $stmt] ""
 
   # Show possible correlations
-  paragraph $hh Correlations [correlations $stmt]
+  # paragraph $hh Correlations [correlations $stmt]
+  $hh heading 3 Correlations
+  correlations $hh $stmt
 }
+
+proc paragraph {hh title content} {
+  $hh heading 3 "${title}:"
+  $hh text $content
+}
+
+
 
 # return 1 iff request should be shown with given opt(ions)
 proc show_request_html? {opt stmt} {
@@ -213,11 +222,6 @@ proc det_get_params_correlation {params} {
 # params: statement parameters, including POST parameters (after ITEMDATA element)
 proc det_post_params_correlation {params} {
   return 0;                     # TODO: for now.
-}
-
-proc paragraph {hh title content} {
-  $hh heading 3 "${title}:"
-  $hh text $content
 }
 
 proc lines_heading {stmt} {
