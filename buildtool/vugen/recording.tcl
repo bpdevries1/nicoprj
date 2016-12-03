@@ -31,6 +31,17 @@ proc stmt_in_recording_dir? {stmt dir} {
   any? [fn inf {stmt_in_inf? $stmt $inf}] [glob -directory "$dir/data" -type f "*.inf"]
 }
 
+# check if stmt->url->path occurs in inf file and if snapshot number is the same.
 proc stmt_in_inf? {stmt inf} {
-  return 1
+  set inf_snapshot [file rootname [file tail $inf]]
+  if {$inf_snapshot == [stmt->snapshot $stmt]} {
+    set path [-> $stmt stmt->url url->parts :path]
+    # for now just check if path occurs in inf file.
+    set inf_text [read_file $inf]
+    if {[string first $path $inf_text] >= 0} {
+      return 1  
+    }
+  }
+  return 0  
 }
+

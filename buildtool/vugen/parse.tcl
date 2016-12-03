@@ -257,5 +257,45 @@ proc stmt->referer {stmt} {
   return ""
 }
 
+# return list of dicts: type,name,value,valuetype
+# type: namevalue or name
+# valuetype: integer, hex, base64, json, ...
+# TODO: multi line string parameters, then possibly two quotes straight after each other.
+proc stmt->params {stmt} {
+  set text ""
+  foreach line [:lines $stmt] {
+    append text [string trim $line]
+  }
+  if {[regexp {^.+?\((.*)\);} $text z param_text]} {
+    set l [csv::split $param_text]
+    set res [list]
+    foreach el $l {
+      if {[regexp {^(.+?)=(.*)$} $el z nm val]} {
+        # lappend res [list $nm $val]
+        lappend res [dict create type namevalue name $nm value $val \
+                         valuetype [det_valuetype $val]]
+      } else {
+        # lappend res [list $el "{NO-VALUE}"]
+        lappend res [dict create type name name $el]
+      }     
+    }
+    return $res
+  } else {
+    error "Cannot parse statement text: $text"
+  }
+}
 
+
+
+# return t<nn>, based on snapshot part in statement.
+# or empty string when not found.
+proc stmt->snapshot {stmt} {
+  foreach param [stmt->params $stmt] {
+    if {[:name $param] == "Snapshot"} {
+      return [file rootname [:value $param]]; # without .inf
+    }
+  }
+  # possible that statement does not have a snapshot parameter, return empty then.
+  return ""
+}
 

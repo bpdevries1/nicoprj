@@ -79,7 +79,7 @@ proc show_request_html {opt hh stmt} {
     return
   }
   set url [stmt->url $stmt]
-  set stmt_params [stmt_params $stmt]
+  set stmt_params [stmt->params $stmt]
   set referer [stmt->referer $stmt]
   set url_params [url->params $url]; # maybe also set from POST body.
   # $hh heading 2 "Request - $url" "class=Failure"
@@ -154,7 +154,7 @@ proc det_request_correlation {stmt} {
   # Correlation value is sum of three things: corr(url), corr(url-get-params), corr(url-post-params). For now only the url-path part.
   return [expr [det_path_correlation [:path $parts]] + \
               [det_get_params_correlation [:params $parts]] + \
-             [det_post_params_correlation [stmt_params $stmt]]]
+             [det_post_params_correlation [stmt->params $stmt]]]
   
   return 0.9
 }
@@ -246,34 +246,6 @@ proc param->html {param} {
       error "Unknown type: $type for: $param"
     }
   }  
-}
-
-# return list of tuples: type,name,value,valuetype as dict
-# type: namevalue or name
-# valuetype: integer, hex, base64, json, ...
-# TODO: multi line string parameters, then possibly two quotes straight after each other.
-proc stmt_params {stmt} {
-  set text ""
-  foreach line [:lines $stmt] {
-    append text [string trim $line]
-  }
-  if {[regexp {^.+?\((.*)\);} $text z param_text]} {
-    set l [csv::split $param_text]
-    set res [list]
-    foreach el $l {
-      if {[regexp {^(.+?)=(.*)$} $el z nm val]} {
-        # lappend res [list $nm $val]
-        lappend res [dict create type namevalue name $nm value $val \
-                         valuetype [det_valuetype $val]]
-      } else {
-        # lappend res [list $el "{NO-VALUE}"]
-        lappend res [dict create type name name $el]
-      }     
-    }
-    return $res
-  } else {
-    error "Cannot parse statement text: $text"
-  }
 }
 
 
