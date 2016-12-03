@@ -44,10 +44,8 @@ proc check_file {srcfile opt} {
     check_file_comments $srcfile
   }
   
-  # [2016-02-05 17:29:15] FIXME: Wil eigenlijk in globals.h een zeer beperkt aantal globals. Beter om te definieren waar ze gebruikt worden, zoals cachecontrol etc.
+  # [2016-02-05 17:29:15] TODO: Wil eigenlijk in globals.h een zeer beperkt aantal globals. Beter om te definieren waar ze gebruikt worden, zoals cachecontrol etc.
   # [2016-07-24 18:46] aan de andere kant nu taken om globals toe te voegen, dus beter te beheren. Maar als global nog steeds maar door 1 lib wordt gebruikt, staat vorige statement nog steeds.
-  # [2016-07-29 12:53:39] check_globals does not exist.
-  # check_globals
 }
 
 # return the number of set binary options in opt
@@ -100,6 +98,10 @@ proc check_file_todos {srcfile} {
     if {[regexp {FIXME} $line]} {
       puts_warn $srcfile $linenr "FIXME found: $line"
     }
+    if {[regexp {TODO} $line]} {
+      puts_warn $srcfile $linenr "TODO found: $line"
+    }
+
   }
   close $f
 }

@@ -44,7 +44,7 @@ proc totabs_line {line tabwidth} {
   return "[string repeat "\t" $ntabs][string repeat " " $nspaces]$rest"
 }
 
-# FIXME: use code in separate tool fix-endings to check more extensions.
+# TODO: use code in separate tool fix-endings to check more extensions.
 # buildtool should also work for other things besides vugen scripts.
 task fixcrlf {Fix line endings
   Syntax: fixcrlf [<filename> ..]
@@ -71,7 +71,7 @@ proc fixcrlf_file {filename} {
   commit_file $filename
 }
 
-# FIXME: use code in separate tool fixendings to check more extensions.
+# TODO: use code in separate tool fixendings to check more extensions.
 # [2016-07-31 12:28] but not yet, current implementation in fixendings clashes with needs here, eg. .c files.
 proc line_ending {filename} {
   set ext [file extension $filename]

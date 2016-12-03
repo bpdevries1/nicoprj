@@ -63,7 +63,6 @@ task add_param {Add var/param to script
   vuser_init.c - to set var or param
   *.config - to add var/param
 } {
-  # FIXME: aan .config toevoegen, want dan moeten deze eerst bestaan.
   lassign $args name datatype varparam default_val
   if {$default_val == ""} {
     if {$datatype == "int"} {

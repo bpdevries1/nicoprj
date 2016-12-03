@@ -8,7 +8,8 @@ task check_configs {Check .config files
 }
 
 proc get_configs {dir} {
-  # FIXME soms ook .config files die niet van mij zijn?
+  # TODO: soms ook .config files die niet van mij zijn?
+  # [2016-12-03 21:10] dan eerst concreet voorbeeld nodig, ook dat het misgaat.
   lsort [glob -nocomplain -directory $dir -type f "*.config"]
 }
 

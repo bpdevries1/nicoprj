@@ -4,10 +4,6 @@
 # these tasks should be idempotent: if they are called twice, the second time nothing should happen.
 
 # args: 1 or more files to add.
-
-# FIXME: task_add maken die ofwel add_file ofwel add_action aanroept.
-# dit dan obv name: als deze een extensie heeft (.h of .c) dan is het file, anders action.
-
 task add_file {Add an extra file to prj
   Syntax: add_file <file> [<file> ..]
   Adds files (create if needed) to the extra files part of the project.

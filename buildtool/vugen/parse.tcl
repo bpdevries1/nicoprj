@@ -1,6 +1,6 @@
 require liburl url
 
-# FIXME: (ooit) use a real parser.
+# TODO: (ooit) use a real parser.
 # comment and empty lines should just be added to the current statement, so no special handling.
 # @result list of statements.
 #   statement: dict with keys: lines type linenr_start linenr_end
@@ -75,11 +75,8 @@ proc statement_end? {line} {
   return 0
 }
 
-
 # just check first lines, so Action()\n<brace> will not be recognised.
 # by checking on ending on just a paren, it should work too.
-# FIXME: text checks (also added with build script) and web_reg_save_param => subs!
-# web_reg_find
 set stmt_types_regexps {
   {[\{\}]$} main
   {\)$} main
@@ -142,7 +139,7 @@ proc group_statements {statements} {
     # breakpoint
     #log debug "stmt: $stmt"
     #log debug "keys: [dict keys $stmt]"
-    # FIXME: [2016-07-17 10:56] now need to set tp in a separate statement, if put directly within if, it will fail. [2016-07-27 22:03] non-reproduceable now.
+    # [2016-07-17 10:56] now need to set type in a separate statement, if put directly within if, it will fail (proc not found?). [2016-07-27 22:03] non-reproduceable now.
     #if {[regexp {^main} [:type $stmt]]} {set stmt}
     #set tp [:type $stmt]
     if {[regexp {web_add_header} $stmt]} {
@@ -168,10 +165,6 @@ proc group_statements {statements} {
   }
   if {$stmts != {}} {
     # [2016-12-03 20:23] Some non-main statements after the last main statement, so url is empty, and therefore domain too.
-    # [2016-12-03 20:15] FIXME: hieronder stmt gebruikt, maar bestaat niet hier.
-    #set url [stmt->url $stmt]
-    #lappend res [dict create statements $stmts domain [url/url->domain $url]\
-    #                  url $url]
     lappend res [dict create statements $stmts]
   }
   return $res
@@ -196,7 +189,6 @@ proc write_source_statements {filename stmt_groups {opt {debug 0}}} {
 }
 
 # return 1 iff there is at least one statement in group with the given type
-# FIXME: could use FP or list comprehension.
 proc stmt_grp_has {stmt_grp type} {
   error "Deprecated, use stmt_grp_has_type?"
   set found 0
@@ -208,6 +200,7 @@ proc stmt_grp_has {stmt_grp type} {
   return $found
 }
 
+# TODO: could use FP or list comprehension.
 proc stmt_grp_has_type? {stmt_grp type} {
   set found 0
   foreach stmt [:statements $stmt_grp] {
@@ -219,7 +212,7 @@ proc stmt_grp_has_type? {stmt_grp type} {
 }
 
 
-# FIXME: multiline comment blocks
+# TODO: multiline comment blocks
 proc line_type {line} {
   set line [string trim $line]
   if {$line == ""} {

@@ -3,7 +3,7 @@
 # all tcl files should be automatically sourced by buildtool
 
 # return a list of directories containing recordings for the current script.
-# FIXME: should be maintained somewhere in the config.tcl file.
+# TODO: should be maintained somewhere in the config.tcl file.
 # for now hardcoded for RRS.
 proc recording_dirs {} {
   filter [fn x {regexp RRS-rec $x}] [glob -directory [file normalize ..] -type d *]

@@ -1,5 +1,3 @@
-
-# FIXME: options to clean several things: non-script files, only .idx files (and shunra), recorder file, replay files (subdirs), _orig dirs. And -all to do it all. If no options given, just show the help.
 # 'clean' is for file(system) actions. Use remove for text within files.
 task clean {Delete non script files
   THIS ACTION CANNOT BE UNDONE (with undo)
@@ -51,7 +49,7 @@ proc det_glob_patterns {opt} {
   return $res
 }
 
-# FIXME: deleting logs directoy does not work. Could do: if isdir and force fails, do per file in dir.
+# TODO: deleting logs directory does not work. Could do: if isdir and force fails, do per file in dir.
 proc delete_path {pathname} {
   puts "Deleting: $pathname"
   # return ; # test

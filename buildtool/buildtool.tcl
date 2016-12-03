@@ -58,7 +58,7 @@ proc handle_init_env {tname trest} {
   }
 }
 
-# [2016-08-10 21:11] FIXME: later call this one 'handle_project_dir'. Not now, still confusing name.
+# [2016-08-10 21:11] TODO: later call this one 'handle_project_dir'. Not now, still confusing name.
 # @pre - [buildtool_env_tcl_name] exists
 proc handle_script_dir {dir tname trest} {
   global as_prjgroup buildtool_env

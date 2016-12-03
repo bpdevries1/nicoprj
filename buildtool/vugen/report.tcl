@@ -1,4 +1,4 @@
-# FIXME: need to put this setting/location somewhere. This could be a user
+# TODO: need to put this setting/location somewhere. This could be a user
 # setting in ~/.config/buildtool, next to location of eg R binary.
 
 # [2016-08-18 15:01:52] Version for VuGen
@@ -6,7 +6,7 @@
 #ndv::source_once ../../vugentools/vuserlog/read-vuserlogs-db.tcl
 #ndv::source_once ../../vugentools/vuser-report/vuser-report.tcl
 
-# FIXME: better way to find perftools_dir, maybe in config-env.
+# TODO: better way to find perftools_dir, maybe in config-env.
 set perftools_dir [file normalize [file join \
                                        [file dirname [info script]] .. .. perftools]]
 source [file join $perftools_dir report read-report-dir.tcl]

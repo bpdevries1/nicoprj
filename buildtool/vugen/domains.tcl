@@ -12,7 +12,8 @@ task domains {get/update domains
 
   foreach filename [get_action_files] {
     if {$filename == "vuser_init.c"} {
-      # FIXME: get_action_files should not return vuser_init, only main action files.
+      # TODO: get_action_files should not return vuser_init, only main action files.
+      # but then should be called main_action_files
       log info "Ignore $filename, could be template, more difficult"
       continue
     }
@@ -60,7 +61,7 @@ proc det_domain_old {stmt} {
   return ""
 }
 
-# FIXME: split this one in 1) comment lines and 2) write to file.
+# TODO: maybe split this one in 1) comment lines and 2) write to file.
 proc domain_write_source_statements {filename stmt_groups domains_ini} {
   #set f [open $filename w]
   #fconfigure $f -translation crlf

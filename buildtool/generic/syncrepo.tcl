@@ -1,6 +1,6 @@
-# FIXME: [2016-09-29 08:58:32] check if the lib to get #include's files not already in repo: then warning or also get those libs.
+# TODO: [2016-09-29 08:58:32] check if the lib to get #include's files not already in repo: then warning or also get those libs.
 # [2016-10-05 20:21] different way of determining different or updated files, because git always sets the current timestamp when updating a local file, not the time of the repo. This means local and base can change, while repo version stays the same. Possibly local and base version a bit different timestamp, both changed is the message. So could diff by content iff timestamps differ.
-# FIXME: [2016-10-05 20:21] maybe should not put .base in git after all. Then it will not change because of git, only when an explicit sync action is done. Local and repo should still be in git, does not matter if repo's are different or the same, moments of commit/push can differ. [2016-10-15 19:51] First get some experience on the content check, just made.
+# TODO: [2016-10-05 20:21] maybe should not put .base in git after all. Then it will not change because of git, only when an explicit sync action is done. Local and repo should still be in git, does not matter if repo's are different or the same, moments of commit/push can differ. [2016-10-15 19:51] First get some experience on the content check, just made.
 
 task libs {Overview of lib files, including status
   Show status of all library files, with respect to repository.
@@ -13,7 +13,7 @@ task libs {Overview of lib files, including status
   log debug "source_files: $source_files"
   set included_files [det_includes_files $source_files]
   log debug "included_files: $included_files"
-  # FIXME: determine files in selectfiles.tcl
+  # TODO: determine files in selectfiles.tcl
   set all_files [lsort -unique [concat $source_files $included_files]]
   set diff_found 0
   # also check if all included files exist.
@@ -132,7 +132,7 @@ proc contents_same? {file1 file2} {
 }
 
 # @pre all 3 versions of libfile exists: local, repo and base
-# FIXME: maybe allow for tiny difference between mtimes? Could be that a file system is
+# TODO: maybe allow for tiny difference between mtimes? Could be that a file system is
 # less detailed?
 proc mtime_status {libfile} {
   global repo_lib_dir

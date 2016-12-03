@@ -9,8 +9,6 @@ task templates {Make script adhere to templates and best practices
   add TT var - ThinkTime.
 } {{debug "Add debug/structure lines to output files"}
 } {
-  # FIXME: possibly something with options, like selecting files?
-  # or keep as standard as possible.
   get_template_files
 
   foreach filename [get_action_files] {
@@ -92,7 +90,7 @@ proc add_web_reg_find_group {stmt_grp} {
       if {[url_needs_find [:url $stmt_grp]]} {
         dict set stmt_grp statements \
             [linsert [:statements $stmt_grp] end-1 \
-                 [stmt_new "\tweb_reg_find(\"Text=<FIXME>\", \"SaveCount=savecount\", LAST);\n" sub-find]]
+                 [stmt_new "\tweb_reg_find(\"Text=<TODO>\", \"SaveCount=savecount\", LAST);\n" sub-find]]
       }
     }
   }

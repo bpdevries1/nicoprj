@@ -9,7 +9,7 @@ use libmacro
 
 # [2016-08-16 20:09] In general, procs here should not be dependent on configfile/var existence. Always check, and do as much as possible without config settings.
 
-# FIXME: add type parameter, and only write stuff to config for certain types, eg lr_include_dir.
+# TODO: add type parameter, and only write stuff to config for certain types, eg lr_include_dir.
 task init {Initialise project/script
   Also update config to latest version.  
 } {{update "Update project/script from old config version to latest"}
@@ -102,7 +102,7 @@ proc version_file {} {
   file join [config_dir] .configversion
 }
 
-# FIXME: also update .gitignore with .base and _orig paths, but should be in hook for git package.
+# TODO: also update .gitignore with .base and _orig paths, but should be in hook for git package.
 # [2016-08-16 20:13] Independent from config/vars
 proc init_from_scratch {} {
   set cfgdir [config_dir]
@@ -133,7 +133,6 @@ proc init_update_from_1 {} {
 
 # [2016-08-16 20:14] config/vars independent.
 proc init_update_from_2 {} {
-  # FIXME: read config, add env parts
   set config_name [config_tcl_name]
   set text [read_file $config_name]
   set config_v3 [get_config_v3]
@@ -149,7 +148,7 @@ proc make_config_tcl {} {
   set config_name [config_tcl_name]
   if {[file exists $config_name]} {
     puts "Config file already exists: $config_name"
-    # FIXME: ? check if config is complete?
+    # TODO: maybe? check if config is complete?
     return
   }
   set now [dt/now]
@@ -181,8 +180,6 @@ proc make_config_env_tcl {} {
   }
 }
 
-# FIXME: need code formatting tool.
-# simple code format by counting braces per line might work.
 # [2016-08-16 20:23] config/vars independent.
 proc get_config_v3 {} {
   return [format_code {set config_env_tcl_name [config_env_tcl_name]
@@ -225,21 +222,23 @@ proc det_lr_include_dir {} {
 }
 
 # Look for loadrunner in both 'Program Files (x86)' and 'Program Files' on all drives.
-# [2016-11-15 12:57:57] FIXME: maybe exclude network drives if this is too slow.
 # [2016-11-15 13:25:34] drive Y: too slow now. For now hardcoded to only check c: and d:
 proc find_loadrunner_dirs {} {
   set res [list]
   log debug "Determining volumes"
   # set volumes [file volumes]
+  # [2016-12-03 21:03] no network drives for now.
+  # TODO: check with eg NET USE which drives are network drives. Could add to system
+  # specific config file.
   set volumes {c:/ d:/}
   foreach volume $volumes {
     log debug "Check volume: $volume"
-	foreach progdir [glob -nocomplain -directory $volume -type d "Prog*"] {
-	  set inc_dir [file join $progdir HP LoadRunner include]
-	  if {[file exists $inc_dir]} {
-		lappend res $inc_dir
-	  }
-	}
+    foreach progdir [glob -nocomplain -directory $volume -type d "Prog*"] {
+      set inc_dir [file join $progdir HP LoadRunner include]
+      if {[file exists $inc_dir]} {
+        lappend res $inc_dir
+      }
+    }
   }
   log debug "Checked all volumes"
   return $res

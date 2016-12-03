@@ -1,9 +1,7 @@
 # args can only be -do, to really perform the replacements. Should be at the end, could be that regexps have/are -do.
 # if not really, create a file.__TEMP__ with the new version. Then perform a diff on both.
-# FIXME: als -do is meegegeven, dan actie opslaan (in repo, want ook voor andere scripts). dan optie om deze te tonen en te kiezen.
+# TODO: als -do is meegegeven, dan actie opslaan (in repo, want ook voor andere scripts). dan optie om deze te tonen en te kiezen.
 # en mss ook een naam te geven.
-# FIXME: optie om replace wel/niet in libs uit te voeren, of alleen in actions. Default mss ook alleen in actions.
-# FIXME: zonder opties lijkt allrec gekozen te worden, en dan foutmelding op nog implemented (dus schade is beperkt)
 task regsub {Regular epression replace} {
   {do "Really perform regsub actions (dry run otherwise)"}
   {all "Handle all files (be careful!)"}
@@ -14,7 +12,6 @@ task regsub {Regular epression replace} {
   {text "Handle all text files (TBD)"}  
   {filenames "Only show filenames with changes, no contents"}
 } {from to} {
-  # FIXME: all and allrec should be general options, applicable to more tasks.
   set really [:do $opt]
   lassign $args from to  
   puts "from: $from, to: $to, args: $args"

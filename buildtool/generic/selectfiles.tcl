@@ -1,11 +1,5 @@
 # Generic version of select files.
 
-# FIXME: remove here, specific for VuGen
-proc get_repo_libs_old {} {
-  global repo_lib_dir
-  glob -nocomplain -tails -directory $repo_lib_dir -type f *
-}
-
 proc get_filenames {opt} {
   if {[:all $opt]} {
     set filenames [get_pattern_files *]
