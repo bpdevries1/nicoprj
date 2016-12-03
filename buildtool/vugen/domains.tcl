@@ -16,7 +16,7 @@ task domains {get/update domains
       log info "Ignore $filename, could be template, more difficult"
       continue
     }
-    log info "Handling file: $filename"
+    log debug "Handling file: $filename"
     set statements [read_source_statements $filename]
     # breakpoint
     set stmt_groups [group_statements $statements]
