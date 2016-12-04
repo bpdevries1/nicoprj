@@ -330,6 +330,27 @@ namespace eval ::ndv {
     public method pre {text} {
       return "<pre>$text</pre>"
     }
+
+    # unordered list functions
+    # for now, only get variant, don't write anything to channel.
+    public method get_ul {lst} {
+      set res "<ul>"
+      foreach el $lst {
+        append res [get_li $el]
+      }
+      append res "</ul>"
+      return $res
+    }
+
+    # if item is already contained within <li> tags, don't add again.
+    public method get_li {item {attrs ""}} {
+      if {[regexp {^<li} $item]} {
+        return $item
+      } else {
+        return "<li $attrs>$item</li>"
+      }
+    }
+    
     
     # [2016-09-25 20:38] lijkt ervoor om .js voor collapse e.d. te kopieren.
     public method copy_files_to_output {output_path} {
