@@ -3,10 +3,14 @@
 # all tcl files should be automatically sourced by buildtool
 
 # return a list of directories containing recordings for the current script.
-# TODO: should be maintained somewhere in the config.tcl file.
-# for now hardcoded for RRS.
 proc recording_dirs {} {
-  filter [fn x {regexp RRS-rec $x}] [glob -directory [file normalize ..] -type d *]
+  global recording_dirs
+  # [2016-12-04 11:04] cannot use 'info var', with 'global' is is defined.
+  if {[catch {set recording_dirs}]} {
+    puts "WARN: set recording_dirs in .bld/config.tcl"
+    exit
+  }
+  return $recording_dirs
 }
 
 # Write html (with hh) with correlation info
@@ -15,8 +19,6 @@ proc correlations {hh stmt} {
   foreach rec_dir $rec_dirs {
     correlations_rec_dir $hh $stmt $rec_dir
   }
-  
-
 }
 
 # return all recording dirs where stmt is found.
