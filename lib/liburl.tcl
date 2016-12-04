@@ -75,7 +75,7 @@ proc url->domain {url} {
 }
 
 # return list of url params
-# each element is a tuple: type,name,value,valuetype as dict
+# each element is a dict: type,name,value,valuetype
 # package uri can only provide full query string, so not really helpful here.
 proc url->params {url} {
   if {[regexp {^[^?]*\?(.*)$} $url z params]} {
