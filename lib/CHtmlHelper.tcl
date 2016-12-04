@@ -1,10 +1,12 @@
 # CHtmlHelper.tcl - helper methods for generating html.
 
-# @todo also use this class in maakindexhtml.tcl
 # @todo also remove methods from perflib.tcl
-#
+# [2016-12-04 11:50] TODO: some method return strings, others directly put html
+# to the channel. Both should be possible, but use naming convention.
+
 package require Itcl
 package require struct ; # matrices.
+package require html;    # official package that does similar things. Use for escaping html in to_html.
 
 package provide ndv 0.1.1
 
@@ -313,12 +315,22 @@ namespace eval ::ndv {
         }
     }
 
-    # @todo ook specifieke tekens als < en &, hier ook al eens eerder code voor gemaakt, en misschien ook wel std lib voor beschikbaar...
-    public method to_html {text} {
+    # TODO: ook specifieke tekens als < en &, hier ook al eens eerder code voor gemaakt, en misschien ook wel std lib voor beschikbaar...
+    public method to_html_old {text} {
       regsub -all "\n" $text "<br/>" text
       return $text			
     }
-		
+
+    public method to_html {text} {
+      # regsub -all "\n" $text "<br/>" text
+      html::nl2br [html::html_entities $text]
+      # return $text			
+    }
+
+    public method pre {text} {
+      return "<pre>$text</pre>"
+    }
+    
     # [2016-09-25 20:38] lijkt ervoor om .js voor collapse e.d. te kopieren.
     public method copy_files_to_output {output_path} {
       foreach filename [glob -directory [file join $::ndv::lib_path js] *] {
