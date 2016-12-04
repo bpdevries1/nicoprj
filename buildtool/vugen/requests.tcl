@@ -83,7 +83,7 @@ proc show_request_html {opt hh stmt} {
   set referer [stmt->referer $stmt]
   set url_params [url->params $url]; # maybe also set from POST body.
   # $hh heading 2 "Request - $url" "class=Failure"
-  $hh heading 2 "Request - $url (corr=[det_request_correlation $stmt])" "class=[det_request_class $opt $stmt]"
+  $hh heading 2 "Request - $url (corr=[format %.3f [det_request_correlation $stmt]])" "class=[det_request_class $opt $stmt]"
   paragraph $hh [lines_heading $stmt] [lines->html [:lines $stmt]]
   paragraph $hh "Statement Parameters" [stmt_params->html $stmt_params]
   paragraph $hh "URL Parameters" [params->html $url_params]
@@ -148,8 +148,8 @@ proc det_request_class {opt stmt} {
   }
 }
 
-# return value between 0 and 1 inclusive with chance we need to do some correlation
-# on this item
+# return value with indication we need to do some correlation
+# on this item. Could be bigger than 1.
 proc det_request_correlation {stmt} {
   # return 0.6
   set url [stmt->url $stmt]
@@ -164,8 +164,6 @@ proc det_request_correlation {stmt} {
   return [expr [det_path_correlation [:path $parts]] + \
               [det_get_params_correlation [:params $parts]] + \
              [det_post_params_correlation [stmt->params $stmt]]]
-  
-  return 0.9
 }
 
 # Request - https://{domain}/RRS2/Content/Files/UpdatUtiUsiTemplate.xlsx (corr=2.375)

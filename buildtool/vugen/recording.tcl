@@ -88,7 +88,7 @@ proc snapshot_contains_path? {hh rec_dir ss path} {
       # $hh line "Found response file in inf: $resp_file"
       if {[resp_file_contains_path? $rec_dir $resp_file $path]} {
         # $hh line "Found $path in response file: $resp_file"
-        $hh line "Found $path in response file: [$hh get_anchor $resp_file [resp_file_path $rec_dir $resp_file]]"
+        $hh line "Found $path in response file: [$hh get_anchor $resp_file [resp_file_path $rec_dir $resp_file]]: [resp_context $hh $rec_dir $resp_file $path]"
         return 1
       }
     }
@@ -124,6 +124,21 @@ proc resp_file_contains_path? {rec_dir resp_file path} {
     return 1
   } else {
     return 0
+  }
+}
+
+# maybe combine with resp_file_contains_path?
+# return path with surrounding text in resp_file, iff path is found.
+# otherwise return empty string.
+proc resp_context {hh rec_dir resp_file path} {
+  set chars_before 60
+  set chars_after 40
+  set resp_text [read_file [resp_file_path $rec_dir $resp_file]]
+  set pos [string first $path $resp_text]
+  if {$pos < 0} {
+    return ""
+  } else {
+    $hh pre [$hh to_html [string range $resp_text $pos-$chars_before [expr $pos+$chars_after+[string length $path]]]]
   }
 }
 
