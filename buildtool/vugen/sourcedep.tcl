@@ -1,6 +1,4 @@
-set perftools_dir [file normalize [file join \
-                                       [file dirname [info script]] .. .. perftools]]
-source [file join $perftools_dir .. devtools sourcedep sourcedep.tcl]
+source [file join [perftools_dir] .. devtools sourcedep sourcedep.tcl]
 
 task sourcedep {Create source dependency graphs/html
 } {{rootdir.arg "." "Root directory"}

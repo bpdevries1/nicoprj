@@ -1,16 +1,6 @@
-# TODO: need to put this setting/location somewhere. This could be a user
-# setting in ~/.config/buildtool, next to location of eg R binary.
-#ndv::source_once ../../../autohotkey/ahklog/read-ahklogs-db.tcl
-#ndv::source_once ../../vugentools/vuser-report/vuser-report.tcl
-
-# call read_report_run_dir
-# TODO: better way to find perftools_dir, maybe in config-env.
-# TODO: maybe a lib tool to find it relative somewhere to the script dir.
-set perftools_dir [file normalize [file join \
-                                       [file dirname [info script]] .. .. perftools]]
-
-source [file join $perftools_dir report read-report-dir.tcl]
 # [2016-08-18 15:02:30] Version for AHK
+
+source [file join [perftools_dir] report read-report-dir.tcl]
 
 task report {Create report of output.txt in script dir
   Copy output.txt to testruns dir, call perftools/autohotkey/ahklog/read-ahklogs-db.tcl
