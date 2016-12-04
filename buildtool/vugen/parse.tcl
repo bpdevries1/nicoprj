@@ -264,16 +264,18 @@ proc stmt->referer {stmt} {
 proc stmt->params {stmt} {
   set text ""
   foreach line [:lines $stmt] {
-    append text [string trim $line]
+    if {![comment_line? $line]} {
+      append text [string trim $line]    
+    }
   }
   if {[regexp {^.+?\((.*)\);} $text z param_text]} {
     set l [csv::split $param_text]
     set res [list]
     foreach el $l {
-      if {[regexp {^(.+?)=(.*)$} $el z nm val]} {
+      if {[regexp {^(.+?)\s*=\s*(.*)$} [string trim $el] z nm val]} {
         # lappend res [list $nm $val]
         lappend res [dict create type namevalue name $nm value $val \
-                         valuetype [det_valuetype $val]]
+                         valuetype [det_lr_valuetype $val]]
       } else {
         # lappend res [list $el "{NO-VALUE}"]
         lappend res [dict create type name name $el]
@@ -285,6 +287,49 @@ proc stmt->params {stmt} {
   }
 }
 
+proc comment_line? {line} {
+  regexp {^//} [string trim $line]
+}
+
+# check if string valuetype is a Loadrunner parameter: {paramname}
+proc det_lr_valuetype {val} {
+  set tp [det_valuetype $val]
+  if {[regexp {^\{[A-Za-z0-9_]+\}$} $val]} {
+    set tp "lrparam"
+  }
+  return $tp
+}
+
+# return list of dict: name, value, valuetype.
+proc stmt->postparams {stmt} {
+  set params [stmt->params $stmt]
+  # FIXME: find ITEMDATA, group name/value pairs after this one.
+  set pos [params_find $params ITEMDATA]
+  set res [list]
+  if {$pos < 0} {
+    return $res
+  }
+  foreach {nmparam valparam endparam} [lrange $params $pos+1 end] {
+    if {([:name $nmparam] == "Name") && ([:name $valparam] == "Value")} {
+      lappend res [dict create name [:value $nmparam] \
+                       value [:value $valparam] valuetype [:valuetype $valparam]]
+    }
+  }
+  # breakpoint
+  return $res
+}
+
+# return index of text in params.
+proc params_find {params text} {
+  set i 0
+  foreach param $params {
+    if {[:name $param] == $text} {
+      return $i
+    }
+    incr i
+  }
+  return -1;                    # not found.
+}
 
 
 # return t<nn>, based on snapshot part in statement.

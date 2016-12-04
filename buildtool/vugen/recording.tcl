@@ -92,7 +92,7 @@ proc snapshot_contains_path? {hh rec_dir ss path} {
         return 1
       }
     }
-    $hh line "Did not find $path in response files for t${ss}.inf."
+    # $hh line "Did not find $path in response files for t${ss}.inf."
     return 0
   } else {
     # don't look here for now, probably only images

@@ -85,14 +85,14 @@ proc show_request_html {opt hh stmt} {
   # $hh heading 2 "Request - $url" "class=Failure"
   $hh heading 2 "Request - $url (corr=[format %.3f [det_request_correlation $stmt]])" "class=[det_request_class $opt $stmt]"
   paragraph $hh [lines_heading $stmt] [lines->html [:lines $stmt]]
-  paragraph $hh "Statement Parameters" [stmt_params->html $stmt_params]
-  paragraph $hh "URL Parameters" [params->html $url_params]
+  # paragraph $hh "Statement Parameters" [stmt_params->html $stmt_params]
+  paragraph $hh "URL/GET Parameters" [params->html $hh $url_params]
+  paragraph $hh "POST Parameters" [params->html $hh [stmt->postparams $stmt]]
   paragraph $hh Url $url
   paragraph $hh Referer $referer
 
   # iff request is shown, add it to correlations file
-  set parts [url->parts $url]
-  corr_ini_add path [:path $parts] [det_request_correlation $stmt] ""
+  corr_ini_add_stmt $stmt;      # this statement is important enough to show, also add to correlations.ini
 
   # Show possible correlations
   # paragraph $hh Correlations [correlations $stmt]
@@ -100,12 +100,34 @@ proc show_request_html {opt hh stmt} {
   correlations $hh $stmt
 }
 
-proc paragraph {hh title content} {
-  $hh heading 3 "${title}:"
-  $hh text $content
+proc corr_ini_add_stmt {stmt} {
+  set url [stmt->url $stmt]
+  set parts [url->parts $url]
+  corr_ini_add path [:path $parts] [det_request_correlation $stmt] ""
+  foreach param [:params $parts] {
+    corr_ini_add_param GET $param
+    # corr_ini_add paramname [:name $param] [param_correlation $param] "GET param, value=[:value $param], type=[:valuetype $param]"
+  }
+  foreach param [stmt->postparams $stmt] {
+    corr_ini_add_param POST $param
+    # corr_ini_add paramname [:name $param] [param_correlation $param] "POST param, value=[:value $param], type=[:valuetype $param]"
+  }
 }
 
+# Add param iff it is not already in the ini-file.
+proc corr_ini_add_param {paramtype param} {
+  if {[count [corr_ini_get_lines paramname [:name $param]]] == 0} {
+    corr_ini_add paramname [:name $param] [param_correlation $param] "$paramtype param, value=[:value $param], type=[:valuetype $param]"
+  }
+}
 
+# Don't show paragraph iff its contents are empty.
+proc paragraph {hh title content} {
+  if {$content != ""} {
+    $hh heading 3 "${title}:"
+    $hh text $content
+  }
+}
 
 # return 1 iff request should be shown with given opt(ions)
 proc show_request_html? {opt stmt} {
@@ -121,7 +143,7 @@ proc show_request_html? {opt stmt} {
   return 0
 }
 
-# TODO: also check GET and POST params.
+# TODO: also check GET and POST params: if stmt has params, then determine if those can be ignored.
 # so split in path_ignore? and params_ignore? calls.
 proc stmt_ignore? {stmt} {
   # Use Clojure threading operator. Both statements below are equivalent.
@@ -129,13 +151,9 @@ proc stmt_ignore? {stmt} {
   corr_ini_ignore? path [-> $stmt stmt->url url->parts :path]
 }
 
-proc old-> {startval args} {
-  set val $startval
-  foreach f $args {
-    # maybe use uplevel?
-    set val [$f $val]
-  }
-  return $val
+# TODO: for now only check name, but could also decide on value and/or valuetype.
+proc param_ignore? {param} {
+  corr_ini_ignore? paramname [:name $param]
 }
 
 # return either Failure or an empty string, based on the chance we need to do some
@@ -161,9 +179,12 @@ proc det_request_correlation {stmt} {
   set parts [url->parts $url]
 
   # Correlation value is sum of three things: corr(url), corr(url-get-params), corr(url-post-params). For now only the url-path part.
+  # url-params: list of params: dict: type,name,value,valuetype
+  # post_params: list of dicts: type,name,value,valuetype
+  # - these are all parameters, not just ones after ITEMDATA.
   return [expr [det_path_correlation [:path $parts]] + \
               [det_get_params_correlation [:params $parts]] + \
-             [det_post_params_correlation [stmt->params $stmt]]]
+             [det_post_params_correlation [stmt->postparams $stmt]]]
 }
 
 # Request - https://{domain}/RRS2/Content/Files/UpdatUtiUsiTemplate.xlsx (corr=2.375)
@@ -212,28 +233,93 @@ proc char_group {char} {
   }
 }
 
-# params: GET parameters
+# params: GET parameters: list of url params
+#   each element is a dict: type,name,value,valuetype
+# return: correlation indicator (float). The higher the result, the more reason to think params need to be correlated.
 proc det_get_params_correlation {params} {
-  return 0;                     # TODO: for now
+
+  # Use both param_ignore? and content check just checks correlations.ini.
+  # for each param can possibly be ignored based on 1 out of 2 reasons:
+  # 1. in correlations.ini ignore list.
+  # 2. based on actual value.
+  
+  #return [count $params];       # for now.
+  # TODO: replace by sum, already have this? or + with var args?
+  count [filter param_correlation $params]
+  #return 0;                     # TODO: for now
 }
 
-# params: statement parameters, including POST parameters (after ITEMDATA element)
-proc det_post_params_correlation {params} {
-  return 0;                     # TODO: for now.
+# postparams: list of dict: name, value, valuetype.
+# return: correlation indicator (float). The higher the result, the more reason to think params need to be correlated.
+proc det_post_params_correlation {postparams} {
+  #return [count $postparams];   # for now.
+  count [filter param_correlation $postparams]
+  #return 0;                     # TODO: for now.
+}
+
+# param is a GET or POST parameter. A dict with name, value, valuetype.
+# return 0 if param does not need to be correlated, 1 if it does.
+# TODO: maybe return a fraction depending on the chance, eg integer-value or string length.
+proc param_correlation {param} {
+  if {[param_ignore? $param]} {
+    return 0
+  }
+  switch [:valuetype $param] {
+    lrparam {return 0}
+    empty {return 0}
+    integer {
+      # values between 0-10 inclusive do not need to be correlated.
+      # TODO: check if this is valid.
+      if {([:value $param] >= 0) && ([:value $param] <= 10)} {
+        return 0
+      } else {
+        return 1
+      }
+    }
+    boolean {return 0}
+    xdigit {return 1}
+    double {return 1}
+    json {return 1}
+    base64 {return 1}
+    string {
+      # short strings do not need to be correlated.
+      # TODO: Check if this is valid.
+      if {[string length [:value $param]] <= 5} {
+        return 0
+      } else {
+        return 1
+      }
+    }
+    default {return 1}
+  }
+  # maybe should check with default, contains epoch times for now, should be correlated.
 }
 
 proc lines_heading {stmt} {
   return "Lines ([:linenr_start $stmt] to [:linenr_end $stmt])"
 }
 
-
-proc params->html {params} {
+proc params->html_old {params} {
   join [map param->html $params] "<br/>"
+  # join [map [fn par {param->html $hh $par}] $params] "<br/>"
+
+
+  $hh get_ul [map [fn par {param->html $hh $par}] $params]
 }
 
+proc params->html {hh params} {
+  # join [map param->html $params] "<br/>"
+  # ul checks items in list. If they are already a <li> elements, don't add tags.
+  # if only a string, do add tags.
+  # $hh get_ul [map param->html $params]
+  $hh get_ul [map [fn par {param->html $hh $par}] $params]
+}
+
+
 # param is a tuple: name, value
-proc param->html {param} {
+proc param->html_old {param} {
   # lassign $param name value
+  set type namevalue;           # default.
   dict_to_vars $param;          # type, name, value, valuetype
   switch $type {
     name {
@@ -250,9 +336,36 @@ proc param->html {param} {
   }  
 }
 
+# param is a tuple: name, value
+proc param->html {hh param} {
+  # lassign $param name value
+  set type namevalue;           # default.
+  dict_to_vars $param;          # type, name, value, valuetype
+  switch $type {
+    name {
+      # return [wordwrap_html $name]
+      return $name;             # no wordwrap for now
+    }
+    namevalue {
+      # return [wordwrap_html "$name = $value \[$valuetype\]"]
+      set str "$name = $value \[$valuetype\]"  
+      if {[param_correlation $param] > 0} {
+        # make red
+        return [$hh get_li $str "style=\"color:red\""]
+      } else {
+        return $str
+      }
+      
+    }
+    else {
+      error "Unknown type: $type for: $param"
+    }
+  }  
+}
 
 # parameters: list of name,value pairs
 proc stmt_params->html {parameters} {
+  error "Not used anymore?"
   params->html $parameters;     # for now, they seem the same.
 }
 
@@ -332,6 +445,12 @@ proc corr_ini_add {type name corr notes} {
   set corr_ini [ini/set_param $corr_ini $header ignore 0]
   set corr_ini [ini/set_param $corr_ini $header notes $notes]
   set corr_ini [ini/set_param $corr_ini $header reason ""]; # to be filled in by user.
+}
+
+proc corr_ini_get_lines {type name} {
+  global corr_ini
+  set header "${type}-${name}"
+  ini/lines $corr_ini $header
 }
 
 # check if request or parameter is marked as ignore in list/ini
