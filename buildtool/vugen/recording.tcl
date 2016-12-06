@@ -59,11 +59,13 @@ proc correlations_rec_dir {hh stmt rec_dir} {
   }
 }
 
-# show all statements/requests in recording dir where stmt.path is found in the response.
+# show all statements/requests in recording dir where stmt.path is found in the response. Or a POST or GET parameter.
 # algorithm:
 # * start at snapshot of inf file, and move back to 1. Stop when 1 found (maybe more later)
 # * Only check a snapshot when the .inf refers to a Filename t<snapshot>.x
 #   - because eg t12.inf points to t6.htm, but don't want those, are only PNG's.
+# TODO: rename proc, now does more than find path.
+# TODO: extract part in foreach loop in new proc.
 proc show_path_responses {hh stmt rec_dir inf_file} {
   regexp {t(\d+).inf} [file tail $inf_file] z stmt_snapshot_nr
   set path [-> $stmt stmt->url url->parts :path]
@@ -73,20 +75,33 @@ proc show_path_responses {hh stmt rec_dir inf_file} {
     if {[snapshot_contains_path? $hh $rec_dir $ss_check $path]} {
       $hh line "Found $path in snapshot $ss_check"
     }
+
+    # [2016-12-06 22:12] even hier POST params erbij, daarna procs hernoemen.
+    # postparams eerst alleen op value zoeken, als te veel, dan evt ook paramname erbij.
+    foreach postparam [stmt->postparams $stmt] {
+      if {[snapshot_contains_path? $hh $rec_dir $ss_check [:value $postparam]]} {
+        $hh line "Found POST param [:name $postparam] with value [:value $postparam] in snapshot $ss_check"
+      }
+    }
+
+    set get_params [-> $stmt stmt->url url->parts :params]
+    foreach param $get_params {
+      if {[snapshot_contains_path? $hh $rec_dir $ss_check [:value $param]]} {
+        $hh line "Found GET param [:name $param] with value [:value $param] in snapshot $ss_check"
+      }
+    }
   }
 }
 
 # also have hh here, so can print some debugging statements.
+# [2016-12-06 22:04] proc heeft side effects.
 proc snapshot_contains_path? {hh rec_dir ss path} {
   set inf_file [file join $rec_dir data "t${ss}.inf"]
   if {[inf_contains_own_snapshot? $inf_file $ss]} {
-    # TODO: continue looking, check actual response file!
     # check all files mentioned in .inf
     set response_files [inf->response_files $inf_file]
     foreach resp_file $response_files {
-      # $hh line "Found response file in inf: $resp_file"
       if {[resp_file_contains_path? $rec_dir $resp_file $path]} {
-        # $hh line "Found $path in response file: $resp_file"
         $hh line "Found $path in response file: [$hh get_anchor $resp_file [resp_file_path $rec_dir $resp_file]]: [resp_context $hh $rec_dir $resp_file $path]"
         return 1
       }
