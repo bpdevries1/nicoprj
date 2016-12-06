@@ -28,11 +28,10 @@ proc stmt_recording_dirs {stmt} {
   filter [fn dir {stmt_in_recording_dir? $stmt $dir}] [recording_dirs]
 }
 
+# return 1 iff? statement can be found in recording directory.
+# [2016-12-06 21:20] use -nocomplain, data dir not always available.
 proc stmt_in_recording_dir? {stmt dir} {
-  #some? any?
-  #some? [fn file {stmt_in_file? $stmt $file}] [glob -directory $dir -type f "*.c"]
-  #breakpoint
-  any? [fn inf {stmt_in_inf? $stmt $inf}] [glob -directory "$dir/data" -type f "*.inf"]
+  any? [fn inf {stmt_in_inf? $stmt $inf}] [glob -nocomplain -directory "$dir/data" -type f "*.inf"]
 }
 
 # check if stmt->url->path occurs in inf file and if snapshot number is the same.
