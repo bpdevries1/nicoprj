@@ -122,8 +122,13 @@ proc det_valuetype {val} {
   }
   if {![catch {json::json2dict $val}]} {
     # also no catch with eg Snapshot = t8.inf [json], so check it is at least surrounded with braces
+	# [2016-12-06 17:16:08] could also be a loadrunner parameter.
     if {[regexp {^\{.*\}$} $val]} {
-      return json  
+	  if {[regexp {^\{[A-Za-z0-9_]+\}$} $val]} {
+		return lrparam
+	  } else {
+		return json  
+	  }
     }
   }
 
