@@ -1,6 +1,5 @@
 package provide ndv 0.1.1
-
-# TODO: maybe det_valuetype is too specific, and should be extracted from url->params.
+package require json
 
 namespace eval ::liburl {
   namespace export url-encode url-decode url->parts url->params url->domain det_valuetype
@@ -120,18 +119,17 @@ proc det_valuetype {val} {
     Body = {\TradingEntities\:null,\RegimeEligibilities\:null,\P }
     and much more.
   }
+  
   if {![catch {json::json2dict $val}]} {
-    # also no catch with eg Snapshot = t8.inf [json], so check it is at least surrounded with braces
-	# [2016-12-06 17:16:08] could also be a loadrunner parameter.
-    if {[regexp {^\{.*\}$} $val]} {
-	  if {[regexp {^\{[A-Za-z0-9_]+\}$} $val]} {
-		return lrparam
-	  } else {
-		return json  
-	  }
-    }
+    # [2016-12-06 21:47] previous things like t8.inf and {abc} are now not seen as
+    # json, get parse error.
+    return json
   }
-
+  
+  if {[regexp {^\{[A-Za-z0-9_]+\}$} $val]} {
+    return lrparam
+  }
+  
   # TODO: should check, not working yet, something with escaping backslashes and quotes.
   if {[regexp TradingEntityReportedRegimes $val]} {
     # log debug "Check jsonexi"
@@ -144,7 +142,6 @@ proc det_valuetype {val} {
       return base64
     }
   }
-
 
   # url and/or html encoded?
 
