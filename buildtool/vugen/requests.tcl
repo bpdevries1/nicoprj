@@ -147,8 +147,9 @@ proc show_request_html? {opt stmt} {
 # so split in path_ignore? and params_ignore? calls.
 proc stmt_ignore? {stmt} {
   # Use Clojure threading operator. Both statements below are equivalent.
-  # corr_ini_ignore? path [:path [url->parts [stmt->url $stmt]]]
-  corr_ini_ignore? path [-> $stmt stmt->url url->parts :path]
+
+  # corr_ini_ignore? path [-> $stmt stmt->url url->parts :path]
+  corr_ini_ignore? path [stmt->path $stmt]
 }
 
 # TODO: for now only check name, but could also decide on value and/or valuetype.
@@ -299,41 +300,12 @@ proc lines_heading {stmt} {
   return "Lines ([:linenr_start $stmt] to [:linenr_end $stmt])"
 }
 
-proc params->html_old {params} {
-  join [map param->html $params] "<br/>"
-  # join [map [fn par {param->html $hh $par}] $params] "<br/>"
-
-
-  $hh get_ul [map [fn par {param->html $hh $par}] $params]
-}
-
 proc params->html {hh params} {
   # join [map param->html $params] "<br/>"
   # ul checks items in list. If they are already a <li> elements, don't add tags.
   # if only a string, do add tags.
   # $hh get_ul [map param->html $params]
   $hh get_ul [map [fn par {param->html $hh $par}] $params]
-}
-
-
-# param is a tuple: name, value
-proc param->html_old {param} {
-  # lassign $param name value
-  set type namevalue;           # default.
-  dict_to_vars $param;          # type, name, value, valuetype
-  switch $type {
-    name {
-      # return [wordwrap_html $name]
-      return $name;             # no wordwrap for now
-    }
-    namevalue {
-      # return [wordwrap_html "$name = $value \[$valuetype\]"]
-      return "$name = $value \[$valuetype\]"
-    }
-    else {
-      error "Unknown type: $type for: $param"
-    }
-  }  
 }
 
 # param is a tuple: name, value

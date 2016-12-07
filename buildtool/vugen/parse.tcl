@@ -21,6 +21,9 @@ proc read_source_statements {filename} {
     lappend lines $line
     if {[statement_end? $line]} {
       #puts "before add 1"
+      # [2016-12-07 14:12:16] ignore comment lines globally, from the start
+      # could use comp(lement) function here?
+      set lines [filter [fn x {expr ![comment_line? $x]}] $lines]
       lappend stmts [dict create lines $lines type [stmt_type $lines] \
                          linenr_start $linenr_start linenr_end $linenr]
       set lines {}
@@ -287,23 +290,21 @@ proc stmt->params {stmt} {
   }
 }
 
-proc comment_line? {line} {
-  regexp {^//} [string trim $line]
+proc stmt->getparams {stmt} {
+  -> $stmt stmt->url_parts :params
 }
 
-# check if string valuetype is a Loadrunner parameter: {paramname}
-proc det_lr_valuetype {val} {
-  set tp [det_valuetype $val]
-  if {[regexp {^\{[A-Za-z0-9_]+\}$} $val]} {
-    set tp "lrparam"
-  }
-  return $tp
+proc stmt->path {stmt} {
+  -> $stmt stmt->url_parts :path
+}
+
+proc stmt->url_parts {stmt} {
+  -> $stmt stmt->url url->parts
 }
 
 # return list of dict: name, value, valuetype.
 proc stmt->postparams {stmt} {
   set params [stmt->params $stmt]
-  # FIXME: find ITEMDATA, group name/value pairs after this one.
   set pos [params_find $params ITEMDATA]
   set res [list]
   if {$pos < 0} {
@@ -318,6 +319,20 @@ proc stmt->postparams {stmt} {
   # breakpoint
   return $res
 }
+
+proc comment_line? {line} {
+  regexp {^//} [string trim $line]
+}
+
+# check if string valuetype is a Loadrunner parameter: {paramname}
+proc det_lr_valuetype {val} {
+  set tp [det_valuetype $val]
+  if {[regexp {^\{[A-Za-z0-9_]+\}$} $val]} {
+    set tp "lrparam"
+  }
+  return $tp
+}
+
 
 # return index of text in params.
 proc params_find {params text} {

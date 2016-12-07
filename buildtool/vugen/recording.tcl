@@ -38,7 +38,8 @@ proc stmt_in_recording_dir? {stmt dir} {
 proc stmt_in_inf? {stmt inf} {
   set inf_snapshot [file rootname [file tail $inf]]
   if {$inf_snapshot == [stmt->snapshot $stmt]} {
-    set path [-> $stmt stmt->url url->parts :path]
+    # set path [-> $stmt stmt->url url->parts :path]
+    set path [stmt->path $stmt]
     # for now just check if path occurs in inf file.
     set inf_text [read_file $inf]
     if {[string first $path $inf_text] >= 0} {
@@ -68,7 +69,8 @@ proc correlations_rec_dir {hh stmt rec_dir} {
 # TODO: extract part in foreach loop in new proc.
 proc show_path_responses {hh stmt rec_dir inf_file} {
   regexp {t(\d+).inf} [file tail $inf_file] z stmt_snapshot_nr
-  set path [-> $stmt stmt->url url->parts :path]
+  # set path [-> $stmt stmt->url url->parts :path]
+  set path [stmt->path $stmt]
   for {set ss_check [expr $stmt_snapshot_nr -1]} {$ss_check >= 1} {incr ss_check -1} {
     # $hh line "Checking snapshot ${ss_check}..."
     # for now only check if stmt.path occurs in snapshot, don't create regexp's yet.
@@ -84,7 +86,8 @@ proc show_path_responses {hh stmt rec_dir inf_file} {
       }
     }
 
-    set get_params [-> $stmt stmt->url url->parts :params]
+    # set get_params [-> $stmt stmt->url url->parts :params]
+    set get_params [stmt->getparams $stmt]
     foreach param $get_params {
       if {[snapshot_contains_path? $hh $rec_dir $ss_check [:value $param]]} {
         $hh line "Found GET param [:name $param] with value [:value $param] in snapshot $ss_check"
