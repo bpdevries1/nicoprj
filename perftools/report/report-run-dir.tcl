@@ -26,6 +26,7 @@ proc main {argv} {
     {full "Create full report"}
     {summary "Create summary report"}
     {ssl "Use SSL lines in log (not used)"}
+    {testruns "Create report for all runs in testruns dir for project"}
   }
   set usage ": [file tail [info script]] \[options] :"
   set opt [getoptions argv $options $usage]
