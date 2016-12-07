@@ -105,7 +105,8 @@ proc snapshot_contains_path? {hh rec_dir ss name value} {
     set response_files [inf->response_files $inf_file]
     foreach resp_file $response_files {
       if {[resp_file_contains_path? $rec_dir $resp_file $value]} {
-        $hh line "Found ($name=)$value in response file: [$hh get_anchor $resp_file [resp_file_path $rec_dir $resp_file]]:"
+        $hh heading 4 "Found ($name=)$value"
+        $hh line "in response file: [$hh get_anchor $resp_file [resp_file_path $rec_dir $resp_file]]:"
         set context_string [resp_context $hh $rec_dir $resp_file $value]
         $hh line [$hh pre [$hh to_html $context_string]]
         set wrs [det_web_reg_save $name $value $context_string]
@@ -128,8 +129,8 @@ proc det_web_reg_save {name value str} {
   # TODO: met deze regexp nog checken hoe vaak deze voorkomt in de tekst. Dan mogelijk een losse proc det_regexp maken.
   set str2 [str->regexp $str]
   set str3 [string map [list $value "(.*?)"] $str2]
-  return "web_reg_save_param_regexp(\"ParamName=$name\",
-\"Regexp=$str3\", LAST);"
+  return "\tweb_reg_save_param_regexp(\"ParamName=$name\",
+\t\t\"Regexp=$str3\", LAST);"
 }
 
 proc inf_contains_own_snapshot? {inf_file ss} {
