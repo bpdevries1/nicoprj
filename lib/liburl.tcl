@@ -123,7 +123,16 @@ proc det_valuetype {val} {
   if {![catch {json::json2dict $val}]} {
     # [2016-12-06 21:47] previous things like t8.inf and {abc} are now not seen as
     # json, get parse error.
-    return json
+    # [2016-12-07 14:17:53] On Windows (Rabo PC) they are seen as json, maybe json lib version? So do same checks here.
+    if {[regexp {^\{[A-Za-z0-9_]+\}$} $val]} {
+      return lrparam
+    }
+    # [2016-12-07 14:19:09] Windows/Rabo PC - t8.inf is also seen as json. So check surrounded by {}
+    if {[regexp {^\{.+\}$} $val]} {
+      return json  
+    } else {
+      # fall through to other checks.
+    }
   }
   
   if {[regexp {^\{[A-Za-z0-9_]+\}$} $val]} {
