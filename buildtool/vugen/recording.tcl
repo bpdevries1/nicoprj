@@ -74,14 +74,14 @@ proc show_path_responses {hh stmt rec_dir inf_file} {
   for {set ss_check [expr $stmt_snapshot_nr -1]} {$ss_check >= 1} {incr ss_check -1} {
     # $hh line "Checking snapshot ${ss_check}..."
     # for now only check if stmt.path occurs in snapshot, don't create regexp's yet.
-    if {[snapshot_contains_path? $hh $rec_dir $ss_check $path]} {
+    if {[snapshot_contains_path? $hh $rec_dir $ss_check path $path]} {
       $hh line "Found $path in snapshot $ss_check"
     }
 
     # [2016-12-06 22:12] even hier POST params erbij, daarna procs hernoemen.
     # postparams eerst alleen op value zoeken, als te veel, dan evt ook paramname erbij.
     foreach postparam [stmt->postparams $stmt] {
-      if {[snapshot_contains_path? $hh $rec_dir $ss_check [:value $postparam]]} {
+      if {[snapshot_contains_path? $hh $rec_dir $ss_check [:name $postparam] [:value $postparam]]} {
         $hh line "Found POST param [:name $postparam] with value [:value $postparam] in snapshot $ss_check"
       }
     }
@@ -89,7 +89,7 @@ proc show_path_responses {hh stmt rec_dir inf_file} {
     # set get_params [-> $stmt stmt->url url->parts :params]
     set get_params [stmt->getparams $stmt]
     foreach param $get_params {
-      if {[snapshot_contains_path? $hh $rec_dir $ss_check [:value $param]]} {
+      if {[snapshot_contains_path? $hh $rec_dir $ss_check [:name $param] [:value $param]]} {
         $hh line "Found GET param [:name $param] with value [:value $param] in snapshot $ss_check"
       }
     }
@@ -97,15 +97,20 @@ proc show_path_responses {hh stmt rec_dir inf_file} {
 }
 
 # also have hh here, so can print some debugging statements.
-# [2016-12-06 22:04] proc heeft side effects.
-proc snapshot_contains_path? {hh rec_dir ss path} {
+# [2016-12-06 22:04] FIXME: proc heeft side effects, moet anders!
+proc snapshot_contains_path? {hh rec_dir ss name value} {
   set inf_file [file join $rec_dir data "t${ss}.inf"]
   if {[inf_contains_own_snapshot? $inf_file $ss]} {
     # check all files mentioned in .inf
     set response_files [inf->response_files $inf_file]
     foreach resp_file $response_files {
-      if {[resp_file_contains_path? $rec_dir $resp_file $path]} {
-        $hh line "Found $path in response file: [$hh get_anchor $resp_file [resp_file_path $rec_dir $resp_file]]: [resp_context $hh $rec_dir $resp_file $path]"
+      if {[resp_file_contains_path? $rec_dir $resp_file $value]} {
+        $hh line "Found ($name=)$value in response file: [$hh get_anchor $resp_file [resp_file_path $rec_dir $resp_file]]:"
+        set context_string [resp_context $hh $rec_dir $resp_file $value]
+        $hh line [$hh pre [$hh to_html $context_string]]
+        set wrs [det_web_reg_save $name $value $context_string]
+        $hh heading 4 "Proposed regexp:"
+        $hh line [$hh pre [$hh to_html $wrs]]
         return 1
       }
     }
@@ -115,6 +120,16 @@ proc snapshot_contains_path? {hh rec_dir ss path} {
     # don't look here for now, probably only images
     return 0
   }
+}
+
+proc det_web_reg_save {name value str} {
+  # set str2 $str
+  # (.*?) mss nog vervangen door bv \d+ of [^"]+
+  # TODO: met deze regexp nog checken hoe vaak deze voorkomt in de tekst. Dan mogelijk een losse proc det_regexp maken.
+  set str2 [str->regexp $str]
+  set str3 [string map [list $value "(.*?)"] $str2]
+  return "web_reg_save_param_regexp(\"ParamName=$name\",
+\"Regexp=$str3\", LAST);"
 }
 
 proc inf_contains_own_snapshot? {inf_file ss} {
@@ -155,10 +170,23 @@ proc resp_context {hh rec_dir resp_file path} {
   if {$pos < 0} {
     return ""
   } else {
-    $hh pre [$hh to_html [string range $resp_text $pos-$chars_before [expr $pos+$chars_after+[string length $path]]]]
+    set substring [string range $resp_text $pos-$chars_before [expr $pos+$chars_after+[string length $path]]]
+    # breakpoint
+    # log info "substring: $substring"
+    # $hh pre [$hh to_html $substring]; # deze mss niet hier.
+    return $substring
   }
 }
 
 proc resp_file_path {rec_dir resp_file} {
   file normalize [file join $rec_dir data $resp_file]
 }
+
+# This one for library, also messed up Emacs colour coding.
+proc str->regexp {str} {
+  #return $str
+  # haakjes moeten dubbel escaped worden, puntje ook.
+  # string map {\" \\" ( \\( ) \\) . \\.} $str
+  string map {\" \\" ( \\\\( ) \\\\) . \\\\.} $str
+}
+

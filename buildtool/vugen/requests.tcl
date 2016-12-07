@@ -29,9 +29,84 @@ task show_requests {Create a HTML report of all requests in script
     foreach filename [get_action_files] {
       show_requests_file $opt $hh $filename
     }
+    $hh write_footer
   }
   corr_ini_write
   # breakpoint
+}
+
+# DB erbij maken waar requests en paths instaan, om dubbele te vinden.
+# eerst DB, mss hierna ook nog html
+task show_paths {Create a DB (and HTML? report) of all statements/paths in script
+  Check if paths occur more than once, should be de-duplicated.
+} {
+  {clean "Delete DB and generated reports before starting"}
+} {
+  file mkdir statements
+  set db [get_stmt_db [file join statements "statements.db"] $opt]
+  $db in_trans {
+    foreach action_file [get_action_files] {
+      set stmts [read_source_statements $action_file]
+      foreach stmt $stmts {
+        if {[:type $stmt] == "main-req"} {
+          set linenr [:linenr_start $stmt]
+          set lines [join [:lines $stmt] "\r\n"]
+          set path [stmt->path $stmt]
+          set url [stmt->url $stmt]
+          $db insert stmt_path [vars_to_dict action_file linenr lines path url]
+        }
+      }
+    }
+  }
+
+  io/with_file f [open statements/statements.html w] {
+    set hh [ndv::CHtmlHelper::new]
+    $hh set_channel $f
+    $hh write_header "All statements in script" 0  
+    $hh table {
+      $hh table_header path file1 file2 url1 url2
+
+      set query "select p1.path path, p1.action_file file1, p2.action_file file2, p1.url url1, p2.url url2
+      from stmt_path p1 join stmt_path p2 on p1.path = p2.path
+      where p1.action_file < p2.action_file
+      order by p1.path, p1.action_file, p2.action_file"
+
+      foreach row [$db query $query] {
+        $hh table_row [:path $row] [:file1 $row] [:file2 $row] [:url1 $row] [:url2 $row]
+      }
+      
+    }
+    $hh write_footer
+  }
+
+  $db close
+}
+
+# deze mogelijk in libdb:
+proc get_stmt_db {db_name opt} {
+  if {[:clean $opt]} {
+    file delete $db_name
+  }
+  set existing_db [file exists $db_name]
+  set db [dbwrapper new $db_name]
+  # define_tables $db $opt
+  # for now only one table
+  $db add_tabledef stmt_path {id} {action_file linenr lines path url}
+  
+  $db create_tables 0 ; # 0: don't drop tables first. Always do create, eg for new table defs. 1: drop tables first.
+  if {!$existing_db} {
+    log info "New db: $db_name, create tables"
+    # create_indexes $db
+  } else {
+    log info "Existing db: $db_name, don't create tables"
+  }
+  # TODO: maybe call prepare just before (or within) first insert call.
+  $db prepare_insert_statements
+  #breakpoint
+
+  # $db load_percentile
+  
+  return $db
 }
 
 proc show_toc {opt hh} {
