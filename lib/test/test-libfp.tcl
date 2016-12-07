@@ -274,10 +274,25 @@ testndv {-> 1234 [fn x {string length $x}] [fn x {+ $x $x}]} 8
 proc even? {x} {
   = 0 [expr $x % 2]
 }
+
 testndv {any? even? {1 2 3}} 1
 testndv {any? even? {1 3 5}} 0
 testndv {any? [fn x {= 0 [expr $x % 2]}] {1 2 3}} 1
 
+proc square {x} {expr $x * $x}
+set odd? [comp not even?]
+
+# complement and compose, use even? and square. not already available.
+# [2016-12-07 20:33] comp was already defined.
+testndv {[comp not even?] 2} 0
+testndv {[comp not even?] 3} 1
+testndv {${odd?} 7} 1
+testndv {${odd?} 4} 0
+
+testndv {[complement even?] 4} 0
+testndv {[complement even?] 5} 1
+
+testndv {filter [complement even?] {1 2 3 4}} {1 3}
 
 cleanupTests
 

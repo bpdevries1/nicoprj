@@ -26,7 +26,8 @@ namespace path {::tcl::mathop}
 namespace eval ::libfp {
   namespace export = != and or ifp seq empty? cond_1 cond not not= \
       str identity fn comp lstride regsub_fn map filter any? reduce repeat range \
-      lambda_to_proc proc_to_lambda find_proc first second count rest ->
+      lambda_to_proc proc_to_lambda find_proc first second count rest -> \
+      complement
 
   # namespace path {::tcl::mathop ::tcl::mathfunc}
   namespace path {::tcl::mathop}
@@ -427,6 +428,12 @@ proc -> {startval args} {
   return $val
 }
 
+# [2016-12-07 20:34] complement function, as in Clojure
+#(defn complement [f]
+# (comp not f))
+proc complement {f} {
+  comp not $f
+}
 
 
 } ; # end-of-namespace
