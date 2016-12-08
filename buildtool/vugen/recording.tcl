@@ -56,7 +56,7 @@ proc correlations_rec_dir {hh stmt rec_dir} {
                      [glob -directory "$rec_dir/data" -type f "*.inf"]]
   foreach inf_file $inf_files {
     $hh line "Statement found in inf_file: $inf_file"
-    show_path_responses $hh $stmt $rec_dir $inf_file
+    find_stmt_in_responses $hh $stmt $rec_dir $inf_file
   }
 }
 
@@ -67,50 +67,53 @@ proc correlations_rec_dir {hh stmt rec_dir} {
 #   - because eg t12.inf points to t6.htm, but don't want those, are only PNG's.
 # TODO: rename proc, now does more than find path.
 # TODO: extract part in foreach loop in new proc.
-proc show_path_responses {hh stmt rec_dir inf_file} {
+proc find_stmt_in_responses {hh stmt rec_dir inf_file} {
   regexp {t(\d+).inf} [file tail $inf_file] z stmt_snapshot_nr
   # set path [-> $stmt stmt->url url->parts :path]
   set path [stmt->path $stmt]
+  set get_params [stmt->getparams $stmt]
+  set post_params [stmt->postparams $stmt]
   for {set ss_check [expr $stmt_snapshot_nr -1]} {$ss_check >= 1} {incr ss_check -1} {
     # $hh line "Checking snapshot ${ss_check}..."
-    # for now only check if stmt.path occurs in snapshot, don't create regexp's yet.
-    if {[snapshot_contains_path? $hh $rec_dir $ss_check path $path]} {
-      $hh line "Found $path in snapshot $ss_check"
-    }
+    find_stmt_in_snapshot $hh $stmt $rec_dir $ss_check
+    
+  }
+}
 
-    # [2016-12-06 22:12] even hier POST params erbij, daarna procs hernoemen.
-    # postparams eerst alleen op value zoeken, als te veel, dan evt ook paramname erbij.
-    foreach postparam [stmt->postparams $stmt] {
-      if {[snapshot_contains_path? $hh $rec_dir $ss_check [:name $postparam] [:value $postparam]]} {
-        $hh line "Found POST param [:name $postparam] with value [:value $postparam] in snapshot $ss_check"
-      }
-    }
+proc find_stmt_in_snapshot {hh stmt rec_dir ss_nr} {
+  # [2016-12-08 09:12:05] Could do those in calling proc, but now only stmt as param.
+  set path [stmt->path $stmt]
+  set get_params [stmt->getparams $stmt]
+  set post_params [stmt->postparams $stmt]
 
-    # set get_params [-> $stmt stmt->url url->parts :params]
-    set get_params [stmt->getparams $stmt]
-    foreach param $get_params {
-      if {[snapshot_contains_path? $hh $rec_dir $ss_check [:name $param] [:value $param]]} {
-        $hh line "Found GET param [:name $param] with value [:value $param] in snapshot $ss_check"
-      }
-    }
+  find_item_in_snapshot $hh $rec_dir $ss_nr path $path
+
+  # [2016-12-08 09:18:01] postparams eerst alleen op value zoeken, als te veel, dan evt ook paramname erbij.
+  foreach postparam $post_params {
+    find_item_in_snapshot $hh $rec_dir $ss_nr [:name $postparam] [:value $postparam]
+  }
+
+  foreach param $get_params {
+    find_item_in_snapshot $hh $rec_dir $ss_nr [:name $param] [:value $param]
   }
 }
 
 # also have hh here, so can print some debugging statements.
 # [2016-12-06 22:04] FIXME: proc heeft side effects, moet anders!
-proc snapshot_contains_path? {hh rec_dir ss name value} {
+proc find_item_in_snapshot {hh rec_dir ss name value} {
   set inf_file [file join $rec_dir data "t${ss}.inf"]
   if {[inf_contains_own_snapshot? $inf_file $ss]} {
     # check all files mentioned in .inf
     set response_files [inf->response_files $inf_file]
     foreach resp_file $response_files {
       if {[resp_file_contains_path? $rec_dir $resp_file $value]} {
-        $hh heading 4 "Found ($name=)$value"
+        $hh heading 4 "Found path/param '$name' with value '$value' in snapshot $ss"
+        $hh heading 5 "Found ($name=)$value"
         $hh line "in response file: [$hh get_anchor $resp_file [resp_file_path $rec_dir $resp_file]]:"
         set context_string [resp_context $hh $rec_dir $resp_file $value]
         $hh line [$hh pre [$hh to_html $context_string]]
         set wrs [det_web_reg_save $name $value $context_string]
-        $hh heading 4 "Proposed regexp:"
+        $hh heading 5 "Proposed regexp:"
         $hh line [$hh pre [$hh to_html $wrs]]
         return 1
       }
