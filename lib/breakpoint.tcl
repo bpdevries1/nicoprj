@@ -44,3 +44,43 @@ proc breakpoint_show {current {show_params 1}} {
     puts stderr "Top level"
   }
 }
+
+# [2016-12-07 21:06] some idea from Cognicast / Think Relevance podcast nr 7.
+# use editproc to edit a proc
+# procname can include a namespace: ns::procname
+# TODO: maybe keep a list of changed procs.
+proc editproc {procname} {
+  global tcl_platform
+  # generate a tempfile.
+  set f [file tempfile tempname]
+  # puts "temp: $tempname"
+  if {$tcl_platform(platform) == "unix"} {
+    set unix 1;                 # don't want to use = operator here, from libfp.
+  } else {
+    set unix 0
+  }
+  if {!$unix} {
+    # to be sure, for notepad.
+    fconfigure $f -translation crlf
+  }
+  # [2016-12-07 21:43] wanted to add newlines around [info body], but then keeps growing.
+  if {[catch {puts $f "proc $procname {[info args $procname]} {[info body $procname]}"}]} {
+    # proc not found, create a new definition.
+    puts $f "proc $procname {} {\n\t\n}"
+  }
+  close $f
+  # make editor configurable? Maybe use EDITOR env var? Want an editor that starts a nwe
+  # instance and blocks this process.
+  if {$unix} {
+    catch {exec -ignorestderr leafpad $tempname >/dev/null 2>&1} msg
+  } else {
+    catch {exec -ignorestderr notepad $tempname} msg
+  }
+  #puts "exec msg: $msg"
+  # assume editing is done here, alternative is a separate read proc.
+  #puts "new proc:"
+  #puts [read_file $tempname]
+  uplevel #0 [source $tempname]
+  # file delete $tempname
+}
+
