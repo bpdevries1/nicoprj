@@ -117,7 +117,7 @@ proc find_item_in_snapshot {hh rec_dir ss name value} {
       if {[resp_file_contains_value? $rec_dir $resp_file $value]} {
         $hh heading 4 "Found path/param '$name' with value '$value' in snapshot $ss"
         $hh heading 5 "Found ($name=)$value"
-        $hh line "in response file: [$hh get_anchor $resp_file [resp_file_path $rec_dir $resp_file]]:"
+        $hh line "in response file: [$hh get_anchor $resp_file file://[resp_file_path $rec_dir $resp_file]]:"
         set context_string [resp_context $hh $rec_dir $resp_file $value]
         $hh line [$hh pre [$hh to_html $context_string]]
         set wrs [det_web_reg_save $name $value $context_string]
@@ -138,10 +138,14 @@ proc det_web_reg_save {name value str} {
   # set str2 $str
   # (.*?) mss nog vervangen door bv \d+ of [^"]+
   # TODO: met deze regexp nog checken hoe vaak deze voorkomt in de tekst. Dan mogelijk een losse proc det_regexp maken.
+  set char_after [str->regexp [char_after_substring $value $str]]
+  
   set str2 [str->regexp $str]
   # FIXME: still need to test, with next param to be replaced.
   set value2 [str->regexp $value]; # also put value to be replaced in regexp format, for subsequent string map.
-  set str3 [string map [list $value2 "(.*?)"] $str2]
+  # set str3 [string map [list $value2 "(.*?)"] $str2]
+  set str3 [string map [list $value2 "(\[^${char_after}\]+)"] $str2]
+  # breakpoint;                   # test vervangen door [^xx]+
   if {[regexp {\n} $str3]} {
     # log warn "regexp contains newline, should replace: $name=$value"
     # breakpoint
@@ -149,6 +153,12 @@ proc det_web_reg_save {name value str} {
   # replace newlines and tabs, also replace surrounding space-characters.
   regsub -all {\s*[\n\r\t]\s*} $str3 {\\\\s+} str4
   return "\tweb_reg_save_param_regexp(\"ParamName=$name\",\n\t\t\"Regexp=$str4\", LAST);"
+}
+
+proc char_after_substring {needle haystack} {
+  set p [string first $needle $haystack]
+  set len [string length $needle]
+  string index $haystack $p+$len
 }
 
 proc inf_contains_own_snapshot? {inf_file ss} {
@@ -205,6 +215,9 @@ proc str->regexp {str} {
   #return $str
   # haakjes moeten dubbel escaped worden, puntje ook.
   # string map {\" \\" ( \\( ) \\) . \\.} $str
-  string map {\" \\" ( \\\\( ) \\\\) . \\\\.} $str
+  # [2016-12-08 12:38:57] also replace {} and []
+  # [2016-12-08 13:53:40] and also * + ?
+  # [2016-12-08 13:54:20] ^ and $ too.
+  string map {\" \\" ( \\\\( ) \\\\) . \\\\. \{ \\\\\{ \} \\\\\} [ \\\\[ ] \\\\] * \\\\* + \\\\+ ? \\\\? ^ \\\\^ $ \\\\$} $str
 }
 
