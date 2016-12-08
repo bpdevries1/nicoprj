@@ -86,15 +86,23 @@ proc find_stmt_in_snapshot {hh stmt rec_dir ss_nr} {
   set get_params [stmt->getparams $stmt]
   set post_params [stmt->postparams $stmt]
 
-  find_item_in_snapshot $hh $rec_dir $ss_nr path $path
+  if {[det_path_correlation $path] > 0.5} {
+    # FIXME: for now, want to use treshold option, possibly by substracting treshold and checking here if value > 0.
+    find_item_in_snapshot $hh $rec_dir $ss_nr path $path  
+  }
 
   # [2016-12-08 09:18:01] postparams eerst alleen op value zoeken, als te veel, dan evt ook paramname erbij.
-  foreach postparam $post_params {
-    find_item_in_snapshot $hh $rec_dir $ss_nr [:name $postparam] [:value $postparam]
+  foreach param $post_params {
+    if {[param_correlation $param] > 0} {
+      # only find item if it needs to be correlated.
+      find_item_in_snapshot $hh $rec_dir $ss_nr [:name $param] [:value $param]  
+    }
   }
 
   foreach param $get_params {
-    find_item_in_snapshot $hh $rec_dir $ss_nr [:name $param] [:value $param]
+    if {[param_correlation $param] > 0} {
+      find_item_in_snapshot $hh $rec_dir $ss_nr [:name $param] [:value $param]
+    }
   }
 }
 
@@ -106,7 +114,7 @@ proc find_item_in_snapshot {hh rec_dir ss name value} {
     # check all files mentioned in .inf
     set response_files [inf->response_files $inf_file]
     foreach resp_file $response_files {
-      if {[resp_file_contains_path? $rec_dir $resp_file $value]} {
+      if {[resp_file_contains_value? $rec_dir $resp_file $value]} {
         $hh heading 4 "Found path/param '$name' with value '$value' in snapshot $ss"
         $hh heading 5 "Found ($name=)$value"
         $hh line "in response file: [$hh get_anchor $resp_file [resp_file_path $rec_dir $resp_file]]:"
@@ -131,9 +139,16 @@ proc det_web_reg_save {name value str} {
   # (.*?) mss nog vervangen door bv \d+ of [^"]+
   # TODO: met deze regexp nog checken hoe vaak deze voorkomt in de tekst. Dan mogelijk een losse proc det_regexp maken.
   set str2 [str->regexp $str]
-  set str3 [string map [list $value "(.*?)"] $str2]
-  return "\tweb_reg_save_param_regexp(\"ParamName=$name\",
-\t\t\"Regexp=$str3\", LAST);"
+  # FIXME: still need to test, with next param to be replaced.
+  set value2 [str->regexp $value]; # also put value to be replaced in regexp format, for subsequent string map.
+  set str3 [string map [list $value2 "(.*?)"] $str2]
+  if {[regexp {\n} $str3]} {
+    # log warn "regexp contains newline, should replace: $name=$value"
+    # breakpoint
+  }
+  # replace newlines and tabs, also replace surrounding space-characters.
+  regsub -all {\s*[\n\r\t]\s*} $str3 {\\\\s+} str4
+  return "\tweb_reg_save_param_regexp(\"ParamName=$name\",\n\t\t\"Regexp=$str4\", LAST);"
 }
 
 proc inf_contains_own_snapshot? {inf_file ss} {
@@ -153,8 +168,7 @@ proc inf->response_files {inf_file} {
   return $res
 }
 
-proc resp_file_contains_path? {rec_dir resp_file path} {
-  # set resp_file_path [file join $rec_dir data $resp_file]
+proc resp_file_contains_value? {rec_dir resp_file path} {
   set resp_text [read_file [resp_file_path $rec_dir $resp_file]]
   if {[string first $path $resp_text] >= 0} {
     return 1
@@ -163,7 +177,7 @@ proc resp_file_contains_path? {rec_dir resp_file path} {
   }
 }
 
-# maybe combine with resp_file_contains_path?
+# maybe combine with resp_file_contains_value?
 # return path with surrounding text in resp_file, iff path is found.
 # otherwise return empty string.
 proc resp_context {hh rec_dir resp_file path} {

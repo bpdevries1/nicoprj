@@ -218,12 +218,7 @@ proc show_request_html? {opt stmt} {
   return 0
 }
 
-# TODO: also check GET and POST params: if stmt has params, then determine if those can be ignored.
-# so split in path_ignore? and params_ignore? calls.
 proc stmt_ignore? {stmt} {
-  # Use Clojure threading operator. Both statements below are equivalent.
-
-  # corr_ini_ignore? path [-> $stmt stmt->url url->parts :path]
   corr_ini_ignore? path [stmt->path $stmt]
 }
 
@@ -273,7 +268,6 @@ proc det_path_correlation {path} {
     log warn "res: $res"
     breakpoint
   }
-  # expr $res1 + $res2]
   + $res1 $res2
 }
 
@@ -319,18 +313,18 @@ proc det_get_params_correlation {params} {
   # 1. in correlations.ini ignore list.
   # 2. based on actual value.
   
-  #return [count $params];       # for now.
-  # TODO: replace by sum, already have this? or + with var args?
-  count [filter param_correlation $params]
-  #return 0;                     # TODO: for now
+  # count [filter param_correlation $params]
+  + {*}[map param_correlation $params]
+
 }
 
 # postparams: list of dict: name, value, valuetype.
 # return: correlation indicator (float). The higher the result, the more reason to think params need to be correlated.
-proc det_post_params_correlation {postparams} {
+# TODO: this one is now the same as GET variant? Merge the two? Or will post be different, eg with multiline items or uploading files?
+proc det_post_params_correlation {params} {
   #return [count $postparams];   # for now.
-  count [filter param_correlation $postparams]
-  #return 0;                     # TODO: for now.
+  # count [filter param_correlation $postparams]
+  + {*}[map param_correlation $params]
 }
 
 # param is a GET or POST parameter. A dict with name, value, valuetype.
@@ -369,6 +363,7 @@ proc param_correlation {param} {
     default {return 1}
   }
   # maybe should check with default, contains epoch times for now, should be correlated.
+  return 0
 }
 
 proc lines_heading {stmt} {
