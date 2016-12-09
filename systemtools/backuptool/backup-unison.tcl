@@ -11,14 +11,16 @@ proc main {argv} {
     log "WARN: Unison already running, exit."
     exit 1
   }
-  set unison_dir "/home/nico/.unison"
+  # set unison_dir "/home/nico/.unison"
+  set unison_dir [file normalize ~/.unison]
+  
   set projects [det_projects $unison_dir $opt]
   puts "projects: $projects"
   # exit
   # projects is list of: project, freq_hours, prio
   # sort on priority, params: project, freq_hours
   foreach el [lsort -integer -index 2 $projects] {
-    backup_unison {*}[lrange $el 0 1]
+    backup_unison {*}[lrange $el 0 1] $unison_dir
   }
 }
 
@@ -87,12 +89,13 @@ proc is_media {prf txt} {
 
 # if a succesful backup has been done longer than 3 days ago, try a new one.
 # check unison exit-codes, possibly not all drives are mounted (eg laptop)
-proc backup_unison {prj freq_hours} {
+proc backup_unison {prj freq_hours unison_dir} {
   log "backup_unison: $prj"
   set last_ok [read_last_ok $prj]
   if {[too_long_ago $last_ok $freq_hours]} {
     log "too long ago, start new backup..."
     set started [now_fmt]
+    rm_unison_log $unison_dir $prj
     set exitcode [do_exec /home/nico/bin/unison -auto -batch $prj >/dev/null 2>@1]
     if {$exitcode <= 2} {
       # code 1 en 2 zijn kleine fouten, ook markeren als ok.
@@ -105,6 +108,25 @@ proc backup_unison {prj freq_hours} {
     log "backup done not too long ago, so nothing to do."
   }
   log "backup_unison: $prj finished"
+}
+
+proc rm_unison_log {unison_dir prj} {
+  set logfile [unison_logfile $unison_dir $prj]
+  if {$logfile != ""} {
+    log "Remove unison logfile: $logfile"
+    file delete $logfile
+  }
+}
+
+# return name of unison log file as mentioned in ~/.unison/$prj.prj
+proc unison_logfile {unison_dir prj} {
+  set prj_file [file join $unison_dir "${prj}.prf"]
+  set text [read_file $prj_file]
+  # logfile = /home/nico/log/unison/home-nico.log
+  if {[regexp {\slogfile\s*=\s*([^\n]+)\n} $text z logfile]} {
+    return $logfile
+  }
+  return ""
 }
 
 if 0 {
