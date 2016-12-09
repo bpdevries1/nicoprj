@@ -49,7 +49,6 @@ proc stmt_in_inf? {stmt inf} {
   return 0  
 }
 
-# TODO: also look for other things besides paths, like GET/POST parameters.
 proc correlations_rec_dir {hh stmt rec_dir} {
   $hh line "Recording dir where statement is found: $rec_dir"
   set inf_files [filter [fn inf {stmt_in_inf? $stmt $inf}] \
@@ -65,8 +64,6 @@ proc correlations_rec_dir {hh stmt rec_dir} {
 # * start at snapshot of inf file, and move back to 1. Stop when 1 found (maybe more later)
 # * Only check a snapshot when the .inf refers to a Filename t<snapshot>.x
 #   - because eg t12.inf points to t6.htm, but don't want those, are only PNG's.
-# TODO: rename proc, now does more than find path.
-# TODO: extract part in foreach loop in new proc.
 proc find_stmt_in_responses {hh stmt rec_dir inf_file} {
   regexp {t(\d+).inf} [file tail $inf_file] z stmt_snapshot_nr
   # set path [-> $stmt stmt->url url->parts :path]
@@ -74,9 +71,7 @@ proc find_stmt_in_responses {hh stmt rec_dir inf_file} {
   set get_params [stmt->getparams $stmt]
   set post_params [stmt->postparams $stmt]
   for {set ss_check [expr $stmt_snapshot_nr -1]} {$ss_check >= 1} {incr ss_check -1} {
-    # $hh line "Checking snapshot ${ss_check}..."
     find_stmt_in_snapshot $hh $stmt $rec_dir $ss_check
-    
   }
 }
 
@@ -210,7 +205,7 @@ proc resp_file_path {rec_dir resp_file} {
   file normalize [file join $rec_dir data $resp_file]
 }
 
-# This one for library, also messed up Emacs colour coding.
+# This one for library, also messes up Emacs colour coding.
 proc str->regexp {str} {
   #return $str
   # haakjes moeten dubbel escaped worden, puntje ook.

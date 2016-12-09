@@ -397,7 +397,6 @@ proc param->html {hh param} {
       } else {
         return $str
       }
-      
     }
     else {
       error "Unknown type: $type for: $param"
