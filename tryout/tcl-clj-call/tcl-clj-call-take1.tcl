@@ -2,19 +2,25 @@
 
 package require ndv
 
-set_log_global debug
+set_log_global info
 
 # nostart optie toevoegen.
 proc main {argv} {
-  global nprompt
+  global nprompt WINDOWS tcl_platform
   set options {
     {nostart "Don't start a new REPL"}
     {restart "Stop current REPL and start a new one."}
+    {timeout.arg "60" "Timeout in seconds"}
   }
   set opt [getoptions argv $options ""]
   set nprompt 0
   set host localhost
   set port 5555
+  if {$tcl_platform(platform) == "windows"} {
+    set WINDOWS 1
+  } else {
+    set WINDOWS 0
+  }
   if {[:restart $opt]} {
     kill_repl
     start_repl
@@ -59,6 +65,38 @@ proc main {argv} {
 }
 
 proc kill_repl {} {
+  global WINDOWS
+  if {$WINDOWS} {
+    kill_repl_windows
+  } else {
+    kill_repl_unix
+  }
+}
+
+# ook eerst proberen het proces netjes te stoppen: connecten en exit command? Of ctrl-D doorgeven?
+proc kill_repl_windows {} {
+  set res ""
+  catch {
+    set res [exec -ignorestderr netstat -ano | grep 5555]  
+  }
+  log debug "res: $res"
+  # breakpoint
+  if {[regexp {LISTENING\s+(\d+)} $res z pid]} {
+    puts "Killing proces with id: $pid"
+    # exec kill -9 $pid
+    # [2016-12-10 20:59:13] note that /F(orce) is needed
+    exec TASKKILL /PID $pid /T /F
+    puts "Now sleeping for 10 seconds..."
+    after 10000
+    puts "And restart..."
+  } else {
+    puts "REPL was not started, so just starting a new one."
+  }
+
+  # breakpoint
+}
+
+proc kill_repl_unix {} {
   set res ""
   catch {
     set res [exec -ignorestderr netstat -anp | grep 5555]  
@@ -78,6 +116,54 @@ proc kill_repl {} {
 }
 
 proc start_repl {} {
+  global WINDOWS
+  if {$WINDOWS} {
+    start_repl_windows
+  } else {
+    start_repl_unix
+  }
+}
+
+proc start_repl_windows {} {
+  global env
+  # start lein repl in the background.
+  set old_pwd [pwd]
+  # TODO: different on windows.
+
+  # TODO: scrabble doet het wel even, maar stopt daarna weer, nrepl foutmelding.
+  # testrepl lijkt het wat beter te doen, maar ook wat langer wachten tussen aanroepen.
+  # cd ~/nicoprjbb/sporttools/scrabble
+  # this info should be set in a config file. For buildtool in .bld dir, for generic scripting maybe an ENV var.
+  cd c:/nico/nicoprjbb/sporttools/testrepl
+  log debug "Starting Repl (1)"
+  # exec -ignorestderr ~/bin/lein repl :headless &
+  # met nohup moet je wel ~ uitklappen.
+  # c:\util\cygwin\bin\nohup.exe cmd.exe /c c:\users\ndvreeze\.lein\bin\lein.bat repl :headless
+  set env(LEIN_JAVA_CMD) {C:\develop\Java\jdk1.8.0_05\bin\java.exe}
+  exec -ignorestderr {c:\util\cygwin\bin\nohup.exe} {c:\windows\system32\cmd.exe} /c {c:\users\ndvreeze\.lein\bin\lein.bat} repl :headless &
+  
+  # onder cygwin:
+  # env(JAVA_CMD)                = /c/develop/Java/jdk1.8.0_05/bin/java.exe
+  # env(JAVA_HOME)               = /c/develop/java/jdk1.6.0_14
+  # env(LEIN_JAVA_CMD)           = /c/develop/Java/jdk1.8.0_05/bin/java.exe
+  
+  # onder 4NT:
+  # env(JAVA_HOME)               = c:\develop\java\jdk1.6.0_14
+  # env(JAVA_ROOT)               = c:\develop\java
+  # env(LEIN_JAVA_CMD)           = C:\develop\Java\jdk1.8.0_05\bin\java.exe
+  # wat dingen proberen.
+  #set lein_bat {c:\users\ndvreeze\.lein\bin\lein.bat}
+  #exec -ignorestderr {c:\windows\system32\cmd.exe} /c {c:\Users\ndvreeze\.lein\bin\lein.bat} repl :headless
+  # -> 2x path not found.
+  # cmd.exe kan 'ie wel vinden.
+  #exec -ignorestderr {c:\windows\system32\cmd.exe} /c $lein_bat repl :headless
+  
+  log debug "Starting Repl (2)"
+  # exit
+  cd $old_pwd
+}
+
+proc start_repl_unix {} {
   # start lein repl in the background.
   set old_pwd [pwd]
   # TODO: different on windows.
@@ -95,6 +181,7 @@ proc start_repl {} {
   cd $old_pwd
 }
 
+
 proc print_text {sock} {
   global nprompt
   set text [read $sock]
@@ -106,7 +193,11 @@ proc print_text {sock} {
     # puts "\[#[string length $line], eof=[eof $sock]\]partial line: <<$line>>"
     # puts "\[#[string length $text], eof=[eof $sock]\]full text: <<$text>>"
     regsub {user=> } $text "" text2
-    puts -nonewline $text2
+    if {[regexp {user} $text2]} {
+      puts "Still user found: $text2"
+      breakpoint
+    }
+    puts -nonewline "$text2"
     if {[regexp {(^|\n)user=> $} $text]} {
       incr nprompt
       log debug "Increased nprompt: $nprompt"
