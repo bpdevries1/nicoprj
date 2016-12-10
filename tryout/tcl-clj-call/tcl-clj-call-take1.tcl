@@ -33,7 +33,12 @@ proc main {argv} {
       puts "Repl not started and -nostart given, so exit"
       exit
     }
-    start_repl
+    if {![:restart $opt]} {
+      start_repl  
+    } else {
+      # already restarted, don't try again, now just wait for connection.
+    }
+    
     set connected 0
     while {!$connected} {
       log debug "Wait 1 second and try to connect..."
@@ -76,6 +81,9 @@ proc start_repl {} {
   # start lein repl in the background.
   set old_pwd [pwd]
   # TODO: different on windows.
+
+  # TODO: scrabble doet het wel even, maar stopt daarna weer, nrepl foutmelding.
+  # testrepl lijkt het wat beter te doen, maar ook wat langer wachten tussen aanroepen.
   # cd ~/nicoprjbb/sporttools/scrabble
   cd ~/nicoprjbb/sporttools/testrepl
   log debug "Starting Repl (1)"
