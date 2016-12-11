@@ -53,7 +53,8 @@ task show_paths {Create a DB (and HTML? report) of all statements/paths in scrip
           set lines [join [:lines $stmt] "\r\n"]
           set path [stmt->path $stmt]
           set url [stmt->url $stmt]
-          $db insert stmt_path [vars_to_dict action_file linenr lines path url]
+          set snapshot [stmt->snapshot $stmt]
+          $db insert stmt_path [vars_to_dict action_file linenr lines path url snapshot]
         }
       }
     }
@@ -91,7 +92,8 @@ proc get_stmt_db {db_name opt} {
   set db [dbwrapper new $db_name]
   # define_tables $db $opt
   # for now only one table
-  $db add_tabledef stmt_path {id} {action_file linenr lines path url}
+  $db def_datatype {linenr} integer
+  $db add_tabledef stmt_path {id} {action_file linenr lines path url snapshot}
   
   $db create_tables 0 ; # 0: don't drop tables first. Always do create, eg for new table defs. 1: drop tables first.
   if {!$existing_db} {

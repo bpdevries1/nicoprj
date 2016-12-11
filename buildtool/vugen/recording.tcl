@@ -121,27 +121,27 @@ proc find_stmt_in_snapshot {hh stmt rec_dir ss_nr} {
 
   if {[det_path_correlation $path] > 0.5} {
     # FIXME: for now, want to use treshold option, possibly by substracting treshold and checking here if value > 0.
-    find_item_in_snapshot $hh $rec_dir $ss_nr path $path  
+    find_item_in_snapshot $hh $rec_dir $stmt $ss_nr path $path  
   }
 
   # [2016-12-08 09:18:01] postparams eerst alleen op value zoeken, als te veel, dan evt ook paramname erbij.
   foreach param $post_params {
     if {[param_correlation $param] > 0} {
       # only find item if it needs to be correlated.
-      find_item_in_snapshot $hh $rec_dir $ss_nr [:name $param] [:value $param]  
+      find_item_in_snapshot $hh $rec_dir $stmt $ss_nr [:name $param] [:value $param]  
     }
   }
 
   foreach param $get_params {
     if {[param_correlation $param] > 0} {
-      find_item_in_snapshot $hh $rec_dir $ss_nr [:name $param] [:value $param]
+      find_item_in_snapshot $hh $rec_dir $stmt $ss_nr [:name $param] [:value $param]
     }
   }
 }
 
 # also have hh here, so can print some debugging statements.
 # [2016-12-06 22:04] FIXME: proc heeft side effects, moet anders!
-proc find_item_in_snapshot {hh rec_dir ss name value} {
+proc find_item_in_snapshot {hh rec_dir stmt ss name value} {
   set inf_file [file join $rec_dir data "t${ss}.inf"]
   if {[inf_contains_own_snapshot? $inf_file $ss]} {
     # check all files mentioned in .inf
@@ -149,12 +149,14 @@ proc find_item_in_snapshot {hh rec_dir ss name value} {
     foreach resp_file $response_files {
       if {[resp_file_contains_value? $rec_dir $resp_file $value]} {
         $hh heading 4 "Found path/param '$name' with value '$value' in snapshot $ss"
+        # $hh line "Source: $source_str"
         $hh heading 5 "Found ($name=)$value"
         $hh line "in response file: [$hh get_anchor $resp_file file://[resp_file_path $rec_dir $resp_file]]:"
         set context_string [resp_context $hh $rec_dir $resp_file $value]
+        set source_str [find_source $inf_file $stmt $ss]
         $hh line [$hh pre [$hh to_html $context_string]]
         set wrs [det_web_reg_save $name $value $context_string]
-        $hh heading 5 "Proposed regexp:"
+        $hh heading 5 "Proposed regexp (in $source_str):"
         $hh line [$hh pre [$hh to_html $wrs]]
         return 1
       }
@@ -164,6 +166,56 @@ proc find_item_in_snapshot {hh rec_dir ss name value} {
   } else {
     # don't look here for now, probably only images
     return 0
+  }
+}
+
+# [2016-12-11 20:54] FIXME: a dirty hack for now
+set stmt_db ""
+
+# return filename/linenr
+# @param stmt is from request/stmt that needs to be correlated, not from response where
+# this path/param is found! So this statement is not very useful here.
+# TODO: find source file in all cases, eg also:
+#   Found path/param 'path' with value 'RRS2/Confirmation/UpdateIdentifiers' in snapshot 5
+#   Found (path=)RRS2/Confirmation/UpdateIdentifiers
+#   in response file: t5.htm:
+proc find_source {inf_file stmt ss} {
+  global stmt_db
+  if {$stmt_db == ""} {
+    set stmt_db [get_stmt_db statements/statements.db {clean 0}]
+    set query "select count(*) nstmts from stmt_path"
+    set res [$stmt_db query $query]
+    if {[:nstmts [first $res]] == 0} {
+      $stmt_db close
+      task_show_paths
+      set stmt_db [get_stmt_db statements/statements.db {clean 0}]
+    }
+  }
+  # here stmt_db has value and statements are read.
+  set path [url->path [inf_main_url $inf_file]]
+  set query "select action_file, linenr
+             from stmt_path
+             where snapshot='t$ss'
+             and path='$path'"
+  set res [$stmt_db query $query]
+  if {[count $res] > 0} {
+    join [map [fn row {return "[:action_file $row]([:linenr $row])"}] $res] ", "  
+  } else {
+    return "SOURCE FILE NOT FOUND for $inf_file"
+  }
+  
+  # return "find_source for $inf_file/$ss"
+}
+
+proc inf_main_url {inf_file} {
+  #[t6]
+  #FileName1=t6.htm
+  #URL1=https://rrs2uat1.eu.rabonet.com/RRS2/Exception
+  set text [read_file $inf_file]
+  if {[regexp {URL1=([^\n]+)} $text z url]} {
+    return $url
+  } else {
+    error "No URL found in inf_file: $inf_file"
   }
 }
 
