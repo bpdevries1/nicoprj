@@ -21,6 +21,19 @@ proc correlations {hh stmt} {
   }
 }
 
+# Write html (with hh) with recording info
+proc recordings {hh stmt} {
+  set rec_dirs [stmt_recording_dirs $stmt]
+  if {[count $rec_dirs] == 0} {
+    # [2016-12-11 20:17] possibly nothing found for images and now also for reporting server, later recording.
+    # log warn "No recording dirs for: $stmt"
+    # breakpoint
+  }
+  foreach rec_dir $rec_dirs {
+    recordings_rec_dir $hh $stmt $rec_dir
+  }
+}
+
 # return all recording dirs where stmt is found.
 # found === both snapshot and URL are the same.
 proc stmt_recording_dirs {stmt} {
@@ -47,6 +60,31 @@ proc stmt_in_inf? {stmt inf} {
     }
   }
   return 0  
+}
+
+# show recording info for statement in recording dir (rec_dir)
+# basically just a href to the response file.
+proc recordings_rec_dir {hh stmt rec_dir} {
+  $hh line "Recording dir where statement is found: $rec_dir"
+  set inf_files [filter [fn inf {stmt_in_inf? $stmt $inf}] \
+                     [glob -directory "$rec_dir/data" -type f "*.inf"]]
+  foreach inf_file $inf_files {
+    set resp_file [first [inf->response_files $inf_file]]
+    $hh line "Statement found in inf_file: $inf_file: [$hh get_anchor $resp_file file://[resp_file_path $rec_dir $resp_file]]"
+    # if {[inf_contains_own_snapshot? $inf_file $ss]} {}
+    # check all files mentioned in .inf
+    if 0 {
+      set response_files [inf->response_files $inf_file]
+      set resp_files2 [filter text_response? $response_files]
+      $hh write [$hh get_ul [map [fn rf {$hh get_anchor $rf file://[resp_file_path $rec_dir $rf]}] $resp_files2]]
+    } 
+  }
+}
+
+# return 1 iff a html or other text response.
+# [2016-12-11 20:01] for now just look at extension
+proc text_response? {resp_file} {
+  regexp {\.html?$} [string tolower $resp_file]
 }
 
 proc correlations_rec_dir {hh stmt rec_dir} {

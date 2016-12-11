@@ -169,6 +169,10 @@ proc show_request_html {opt hh stmt} {
   # iff request is shown, add it to correlations file
   corr_ini_add_stmt $stmt;      # this statement is important enough to show, also add to correlations.ini
 
+  # show response files of recording(s)
+  $hh heading 3 Recording(s)
+  recordings $hh $stmt
+  
   # Show possible correlations
   # paragraph $hh Correlations [correlations $stmt]
   $hh heading 3 Correlations
