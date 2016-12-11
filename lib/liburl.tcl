@@ -2,7 +2,7 @@ package provide ndv 0.1.1
 package require json
 
 namespace eval ::liburl {
-  namespace export url-encode url-decode url->parts url->params url->domain det_valuetype
+  namespace export url-encode url-decode url->parts url->params url->domain url->path det_valuetype
 
 # source: http://wiki.tcl.tk/14144
 proc init-url-encode {} {
@@ -71,6 +71,10 @@ proc url->parts {url} {
 # some syntactic sugar on url->parts:
 proc url->domain {url} {
   :domain [url->parts $url]
+}
+
+proc url->path {url} {
+  :path [url->parts $url]
 }
 
 # return list of url params
