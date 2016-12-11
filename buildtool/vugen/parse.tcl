@@ -302,6 +302,20 @@ proc stmt->url_parts {stmt} {
   -> $stmt stmt->url url->parts
 }
 
+# [2016-12-11 20:52] already had this function
+proc stmt->snapshot_old {stmt} {
+  # "Snapshot=t18.inf",
+  foreach param $params {
+    if {[:name $param] == "Snapshot"} {
+      if {[regexp {t(\d+).inf} [:value $param] z ss]} {
+        breakpoint
+        return $ss
+      }
+    }
+  }
+  return ""
+}
+
 # return list of dict: name, value, valuetype.
 proc stmt->postparams {stmt} {
   set params [stmt->params $stmt]
