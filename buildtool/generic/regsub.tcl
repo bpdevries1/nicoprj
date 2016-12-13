@@ -49,3 +49,11 @@ proc regsub_file {srcfile from to opt} {
   }
 }
 
+if 0 {
+  Example regsubs:
+
+  put ff:<text> in action file, this regsub will replace it with weg_reg_find:
+  bld regsub -action "[ \t]*ff:([^\n\r]+)" "    web_reg_find(\"Text=\1\", \"Fail=NotFound\", LAST);"
+
+  
+}
