@@ -1,4 +1,3 @@
-# args can only be -do, to really perform the replacements. Should be at the end, could be that regexps have/are -do.
 # if not really, create a file.__TEMP__ with the new version. Then perform a diff on both.
 # TODO: als -do is meegegeven, dan actie opslaan (in repo, want ook voor andere scripts). dan optie om deze te tonen en te kiezen.
 # en mss ook een naam te geven.
