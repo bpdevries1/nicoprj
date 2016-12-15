@@ -85,8 +85,8 @@ proc add_web_reg_find {stmt_groups} {
 # return new statement group based on current one, possibly adding a statement for
 # web_reg_find, if it does not exist yet. Add it just before the request
 proc add_web_reg_find_group {stmt_grp} {
-  if {[stmt_grp_has $stmt_grp main-req]} {
-    if {![stmt_grp_has $stmt_grp sub-find]} {
+  if {[stmt_grp_has_type? $stmt_grp main-req]} {
+    if {![stmt_grp_has_type? $stmt_grp sub-find]} {
       if {[url_needs_find [:url $stmt_grp]]} {
         dict set stmt_grp statements \
             [linsert [:statements $stmt_grp] end-1 \
