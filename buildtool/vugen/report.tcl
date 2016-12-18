@@ -35,12 +35,29 @@ task report {Create report of output.txt in script dir
   if {![file exists $to_file]} {
     file mkdir $subdir
     file copy output.txt $to_file
+    if {[:step $opt]} {
+      copy_step_result_files $subdir
+    }
   }
   read_report_run_dir $subdir $opt; # in perftools/report/read-report-dir.tcl
   if {[:testruns $opt]} {
     # call for every dir in testruns dir.
     foreach subdir [glob -directory $testruns_dir -type d *] {
       read_report_run_dir $subdir $opt
+    }
+  }
+}
+
+proc copy_step_result_files {target_dir_root} {
+  set src_dir [file join "result1/iteration1"]
+  set target_dir [file join $target_dir_root $src_dir]
+  file mkdir $target_dir
+  foreach filename [glob -nocomplain -directory $src_dir *.inf] {
+    file copy $filename [file join $target_dir [file tail $filename]]
+    set ref_file [step_get_ref_file $filename]
+    set ref_path [file join $src_dir $ref_file]
+    if {[file exists $ref_path]} {
+      file copy $ref_path [file join $target_dir [file tail $ref_path]]
     }
   }
 }
