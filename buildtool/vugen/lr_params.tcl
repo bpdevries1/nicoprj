@@ -5,6 +5,7 @@ task check_lr_params {Check LR parameter settings
   For each parameter, check:
   * not set to sequential - should only be used for script testing.
   * first row != 1        - should only be used for script testing.
+  * not set to continue-with-last.
 } {
   foreach filename [glob -nocomplain *.prm] {
     check_lr_params_file $filename
@@ -26,9 +27,25 @@ proc check_lr_params_file {filename} {
       if {$st != 1} {
         puts "WARNING: $param: $line"
       }
+    } elseif {[regexp {OutOfRangePolicy="(.+)"} $line z st]} {
+      # OutOfRangePolicy="ContinueWithLast"
+      if {$st == "ContinueWithLast"} {
+        puts "WARNING: $param: $line"
+      }
+    } elseif {[regexp {Table="(.+)"} $line z dat_filename]} {
+      # Table="mmsr_upload_file.dat"
+      check_param_dat_file $dat_filename
     }
   }
   close $f
+}
+
+# [2016-12-18 15:46] Check if param.dat file ends with a newline. If it doesn't, ALM/Controller refuses to execute script, without stating cause of error, causing wasted effort in chasing the 'bug'.
+proc check_param_dat_file {dat_filename} {
+  set text [read_file $dat_filename]
+  if {![regexp {\n$} $text]} {
+    puts "FATAL: $dat_filename does NOT end in newline! (ALM will fail to run!)"
+  }
 }
 
 proc check_lr_params_generic {} {
