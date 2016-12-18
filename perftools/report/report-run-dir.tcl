@@ -81,7 +81,7 @@ proc report_full {db dir opt} {
       report_iter_user $db $row $hh
     }
     if {[:step $opt]} {
-      report_steps $db $hh $opt
+      report_steps $db $hh $opt $dir
     }
     $hh write_footer
   }
@@ -158,16 +158,50 @@ proc href_resources {db hh vuserid iteration user transname} {
   }
 }
 
-proc report_steps {db hh opt} {
+proc report_steps {db hh opt dir} {
   $hh heading 1 "All steps within transactions"
   $hh table_start
   $hh table_header linenr transname step_name step_type
   set query "select linenr, transname, step_name, step_type from step order by linenr"
   foreach row [$db query $query] {
-    $hh table_row [:linenr $row] [:transname $row] [:step_name $row] [:step_type $row]
+    $hh table_row [:linenr $row] [:transname $row] [step_href $hh $dir [:step_name $row]] [:step_type $row]
   }
   $hh table_end
 }
+
+proc step_href {hh dir step_name} {
+  set ref_file [step_html_ref $dir $step_name]
+  $hh get_anchor $step_name [file join "result1/iteration1" $ref_file]
+}
+
+# find and return .inf file which contains step.
+# dir - main dir, so need to go to result1/iteration1
+proc step_html_ref {dir step_name} {
+  set ref_file ""
+  foreach filename [glob -nocomplain -directory [file join $dir "result1/iteration1"] *.inf] {
+    set text [read_file $filename]
+    # StepName=Url: System Features
+    if {[regexp -nocase -line "^StepName=\[^:\]+: ${step_name}$" $text line]} {
+      set ref_file [step_get_ref_file $filename]
+      # puts "[file tail $filename]: $line -> $ref_file"
+    }
+  }
+  return $ref_file
+}
+
+# find FileName1 in .inf file.
+# FileName1=t8.html
+# [2016-12-18 17:13] this one copied from steps.tcl in buildtool, should have SPOD.
+proc step_get_ref_file {filename} {
+  set text [read_file $filename]
+  if {[regexp -line {^FileName1=(.+)$} $text z ref]} {
+    return $ref
+  } else {
+    return "FileName1 not found"
+  }
+}
+
+
 
 # starting point, also called from buildtool/ahk and /vugen.
 proc report_summary {db dir opt} {
