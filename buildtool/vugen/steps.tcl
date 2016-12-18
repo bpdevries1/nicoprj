@@ -6,7 +6,7 @@ task find_step {Find t<xx>.inf with the step as in source
     set text [read_file $filename]
     # StepName=Url: System Features
     if {[regexp -nocase -line "^StepName=\[^:\]+: $step.*$" $text line]} {
-      set ref_file [get_ref_file $filename]
+      set ref_file [step_get_ref_file $filename]
       puts "[file tail $filename]: $line -> $ref_file"
     }
   }
@@ -14,7 +14,7 @@ task find_step {Find t<xx>.inf with the step as in source
 
 # find FileName1 in .inf file.
 # FileName1=t8.html
-proc get_ref_file {filename} {
+proc step_get_ref_file {filename} {
   set text [read_file $filename]
   if {[regexp -line {^FileName1=(.+)$} $text z ref]} {
     return $ref
@@ -24,4 +24,5 @@ proc get_ref_file {filename} {
 }
 
 # TODO: maybe use this for generating a (HTML) table with srcfile/srcline, stepname, stepnr (t<xx) and ref to main (html,js,json) file and maybe supporting file.
+# [2016-12-18 17:21] part of this done in report-run-dir.tcl.
 
