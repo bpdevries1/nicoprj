@@ -29,8 +29,9 @@ proc check_lr_params_file {filename} {
       }
     } elseif {[regexp {OutOfRangePolicy="(.+)"} $line z st]} {
       # OutOfRangePolicy="ContinueWithLast"
+      # [2016-12-20 20:48] only if unique is set (not sequential or random) this value is used. For now, no warning.
       if {$st == "ContinueWithLast"} {
-        puts "WARNING: $param: $line"
+        # puts "WARNING: $param: $line"
       }
     } elseif {[regexp {Table="(.+)"} $line z dat_filename]} {
       # Table="mmsr_upload_file.dat"
