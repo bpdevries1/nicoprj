@@ -66,6 +66,7 @@ proc create_random_view {} {
   }
   log debug "Dropped view albums"
   # breakpoint
+  # [2016-12-18 20:11] in music no XRated, have separate script for this.
   set query "create view albums (id, path, freq, freq_history, play_count) as
              select g.id, a.path, g.freq, g.freq_history, g.play_count
              from generic g, album a, member mem, mgroup mg
@@ -73,6 +74,7 @@ proc create_random_view {} {
              and mem.generic = g.id
              and mem.mgroup = mg.id
              and mg.name = 'Albums'
+             and a.path not like '%XRated%'
              and (a.file_exists is null or a.file_exists = 1)"
   try_eval {
     pg_query $conn $query
