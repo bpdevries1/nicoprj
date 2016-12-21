@@ -22,7 +22,6 @@ bld remove-comment
 bld remove-empty-lines
 gac -> Put result of these automatic actions in git.
 bld test -> check for errors and inconsistencies
-
 ** Manual actions 25-11-2016
 bld get logger.c -> not automatically done correctly yet.
 bld put configfile.c -> possibly some whitespace changes
@@ -32,6 +31,9 @@ bld put vugen.h -> same
 bld put wrr_functions.c -> same
 bld put y_core.c -> same
 ** Add actions to existing script
+** General notes
+*** Don't wait to long with correlations
+[2016-12-20 10:31:26] Script will differ from recordings more and more, so correlations will be more difficult. Eg snapshot numbers may change, some code might be integrated.
 * org-mode configuration
 #+STARTUP: indent
 #+STARTUP: overview
