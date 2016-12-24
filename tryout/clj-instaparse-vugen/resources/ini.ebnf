@@ -1,9 +1,3 @@
-(*
-Some issues:
-* space between key and = is now part of the key. And also for value.
-
-*)
-
 Ini = Section*
 
 Section = Header Body?
@@ -16,8 +10,12 @@ Header = <'['> HeaderValue <']'> <NewLine>
 
 <HeaderValue> = #'[^\r\n\[\]]+'
 
-Key = #'[^\r\n=]+'
-Value = Line
+(* Key = #'[^\r\n=]+' *)
+Key = WordNoEq (Spaces WordNoEq)*
+Value = Epsilon | Word (Spaces Word)*
+
+<Word> = #'[^\s]+'
+<WordNoEq> = #'[^\s=]+'
 
 (* Line/Value can be empty *)
 <Line> = #'[^\r\n]*'
@@ -26,7 +24,7 @@ Value = Line
 <NewLine> = #'\r?\n'
 
 (* Spaces should not contain new lines *)
-<Spaces> = <Space*>
+<Spaces> = Space*
 <Space> = ' '
 
      

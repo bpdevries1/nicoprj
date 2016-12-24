@@ -8,31 +8,21 @@
   [& args]
   (println "Hello, World!"))
 
-(def as-and-bs
-  (insta/parser
-   "S = AB*
-     AB = A B
-     A = 'a'+
-     B = 'b'+"))
+(def ini-parser (-> "ini.ebnf" io/resource slurp insta/parser))
 
-;; read syntax from file.
-(def ini-parser-old
-  (insta/parser (clojure.java.io/resource "ini.ebnf"))
-  ;;(insta/parser "ini.ebnf")
-  )
-
-;; deze is ok:
-;;(insta/parser "file:/home/nico/nicoprj/tryout/clj-instaparse-vugen/resources/ini.ebnf")
-
-(def ini-res (clojure.java.io/resource "ini.ebnf"))
-
-(def ini-parser (insta/parser (slurp ini-res)))
+(defn ini-parse
+  "Parse a string using ini-parser and transform"
+  [s]
+  (->> s ini-parser 
+       (insta/transform {:Value str :Key str})))
 
 (def usr-text (slurp (io/resource "RRS_Users.usr")))
-
-(def usr (ini-parser usr-text))
+(def usr (ini-parse usr-text))
 
 (def mini-text (slurp (io/resource "mini.usr")))
-(def mini (ini-parser mini-text))
+(def mini (ini-parse-transform mini-text))
+
+
+
 
 
