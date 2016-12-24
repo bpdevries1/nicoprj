@@ -1,0 +1,32 @@
+(*
+Some issues:
+* space between key and = is now part of the key. And also for value.
+
+*)
+
+Ini = Section*
+
+Section = Header Body?
+
+Body = (KeyValue | <EmptyLine>)*
+
+KeyValue = Key <Spaces '=' Spaces> Value <NewLine?>
+
+Header = <'['> HeaderValue <']'> <NewLine>
+
+<HeaderValue> = #'[^\r\n\[\]]+'
+
+Key = #'[^\r\n=]+'
+Value = Line
+
+(* Line/Value can be empty *)
+<Line> = #'[^\r\n]*'
+<EmptyLine> = NewLine
+
+<NewLine> = #'\r?\n'
+
+(* Spaces should not contain new lines *)
+<Spaces> = <Space*>
+<Space> = ' '
+
+     

@@ -1,0 +1,9 @@
+[General]
+Type=Multi
+DefaultCfg=default.cfg
+[Actions]
+abc=
+Action=Action.c
+vuser init = vuser init.c
+
+landing=landing.c
