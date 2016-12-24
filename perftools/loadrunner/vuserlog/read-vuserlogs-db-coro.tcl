@@ -33,7 +33,7 @@ use libmacro;                   # syntax_quote
 
 # separate function, to be called once, even when handling multiple log files.
 proc define_logreader_handlers {} {
-  log info "define_logreader_handlers (vuserlogs): start"
+  log debug "define_logreader_handlers (vuserlogs): start"
   # of toch een losse namespace waar deze dingen in hangen?
 
   reset_parsers_handlers
@@ -164,6 +164,17 @@ def_parser_regexp_srcline step_start step_start {(web_url|web_submit_data|web_cu
 
 def_parser_regexp_srcline request_start request_start {: (\d+)-byte request headers for "(.+?)" \(RelFrameId} reqheaderbytes url
 
+# auto log messages start and end.
+# [2016-12-23 19:24] possibly not even needed: auto_log_start/auto_log_end.
+def_parser_regexp auto_log_start auto_log_start {Start auto log messages stack - Iteration (\d+).} iteration
+
+def_parser_regexp auto_log_end auto_log_end {End auto log messages stack.}
+
+# error line with timestamp
+# tradesearch_exit_rebuild.c(15): Error -35049: No match found for the requested parameter "ParentDealId". Check whether the requested regular expression exists in the response data     [MsgId: MERR-35049] [Time:2016-12-21 18:30:27]
+
+def_parser_regexp_srcline errorline_ts errorline_ts {Error ([-0-9]+): (.*?) \[Time:([0-9 :-]+)\]} errornr errortext ts
+
 }
 
 # Most log lines in vugen/vuserlog start with sourcefile/sourceline, include those in topic-items.
@@ -192,7 +203,7 @@ proc log2nvpairs {line} {
 proc def_handlers {} {
 
   # convert trans_line => trans
-  def_handler trans {bof eof trans_line trans_param} trans {
+  def_handler trans {bof eof trans_line trans_param errorline_ts} trans {
     # init
     set user ""; set iteration 0; set split_proc "<none>"; set trans_params [dict create]
   } {
@@ -210,6 +221,10 @@ proc def_handlers {} {
       trans_param {
         log debug "in trans handler, got trans_param: $item"
         dict set trans_params [:paramname $item] [:paramvalue $item]
+      }
+      errorline_ts {
+        log debug "found errorline, possibly no end-trans for start-trans"
+        set started_transactions [update_with_errorline_ts $started_transactions $item]
       }
       trans_line {
         if {[new_user_iteration? $item $user $iteration]} {
@@ -398,5 +413,17 @@ proc det_error_details {rest} {
     }
   }
   list $errortype $user $level $details
+}
+
+# set started_transactions [update_with_errorline_ts $started_transactions $item]
+proc update_with_errorline_ts {started_transactions item} {
+  log debug "Update_with_errorline_ts called"
+  dict map {transname trans} $started_transactions {
+    update_trans_with_errorline_ts $transname $trans $item
+  }
+}
+
+proc update_trans_with_errorline_ts {transname trans item} {
+  dict merge $trans [dict create ts_end [:ts $item]]
 }
 

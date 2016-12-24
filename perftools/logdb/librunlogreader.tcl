@@ -23,6 +23,23 @@ proc make_trans_not_finished {started_transactions} {
   foreach row [dict values $started_transactions] {
     set dstart [dict_rename $row $line_fields $line_start_fields]
     set dend [dict_rename $row $line_fields $line_end_fields]
+    if {[:ts_end $dstart] != ""} {
+      # take end timestamp from errorline with timestamp.
+      if {[:ts_end $dstart] < [:ts_start $dstart]} {
+        # probably because of missing msec: set end = start, resp time = 0
+        dict set dend ts_end [:ts_start $dstart]
+        dict set dend resptime 0.0
+      } else {
+        set ts_end [:ts_end $dstart]
+        dict set dend ts_end $ts_end
+        set sec_ts_end [parse_ts $ts_end]
+        dict set dend sec_ts_end $sec_ts_end
+        set resptime [format %.3f [expr $sec_ts_end - [:sec_ts_start $dstart]]]
+        dict set dend resptime $resptime
+        # dict set dend resptime 1234; # TODO: calculate.
+      }
+      log debug "set ts_end and also resptime to 1234"
+    }
     set d [dict merge $dstart $dend]
     lappend res $d
   }
