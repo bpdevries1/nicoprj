@@ -130,6 +130,7 @@ proc handle_parsers {to_publish logfile line linenr} {
     # channels. Also, more than one parser could produce a result. A parser produces
     # max 1 result for 1 topic, handlers could split these into multiple results.
     if {$res != ""} {
+      log debug "Created item to publish: $res"
       $to_publish put $res
     }
   }

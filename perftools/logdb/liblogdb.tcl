@@ -31,10 +31,10 @@ proc get_run_db {db_name opt} {
   }
   $db create_tables 0 ; # 0: don't drop tables first. Always do create, eg for new table defs. 1: drop tables first.
   if {!$existing_db} {
-    log info "New db: $db_name, create tables"
+    log debug "New db: $db_name, create tables"
     # create_indexes $db
   } else {
-    log info "Existing db: $db_name, don't create tables"
+    log debug "Existing db: $db_name, don't create tables"
   }
   # TODO: maybe call prepare just before (or within) first insert call.
   $db prepare_insert_statements
@@ -112,7 +112,7 @@ proc define_tables {db opt} {
 }
 
 proc delete_database {dbname} {
-  log info "delete database: $dbname"
+  log debug "delete database: $dbname"
   # error nietgoed
   set ok 0
   catch {

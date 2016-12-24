@@ -29,7 +29,7 @@ lappend reader_namespaces [source [file join $perftools_dir loadrunner \
 # * now expect DB in subdir, also put html reports there.
 proc main {argv} {
   global argv0 log
-  log info "$argv0 called with options: $argv"
+  log debug "$argv0 called with options: $argv"
   set options {
     {dir.arg "" "Directory with subdirs with vuserlog files and sqlite db's"}
     {all "Create all reports (full and summary)"}
@@ -50,7 +50,7 @@ proc main {argv} {
   log debug "logdir: $logdir"
   foreach subdir [glob -nocomplain -directory $logdir -type d *] {
     if {[ignore_dir $subdir]} {
-      log info "Ignore dir: $subdir"
+      log debug "Ignore dir: $subdir"
       continue
     }
     # set dbname "$subdir.db"
@@ -91,11 +91,11 @@ proc read_report_run_dir {rundir opt} {
   
   set dbname [file join $rundir testrunlog.db]
   if {[:clean $opt]} {
-    log info "Deleting DB: $dbname"
+    log debug "Deleting DB: $dbname"
     file delete $dbname
   }
   if {![file exists $dbname]} {
-    log info "New dir: read logfiles: $rundir"
+    log debug "New dir: read logfiles: $rundir"
     # file delete $dbname
     # read_logfile_dir $dir $dbname 0 split_transname
     read_run_dir $rundir $dbname $opt
@@ -121,9 +121,9 @@ proc read_run_dir {rundir dbname opt} {
     $pg at_item $nhandled
   }
   add_read_status $db "complete"
-  log info "set read_status, closing DB"
+  log debug "set read_status, closing DB"
   $db close
-  log info "closed DB"
+  log debug "closed DB"
   log info "Read $nread logfile(s) in $rundir"
 }
 
@@ -189,7 +189,7 @@ proc read_report_set_namespaces {rundir opt} {
 
 proc create_dot_png {ns rundir} {
   global parsers handlers
-  log info "Create dot/png for: $ns in dir: $rundir"
+  log debug "Create dot/png for: $ns in dir: $rundir"
   # ${ns}::define_logreader_handlers
   if {$ns == "::vuserlog"} {
     define_logreader_handlers
@@ -209,7 +209,7 @@ proc create_dot_png {ns rundir} {
   set filled_blue {style filled fillcolor lightblue shape note}
   set filled_red {style filled fillcolor coral3}
   foreach p $parsers {
-    log info "Parser: [:proc_name $p] -> [:topic $p]/[:label $p]"
+    log debug "Parser: [:proc_name $p] -> [:topic $p]/[:label $p]"
     # set nd_proc [puts_node_stmt $f [:proc_name $p]]
     set nd_proc [puts_node_stmt $f [:label $p] {*}$filled_red]
     set nd_topic [puts_node_stmt $f [:topic $p] {*}$filled_blue]
@@ -218,7 +218,7 @@ proc create_dot_png {ns rundir} {
   dict for {in_topic lst} $handlers {
     set nd_topic_in [puts_node_stmt $f $in_topic {*}$filled_blue]; # mss niet eens nodig, in_topic moet je al hebben. Maar bof/eof waarsch niet.
     foreach el $lst {
-      log info "Handler: $in_topic -> [:coro_name $el]/[:label $el] -> [:topic $el]"
+      log debug "Handler: $in_topic -> [:coro_name $el]/[:label $el] -> [:topic $el]"
       # set nd_coro [puts_node_stmt $f [:coro_name $el]]
       set nd_coro [puts_node_stmt $f [:label $el] {*}$filled_red]
       set nd_topic_out [puts_node_stmt $f [:topic $el] {*}$filled_blue]
