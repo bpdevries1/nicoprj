@@ -7,3 +7,4 @@ Action=Action.c
 vuser init = vuser init.c
 
 landing=landing.c
+[empty]

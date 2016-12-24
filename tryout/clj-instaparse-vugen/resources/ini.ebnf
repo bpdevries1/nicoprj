@@ -1,6 +1,6 @@
 Ini = Section*
 
-Section = Header Body?
+Section = Header Body
 
 Body = (KeyValue | <EmptyLine>)*
 
@@ -8,9 +8,9 @@ KeyValue = Key <Spaces '=' Spaces> Value <NewLine?>
 
 Header = <'['> HeaderValue <']'> <NewLine>
 
+(* Header cannot contain brackets itself *)
 <HeaderValue> = #'[^\r\n\[\]]+'
 
-(* Key = #'[^\r\n=]+' *)
 Key = WordNoEq (Spaces WordNoEq)*
 Value = Epsilon | Word (Spaces Word)*
 
