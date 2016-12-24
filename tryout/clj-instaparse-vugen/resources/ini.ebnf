@@ -4,7 +4,7 @@ Section = Header Body
 
 Body = (KeyValue | <EmptyLine>)*
 
-KeyValue = Key <Spaces '=' Spaces> Value <NewLine?>
+KeyValue = Key <Spaces '=' Spaces> Value <Spaces? NewLine?>
 
 Header = <'['> HeaderValue <']'> <NewLine>
 

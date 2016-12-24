@@ -3,6 +3,7 @@ Type=Multi
 DefaultCfg=default.cfg
 [Actions]
 abc =  
+def = spaces after too  
 Action=Action.c
 vuser init = vuser init.c
 
