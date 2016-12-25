@@ -22,7 +22,12 @@
 (def mini-text (slurp (io/resource "mini.usr")))
 (def mini (ini-parse-transform mini-text))
 
+(def c-parser (-> "clang.ebnf" io/resource slurp insta/parser))
 
+(def vuser-end-text (slurp (io/resource "vuser_end.c")))
 
+;; total true -> embed failure node in tree.
+(def vuser-end (c-parser vuser-end-text :total true :unhide :all))
+#_(def vuser-end (insta/parses c-parser vuser-end-text :total true :unhide :all))
 
 
