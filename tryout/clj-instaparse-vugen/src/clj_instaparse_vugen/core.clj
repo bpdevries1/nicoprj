@@ -20,7 +20,7 @@
 (def usr (ini-parse usr-text))
 
 (def mini-text (slurp (io/resource "mini.usr")))
-(def mini (ini-parse-transform mini-text))
+(def mini (ini-parse mini-text))
 
 (def c-parser (-> "clang.ebnf" io/resource slurp insta/parser))
 
@@ -28,6 +28,12 @@
 
 ;; total true -> embed failure node in tree.
 (def vuser-end (c-parser vuser-end-text :total true :unhide :all))
-#_(def vuser-end (insta/parses c-parser vuser-end-text :total true :unhide :all))
+(def vuser-ends (insta/parses c-parser vuser-end-text :total true :unhide :all))
+
+(def landing-text (slurp (io/resource "landing.c")))
+;; total true -> embed failure node in tree.
+#_(def landing (c-parser landing-text :total true :unhide :all))
+
+;; (clojure.pprint/pprint *map* (clojure.java.io/writer "foo.txt"))
 
 
