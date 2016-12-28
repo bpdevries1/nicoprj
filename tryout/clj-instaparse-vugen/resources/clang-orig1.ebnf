@@ -20,25 +20,25 @@ function-definition ::= {<declaration-specifier>}* <declarator> {<declaration>}*
                             | extern
                             | typedef
 
-<type-specifier> ::= void
-                   | char
-                   | short
-                   | int
-                   | long
-                   | float
-                   | double
-                   | signed
-                   | unsigned
+<type-specifier> ::= void <ows>
+                   | char <ows>
+                   | short <ows>
+                   | int <ows>
+                   | long <ows>
+                   | float <ows>
+                   | double <ows>
+                   | signed <ows>
+                   | unsigned <ows>
                    | <struct-or-union-specifier>
                    | <enum-specifier>
                    | <typedef-name>
 
-<struct-or-union-specifier> ::= <struct-or-union> <identifier> <ows> { {<struct-declaration>}+ }
+<struct-or-union-specifier> ::= <struct-or-union> <identifier> { {<struct-declaration>}+ }
                               | <struct-or-union> { {<struct-declaration>}+ }
-                              | <struct-or-union> <identifier> <ows>
+                              | <struct-or-union> <identifier>
 
-<struct-or-union> ::= struct
-                    | union
+<struct-or-union> ::= struct <ows>
+                    | union <ows>
 
 <struct-declaration> ::= {<specifier-qualifier>}* <struct-declarator-list>
 
@@ -59,11 +59,11 @@ function-definition ::= {<declaration-specifier>}* <declarator> {<declaration>}*
 <type-qualifier> ::= const
                    | volatile
 
-<direct-declarator> ::= <identifier> <ows>
-                      | ( <declarator> )
-                      | <direct-declarator> [  {<constant-expression>}? ] 
-                      | <direct-declarator> (  <parameter-type-list> ) 
-                      | <direct-declarator> (  {<identifier> <ows>}* ) 
+<direct-declarator> ::= <identifier>
+                      | ( <ows> <declarator> ) <ows>
+                      | <direct-declarator> [  <ows> {<constant-expression>}? ]  <ows>
+                      | <direct-declarator> (  <ows> <parameter-type-list> )  <ows>
+                      | <direct-declarator> (  <ows> {<identifier>}* )  <ows>
 
 <constant-expression> ::= <conditional-expression>
 
@@ -77,7 +77,7 @@ function-definition ::= {<declaration-specifier>}* <declarator> {<declaration>}*
                            | <logical-and-expression> && <inclusive-or-expression>
 
 <inclusive-or-expression> ::= <exclusive-or-expression>
-                            | <inclusive-or-expression> '|' <exclusive-or-expression>
+                            | <inclusive-or-expression> | <exclusive-or-expression>
 
 <exclusive-or-expression> ::= <and-expression>
                             | <exclusive-or-expression> ^ <and-expression>
@@ -121,19 +121,19 @@ function-definition ::= {<declaration-specifier>}* <declarator> {<declaration>}*
 <postfix-expression> ::= <primary-expression>
                        | <postfix-expression> [ <expression> ]
                        | <postfix-expression> ( {<assignment-expression>}* )
-                       | <postfix-expression> . <identifier> <ows>
-                       | <postfix-expression> -> <identifier> <ows>
+                       | <postfix-expression> . <identifier>
+                       | <postfix-expression> -> <identifier>
                        | <postfix-expression> ++
                        | <postfix-expression> --
 
-<primary-expression> ::= <identifier> <ows>
+<primary-expression> ::= <identifier>
                        | <constant>
-                       | <string> <ows>
+                       | <string>
                        | ( <expression> )
 
-<constant> ::= <floating-constant> <ows>
-             | <integer-constant> <ows>
+<constant> ::= <integer-constant> <ows>
              | <character-constant> <ows>
+             | <floating-constant> <ows>
              | <enumeration-constant> <ows>
 
 <expression> ::= <assignment-expression>
@@ -183,17 +183,17 @@ function-definition ::= {<declaration-specifier>}* <declarator> {<declaration>}*
                                | {<direct-abstract-declarator>}? [ {<constant-expression>}? ]
                                | {<direct-abstract-declarator>}? ( {<parameter-type-list>}? )
 
-<enum-specifier> ::= enum <identifier> <ows> { <enumerator-list> }
+<enum-specifier> ::= enum <identifier> { <enumerator-list> }
                    | enum { <enumerator-list> }
-                   | enum <identifier> <ows>
+                   | enum <identifier>
 
 <enumerator-list> ::= <enumerator>
                     | <enumerator-list> , <enumerator>
 
-<enumerator> ::= <identifier> <ows>
-               | <identifier> <ows> = <constant-expression>
+<enumerator> ::= <identifier>
+               | <identifier> = <constant-expression>
 
-<typedef-name> ::= <identifier> <ows>
+<typedef-name> ::= <identifier>
 
 <declaration> ::=  {<declaration-specifier>}+ {<init-declarator>}*
 
@@ -208,8 +208,8 @@ function-definition ::= {<declaration-specifier>}* <declarator> {<declaration>}*
                      | <initializer-list> , <initializer>
 
 (* bij deze is  al lastiger, want kan ook tussen declarations staat of tussen statements. En maakt dan geen onderdeel uit van het statement zelf. *)
-(* alternatief is dat je dingen als statement in de def laat volgen door een ows. Dan eigenlijk elke finite char(s) laten volgen door  *)
-<compound-statement> ::= { {<declaration>}* {<statement>}* }
+(* alternatief is dat je dingen als statement in de def laat volgen door een ows. Dan eigenlijk elke finite char(s) laten volgen door <ows>  *)
+<compound-statement> ::= { <ows> {<declaration>}* {<statement>}* } <ows>
 
 (* <compound-statement> ::= { {<declaration>}* {<statement>}* } *)
 
@@ -220,7 +220,7 @@ function-definition ::= {<declaration-specifier>}* <declarator> {<declaration>}*
               | <iteration-statement>
               | <jump-statement>
 
-<labeled-statement> ::= <identifier> <ows> : <statement>
+<labeled-statement> ::= <identifier> : <statement>
                       | case <constant-expression> : <statement>
                       | default : <statement>
 
@@ -234,10 +234,10 @@ function-definition ::= {<declaration-specifier>}* <declarator> {<declaration>}*
                         | do <statement> while ( <expression> ) ;
                         | for ( {<expression>}? ; {<expression>}? ; {<expression>}? ) <statement>
 
-<jump-statement> ::= goto <identifier> <ows> ;
+<jump-statement> ::= goto <identifier> ;
                    | continue ;
                    | break ;
-                   | return {<expression>}? ;
+                   | return <mws> {<expression>}? ; <ows>
 
 (* added [2016-12-25 10:58]. Kan nu wel weer onderaan *)
 <keyword> ::= 'auto' | 'break' | 'case' | 'char' | 'const' | 'continue' | 'default' | 'do' | 'double' | 'else' | 'enum' | 'extern' | 'float' | 'for' | 'goto' | 'if' | 'int' | 'long' | 'register' | 'return' | 'short' | 'signed' | 'sizeof' | 'static' | 'struct' | 'switch' | 'typedef' | 'union' | 'unsigned' | 'void' | 'volatile' | 'while'
@@ -246,28 +246,16 @@ function-definition ::= {<declaration-specifier>}* <declarator> {<declaration>}*
 <identifier> ::= !keyword #'[A-Za-z_][A-Za-z0-9_]+'
 
 (* eigenlijk zou <ows> hier ook achter moeten, maar wil de whitespace niet bij de integer-constant etc hebben. Kan natuurlijk wel een string trim toepassen *)
-(* [2016-12-27 20:39] for now no exponential notation, is not the first thing that matches, maybe need to do it outside of regexp. *)
-(* <floating-constant> ::= #'[0-9]*\.[0-9]*([eE][+-]?[0-9]+)?' *)
-
-<floating-constant> ::= #'[0-9]*\.[0-9]*'
 <integer-constant> ::= #'[0-9]+'
-<character-constant> ::= #'\'[^\']\''
-(* <string> ::= #'\"[^\"]*\"' *)
-(* <string> ::= #'"[^"]*"' *)
-
-(* [2016-12-27 21:18] deze hieronder met regexp werkt wel voor vuser_end.c test met andere strings, maar duurt best (te?) lang voor landing.c *)
-(* <string> ::= #'"([^\\"]|\\.)*"' *)
-(* [2016-12-28 11:09] use chars instead of char, less memory *)
-
-<string> ::= '"' {<chars> | <escaped-char>}* '"'
-<chars> ::= #'[^\"\\]+'
-<escaped-char> ::= #'\\.'
-
-<enumeration-constant> ::= 'enumeration-constant'
-
 
 (* handle white space, both optional (ows) and mandatory (mws) *)
 (* comments should also be possible everywhere a whitespace is allowed, but want to handle this with pre-processing *)
+
+(*
+<mws> ::= <ws>+
+<ows> ::= <ws>*
+<ws> ::= #'\s'
+*)
 
 <mws> ::= #'\s+'
 <ows> ::= #'\s*'

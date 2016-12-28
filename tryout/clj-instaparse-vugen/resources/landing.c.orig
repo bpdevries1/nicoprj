@@ -24,6 +24,8 @@ landing() {
 	web_add_header("Accept-Language", 
 		"nl-NL");
 
+	// [2016-12-06 16:30:14] autogenerator for Flat MI Submissions reporting.
+/*Correlation comment - Do not change!  Original value='2001-01-01' Name ='FromDate' Type ='ResponseBased'*/
 	web_reg_save_param_regexp(
 		"ParamName=FromDate_all",
 		"RegExp=FromDate=(.*?)&amp",
@@ -33,6 +35,7 @@ landing() {
 		"RequestUrl=*/RRS2/*",
 		LAST);
 
+/*Correlation comment - Do not change!  Original value='9999-01-01' Name ='ToDate' Type ='ResponseBased'*/
 	web_reg_save_param_regexp(
 		"ParamName=ToDate_all",
 		"RegExp=ToDate=(.*?)\"\\ target",
@@ -42,6 +45,7 @@ landing() {
 		"RequestUrl=*/RRS2/*",
 		LAST);
 
+/*Correlation comment - Do not change!  Original value='2016-11-01' Name ='FromDate_1' Type ='ResponseBased'*/
 	web_reg_save_param_regexp(
 		"ParamName=FromDate_month",
 		"RegExp=FromDate=(.*?)&amp",
@@ -52,6 +56,7 @@ landing() {
 		"RequestUrl=*/RRS2/*",
 		LAST);
 
+/*Correlation comment - Do not change!  Original value='2016-12-01' Name ='ToDate_1' Type ='ResponseBased'*/
 	web_reg_save_param_regexp(
 		"ParamName=ToDate_month",
 		"RegExp=ToDate=(.*?)\"\\ target",

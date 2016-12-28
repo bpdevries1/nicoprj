@@ -1,4 +1,4 @@
-int vuser_end()
+vuser_end()
 {
-	return 0;
+  return "test\" \\ \n test";
 }
