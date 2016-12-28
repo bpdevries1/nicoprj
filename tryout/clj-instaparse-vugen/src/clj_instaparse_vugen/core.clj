@@ -26,9 +26,19 @@
 
 (def vuser-end-text (slurp (io/resource "vuser_end.c")))
 
+(defn measured-parse
+  "Measure time and number of parse trees"
+  [parser text]
+  (let [trees (time (insta/parses parser text :total true :unhide :all))]
+    (println "Number of characters:" (count text))
+    (println "Number of trees:" (count trees))
+    trees))
+
 ;; total true -> embed failure node in tree.
-(def vuser-end (c-parser vuser-end-text :total true :unhide :all))
-(def vuser-ends (insta/parses c-parser vuser-end-text :total true :unhide :all))
+(time (def vuser-end (c-parser vuser-end-text :total true :unhide :all)))
+#_(time (def vuser-ends (insta/parses c-parser vuser-end-text :total true :unhide :all)))
+
+(def vuser-ends (measured-parse c-parser vuser-end-text))
 
 (def landing-text (slurp (io/resource "landing.c")))
 ;; total true -> embed failure node in tree.
