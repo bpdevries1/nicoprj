@@ -70,31 +70,37 @@ Dit is bijna letterlijk hetzelfde.
 <type-qualifier> ::= const
                    | volatile
 
+(*
 <direct-declarator> ::= <identifier> 
                       | ( <declarator> )
                       | <direct-declarator> [  constant-expression? ] 
                       | <direct-declarator> (  <parameter-type-list> ) 
                       | <direct-declarator> (  identifier* ) 
+*)
                       
-(* in yacc, dan meer varianten direct uitgeschreven, maar werkt mss beter?:
+(* in yacc, dan meer varianten direct uitgeschreven, maar werkt mss beter?: *)
 
 
-direct_declarator
-	: IDENTIFIER
+direct-declarator ::=identifier
 	| '(' declarator ')'
-	| direct_declarator '[' ']'
-	| direct_declarator '[' '*' ']'
-	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']'
-	| direct_declarator '[' STATIC assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list '*' ']'
-	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list ']'
-	| direct_declarator '[' assignment_expression ']'
-	| direct_declarator '(' parameter_type_list ')'
-	| direct_declarator '(' ')'
-	| direct_declarator '(' identifier_list ')'
-*)	                      
+	| direct-declarator '[' ']'
+	| direct-declarator '[' '*' ']'
+	| direct-declarator '[' 'static' type-qualifier-list assignment-expression ']'
+	| direct-declarator '[' 'static' assignment-expression ']'
+	| direct-declarator '[' type-qualifier-list '*' ']'
+	| direct-declarator '[' type-qualifier-list 'static' assignment-expression ']'
+	| direct-declarator '[' type-qualifier-list assignment-expression ']'
+	| direct-declarator '[' type-qualifier-list ']'
+	| direct-declarator '[' assignment-expression ']'
+	| direct-declarator '(' parameter-type-list ')'
+	| direct-declarator '(' ')'
+	| direct-declarator '(' identifier-list ')'
+	                      
+type-qualifier-list ::=type-qualifier
+	| type-qualifier-list type-qualifier
+
+identifier-list ::= identifier
+	| identifier-list ',' identifier
 
 <constant-expression> ::= <conditional-expression>
 

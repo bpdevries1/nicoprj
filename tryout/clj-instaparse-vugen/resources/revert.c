@@ -1,4 +1,5 @@
 landing() {
-	web_revert_auto_header("Accept-Language");
+  a= 1;
+	web_add_auto_header("Accept",2);
 }
 
