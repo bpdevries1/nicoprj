@@ -8,7 +8,7 @@ translation-unit ::=  {external-declaration}*
 external-declaration ::= function-definition | declaration
 
 (* Add optional whitespace   => not only after terminals *)
-function-definition ::= {<declaration-specifier>}* <declarator> {<declaration>}* <compound-statement>
+function-definition ::= declaration-specifier* <declarator> declaration* <compound-statement>
 
 (* van http://www.quut.com/c/ANSI-C-grammar-y.html, een yacc spec:
 
@@ -44,14 +44,14 @@ Dit is bijna letterlijk hetzelfde.
                    | <enum-specifier>
                    | <typedef-name>
 
-<struct-or-union-specifier> ::= <struct-or-union> <identifier>  '{' {<struct-declaration>}+ '}'
-                              | <struct-or-union> '{' {<struct-declaration>}+ '}'
+<struct-or-union-specifier> ::= <struct-or-union> <identifier>  '{' struct-declaration+ '}'
+                              | <struct-or-union> '{' struct-declaration+ '}'
                               | <struct-or-union> <identifier> 
 
 <struct-or-union> ::= 'struct'
                     | 'union'
 
-<struct-declaration> ::= {<specifier-qualifier>}* <struct-declarator-list>
+<struct-declaration> ::= specifier-qualifier* <struct-declarator-list>
 
 <specifier-qualifier> ::= <type-specifier>
                         | <type-qualifier>
@@ -63,18 +63,18 @@ Dit is bijna letterlijk hetzelfde.
                       | <declarator> ':' <constant-expression>
                       | ':' <constant-expression>
 
-<declarator> ::= {<pointer>}? <direct-declarator>
+<declarator> ::= pointer? <direct-declarator>
 
-<pointer> ::= '*' {<type-qualifier>}* {<pointer>}?
+<pointer> ::= '*' type-qualifier* pointer?
 
 <type-qualifier> ::= 'const'
                    | 'volatile'
 
 <direct-declarator> ::= <identifier> 
                       | '(' <declarator> ')'
-                      | <direct-declarator> '['  {<constant-expression>}? ']' 
+                      | <direct-declarator> '['  constant-expression? ']' 
                       | <direct-declarator> '('  <parameter-type-list> ')' 
-                      | <direct-declarator> '('  {<identifier> }* ')' 
+                      | <direct-declarator> '('  identifier* ')' 
                       
 (* in yacc, dan meer varianten direct uitgeschreven, maar werkt mss beter?:
 
@@ -151,7 +151,7 @@ direct_declarator
 
 <postfix-expression> ::= <primary-expression>
                        | <postfix-expression> '[' <expression> ']'
-                       | <postfix-expression> '(' {<assignment-expression>}* ')'
+                       | <postfix-expression> '(' assignment-expression* ')'
                        | <postfix-expression> '.' <identifier> 
                        | <postfix-expression> '->' <identifier> 
                        | <postfix-expression> '++'
@@ -192,7 +192,7 @@ direct_declarator
                    | '~'
                    | '!'
 
-<type-name> ::= {<specifier-qualifier>}+ {<abstract-declarator>}?
+<type-name> ::= specifier-qualifier+ abstract-declarator?
 
 <parameter-type-list> ::= <parameter-list>
                         | <parameter-list> ',' '...'
@@ -200,19 +200,19 @@ direct_declarator
 <parameter-list> ::= <parameter-declaration>
                    | <parameter-list> ',' <parameter-declaration>
 
-<parameter-declaration> ::= {<declaration-specifier>}+ <declarator>
-                          | {<declaration-specifier>}+ <abstract-declarator>
-                          | {<declaration-specifier>}+
+<parameter-declaration> ::= declaration-specifier+ <declarator>
+                          | declaration-specifier+ <abstract-declarator>
+                          | declaration-specifier+
 
 <abstract-declarator> ::= <pointer>
                         | <pointer> <direct-abstract-declarator>
                         | <direct-abstract-declarator>
 
-(* orig:  '(' {<parameter-type-list>|? ), so replaced | with '}' *)
+(* orig:  '(' parameter-type-list>|? ), so replaced | with '}' *)
 
 <direct-abstract-declarator> ::=  '(' <abstract-declarator> ')'
-                               | {<direct-abstract-declarator>}? '[' {<constant-expression>}? ']'
-                               | {<direct-abstract-declarator>}? '(' {<parameter-type-list>}? ')'
+                               | direct-abstract-declarator? '[' constant-expression? ']'
+                               | direct-abstract-declarator? '(' parameter-type-list? ')'
 
 <enum-specifier> ::= 'enum' <identifier>  '{' <enumerator-list> '}'
                    | 'enum' '{' <enumerator-list> '}'
@@ -226,7 +226,7 @@ direct_declarator
 
 <typedef-name> ::= <identifier> 
 
-<declaration> ::=  {<declaration-specifier>}+ {<init-declarator>}*
+<declaration> ::=  declaration-specifier+ init-declarator*
 
 <init-declarator> ::= <declarator>
                     | <declarator> '=' <initializer>
@@ -240,9 +240,9 @@ direct_declarator
 
 (* bij deze is  al lastiger, want kan ook tussen declarations staat of tussen statements. En maakt dan geen onderdeel uit van het statement zelf. *)
 (* alternatief is dat je dingen als statement in de def laat volgen door een ows. Dan eigenlijk elke finite char(s) laten volgen door  *)
-<compound-statement> ::= '{' {<declaration>}* {<statement>}* '}'
+<compound-statement> ::= '{' declaration* statement* '}'
 
-(* <compound-statement> ::= '{' {<declaration>}* {<statement>}* '}' *)
+(* <compound-statement> ::= '{' declaration* statement* '}' *)
 
 <statement> ::= <labeled-statement>
               | <expression-statement>
@@ -255,7 +255,7 @@ direct_declarator
                       | 'case' <constant-expression> ':' <statement>
                       | 'default' ':' <statement>
 
-<expression-statement> ::= {<expression>}? ';'
+<expression-statement> ::= expression? ';'
 
 <selection-statement> ::= 'if' '(' <expression> ')' <statement>
                         | 'if' '(' <expression> ')' <statement> 'else' <statement>
@@ -263,12 +263,12 @@ direct_declarator
 
 <iteration-statement> ::= 'while' '(' <expression> ')' <statement>
                         | 'do' <statement> 'while' '(' <expression> ')' ';'
-                        | 'for' '(' {<expression>}? ';' {<expression>}? ';' {<expression>}? ')' <statement>
+                        | 'for' '(' expression? ';' expression? ';' expression? ')' <statement>
 
 <jump-statement> ::= 'goto' <identifier>  ';'
                    | 'continue' ';'
                    | 'break' ';'
-                   | 'return' {<expression>}? ';'
+                   | 'return' expression? ';'
 
 (* added [2016-12-25 10:58]. Kan nu wel weer onderaan *)
 <keyword> ::= 'auto' | 'break' | 'case' | 'char' | 'const' | 'continue' | 'default' | 'do' | 'double' | 'else' | 'enum' | 'extern' | 'float' | 'for' | 'goto' | 'if' | 'int' | 'long' | 'register' | 'return' | 'short' | 'signed' | 'sizeof' | 'static' | 'struct' | 'switch' | 'typedef' | 'union' | 'unsigned' | 'void' | 'volatile' | 'while'
