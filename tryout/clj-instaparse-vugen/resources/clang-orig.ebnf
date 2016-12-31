@@ -3,7 +3,8 @@
 (* maybe useful too: https://www.lysator.liu.se/c/ANSI-C-grammar-y.html and http://www.quut.com/c/ANSI-C-grammar-y.html *)
 
 (* only one place at the start where ows can occur before a terminal/something *)
-translation-unit ::=  external-declaration+
+translation-unit ::=external-declaration
+	| translation-unit external-declaration
 
 external-declaration ::= function-definition | declaration
 
@@ -59,6 +60,8 @@ declaration-list 	::= declaration
                    | <enum-specifier>
                    | <typedef-name>
                    | atomic-type-specifier
+
+<typedef-name> ::= <identifier> 
 
 atomic-type-specifier ::= 'atomic' '(' type-name ')'
 
@@ -328,8 +331,6 @@ block-item-list	::= block-item
 block-item ::=declaration
 	| statement
 
-(* <compound-statement> ::= { declaration* statement* } *)
-
 <statement> ::= <labeled-statement>
               | <expression-statement>
               | <compound-statement>
@@ -341,15 +342,19 @@ block-item ::=declaration
                       | case <constant-expression> : <statement>
                       | default : <statement>
 
-<expression-statement> ::= expression? ;
+expression-statement	::= ';'
+	| expression ';'
 
 <selection-statement> ::= if ( <expression> ) <statement>
                         | if ( <expression> ) <statement> else <statement>
                         | switch ( <expression> ) <statement>
 
-<iteration-statement> ::= while ( <expression> ) <statement>
-                        | do <statement> while ( <expression> ) ;
-                        | for ( expression? ; expression? ; expression? ) <statement>
+iteration-statement	::= 'while' '(' expression ')' statement
+	| 'do' statement 'while' '(' expression ')' ';'
+	| 'for' '(' expression-statement expression-statement ')' statement
+	| 'for' '(' expression-statement expression-statement expression ')' statement
+	| 'for' '(' declaration expression-statement ')' statement
+	| 'for' '(' declaration expression-statement expression ')' statement
 
 <jump-statement> ::= goto <identifier>  ;
                    | continue ;
@@ -377,11 +382,26 @@ block-item ::=declaration
 (* [2016-12-28 11:09] use chars instead of char, less memory *)
 
 <string> ::= '"' {<chars> | <escaped-char>}* '"'
-<chars> ::= #'[^\"\\]+'
+<chars> ::= #'[^\"\\\n\r]+'
 <escaped-char> ::= #'\\.'
 
-<enumeration-constant> ::= 'enumeration-constant'
+enumeration-constant	 ::= identifier
 
+(* onderstaande evt ook nog doen, als je het gebruikt, anders maakt het niet uit.
+
+"_Alignas"                              { return ALIGNAS; }
+"_Alignof"                              { return ALIGNOF; }
+"_Atomic"                               { return ATOMIC; }
+"_Bool"                                 { return BOOL; }
+"_Complex"                              { return COMPLEX; }
+"_Generic"                              { return GENERIC; }
+"_Imaginary"                            { return IMAGINARY; }
+"_Noreturn"                             { return NORETURN; }
+"_Static_assert"                        { return STATIC_ASSERT; }
+"_Thread_local"                         { return THREAD_LOCAL; }
+"__func__"                              { return FUNC_NAME; }
+
+ *)
 
 (* handle white space, both optional (ows) and mandatory (mws) *)
 (* comments should also be possible everywhere a whitespace is allowed, but want to handle this with pre-processing *)
@@ -390,13 +410,4 @@ block-item ::=declaration
 <ows> ::= #'\s*'
 
 
-(* deze waarschijnlijk straks niet meer nodig *)
-<declaration-specifier> ::= <storage-class-specifier>
-                          | <type-specifier>
-                          | <type-qualifier>
-
-<specifier-qualifier> ::= <type-specifier>
-                        | <type-qualifier>
-
-<typedef-name> ::= <identifier> 
 
