@@ -3,33 +3,45 @@
 (* maybe useful too: https://www.lysator.liu.se/c/ANSI-C-grammar-y.html and http://www.quut.com/c/ANSI-C-grammar-y.html *)
 
 (* only one place at the start where ows can occur before a terminal/something *)
-translation-unit ::=  {external-declaration}*
+translation-unit ::=  external-declaration+
 
 external-declaration ::= function-definition | declaration
 
-(* Add optional whitespace   => not only after terminals *)
-function-definition ::= declaration-specifier* <declarator> declaration* <compound-statement>
+function-definition	::= declaration-specifiers declarator declaration-list compound-statement
+	| declaration-specifiers declarator compound-statement
 
 (* van http://www.quut.com/c/ANSI-C-grammar-y.html, een yacc spec:
-
-function_definition
-	: declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement
-	;
 
 Dit is bijna letterlijk hetzelfde.
 
 *)
 
-<declaration-specifier> ::= <storage-class-specifier>
-                          | <type-specifier>
-                          | <type-qualifier>
+declaration-specifiers ::= storage-class-specifier declaration-specifiers
+	| storage-class-specifier
+	| type-specifier declaration-specifiers
+	| type-specifier
+	| type-qualifier declaration-specifiers
+	| type-qualifier
+	| function-specifier declaration-specifiers
+	| function-specifier
+	| alignment-specifier declaration-specifiers
+	| alignment-specifier
+
+alignment-specifier	::= 'alignas' '(' type-name ')'
+	| 'alignas' '(' constant-expression ')'
+
+function-specifier ::= 'inline' | 'noreturn'
+
+declaration-list 	::= declaration
+	| declaration-list declaration
+
 
 <storage-class-specifier> ::= auto
                             | register
                             | static
                             | extern
                             | typedef
+                            | 'thread-local'
 
 <type-specifier> ::= void
                    | char
@@ -40,21 +52,36 @@ Dit is bijna letterlijk hetzelfde.
                    | double
                    | signed
                    | unsigned
+                   | 'bool'
+                   | 'complex'
+                   | 'imaginary'
                    | <struct-or-union-specifier>
                    | <enum-specifier>
                    | <typedef-name>
+                   | atomic-type-specifier
 
-<struct-or-union-specifier> ::= <struct-or-union> <identifier>  { struct-declaration+ }
-                              | <struct-or-union> { struct-declaration+ }
-                              | <struct-or-union> <identifier> 
+atomic-type-specifier ::= 'atomic' '(' type-name ')'
+
+struct-or-union-specifier ::= struct-or-union '{' struct-declaration-list '}'
+	| struct-or-union identifier '{' struct-declaration-list '}'
+	| struct-or-union identifier
+
+struct-declaration-list ::= struct-declaration
+	| struct-declaration-list struct-declaration
 
 <struct-or-union> ::= struct
                     | union
 
-<struct-declaration> ::= specifier-qualifier* <struct-declarator-list>
+struct-declaration ::=specifier-qualifier-list ';'	
+	| specifier-qualifier-list struct-declarator-list ';'
+	| static-assert-declaration
+	
+specifier-qualifier-list ::=type-specifier specifier-qualifier-list
+	| type-specifier
+	| type-qualifier specifier-qualifier-list
+	| type-qualifier
 
-<specifier-qualifier> ::= <type-specifier>
-                        | <type-qualifier>
+static-assert-declaration ::= 'static-assert'  '(' constant-expression ',' string ')' ';'
 
 <struct-declarator-list> ::= <struct-declarator>
                            | <struct-declarator-list> , <struct-declarator>
@@ -63,9 +90,16 @@ Dit is bijna letterlijk hetzelfde.
                       | <declarator> : <constant-expression>
                       | : <constant-expression>
 
-<declarator> ::= pointer? <direct-declarator>
+declarator	::= pointer direct-declarator
+	| direct-declarator
 
-<pointer> ::= * type-qualifier* pointer?
+pointer	::= '*' type-qualifier-list pointer
+	| '*' type-qualifier-list
+	| '*' pointer
+	| '*'
+
+type-qualifier-list ::=type-qualifier
+	| type-qualifier-list type-qualifier
 
 <type-qualifier> ::= const
                    | volatile
@@ -310,5 +344,11 @@ identifier-list ::= identifier
 <ows> ::= #'\s*'
 
 
+(* deze waarschijnlijk straks niet meer nodig *)
+<declaration-specifier> ::= <storage-class-specifier>
+                          | <type-specifier>
+                          | <type-qualifier>
 
+<specifier-qualifier> ::= <type-specifier>
+                        | <type-qualifier>
 
