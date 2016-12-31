@@ -325,8 +325,12 @@ argument-expression-list ::= assignment-expression
 compound-statement	::= '{' '}'
 	| '{'  block-item-list '}'
 
+(*
 block-item-list	::= block-item
 	| block-item-list block-item
+*)
+
+block-item-list	::= block-item+
 
 block-item ::=declaration
 	| statement
