@@ -287,9 +287,12 @@ enum-specifier	::= 'enum' '{' enumerator-list '}'
 enumerator	 ::= enumeration-constant '=' constant-expression
 	| enumeration-constant
 
-<typedef-name> ::= <identifier> 
+declaration	::= declaration-specifiers ';'
+	| declaration-specifiers init-declarator-list ';'
+	| static-assert-declaration
 
-<declaration> ::=  declaration-specifier+ init-declarator*
+init-declarator-list ::= init-declarator
+	| init-declarator-list ',' init-declarator
 
 <init-declarator> ::= <declarator>
                     | <declarator> '=' <initializer>
@@ -298,12 +301,32 @@ enumerator	 ::= enumeration-constant '=' constant-expression
                 | '{' <initializer-list> '}'
                 | '{' <initializer-list> ',' '}'
 
-<initializer-list> ::= <initializer>
-                     | <initializer-list> ',' <initializer>
+initializer-list	::= designation initializer
+	| initializer
+	| initializer-list ',' designation initializer
+	| initializer-list ',' initializer
 
-(* bij deze is  al lastiger, want kan ook tussen declarations staat of tussen statements. En maakt dan geen onderdeel uit van het statement zelf. *)
-(* alternatief is dat je dingen als statement in de def laat volgen door een ows. Dan eigenlijk elke finite char(s) laten volgen door  *)
-<compound-statement> ::= '{' declaration* statement* '}'
+designation	::= designator-list '='
+
+designator-list ::=designator
+	| designator-list designator
+
+designator ::= '[' constant-expression ']'
+	| '.' identifier
+
+
+(* [2016-12-31 22:34] paar rules al eerder moeten toevoegen, nu alsnog *)
+argument-expression-list ::= assignment-expression
+	| argument-expression-list ',' assignment-expression
+
+compound-statement	::= '{' '}'
+	| '{'  block-item-list '}'
+
+block-item-list	::= block-item
+	| block-item-list block-item
+
+block-item ::=declaration
+	| statement
 
 (* <compound-statement> ::= '{' declaration* statement* '}' *)
 
@@ -375,9 +398,6 @@ enumerator	 ::= enumeration-constant '=' constant-expression
 <specifier-qualifier> ::= <type-specifier>
                         | <type-qualifier>
 
+<typedef-name> ::= <identifier> 
 
-<enum-specifier> ::= 'enum-specifier'
-<pointer> ::= 'pointer'
-<declarator> ::= 'declarator'
-<postfix-expression> ::= 'postfix-expression'
-<enumerator> ::= 'enumerator'
+

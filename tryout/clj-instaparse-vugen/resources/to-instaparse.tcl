@@ -50,7 +50,8 @@ proc transform {text until_line} {
   set rhs_rules [find_rhs_rules $all_lines]
   set new_rules [::struct::set difference $rhs_rules $lhs_rules]
   foreach rule $new_rules {
-    lappend all_lines "<$rule> ::= '$rule'"
+    # [2016-12-31 22:32] Nu even niet meer doen.
+    # lappend all_lines "<$rule> ::= '$rule'"
   }
 
   # temporary, add to source:
