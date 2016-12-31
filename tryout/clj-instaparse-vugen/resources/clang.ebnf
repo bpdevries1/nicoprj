@@ -102,18 +102,7 @@ type-qualifier-list ::=type-qualifier
 	| type-qualifier-list type-qualifier
 
 <type-qualifier> ::= 'const'
-                   | 'volatile'
-
-(*
-<direct-declarator> ::= <identifier> 
-                      | '(' <declarator> ')'
-                      | <direct-declarator> '['  constant-expression? ']' 
-                      | <direct-declarator> '('  <parameter-type-list> ')' 
-                      | <direct-declarator> '('  identifier* ')' 
-*)
-                      
-(* in yacc, dan meer varianten direct uitgeschreven, maar werkt mss beter?: *)
-
+                   | 'volatile' | 'atomic' | 'restrict'
 
 direct-declarator ::=identifier
 	| '(' declarator ')'
@@ -187,20 +176,33 @@ identifier-list ::= identifier
                      | '--' <unary-expression>
                      | <unary-operator> <cast-expression>
                      | 'sizeof' <unary-expression>
-                     | 'sizeof' <type-name>
+                     | 'sizeof' '(' <type-name> ')'
+                     | 'alignof' '(' <type-name> ')'
 
-<postfix-expression> ::= <primary-expression>
-                       | <postfix-expression> '[' <expression> ']'
-                       | <postfix-expression> '(' assignment-expression* ')'
-                       | <postfix-expression> '.' <identifier> 
-                       | <postfix-expression> '->' <identifier> 
-                       | <postfix-expression> '++'
-                       | <postfix-expression> '--'
+postfix-expression	::= primary-expression
+	| postfix-expression '[' expression ']'
+	| postfix-expression '(' ')'
+	| postfix-expression '(' argument-expression-list ')'
+	| postfix-expression '.' identifier
+	| postfix-expression '->' identifier
+	| postfix-expression '++'
+	| postfix-expression '--'
+	| '(' type-name ')' '{' initializer-list '}'
+	| '(' type-name ')' '{' initializer-list ',' '}'
 
 <primary-expression> ::= <identifier> 
                        | <constant>
                        | <string> 
                        | '(' <expression> ')'
+                       | generic-selection
+
+generic-selection ::='generic'  '(' assignment-expression ',' generic-assoc-list ')'
+
+generic-assoc-list ::= generic-association
+	| generic-assoc-list ',' generic-association
+
+generic-association ::=type-name ':' assignment-expression
+	| 'default' ':' assignment-expression
 
 <constant> ::= <floating-constant> 
              | <integer-constant> 
@@ -232,7 +234,8 @@ identifier-list ::= identifier
                    | '~'
                    | '!'
 
-<type-name> ::= specifier-qualifier+ abstract-declarator?
+type-name ::= specifier-qualifier-list abstract-declarator
+	| specifier-qualifier-list
 
 <parameter-type-list> ::= <parameter-list>
                         | <parameter-list> ',' '...'
@@ -240,9 +243,9 @@ identifier-list ::= identifier
 <parameter-list> ::= <parameter-declaration>
                    | <parameter-list> ',' <parameter-declaration>
 
-<parameter-declaration> ::= declaration-specifier+ <declarator>
-                          | declaration-specifier+ <abstract-declarator>
-                          | declaration-specifier+
+<parameter-declaration> ::= declaration-specifiers <declarator>
+                          | declaration-specifiers <abstract-declarator>
+                          | declaration-specifiers
 
 <abstract-declarator> ::= <pointer>
                         | <pointer> <direct-abstract-declarator>
@@ -250,19 +253,39 @@ identifier-list ::= identifier
 
 (* orig:  '(' parameter-type-list>|? ), so replaced | with '}' *)
 
-<direct-abstract-declarator> ::=  '(' <abstract-declarator> ')'
-                               | direct-abstract-declarator? '[' constant-expression? ']'
-                               | direct-abstract-declarator? '(' parameter-type-list? ')'
+direct-abstract-declarator ::= '(' abstract-declarator ')'
+	| '[' ']'
+	| '[' '*' ']'
+	| '[' 'static' type-qualifier-list assignment-expression ']'
+	| '[' 'static' assignment-expression ']'
+	| '[' type-qualifier-list 'static' assignment-expression ']'
+	| '[' type-qualifier-list assignment-expression ']'
+	| '[' type-qualifier-list ']'
+	| '[' assignment-expression ']'
+	| direct-abstract-declarator '[' ']'
+	| direct-abstract-declarator '[' '*' ']'
+	| direct-abstract-declarator '[' 'static' type-qualifier-list assignment-expression ']'
+	| direct-abstract-declarator '[' 'static' assignment-expression ']'
+	| direct-abstract-declarator '[' type-qualifier-list assignment-expression ']'
+	| direct-abstract-declarator '[' type-qualifier-list 'static' assignment-expression ']'
+	| direct-abstract-declarator '[' type-qualifier-list ']'
+	| direct-abstract-declarator '[' assignment-expression ']'
+	| '(' ')'
+	| '(' parameter-type-list ')'
+	| direct-abstract-declarator '(' ')'
+	| direct-abstract-declarator '(' parameter-type-list ')'
 
-<enum-specifier> ::= 'enum' <identifier>  '{' <enumerator-list> '}'
-                   | 'enum' '{' <enumerator-list> '}'
-                   | 'enum' <identifier> 
+enum-specifier	::= 'enum' '{' enumerator-list '}'
+	| 'enum' '{' enumerator-list ',' '}'
+	| 'enum' identifier '{' enumerator-list '}'
+	| 'enum' identifier '{' enumerator-list ',' '}'
+	| 'enum' identifier
 
 <enumerator-list> ::= <enumerator>
                     | <enumerator-list> ',' <enumerator>
 
-<enumerator> ::= <identifier> 
-               | <identifier>  '=' <constant-expression>
+enumerator	 ::= enumeration-constant '=' constant-expression
+	| enumeration-constant
 
 <typedef-name> ::= <identifier> 
 
@@ -353,5 +376,8 @@ identifier-list ::= identifier
                         | <type-qualifier>
 
 
+<enum-specifier> ::= 'enum-specifier'
 <pointer> ::= 'pointer'
 <declarator> ::= 'declarator'
+<postfix-expression> ::= 'postfix-expression'
+<enumerator> ::= 'enumerator'
