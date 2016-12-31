@@ -3,11 +3,11 @@
 (* maybe useful too: https://www.lysator.liu.se/c/ANSI-C-grammar-y.html and http://www.quut.com/c/ANSI-C-grammar-y.html *)
 
 (* only one place at the start where ows can occur before a terminal/something *)
-translation-unit ::= <ows> {external-declaration}*
+translation-unit ::=  {external-declaration}*
 
 external-declaration ::= function-definition | declaration
 
-(* Add optional whitespace <ows>  => not only after terminals *)
+(* Add optional whitespace   => not only after terminals *)
 function-definition ::= {<declaration-specifier>}* <declarator> {<declaration>}* <compound-statement>
 
 (* van http://www.quut.com/c/ANSI-C-grammar-y.html, een yacc spec:
@@ -25,31 +25,31 @@ Dit is bijna letterlijk hetzelfde.
                           | <type-specifier>
                           | <type-qualifier>
 
-<storage-class-specifier> ::= 'auto' <ows>
-                            | 'register' <ows>
-                            | 'static' <ows>
-                            | 'extern' <ows>
-                            | 'typedef' <ows>
+<storage-class-specifier> ::= 'auto' 
+                            | 'register' 
+                            | 'static' 
+                            | 'extern' 
+                            | 'typedef' 
 
-<type-specifier> ::= 'void' <ows>
-                   | 'char' <ows>
-                   | 'short' <ows>
-                   | 'int' <ows>
-                   | 'long' <ows>
-                   | 'float' <ows>
-                   | 'double' <ows>
-                   | 'signed' <ows>
-                   | 'unsigned' <ows>
+<type-specifier> ::= 'void' 
+                   | 'char' 
+                   | 'short' 
+                   | 'int' 
+                   | 'long' 
+                   | 'float' 
+                   | 'double' 
+                   | 'signed' 
+                   | 'unsigned' 
                    | <struct-or-union-specifier>
                    | <enum-specifier>
                    | <typedef-name>
 
-<struct-or-union-specifier> ::= <struct-or-union> <identifier> <ows> '{' <ows> {<struct-declaration>}+ '}' <ows>
-                              | <struct-or-union> '{' <ows> {<struct-declaration>}+ '}' <ows>
-                              | <struct-or-union> <identifier> <ows>
+<struct-or-union-specifier> ::= <struct-or-union> <identifier>  '{'  {<struct-declaration>}+ '}' 
+                              | <struct-or-union> '{'  {<struct-declaration>}+ '}' 
+                              | <struct-or-union> <identifier> 
 
-<struct-or-union> ::= 'struct' <ows>
-                    | 'union' <ows>
+<struct-or-union> ::= 'struct' 
+                    | 'union' 
 
 <struct-declaration> ::= {<specifier-qualifier>}* <struct-declarator-list>
 
@@ -57,24 +57,24 @@ Dit is bijna letterlijk hetzelfde.
                         | <type-qualifier>
 
 <struct-declarator-list> ::= <struct-declarator>
-                           | <struct-declarator-list> ',' <ows> <struct-declarator>
+                           | <struct-declarator-list> ','  <struct-declarator>
 
 <struct-declarator> ::= <declarator>
-                      | <declarator> ':' <ows> <constant-expression>
-                      | ':' <ows> <constant-expression>
+                      | <declarator> ':'  <constant-expression>
+                      | ':'  <constant-expression>
 
 <declarator> ::= {<pointer>}? <direct-declarator>
 
-<pointer> ::= '*' <ows> {<type-qualifier>}* {<pointer>}?
+<pointer> ::= '*'  {<type-qualifier>}* {<pointer>}?
 
-<type-qualifier> ::= 'const' <ows>
-                   | 'volatile' <ows>
+<type-qualifier> ::= 'const' 
+                   | 'volatile' 
 
-<direct-declarator> ::= <identifier> <ows>
-                      | '(' <ows> <declarator> ')' <ows>
-                      | <direct-declarator> '[' <ows>  {<constant-expression>}? ']' <ows> 
-                      | <direct-declarator> '(' <ows>  <parameter-type-list> ')' <ows> 
-                      | <direct-declarator> '(' <ows>  {<identifier> <ows>}* ')' <ows> 
+<direct-declarator> ::= <identifier> 
+                      | '('  <declarator> ')' 
+                      | <direct-declarator> '['   {<constant-expression>}? ']'  
+                      | <direct-declarator> '('   <parameter-type-list> ')'  
+                      | <direct-declarator> '('   {<identifier> }* ')'  
                       
 (* in yacc, dan meer varianten direct uitgeschreven, maar werkt mss beter?:
 
@@ -99,106 +99,106 @@ direct_declarator
 <constant-expression> ::= <conditional-expression>
 
 <conditional-expression> ::= <logical-or-expression>
-                           | <logical-or-expression> '?' <ows> <expression> ':' <ows> <conditional-expression>
+                           | <logical-or-expression> '?'  <expression> ':'  <conditional-expression>
 
 <logical-or-expression> ::= <logical-and-expression>
-                          | <logical-or-expression> '||' <ows> <logical-and-expression>
+                          | <logical-or-expression> '||'  <logical-and-expression>
 
 <logical-and-expression> ::= <inclusive-or-expression>
-                           | <logical-and-expression> '&&' <ows> <inclusive-or-expression>
+                           | <logical-and-expression> '&&'  <inclusive-or-expression>
 
 <inclusive-or-expression> ::= <exclusive-or-expression>
                             | <inclusive-or-expression> '|' <exclusive-or-expression>
 
 <exclusive-or-expression> ::= <and-expression>
-                            | <exclusive-or-expression> '^' <ows> <and-expression>
+                            | <exclusive-or-expression> '^'  <and-expression>
 
 <and-expression> ::= <equality-expression>
-                   | <and-expression> '&' <ows> <equality-expression>
+                   | <and-expression> '&'  <equality-expression>
 
 <equality-expression> ::= <relational-expression>
-                        | <equality-expression> '==' <ows> <relational-expression>
-                        | <equality-expression> '!=' <ows> <relational-expression>
+                        | <equality-expression> '=='  <relational-expression>
+                        | <equality-expression> '!='  <relational-expression>
 
 <relational-expression> ::= <shift-expression>
-                          | <relational-expression> '<' <ows> <shift-expression>
-                          | <relational-expression> '>' <ows> <shift-expression>
-                          | <relational-expression> '<=' <ows> <shift-expression>
-                          | <relational-expression> '>=' <ows> <shift-expression>
+                          | <relational-expression> '<'  <shift-expression>
+                          | <relational-expression> '>'  <shift-expression>
+                          | <relational-expression> '<='  <shift-expression>
+                          | <relational-expression> '>='  <shift-expression>
 
 <shift-expression> ::= <additive-expression>
-                     | <shift-expression> '<<' <ows> <additive-expression>
-                     | <shift-expression> '>>' <ows> <additive-expression>
+                     | <shift-expression> '<<'  <additive-expression>
+                     | <shift-expression> '>>'  <additive-expression>
 
 <additive-expression> ::= <multiplicative-expression>
-                        | <additive-expression> '+' <ows> <multiplicative-expression>
-                        | <additive-expression> '-' <ows> <multiplicative-expression>
+                        | <additive-expression> '+'  <multiplicative-expression>
+                        | <additive-expression> '-'  <multiplicative-expression>
 
 <multiplicative-expression> ::= <cast-expression>
-                              | <multiplicative-expression> '*' <ows> <cast-expression>
-                              | <multiplicative-expression> '/' <ows> <cast-expression>
-                              | <multiplicative-expression> '%' <ows> <cast-expression>
+                              | <multiplicative-expression> '*'  <cast-expression>
+                              | <multiplicative-expression> '/'  <cast-expression>
+                              | <multiplicative-expression> '%'  <cast-expression>
 
 <cast-expression> ::= <unary-expression>
-                    | '(' <ows> <type-name> ')' <ows> <cast-expression>
+                    | '('  <type-name> ')'  <cast-expression>
 
 <unary-expression> ::= <postfix-expression>
-                     | '++' <ows> <unary-expression>
-                     | '--' <ows> <unary-expression>
+                     | '++'  <unary-expression>
+                     | '--'  <unary-expression>
                      | <unary-operator> <cast-expression>
-                     | 'sizeof' <ows> <unary-expression>
-                     | 'sizeof' <ows> <type-name>
+                     | 'sizeof'  <unary-expression>
+                     | 'sizeof'  <type-name>
 
 <postfix-expression> ::= <primary-expression>
-                       | <postfix-expression> '[' <ows> <expression> ']' <ows>
-                       | <postfix-expression> '(' <ows> {<assignment-expression>}* ')' <ows>
-                       | <postfix-expression> '.' <ows> <identifier> <ows>
-                       | <postfix-expression> '->' <ows> <identifier> <ows>
-                       | <postfix-expression> '++' <ows>
-                       | <postfix-expression> '--' <ows>
+                       | <postfix-expression> '['  <expression> ']' 
+                       | <postfix-expression> '('  {<assignment-expression>}* ')' 
+                       | <postfix-expression> '.'  <identifier> 
+                       | <postfix-expression> '->'  <identifier> 
+                       | <postfix-expression> '++' 
+                       | <postfix-expression> '--' 
 
-<primary-expression> ::= <identifier> <ows>
+<primary-expression> ::= <identifier> 
                        | <constant>
-                       | <string> <ows>
-                       | '(' <ows> <expression> ')' <ows>
+                       | <string> 
+                       | '('  <expression> ')' 
 
-<constant> ::= <floating-constant> <ows>
-             | <integer-constant> <ows>
-             | <character-constant> <ows>
-             | <enumeration-constant> <ows>
+<constant> ::= <floating-constant> 
+             | <integer-constant> 
+             | <character-constant> 
+             | <enumeration-constant> 
 
 <expression> ::= <assignment-expression>
-               | <expression> ',' <ows> <assignment-expression>
+               | <expression> ','  <assignment-expression>
 
 <assignment-expression> ::= <conditional-expression>
                           | <unary-expression> <assignment-operator> <assignment-expression>
 
-<assignment-operator> ::= '=' <ows>
-                        | '*=' <ows>
-                        | '/=' <ows>
-                        | '%=' <ows>
-                        | '+=' <ows>
-                        | '-=' <ows>
-                        | '<<=' <ows>
-                        | '>>=' <ows>
-                        | '&=' <ows>
-                        | '^=' <ows>
-                        | '|=' <ows>
+<assignment-operator> ::= '=' 
+                        | '*=' 
+                        | '/=' 
+                        | '%=' 
+                        | '+=' 
+                        | '-=' 
+                        | '<<=' 
+                        | '>>=' 
+                        | '&=' 
+                        | '^=' 
+                        | '|=' 
 
-<unary-operator> ::= '&' <ows>
-                   | '*' <ows>
-                   | '+' <ows>
-                   | '-' <ows>
-                   | '~' <ows>
-                   | '!' <ows>
+<unary-operator> ::= '&' 
+                   | '*' 
+                   | '+' 
+                   | '-' 
+                   | '~' 
+                   | '!' 
 
 <type-name> ::= {<specifier-qualifier>}+ {<abstract-declarator>}?
 
 <parameter-type-list> ::= <parameter-list>
-                        | <parameter-list> ',' <ows> '...' <ows>
+                        | <parameter-list> ','  '...' 
 
 <parameter-list> ::= <parameter-declaration>
-                   | <parameter-list> ',' <ows> <parameter-declaration>
+                   | <parameter-list> ','  <parameter-declaration>
 
 <parameter-declaration> ::= {<declaration-specifier>}+ <declarator>
                           | {<declaration-specifier>}+ <abstract-declarator>
@@ -208,41 +208,41 @@ direct_declarator
                         | <pointer> <direct-abstract-declarator>
                         | <direct-abstract-declarator>
 
-(* orig:  '(' <ows> {<parameter-type-list>|? ), so replaced | with '}' <ows> *)
+(* orig:  '('  {<parameter-type-list>|? ), so replaced | with '}'  *)
 
-<direct-abstract-declarator> ::=  '(' <ows> <abstract-declarator> ')' <ows>
-                               | {<direct-abstract-declarator>}? '[' <ows> {<constant-expression>}? ']' <ows>
-                               | {<direct-abstract-declarator>}? '(' <ows> {<parameter-type-list>}? ')' <ows>
+<direct-abstract-declarator> ::=  '('  <abstract-declarator> ')' 
+                               | {<direct-abstract-declarator>}? '['  {<constant-expression>}? ']' 
+                               | {<direct-abstract-declarator>}? '('  {<parameter-type-list>}? ')' 
 
-<enum-specifier> ::= 'enum' <ows> <identifier> <ows> '{' <ows> <enumerator-list> '}' <ows>
-                   | 'enum' <ows> '{' <ows> <enumerator-list> '}' <ows>
-                   | 'enum' <ows> <identifier> <ows>
+<enum-specifier> ::= 'enum'  <identifier>  '{'  <enumerator-list> '}' 
+                   | 'enum'  '{'  <enumerator-list> '}' 
+                   | 'enum'  <identifier> 
 
 <enumerator-list> ::= <enumerator>
-                    | <enumerator-list> ',' <ows> <enumerator>
+                    | <enumerator-list> ','  <enumerator>
 
-<enumerator> ::= <identifier> <ows>
-               | <identifier> <ows> '=' <ows> <constant-expression>
+<enumerator> ::= <identifier> 
+               | <identifier>  '='  <constant-expression>
 
-<typedef-name> ::= <identifier> <ows>
+<typedef-name> ::= <identifier> 
 
 <declaration> ::=  {<declaration-specifier>}+ {<init-declarator>}*
 
 <init-declarator> ::= <declarator>
-                    | <declarator> '=' <ows> <initializer>
+                    | <declarator> '='  <initializer>
 
 <initializer> ::= <assignment-expression>
-                | '{' <ows> <initializer-list> '}' <ows>
-                | '{' <ows> <initializer-list> ',' <ows> '}' <ows>
+                | '{'  <initializer-list> '}' 
+                | '{'  <initializer-list> ','  '}' 
 
 <initializer-list> ::= <initializer>
-                     | <initializer-list> ',' <ows> <initializer>
+                     | <initializer-list> ','  <initializer>
 
 (* bij deze is  al lastiger, want kan ook tussen declarations staat of tussen statements. En maakt dan geen onderdeel uit van het statement zelf. *)
 (* alternatief is dat je dingen als statement in de def laat volgen door een ows. Dan eigenlijk elke finite char(s) laten volgen door  *)
-<compound-statement> ::= '{' <ows> {<declaration>}* {<statement>}* '}' <ows>
+<compound-statement> ::= '{'  {<declaration>}* {<statement>}* '}' 
 
-(* <compound-statement> ::= '{' <ows> {<declaration>}* {<statement>}* '}' <ows> *)
+(* <compound-statement> ::= '{'  {<declaration>}* {<statement>}* '}'  *)
 
 <statement> ::= <labeled-statement>
               | <expression-statement>
@@ -251,24 +251,24 @@ direct_declarator
               | <iteration-statement>
               | <jump-statement>
 
-<labeled-statement> ::= <identifier> <ows> ':' <ows> <statement>
-                      | 'case' <ows> <constant-expression> ':' <ows> <statement>
-                      | 'default' <ows> ':' <ows> <statement>
+<labeled-statement> ::= <identifier>  ':'  <statement>
+                      | 'case'  <constant-expression> ':'  <statement>
+                      | 'default'  ':'  <statement>
 
-<expression-statement> ::= {<expression>}? ';' <ows>
+<expression-statement> ::= {<expression>}? ';' 
 
-<selection-statement> ::= 'if' <ows> '(' <ows> <expression> ')' <ows> <statement>
-                        | 'if' <ows> '(' <ows> <expression> ')' <ows> <statement> 'else' <ows> <statement>
-                        | 'switch' <ows> '(' <ows> <expression> ')' <ows> <statement>
+<selection-statement> ::= 'if'  '('  <expression> ')'  <statement>
+                        | 'if'  '('  <expression> ')'  <statement> 'else'  <statement>
+                        | 'switch'  '('  <expression> ')'  <statement>
 
-<iteration-statement> ::= 'while' <ows> '(' <ows> <expression> ')' <ows> <statement>
-                        | 'do' <ows> <statement> 'while' <ows> '(' <ows> <expression> ')' <ows> ';' <ows>
-                        | 'for' <ows> '(' <ows> {<expression>}? ';' <ows> {<expression>}? ';' <ows> {<expression>}? ')' <ows> <statement>
+<iteration-statement> ::= 'while'  '('  <expression> ')'  <statement>
+                        | 'do'  <statement> 'while'  '('  <expression> ')'  ';' 
+                        | 'for'  '('  {<expression>}? ';'  {<expression>}? ';'  {<expression>}? ')'  <statement>
 
-<jump-statement> ::= 'goto' <ows> <identifier> <ows> ';' <ows>
-                   | 'continue' <ows> ';' <ows>
-                   | 'break' <ows> ';' <ows>
-                   | 'return' <ows> {<expression>}? ';' <ows>
+<jump-statement> ::= 'goto'  <identifier>  ';' 
+                   | 'continue'  ';' 
+                   | 'break'  ';' 
+                   | 'return'  {<expression>}? ';' 
 
 (* added [2016-12-25 10:58]. Kan nu wel weer onderaan *)
 <keyword> ::= 'auto' | 'break' | 'case' | 'char' | 'const' | 'continue' | 'default' | 'do' | 'double' | 'else' | 'enum' | 'extern' | 'float' | 'for' | 'goto' | 'if' | 'int' | 'long' | 'register' | 'return' | 'short' | 'signed' | 'sizeof' | 'static' | 'struct' | 'switch' | 'typedef' | 'union' | 'unsigned' | 'void' | 'volatile' | 'while'
@@ -276,8 +276,8 @@ direct_declarator
 (* use look ahead extension *)
 <identifier> ::= !keyword #'[A-Za-z_][A-Za-z0-9_]*'
 
-(* eigenlijk zou <ows> hier ook achter moeten, maar wil de whitespace niet bij de integer-constant etc hebben. Kan natuurlijk wel een string trim toepassen *)
-(* [2016-12-27 20:39] 'for' <ows> now no exponential notation, is not the first thing that matches, maybe need to 'do' <ows> it outside of regexp. *)
+(* eigenlijk zou  hier ook achter moeten, maar wil de whitespace niet bij de integer-constant etc hebben. Kan natuurlijk wel een string trim toepassen *)
+(* [2016-12-27 20:39] 'for'  now no exponential notation, is not the first thing that matches, maybe need to 'do'  it outside of regexp. *)
 (* <floating-constant> ::= #'[0-9]*\.[0-9]*([eE][+-]?[0-9]+)?' *)
 
 <floating-constant> ::= #'[0-9]*\.[0-9]*'
