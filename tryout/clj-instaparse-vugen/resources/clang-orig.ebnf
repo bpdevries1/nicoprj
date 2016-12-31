@@ -3,11 +3,11 @@
 (* maybe useful too: https://www.lysator.liu.se/c/ANSI-C-grammar-y.html and http://www.quut.com/c/ANSI-C-grammar-y.html *)
 
 (* only one place at the start where ows can occur before a terminal/something *)
-translation-unit ::= <ows> {external-declaration}*
+translation-unit ::=  {external-declaration}*
 
 external-declaration ::= function-definition | declaration
 
-(* Add optional whitespace <ows>  => not only after terminals *)
+(* Add optional whitespace   => not only after terminals *)
 function-definition ::= {<declaration-specifier>}* <declarator> {<declaration>}* <compound-statement>
 
 (* van http://www.quut.com/c/ANSI-C-grammar-y.html, een yacc spec:
@@ -44,9 +44,9 @@ Dit is bijna letterlijk hetzelfde.
                    | <enum-specifier>
                    | <typedef-name>
 
-<struct-or-union-specifier> ::= <struct-or-union> <identifier> <ows> { {<struct-declaration>}+ }
+<struct-or-union-specifier> ::= <struct-or-union> <identifier>  { {<struct-declaration>}+ }
                               | <struct-or-union> { {<struct-declaration>}+ }
-                              | <struct-or-union> <identifier> <ows>
+                              | <struct-or-union> <identifier> 
 
 <struct-or-union> ::= struct
                     | union
@@ -70,11 +70,11 @@ Dit is bijna letterlijk hetzelfde.
 <type-qualifier> ::= const
                    | volatile
 
-<direct-declarator> ::= <identifier> <ows>
+<direct-declarator> ::= <identifier> 
                       | ( <declarator> )
                       | <direct-declarator> [  {<constant-expression>}? ] 
                       | <direct-declarator> (  <parameter-type-list> ) 
-                      | <direct-declarator> (  {<identifier> <ows>}* ) 
+                      | <direct-declarator> (  {<identifier> }* ) 
                       
 (* in yacc, dan meer varianten direct uitgeschreven, maar werkt mss beter?:
 
@@ -152,20 +152,20 @@ direct_declarator
 <postfix-expression> ::= <primary-expression>
                        | <postfix-expression> [ <expression> ]
                        | <postfix-expression> ( {<assignment-expression>}* )
-                       | <postfix-expression> . <identifier> <ows>
-                       | <postfix-expression> -> <identifier> <ows>
+                       | <postfix-expression> . <identifier> 
+                       | <postfix-expression> -> <identifier> 
                        | <postfix-expression> ++
                        | <postfix-expression> --
 
-<primary-expression> ::= <identifier> <ows>
+<primary-expression> ::= <identifier> 
                        | <constant>
-                       | <string> <ows>
+                       | <string> 
                        | ( <expression> )
 
-<constant> ::= <floating-constant> <ows>
-             | <integer-constant> <ows>
-             | <character-constant> <ows>
-             | <enumeration-constant> <ows>
+<constant> ::= <floating-constant> 
+             | <integer-constant> 
+             | <character-constant> 
+             | <enumeration-constant> 
 
 <expression> ::= <assignment-expression>
                | <expression> , <assignment-expression>
@@ -214,17 +214,17 @@ direct_declarator
                                | {<direct-abstract-declarator>}? [ {<constant-expression>}? ]
                                | {<direct-abstract-declarator>}? ( {<parameter-type-list>}? )
 
-<enum-specifier> ::= enum <identifier> <ows> { <enumerator-list> }
+<enum-specifier> ::= enum <identifier>  { <enumerator-list> }
                    | enum { <enumerator-list> }
-                   | enum <identifier> <ows>
+                   | enum <identifier> 
 
 <enumerator-list> ::= <enumerator>
                     | <enumerator-list> , <enumerator>
 
-<enumerator> ::= <identifier> <ows>
-               | <identifier> <ows> = <constant-expression>
+<enumerator> ::= <identifier> 
+               | <identifier>  = <constant-expression>
 
-<typedef-name> ::= <identifier> <ows>
+<typedef-name> ::= <identifier> 
 
 <declaration> ::=  {<declaration-specifier>}+ {<init-declarator>}*
 
@@ -251,7 +251,7 @@ direct_declarator
               | <iteration-statement>
               | <jump-statement>
 
-<labeled-statement> ::= <identifier> <ows> : <statement>
+<labeled-statement> ::= <identifier>  : <statement>
                       | case <constant-expression> : <statement>
                       | default : <statement>
 
@@ -265,7 +265,7 @@ direct_declarator
                         | do <statement> while ( <expression> ) ;
                         | for ( {<expression>}? ; {<expression>}? ; {<expression>}? ) <statement>
 
-<jump-statement> ::= goto <identifier> <ows> ;
+<jump-statement> ::= goto <identifier>  ;
                    | continue ;
                    | break ;
                    | return {<expression>}? ;
@@ -276,7 +276,7 @@ direct_declarator
 (* use look ahead extension *)
 <identifier> ::= !keyword #'[A-Za-z_][A-Za-z0-9_]*'
 
-(* eigenlijk zou <ows> hier ook achter moeten, maar wil de whitespace niet bij de integer-constant etc hebben. Kan natuurlijk wel een string trim toepassen *)
+(* eigenlijk zou  hier ook achter moeten, maar wil de whitespace niet bij de integer-constant etc hebben. Kan natuurlijk wel een string trim toepassen *)
 (* [2016-12-27 20:39] for now no exponential notation, is not the first thing that matches, maybe need to do it outside of regexp. *)
 (* <floating-constant> ::= #'[0-9]*\.[0-9]*([eE][+-]?[0-9]+)?' *)
 

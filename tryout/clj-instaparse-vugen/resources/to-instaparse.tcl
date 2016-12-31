@@ -24,14 +24,14 @@ proc transform {text until_line} {
   # don't include |, is used in BNF itself.
   foreach chars {, : * ? \{ \} || << >> ^ / % ++ -- -> = == > < >= <= + - . ~ ! *= /= += -= <<= >>= ^= != |= %= ... ; ( ) [ ]} {
     # regsub -all " \\$char " $text " '$char' " text
-    regsub -all [to_regexp $chars] $text " '$chars' <ows>\\1" text
+    regsub -all [to_regexp $chars] $text " '$chars'\\1" text
   }
   # & and && have special syntax in regsub, so specific replace.
-  regsub -all { \&([ \n])} $text " '\\&' <ows>\\1" text
-  regsub -all { \&\&([ \n])} $text " '\\&\\&' <ows>\\1" text
-  regsub -all { \&=([ \n])} $text " '\\&=' <ows>\\1" text
+  regsub -all { \&([ \n])} $text " '\\&'\\1" text
+  regsub -all { \&\&([ \n])} $text " '\\&\\&'\\1" text
+  regsub -all { \&=([ \n])} $text " '\\&='\\1" text
   foreach keyword $keywords {
-    regsub -all " ${keyword}(\[ \\n\])" $text " '$keyword' <ows>\\1" text
+    regsub -all " ${keyword}(\[ \\n\])" $text " '$keyword'\\1" text
   }
 
   # keep text until until_line, replace rest with trivial LHS ::= 'LHS'
