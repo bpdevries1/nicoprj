@@ -10,6 +10,17 @@ external-declaration ::= function-definition | declaration
 (* Add optional whitespace <ows>  => not only after terminals *)
 function-definition ::= {<declaration-specifier>}* <declarator> {<declaration>}* <compound-statement>
 
+(* van http://www.quut.com/c/ANSI-C-grammar-y.html, een yacc spec:
+
+function_definition
+	: declaration_specifiers declarator declaration_list compound_statement
+	| declaration_specifiers declarator compound_statement
+	;
+
+Dit is bijna letterlijk hetzelfde.
+
+*)
+
 <declaration-specifier> ::= <storage-class-specifier>
                           | <type-specifier>
                           | <type-qualifier>
@@ -64,6 +75,26 @@ function-definition ::= {<declaration-specifier>}* <declarator> {<declaration>}*
                       | <direct-declarator> '[' <ows>  {<constant-expression>}? ']' <ows> 
                       | <direct-declarator> '(' <ows>  <parameter-type-list> ')' <ows> 
                       | <direct-declarator> '(' <ows>  {<identifier> <ows>}* ')' <ows> 
+                      
+(* in yacc, dan meer varianten direct uitgeschreven, maar werkt mss beter?:
+
+
+direct_declarator
+	: IDENTIFIER
+	| '(' declarator ')'
+	| direct_declarator '[' ']'
+	| direct_declarator '[' '*' ']'
+	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']'
+	| direct_declarator '[' STATIC assignment_expression ']'
+	| direct_declarator '[' type_qualifier_list '*' ']'
+	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'
+	| direct_declarator '[' type_qualifier_list assignment_expression ']'
+	| direct_declarator '[' type_qualifier_list ']'
+	| direct_declarator '[' assignment_expression ']'
+	| direct_declarator '(' parameter_type_list ')'
+	| direct_declarator '(' ')'
+	| direct_declarator '(' identifier_list ')'
+*)	                      
 
 <constant-expression> ::= <conditional-expression>
 
@@ -243,7 +274,7 @@ function-definition ::= {<declaration-specifier>}* <declarator> {<declaration>}*
 <keyword> ::= 'auto' | 'break' | 'case' | 'char' | 'const' | 'continue' | 'default' | 'do' | 'double' | 'else' | 'enum' | 'extern' | 'float' | 'for' | 'goto' | 'if' | 'int' | 'long' | 'register' | 'return' | 'short' | 'signed' | 'sizeof' | 'static' | 'struct' | 'switch' | 'typedef' | 'union' | 'unsigned' | 'void' | 'volatile' | 'while'
 
 (* use look ahead extension *)
-<identifier> ::= !keyword #'[A-Za-z_][A-Za-z0-9_]+'
+<identifier> ::= !keyword #'[A-Za-z_][A-Za-z0-9_]*'
 
 (* eigenlijk zou <ows> hier ook achter moeten, maar wil de whitespace niet bij de integer-constant etc hebben. Kan natuurlijk wel een string trim toepassen *)
 (* [2016-12-27 20:39] 'for' <ows> now no exponential notation, is not the first thing that matches, maybe need to 'do' <ows> it outside of regexp. *)
