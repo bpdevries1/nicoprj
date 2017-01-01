@@ -22,10 +22,28 @@
 (def mini-text (slurp (io/resource "mini.usr")))
 (def mini (ini-parse mini-text))
 
-#_(def c-parser (-> "clang.ebnf" io/resource slurp (insta/parser :auto-whitespace :standard)))
+;; [2017-01-01 12:22] Optional feature, could be very useful.
+;; TODO: // feature, until end-of-line.
+;; meest voor de hand liggen om de #'.' te vervangen door #'.+', maar dit gaat niet werken, omdat dan de comment mogelijk te groot wordt gezien, stuk tussen 2 comments dan mogelijk ook als comment gezien.
+#_(def whitespace-or-comments
+    (insta/parser
+     "ws-or-comments = #'\\s+' | comments
+     comments = comment+
+     comment = '/*' inside-comment* '*/'
+     inside-comment =  !( '*/' | '/*' ) #'.' | comment"
+     :auto-whitespace :standard))
+
+(def whitespace-or-comments
+  (insta/parser
+   "ws-or-comments = #'\\s+' | comments
+     comments = comment+
+     comment = '/*' inside-comment* '*/'
+     inside-comment = #'[^*]+' | !'*/' '*'"
+   :auto-whitespace :standard))
 
 (def c-grammar (-> "clang.ebnf" io/resource slurp))
-(def c-parser (insta/parser c-grammar :auto-whitespace :standard))
+#_(def c-parser (insta/parser c-grammar :auto-whitespace :standard))
+(def c-parser (insta/parser c-grammar :auto-whitespace whitespace-or-comments))
 
 (def vuser-end-text (slurp (io/resource "vuser_end.c")))
 
