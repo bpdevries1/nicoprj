@@ -1,5 +1,5 @@
 /* comment at the start */
-
+// single line comment
 landing() {
   a= 1;
   /* comment within function
@@ -8,7 +8,7 @@ landing() {
 	
 	/* and more more with **** in the center */
 	
-	a= 2;
+	a= 2; // and other comment with */ and */ and // again.
 	
 	/**
 	 * doc string like.

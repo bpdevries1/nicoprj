@@ -33,11 +33,19 @@
      inside-comment =  !( '*/' | '/*' ) #'.' | comment"
      :auto-whitespace :standard))
 
-(def whitespace-or-comments
+#_(def whitespace-or-comments
   (insta/parser
    "ws-or-comments = #'\\s+' | comments
      comments = comment+
      comment = '/*' inside-comment* '*/'
+     inside-comment = #'[^*]+' | !'*/' '*'"
+   :auto-whitespace :standard))
+
+(def whitespace-or-comments
+  (insta/parser
+   "ws-or-comments = #'\\s+' | comments
+     comments = comment+
+     comment = '/*' inside-comment* '*/' | '//' #'[^\\n\\r]+'
      inside-comment = #'[^*]+' | !'*/' '*'"
    :auto-whitespace :standard))
 
