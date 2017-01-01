@@ -45,7 +45,7 @@
   (insta/parser
    "ws-or-comments = #'\\s+' | comments
      comments = comment+
-     comment = '/*' inside-comment* '*/' | '//' #'[^\\n\\r]+'
+     comment = '/*' inside-comment* '*/' | '//' #'[^\\n\\r]+\\r?\\n' 
      inside-comment = #'[^*]+' | !'*/' '*'"
    :auto-whitespace :standard))
 
@@ -63,7 +63,7 @@
   (println "All trees:")
   (let [trees (time (insta/parses parser text :total true :unhide :all))]
     (println "Number of characters:" (count text))
-    (println "Number of trees:" (count trees))
+    (println "Number of trees:" (time (count trees)))
     trees))
 
 (defn measured-parse-file
@@ -76,18 +76,28 @@
   "Like previous, but just one, is faster"
   [parser filename]
   (println "Filename:" filename)
-  (time (insta/parse parser (slurp (io/resource filename)))))
+  (let [res (time (insta/parse parser (slurp (io/resource filename))))]
+    (println "Filename finished: " filename)
+    res))
 
 (defn pprint-file
   "pretty print part of trees to filename"
   [trees ndx basename]
   (pprint (nth trees ndx) (io/writer (str "/tmp/"  basename "-" ndx ".txt"))))
 
-(defn pprint-file-trees
+#_(defn pprint-file-trees
   "Print all trees of parse to a separate file"
   [trees basename]
   (doseq [ndx (range (count trees))]
     (pprint-file trees ndx basename)))
+
+(defn pprint-file-trees
+  "Print all trees of parse to a separate file"
+  ([trees basename max-cnt]
+   (doseq [ndx (take max-cnt (range (count trees)))]
+     (pprint-file trees ndx basename)))
+  ([trees basename]
+   (pprint-file-trees trees basename 20)))
 
 ;; total true -> embed failure node in tree.
 (time (def vuser-end (c-parser vuser-end-text :total true :unhide :all)))

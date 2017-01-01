@@ -6,7 +6,7 @@
 translation-unit ::=external-declaration
 	| translation-unit external-declaration
 
-external-declaration ::= function-definition | declaration
+external-declaration ::= function-definition | declaration | preproc
 
 (* [2017-01-01 12:00] Nog 2 varianten erbij zonder de decl-spec, bv int, nodig voor Actions *)
 function-definition	::= declaration-specifiers declarator declaration-list compound-statement
@@ -338,6 +338,9 @@ block-item-list	::= block-item+
 
 block-item ::=declaration
 	| statement
+	| preproc
+
+preproc ::= '#' #'[^\n\r]+\r?\n' 
 
 statement ::= labeled-statement
               | expression-statement

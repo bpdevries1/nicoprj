@@ -1,3 +1,5 @@
+#ifndef abc
+#define abc
 /* comment at the start */
 // single line comment
 landing() {
@@ -22,4 +24,5 @@ landing() {
 	 
 	 a= 4;
 }
+#endif
 
