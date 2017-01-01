@@ -87,8 +87,7 @@
 #_(def landing-106 (measured-parse-file c-parser "landing-106.c"))
 ;; [2016-12-31 23:10] deze lukt niet, maar eerste lijkt wel te lukken.
 #_(def landing (measured-parse-file c-parser "landing.c"))
-#_(def landing (measured-parse-file c-parser "revert.c"))
-
+(def revert (measured-parse-file c-parser "revert.c"))
 (def landing (measured-single-parse-file c-parser "landing.c"))
 
 ;; (clojure.pprint/pprint *map* (clojure.java.io/writer "foo.txt"))

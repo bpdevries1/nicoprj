@@ -8,8 +8,11 @@ translation-unit ::=external-declaration
 
 external-declaration ::= function-definition | declaration
 
+(* [2017-01-01 12:00] Nog 2 varianten erbij zonder de decl-spec, bv int, nodig voor Actions *)
 function-definition	::= declaration-specifiers declarator declaration-list compound-statement
 	| declaration-specifiers declarator compound-statement
+	| declarator declaration-list compound-statement
+	| declarator compound-statement
 
 (* van http://www.quut.com/c/ANSI-C-grammar-y.html, een yacc spec:
 
@@ -17,6 +20,7 @@ Dit is bijna letterlijk hetzelfde.
 
 *)
 
+(* [2017-01-01 11:59] Kan hier zeggen dat het niets mag zijn, maar werkt niet zo goed, en wil dit ook alleen vanuit function-def, dus daar oplossen *)
 declaration-specifiers ::= storage-class-specifier declaration-specifiers
 	| storage-class-specifier
 	| type-specifier declaration-specifiers
@@ -335,12 +339,12 @@ block-item-list	::= block-item+
 block-item ::=declaration
 	| statement
 
-<statement> ::= <labeled-statement>
-              | <expression-statement>
-              | <compound-statement>
-              | <selection-statement>
-              | <iteration-statement>
-              | <jump-statement>
+statement ::= labeled-statement
+              | expression-statement
+              | compound-statement
+              | selection-statement
+              | iteration-statement
+              | jump-statement
 
 <labeled-statement> ::= <identifier>  : <statement>
                       | case <constant-expression> : <statement>
@@ -349,9 +353,9 @@ block-item ::=declaration
 expression-statement	::= ';'
 	| expression ';'
 
-<selection-statement> ::= if ( <expression> ) <statement>
-                        | if ( <expression> ) <statement> else <statement>
-                        | switch ( <expression> ) <statement>
+selection-statement ::= if ( expression ) statement
+                        | if ( expression ) statement else statement
+                        | switch ( expression ) statement
 
 iteration-statement	::= 'while' '(' expression ')' statement
 	| 'do' statement 'while' '(' expression ')' ';'
@@ -365,7 +369,8 @@ iteration-statement	::= 'while' '(' expression ')' statement
                    | break ;
                    | return expression? ;
 
-(* added [2016-12-25 10:58]. Kan nu wel weer onderaan *)
+(* added [2016-12-25 10:58]. 
+   [2017-01-01 11:37] Hier nog keywords bijzetten? Zijn vooral nieuwe, die ik niet/weinig gebruik. *)
 <keyword> ::= 'auto' | 'break' | 'case' | 'char' | 'const' | 'continue' | 'default' | 'do' | 'double' | 'else' | 'enum' | 'extern' | 'float' | 'for' | 'goto' | 'if' | 'int' | 'long' | 'register' | 'return' | 'short' | 'signed' | 'sizeof' | 'static' | 'struct' | 'switch' | 'typedef' | 'union' | 'unsigned' | 'void' | 'volatile' | 'while'
 
 (* use look ahead extension *)
