@@ -217,7 +217,11 @@ proc det_lr_include_dir {} {
     return ""
   } else {
     # already set, leave unchanged
-    return $lr_include_dir
+	if {[file exists $lr_include_dir]} {
+		return $lr_include_dir
+	} else {
+		error "lr_include_dir not found: $lr_include_dir. Check [buildtool_env_tcl_name]"
+	}
   }
 }
 
