@@ -18,6 +18,7 @@ proc main {argv} {
   # array set params [::cmdline::getoptions argv $options $usage]
   set opt [getoptions argv $options $usage]
   lassign $argv drive
+  set drive [string tolower $drive]
   #puts "drive: $drive"
   #puts "opt: $opt"
   source [:config $opt]
@@ -51,14 +52,28 @@ proc main {argv} {
 }
 
 proc det_share {res} {
-  if {[regexp {Remote name\s+(\S+)} $res z share]} {
+  # [2016-11-28 12:36:10] share can contain spaces.
+  if {[regexp {Remote name\s+([^\n\r]+)} $res z share]} {
 	return $share
+  } elseif {[regexp {Externe naam\s+([^\n\r]+)} $res z share]} {
+    # log debug "Found!"
+    #breakpoint
+    return $share
   } else {
+    #breakpoint
     error "Cannot determine share from: $res"
   }
 }
 
 if 0 {
+
+Op RN Laptop in NL:
+G:\.config\recon>net use y:
+Lokale naam             y:
+Externe naam            \\bxtv150003.eu.rabonet.com\HOST_VOL3_L_FS$\ISD\Corporate Banking IT\Users\vreezen
+Type netwerkbron        Schijf
+De opdracht is voltooid.
+
 
                              
 
