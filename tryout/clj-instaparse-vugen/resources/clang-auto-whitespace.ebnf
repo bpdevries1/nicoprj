@@ -41,22 +41,22 @@ declaration-list 	::= declaration
 	| declaration-list declaration
 
 
-<storage-class-specifier> ::= auto
-                            | register
-                            | static
-                            | extern
-                            | typedef
+<storage-class-specifier> ::= 'auto'
+                            | 'register'
+                            | 'static'
+                            | 'extern'
+                            | 'typedef'
                             | 'thread-local'
 
-<type-specifier> ::= void
-                   | char
-                   | short
-                   | int
-                   | long
-                   | float
-                   | double
-                   | signed
-                   | unsigned
+<type-specifier> ::= 'void'
+                   | 'char'
+                   | 'short'
+                   | 'int'
+                   | 'long'
+                   | 'float'
+                   | 'double'
+                   | 'signed'
+                   | 'unsigned'
                    | 'bool'
                    | 'complex'
                    | 'imaginary'
@@ -76,8 +76,8 @@ struct-or-union-specifier ::= struct-or-union '{' struct-declaration-list '}'
 struct-declaration-list ::= struct-declaration
 	| struct-declaration-list struct-declaration
 
-<struct-or-union> ::= struct
-                    | union
+<struct-or-union> ::= 'struct'
+                    | 'union'
 
 struct-declaration ::=specifier-qualifier-list ';'	
 	| specifier-qualifier-list struct-declarator-list ';'
@@ -91,11 +91,11 @@ specifier-qualifier-list ::=type-specifier specifier-qualifier-list
 static-assert-declaration ::= 'static-assert'  '(' constant-expression ',' string ')' ';'
 
 <struct-declarator-list> ::= <struct-declarator>
-                           | <struct-declarator-list> , <struct-declarator>
+                           | <struct-declarator-list> ',' <struct-declarator>
 
 <struct-declarator> ::= <declarator>
-                      | <declarator> : <constant-expression>
-                      | : <constant-expression>
+                      | <declarator> ':' <constant-expression>
+                      | ':' <constant-expression>
 
 declarator	::= pointer direct-declarator
 	| direct-declarator
@@ -108,10 +108,10 @@ pointer	::= '*' type-qualifier-list pointer
 type-qualifier-list ::=type-qualifier
 	| type-qualifier-list type-qualifier
 
-<type-qualifier> ::= const
-                   | volatile | 'atomic' | 'restrict'
+<type-qualifier> ::= 'const'
+                   | 'volatile' | 'atomic' | 'restrict'
 
-direct-declarator ::= identifier
+direct-declarator ::=identifier
 	| '(' declarator ')'
 	| direct-declarator '[' ']'
 	| direct-declarator '[' '*' ']'
@@ -135,55 +135,55 @@ identifier-list ::= identifier
 <constant-expression> ::= <conditional-expression>
 
 <conditional-expression> ::= <logical-or-expression>
-                           | <logical-or-expression> ? <expression> : <conditional-expression>
+                           | <logical-or-expression> '?' <expression> ':' <conditional-expression>
 
 <logical-or-expression> ::= <logical-and-expression>
-                          | <logical-or-expression> || <logical-and-expression>
+                          | <logical-or-expression> '||' <logical-and-expression>
 
 <logical-and-expression> ::= <inclusive-or-expression>
-                           | <logical-and-expression> && <inclusive-or-expression>
+                           | <logical-and-expression> '&&' <inclusive-or-expression>
 
 <inclusive-or-expression> ::= <exclusive-or-expression>
                             | <inclusive-or-expression> '|' <exclusive-or-expression>
 
 <exclusive-or-expression> ::= <and-expression>
-                            | <exclusive-or-expression> ^ <and-expression>
+                            | <exclusive-or-expression> '^' <and-expression>
 
 <and-expression> ::= <equality-expression>
-                   | <and-expression> & <equality-expression>
+                   | <and-expression> '&' <equality-expression>
 
 <equality-expression> ::= <relational-expression>
-                        | <equality-expression> == <relational-expression>
-                        | <equality-expression> != <relational-expression>
+                        | <equality-expression> '==' <relational-expression>
+                        | <equality-expression> '!=' <relational-expression>
 
 <relational-expression> ::= <shift-expression>
-                          | <relational-expression> < <shift-expression>
-                          | <relational-expression> > <shift-expression>
-                          | <relational-expression> <= <shift-expression>
-                          | <relational-expression> >= <shift-expression>
+                          | <relational-expression> '<' <shift-expression>
+                          | <relational-expression> '>' <shift-expression>
+                          | <relational-expression> '<=' <shift-expression>
+                          | <relational-expression> '>=' <shift-expression>
 
 <shift-expression> ::= <additive-expression>
-                     | <shift-expression> << <additive-expression>
-                     | <shift-expression> >> <additive-expression>
+                     | <shift-expression> '<<' <additive-expression>
+                     | <shift-expression> '>>' <additive-expression>
 
 <additive-expression> ::= <multiplicative-expression>
-                        | <additive-expression> + <multiplicative-expression>
-                        | <additive-expression> - <multiplicative-expression>
+                        | <additive-expression> '+' <multiplicative-expression>
+                        | <additive-expression> '-' <multiplicative-expression>
 
 <multiplicative-expression> ::= <cast-expression>
-                              | <multiplicative-expression> * <cast-expression>
-                              | <multiplicative-expression> / <cast-expression>
-                              | <multiplicative-expression> % <cast-expression>
+                              | <multiplicative-expression> '*' <cast-expression>
+                              | <multiplicative-expression> '/' <cast-expression>
+                              | <multiplicative-expression> '%' <cast-expression>
 
 <cast-expression> ::= <unary-expression>
-                    | ( <type-name> ) <cast-expression>
+                    | '(' <type-name> ')' <cast-expression>
 
 <unary-expression> ::= <postfix-expression>
-                     | ++ <unary-expression>
-                     | -- <unary-expression>
+                     | '++' <unary-expression>
+                     | '--' <unary-expression>
                      | <unary-operator> <cast-expression>
-                     | sizeof <unary-expression>
-                     | sizeof '(' <type-name> ')'
+                     | 'sizeof' <unary-expression>
+                     | 'sizeof' '(' <type-name> ')'
                      | 'alignof' '(' <type-name> ')'
 
 postfix-expression	::= primary-expression
@@ -200,7 +200,7 @@ postfix-expression	::= primary-expression
 <primary-expression> ::= <identifier> 
                        | <constant>
                        | <string> 
-                       | ( <expression> )
+                       | '(' <expression> ')'
                        | generic-selection
 
 generic-selection ::='generic'  '(' assignment-expression ',' generic-assoc-list ')'
@@ -217,38 +217,38 @@ generic-association ::=type-name ':' assignment-expression
              | <enumeration-constant> 
 
 <expression> ::= <assignment-expression>
-               | <expression> , <assignment-expression>
+               | <expression> ',' <assignment-expression>
 
 <assignment-expression> ::= <conditional-expression>
                           | <unary-expression> <assignment-operator> <assignment-expression>
 
-<assignment-operator> ::= =
-                        | *=
-                        | /=
-                        | %=
-                        | +=
-                        | -=
-                        | <<=
-                        | >>=
-                        | &=
-                        | ^=
-                        | |=
+<assignment-operator> ::= '='
+                        | '*='
+                        | '/='
+                        | '%='
+                        | '+='
+                        | '-='
+                        | '<<='
+                        | '>>='
+                        | '&='
+                        | '^='
+                        | '|='
 
-<unary-operator> ::= &
-                   | *
-                   | +
-                   | -
-                   | ~
-                   | !
+<unary-operator> ::= '&'
+                   | '*'
+                   | '+'
+                   | '-'
+                   | '~'
+                   | '!'
 
 type-name ::= specifier-qualifier-list abstract-declarator
 	| specifier-qualifier-list
 
 <parameter-type-list> ::= <parameter-list>
-                        | <parameter-list> , ...
+                        | <parameter-list> ',' '...'
 
 <parameter-list> ::= <parameter-declaration>
-                   | <parameter-list> , <parameter-declaration>
+                   | <parameter-list> ',' <parameter-declaration>
 
 <parameter-declaration> ::= declaration-specifiers <declarator>
                           | declaration-specifiers <abstract-declarator>
@@ -258,7 +258,7 @@ type-name ::= specifier-qualifier-list abstract-declarator
                         | <pointer> <direct-abstract-declarator>
                         | <direct-abstract-declarator>
 
-(* orig:  ( parameter-type-list>|? ), so replaced | with } *)
+(* orig:  '(' parameter-type-list>|? ), so replaced | with '}' *)
 
 direct-abstract-declarator ::= '(' abstract-declarator ')'
 	| '[' ']'
@@ -282,14 +282,14 @@ direct-abstract-declarator ::= '(' abstract-declarator ')'
 	| direct-abstract-declarator '(' ')'
 	| direct-abstract-declarator '(' parameter-type-list ')'
 
-enum-specifier	::= enum '{' enumerator-list '}'
-	| enum '{' enumerator-list ',' '}'
-	| enum identifier '{' enumerator-list '}'
-	| enum identifier '{' enumerator-list ',' '}'
-	| enum identifier
+enum-specifier	::= 'enum' '{' enumerator-list '}'
+	| 'enum' '{' enumerator-list ',' '}'
+	| 'enum' identifier '{' enumerator-list '}'
+	| 'enum' identifier '{' enumerator-list ',' '}'
+	| 'enum' identifier
 
 <enumerator-list> ::= <enumerator>
-                    | <enumerator-list> , <enumerator>
+                    | <enumerator-list> ',' <enumerator>
 
 enumerator	 ::= enumeration-constant '=' constant-expression
 	| enumeration-constant
@@ -302,11 +302,11 @@ init-declarator-list ::= init-declarator
 	| init-declarator-list ',' init-declarator
 
 <init-declarator> ::= <declarator>
-                    | <declarator> = <initializer>
+                    | <declarator> '=' <initializer>
 
 <initializer> ::= <assignment-expression>
-                | { <initializer-list> }
-                | { <initializer-list> , }
+                | '{' <initializer-list> '}'
+                | '{' <initializer-list> ',' '}'
 
 initializer-list	::= designation initializer
 	| initializer
@@ -349,16 +349,16 @@ statement ::= labeled-statement
               | iteration-statement
               | jump-statement
 
-<labeled-statement> ::= <identifier>  : <statement>
-                      | case <constant-expression> : <statement>
-                      | default : <statement>
+<labeled-statement> ::= <identifier>  ':' <statement>
+                      | 'case' <constant-expression> ':' <statement>
+                      | 'default' ':' <statement>
 
 expression-statement	::= ';'
 	| expression ';'
 
-selection-statement ::= if ( expression ) statement
-                        | if ( expression ) statement else statement
-                        | switch ( expression ) statement
+selection-statement ::= 'if' '(' expression ')' statement
+                        | 'if' '(' expression ')' statement 'else' statement
+                        | 'switch' '(' expression ')' statement
 
 iteration-statement	::= 'while' '(' expression ')' statement
 	| 'do' statement 'while' '(' expression ')' ';'
@@ -367,10 +367,10 @@ iteration-statement	::= 'while' '(' expression ')' statement
 	| 'for' '(' declaration expression-statement ')' statement
 	| 'for' '(' declaration expression-statement expression ')' statement
 
-<jump-statement> ::= goto <identifier>  ;
-                   | continue ;
-                   | break ;
-                   | return expression? ;
+<jump-statement> ::= 'goto' <identifier>  ';'
+                   | 'continue' ';'
+                   | 'break' ';'
+                   | 'return' expression? ';'
 
 (* added [2016-12-25 10:58]. 
    [2017-01-01 11:37] Hier nog keywords bijzetten? Zijn vooral nieuwe, die ik niet/weinig gebruik. *)
@@ -380,7 +380,7 @@ iteration-statement	::= 'while' '(' expression ')' statement
 <identifier> ::= !keyword #'[A-Za-z_][A-Za-z0-9_]*'
 
 (* eigenlijk zou  hier ook achter moeten, maar wil de whitespace niet bij de integer-constant etc hebben. Kan natuurlijk wel een string trim toepassen *)
-(* [2016-12-27 20:39] for now no exponential notation, is not the first thing that matches, maybe need to do it outside of regexp. *)
+(* [2016-12-27 20:39] 'for' now no exponential notation, is not the first thing that matches, maybe need to 'do' it outside of regexp. *)
 (* <floating-constant> ::= #'[0-9]*\.[0-9]*([eE][+-]?[0-9]+)?' *)
 
 <floating-constant> ::= #'[0-9]*\.[0-9]*'
@@ -401,17 +401,17 @@ enumeration-constant	 ::= identifier
 
 (* onderstaande evt ook nog doen, als je het gebruikt, anders maakt het niet uit.
 
-"_Alignas"                              { return ALIGNAS; }
-"_Alignof"                              { return ALIGNOF; }
-"_Atomic"                               { return ATOMIC; }
-"_Bool"                                 { return BOOL; }
-"_Complex"                              { return COMPLEX; }
-"_Generic"                              { return GENERIC; }
-"_Imaginary"                            { return IMAGINARY; }
-"_Noreturn"                             { return NORETURN; }
-"_Static_assert"                        { return STATIC_ASSERT; }
-"_Thread_local"                         { return THREAD_LOCAL; }
-"__func__"                              { return FUNC_NAME; }
+"_Alignas"                              '{' 'return' ALIGNAS; '}'
+"_Alignof"                              '{' 'return' ALIGNOF; '}'
+"_Atomic"                               '{' 'return' ATOMIC; '}'
+"_Bool"                                 '{' 'return' BOOL; '}'
+"_Complex"                              '{' 'return' COMPLEX; '}'
+"_Generic"                              '{' 'return' GENERIC; '}'
+"_Imaginary"                            '{' 'return' IMAGINARY; '}'
+"_Noreturn"                             '{' 'return' NORETURN; '}'
+"_Static_assert"                        '{' 'return' STATIC_ASSERT; '}'
+"_Thread_local"                         '{' 'return' THREAD_LOCAL; '}'
+"__func__"                              '{' 'return' FUNC_NAME; '}'
 
  *)
 
@@ -420,6 +420,7 @@ enumeration-constant	 ::= identifier
 
 <mws> ::= #'\s+'
 <ows> ::= #'\s*'
+
 
 
 
