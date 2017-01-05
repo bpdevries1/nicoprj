@@ -3,8 +3,15 @@
 (* maybe useful too: https://www.lysator.liu.se/c/ANSI-C-grammar-y.html and http://www.quut.com/c/ANSI-C-grammar-y.html *)
 
 (* only one place at the start where ows can occur before a terminal/something *)
-translation-unit ::=external-declaration
+start-parse ::= <ows> translation-unit
+
+(*
+translation-unit ::= external-declaration
 	| translation-unit external-declaration
+*)
+
+(* met deze meer sequentieel, minder diepe tree *)
+translation-unit ::= external-declaration+
 
 external-declaration ::= function-definition | declaration | preproc
 
@@ -65,13 +72,13 @@ declaration-list 	::= declaration
                    | <typedef-name>
                    | atomic-type-specifier
 
-<typedef-name> ::= <identifier> 
+<typedef-name> ::= <identifier> <ows> 
 
 atomic-type-specifier ::= 'atomic' <ows> '(' <ows> type-name ')' <ows>
 
 struct-or-union-specifier ::= struct-or-union '{' <ows> struct-declaration-list '}' <ows>
-	| struct-or-union identifier '{' <ows> struct-declaration-list '}' <ows>
-	| struct-or-union identifier
+	| struct-or-union identifier <ows> '{' <ows> struct-declaration-list '}' <ows>
+	| struct-or-union identifier <ows>
 
 struct-declaration-list ::= struct-declaration
 	| struct-declaration-list struct-declaration
@@ -88,7 +95,7 @@ specifier-qualifier-list ::=type-specifier specifier-qualifier-list
 	| type-qualifier specifier-qualifier-list
 	| type-qualifier
 
-static-assert-declaration ::= 'static-assert' <ows>  '(' <ows> constant-expression ',' <ows> string ')' <ows> ';' <ows>
+static-assert-declaration ::= 'static-assert' <ows>  '(' <ows> constant-expression ',' <ows> string <ows> ')' <ows> ';' <ows>
 
 <struct-declarator-list> ::= <struct-declarator>
                            | <struct-declarator-list> ',' <ows> <struct-declarator>
@@ -111,7 +118,7 @@ type-qualifier-list ::=type-qualifier
 <type-qualifier> ::= 'const' <ows>
                    | 'volatile' <ows> | 'atomic' <ows> | 'restrict' <ows>
 
-direct-declarator ::= identifier
+direct-declarator ::= identifier <ows>
 	| '(' <ows> declarator ')' <ows>
 	| direct-declarator '[' <ows> ']' <ows>
 	| direct-declarator '[' <ows> '*' <ows> ']' <ows>
@@ -129,8 +136,8 @@ direct-declarator ::= identifier
 type-qualifier-list ::=type-qualifier
 	| type-qualifier-list type-qualifier
 
-identifier-list ::= identifier
-	| identifier-list ',' <ows> identifier
+identifier-list ::= identifier <ows>
+	| identifier-list ',' <ows> identifier <ows>
 
 <constant-expression> ::= <conditional-expression>
 
@@ -190,16 +197,16 @@ postfix-expression	::= primary-expression
 	| postfix-expression '[' <ows> expression ']' <ows>
 	| postfix-expression '(' <ows> ')' <ows>
 	| postfix-expression '(' <ows> argument-expression-list ')' <ows>
-	| postfix-expression '.' <ows> identifier
-	| postfix-expression '->' <ows> identifier
+	| postfix-expression '.' <ows> identifier <ows>
+	| postfix-expression '->' <ows> identifier <ows>
 	| postfix-expression '++' <ows>
 	| postfix-expression '--' <ows>
 	| '(' <ows> type-name ')' <ows> '{' <ows> initializer-list '}' <ows>
 	| '(' <ows> type-name ')' <ows> '{' <ows> initializer-list ',' <ows> '}' <ows>
 
-<primary-expression> ::= <identifier> 
+<primary-expression> ::= <identifier> <ows> 
                        | <constant>
-                       | <string> 
+                       | <string> <ows> 
                        | '(' <ows> <expression> ')' <ows>
                        | generic-selection
 
@@ -211,9 +218,9 @@ generic-assoc-list ::= generic-association
 generic-association ::=type-name ':' <ows> assignment-expression
 	| 'default' <ows> ':' <ows> assignment-expression
 
-<constant> ::= <floating-constant> 
-             | <integer-constant> 
-             | <character-constant> 
+<constant> ::= <floating-constant> <ows> 
+             | <integer-constant> <ows> 
+             | <character-constant> <ows> 
              | <enumeration-constant> 
 
 <expression> ::= <assignment-expression>
@@ -284,9 +291,9 @@ direct-abstract-declarator ::= '(' <ows> abstract-declarator ')' <ows>
 
 enum-specifier	::= 'enum' <ows> '{' <ows> enumerator-list '}' <ows>
 	| 'enum' <ows> '{' <ows> enumerator-list ',' <ows> '}' <ows>
-	| 'enum' <ows> identifier '{' <ows> enumerator-list '}' <ows>
-	| 'enum' <ows> identifier '{' <ows> enumerator-list ',' <ows> '}' <ows>
-	| 'enum' <ows> identifier
+	| 'enum' <ows> identifier <ows> '{' <ows> enumerator-list '}' <ows>
+	| 'enum' <ows> identifier <ows> '{' <ows> enumerator-list ',' <ows> '}' <ows>
+	| 'enum' <ows> identifier <ows>
 
 <enumerator-list> ::= <enumerator>
                     | <enumerator-list> ',' <ows> <enumerator>
@@ -319,7 +326,7 @@ designator-list ::=designator
 	| designator-list designator
 
 designator ::= '[' <ows> constant-expression ']' <ows>
-	| '.' <ows> identifier
+	| '.' <ows> identifier <ows>
 
 
 (* [2016-12-31 22:34] paar rules al eerder moeten toevoegen, nu alsnog *)
@@ -349,7 +356,7 @@ statement ::= labeled-statement
               | iteration-statement
               | jump-statement
 
-<labeled-statement> ::= <identifier>  ':' <ows> <statement>
+<labeled-statement> ::= <identifier> <ows>  ':' <ows> <statement>
                       | 'case' <ows> <constant-expression> ':' <ows> <statement>
                       | 'default' <ows> ':' <ows> <statement>
 
@@ -367,7 +374,7 @@ iteration-statement	::= 'while' <ows> '(' <ows> expression ')' <ows> statement
 	| 'for' <ows> '(' <ows> declaration expression-statement ')' <ows> statement
 	| 'for' <ows> '(' <ows> declaration expression-statement expression ')' <ows> statement
 
-<jump-statement> ::= 'goto' <ows> <identifier>  ';' <ows>
+<jump-statement> ::= 'goto' <ows> <identifier> <ows>  ';' <ows>
                    | 'continue' <ows> ';' <ows>
                    | 'break' <ows> ';' <ows>
                    | 'return' <ows> expression? ';' <ows>
@@ -379,7 +386,7 @@ iteration-statement	::= 'while' <ows> '(' <ows> expression ')' <ows> statement
 (* use look ahead extension *)
 <identifier> ::= !keyword #'[A-Za-z_][A-Za-z0-9_]*'
 
-(* eigenlijk zou  hier ook achter moeten, maar wil de whitespace niet bij de integer-constant etc hebben. Kan natuurlijk wel een string trim toepassen *)
+(* eigenlijk zou  hier ook achter moeten, maar wil de whitespace niet bij de integer-constant <ows> etc hebben. Kan natuurlijk wel een string <ows> trim toepassen *)
 (* [2016-12-27 20:39] 'for' <ows> now no exponential notation, is not the first thing that matches, maybe need to 'do' <ows> it outside of regexp. *)
 (* <floating-constant> ::= #'[0-9]*\.[0-9]*([eE][+-]?[0-9]+)?' *)
 
@@ -391,13 +398,13 @@ iteration-statement	::= 'while' <ows> '(' <ows> expression ')' <ows> statement
 
 (* [2016-12-27 21:18] deze hieronder met regexp werkt wel voor vuser_end.c test met andere strings, maar duurt best (te?) lang voor landing.c *)
 (* <string> ::= #'"([^\\"]|\\.)*"' *)
-(* [2016-12-28 11:09] use chars instead of char, less memory *)
+(* [2016-12-28 11:09] use chars <ows> instead of char, less memory *)
 
 <string> ::= '"' {<chars> | <escaped-char>}* '"'
 <chars> ::= #'[^\"\\\n\r]+'
 <escaped-char> ::= #'\\.' <ows>
 
-enumeration-constant	 ::= identifier
+enumeration-constant ::= identifier <ows>
 
 (* onderstaande evt ook nog doen, als je het gebruikt, anders maakt het niet uit.
 
@@ -419,8 +426,18 @@ enumeration-constant	 ::= identifier
 (* comments should also be possible everywhere a whitespace is allowed, but want to handle this with pre-processing *)
 
 <mws> ::= #'\s+' <ows>
-<ows> ::= #'\s*' <ows>
+(* <ows> ::= #'\s*' <ows> *)
+<ows> ::= <ws-or-comments>*
 
+(* orig from core.clj, based on auto-whitespace. This one will parse exactly one of whitespaces or a comment *)
+<ws-or-comments> ::= #'\\s+' <ows> | comments
+comments ::= comment+
 
+(* second part is a single line comment, including the line ending *)
+comment ::= '/*' <ows> inside-comment* '*/' <ows> | '//' <ows> #'[^\\n\\r]+\\r?\\n' <ows> 
+
+(* everything but a star. Stars should be matched per item, every time we need to check 'if' <ows> it's not followed by a slash *)
+inside-comment ::= #'[^*]+' <ows> | !'*/' <ows> '*' <ows>
+     
 
 

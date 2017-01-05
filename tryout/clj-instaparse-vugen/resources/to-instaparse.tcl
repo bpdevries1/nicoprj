@@ -22,7 +22,21 @@ set keywords { auto break case char const continue default do double else enum e
 
 # if keywords or operators are already included in quotes, the <ows> won't get added. Fixed by first adding quotes, next add <ows> after each quoted element. 
 # TODO: ows rule should include comments (as now done with auto-whitespace)
-# TODO: add <ows> after usage of terminals like identifier, don't want the ows to be part of identifiers, constants and strings.
+# -> [2017-01-04 22:25] done, but need to test.
+
+# add <ows> after usage of terminals like identifier, don't want the ows to be part of identifiers, constants and strings.
+
+if 0 {
+  struct-or-union-specifier ::= struct-or-union '{' struct-declaration-list '}'
+	| struct-or-union identifier '{' struct-declaration-list '}'
+	| struct-or-union identifier
+
+  so here each identifier needs to be followed by <ows>. Don't do this if identifier etc is the rule, should be covered by add_ows?
+
+  Could be <identifier> as well.
+  
+}
+
 proc transform {text until_line} {
   global keywords OWS
   if {$OWS} {
@@ -50,9 +64,13 @@ proc transform {text until_line} {
   # don't want to do replace in some lines, so split by line.
   set lines [split $text "\n"]
   set lines2 [list]
+  set rules {keyword identifier floating-constant integer-constant character-constant string chars escaped-chars}
   foreach line $lines {
-    if {[add_ows? $line]} {
+    if {[add_ows? $line $rules]} {
       regsub -all {('[^'']+')} $line "\\1$ows" line
+      foreach rule $rules {
+        regsub -all "(\\s<?)${rule}(>?)(\\s|$)" $line "\\1${rule}\\2 <ows>\\3" line
+      }
     }
     lappend lines2 $line
   }
@@ -61,12 +79,12 @@ proc transform {text until_line} {
   
 }
 
-proc add_ows? {line} {
+proc add_ows? {line rules} {
   if {[regexp keyword $line]} {
     #breakpoint
   }
   
-  foreach rule {keyword identifier floating-constant integer-constant character-constant string chars escaped-chars} {
+  foreach rule $rules {
     if {[regexp "$rule>? ?::=" $line]} {
       return 0
     }

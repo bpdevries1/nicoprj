@@ -3,8 +3,15 @@
 (* maybe useful too: https://www.lysator.liu.se/c/ANSI-C-grammar-y.html and http://www.quut.com/c/ANSI-C-grammar-y.html *)
 
 (* only one place at the start where ows can occur before a terminal/something *)
-translation-unit ::=external-declaration
+start-parse ::= <ows> translation-unit
+
+(*
+translation-unit ::= external-declaration
 	| translation-unit external-declaration
+*)
+
+(* met deze meer sequentieel, minder diepe tree *)
+translation-unit ::= external-declaration+
 
 external-declaration ::= function-definition | declaration | preproc
 
@@ -397,7 +404,7 @@ iteration-statement	::= 'while' '(' expression ')' statement
 <chars> ::= #'[^\"\\\n\r]+'
 <escaped-char> ::= #'\\.'
 
-enumeration-constant	 ::= identifier
+enumeration-constant ::= identifier
 
 (* onderstaande evt ook nog doen, als je het gebruikt, anders maakt het niet uit.
 
@@ -419,7 +426,17 @@ enumeration-constant	 ::= identifier
 (* comments should also be possible everywhere a whitespace is allowed, but want to handle this with pre-processing *)
 
 <mws> ::= #'\s+'
-<ows> ::= #'\s*'
+(* <ows> ::= #'\s*' *)
+<ows> ::= <ws-or-comments>*
 
+(* orig from core.clj, based on auto-whitespace. This one will parse exactly one of whitespaces or a comment *)
+<ws-or-comments> ::= #'\\s+' | comments
+comments ::= comment+
 
+(* second part is a single line comment, including the line ending *)
+comment ::= '/*' inside-comment* '*/' | '//' #'[^\\n\\r]+\\r?\\n' 
+
+(* everything but a star. Stars should be matched per item, every time we need to check if it's not followed by a slash *)
+inside-comment ::= #'[^*]+' | !'*/' '*'
+     
 
