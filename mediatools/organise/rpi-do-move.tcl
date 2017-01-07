@@ -19,6 +19,11 @@ proc main {argv} {
 }
 
 proc do_move {move_name roots} {
+  set action ""
+  set logline ""
+  set played ""
+  set dir_orig ""
+  set dir_new ""
   set f [open $move_name r]
   while {![eof $f]} {
     gets $f line
@@ -27,6 +32,11 @@ proc do_move {move_name roots} {
       set $nm [string trim $val]
       if {$nm == "action"} {
         handle_action $action $logline $played $dir_orig $dir_new $roots
+        set action ""
+        set logline ""
+        set played ""
+        set dir_orig ""
+        set dir_new ""
       }
     }
   }

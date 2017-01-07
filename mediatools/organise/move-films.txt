@@ -1,0 +1,5 @@
+* cd ~/nicoprj/mediatools/organise
+* rpi-make-move.tcl
+* edit /home/media/Films/_tijdelijk/move-films.txt (automatisch geopend in gedit)
+* rpi-do-move.tcl
+

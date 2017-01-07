@@ -14,7 +14,8 @@ proc main {argv} {
 
   make_move $logfile $move_name
 
-  file delete $logfile
+  # [2017-01-07 21:11] TODO: delete again, for now don't.
+  # file delete $logfile
 
   puts "gedit $move_name"
   exec gedit $move_name &
@@ -27,11 +28,14 @@ proc make_move {logfile move_name} {
   while {![eof $fi]} {
     gets $fi line
     log debug "read line: $line"
-    if {[to_handle $line]} {
+    if {[to_handle? $line]} {
       handle_line $line $fo
     }
   }
+  # TODO: handle films that were started, but not finished, possibly not viewable on R.Pi?
   close $fi
+
+  handle_started_film $fo
   close $fo
 }
 
@@ -39,13 +43,21 @@ proc make_move {logfile move_name} {
 
 # [2017-01-07 21:06] old: only handle first time a film is mentioned, i.e. the start.
 # but also want the finish, to check if I really watched it.
-proc to_handle {line} {
-  global ar_films
+proc to_handle? {line} {
+  global ar_films started_film
   set res 0  
-  set temp_film [det_temp_film $line]
+  # set temp_film [det_temp_film $line]
+  lassign [det_temp_film $line] temp_film start_finish
   if {$temp_film != ""} {
     incr ar_films($temp_film)
     if {$ar_films($temp_film) == 1} {
+      # set res 1
+    }
+    if {$start_finish == "Start"} {
+      set started_film($temp_film) $line
+      set res 0
+    } else {
+      # finished, so really played.
       set res 1
     }
   }
@@ -59,7 +71,12 @@ proc to_handle {line} {
 
 # [2015-10-11 19:05:25] Start: /media/shortcuts/Films/_tijdelijk/Napoleon Dynamite (2004) 
 proc handle_line {line fo} {
-  set temp_film [det_temp_film $line]
+  global started_film
+  # set temp_film [det_temp_film $line]
+  
+  lassign [det_temp_film $line] temp_film start_finish
+  catch {puts $fo "logline: $started_film($temp_film)"}
+  set started_film($temp_film) ""; # reset, so won't show up in un-finished films at the end.
   puts $fo "logline: $line"
   puts $fo "played: $temp_film"
   # regexp {_tijdelijk/([^/]+)/} $temp_film z dir_orig
@@ -71,11 +88,12 @@ proc handle_line {line fo} {
   puts $fo "------------------------------------------"
 }
 
-# return full path of temp film iff it is really in the temp (tijdelijk) dir.
+# return tuple of full path of temp film and start/finished iff it is really in the temp (tijdelijk) dir.
 # otherwise return an empty string
 proc det_temp_film {line} {
   set res ""
-  if {[regexp {(Start|Finished): (.+?) \(subs:.*\)} $line z z path]} {
+  set start_finish ""
+  if {[regexp {(Start|Finished): (.+?) \(subs:.*\)} $line z start_finish path]} {
     if {[regexp {/_tijdelijk/} $path]} {
       set res $path
     }
@@ -83,7 +101,7 @@ proc det_temp_film {line} {
   if {[regexp -nocase napoleon $line]} {
     #breakpoint
   }
-  return $res
+  list $res $start_finish
 }
 
 # TODO kan zijn dat dir wat dieper zit, bv bij de top250 (seven samurai bv)
@@ -99,14 +117,42 @@ proc det_dir_new {dir_orig} {
   if {[regexp {^\d+ - (.+)$} $dir_new z d2]} {
     set dir_new $d2
   }
-  regsub -all {\.} $dir_new " " dir_new
-  if {[regexp {^(.+) \((\d{4})\)} $dir_new z name year]} {
-    return "$name ($year)"
+  regsub -all {\.} $dir_new " " dir_new; # replace (common) dots by spaces.
+
+  # parse 4 digits as a year, provided they are surrounded by parens, brackets or spaces
+  if {[regexp {^(.+)[\(\)\[\] ](\d{4})[\(\)\[\] ]} $dir_new z name year]} {
+    return "[string trim $name] ($year)"
   }
-  if {[regexp {^(.+) (\d{4}) } $dir_new z name year]} {
-    return "$name ($year)"
+  if {[regexp {The Cider House Rules} $dir_new]} {
+    # breakpoint
   }
+  if 0 {
+    if {[regexp {^(.+) \((\d{4})\)} $dir_new z name year]} {
+      return "$name ($year)"
+    }
+    if {[regexp {^(.+) (\d{4}) } $dir_new z name year]} {
+      return "$name ($year)"
+    }
+    
+  }
+  
   return "$dir_new (__YEAR__)"
+}
+
+proc handle_started_film {fo} {
+  global started_film
+  puts $fo "Unfinished films:"
+  foreach film [array names started_film] {
+    if {$started_film($film) != ""} {
+      puts $fo "logline: $started_film($film)"
+      set dir_orig [det_dir_orig $film]
+      puts $fo "dir_orig: $dir_orig"
+      # also use played here, to recognise in rpi-do-move.tcl
+      puts $fo "played: $film"
+      puts $fo "action  : delete"
+      puts $fo "------------------------------------------"
+    }
+  }
 }
 
 main $argv
