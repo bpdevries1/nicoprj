@@ -69,7 +69,7 @@
   (if (pos? (count date))
     (tf/parse fmtr-date-tz date)))
 
-;; TODO Met date functies doen, maar dan wel afwezig als tijdstippen noteren, dus inclusief
+;; TODO: Met date functies doen, maar dan wel afwezig als tijdstippen noteren, dus inclusief
 ;; tijd. Dat enkele dag afwezig dus is: begin is dag 0:00 en eind is dag 23:59.
 (defn date-between
   "returns true iff d is between d-start and d-end, inclusive"
