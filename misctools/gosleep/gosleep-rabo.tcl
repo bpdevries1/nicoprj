@@ -14,6 +14,9 @@ proc main {} {
   if 1 {
 	  unison -auto projecten2h ; # [2016-12-01 10:28:27] deze nog wel belangrijk.
 	  unison -auto sync-c-g ; # [2016-12-01 10:29:39] kijken hoe automatisch dit gaat.
+	  unison -auto projecten2vdc ; # [2017-01-05 15:35:46] deze nu erbij.
+	  unison -auto sync-c-u ; # [2017-01-05 15:35:59] en deze ook.
+	  
 	  # unison -auto -batch backup2g ; # [2016-12-01 10:28:46] deze vervangen door sync-c-g (om daarna ook op laptop te zetten)
 	  # unison -auto -batch vugen2h ; # [2016-12-01 10:28:13] niet echt nodig, scripts in git/bitbucket.
 	  # zip_vugens ; # [2016-09-29 09:10:09] niet meer nodig.
