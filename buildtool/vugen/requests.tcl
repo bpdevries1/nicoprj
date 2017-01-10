@@ -161,6 +161,7 @@ proc show_request_html {opt hh stmt} {
   set url_params [url->params $url]; # maybe also set from POST body.
   # $hh heading 2 "Request - $url" "class=Failure"
   $hh heading 2 "Request - $url (corr=[format %.3f [det_request_correlation $stmt]])" "class=[det_request_class $opt $stmt]"
+  paragraph $hh "Correlation details" [lines->html [correlation_details $stmt]]
   paragraph $hh [lines_heading $stmt] [lines->html [:lines $stmt]]
   # paragraph $hh "Statement Parameters" [stmt_params->html $stmt_params]
   paragraph $hh "URL/GET Parameters" [params->html $hh $url_params]
@@ -264,6 +265,23 @@ proc det_request_correlation {stmt} {
              [det_post_params_correlation [stmt->postparams $stmt]]]
 }
 
+# return lines with details about value of correlation for this statement
+proc correlation_details {stmt} {
+  set url [stmt->url $stmt]
+  set ext [string tolower [file extension $url]]
+  # less chance that images need to be correlated, but this could depend on the script/project.
+  if {[lsearch -exact {.gif .jpg .jpeg .png .js .css} $ext] >= 0} {
+    return [list "Image or static: $ext => 0.1"]
+  }
+  set parts [url->parts $url]
+  set res [list]
+  lappend res "path: [det_path_correlation [:path $parts]]"
+  lappend res {*}[det_path_correlation_details [:path $parts]]
+  lappend res "get params: [det_get_params_correlation [:params $parts]]"
+  lappend res "post params: [det_post_params_correlation [stmt->postparams $stmt]]"
+  return $res
+}
+
 # Request - https://{domain}/RRS2/Content/Files/UpdatUtiUsiTemplate.xlsx (corr=2.375)
 # if path is empty, correlation is 0.
 proc det_path_correlation {path} {
@@ -271,14 +289,14 @@ proc det_path_correlation {path} {
     return 0.0
   }
   if {[catch {
-    set res1 [expr 1.0 * [max {*}[map [fn x {string length $x}] [split $path "/"]]] / 50]
+    set res1 [expr 1.0 * [max {*}[map [fn x {string length [remove_params $x]}] [split $path "/"]]] / 80]
   }]} {
     log warn "Exception in det_path_correlation"
     breakpoint
   }
 
   # / 8 so max consec of 4 will result in 0.5.
-  set res2 [expr 1.0 * [max {*}[map max_consecutive_chargroup [split $path "/"]]] / 8]
+  set res2 [expr 1.0 * [max {*}[map max_consecutive_chargroup [split $path "/"]]] / 12]
   if {$res2 > 2.0} {
     log warn "res: $res"
     breakpoint
@@ -286,13 +304,53 @@ proc det_path_correlation {path} {
   + $res1 $res2
 }
 
+# remove LR params from string, i.e. everything between {}
+# these params should not count for correlation value.
+proc remove_params {str} {
+  regsub -all {\{[^\{\}]+\}} $str "" str2
+  return $str2
+}
+
+# Request - https://{domain}/RRS2/Content/Files/UpdatUtiUsiTemplate.xlsx (corr=2.375)
+# if path is empty, correlation is 0.
+# TODO: merge with previous function: det_path_correlation. In Clojure maybe with metadata.
+# return list with strings to put in html.
+# Als lengte meer dan 40 is, wordt het ook spannend.
+#bv met len=40 en conseq=6 is het wel spannend, dan moet je boven .9 uitkomen, bv 1.0.
+#Beide voor de helft laten tellen.
+#40/80 = .5
+#6/12 = .5
+proc det_path_correlation_details {path} {
+  if {$path == ""} {
+    return [list "Empty path"]
+  }
+  if {[catch {
+    set res1 [expr 1.0 * [max {*}[map [fn x {string length $x}] [split $path "/"]]] / 80]
+  }]} {
+    log warn "Exception in det_path_correlation"
+    breakpoint
+  }
+
+  # / 8 so max consec of 4 will result in 0.5.
+  set res2 [expr 1.0 * [max {*}[map max_consecutive_chargroup [split $path "/"]]] / 12]
+  if {$res2 > 2.0} {
+    log warn "res: $res"
+    breakpoint
+  }
+  # + $res1 $res2
+  list "max length of a segment: $res1 (len = [expr round($res1 * 80)])" \
+      "max consec chargroup: $res2 (# = [expr round($res2 * 12)])"
+}
+
+
 # return max number of consecutive characters of the same group.
 # group is hardcoded here as: vowels, consonants, digits and other characters.
 proc max_consecutive_chargroup {str} {
   set max 0
   set i 0
   set prev_group ""
-  foreach char [split $str ""] {
+  set str2 [remove_params $str]
+  foreach char [split $str2 ""] {
     set group [char_group $char]
     # puts "group of $char: $group"
     if {$group == $prev_group} {
