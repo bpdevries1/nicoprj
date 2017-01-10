@@ -242,7 +242,21 @@ proc line_type {line} {
 
 # [2016-12-03 20:06] For now keep stmt->x procs in parse.tcl
 # determine url within web_url etc statement.
+# [2017-01-10 14:28:12] could be a param instead of literal http. Could basically be anything after URL=
+# this one will fail if there is an escaped quote in the text.
+# "URL={webpackPublicPath}styles/fonts/ri-icon.eot?"
 proc stmt->url {stmt} {
+  foreach line [:lines $stmt] {
+    if {[regexp {\"(URL|Action)=([^:]+://([^/]+)/[^\"]+)\"} $line z z url domain]} {
+      return $url
+    } elseif {[regexp {\"(URL|Action)=([^\"]+)} $line z z url]} {
+      return $url
+    }
+  }
+  return ""
+}
+
+proc stmt->url_old {stmt} {
   foreach line [:lines $stmt] {
     if {[regexp {\"(URL|Action)=(https?://([^/]+)/[^\"]+)\"} $line z z url domain]} {
       return $url
@@ -251,9 +265,10 @@ proc stmt->url {stmt} {
   return ""
 }
 
+
 proc stmt->referer {stmt} {
   foreach line [:lines $stmt] {
-    if {[regexp {\"(Referer)=(https?://([^/]+)/[^\"]+)\"} $line z z referer domain]} {
+    if {[regexp {\"(Referer)=([^:]+://([^/]+)/[^\"]+)\"} $line z z referer domain]} {
       return $referer
     }
   }
@@ -290,6 +305,7 @@ proc stmt->params {stmt} {
   }
 }
 
+# get statement parameters (NOT requests parameters)
 proc stmt->getparams {stmt} {
   -> $stmt stmt->url_parts :params
 }
