@@ -32,6 +32,8 @@ proc main {argv} {
 
   testndv {url->parts "http://google.nl:80/sub/sub2?a=b&c=d"} [dict create protocol http domain google.nl port 80 path sub/sub2 params [list  [dict create type namevalue name a value b valuetype xdigit] [dict create type namevalue name c value d valuetype xdigit]]]
 
+  # [2017-01-10 14:48:40] this one cannot be parsed, should return empty dict
+  testndv {url->parts "{webpackPublicPath}styles/fonts/ri-icon.eot?"} [dict create]
   
   cleanupTests
 }

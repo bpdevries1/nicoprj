@@ -52,6 +52,7 @@ proc url-decode str {
 # return dict with keys protocol, domain, port, path, params.
 # params as in url->params
 # return empty dict iff url cannot be parsed.
+# {webpackPublicPath}styles/fonts/ri-icon.eot?
 proc url->parts {url} {
   if {[regexp {^(.+?)://([^/:]+?)(:(\d+))?/([^?]*)(.*)$} $url z protocol domain z port path rest]} {
     if {$rest != ""} {
@@ -62,8 +63,8 @@ proc url->parts {url} {
     vars_to_dict protocol domain port path params
   } else {
     # error "Could not parse URL: ${url}."
-    log warn "Could not parse URL: ${url}."
-    breakpoint
+    #log warn "Could not parse URL: ${url}."
+    #breakpoint
     dict create;                # empty dict
   }
 }
