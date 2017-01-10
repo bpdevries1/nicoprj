@@ -265,8 +265,17 @@ proc det_request_correlation {stmt} {
 }
 
 # Request - https://{domain}/RRS2/Content/Files/UpdatUtiUsiTemplate.xlsx (corr=2.375)
+# if path is empty, correlation is 0.
 proc det_path_correlation {path} {
-  set res1 [expr 1.0 * [max {*}[map [fn x {string length $x}] [split $path "/"]]] / 50]
+  if {$path == ""} {
+    return 0.0
+  }
+  if {[catch {
+    set res1 [expr 1.0 * [max {*}[map [fn x {string length $x}] [split $path "/"]]] / 50]
+  }]} {
+    log warn "Exception in det_path_correlation"
+    breakpoint
+  }
 
   # / 8 so max consec of 4 will result in 0.5.
   set res2 [expr 1.0 * [max {*}[map max_consecutive_chargroup [split $path "/"]]] / 8]
