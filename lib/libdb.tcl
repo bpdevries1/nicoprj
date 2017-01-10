@@ -35,7 +35,15 @@ oo::class create dbwrapper {
       # assume sqlite
       set dbtype "sqlite3"
       log debug "connect to: [lindex $args 0]"
-      set conn [tdbc::sqlite3::connection new [lindex $args 0]]
+      if {[catch {
+        set conn [tdbc::sqlite3::connection new [lindex $args 0]]        
+      }]} {
+        set path [lindex $args 0]
+        log warn "path: $path, exists: [file exists $path]"
+        set parent [file dirname $path]
+        log warn "parent: $parent, exists: [file exists $parent]"
+        error "Failed to connect to sqlite DB: $args"
+      }
       log debug "connected"
       set dbname [lindex $args 0]
     } else {
