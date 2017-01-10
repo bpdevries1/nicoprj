@@ -8,6 +8,14 @@ proc recording_dirs {} {
   # [2016-12-04 11:04] cannot use 'info var', with 'global' is is defined.
   if {[catch {set recording_dirs}]} {
     puts "WARN: set recording_dirs in .bld/config.tcl"
+    puts "Example:
+proc define_recording_dirs {} {
+  global recording_dirs
+  set recording_dirs \[filter \[fn x {regexp RCC-rec \$x}] \[glob -directory \[file normalize ..] -type d *]]
+}
+
+define_recording_dirs 
+"
     exit
   }
   return $recording_dirs
