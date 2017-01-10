@@ -1,6 +1,11 @@
 # perform some tests. For now only show if libs are up-to-date
 task test {Perform tests on script
   Calls following tasks: libs, check, check_configs, check_lr_params.
+} {{includes "Check includes (default)"}
+  {todos "Check todo's"}
+  {comments "Check comments"}
+  {misc "Check misc things"}
+  {all "Do full check, including todo's and comments"}
 } {
   task_libs {*}$args
   task_check {*}$args
@@ -13,6 +18,7 @@ task check {Perform some checks on sources
 } {{includes "Check includes (default)"}
   {todos "Check todo's"}
   {comments "Check comments"}
+  {misc "Check misc things"}
   {all "Do full check, including todo's and comments"}
 } {
   if {$args != {}} {
@@ -32,7 +38,7 @@ proc check_file {srcfile opt} {
     set opt [dict merge $opt [dict create includes 1 todos 1 comments 1]]
   }
   if {[count_set_options $opt] == 0} {
-    set opt [dict merge $opt [dict create includes 1]]
+    set opt [dict merge $opt [dict create includes 1 misc 1]]
   }
   if {[:includes $opt]} {
     check_file_includes $srcfile  
@@ -42,6 +48,9 @@ proc check_file {srcfile opt} {
   }
   if {[:comments $opt]} {
     check_file_comments $srcfile
+  }
+  if {[:misc $opt]} {
+    check_file_misc $srcfile
   }
   
   # [2016-02-05 17:29:15] TODO: Wil eigenlijk in globals.h een zeer beperkt aantal globals. Beter om te definieren waar ze gebruikt worden, zoals cachecontrol etc.
@@ -121,6 +130,13 @@ proc check_file_comments {srcfile} {
     }
   }
   close $f
+}
+
+proc check_file_misc {srcfile} {
+  set text [read_file $srcfile]
+  if {[regexp {dynaTraceMonitor} $text]} {
+    puts_warn $srcfile 0 "Found dynaTraceMonitor"
+  }
 }
 
 # check script scope things, eg all .c/.h files in dir are included in the script. Also for .config files.
