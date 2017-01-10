@@ -190,7 +190,14 @@ set stmt_db ""
 proc find_source {inf_file stmt ss} {
   global stmt_db
   if {$stmt_db == ""} {
-    set stmt_db [get_stmt_db statements/statements.db {clean 0}]
+    if {[catch {
+      set stmt_db [get_stmt_db statements/statements.db {clean 0}]      
+    }]} {
+      log warn "statements.db does not exist"
+      log warn "first run 'bld show-paths'"
+      exit;                     # for now.
+    }
+
     set query "select count(*) nstmts from stmt_path"
     set res [$stmt_db query $query]
     if {[:nstmts [first $res]] == 0} {
