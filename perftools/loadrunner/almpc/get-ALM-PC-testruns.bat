@@ -2,7 +2,11 @@
 setlocal
 
 rem eerst shared env, is default:
-tclsh get-ALM-PC-testruns.tcl -firstrunid 683 -lastrunid 692
+rem tclsh get-ALM-PC-testruns.tcl -firstrunid 683 -lastrunid 692
+rem tclsh get-ALM-PC-testruns.tcl -firstrunid 737 -lastrunid 738
+tclsh get-ALM-PC-testruns.tcl -firstrunid 739 -lastrunid 740
+
+
 rem tclsh get-ALM-PC-testruns.tcl -domain PCC -project WeekvanWaarden
 
 rem volgenden lukken niet met Runs download, waarschijnlijk te oud.
