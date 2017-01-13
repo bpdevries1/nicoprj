@@ -13,7 +13,7 @@ task report {Create report of output.txt in script dir
   {all "Both summary and full"}
   {ssl "Read SSL logs into DB"}
   {logdotpng "Create PNG for read log process"}
-  {testruns "Create report for all runs in testruns dir for project"}
+  {testruns.arg "" "Create report for 'all' or given runs (csv) in testruns dir for project"}
 } {
   global testruns_dir
   if {[regexp {<FILL IN>} $testruns_dir]} {
@@ -41,9 +41,23 @@ task report {Create report of output.txt in script dir
   }
   
   read_report_run_dir $subdir $opt; # in perftools/report/read-report-dir.tcl
-  if {[:testruns $opt]} {
+
+  report_testruns $opt
+}
+
+proc report_testruns {opt} {
+  global testruns_dir
+  if {[:testruns $opt] == "all"} {
     # call for every dir in testruns dir.
     foreach subdir [glob -directory $testruns_dir -type d *] {
+      read_report_run_dir $subdir $opt
+    }
+  } else {
+    foreach run [split [:testruns $opt] ","] {
+      if {![regexp {run} $run]} {
+        set run "run${run}"
+      }
+      set subdir [file join $testruns_dir $run]
       read_report_run_dir $subdir $opt
     }
   }
