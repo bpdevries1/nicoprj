@@ -7,7 +7,7 @@ use liburl
 
 # [2016-12-03 21:28] TODO: tresholds etc should be settable per script/project, possibly override (like now) with cmdline param.
 
-task show_requests {Create a HTML report of all requests in script
+task show_requests {Create a HTML report of requests for correlation.
   Check if requests have dynamic items, which should be correlated.
 } {
   {clean "Delete DB and generated reports before starting"}
@@ -282,9 +282,58 @@ proc correlation_details {stmt} {
   return $res
 }
 
+# [2017-01-13 11:27] some refactoring done to have a SPOD, and use results both for
+# calculating the correlation value and showing all details in HTML.
+proc det_path_correlation {path} {
+  + [max_segm_len_corr $path] [max_segm_consec_chargroup_corr $path]
+}
+
+proc det_path_correlation_details {path} {
+  set ml [max_segm_len $path]
+  set mcc [max_segm_consec_chargroup $path]
+  set ml_corr [format %.3f [max_segm_len_corr $path]]
+  set mcc_corr [format %.3f [max_segm_consec_chargroup_corr $path]]
+  
+  list "max length of a segment: $ml_corr (len = $ml)" \
+      "max consec chargroup: $mcc_corr (# = $mcc)"
+}
+
+proc max_segm_len_corr {path} {
+  expr 1.0 * [max_segm_len $path] / 80
+}
+
+proc max_segm_consec_chargroup_corr {path} {
+  set res2 [expr 1.0 * [max_segm_consec_chargroup $path] / 12]
+  if {$res2 > 2.0} {
+    log warn "res: $res"
+    breakpoint
+  }
+  return $res2
+}
+
+
+# return int, the fact, max segment length
+proc max_segm_len {path} {
+  if {$path == ""} {
+    return 0
+  }
+  set res1 [max {*}[map [fn x {string length [remove_params $x]}] [split $path "/"]]]
+  return $res1  
+}
+
+# return int, the fact, max number of consecutive characters in path-segment.
+proc max_segm_consec_chargroup {path} {
+  if {$path == ""} {
+    return 0
+  }
+  set res2 [max {*}[map max_consecutive_chargroup [split $path "/"]]]
+  return $res2
+}
+
+
 # Request - https://{domain}/RRS2/Content/Files/UpdatUtiUsiTemplate.xlsx (corr=2.375)
 # if path is empty, correlation is 0.
-proc det_path_correlation {path} {
+proc det_path_correlation_old {path} {
   if {$path == ""} {
     return 0.0
   }
@@ -320,7 +369,7 @@ proc remove_params {str} {
 #Beide voor de helft laten tellen.
 #40/80 = .5
 #6/12 = .5
-proc det_path_correlation_details {path} {
+proc det_path_correlation_details_old {path} {
   if {$path == ""} {
     return [list "Empty path"]
   }
@@ -341,7 +390,6 @@ proc det_path_correlation_details {path} {
   list "max length of a segment: $res1 (len = [expr round($res1 * 80)])" \
       "max consec chargroup: $res2 (# = [expr round($res2 * 12)])"
 }
-
 
 # return max number of consecutive characters of the same group.
 # group is hardcoded here as: vowels, consonants, digits and other characters.
