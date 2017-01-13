@@ -398,46 +398,52 @@ iteration-statement	::= 'while' <ows> '(' <ows> expression ')' <ows> statement
 
 (* [2016-12-27 21:18] deze hieronder met regexp werkt wel voor vuser_end.c test met andere strings, maar duurt best (te?) lang voor landing.c *)
 (* <string> ::= #'"([^\\"]|\\.)*"' *)
-(* [2016-12-28 11:09] use chars <ows> instead of char, less memory *)
+(* [2016-12-28 11:09] use chars instead of char, less memory *)
+
+(* TODO: vanaf hier kijken dat er geen <ows> onterecht bij wordt gezet *)
 
 <string> ::= '"' {<chars> | <escaped-char>}* '"'
 <chars> ::= #'[^\"\\\n\r]+'
-<escaped-char> ::= #'\\.' <ows>
+<escaped-char> ::= #'\\.'
 
-enumeration-constant ::= identifier <ows>
+(* had hier al <ows> achter, maar dan straks nog een *)
+(* [2017-01-08 19:58] Deze voorlopig even weg: lijkt niet nodig en zorgt voor dubbele parse trees. Dit was mogelijk ook iets dat afwijkt van de lex/yacc versie. Wel een dummy houden.*)
+(* enumeration-constant ::= identifier <ows> *)
+enumeration-constant ::= 'identifier' <ows>
 
 (* onderstaande evt ook nog doen, als je het gebruikt, anders maakt het niet uit.
 
-"_Alignas"                              '{' <ows> 'return' <ows> ALIGNAS; '}' <ows>
-"_Alignof"                              '{' <ows> 'return' <ows> ALIGNOF; '}' <ows>
-"_Atomic"                               '{' <ows> 'return' <ows> ATOMIC; '}' <ows>
-"_Bool"                                 '{' <ows> 'return' <ows> BOOL; '}' <ows>
-"_Complex"                              '{' <ows> 'return' <ows> COMPLEX; '}' <ows>
-"_Generic"                              '{' <ows> 'return' <ows> GENERIC; '}' <ows>
-"_Imaginary"                            '{' <ows> 'return' <ows> IMAGINARY; '}' <ows>
-"_Noreturn"                             '{' <ows> 'return' <ows> NORETURN; '}' <ows>
-"_Static_assert"                        '{' <ows> 'return' <ows> STATIC_ASSERT; '}' <ows>
-"_Thread_local"                         '{' <ows> 'return' <ows> THREAD_LOCAL; '}' <ows>
-"__func__"                              '{' <ows> 'return' <ows> FUNC_NAME; '}' <ows>
+"_Alignas"                              '{' <ows> 'return' <ows> ALIGNAS; '}' <ows> <ows>
+"_Alignof"                              '{' <ows> 'return' <ows> ALIGNOF; '}' <ows> <ows>
+"_Atomic"                               '{' <ows> 'return' <ows> ATOMIC; '}' <ows> <ows>
+"_Bool"                                 '{' <ows> 'return' <ows> BOOL; '}' <ows> <ows>
+"_Complex"                              '{' <ows> 'return' <ows> COMPLEX; '}' <ows> <ows>
+"_Generic"                              '{' <ows> 'return' <ows> GENERIC; '}' <ows> <ows>
+"_Imaginary"                            '{' <ows> 'return' <ows> IMAGINARY; '}' <ows> <ows>
+"_Noreturn"                             '{' <ows> 'return' <ows> NORETURN; '}' <ows> <ows>
+"_Static_assert"                        '{' <ows> 'return' <ows> STATIC_ASSERT; '}' <ows> <ows>
+"_Thread_local"                         '{' <ows> 'return' <ows> THREAD_LOCAL; '}' <ows> <ows>
+"__func__"                              '{' <ows> 'return' <ows> FUNC_NAME; '}' <ows> <ows>
 
  *)
 
 (* handle white space, both optional (ows) and mandatory (mws) *)
 (* comments should also be possible everywhere a whitespace is allowed, but want to handle this with pre-processing *)
 
-<mws> ::= #'\s+' <ows>
-(* <ows> ::= #'\s*' <ows> *)
-<ows> ::= <ws-or-comments>*
+<mws> ::= #'\s+'
+(* <ows> ::= #'\s*' *)
+ows ::= ws-or-comment*
 
 (* orig from core.clj, based on auto-whitespace. This one will parse exactly one of whitespaces or a comment *)
-<ws-or-comments> ::= #'\\s+' <ows> | comments
-comments ::= comment+
+
+ws-or-comment ::= ws | comment
+ws ::= #'\s+'
 
 (* second part is a single line comment, including the line ending *)
-comment ::= '/*' <ows> inside-comment* '*/' <ows> | '//' <ows> #'[^\\n\\r]+\\r?\\n' <ows> 
+comment ::= '/*' inside-comment* '*/'   | '//' #'[^\n\r]+\r?\n'
 
 (* everything but a star. Stars should be matched per item, every time we need to check 'if' <ows> it's not followed by a slash *)
-inside-comment ::= #'[^*]+' <ows> | !'*/' <ows> '*' <ows>
-     
+inside-comment ::= #'[^*]+'   | !'*/' '*'
+
 
 

@@ -51,7 +51,8 @@
 
 (def c-grammar (-> "clang.ebnf" io/resource slurp))
 #_(def c-parser (insta/parser c-grammar :auto-whitespace :standard))
-(def c-parser (insta/parser c-grammar :auto-whitespace whitespace-or-comments))
+#_(def c-parser (insta/parser c-grammar :auto-whitespace whitespace-or-comments))
+(def c-parser (insta/parser c-grammar))
 
 (def vuser-end-text (slurp (io/resource "vuser_end.c")))
 
@@ -63,7 +64,7 @@
   (println "All trees:")
   (let [trees (time (insta/parses parser text :total true :unhide :all))]
     (println "Number of characters:" (count text))
-    (println "Number of trees:" (time (count trees)))
+    (println "Number of trees (max 4):" (time (count (take 4 trees))))
     trees))
 
 (defn measured-parse-file
@@ -92,9 +93,9 @@
     (pprint-file trees ndx basename)))
 
 (defn pprint-file-trees
-  "Print all trees of parse to a separate file"
+  "Print all trees of parse to a separate file, up to a given max-cnt."
   ([trees basename max-cnt]
-   (doseq [ndx (take max-cnt (range (count trees)))]
+   (doseq [ndx (take max-cnt (range (count (take max-cnt trees))))]
      (pprint-file trees ndx basename)))
   ([trees basename]
    (pprint-file-trees trees basename 20)))
@@ -123,9 +124,10 @@
 #_(def landing-106 (measured-parse-file c-parser "landing-106.c"))
 ;; [2016-12-31 23:10] deze lukt niet, maar eerste lijkt wel te lukken.
 #_(def landing (measured-parse-file c-parser "landing.c"))
-#_(def revert (measured-parse-file c-parser "revert.c"))
-(def revert (measured-single-parse-file c-parser "revert.c"))
-(def landing (measured-single-parse-file c-parser "landing.c"))
+(def revert (measured-parse-file c-parser "revert.c"))
+#_(def revert (measured-single-parse-file c-parser "revert.c"))
+#_(def landing (measured-single-parse-file c-parser "landing.c"))
+(def landing (measured-parse-file c-parser "landing.c"))
 
 ;; (clojure.pprint/pprint *map* (clojure.java.io/writer "foo.txt"))
 

@@ -400,25 +400,30 @@ iteration-statement	::= 'while' '(' expression ')' statement
 (* <string> ::= #'"([^\\"]|\\.)*"' *)
 (* [2016-12-28 11:09] use chars instead of char, less memory *)
 
+(* TODO: vanaf hier kijken dat er geen <ows> onterecht bij wordt gezet *)
+
 <string> ::= '"' {<chars> | <escaped-char>}* '"'
 <chars> ::= #'[^\"\\\n\r]+'
 <escaped-char> ::= #'\\.'
 
-enumeration-constant ::= identifier
+(* had hier al <ows> achter, maar dan straks nog een *)
+(* [2017-01-08 19:58] Deze voorlopig even weg: lijkt niet nodig en zorgt voor dubbele parse trees. Dit was mogelijk ook iets dat afwijkt van de lex/yacc versie. Wel een dummy houden.*)
+(* enumeration-constant ::= identifier *)
+enumeration-constant ::= 'identifier'
 
 (* onderstaande evt ook nog doen, als je het gebruikt, anders maakt het niet uit.
 
-"_Alignas"                              { return ALIGNAS; }
-"_Alignof"                              { return ALIGNOF; }
-"_Atomic"                               { return ATOMIC; }
-"_Bool"                                 { return BOOL; }
-"_Complex"                              { return COMPLEX; }
-"_Generic"                              { return GENERIC; }
-"_Imaginary"                            { return IMAGINARY; }
-"_Noreturn"                             { return NORETURN; }
-"_Static_assert"                        { return STATIC_ASSERT; }
-"_Thread_local"                         { return THREAD_LOCAL; }
-"__func__"                              { return FUNC_NAME; }
+"_Alignas"                              '{' 'return' ALIGNAS; '}' <ows>
+"_Alignof"                              '{' 'return' ALIGNOF; '}' <ows>
+"_Atomic"                               '{' 'return' ATOMIC; '}' <ows>
+"_Bool"                                 '{' 'return' BOOL; '}' <ows>
+"_Complex"                              '{' 'return' COMPLEX; '}' <ows>
+"_Generic"                              '{' 'return' GENERIC; '}' <ows>
+"_Imaginary"                            '{' 'return' IMAGINARY; '}' <ows>
+"_Noreturn"                             '{' 'return' NORETURN; '}' <ows>
+"_Static_assert"                        '{' 'return' STATIC_ASSERT; '}' <ows>
+"_Thread_local"                         '{' 'return' THREAD_LOCAL; '}' <ows>
+"__func__"                              '{' 'return' FUNC_NAME; '}' <ows>
 
  *)
 
@@ -427,16 +432,17 @@ enumeration-constant ::= identifier
 
 <mws> ::= #'\s+'
 (* <ows> ::= #'\s*' *)
-<ows> ::= <ws-or-comments>*
+ows ::= ws-or-comment*
 
 (* orig from core.clj, based on auto-whitespace. This one will parse exactly one of whitespaces or a comment *)
-<ws-or-comments> ::= #'\\s+' | comments
-comments ::= comment+
+
+ws-or-comment ::= ws | comment
+ws ::= #'\s+'
 
 (* second part is a single line comment, including the line ending *)
-comment ::= '/*' inside-comment* '*/' | '//' #'[^\\n\\r]+\\r?\\n' 
+comment ::= '/*' inside-comment* '*/'   | '//' #'[^\n\r]+\r?\n'
 
 (* everything but a star. Stars should be matched per item, every time we need to check if it's not followed by a slash *)
-inside-comment ::= #'[^*]+' | !'*/' '*'
-     
+inside-comment ::= #'[^*]+'   | !'*/' '*'
+
 

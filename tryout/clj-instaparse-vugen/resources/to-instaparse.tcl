@@ -46,14 +46,17 @@ proc transform {text until_line} {
   }
   # breakpoint
   # don't include |, is used in BNF itself.
+  # First add quotes around characters...
   foreach chars {, : * ? \{ \} || << >> ^ / % ++ -- -> = == > < >= <= + - . ~ ! *= /= += -= <<= >>= ^= != |= %= ... ; ( ) [ ]} {
     # regsub -all " \\$char " $text " '$char' " text
     regsub -all [to_regexp $chars] $text " '$chars'\\1" text
   }
   # & and && have special syntax in regsub, so specific replace.
+  # And also add quotes around some more specific characters.
   regsub -all { \&([ \n])} $text " '\\&'\\1" text
   regsub -all { \&\&([ \n])} $text " '\\&\\&'\\1" text
   regsub -all { \&=([ \n])} $text " '\\&='\\1" text
+  # Add also add quotes around keywords, should be quoted.
   foreach keyword $keywords {
     regsub -all " ${keyword}(\[ \\n\])" $text " '$keyword'\\1" text
   }
@@ -64,15 +67,25 @@ proc transform {text until_line} {
   # don't want to do replace in some lines, so split by line.
   set lines [split $text "\n"]
   set lines2 [list]
-  set rules {keyword identifier floating-constant integer-constant character-constant string chars escaped-chars}
+
+  set rules_ignore {keyword identifier floating-constant integer-constant character-constant string chars escaped-char mws ows ws-or-comment ws comment inside-comment}
+
+  set rules_append {keyword identifier floating-constant integer-constant character-constant string}
+  
   foreach line $lines {
-    if {[add_ows? $line $rules]} {
+    set line_orig $line
+    if {[add_ows? $line $rules_ignore]} {
+      # add <ows> after each quoted item in the line:
       regsub -all {('[^'']+')} $line "\\1$ows" line
-      foreach rule $rules {
+      # add <ows> after usage of things like identifier.
+      foreach rule $rules_append {
         regsub -all "(\\s<?)${rule}(>?)(\\s|$)" $line "\\1${rule}\\2 <ows>\\3" line
       }
     }
     lappend lines2 $line
+    if {[regexp {compound-statement	::=} $line_orig]} {
+      # breakpoint
+    }
   }
   
   join $lines2 "\n"
