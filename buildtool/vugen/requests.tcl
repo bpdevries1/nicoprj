@@ -275,19 +275,31 @@ proc correlation_details {stmt} {
   }
   set parts [url->parts $url]
   set res [list]
-  lappend res "path: [det_path_correlation [:path $parts]]"
+  lappend res "path: [format %.3f [det_path_correlation [:path $parts]]]"
   lappend res {*}[det_path_correlation_details [:path $parts]]
   lappend res "get params: [det_get_params_correlation [:params $parts]]"
   lappend res "post params: [det_post_params_correlation [stmt->postparams $stmt]]"
   return $res
 }
 
+# Request - https://{domain}/RRS2/Content/Files/UpdatUtiUsiTemplate.xlsx (corr=2.375)
+# if path is empty, correlation is 0.
+#
 # [2017-01-13 11:27] some refactoring done to have a SPOD, and use results both for
 # calculating the correlation value and showing all details in HTML.
+#
+# Als lengte meer dan 40 is, wordt het ook spannend.
+# bv met len=40 en conseq=6 is het wel spannend, dan moet je boven .9 uitkomen, bv 1.0.
+# Beide voor de helft laten tellen.
+# 40/80 = .5
+# 6/12 = .5
 proc det_path_correlation {path} {
   + [max_segm_len_corr $path] [max_segm_consec_chargroup_corr $path]
 }
 
+# Request - https://{domain}/RRS2/Content/Files/UpdatUtiUsiTemplate.xlsx (corr=2.375)
+# if path is empty, correlation is 0.
+# return list with strings to put in html.
 proc det_path_correlation_details {path} {
   set ml [max_segm_len $path]
   set mcc [max_segm_consec_chargroup $path]
@@ -330,65 +342,11 @@ proc max_segm_consec_chargroup {path} {
   return $res2
 }
 
-
-# Request - https://{domain}/RRS2/Content/Files/UpdatUtiUsiTemplate.xlsx (corr=2.375)
-# if path is empty, correlation is 0.
-proc det_path_correlation_old {path} {
-  if {$path == ""} {
-    return 0.0
-  }
-  if {[catch {
-    set res1 [expr 1.0 * [max {*}[map [fn x {string length [remove_params $x]}] [split $path "/"]]] / 80]
-  }]} {
-    log warn "Exception in det_path_correlation"
-    breakpoint
-  }
-
-  # / 8 so max consec of 4 will result in 0.5.
-  set res2 [expr 1.0 * [max {*}[map max_consecutive_chargroup [split $path "/"]]] / 12]
-  if {$res2 > 2.0} {
-    log warn "res: $res"
-    breakpoint
-  }
-  + $res1 $res2
-}
-
 # remove LR params from string, i.e. everything between {}
 # these params should not count for correlation value.
 proc remove_params {str} {
   regsub -all {\{[^\{\}]+\}} $str "" str2
   return $str2
-}
-
-# Request - https://{domain}/RRS2/Content/Files/UpdatUtiUsiTemplate.xlsx (corr=2.375)
-# if path is empty, correlation is 0.
-# TODO: merge with previous function: det_path_correlation. In Clojure maybe with metadata.
-# return list with strings to put in html.
-# Als lengte meer dan 40 is, wordt het ook spannend.
-#bv met len=40 en conseq=6 is het wel spannend, dan moet je boven .9 uitkomen, bv 1.0.
-#Beide voor de helft laten tellen.
-#40/80 = .5
-#6/12 = .5
-proc det_path_correlation_details_old {path} {
-  if {$path == ""} {
-    return [list "Empty path"]
-  }
-  if {[catch {
-    set res1 [expr 1.0 * [max {*}[map [fn x {string length $x}] [split $path "/"]]] / 80]
-  }]} {
-    log warn "Exception in det_path_correlation"
-    breakpoint
-  }
-
-  # / 8 so max consec of 4 will result in 0.5.
-  set res2 [expr 1.0 * [max {*}[map max_consecutive_chargroup [split $path "/"]]] / 12]
-  if {$res2 > 2.0} {
-    log warn "res: $res"
-    breakpoint
-  }
-  # + $res1 $res2
-  list "max length of a segment: $res1 (len = [expr round($res1 * 80)])" \
-      "max consec chargroup: $res2 (# = [expr round($res2 * 12)])"
 }
 
 # return max number of consecutive characters of the same group.
