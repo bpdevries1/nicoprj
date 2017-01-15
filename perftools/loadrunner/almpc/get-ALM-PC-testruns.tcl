@@ -37,6 +37,7 @@ proc main {argv} {
     {lastrunid.arg "" "Last runid to download. Iff set, do not download all runs XML file (fails in old projects)"}
     {delete "Delete all rows from DB before reading (debug mode)"}
     {just1 "Read just 1 testrun with attachments"}
+	{test "Do a test, eg download/upload script"}
   }
   set usage ": [file tail [info script]] \[options] :"
   set dargv [getoptions argv $options $usage]
@@ -66,6 +67,11 @@ proc main {argv} {
     delete_table_rows $db
   }
   # read_tests_file $almfilename $db [:just1 $dargv]
+  
+  if {[:test $dargv]} {
+	do_test $dargv
+	exit
+  }
   read_test_results $db $prj_rootdir
   
   $db close
@@ -364,6 +370,42 @@ proc handle_result {db run_dir runid testrun_id node} {
     
     $db insert testrunresult [vars_to_dict testrun_id alm_id name type runid path filesize ts_cet]
   }
+}
+
+proc do_test {opt} {
+  global config
+ 
+  # download a zip with a script
+# url - full URL
+# filename - full path
+  # set url "http://wsrv5334.rabobank.corp/loadtest/rest/domains/RI/projects/Scrittura/Scripts/1/zip"
+  # set url "http://wsrv5334.rabobank.corp/loadtest/rest/domains/RI/projects/Scrittura/Scripts/7/zip"
+  #set url "http://wsrv5334.rabobank.corp/loadtest/rest/domains/RI/projects/Scrittura/Scripts/51/zip"
+  set url "http://wsrv5334.rabobank.corp/loadtest/rest/domains/RI/projects/Scrittura/Scripts"
+  # set filename {c:/PCC/aaa/scrit-conf.zip}
+  set filename {c:/PCC/aaa/scrit-conf-upload.xml}
+  
+  alm_login
+  # exec -ignorestderr $CURL_BIN -b cookies.txt -o $filename $url
+  # exec_curl -b cookies.txt -X POST --header "Content-Type:application/xml" --data @upload.xml --data-binary @scrit-conf.zip -o $filename $url
+  # exec_curl -b cookies.txt -X POST --header "Content-Type:application/xml" --data-urlencode \@upload.xml --data-binary @scrit-conf.zip -o $filename $url
+  
+  # met ondertaande geen CURL fout, maar dan weer ALM met error 1600.
+  #exec_curl -b cookies.txt -X POST --header "Content-Type:application/xml" --data-urlencode \\@upload.xml -o $filename $url
+
+  file delete $filename
+  set CURL_BIN [:curl $config]
+  # exec -ignorestderr $CURL_BIN -b cookies.txt -X POST --header "Content-Type:application/xml" --data \@upload.xml -o $filename $url
+  puts {-ignorestderr $CURL_BIN -b cookies.txt -X POST --header "Content-Type:application/xml" --data \@upload.xml -o $filename $url}
+
+  if {[file exists $filename]} {
+    set text [read_file $filename]
+	puts "$filename:"
+	puts $text
+  } else {
+    puts "no filename: $filename"
+  }
+  # do_alm_curl $url $filename
 }
 
 main $argv

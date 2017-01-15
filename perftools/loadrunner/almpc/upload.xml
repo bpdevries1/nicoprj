@@ -1,0 +1,5 @@
+<Script xmlns="http://www.hp.com/PC/REST/API">
+ <TestFolderPath>Scripts</TestFolderPath>
+ <Overwrite>true</Overwrite>
+ <RuntimeOnly>true</RuntimeOnly>
+</Script>
