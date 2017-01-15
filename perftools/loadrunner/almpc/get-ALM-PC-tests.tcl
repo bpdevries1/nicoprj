@@ -33,11 +33,20 @@ proc main {argv} {
     {config.arg "c:/PCC/Nico/config/ALM.config" "Config file with project name and credentials"}
     {delete "Delete all rows from DB before reading (debug mode)"}
     {just1 "Read just 1 test/scenario"}
+    {domain.arg "" "Override domain from config"}
+    {project.arg "" "Override project from config"}
   }
   set usage ": [file tail [info script]] \[options] :"
   set dargv [getoptions argv $options $usage]
 
-  set config [read_config [:config $dargv]]
+  set config [read_config [:config $dargv]]; # returns dict
+  if {[:domain $dargv] != ""} {
+    dict set config [:domain $dargv]
+  }
+  if {[:project $dargv] != ""} {
+    dict set project [:project $dargv]
+  }
+  
   set dir [:dir $dargv]
   if {[:download $dargv]} {
     set almfilename [download_alm $dir $config]
