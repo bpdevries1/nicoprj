@@ -22,7 +22,7 @@ task download_run {Download run from PC/ALM
 }
 
 proc download_testruns {opt} {
-  global testruns_dir
+  global testruns_dir alm_domain alm_project
   set get_runs [file join [perftools_dir] loadrunner almpc get-ALM-PC-testruns.tcl]
   set almroot_dir [det_almroot_dir]
   if {[:testruns $opt] == "all"} {
@@ -47,7 +47,7 @@ proc download_testruns {opt} {
         log info "Testrun $run already downloaded before: $run"
       } else {
         log info "Exec: tclsh $get_runs -firstrunid $run -lastrunid $run"
-        set res [exec -ignorestderr tclsh $get_runs -firstrunid $run -lastrunid $run]
+        set res [exec -ignorestderr tclsh $get_runs -domain $alm_domain -project $alm_project -firstrunid $run -lastrunid $run]
         puts $res
       }
       # and then unzip.
@@ -57,17 +57,20 @@ proc download_testruns {opt} {
   }
 }
 
-# TODO: should read from config, project specific.
 proc det_almroot_dir {} {
-  return [file join "c:/PCC/Nico/ALMdata" RI Ri_Shared_Environment]
+  global alm_domain alm_project
+  if {[catch {set alm_domain}]} {
+    log warn "set alm_domain and alm_project in [config_tcl_name]"
+    exit
+  }
+  # return [file join "c:/PCC/Nico/ALMdata" RI Ri_Shared_Environment]
+  return [file join "c:/PCC/Nico/ALMdata" $alm_domain $alm_project]
 }
 
 proc unzip_file {zipfile dir} {
   global env
   log info "unzip $zipfile => $dir"
-  # TODO check op existence, vertaal cygwin pad naar windows pad.
   set zipfile_win [det_win_file $zipfile]
-  # set zipfile_win $zipfile
   if {![file exists $zipfile_win]} {
     puts "zipfile does not exist: $zipfile"
     return
