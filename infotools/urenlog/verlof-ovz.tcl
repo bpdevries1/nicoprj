@@ -109,6 +109,10 @@ proc maak_verlof_ovz {hh} {
       } elseif {$project == "Feestdag"} {
         lappend lst_notes "$date: Feestdag"
         set werkdag 0
+      } elseif {$project == "Ziek"} {
+        # [2017-01-22 14:13] Ziek op dezelfde manier als feestdag: kost geen saldo, levert ook niets op.
+        lappend lst_notes "$date: Ziek"
+        set werkdag 0
       } else {
         if {[is_weekend $date]} {
           incrnum delta_deeltijd $hours
