@@ -12,18 +12,6 @@
 \Memory\Available MBytes
 \Memory\Page Faults/sec
 \Memory\Pages/sec
-\MSSQL$VM_UAT_01:Memory Manager\Connection Memory (KB)
-\MSSQL$VM_UAT_01:Memory Manager\Database Cache Memory (KB)
-\MSSQL$VM_UAT_01:Memory Manager\Free Memory (KB)
-\MSSQL$VM_UAT_01:Memory Manager\Lock Memory (KB)
-\MSSQL$VM_UAT_01:Memory Manager\Log Pool Memory (KB)
-\MSSQL$VM_UAT_01:Memory Manager\SQL Cache Memory (KB)
-\MSSQL$VM_UAT_01:Memory Manager\Stolen Server Memory (KB)
-\MSSQL$VM_UAT_01:Memory Manager\Target Server Memory (KB)
-\MSSQL$VM_UAT_01:Memory Manager\Total Server Memory (KB)
-\MSSQL$VM_UAT_01:Wait Statistics(*)\Memory grant queue waits
-\MSSQL$VM_UAT_01:Wait Statistics(*)\Network IO waits
-\MSSQL$VM_UAT_01:Wait Statistics(*)\Thread-safe memory objects waits
 \MSSQL$DFAR_UAT_02:Memory Manager\Connection Memory (KB)
 \MSSQL$DFAR_UAT_02:Memory Manager\Database Cache Memory (KB)
 \MSSQL$DFAR_UAT_02:Memory Manager\Free Memory (KB)
@@ -36,75 +24,18 @@
 \MSSQL$DFAR_UAT_02:Wait Statistics(*)\Memory grant queue waits
 \MSSQL$DFAR_UAT_02:Wait Statistics(*)\Network IO waits
 \MSSQL$DFAR_UAT_02:Wait Statistics(*)\Thread-safe memory objects waits
-\SQLServer:Memory Manager\Connection Memory (KB)
-\SQLServer:Memory Manager\Database Cache Memory (KB)
-\SQLServer:Memory Manager\Free Memory (KB)
-\SQLServer:Memory Manager\Lock Memory (KB)
-\SQLServer:Memory Manager\Log Pool Memory (KB)
-\SQLServer:Memory Manager\SQL Cache Memory (KB)
-\SQLServer:Memory Manager\Stolen Server Memory (KB)
-\SQLServer:Memory Manager\Target Server Memory (KB)
-\SQLServer:Memory Manager\Total Server Memory (KB)
-\SQLServer:Wait Statistics(*)\Memory grant queue waits
-\SQLServer:Wait Statistics(*)\Network IO waits
-\SQLServer:Wait Statistics(*)\Thread-safe memory objects waits
-\SQLServer:General Statistics\Active Temp Tables
-\SQLServer:General Statistics\Temp Tables Creation Rate
-\SQLServer:General Statistics\Logins/sec
-\SQLServer:General Statistics\Connection Reset/sec
-\SQLServer:General Statistics\Logouts/sec
-\SQLServer:General Statistics\User Connections
-\SQLServer:General Statistics\Logical Connections
-\SQLServer:General Statistics\Transactions
-\SQLServer:General Statistics\Non-atomic yield rate
-\SQLServer:General Statistics\Mars Deadlocks
-\SQLServer:General Statistics\HTTP Authenticated Requests
-\SQLServer:General Statistics\SOAP Empty Requests
-\SQLServer:General Statistics\SOAP SQL Requests
-\SQLServer:General Statistics\SOAP Method Invocations
-\SQLServer:General Statistics\SOAP WSDL Requests
-\SQLServer:General Statistics\SOAP Session Initiate Requests
-\SQLServer:General Statistics\SOAP Session Terminate Requests
-\SQLServer:General Statistics\Processes blocked
-\SQLServer:General Statistics\Temp Tables For Destruction
-\SQLServer:General Statistics\Event Notifications Delayed Drop
-\SQLServer:General Statistics\Trace Event Notification Queue
-\SQLServer:General Statistics\SQL Trace IO Provider Lock Waits
-\SQLServer:General Statistics\Tempdb recovery unit id
-\SQLServer:General Statistics\Tempdb rowset id
-\SQLServer:Locks(*)\Lock Requests/sec
-\SQLServer:Locks(*)\Lock Timeouts/sec
-\SQLServer:Locks(*)\Number of Deadlocks/sec
-\SQLServer:Locks(*)\Lock Waits/sec
-\SQLServer:Locks(*)\Lock Wait Time (ms)
-\SQLServer:Locks(*)\Average Wait Time (ms)
-\SQLServer:Locks(*)\Lock Timeouts (timeout > 0)/sec
-\SQLServer:Access Methods\Full Scans/sec
-\SQLServer:Access Methods\Range Scans/sec
-\SQLServer:Access Methods\Probe Scans/sec
-\SQLServer:Access Methods\Table Lock Escalations/sec
-\SQLServer:SQL Errors(*)\Errors/sec
-\SQLServer:SQL Statistics\Batch Requests/sec
-\SQLServer:Plan Cache(*)\Cache Hit Ratio
-\SQLServer:Plan Cache(*)\Cache Pages
-\SQLServer:Plan Cache(*)\Cache Object Counts
-\SQLServer:Plan Cache(*)\Cache Objects in use
-\SQLServer:Wait Statistics(*)\Lock waits
-\SQLServer:Wait Statistics(*)\Memory grant queue waits
-\SQLServer:Wait Statistics(*)\Thread-safe memory objects waits
-\SQLServer:Wait Statistics(*)\Log write waits
-\SQLServer:Wait Statistics(*)\Log buffer waits
-\SQLServer:Wait Statistics(*)\Network IO waits
-\SQLServer:Wait Statistics(*)\Page IO latch waits
-\SQLServer:Wait Statistics(*)\Page latch waits
-\SQLServer:Wait Statistics(*)\Non-Page latch waits
-\SQLServer:Wait Statistics(*)\Wait for the worker
-\SQLServer:Wait Statistics(*)\Workspace synchronization waits
-\SQLServer:Wait Statistics(*)\Transaction ownership waits
-\SQLServer:Exec Statistics(*)\Extended Procedures
-\SQLServer:Exec Statistics(*)\DTC calls
-\SQLServer:Exec Statistics(*)\OLEDB calls
-\SQLServer:Exec Statistics(*)\Distributed Query
+\MSSQL$VM_UAT_01:Memory Manager\Connection Memory (KB)
+\MSSQL$VM_UAT_01:Memory Manager\Database Cache Memory (KB)
+\MSSQL$VM_UAT_01:Memory Manager\Free Memory (KB)
+\MSSQL$VM_UAT_01:Memory Manager\Lock Memory (KB)
+\MSSQL$VM_UAT_01:Memory Manager\Log Pool Memory (KB)
+\MSSQL$VM_UAT_01:Memory Manager\SQL Cache Memory (KB)
+\MSSQL$VM_UAT_01:Memory Manager\Stolen Server Memory (KB)
+\MSSQL$VM_UAT_01:Memory Manager\Target Server Memory (KB)
+\MSSQL$VM_UAT_01:Memory Manager\Total Server Memory (KB)
+\MSSQL$VM_UAT_01:Wait Statistics(*)\Memory grant queue waits
+\MSSQL$VM_UAT_01:Wait Statistics(*)\Network IO waits
+\MSSQL$VM_UAT_01:Wait Statistics(*)\Thread-safe memory objects waits
 \Network Interface(*)\Bytes Received/sec
 \Network Interface(*)\Bytes Sent/sec
 \Network Interface(*)\Bytes Total/sec
@@ -117,3 +48,69 @@
 \Processor(*)\% Idle Time
 \Processor(*)\% Processor Time
 \Processor(*)\% User Time
+\SQLServer:Access Methods\Full Scans/sec
+\SQLServer:Access Methods\Probe Scans/sec
+\SQLServer:Access Methods\Range Scans/sec
+\SQLServer:Access Methods\Table Lock Escalations/sec
+\SQLServer:Exec Statistics(*)\Distributed Query
+\SQLServer:Exec Statistics(*)\DTC calls
+\SQLServer:Exec Statistics(*)\Extended Procedures
+\SQLServer:Exec Statistics(*)\OLEDB calls
+\SQLServer:General Statistics\Active Temp Tables
+\SQLServer:General Statistics\Connection Reset/sec
+\SQLServer:General Statistics\Event Notifications Delayed Drop
+\SQLServer:General Statistics\HTTP Authenticated Requests
+\SQLServer:General Statistics\Logical Connections
+\SQLServer:General Statistics\Logins/sec
+\SQLServer:General Statistics\Logouts/sec
+\SQLServer:General Statistics\Mars Deadlocks
+\SQLServer:General Statistics\Non-atomic yield rate
+\SQLServer:General Statistics\Processes blocked
+\SQLServer:General Statistics\SOAP Empty Requests
+\SQLServer:General Statistics\SOAP Method Invocations
+\SQLServer:General Statistics\SOAP Session Initiate Requests
+\SQLServer:General Statistics\SOAP Session Terminate Requests
+\SQLServer:General Statistics\SOAP SQL Requests
+\SQLServer:General Statistics\SOAP WSDL Requests
+\SQLServer:General Statistics\SQL Trace IO Provider Lock Waits
+\SQLServer:General Statistics\Temp Tables Creation Rate
+\SQLServer:General Statistics\Temp Tables For Destruction
+\SQLServer:General Statistics\Tempdb recovery unit id
+\SQLServer:General Statistics\Tempdb rowset id
+\SQLServer:General Statistics\Trace Event Notification Queue
+\SQLServer:General Statistics\Transactions
+\SQLServer:General Statistics\User Connections
+\SQLServer:Locks(*)\Average Wait Time (ms)
+\SQLServer:Locks(*)\Lock Requests/sec
+\SQLServer:Locks(*)\Lock Timeouts (timeout > 0)/sec
+\SQLServer:Locks(*)\Lock Timeouts/sec
+\SQLServer:Locks(*)\Lock Wait Time (ms)
+\SQLServer:Locks(*)\Lock Waits/sec
+\SQLServer:Locks(*)\Number of Deadlocks/sec
+\SQLServer:Memory Manager\Connection Memory (KB)
+\SQLServer:Memory Manager\Database Cache Memory (KB)
+\SQLServer:Memory Manager\Free Memory (KB)
+\SQLServer:Memory Manager\Lock Memory (KB)
+\SQLServer:Memory Manager\Log Pool Memory (KB)
+\SQLServer:Memory Manager\SQL Cache Memory (KB)
+\SQLServer:Memory Manager\Stolen Server Memory (KB)
+\SQLServer:Memory Manager\Target Server Memory (KB)
+\SQLServer:Memory Manager\Total Server Memory (KB)
+\SQLServer:Plan Cache(*)\Cache Hit Ratio
+\SQLServer:Plan Cache(*)\Cache Object Counts
+\SQLServer:Plan Cache(*)\Cache Objects in use
+\SQLServer:Plan Cache(*)\Cache Pages
+\SQLServer:SQL Errors(*)\Errors/sec
+\SQLServer:SQL Statistics\Batch Requests/sec
+\SQLServer:Wait Statistics(*)\Lock waits
+\SQLServer:Wait Statistics(*)\Log buffer waits
+\SQLServer:Wait Statistics(*)\Log write waits
+\SQLServer:Wait Statistics(*)\Memory grant queue waits
+\SQLServer:Wait Statistics(*)\Network IO waits
+\SQLServer:Wait Statistics(*)\Non-Page latch waits
+\SQLServer:Wait Statistics(*)\Page IO latch waits
+\SQLServer:Wait Statistics(*)\Page latch waits
+\SQLServer:Wait Statistics(*)\Thread-safe memory objects waits
+\SQLServer:Wait Statistics(*)\Transaction ownership waits
+\SQLServer:Wait Statistics(*)\Wait for the worker
+\SQLServer:Wait Statistics(*)\Workspace synchronization waits

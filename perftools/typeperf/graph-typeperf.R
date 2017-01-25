@@ -15,6 +15,14 @@ legend_name = commandArgs()[8]
 # startend_name = commandArgs()[9]
 machine_name = commandArgs()[9]
 
+typeperf_name = "C:/PCC/Nico/aaa/dms-typeperf/wsrv4275.csv"
+npoints_max = 40
+legend_name = "C:/PCC/Nico/aaa/dms-typeperf/wsrv4275.csv.legend"
+# startend_name = commandArgs()[9]
+machine_name = "wsrv4275"
+
+
+
 typeperf_data <- read.csv(typeperf_name, header=T, sep=",")
 
 legend_data <- read.csv(legend_name, header=T, sep=",")
@@ -101,7 +109,9 @@ add_scale = function(idx) {
 legend.labels = legend_data[[1]]
 # remove first label: timestamp
 legend.labels = legend.labels[2:length(legend.labels)]
-legend.labels = sapply(1:length(legend.labels), add_scale)
+
+# [2017-01-25 14:25:24] even weg.
+# legend.labels = sapply(1:length(legend.labels), add_scale)
 
 # legend.labels
 legend("bottom", legend=legend.labels, col=1:nlines, pch = 1:nlines, cex = 0.8, ncol = 2)

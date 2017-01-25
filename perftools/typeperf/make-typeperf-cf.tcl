@@ -50,11 +50,13 @@ proc make_selection {filename specs} {
       if {[regexp {^/(.*)/$} $spec z re]} {
         if {[regexp $re $line]} {
           puts $fo $line
+          break;                # just add counter once
         }
       } else {
         # literal check
         if {$line == $spec} {
           puts $fo $line
+          break;                # just add counter once
         }
       }
     }

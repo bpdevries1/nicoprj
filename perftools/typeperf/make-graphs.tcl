@@ -21,7 +21,7 @@ proc main {argc argv} {
 	"d:/apps/R/R-2.11.1/bin/Rscript.exe" {*}[split $env(PATH) ";"]]
 
   set options {
-    {dir.arg "*typeperf*.csv" "Directory with typeperf files."}  
+    {dir.arg "" "Directory with typeperf files."}  
     {glob.arg "*typeperf*.csv" "glob pattern to use for files."}
     {nopre "Don't preprocess files."}
     {incr "Make graphs incremental, don't create if already exists"}
@@ -29,7 +29,8 @@ proc main {argc argv} {
     {loglevel.arg "" "Set global log level"}
   }
   set usage ": [file tail [info script]] \[options] :"
-  array set ar_argv [::cmdline::getoptions argv $options $usage]
+  # array set ar_argv [::cmdline::getoptions argv $options $usage]
+  array set ar_argv [getoptions argv $options $usage]
  
   
   # check_params $argc $argv
@@ -241,12 +242,25 @@ proc matrix_find_columns {m re} {
 }
 
 # wrapper around math::sum, check if sum can be calculated
-proc sum {args} {
+# args can contain empty values, so check.
+proc sum_old {args} {
   if {[string is double [lindex $args 0]]} {
     math::sum {*}$args 
   } else {
     return 0 
   }
+}
+
+proc sum {args} {
+  set res 0.0
+  foreach el $args {
+    if {$el != ""} {
+      if {[string is double $el]} {
+        set res [expr $res + $el]
+      }
+    }
+  }
+  return $res
 }
 
 # apply procname to each corresponding member in lst_lsts
