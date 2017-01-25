@@ -52,7 +52,7 @@ proc handle_table {db table} {
   set fieldnames [dict keys [$db fields $table]]
   log info "Handle table: $table (nfields: [count $fieldnames])"
   # breakpoint
-  if {![regexp {_pdh_csv_} [first $fieldnames]]} {
+  if {![regexp -nocase {_pdh_csv_} [first $fieldnames]]} {
     log debug "Not a typeperf table, return: $table"
     return
   }
