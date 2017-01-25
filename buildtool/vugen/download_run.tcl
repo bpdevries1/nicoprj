@@ -52,7 +52,29 @@ proc download_testruns {opt} {
       }
       # and then unzip.
       # file mkdir $subdir
-      unzip_file [file join $alm_dir VuserLog.zip] $subdir
+      unzip_files $alm_dir $subdir
+    }
+  }
+}
+
+# unzip and copy files to testruns dir for further analysis.
+proc unzip_files {alm_dir destdir} {
+  unzip_file [file join $alm_dir VuserLog.zip] $destdir
+
+  # also results for opening in Analysis
+  unzip_file [file join $alm_dir Results.zip] [file join  $destdir results]
+
+  unzip_file [file join $alm_dir output.mdb.zip] [file join  $destdir output_mdb]
+
+  unzip_file [file join $alm_dir RawResults.zip] [file join  $destdir rawresults]
+
+  unzip_file [file join $alm_dir Reports.zip] [file join  $destdir reports]
+  
+  set file_dir [file join $destdir report_files]
+  file mkdir $file_dir
+  foreach filename [glob -directory $alm_dir -type f *] {
+    if {[file extension $filename] != ".zip"} {
+      file copy $filename [file join $file_dir [file tail $filename]]
     }
   }
 }
@@ -91,20 +113,6 @@ proc unzip_file {zipfile dir} {
   cd $old_dir
   set env(PATH) $old_path
 }  
-
-proc unzip_old {filename target_dir} {
-	puts "Unzipping $filename => $target_dir"
-	try_eval {
-		set output [exec /usr/bin/unzip $filename -d $target_dir]
-		set result 1
-	} {
-		# print error info?
-		set result 0
-	}
-	# als 't niet goed gaat, knalt 'ie wel, en wordt delete ook niet gedaan...
-	# exit ; # for now, just one.
-	return $result
-}
 
 proc det_win_file {cygwin_file} {
   if {[regexp {^/c/(.*)$} $cygwin_file z rest]} {
