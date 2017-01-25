@@ -1,4 +1,4 @@
-# files which git should ignore
+# FILes which git should ignore
 *.bak
 *~
 *.log
@@ -40,4 +40,7 @@ git-add-commit.sh
 
 # build config dirs
 .bld
+
+# [2017-01-2% 12;44;35] cookies.txt in almpc
+cookies.txt
 
