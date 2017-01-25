@@ -23,7 +23,7 @@ package require csv
 #set log [::ndv::CLogger::new_logger [file tail [info script]] info]
 #$log set_file "excel2db.log"
 
-set_log_global info
+# set_log_global info
 
 namespace eval ::excel2db {
 
@@ -42,10 +42,14 @@ proc excel2db_main {argv} {
     {fillblanks "Fill blank cells with contents of previous row"}
     {singlelines "Each CSV record is on a single line (faster processing)"}
     {commitlines.arg "100000" "Perform commit after reading n lines"}
+    {loglevel.arg "info" "Loglevel to use (info, debug, ...)"}
   }
   set usage ": [file tail [info script]] \[options] \[dirname\]:"
   set opt [getoptions argv $options $usage]
-	
+	# log_set_level $opt
+  # $log set_log_level debug
+  set_log_global [:loglevel $opt]
+  
   set fill_blanks [:fillblanks $opt] 
   set config_tcl [:config $opt]
   # lassign $argv dirname config_tcl
@@ -154,7 +158,11 @@ proc file2sqlite_table {conn basename filename table idx opt} {
   if {[llength $fields] == 0} {
     log warn "No fields in table $tablename, return"
   } else {
-    db_eval $conn "create table $tablename ([join $fields ", "])"
+    set create_sql "create table $tablename ([join $fields ", "])"
+    log_fields $fields
+    log debug "Creating table $tablename - $create_sql"    
+    db_eval $conn $create_sql
+    log debug "Created table: $tablename"
     set stmt_insert [prepare_insert $conn $tablename {*}$fields]
     log info "stmt_insert: $stmt_insert"
     if {[:singlelines $opt]} {
@@ -187,6 +195,18 @@ proc file2sqlite_table {conn basename filename table idx opt} {
     }
   }
   close $f
+}
+
+proc log_fields {fields} {
+  log debug "All fields in table: "
+  set prev ""
+  foreach el [lsort $fields] {
+    log debug $el
+    if {$el == $prev} {
+      log debug "--> Same as previous!"
+    }
+    set prev $el
+  }
 }
 
 proc close_resultsets {stmt} {
