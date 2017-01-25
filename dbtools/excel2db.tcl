@@ -267,7 +267,9 @@ proc det_fields {headerline sep_char} {
     if {$el == ""} {
       lappend res "field$fieldindex"
     } else {
-      lappend res [sanitise $el]
+      set dbfieldname [sanitise $el]
+      set dbfieldname_unique [make_unique $dbfieldname $res]
+      lappend res $dbfieldname_unique
     }
   }
   return $res
@@ -277,6 +279,31 @@ proc det_fields {headerline sep_char} {
 proc sanitise {str} {
   regsub -all {[^a-zA-Z0-9_]} $str "_" str2
   return $str2
+}
+
+# if fieldname does not occur in lst, just return it.
+# if it does occur, add an index so it becomes unique.
+proc make_unique {fieldname lst} {
+  if {[list_contains? $lst $fieldname]} {
+    set ndx 2
+    while {1} {
+      set fieldname2 "${fieldname}$ndx"
+      if {![list_contains? $lst $fieldname2]} {
+        return $fieldname2
+      }
+      incr ndx
+    }
+  } else {
+    return $fieldname
+  }
+}
+
+proc list_contains? {lst el} {
+  if {[lsearch -exact $lst $el] >= 0} {
+    return 1
+  } else {
+    return 0
+  }
 }
 
 # @param line can be 'multiline'
