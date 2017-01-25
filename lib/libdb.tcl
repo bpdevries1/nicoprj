@@ -356,7 +356,8 @@ oo::class create dbwrapper {
     return $res
   }
 
-  # return list of all known tables in database
+  # return dict of all known tables in database
+  # key = tablename, val = list of fields.
   method tables {} {
     my variable conn
     $conn tables
@@ -373,6 +374,14 @@ oo::class create dbwrapper {
     }
   }
 
+  # return fields in table as dict
+  # key: column name
+  # value: info about column, also a dict.
+  method fields {tablename} {
+    my variable conn
+    $conn columns $tablename
+  }
+  
   method function {fn_name}   {
     [my get_db_handle] function $fn_name $fn_name
   }
