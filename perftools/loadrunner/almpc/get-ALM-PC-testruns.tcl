@@ -395,8 +395,8 @@ proc do_test {opt} {
 
   file delete $filename
   set CURL_BIN [:curl $config]
-  # exec -ignorestderr $CURL_BIN -b cookies.txt -X POST --header "Content-Type:application/xml" --data \@upload.xml -o $filename $url
-  puts {-ignorestderr $CURL_BIN -b cookies.txt -X POST --header "Content-Type:application/xml" --data \@upload.xml -o $filename $url}
+  exec -ignorestderr $CURL_BIN -b cookies.txt -X POST --header "Content-Type:application/xml" --data \@upload.xml -o $filename $url
+  # puts {-ignorestderr $CURL_BIN -b cookies.txt -X POST --header "Content-Type:application/xml" --data \@upload.xml -o $filename $url}
 
   if {[file exists $filename]} {
     set text [read_file $filename]
