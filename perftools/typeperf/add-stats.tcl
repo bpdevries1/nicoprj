@@ -12,7 +12,6 @@ use libfp
 
 proc main {argc argv} {
   global env ar_argv
-
   set options {
     {dir.arg "" "Directory with SQLite DB with read typeperf files."}
     {db.arg "perfmon.db" "Database name"}
@@ -35,9 +34,50 @@ proc main {argc argv} {
   set dbname [file join $root_dir [:db $opt]]
   set db [dbwrapper new $dbname]
   $db load_percentile
-  source [file join $root_dir [:config $opt]]
+  set config_file [file join $root_dir [:config $opt]]
+  if {[file exists $config_file]} {
+    source $config_file
+  } else {
+    log warn "Config file not found: $config_file"
+    return
+  }
+  make_counternames $db
   make_stats $db $segments
   $db close
+}
+
+proc make_counternames {db} {
+  $db add_tabledef countername {id} {tablename fieldname csvfield computer object instance counter}
+  $db create_tables
+  $db prepare_insert_statements
+  $db exec "delete from countername"
+  foreach row [$db query "select tablename, fieldname, csvfield from _csvdbmap"] {
+    set parts [det_counter_parts [:csvfield $row]]
+    $db insert countername [dict merge $row $parts]
+  }
+}
+
+# return dict with perfmon counter parts: computer, object, instance, counter
+# \\WSRV4275\SQLServer:General Statistics\Non-atomic yield rate
+# \\WSRV4275\Process(cmd)\% Processor Time
+proc det_counter_parts {csvfield} {
+  # field can either start with double backslash (computer included) or not
+  if {![regexp {^\\\\([^\\]+)(.*)$} $csvfield z computer rest]} {
+    set computer "unknown"
+    set rest $csvfield
+  }
+  set lst [split $rest "\\"]
+  # only take last 2 items
+  set lst2 [lrange $lst end-1 end]
+  lassign $lst2 object counter
+  # object could have instance between parens
+  if {[regexp {^([^()]+)\(([^()]+)\)} $object z obj2 inst]} {
+    set object $obj2
+    set instance $inst
+  } else {
+    set instance ""
+  }
+  vars_to_dict computer object instance counter
 }
 
 proc make_stats {db segments} {
