@@ -35,7 +35,7 @@ proc excel2db_main {argv} {
   set options {
     {dir.arg "" "Directory with log files"}
     {filespecs.arg "*.csv:*.tsv" "File specs of files to import"}
-    {db.arg "auto" "SQLite DB location (auto=create in dir)"}
+    {db.arg "auto" "Relative SQLite DB location (auto=create in dir)"}
     {table.arg "auto" "Tablename (prefix) to use"}
     {config.arg "" "Config.tcl file"}
     {deletedb "Delete DB before reading (for debugging)"}
@@ -98,13 +98,15 @@ proc delete_old_csv {targetroot} {
   }
 }
 
-proc files2sqlite {dirname db table deletedb opt} {
-  if {$db == "auto"} {
+# TODO: dbwrapepr gebruiken.
+proc files2sqlite {dirname pdbname table deletedb opt} {
+  if {$pdbname == "auto"} {
     set basename [file join $dirname [file tail $dirname]]
     set dbname "$basename.db"
   } else {
-    set dbname $db
+    # [2017-01-26 12:39:12] dname relative to dirname. If absolute name, should still work.
     set basename $table
+    set dbname [file join $dirname $pdbname]
   }
   
   # log info "files2sqlite: $basename"
@@ -113,7 +115,12 @@ proc files2sqlite {dirname db table deletedb opt} {
   }
   # file delete "$basename.db"
   # set conn [open_db "$basename.db"]
-  set conn [open_db $dbname]
+  set db [dbwrapper new $dbname]
+  $db add_tabledef _csvdbmap {id} {tablename fieldname csvfilename csvfield csvfieldnr}
+  $db create_tables
+  $db prepare_insert_statements
+  set conn [$db get_conn]
+  # set conn [open_db $dbname]
   #@note begin_trans lijkt alleen voor perf zin te hebben, want als het halverwege fout gaan, wordt er geen rollback gedaan.
   # 2010-10-21 NdV nog omzetter naar nieuwe db lib met $db in_trans
   
@@ -126,7 +133,7 @@ proc files2sqlite {dirname db table deletedb opt} {
       db_eval $conn "begin transaction"      
       incr idx
       try_eval {
-        file2sqlite_table $conn $basename $filename $table $idx $opt
+        file2sqlite_table $db $basename $filename $table $idx $opt
       } {
         log warn "Failed to convert: $filename" 
         log warn "Error: $errorResult"
@@ -137,7 +144,8 @@ proc files2sqlite {dirname db table deletedb opt} {
   
 }
 
-proc file2sqlite_table {conn basename filename table idx opt} {
+proc file2sqlite_table {db basename filename table idx opt} {
+  set conn [$db get_conn]
   if {$table == "auto"} {
     set tablename [det_tablename $basename $filename]
   } else {
@@ -147,13 +155,17 @@ proc file2sqlite_table {conn basename filename table idx opt} {
       set tablename "$table$idx"
     }
   }
+  if {[$db table_exists $tablename]} {
+    log info "Table already exists, return: $tablename"
+    return
+  }
   set commit_lines [:commitlines $opt]
   log info "file2sqlite_table: basename=$basename, filename=$filename" 
   log info "tablename to create: $tablename"
   set sep_char [det_sep_char $filename]
   set f [open $filename r]
   gets $f headerline
-  set fields [det_fields $headerline $sep_char]
+  set fields [det_fields $db $filename $tablename $headerline $sep_char]
   log debug "fields: $fields"
   if {[llength $fields] == 0} {
     log warn "No fields in table $tablename, return"
@@ -168,6 +180,7 @@ proc file2sqlite_table {conn basename filename table idx opt} {
     if {[:singlelines $opt]} {
       read_single_lines $f $conn $stmt_insert $tablename $fields $sep_char $opt
     } else {
+      # TODO: factor out in read_multi_lines
       set lines ""
       set dct_prev {}
       set linenr 1
@@ -262,18 +275,23 @@ proc det_tablename {basename filename} {
   sanitise [file root [file tail $filename]] 
 }
 
-proc det_fields {headerline sep_char} {
+proc det_fields {db filename tablename headerline sep_char} {
   set res {}
   set fieldindex 0
+  set filename_tail [file tail $filename]
   foreach el [csv::split $headerline $sep_char] {
     incr fieldindex
     if {$el == ""} {
-      lappend res "field$fieldindex"
+      # lappend res "field$fieldindex"
+      set dbfieldname_unique "field$fieldindex"
     } else {
       set dbfieldname [sanitise $el]
       set dbfieldname_unique [make_unique $dbfieldname $res]
-      lappend res $dbfieldname_unique
+    
     }
+    lappend res $dbfieldname_unique
+    #   $db define_table _csvdbmap {id} {tablename fieldname csvfilename csvfield csvfieldnr}
+    $db insert _csvdbmap [dict create tablename $tablename fieldname $dbfieldname_unique csvfilename $filename_tail csvfield $el csvfieldnr $fieldindex]
   }
   return $res
 }
