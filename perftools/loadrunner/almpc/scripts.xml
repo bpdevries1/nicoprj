@@ -1,0 +1,226 @@
+<Scripts xmlns="http://www.hp.com/PC/REST/API">
+  <Script>
+    <ID>1</ID>
+    <Name>20160211_Scrittura</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>3</ID>
+    <Name>20160217_Scrittura</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>4</ID>
+    <Name>20160219_Scrittura</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>5</ID>
+    <Name>20160318_Scrittura</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>7</ID>
+    <Name>Scrittura_Put</Name>
+    <CreatedBy>VreezeNB</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>C Vuser</Protocol>
+  </Script>
+  <Script>
+    <ID>9</ID>
+    <Name>20160322_Scrittura</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>22</ID>
+    <Name>20160322_Scrittura_GUI_search</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>23</ID>
+    <Name>20160322_Scrittura_GUI_loginLogout</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>24</ID>
+    <Name>20160322_Scrittura_GUI_outgoingToBeDraftedList_derv</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>25</ID>
+    <Name>20160322_Scrittura_GUI_outgoingToBeDraftedList_fx</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>26</ID>
+    <Name>20160322_Scrittura_GUI_incomingProposedMatch_derv</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>27</ID>
+    <Name>20160322_Scrittura_GUI_incomingProposedMatch_fx</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>28</ID>
+    <Name>20160322_Scrittura_GUI_incomingUnrecognised_derv</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>29</ID>
+    <Name>20160322_Scrittura_GUI_incomingUnrecognised_fx</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>31</ID>
+    <Name>20160324_Scrittura_GUI_incomingProposedMatch_fx</Name>
+    <CreatedBy>VreezeNB</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>32</ID>
+    <Name>20160324_Scrittura</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>33</ID>
+    <Name>20160324_Scrittura_GUI_search</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>34</ID>
+    <Name>20160324_Scrittura_GUI_loginLogout</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>35</ID>
+    <Name>20160324_Scrittura_GUI_incomingProposedMatch_derv</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>36</ID>
+    <Name>20160324_Scrittura_GUI_incomingProposedMatch_fx_v2</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>37</ID>
+    <Name>20160324_Scrittura_GUI_incomingUnrecognised_derv</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>38</ID>
+    <Name>20160324_Scrittura_GUI_incomingUnrecognised_fx</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>39</ID>
+    <Name>20160324_Scrittura_GUI_outgoingToBeDraftedList_derv</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>40</ID>
+    <Name>20160324_Scrittura_GUI_outgoingToBeDraftedList_fx</Name>
+    <CreatedBy>DronkelaarFA</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>TruClient - Firefox</Protocol>
+  </Script>
+  <Script>
+    <ID>44</ID>
+    <Name>Scrittura_Get</Name>
+    <CreatedBy>VreezeNB</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>C Vuser</Protocol>
+  </Script>
+  <Script>
+    <ID>51</ID>
+    <Name>Scrittura_confirmations</Name>
+    <CreatedBy>VreezeNB</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>Web - HTTP/HTML</Protocol>
+  </Script>
+  <Script>
+    <ID>73</ID>
+    <Name>Inspire_DMS</Name>
+    <CreatedBy>vreezenb</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>Web Services, Web - HTTP/HTML</Protocol>
+  </Script>
+  <Script>
+    <ID>74</ID>
+    <Name>FAR</Name>
+    <CreatedBy>vreezenb</CreatedBy>
+    <TestFolderPath>Subject\Scripts</TestFolderPath>
+    <WorkingMode>Runtime</WorkingMode>
+    <Protocol>Web - HTTP/HTML</Protocol>
+  </Script>
+</Scripts>

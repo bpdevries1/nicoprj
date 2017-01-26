@@ -1,0 +1,4 @@
+<Exception xmlns="http://www.hp.com/PC/REST/API">
+  <ExceptionMessage>Operation failed.</ExceptionMessage>
+  <ErrorCode>1001</ErrorCode>
+</Exception>

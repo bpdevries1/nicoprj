@@ -1,0 +1,297 @@
+<Test xmlns="http://www.hp.com/PC/REST/API">
+  <ID>54</ID>
+  <Name>GUI_scripts_endurance_8h</Name>
+  <CreatedBy>dronkelaarfa</CreatedBy>
+  <LastModified>02/08/2016 13:01:00</LastModified>
+  <TestFolderPath>Subject\Scenarios</TestFolderPath>
+  <Content>
+    <WorkloadType>
+      <Type>basic</Type>
+      <SubType>by group</SubType>
+    </WorkloadType>
+    <LGDistribution>
+      <Type>manual</Type>
+    </LGDistribution>
+    <MonitorProfiles />
+    <Groups>
+      <Group>
+        <Name>outgoingtobedraftedlist_derv</Name>
+        <Vusers>1</Vusers>
+        <Script>
+          <ID>39</ID>
+        </Script>
+        <Hosts>
+          <Host>
+            <Name>LG1</Name>
+            <Type>automatch</Type>
+          </Host>
+        </Hosts>
+        <RTS>
+          <Pacing>
+            <NumberOfIterations>1</NumberOfIterations>
+            <StartNewIteration Type="fixed interval">
+              <DelayOfSeconds>60</DelayOfSeconds>
+            </StartNewIteration>
+          </Pacing>
+          <Log Type="disable" />
+        </RTS>
+        <Scheduler>
+          <Actions>
+            <Action>
+              <StartGroup Type="immediately" />
+            </Action>
+            <Action>
+              <Initialize Type="just before vuser runs" />
+            </Action>
+            <Action>
+              <StartVusers Type="simultaneously" />
+            </Action>
+            <Action>
+              <Duration Type="run for">
+                <TimeInterval>
+                  <Hours>8</Hours>
+                </TimeInterval>
+              </Duration>
+            </Action>
+            <Action>
+              <StopVusers Type="simultaneously" />
+            </Action>
+          </Actions>
+        </Scheduler>
+      </Group>
+      <Group>
+        <Name>outgoingtobedraftedlist_fx</Name>
+        <Vusers>1</Vusers>
+        <Script>
+          <ID>40</ID>
+        </Script>
+        <Hosts>
+          <Host>
+            <Name>LG1</Name>
+            <Type>automatch</Type>
+          </Host>
+        </Hosts>
+        <RTS>
+          <Pacing>
+            <NumberOfIterations>1</NumberOfIterations>
+            <StartNewIteration Type="fixed interval">
+              <DelayOfSeconds>60</DelayOfSeconds>
+            </StartNewIteration>
+          </Pacing>
+          <Log Type="disable" />
+        </RTS>
+        <Scheduler>
+          <Actions>
+            <Action>
+              <StartGroup Type="immediately" />
+            </Action>
+            <Action>
+              <Initialize Type="just before vuser runs" />
+            </Action>
+            <Action>
+              <StartVusers Type="simultaneously" />
+            </Action>
+            <Action>
+              <Duration Type="run for">
+                <TimeInterval>
+                  <Hours>8</Hours>
+                </TimeInterval>
+              </Duration>
+            </Action>
+            <Action>
+              <StopVusers Type="simultaneously" />
+            </Action>
+          </Actions>
+        </Scheduler>
+      </Group>
+      <Group>
+        <Name>incomingproposedmatch_derv</Name>
+        <Vusers>1</Vusers>
+        <Script>
+          <ID>35</ID>
+        </Script>
+        <Hosts>
+          <Host>
+            <Name>LG1</Name>
+            <Type>automatch</Type>
+          </Host>
+        </Hosts>
+        <RTS>
+          <Pacing>
+            <NumberOfIterations>1</NumberOfIterations>
+            <StartNewIteration Type="fixed interval">
+              <DelayOfSeconds>60</DelayOfSeconds>
+            </StartNewIteration>
+          </Pacing>
+          <Log Type="disable" />
+        </RTS>
+        <Scheduler>
+          <Actions>
+            <Action>
+              <StartGroup Type="immediately" />
+            </Action>
+            <Action>
+              <Initialize Type="just before vuser runs" />
+            </Action>
+            <Action>
+              <StartVusers Type="simultaneously" />
+            </Action>
+            <Action>
+              <Duration Type="run for">
+                <TimeInterval>
+                  <Hours>8</Hours>
+                </TimeInterval>
+              </Duration>
+            </Action>
+            <Action>
+              <StopVusers Type="simultaneously" />
+            </Action>
+          </Actions>
+        </Scheduler>
+      </Group>
+      <Group>
+        <Name>incomingproposedmatch_fx</Name>
+        <Vusers>3</Vusers>
+        <Script>
+          <ID>36</ID>
+        </Script>
+        <Hosts>
+          <Host>
+            <Name>LG1</Name>
+            <Type>automatch</Type>
+          </Host>
+        </Hosts>
+        <RTS>
+          <Pacing>
+            <NumberOfIterations>1</NumberOfIterations>
+            <StartNewIteration Type="fixed interval">
+              <DelayOfSeconds>60</DelayOfSeconds>
+            </StartNewIteration>
+          </Pacing>
+          <Log Type="disable" />
+        </RTS>
+        <Scheduler>
+          <Actions>
+            <Action>
+              <StartGroup Type="immediately" />
+            </Action>
+            <Action>
+              <Initialize Type="just before vuser runs" />
+            </Action>
+            <Action>
+              <StartVusers Type="gradually">
+                <Ramp>
+                  <Vusers>1</Vusers>
+                  <TimeInterval>
+                    <Minutes>5</Minutes>
+                    <Seconds>15</Seconds>
+                  </TimeInterval>
+                </Ramp>
+              </StartVusers>
+            </Action>
+            <Action>
+              <Duration Type="run for">
+                <TimeInterval>
+                  <Hours>8</Hours>
+                </TimeInterval>
+              </Duration>
+            </Action>
+            <Action>
+              <StopVusers Type="simultaneously" />
+            </Action>
+          </Actions>
+        </Scheduler>
+      </Group>
+      <Group>
+        <Name>incomingunrecognised_derv</Name>
+        <Vusers>1</Vusers>
+        <Script>
+          <ID>37</ID>
+        </Script>
+        <Hosts>
+          <Host>
+            <Name>LG1</Name>
+            <Type>automatch</Type>
+          </Host>
+        </Hosts>
+        <RTS>
+          <Pacing>
+            <NumberOfIterations>1</NumberOfIterations>
+            <StartNewIteration Type="fixed interval">
+              <DelayOfSeconds>60</DelayOfSeconds>
+            </StartNewIteration>
+          </Pacing>
+          <Log Type="disable" />
+        </RTS>
+        <Scheduler>
+          <Actions>
+            <Action>
+              <StartGroup Type="immediately" />
+            </Action>
+            <Action>
+              <Initialize Type="just before vuser runs" />
+            </Action>
+            <Action>
+              <StartVusers Type="simultaneously" />
+            </Action>
+            <Action>
+              <Duration Type="run for">
+                <TimeInterval>
+                  <Hours>8</Hours>
+                </TimeInterval>
+              </Duration>
+            </Action>
+            <Action>
+              <StopVusers Type="simultaneously" />
+            </Action>
+          </Actions>
+        </Scheduler>
+      </Group>
+      <Group>
+        <Name>incomingunrecognised_fx</Name>
+        <Vusers>1</Vusers>
+        <Script>
+          <ID>38</ID>
+        </Script>
+        <Hosts>
+          <Host>
+            <Name>LG1</Name>
+            <Type>automatch</Type>
+          </Host>
+        </Hosts>
+        <RTS>
+          <Pacing>
+            <NumberOfIterations>1</NumberOfIterations>
+            <StartNewIteration Type="fixed interval">
+              <DelayOfSeconds>60</DelayOfSeconds>
+            </StartNewIteration>
+          </Pacing>
+          <Log Type="disable" />
+        </RTS>
+        <Scheduler>
+          <Actions>
+            <Action>
+              <StartGroup Type="immediately" />
+            </Action>
+            <Action>
+              <Initialize Type="just before vuser runs" />
+            </Action>
+            <Action>
+              <StartVusers Type="simultaneously" />
+            </Action>
+            <Action>
+              <Duration Type="run for">
+                <TimeInterval>
+                  <Hours>8</Hours>
+                </TimeInterval>
+              </Duration>
+            </Action>
+            <Action>
+              <StopVusers Type="simultaneously" />
+            </Action>
+          </Actions>
+        </Scheduler>
+      </Group>
+    </Groups>
+  </Content>
+</Test>

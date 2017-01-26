@@ -1,0 +1,86 @@
+<Tests xmlns="http://www.hp.com/PC/REST/API">
+  <Test>
+    <ID>2</ID>
+    <Name>20160211_Validation_outgoingDrafts</Name>
+    <CreatedBy>dronkelaarfa</CreatedBy>
+    <LastModified>11/02/2016 13:39:56</LastModified>
+    <TestFolderPath>Subject\Scenarios</TestFolderPath>
+  </Test>
+  <Test>
+    <ID>8</ID>
+    <Name>Scrittura_MQ_Single_Iter</Name>
+    <CreatedBy>vreezenb</CreatedBy>
+    <LastModified>07/04/2016 09:57:00</LastModified>
+    <TestFolderPath>Subject\Scenarios</TestFolderPath>
+  </Test>
+  <Test>
+    <ID>21</ID>
+    <Name>20160323_Validation_GUI_script</Name>
+    <CreatedBy>dronkelaarfa</CreatedBy>
+    <LastModified>07/04/2016 09:57:26</LastModified>
+    <TestFolderPath>Subject\Scenarios</TestFolderPath>
+  </Test>
+  <Test>
+    <ID>30</ID>
+    <Name>20160324_GUI_script_proposed_only</Name>
+    <CreatedBy>dronkelaarfa</CreatedBy>
+    <LastModified>24/03/2016 13:00:51</LastModified>
+    <TestFolderPath>Subject\Scenarios</TestFolderPath>
+  </Test>
+  <Test>
+    <ID>41</ID>
+    <Name>20160324_GUI_script</Name>
+    <CreatedBy>dronkelaarfa</CreatedBy>
+    <LastModified>20/06/2016 16:32:57</LastModified>
+    <TestFolderPath>Subject\Scenarios</TestFolderPath>
+  </Test>
+  <Test>
+    <ID>42</ID>
+    <Name>20160324_GUI_script_only_queues</Name>
+    <CreatedBy>dronkelaarfa</CreatedBy>
+    <LastModified>24/03/2016 17:25:29</LastModified>
+    <TestFolderPath>Subject\Scenarios</TestFolderPath>
+  </Test>
+  <Test>
+    <ID>43</ID>
+    <Name>20160331_GUI_script_only_queues</Name>
+    <CreatedBy>dronkelaarfa</CreatedBy>
+    <LastModified>20/06/2016 17:13:16</LastModified>
+    <TestFolderPath>Subject\Scenarios</TestFolderPath>
+  </Test>
+  <Test>
+    <ID>50</ID>
+    <Name>20160620_GUI_script</Name>
+    <CreatedBy>dronkelaarfa</CreatedBy>
+    <LastModified>05/07/2016 14:02:06</LastModified>
+    <TestFolderPath>Subject\Scenarios</TestFolderPath>
+  </Test>
+  <Test>
+    <ID>52</ID>
+    <Name>Confirmations_1_user_it</Name>
+    <CreatedBy>dronkelaarfa</CreatedBy>
+    <LastModified>21/06/2016 16:09:19</LastModified>
+    <TestFolderPath>Subject\Scenarios</TestFolderPath>
+  </Test>
+  <Test>
+    <ID>53</ID>
+    <Name>Confirmations_10_users</Name>
+    <CreatedBy>dronkelaarfa</CreatedBy>
+    <LastModified>02/08/2016 11:16:46</LastModified>
+    <TestFolderPath>Subject\Scenarios</TestFolderPath>
+  </Test>
+  <Test>
+    <ID>54</ID>
+    <Name>GUI_scripts_endurance_8h</Name>
+    <CreatedBy>dronkelaarfa</CreatedBy>
+    <LastModified>02/08/2016 13:01:00</LastModified>
+    <TestFolderPath>Subject\Scenarios</TestFolderPath>
+  </Test>
+  <Test>
+    <ID>66</ID>
+    <Name>test_rcc</Name>
+    <CreatedBy>vreezenb</CreatedBy>
+    <LastModified>25/01/2017 22:02:40</LastModified>
+    <TestFolderPath>Subject\Scenarios</TestFolderPath>
+  </Test>
+</Tests>

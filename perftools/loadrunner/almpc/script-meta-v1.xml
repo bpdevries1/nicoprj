@@ -1,0 +1,8 @@
+<Script xmlns="http://www.hp.com/PC/REST/API">
+  <ID>73</ID>
+  <Name>Inspire_DMS</Name>
+  <CreatedBy>vreezenb</CreatedBy>
+  <TestFolderPath>Subject\Scripts</TestFolderPath>
+  <WorkingMode>Runtime</WorkingMode>
+  <Protocol>Web Services</Protocol>
+</Script>

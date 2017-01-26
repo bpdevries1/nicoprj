@@ -1,0 +1,8 @@
+<Script xmlns="http://www.hp.com/PC/REST/API">
+  <ID>74</ID>
+  <Name>FAR</Name>
+  <CreatedBy>vreezenb</CreatedBy>
+  <TestFolderPath>Subject\Scripts</TestFolderPath>
+  <WorkingMode>Runtime</WorkingMode>
+  <Protocol>Web - HTTP/HTML</Protocol>
+</Script>
