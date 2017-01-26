@@ -73,7 +73,7 @@ proc segment->string {segment} {
 }
 
 proc write_segment_counter_stats {db hh segment counter} {
-  lassign $counter counter_spec treshold
+  lassign $counter counter_spec treshold_show treshold_error
   set spec_str [string trim $counter_spec "%"]
   lassign $segment _ _ segm_name
   $hh heading 2 "Stats for $spec_str"
@@ -85,7 +85,9 @@ proc write_segment_counter_stats {db hh segment counter} {
                join countername c on c.tablename = s.tablename
                   and c.fieldname = s.fieldname
                where c.csvfield like '$counter_spec'
-               and s.segm_name = '$segm_name'"
+               and s.segm_name = '$segm_name'
+               and s.avg_val $treshold_show"
+    
     log debug "query: $query"
     foreach row [$db query $query] {
       $hh table_row_start
@@ -96,7 +98,7 @@ proc write_segment_counter_stats {db hh segment counter} {
         set value [:$field $row]
         set class ""
         # see if this works with treshold as ">80"
-        if {[expr $value $treshold]} {
+        if {[expr $value $treshold_error]} {
           set class "class=\"Failure\"" 
         }
         $hh table_data [format %.3f $value] 0 $class
