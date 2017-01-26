@@ -230,7 +230,10 @@ proc read_single_lines {f conn stmt_insert tablename fields sep_char opt} {
     incr linenr
     # string trim gebruiken, want kan 'lege' line zijn met alleen komma's.
     if {[string trim $line] != ""} {
+      #insert_line $conn $stmt_insert $tablename $fields $line $linenr {} $sep_char
       insert_single_line $conn $stmt_insert $tablename $fields $line $linenr $sep_char
+      
+      #return;                   # for test.
     }
     # breakpoint
     if {$linenr % $commit_lines == 0} {
@@ -310,24 +313,32 @@ proc list_contains? {lst el} {
 proc insert_line {conn stmt_insert tablename fields line linenr dct_prev sep_char} {
   global fill_blanks
   log debug "line $linenr: $line"
+  log debug "fill_blanks: $fill_blanks"
   # TODO: should use dict interface, with dict create and dict set.
-  set dct {}
+  # set dct {}
+  set dct [dict create]
   foreach k $fields v [csv::split $line $sep_char] {
     if {$v == ""} {
       if {$fill_blanks} {
         if {[dict exists $dct_prev $k]} {
-          lappend dct $k [dict get $dct_prev $k]
+          #lappend dct $k [dict get $dct_prev $k]
+          dict set dct $k [dict get $dct_prev $k]
         } else {
-          lappend dct $k $v
+          #lappend dct $k $v
+          dict set dct $k $v
         }
       } else {
-        lappend dct $k $v
+        #lappend dct $k $v
+        dict set dct $k $v
       }
     } else {
-      lappend dct $k $v
+      #lappend dct $k $v
+      dict set dct $k $v
     }
   }
   try_eval {
+    #set dct [lrange $dct 0 9]
+    #log debug "insert_line: $dct"
     [$stmt_insert execute $dct] close
   } {
     puts "dct: $dct"
@@ -339,12 +350,27 @@ proc insert_line {conn stmt_insert tablename fields line linenr dct_prev sep_cha
 proc insert_single_line {conn stmt_insert tablename fields line linenr sep_char} {
   # TODO: find other way to create dict with list of keys and list of values (zipper?)
   # or another way to put in DB, using something else besides a dict.
+  #set dct {}
   set dct [dict create]
   foreach k $fields v [csv::split $line $sep_char] {
-    dict set dct $k $v
+    # dict set dct $k $v
+    # [2017-01-26 10:54:05] Strange construction here, but apparantly necessary:
+    # by checking the value of $v, something happens inside it, maybe the type is being
+    # set, which is next used by the prepared statement to set int/float when possible.
+    # So leave like this for now.
+    if {$v == ""} {
+      dict set dct $k $v
+      #lappend dct $k $v      
+    } else {
+      dict set dct $k $v
+      #lappend dct $k $v
+    }
+
   }
   try_eval {
     # [2016-07-09 13:44] should catch result and close/free it.
+    #set dct [lrange $dct 0 9]
+    #log debug "insert_single_line: $dct"
     [$stmt_insert execute $dct] close
     # nog even test zonder, kijken of vangnet 'em pakt
     # $stmt_insert execute $dct
