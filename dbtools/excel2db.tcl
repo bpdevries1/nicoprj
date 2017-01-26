@@ -299,7 +299,7 @@ proc det_fields {db filename tablename headerline sep_char} {
 # sanitise string so it can be used as table or column name.
 proc sanitise {str} {
   regsub -all {[^a-zA-Z0-9_]} $str "_" str2
-  return $str2
+  return [string tolower $str2]
 }
 
 # if fieldname does not occur in lst, just return it.
