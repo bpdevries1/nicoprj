@@ -9,7 +9,9 @@ set_log_global info
 require libdatetime dt
 use libfp
 
-source libperf.tcl
+ndv::source_once libperf.tcl
+
+set_log_global info
 
 proc main {argv} {
   global argv0
@@ -42,11 +44,13 @@ proc make_typeperf_cf {} {
 
 # make perfmon/typeperf selection
 proc make_selection {filename specs} {
+  log info "Make selection for: $filename"
   set fi [open $filename r]
   set fo [open "[file rootname $filename]-sel[file extension $filename]" w]
   while {[gets $fi line] >= 0} {
     foreach spec $specs {
       if {$spec == ""} {continue}
+      if {[regexp {^#} $spec]} {continue}
       if {[regexp {^/(.*)/$} $spec z re]} {
         if {[regexp $re $line]} {
           puts $fo $line
