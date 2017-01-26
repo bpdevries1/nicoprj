@@ -37,8 +37,16 @@ proc main {argv} {
 proc make_stats {opt} {
   set excel2db [det_excel2db]
   #exec -ignorestderr tclsh $excel2db -dir [:dir $opt] -singlelines -loglevel debug
-  exec -ignorestderr tclsh $excel2db -dir [:dir $opt] -singlelines
+  # exec -ignorestderr tclsh $excel2db -dir [:dir $opt] -singlelines
+  exec_tcl $excel2db -dir [:dir $opt] -db perfmon.db -singlelines
   # exec -ignorestderr tclsh $excel2db -dir [:dir $opt]
+  exec_tcl add-tslocaltz.tcl -dir [:dir $opt]
+  exec_tcl add-stats.tcl -dir [:dir $opt]
+  
+}
+
+proc exec_tcl {args} {
+  exec -ignorestderr tclsh {*}$args
   
 }
 
