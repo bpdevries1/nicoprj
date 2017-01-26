@@ -92,7 +92,10 @@ proc make_stats {db segments} {
   foreach table [dict keys $tables] {
     handle_table $db $table $segments
   }
-  
+  set query "delete from stats
+             where fieldname like '%process\\_%' escape '\\'
+             and (fieldname like '%total%' or fieldname like '%idle%')"
+  $db exec $query
 }
 
 proc handle_table {db table segments} {
