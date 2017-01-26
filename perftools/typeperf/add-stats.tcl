@@ -81,10 +81,11 @@ proc det_counter_parts {csvfield} {
 }
 
 proc make_stats {db segments} {
+  catch {$db exec "drop table stats"}
   $db def_datatype {.*_val} float
-  $db add_tabledef stats {id} {segm_start segm_end tablename fieldname min_val avg_val max_val p95_val}
+  $db add_tabledef stats {id} {segm_start segm_end segm_name tablename fieldname min_val avg_val max_val p95_val}
   $db create_tables
-  $db exec "delete from stats"
+  # $db exec "delete from stats"
   # $db prepare_insert_statements
   set tables [$db tables]
   # breakpoint
@@ -123,9 +124,9 @@ proc handle_table_field {db table field segments} {
 # insert records into stats table with stats for <field> in <table> for <segment>
 proc handle_table_field_segment {db table field segment} {
   # $db add_tabledef stats {id} {segm_start segm_end tablename fieldname min_val avg_val max_val p95_val}
-  lassign $segment segm_start segm_end
-  set query "insert into stats (segm_start, segm_end, tablename, fieldname, min_val, avg_val, max_val, p95_val)
-  select '$segm_start', '$segm_end', '$table', '$field', min($field), avg($field), max($field), percentile($field, 95)
+  lassign $segment segm_start segm_end segm_name
+  set query "insert into stats (segm_start, segm_end, segm_name, tablename, fieldname, min_val, avg_val, max_val, p95_val)
+  select '$segm_start', '$segm_end', '$segm_name', '$table', '$field', min($field), avg($field), max($field), percentile($field, 95)
   from $table
   where ts_localtz between '$segm_start' and '$segm_end'
   and $field is not null
