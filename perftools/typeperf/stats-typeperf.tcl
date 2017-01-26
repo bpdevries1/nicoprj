@@ -42,6 +42,7 @@ proc make_stats {opt} {
   # exec -ignorestderr tclsh $excel2db -dir [:dir $opt]
   exec_tcl add-tslocaltz.tcl -dir [:dir $opt]
   exec_tcl add-stats.tcl -dir [:dir $opt]
+  exec_tcl report-stats.tcl -dir [:dir $opt]
   
 }
 
