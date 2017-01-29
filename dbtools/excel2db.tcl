@@ -23,14 +23,14 @@ package require csv
 #set log [::ndv::CLogger::new_logger [file tail [info script]] info]
 #$log set_file "excel2db.log"
 
-# set_log_global info
+set_log_global info
 
 namespace eval ::excel2db {
 
   namespace export excel2db_main handle_dir files2sqlite file2sqlite_table
   
 proc excel2db_main {argv} {
-  global fill_blanks
+  global fill_blanks log
   
   set options {
     {dir.arg "" "Directory with log files"}
@@ -48,8 +48,8 @@ proc excel2db_main {argv} {
   set opt [getoptions argv $options $usage]
 	# log_set_level $opt
   # $log set_log_level debug
-  set_log_global [:loglevel $opt]
-  
+  # set_log_global [:loglevel $opt]
+  $log set_log_level [:loglevel $opt]
   set fill_blanks [:fillblanks $opt] 
   set config_tcl [:config $opt]
   # lassign $argv dirname config_tcl
