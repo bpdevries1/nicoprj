@@ -33,7 +33,7 @@ proc excel2db_main {argv} {
   global fill_blanks
   
   set options {
-    {dir.arg "" "Directory with log files"}
+    {dir.arg "" "Directory with files to import"}
     {filespecs.arg "*.csv:*.tsv" "File specs of files to import"}
     {db.arg "auto" "Relative SQLite DB location (auto=create in dir)"}
     {table.arg "auto" "Tablename (prefix) to use"}
@@ -55,7 +55,7 @@ proc excel2db_main {argv} {
   # lassign $argv dirname config_tcl
   if {[:dir $opt] == ""} {
     # final argument after options
-	set dirname [:0 $argv]
+    set dirname [:0 $argv]
   } else {
     set dirname [:dir $opt]
   }
@@ -66,14 +66,14 @@ proc excel2db_main {argv} {
   handle_dir $dirname [:db $opt] [:table $opt] [:deletedb $opt] $opt
 }
 
-proc handle_dir {dirname db table deletedb opt} {
+proc handle_dir {dirname dbname table deletedb opt} {
   global tcl_platform
   if {$tcl_platform(platform) == "windows"} {
     make_csvs $dirname
   } else {
     log warn "System != windows, cannot extract csv's from Excel" 
   }
-  files2sqlite $dirname $db $table $deletedb $opt
+  files2sqlite $dirname $dbname $table $deletedb $opt
 }
 
 proc make_csvs {dirname} {
@@ -89,7 +89,17 @@ proc excel2csv {filename} {
   log debug "nativename: $nativename"
   log debug "targetroot: $targetroot"
   delete_old_csv $targetroot
-  exec cscript xls2csv.vbs $nativename $targetroot
+  # exec cscript xls2csv.vbs $nativename $targetroot
+  set xls2csv [det_xls2csv]
+  exec cscript $xls2csv $nativename $targetroot
+}
+
+proc det_xls2csv {} {
+  set res [file normalize [file join [info script] .. .. lib xls2csv.vbs]]
+  if {![file exists $res]} {
+    error "Cannot find xls2csv.vbs: $res"
+  }
+  return $res
 }
 
 proc delete_old_csv {targetroot} {
@@ -101,7 +111,7 @@ proc delete_old_csv {targetroot} {
 # TODO: dbwrapepr gebruiken.
 proc files2sqlite {dirname pdbname table deletedb opt} {
   if {$pdbname == "auto"} {
-    set basename [file join $dirname [file tail $dirname]]
+    set basename [file join $dirname [file tail [file normalize $dirname]]]
     set dbname "$basename.db"
   } else {
     # [2017-01-26 12:39:12] dname relative to dirname. If absolute name, should still work.
@@ -172,7 +182,7 @@ proc file2sqlite_table {db basename filename table idx opt} {
   } else {
     set create_sql "create table $tablename ([join $fields ", "])"
     log_fields $fields
-    log debug "Creating table $tablename - $create_sql"    
+    log debug "Creating table $tablename:\n$create_sql"    
     db_eval $conn $create_sql
     log debug "Created table: $tablename"
     set stmt_insert [prepare_insert $conn $tablename {*}$fields]
@@ -266,13 +276,29 @@ proc det_sep_char {filename} {
   } elseif {$ext == ".tsv"} {
     return "\t"
   } else {
-    return "<none>"
+    # [2017-02-01 13:39:53] read first line and count number of comma's and tabs. Whichever occurs the most is the sepchar.
+    # if none found, default to comma, could be a single field file.
+    # return "<none>"
+    set f [open $filename r]
+    set line [gets $f]
+    close $f
+    set ncomma [regexp -all {,} $line]
+    set ntab [regexp -all {\t} $line]
+    if {$ntab > $ncomma} {
+      return "\t"
+    } else {
+      return ","
+    }
   }
 }
 
 # @pre filename starts with basename
 proc det_tablename {basename filename} {
-  sanitise [file root [file tail $filename]] 
+  set res [sanitise [file root [file tail $filename]]]
+  if {[regexp {^[0-9]} $res]} {
+    set res "_$res";            # tablename cannot start with a digit.
+  }
+  return $res
 }
 
 proc det_fields {db filename tablename headerline sep_char} {
