@@ -141,6 +141,10 @@ proc check_file_misc {srcfile} {
   if {[file tail $srcfile] != "functions.c"} {
     if {[regexp {rb_web_reg_find\(} $text]} {
       puts_warn $srcfile 0 "Found deprecated function call: rb_web_reg_find"
+      # puts_warn $srcfile 0 ""
+      # use:
+      # bld regsub -action "rb_web_reg_find\(\"Text=([^\"\"]+)\"\);" "rb_web_reg_findm(\"Text=\1\", \"Fail=NotFound\");"
+      # bld regsub -action "rb_check_web_reg_find\(\)" "rb_check_web_reg_findm()"
     }
   }
 }
