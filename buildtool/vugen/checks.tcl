@@ -137,6 +137,12 @@ proc check_file_misc {srcfile} {
   if {[regexp {dynaTraceMonitor} $text]} {
     puts_warn $srcfile 0 "Found dynaTraceMonitor"
   }
+  # check for deprecated functions, first just one.
+  if {[file tail $srcfile] != "functions.c"} {
+    if {[regexp {rb_web_reg_find\(} $text]} {
+      puts_warn $srcfile 0 "Found deprecated function call: rb_web_reg_find"
+    }
+  }
 }
 
 # check script scope things, eg all .c/.h files in dir are included in the script. Also for .config files.
