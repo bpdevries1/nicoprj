@@ -36,9 +36,11 @@ tclsh update-user-dat.tcl -db C:\pcc\Nico\Testruns\RCC-All\run603.db
 tclsh update-user-dat.tcl -db C:\pcc\Nico\Testruns\RCC-All\run604.db
 tclsh update-user-dat.tcl -db C:\pcc\Nico\Testruns\RCC-All\run605.db
 tclsh update-user-dat.tcl -db C:\pcc\Nico\Testruns\RCC-All\run607.db
-
-:current
 tclsh update-user-dat.tcl -db C:\pcc\Nico\Testruns\RCC-All\run733\testrunlog.db
 tclsh update-user-dat.tcl -db C:\pcc\Nico\Testruns\RCC-All\run734\testrunlog.db
+
+:current
+tclsh update-user-dat.tcl -db C:\pcc\Nico\Testruns\RCC-All\run750\testrunlog.db
+
 
 :end
