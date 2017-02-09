@@ -8,7 +8,7 @@ task download_run {Download run from PC/ALM
   Call get-ALM-PC-testruns.tcl and unzip vugenlog to testruns dir for further processing
   with task report.
 } {
-  {testruns.arg "" "Download 'all' or given runs (csv) in testruns dir for project"}
+  {testruns.arg "" "Download 'all' or given runs (csv, also ranges with -) in testruns dir for project"}
 } {
   global testruns_dir
   if {[regexp {<FILL IN>} $testruns_dir]} {
@@ -30,7 +30,8 @@ proc download_testruns {opt} {
     log warn "Not implemented yet: download all"
     return
   } else {
-    foreach run [split [:testruns $opt] ","] {
+    foreach run [det_runs [:testruns $opt]] {
+#      foreach run [split [:testruns $opt] ","] {}
       set subdir [file join $testruns_dir "run${run}"]
       if {[file exists $subdir]} {
         set nfiles [llength [glob -nocomplain -directory $subdir *]]
@@ -57,6 +58,22 @@ proc download_testruns {opt} {
   }
 }
 
+# determine list of testruns based on cmdline gives list, like: 750,759-762,764
+proc det_runs {lst} {
+  set res [list]
+  foreach el [split $lst ","] {
+    if {[regexp {^(\d+)-(\d+)$} $el z first last]} {
+      for {set i $first} {$i <= $last} {incr i} {
+        lappend res $i
+      }
+    } else {
+      lappend res $el
+    }
+  }
+  # breakpoint
+  return $res
+}
+
 # unzip and copy files to testruns dir for further analysis.
 proc unzip_files {alm_dir destdir} {
   unzip_file [file join $alm_dir VuserLog.zip] $destdir
@@ -68,7 +85,12 @@ proc unzip_files {alm_dir destdir} {
 
   unzip_file [file join $alm_dir RawResults.zip] [file join  $destdir rawresults]
 
-  unzip_file [file join $alm_dir Reports.zip] [file join  $destdir reports]
+  # [2017-02-06 10:41:38] this one possibly not correct, so catch
+  if {[catch {
+    unzip_file [file join $alm_dir Reports.zip] [file join  $destdir reports]    
+  }]} {
+    log warn "Cannot unzip [file join $alm_dir Reports.zip]"
+  }
   
   set file_dir [file join $destdir report_files]
   file mkdir $file_dir

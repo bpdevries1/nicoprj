@@ -53,7 +53,9 @@ proc report_testruns {opt} {
       read_report_run_dir $subdir $opt
     }
   } else {
-    foreach run [split [:testruns $opt] ","] {
+    # foreach run [split [:testruns $opt] ","] {}
+    # [2017-02-06 09:53:00] det_runs in download_run, need vugen-lib for this?
+    foreach run [det_runs [:testruns $opt]] {
       if {![regexp {run} $run]} {
         set run "run${run}"
       }
