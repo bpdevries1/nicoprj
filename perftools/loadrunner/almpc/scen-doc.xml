@@ -1,0 +1,88 @@
+<Test xmlns="http://www.hp.com/PC/REST/API">
+    <Name>java_client_test_4</Name>
+    <TestFolderPath>Subject\Scenarios</TestFolderPath>
+    <Content>
+        <WorkloadType>
+            <Type>real-world</Type>
+            <SubType>by test</SubType>
+            <VusersDistributionMode>by percentage</VusersDistributionMode>
+        </WorkloadType>
+        <LGDistribution>
+            <Type>all to each group</Type>
+            <Amount>5</Amount>
+        </LGDistribution>
+        <MonitorProfiles>
+            <MonitorProfile>
+                <ID>1016</ID>
+            </MonitorProfile>
+        </MonitorProfiles>
+        <Groups>
+            <Group>
+                <Name>login_logout</Name>
+                <Vusers>10</Vusers>
+                <Script>
+                    <ID>1</ID>
+                </Script>
+                <RTS>
+                    <Pacing>
+                        <NumberOfIterations>1</NumberOfIterations>
+                        <StartNewIteration Type="immediately"/>
+                    </Pacing>
+                    <ThinkTime Type="replay"/>
+                    <Log Type="standard">
+                        <LogOptions Type="on error">
+                            <CacheSize>1</CacheSize>
+                        </LogOptions>
+                    </Log>
+                </RTS>
+            </Group>
+        </Groups>
+        <Scheduler>
+            <Actions>
+                <Action>
+                    <Initialize Type="just before vuser runs">
+                        <Vusers>0.0</Vusers>
+                    </Initialize>
+                </Action>
+                <Action>
+                    <StartVusers Type="gradually">
+                        <Vusers>100</Vusers>
+                        <Ramp>
+                            <TimeInterval>
+                                <Days>0</Days>
+                                <Hours>0</Hours>
+                                <Minutes>0</Minutes>
+                                <Seconds>10</Seconds>
+                            </TimeInterval>
+                            <Vusers>2</Vusers>
+                        </Ramp>
+                    </StartVusers>
+                </Action>
+                <Action>
+                    <Duration Type="run for">
+                        <TimeInterval>
+                            <Days>1</Days>
+                            <Hours>2</Hours>
+                            <Minutes>3</Minutes>
+                            <Seconds>4</Seconds>
+                        </TimeInterval>
+                    </Duration>
+                </Action>
+                <Action>
+                    <StopVusers Type="gradually">
+                        <Vusers>0</Vusers>
+                        <Ramp>
+                            <TimeInterval>
+                                <Days>0</Days>
+                                <Hours>0</Hours>
+                                <Minutes>0</Minutes>
+                                <Seconds>20</Seconds>
+                            </TimeInterval>
+                            <Vusers>2</Vusers>
+                        </Ramp>
+                    </StopVusers>
+                </Action>
+            </Actions>
+        </Scheduler>
+    </Content>
+</Test>

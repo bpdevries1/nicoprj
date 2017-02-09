@@ -1,0 +1,53 @@
+<Test xmlns="http://www.hp.com/PC/REST/API">
+  <Name>FAR_testje3</Name>
+  <TestFolderPath>Subject\Scenarios</TestFolderPath>
+  <Content>
+    <WorkloadType>
+      <Type>basic</Type>
+      <SubType>by group</SubType>
+    </WorkloadType>
+    <LGDistribution>
+      <Type>manual</Type>
+    </LGDistribution>
+    <MonitorProfiles />
+    <Groups>
+      <Group>
+        <Name>far</Name>
+        <Vusers>1</Vusers>
+        <Script>
+          <ID>94</ID>
+        </Script>
+        <Hosts>
+          <Host>
+            <Name>LG1</Name>
+            <Type>automatch</Type>
+          </Host>
+        </Hosts>
+        <RTS>
+          <Pacing>
+            <NumberOfIterations>1</NumberOfIterations>
+            <StartNewIteration Type="immediately" />
+          </Pacing>
+          <ThinkTime Type="replay" />
+          <Log Type="disable" />
+        </RTS>
+        <Scheduler>
+          <Actions>
+            <Action>
+              <StartGroup Type="immediately" />
+            </Action>
+            <Action>
+              <Initialize Type="just before vuser runs" />
+            </Action>
+            <Action>
+              <StartVusers Type="simultaneously" />
+            </Action>
+            <Action>
+              <Duration Type="until completion" />
+            </Action>
+          </Actions>
+        </Scheduler>
+      </Group>
+    </Groups>
+  </Content>
+</Test>

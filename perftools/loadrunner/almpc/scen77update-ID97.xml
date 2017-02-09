@@ -1,0 +1,10 @@
+<Test xmlns="http://www.hp.com/PC/REST/API">
+  <Content>
+    <Groups>
+      <Group>
+        <Name>far</Name>
+        <Vusers>2</Vusers>
+      </Group>
+    </Groups>
+  </Content>
+</Test>

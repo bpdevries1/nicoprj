@@ -1,0 +1,37 @@
+<Group xmlns="http://www.hp.com/PC/REST/API">
+  <Name>dms</Name>
+  <Vusers>2</Vusers>
+  <Script>
+    <ID>73</ID>
+  </Script>
+  <Hosts>
+    <Host>
+      <Name>LG1</Name>
+      <Type>automatch</Type>
+    </Host>
+  </Hosts>
+  <RTS>
+    <Pacing>
+      <NumberOfIterations>3</NumberOfIterations>
+      <StartNewIteration Type="immediately" />
+    </Pacing>
+    <ThinkTime Type="replay" />
+    <Log Type="disable" />
+  </RTS>
+  <Scheduler>
+    <Actions>
+      <Action>
+        <StartGroup Type="immediately" />
+      </Action>
+      <Action>
+        <Initialize Type="just before vuser runs" />
+      </Action>
+      <Action>
+        <StartVusers Type="simultaneously" />
+      </Action>
+      <Action>
+        <Duration Type="until completion" />
+      </Action>
+    </Actions>
+  </Scheduler>
+</Group>
