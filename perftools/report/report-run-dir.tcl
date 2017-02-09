@@ -18,6 +18,7 @@ source [file join $perftools_dir logdb liblogdb.tcl]
 
 # use libns
 require libio io
+use libfp
 
 proc main {argv} {
   set options {
@@ -42,7 +43,7 @@ proc report_run_dir {dir dbname opt} {
   }
   set report_made 0
   set db [get_run_db $dbname $opt]
-  # $db load_percentile ; # do in get_run_dn
+  # $db load_percentile ; # do in get_run_db
   if {[:full $opt]} {
     report_full $db $dir $opt
     set report_made 1
@@ -347,12 +348,21 @@ proc report_summary_html {db dir} {
     set hh [ndv::CHtmlHelper::new]
     $hh set_channel $f
     $hh write_header "Vuser log report" 0
+    report_summary_testrun $db $hh
     set query "select usecase, min(min_ts) min_ts from summary group by 1 order by 2"
     foreach row [$db query $query] {
       report_summary_html_usecase $db $hh $row
     }
     $hh write_footer
   }
+}
+
+# show runtime of test
+proc report_summary_testrun {db hh} {
+  set query "select min(ts_start) min_ts, max(ts_end) max_ts,
+       round((max(sec_ts_end) - min(sec_ts_start)) / 60) runtime_minutes from trans"
+  set row [first [$db query $query]]
+  $hh heading 1 "[:min_ts $row] - [:max_ts $row] ([format %.0f [:runtime_minutes $row]] minutes)"
 }
 
 proc report_summary_html_usecase {db hh row} {
