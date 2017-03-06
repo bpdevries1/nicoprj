@@ -125,6 +125,7 @@ proc handle_table_field {db table field segments} {
 }
 
 # insert records into stats table with stats for <field> in <table> for <segment>
+# [2017-02-09 16:33:23] raar: stond group by 1,2,3,4 maar er zijn 5 velden, dus ,5 erbij gezet.
 proc handle_table_field_segment {db table field segment} {
   # $db add_tabledef stats {id} {segm_start segm_end tablename fieldname min_val avg_val max_val p95_val}
   lassign $segment segm_start segm_end segm_name
@@ -134,7 +135,7 @@ proc handle_table_field_segment {db table field segment} {
   where ts_localtz between '$segm_start' and '$segm_end'
   and $field is not null
   and trim($field) <> ''
-  group by 1,2,3,4"
+  group by 1,2,3,4,5"
 
   log debug "query: $query"
   $db exec $query
