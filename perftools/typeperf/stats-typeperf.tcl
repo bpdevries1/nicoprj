@@ -40,10 +40,19 @@ proc make_stats {opt} {
   # exec -ignorestderr tclsh $excel2db -dir [:dir $opt] -singlelines
   exec_tcl $excel2db -dir [:dir $opt] -db perfmon.db -singlelines
   # exec -ignorestderr tclsh $excel2db -dir [:dir $opt]
-  exec_tcl add-tslocaltz.tcl -dir [:dir $opt]
-  exec_tcl add-stats.tcl -dir [:dir $opt]
-  exec_tcl report-stats.tcl -dir [:dir $opt]
+  exec_tcl [in_scriptdir add-tslocaltz.tcl] -dir [:dir $opt]
+  exec_tcl [in_scriptdir add-stats.tcl] -dir [:dir $opt]
+  exec_tcl [in_scriptdir report-stats.tcl] -dir [:dir $opt]
   
+}
+
+# return full/normalized path of filename within current scriptdir.
+proc in_scriptdir {filename} {
+  set res [file normalize [file join [info script] .. $filename]]
+  if {![file exists $res]} {
+    error "File does not exist: $res"
+  }
+  return $res
 }
 
 proc exec_tcl {args} {
