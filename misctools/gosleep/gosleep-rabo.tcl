@@ -5,6 +5,8 @@ package require ndv
 
 set UNISON_BINARY {c:\PCC\Util\Unison\Unison-2.40.102-Text.exe}
 
+use libfp
+
 # TODO mss unison output bewaren, zodat je het de volgende dag kan bekijken, of eerst tonen de volgende keer dat je gosleep start.
 # TODO mss toch periodiek uitvoeren, niet elke dag?
 
@@ -12,10 +14,14 @@ proc main {} {
   # zip_projects ; # [2016-12-01 10:30:10] niet meer nodig, git (github/bitbucket)
   # zip_vugens
   if 1 {
+      # heck_drives h: g: u: w: v:
+	  check_drives h: g: u:
+	  # [2017-03-06 11:15:25] script now fails if u: not mounted. Could decide to continue anyway.
 	  unison -auto projecten2h ; # [2016-12-01 10:28:27] deze nog wel belangrijk.
 	  unison -auto sync-c-g ; # [2016-12-01 10:29:39] kijken hoe automatisch dit gaat.
-	  unison -auto projecten2vdc ; # [2017-01-05 15:35:46] deze nu erbij.
+	  unison -auto projecten2vdc ; # [2017-01-05 15:35:46] deze nu erbij, ook u: schijf.
 	  unison -auto sync-c-u ; # [2017-01-05 15:35:59] en deze ook.
+	  check_drives h: g: u: ; # [2017-03-06 11:15:57] also check at the end, for reporting.
 	  
 	  # unison -auto -batch backup2g ; # [2016-12-01 10:28:46] deze vervangen door sync-c-g (om daarna ook op laptop te zetten)
 	  # unison -auto -batch vugen2h ; # [2016-12-01 10:28:13] niet echt nodig, scripts in git/bitbucket.
@@ -24,6 +30,21 @@ proc main {} {
 	  # zip_notes_org ; # [2016-12-01 10:27:16] niet meer nodig, deze zitten in sync-c-g project.
 	  # cleanup
   }
+}
+
+proc check_drives {args} {
+	foreach drive $args {
+		set root [file join $drive ""]
+		set res [list]
+		if {![file exists $root]} {
+			puts "WARN: drive not mounted: $drive"
+		} else {
+			set res [glob -nocomplain -directory $root *]
+			puts "$root => [count $res]"
+			# puts $res
+		}
+	}
+	# exit; # for test.
 }
 
 proc unison {args} {
