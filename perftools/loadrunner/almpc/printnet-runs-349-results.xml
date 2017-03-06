@@ -1,0 +1,38 @@
+<RunResults xmlns="http://www.hp.com/PC/REST/API">
+  <RunResult>
+    <ID>2661</ID>
+    <Name>output.mdb.zip</Name>
+    <Type>Output Log</Type>
+    <RunID>349</RunID>
+  </RunResult>
+  <RunResult>
+    <ID>2662</ID>
+    <Name>RawResults.zip</Name>
+    <Type>Raw Results</Type>
+    <RunID>349</RunID>
+  </RunResult>
+  <RunResult>
+    <ID>2663</ID>
+    <Name>VuserLog.zip</Name>
+    <Type>Output Log</Type>
+    <RunID>349</RunID>
+  </RunResult>
+  <RunResult>
+    <ID>2664</ID>
+    <Name>Results.zip</Name>
+    <Type>Analyzed Result</Type>
+    <RunID>349</RunID>
+  </RunResult>
+  <RunResult>
+    <ID>2665</ID>
+    <Name>HighLevelReport_349.xls</Name>
+    <Type>Rich Report</Type>
+    <RunID>349</RunID>
+  </RunResult>
+  <RunResult>
+    <ID>2666</ID>
+    <Name>Reports.zip</Name>
+    <Type>HTML Report</Type>
+    <RunID>349</RunID>
+  </RunResult>
+</RunResults>
