@@ -130,7 +130,12 @@ proc unzip_file {zipfile dir} {
   
   # exec "C:/PCC/Util/cygwin/lib/p7zip/7z.exe" x -tzip $zipfile
   # TODO: determine unzip.exe location dynamically.
-  exec c:/PCC/util/cygwin/bin/unzip.exe $zipfile
+  try_eval {
+    exec c:/PCC/util/cygwin/bin/unzip.exe $zipfile
+  } {
+    log error $errorResult
+    # breakpoint 
+  } 
   # file delete $zipfile_win
   cd $old_dir
   set env(PATH) $old_path
