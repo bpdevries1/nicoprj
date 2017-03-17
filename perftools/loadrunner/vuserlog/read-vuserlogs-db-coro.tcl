@@ -255,6 +255,11 @@ proc def_handlers {} {
             res_add res [make_trans_error $item]
             dict unset started_transactions [:transname $item]
           }
+		  2 {
+		    # [2017-03-15 16:12:47] occurred in RCC_All with ok-pas and error 500. This could be a failed transaction. For now the same as 1/error
+            res_add res [make_trans_error $item]
+            dict unset started_transactions [:transname $item]
+		  }
           4 {
             # functional warning, eg. no FT's available to approve.
             # [2016-08-12 20:46] possibly also call make_trans_error here,
