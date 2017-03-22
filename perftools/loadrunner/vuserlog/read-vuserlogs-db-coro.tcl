@@ -125,9 +125,11 @@ proc def_parsers {} {
 
 def_parser trans_param trans_param {
     # TODO: [2016-08-23 17:17:15] wil ? achter optional time aan het einde, maar dan wordt 'ie bij paramvalue meegenomen.
-    if {[regexp {: \[([0-9 :.-]+)\] Trans param: ([^= ]+) = (.*)( \[[0-9/ :-]+])} $line z ts paramname paramvalue]} {
-      log debug "Found trans_param: $paramname = $paramvalue"
-      return [dict create ts $ts sec_ts [parse_ts $ts] paramname $paramname paramvalue $paramvalue]
+    if {[regexp {: \[([0-9 :.-]+)\] Trans param: ([^= ]+) = (.*)( \[(Time:)?[0-9/ :-]+])} $line z ts paramname paramvalue]} {
+        log debug "Found trans_param: $paramname = $paramvalue"
+        return [dict create ts $ts sec_ts [parse_ts $ts] paramname $paramname paramvalue $paramvalue]
+    } elseif {[regexp {Trans param: } $line]} {
+        breakpoint
     } else {
       return ""
     }
@@ -202,79 +204,89 @@ proc log2nvpairs {line} {
 
 proc def_handlers {} {
 
-  # convert trans_line => trans
-  def_handler trans {bof eof trans_line trans_param errorline_ts} trans {
+    # convert trans_line => trans
+    def_handler trans {bof eof trans_line trans_param errorline_ts} trans {
     # init
     set user ""; set iteration 0; set split_proc "<none>"; set trans_params [dict create]
-  } {
+} {
     # body/loop
     log debug "trans-handler - assert topic [:topic $item], item: $item"
     assert {[lsearch -exact [dict keys $item] ""] < 0}  
     switch [:topic $item] {
-      bof {
-        set started_transactions [dict create]
-        dict_to_vars $item ;    # set db, split_proc, ssl
-      }
-      eof {
-        res_add res {*}[make_trans_not_finished $started_transactions]
-      }
-      trans_param {
-        log debug "in trans handler, got trans_param: $item"
-        dict set trans_params [:paramname $item] [:paramvalue $item]
-      }
-      errorline_ts {
-        log debug "found errorline, possibly no end-trans for start-trans"
-        set started_transactions [update_with_errorline_ts $started_transactions $item]
-      }
-      trans_line {
-        if {[new_user_iteration? $item $user $iteration]} {
-          res_add res {*}[make_trans_not_finished $started_transactions]
-          set started_transactions [dict create]
-          dict_to_vars $item; # user, iteration
+        bof {
+            set started_transactions [dict create]
+            dict_to_vars $item ;    # set db, split_proc, ssl
         }
-        set item [dict merge $item [$split_proc [:transname $item]]]
-        switch [:trans_status $item] {
-          -1 {
-            # start of a transaction, keep data to combine with end-of-trans.
-            dict set started_transactions [:transname $item] $item
-            # TODO: reset trans_params on new transaction, will fail for nested transactions. Will also fail when done at end transaction,
-            # need concept of nested transactions here (and record nesting level)
-            set trans_params [dict create]
-          }
-          0 {
-            # succesful end of a transaction, find start data and insert item.
-            set tr [dict merge $trans_params [make_trans_finished $item $started_transactions]]
-            log debug "trans handler: adding trans: $tr"
-            res_add res $tr
-            dict unset started_transactions [:transname $item]
-            # TODO: also unset trans_params? Only if they really are trans params, not iteration params.
-          }
-          1 {
-            # synthetic error, just insert.
-            # [2016-08-17 15:07:08] could also have a start trans (-1) for this, so also dict unset.
-            res_add res [make_trans_error $item]
-            dict unset started_transactions [:transname $item]
-          }
-		  2 {
-		    # [2017-03-15 16:12:47] occurred in RCC_All with ok-pas and error 500. This could be a failed transaction. For now the same as 1/error
-            res_add res [make_trans_error $item]
-            dict unset started_transactions [:transname $item]
-		  }
-          4 {
-            # functional warning, eg. no FT's available to approve.
-            # [2016-08-12 20:46] possibly also call make_trans_error here,
-            # but no logfile to test with here. Check status (should be 4)
-            res_add res [make_trans_finished $item $started_transactions]
-            # [2016-08-17 15:07:45] also dict unset just to be sure:
-            dict unset started_transactions [:transname $item]
-          }
-          default {
-            error "Unknown transaction status: [:trans_status $item]"
-          }
-        };                    # end-of-switch-status
-      }
-    };                        # end-of-switch-topic
-  };                          # end-of-define-handler
+        eof {
+            res_add res {*}[make_trans_not_finished $started_transactions]
+        }
+        trans_param {
+            log debug "in trans handler, got trans_param: $item"
+            dict set trans_params [:paramname $item] [:paramvalue $item]
+        }
+        errorline_ts {
+            log debug "found errorline, possibly no end-trans for start-trans"
+            set started_transactions [update_with_errorline_ts $started_transactions $item]
+        }
+        trans_line {
+            if {[new_user_iteration? $item $user $iteration]} {
+                res_add res {*}[make_trans_not_finished $started_transactions]
+                set started_transactions [dict create]
+                dict_to_vars $item; # user, iteration
+            }
+            set item [dict merge $item [$split_proc [:transname $item]]]
+            switch [:trans_status $item] {
+                -1 {
+                    # start of a transaction, keep data to combine with end-of-trans.
+                    dict set started_transactions [:transname $item] $item
+                    # TODO: reset trans_params on new transaction, will fail for nested transactions. Will also fail when done at end transaction,
+                    # need concept of nested transactions here (and record nesting level)
+                    # [2017-03-22 10:12:54] TODO: voor nu even niet, params bewaren.
+                    # [2017-03-22 10:15:27] Deze werkt nu voor iteration_sub en password.
+                    # set trans_params [dict create]
+                }
+                0 {
+                    # succesful end of a transaction, find start data and insert item.
+                    set tr [dict merge $trans_params [make_trans_finished $item $started_transactions]]
+                    log debug "trans handler: adding trans: $tr"
+                    res_add res $tr
+                    dict unset started_transactions [:transname $item]; # 
+                    # TODO: also unset trans_params? Only if they really are trans params, not iteration params.
+                }
+                1 {
+                    # synthetic error, just insert.
+                    # [2016-08-17 15:07:08] could also have a start trans (-1) for this, so also dict unset.
+                    # res_add res [make_trans_error $item]
+                    set tr [dict merge $trans_params [make_trans_error $item]]
+                    res_add res $tr
+                    dict unset started_transactions [:transname $item]
+                }
+                2 {
+                    # [2017-03-15 16:12:47] occurred in RCC_All with ok-pas and error 500. This could be a failed transaction. For now the same as 1/error
+                    # res_add res [make_trans_error $item]
+                    set tr [dict merge $trans_params [make_trans_error $item]]
+                    res_add res $tr
+                    
+                    dict unset started_transactions [:transname $item]
+                }
+                4 {
+                    # functional warning, eg. no FT's available to approve.
+                    # [2016-08-12 20:46] possibly also call make_trans_error here,
+                    # but no logfile to test with here. Check status (should be 4)
+                    # res_add res [make_trans_finished $item $started_transactions]
+                    set tr [dict merge $trans_params [make_trans_finished $item $started_transactions]]
+                    res_add res $tr
+                    
+                    # [2016-08-17 15:07:45] also dict unset just to be sure:
+                    dict unset started_transactions [:transname $item]
+                }
+                default {
+                    error "Unknown transaction status: [:trans_status $item]"
+                }
+            };                  # end-of-switch-status
+        }
+    };                          # end-of-switch-topic
+};                          # end-of-define-handler
 
   # make error object from errorline and trans_line
   def_handler error {trans_line errorline} error {set trans_line_item {}} {
