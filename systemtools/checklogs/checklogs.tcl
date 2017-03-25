@@ -200,8 +200,11 @@ proc add_warning {msg file} {
 
 proc ignore_path {opt path} {
   set res 0
-  if {[regexp {checklogs} $path]} {
-    set res 1
+  set regexps {checklogs pomo.log}
+  foreach re $regexps {
+    if {[regexp $re $path]} {
+      set res 1
+    }
   }
   return $res
 }
