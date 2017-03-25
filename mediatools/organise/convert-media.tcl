@@ -4,12 +4,15 @@ package require ndv
 package require Tclx
 
 proc main {argc argv} {
-  global log warnings
+  global log warnings error_files
 
   set log [::ndv::CLogger::new_logger [file tail [info script]] info]
   # $log set_file "[file tail [info script]].log"
-  $log set_file [file join ~ log "[file tail [info script]]-[cur_time].log"]
+  # $log set_file [file join ~ log "[file tail [info script]]-[cur_time].log"]
 
+  # [2017-03-18 11:38] don't put in ~/log anymore, but in /tmp.
+  $log set_file [file join /tmp "[file tail [info script]]-[cur_time].log"]
+  
   set options {
     {dir.arg "<NODEFAULT>" "Root dir to start converting in"}
     {fromext.arg "asf,flv,wmv,mpg,mpeg,ogm,vob,divx,mov,qt,ac3,3gp" "Source extensions to convert"}
@@ -23,21 +26,26 @@ proc main {argc argv} {
 
   set usage ": [file tail [info script]] \[options] :"
   # set dargv [::cmdline::getoptions argv $options $usage]
-  set d [getoptions argv $options $usage]
-  if {[:dir $d] == "<NODEFAULT>"} {
+  set opt [getoptions argv $options $usage]
+  if {[:dir $opt] == "<NODEFAULT>"} {
     $log warn "No dir given, exiting..."
     exit 1
   }
   
-  $log info "Starting: [:dir $d] (minsize=[:minsize $d])"
-  set warnings {}
-  set size [convert_files [:dir $d] [split  [:fromext $d] ","] [:toext $d] [concat [split  [:ignoreext $d] ","] [:toext $d]] [:minsize $d] [:deleteorig $d] [:dryrun $d] $d]
+  $log info "Starting: [:dir $opt] (minsize=[:minsize $opt])"
+    set warnings {}
+    set error_files [list]
+  set size [convert_files [:dir $opt] [split  [:fromext $opt] ","] [:toext $opt] [concat [split  [:ignoreext $opt] ","] [:toext $opt]] [:minsize $opt] [:deleteorig $opt] [:dryrun $opt] $opt]
 
-  $log warn "All warnings: [join $warnings "\n"]"
-  $log info "Total size converted: [format %.1f  $size] MB"
-  if {[:dryrun $d]} {
-    $log warn "This was a dry run!"
-  }
+    $log warn "All warnings: [join $warnings "\n"]"
+    $log info "Total size converted: [format %.1f  $size] MB"
+    if {[:dryrun $opt]} {
+        $log warn "This was a dry run!"
+    }
+    puts "Files failed to convert:"
+    foreach file $error_files {
+        puts $file
+    }
   $log info "Finished"
 }
 
@@ -54,13 +62,13 @@ proc cur_time {} {
 # @param fromext: list
 # @param toext: single element
 # @param ignoreext: list
-proc convert_files {dir fromext toext ignoreext minsize deleteorig dryrun d} {
+proc convert_files {dir fromext toext ignoreext minsize deleteorig dryrun opt} {
   global log
   set totalsize_MB 0
   foreach fromfile [glob -nocomplain -directory $dir -type f *] {
     set ext [string tolower [string range [file extension $fromfile] 1 end]]
     if {[lsearch $fromext $ext] >= 0} {
-      set size [convert_file $fromfile [det_tofile $fromfile $toext] $deleteorig $dryrun $d]
+      set size [convert_file $fromfile [det_tofile $fromfile $toext] $deleteorig $dryrun $opt]
       set totalsize_MB [expr $totalsize_MB + $size]
     } elseif {[lsearch $ignoreext $ext] >= 0} {
       # ok, can ignore this one
@@ -74,7 +82,7 @@ proc convert_files {dir fromext toext ignoreext minsize deleteorig dryrun d} {
     }
   }
   foreach subdir [glob -nocomplain -directory $dir -type d *] {
-    set size [convert_files $subdir $fromext $toext $ignoreext $minsize $deleteorig $dryrun]
+    set size [convert_files $subdir $fromext $toext $ignoreext $minsize $deleteorig $dryrun $opt]
     set totalsize_MB [expr $totalsize_MB + $size]
   }
   return $totalsize_MB
@@ -85,8 +93,8 @@ proc det_tofile {fromfile toext} {
 }
 
 # @pre determined that this file has to be converted
-proc convert_file {from to deleteorig dryrun d} {
-  global log warnings
+proc convert_file {from to deleteorig dryrun opt} {
+  global log warnings error_files
   if {[file exists $to]} {
     warn "target already exists, returning: $to"
     return
@@ -103,7 +111,7 @@ proc convert_file {from to deleteorig dryrun d} {
     set ok 0
   } else {
     catch {
-      set cmd [list avconv {*}[extra_params $from] -i $from -strict experimental -qscale 1 -aq 1 {*}[:outputoptions $d] $totemp]
+      set cmd [list avconv {*}[extra_params $from] -i $from -strict experimental -qscale 1 -aq 1 {*}[:outputoptions $opt] $totemp]
       log info "Executing cmd: $cmd"
       # set output [exec -ignorestderr avconv -i $from $totemp]
       set output [exec -ignorestderr {*}$cmd]
@@ -133,7 +141,8 @@ proc convert_file {from to deleteorig dryrun d} {
     }
   } else {
     if {!$dryrun} {
-      warn "Error while converting: $from, res: $res"  
+        warn "Error while converting: $from, res: $res"
+        lappend error_files $from
     }
   }
 
