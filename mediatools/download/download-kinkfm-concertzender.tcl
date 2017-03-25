@@ -5,7 +5,9 @@ proc main {argv} {
   # use 12 noon so dlst does not skip a day too many.
   set sec_date [clock scan "2012-05-13 12:00:00" -format "%Y-%m-%d %H:%M:%S"]
   set now [clock seconds]
-  while {$sec_date < $now} {
+  # [2017-03-25 12:10] only download if at least few days old, otherwise could be too soon.
+  set now_3 [expr $now - (3 * 24 * 3600)]
+  while {$sec_date < $now_3} {
     download_x Rated $outdir_root $sec_date
     download_x Ray $outdir_root $sec_date
     set sec_date [expr $sec_date + 7 * 24 * 3600]
