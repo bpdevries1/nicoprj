@@ -1,50 +1,49 @@
 #! /usr/bin/env wish
 package require img::jpeg
 
-proc main_old1 {} {
-  #set img [image create photo -file /home/nico/foto2.jpg]
-#  set img [image create photo -file /home/nico/foto2.jpg -width 1300 -height 1000]
-
-  # deze doet een crop, gen resize:
-  # set img [image create photo -file /home/nico/foto2.jpg -width 130 -height 100]
-  #set img2 [image create photo]
-  # deze subsample 7 lijkt vrij goed om 4 foto's te tonen.
-  #$img2 copy $img -subsample 7
-  wm withdraw .
-
-  set img [get_image ~/foto2.jpg 7]
-  # -title oid kent 'ie niet.
-  toplevel .top -width 1000 -height 800
-  canvas .top.c
-  pack .top.c -expand yes -fill both
-  .top.c create image 0 0 -anchor nw -image $img
-  set sw [winfo screenwidth .top]
-  set menu_width 150
-  set ww [expr $sw - $menu_width]
-  set sh [winfo screenheight .top]
-  set wh $sh
-  wm geometry .top "${ww}x${wh}-0+0"  
-  # maximise window
-  #wm attributes .top -zoomed
-}
-
 # TODO:
-# de windows/frames maken, en pas hierna de foto's erin. Dit moeten namelijk ook later weer anderen kunnen worden.
-# dan wel vraag of de size al bekend is, zodat de scaling van de image goed is.
-# evt create rectangle om eerst het frame weer leeg te maken. Gaat meestal wel goed, maar mss niet bij portrait foto.
-# bij portrait moet je nog meer verkleinen. Maar je kunt zowel orig image size als de window size opvragen. Dan verhouding bepalen, afronden, en dit wordt dan de scaling factor.
-# mss bij elke 4 foto's allen 4 cijfers in te typen, niet steeds tab tussendoor. Als je een fout maakt, dan net als met teletekst weer overnieuw beginnen.
+# * mss bij elke 4 foto's alleen 4 cijfers in te typen, niet steeds tab tussendoor. Als je een fout maakt, dan net als met teletekst weer overnieuw beginnen.
+# * v1 als v(1)?
+# * 4 items in een lus maken, niet hardcoded.
+# * tags veld erbij.
+# * Cijfer als label, en met ctrl-cijfer.
+
+# Overwegingen:
+# * conflicterend: wil ook tags kunnen zien en editten, moet wel los veld zijn. Kan mss Ctrl-<cijfer> doen om labels te zetten, en met tabs dan gewoon de tags.
 
 proc main {} {
-  global v1 v2 v3 v4
+  # global v1 v2 v3 v4 v
+  global photo_value frame photo_tags photo_filename
+
+  create_windows
+
+  foreach i {1 2 3 4} {
+    set photo_value($i) [expr $i + 6]
+    set photo_tags($i) "tag[expr $i + 6]"
+  }
+
+  # [2017-03-27 21:49] update here is quite essential, otherwise no photo is shown.
+  update;                       # to be able to ask height/width of frames
+
+  set photo_filename(1) "~/foto2.jpg"
+  set photo_filename(2) "~/foto.jpg"
+  set photo_filename(3) "~/foto3.jpg"
+  set photo_filename(4) "~/foto2.jpg"
+  
+  foreach i {1 2 3 4} {
+    set_photo $frame($i) $photo_filename($i)
+  }
+  
+  # focus $frame(1).edit
+  focus $frame(1) ; # werkt wel, en is ook nodig om keypresses te zien.
+}
+
+# pas vullen na refactor: alles op frame
+proc create_windows {} {
+  global frame
   
   wm withdraw .
-  # maximise window
-  # maximise window
-  toplevel .top -width 1000 -height 800
-  #canvas .top.c
-  #pack .top.c -expand yes -fill both
-  # .top.c create image 0 0 -anchor nw -image $img
+  toplevel .top
   set sw [winfo screenwidth .top]
   set menu_width 150
   set menu_height 30
@@ -57,72 +56,27 @@ proc main {} {
   frame .top.f2
 
   pack .top.f1 .top.f2 -side top -expand 1 -fill both
-  
-  # set f1 [image_frame .top.f1 "~/foto2.jpg" v1]
-  set f1 [image_frame2 .top.f1 v1]
-  # pack $f1 -in .top -expand yes -fill both
-  pack $f1 -side left -expand yes -fill both
-  #pack $f1 -anchor nw -expand yes -fill both
-  # pack $f1 -in . -expand yes -fill both
 
-  set f2 [image_frame .top.f1 "~/foto.jpg" v2]
-  # pack $f1 -in .top -expand yes -fill both
-  pack $f2 -side left -expand yes -fill both
-
-  set f3 [image_frame .top.f2 "~/foto2.jpg" v3]
-  # pack $f1 -in .top -expand yes -fill both
-  pack $f3 -side left -expand yes -fill both
-
-  # set f4 [image_frame .top.f2 "~/foto3.jpg" v4]
-  set f4 [image_frame2 .top.f2 v4]
-  # pack $f1 -in .top -expand yes -fill both
-  pack $f4 -side left -expand yes -fill both
-
-  #grid $f1 -column 0 -row 0
-  #grid $f2 -column 1 -row 0
-  #grid $f3 -column 0 -row 1
-
-  set v1 8
-  set v2 9
-  set v3 1
-  set v4 6
-
-  bind . <Key> {
-    set keysym "You pressed %K"
-    puts $keysym
+  for {set i 1} {$i <= 4} {incr i} {
+    set row [expr ($i + 1) / 2]
+    set frame($i) [image_frame .top.f$row photo_value($i)]
+    pack $frame($i) -side left -expand yes -fill both
   }
-
-  update;                       # to be able to ask height/width of frames
-  puts "f1.c.height: [winfo height $f1.c]"
-  puts "f1.c.width: [winfo width $f1.c]"
-
-  set_photo $f1 "~/foto2.jpg"
-  set_photo $f4 "~/foto3.jpg"
-
-  focus $f1.edit
-}
-
-proc get_image {filename subsample} {
-  set img [image create photo -file $filename]
-  set img2 [image create photo]
-  # deze subsample 7 lijkt vrij goed om 4 foto's te tonen.
-  $img2 copy $img -subsample $subsample
-  return $img2
+  
 }
 
 # get image for display on canvas, subsample calculated here.
-proc get_image2 {filename canvas} {
+proc get_image {filename canvas} {
   set img [image create photo -file $filename]
   set img2 [image create photo]
-  # deze subsample 7 lijkt vrij goed om 4 foto's te tonen.
 
   set ch [winfo height $canvas]
   set cw [winfo width $canvas]
   set ih [image height $img]
   set iw [image width $img]
 
-  puts "Canvas: $cw x $ch"
-  puts "Image : $iw x $ih"
+  #puts "Canvas: $cw x $ch"
+  #puts "Image : $iw x $ih"
   #Canvas: 765 x 490
   #Image : 5312 x 2988
 
@@ -138,40 +92,16 @@ proc get_image2 {filename canvas} {
 
   set ss [expr round(ceil($ss))]
   
-  puts "ss width: $sswidth, ss height: $ssheight => ss: $ss"
+  #puts "ss width: $sswidth, ss height: $ssheight => ss: $ss"
   
-  set subsample 10;             # om verschil te zien.
   $img2 copy $img -subsample $ss
   return $img2
 }
 
-
-proc image_frame {parent filename var_name} {
-  global v1 v2 v3 v4
-  
-  set img [get_image $filename 7]
-  set f [frame [random_path $parent]]
-  canvas $f.c
-  $f.c create image 0 0 -anchor nw -image $img
-  entry $f.edit -textvariable $var_name
-  #bind $f.edit <Key> {
-  #  set keysym "Edit - You pressed %K"
-  #  puts $keysym
-  #}
-  bind $f.edit <Key> [list entry_command "%K"]
-    
-  pack $f.edit $f -side top -fill none -expand 0
-  pack $f.c -side top -fill both -expand 1
-  # pack $f.c -side top -expand 1
-
-  #grid $f.c -column 0 -row 0 -fill both -expand 1
-  #grid $f.edit -column 0 -row 1 -fill none -expand 0
-  return $f
-}
-
 # hier nog geen filename, komt later.
-proc image_frame2 {parent var_name} {
-  global v1 v2 v3 v4
+proc image_frame {parent var_name} {
+  # global v1 v2 v3 v4 v
+  # global photo_value
   
   # set img [get_image $filename 7]
   set f [frame [random_path $parent]]
@@ -182,7 +112,11 @@ proc image_frame2 {parent var_name} {
   #  set keysym "Edit - You pressed %K"
   #  puts $keysym
   #}
-  bind $f.edit <Key> [list entry_command "%K"]
+  foreach w [list $f $f.edit] {
+    bind $w <Key> [list entry_command "$w-%K"]
+    # [2017-03-27 22:20] modifier key lezen is niet zo gemakkelijk, zo specifiek met Ctrl-q werkt ook.
+    bind $w <Control-q> quit_command
+  }
   
   pack $f.edit $f -side top -fill none -expand 0
   pack $f.c -side top -fill both -expand 1
@@ -195,7 +129,7 @@ proc image_frame2 {parent var_name} {
 
 proc set_photo {frame filename} {
   # set img [get_image $filename 7]
-  set img [get_image2 $filename $frame.c]
+  set img [get_image $filename $frame.c]
   $frame.c create image 0 0 -anchor nw -image $img
 }
 
@@ -206,15 +140,22 @@ proc random_path {parent} {
 }
 
 proc entry_command {key} {
-  global v1 v2 v3 v4
+  global photo_value
   # puts "entry_command $args"
   puts "Key pressed: $key"
-  if {$key ==  "Return"} {
+  if {[regexp Return  $key]} {
     puts "Return pressed, do action!"
-    foreach v {1 2 3 4} {
-      puts "Value $v: [set v$v]"
+    foreach i {1 2 3 4} {
+      # puts "Value $i: [set v$i]"
+      puts "Value v($i): $photo_value($i)"  
     }
+    
   }
+}
+
+proc quit_command {} {
+  puts "QUIT!"
+  exit
 }
 
 main
