@@ -68,16 +68,21 @@ proc report_full {db dir opt} {
   if {[file exists $html_name]} {
     # return ; # or maybe a clean option to start anew
   }
+
+  # [2017-03-29 12:51:46] idempotent, so can be done here. Should be done while reading.
+  $db exec "update trans set iteration_sub = 1 where iteration_sub is null"
+  
   io/with_file f [open $html_name w] {
     set hh [ndv::CHtmlHelper::new]
     $hh set_channel $f
     $hh write_header "Vuser log report" 0
     # [2016-08-17 12:28:11] check both logfile and vuserid
-    set query "select logfile, vuserid, iteration_start, usecase, user,
+    # [2017-03-28 15:49:11] use iteration_sub if available.
+    set query "select logfile, vuserid, iteration_start, iteration_sub, usecase, user,
                min(ts_start) ts_min, max(ts_end) ts_max
                from trans
-               group by 1,2,3,4,5
-               order by 1,2,3,6"
+               group by 1,2,3,4,5,6
+               order by 1,2,3,4,6"
     foreach row [$db query $query] {
       report_iter_user $db $row $hh
     }
@@ -89,7 +94,7 @@ proc report_full {db dir opt} {
 }
 
 proc report_iter_user {db row hh} {
-  $hh heading 1 "Logfile: [file tail [:logfile $row]] / Iteration: [:iteration_start $row] / usecase: [:usecase $row] / user: [:user $row][vuser_str $row]"
+  $hh heading 1 "Logfile: [file tail [:logfile $row]] / Iteration: [:iteration_start $row].[:iteration_sub $row] / usecase: [:usecase $row] / user: [:user $row][vuser_str $row]"
   $hh line "[:ts_min $row] => [:ts_max $row]"
   # $hh table body ook leuk? Ook vgl clojure/hiccup.
   $hh table_start
@@ -99,6 +104,7 @@ proc report_iter_user {db row hh} {
              from trans
              where vuserid = [:vuserid $row] + 0
              and iteration_start = [:iteration_start $row] + 0
+             and iteration_sub = [:iteration_sub $row] + 0
              and user = '[:user $row]'
              and logfile = '[:logfile $row]'
              order by ts_start"
@@ -115,6 +121,8 @@ proc report_iter_user {db row hh} {
 
   # Check if there were errors in this iteration
   # [2016-08-02 13:41:59] + 0 for when fields are empty.
+  # [2017-03-28 15:52:57] error table does not have iteration_sub (yet)
+  #              and iteration_sub = [:iteration_sub $row] + 0
   set query "select ts, line
              from error
              where vuserid = [:vuserid $row] + 0
