@@ -69,7 +69,10 @@ proc define_tables {db opt} {
   
   # [2016-08-19 19:07] transshort weg, moet dynamisch added worden.
   # [2016-08-22 10:03:55] fields usecase and transshort used in reports for now, so make sure they always exist.
-  set trans_fields {transname user resptime trans_status usecase transshort}
+  # set trans_fields {transname user resptime trans_status usecase transshort}
+
+  # [2017-03-29 12:36:00] add iteration_sub, used in report, possibly defined from Vugen script.
+  set trans_fields {transname user resptime trans_status usecase transshort iteration_sub}
   # [2016-08-19 21:10] fields below will be added dynamically
   # usecase revisit transid searchcrit
   
