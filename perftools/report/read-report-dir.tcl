@@ -88,7 +88,10 @@ proc ignore_dir {dir} {
 proc read_report_run_dir {rundir opt} {
   # [2016-11-16 13:28:34] zet de namespaces hier opnieuw, kunnen overschreven zijn door bv sourcedep.tcl
   read_report_set_namespaces $rundir $opt
-  
+  if {![file exists $rundir]} {
+    log warn "Dir does not exist, returning: $rundir"
+    return
+  }
   set dbname [file join $rundir testrunlog.db]
   if {[:clean $opt]} {
     log debug "Deleting DB: $dbname"
