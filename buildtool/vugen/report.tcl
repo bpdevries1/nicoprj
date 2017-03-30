@@ -6,14 +6,15 @@ task report {Create report of output.txt in script dir
   Copy output.txt to testruns dir, call vugentools/vuserlog/read-vuserlogs-db.tcl
   and create Html report.
 } {
-  {clean "Delete DB and generated reports before starting"}
-  {summary "Create summary report, with aggregate times and errors"}
-  {full "Create full report, with each iteration/transaction."}
-  {step "Include all steps in full report"}
-  {all "Both summary and full"}
-  {ssl "Read SSL logs into DB"}
-  {logdotpng "Create PNG for read log process"}
-  {testruns.arg "" "Create report for 'all' or given runs (csv) in testruns dir for project"}
+    {clean "Delete DB and generated reports before starting"}
+    {summary "Create summary report, with aggregate times and errors"}
+    {full "Create full report, with each iteration/transaction."}
+    {step "Include all steps in full report"}
+    {all "Both summary and full"}
+    {ssl "Read SSL logs into DB"}
+    {logdotpng "Create PNG for read log process"}
+    {result1 "Copy result1 files and read into DB"}
+    {testruns.arg "" "Create report for 'all' or given runs (csv) in testruns dir for project"}
 } {
   global testruns_dir
   if {[regexp {<FILL IN>} $testruns_dir]} {
@@ -39,7 +40,9 @@ task report {Create report of output.txt in script dir
   if {[:step $opt]} {
     copy_step_result_files $subdir
   }
-  
+  if {[:result1 $opt]} {
+    
+  }
   read_report_run_dir $subdir $opt; # in perftools/report/read-report-dir.tcl
 
   report_testruns $opt
@@ -60,6 +63,7 @@ proc report_testruns {opt} {
         set run "run${run}"
       }
       set subdir [file join $testruns_dir $run]
+      log info "Read/report dir: $subdir"
       read_report_run_dir $subdir $opt
     }
   }

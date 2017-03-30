@@ -11,6 +11,6 @@ task rb_trans {set rb_transaction usage
 
   # deze nieuw, wel zorgen dat trans_name goed werkt. Dus ook trans_name_init en trans_name functie goed zetten in
   # script specifieke functies.c file, bv mcp_funcions.c
-  task_regsub -do -action {rb_start_transaction\(\"([^\"]+)\"\);} {char * transactie;\n    transactie = trans_name("\1");\n    rb_start_transaction(transactie);}
+  task_regsub -do -action {rb_start_transaction\(\"([^\"]+)\"\);} {char * transactie = NULL;\n    transactie = trans_name("\1");\n    rb_start_transaction(transactie);}
   task_regsub -do -action {rb_end_transaction\(\"[^\"]+\", TT\);} {rb_end_transaction(transactie, TT);}
 }
