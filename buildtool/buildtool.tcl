@@ -25,24 +25,28 @@ proc trace_callback {nm idx action} {
     
 proc main {argv} {
   global log
-  if {[lsearch -exact $argv "-debug"] >= 0} {
-    $log set_log_level debug
-    lremove argv -debug
-  }
-  set dir [file normalize .]
-  set tname [task_name [lindex $argv 0]]
-  if {$tname == ""} {set tname help}
-  set trest [lrange $argv 1 end]
-  handle_init_env $tname $trest
-  # here the env config file is available: ~/.config/buildtool/env.tcl 
-  if {[in_bld_subdir? $dir]} {
-    puts "In buildtool subdir, exiting: $dir"
-    return
-  }
-  if {[is_prjgroup_dir $dir]} {
-    handle_prjgroup_dir $dir $tname $trest
-  } else {
-    handle_script_dir $dir $tname $trest
+  try_eval {
+    if {[lsearch -exact $argv "-debug"] >= 0} {
+      $log set_log_level debug
+      lremove argv -debug
+    }
+    set dir [file normalize .]
+    set tname [task_name [lindex $argv 0]]
+    if {$tname == ""} {set tname help}
+    set trest [lrange $argv 1 end]
+    handle_init_env $tname $trest
+    # here the env config file is available: ~/.config/buildtool/env.tcl 
+    if {[in_bld_subdir? $dir]} {
+      puts "In buildtool subdir, exiting: $dir"
+      return
+    }
+    if {[is_prjgroup_dir $dir]} {
+      handle_prjgroup_dir $dir $tname $trest
+    } else {
+      handle_script_dir $dir $tname $trest
+    }
+  } {
+    ndv::stacktrace_info $errorResult $errorCode $errorInfo
   }
 }
 
@@ -94,38 +98,6 @@ proc handle_script_dir {dir tname trest} {
   }
 }
 
-proc handle_script_dir_old {dir tname trest} {
-  global as_prjgroup buildtool_env
-  if {([regexp {^init} $tname]) || ([current_version] == [latest_version])} {
-    if {[file exists [buildtool_env_tcl_name]]} {
-      uplevel #0 {source [buildtool_env_tcl_name]}
-    } else {
-      if {$tname != "init_env"} {
-        puts "do bld init-env!"
-        return
-      }
-    }
-    # [2016-08-15 09:40:44] even weg, bootstrap probleem
-    # puts "env: $buildtool_env"
-    source_dir [file join [buildtool_dir] generic]
-    if {$tname != "init"} {
-      uplevel #0 {source [config_tcl_name]}
-      source_prjtype
-    }
-    set as_prjgroup 0
-    set_origdir ; # to use by all subsequent tasks.
-    if {[info procs task_$tname] == {}} {
-      puts "Unknown task: $tname"
-      return
-    }
-    task_$tname {*}$trest
-    mark_backup $tname $trest
-    check_temp_files
-  } else {
-    puts "Update config version with init -update"
-  }
-}
-
 
 # source all tcl files in bldprjlib iff defined.
 proc source_prjtype {} {
@@ -141,7 +113,8 @@ proc source_prjtype {} {
 proc source_dir {dir} {
   foreach libfile [lsort [glob -nocomplain -directory $dir *.tcl]] {
     # ndv::source_once?
-    uplevel #0 [list source $libfile]
+    # uplevel #0 [list source $libfile]
+    uplevel #0 [list ndv::source_once $libfile]
   }
 }
 
