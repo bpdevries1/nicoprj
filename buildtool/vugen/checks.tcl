@@ -11,6 +11,7 @@ task test {Perform tests on script
   task_check {*}$args
   task_check_configs {*}$args
   task_check_lr_params {*}$args
+  # abc;                          # to generate error.
 }
 
 task check {Perform some checks on sources
