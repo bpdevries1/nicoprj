@@ -1,6 +1,7 @@
 # [2016-08-18 15:01:52] Version for VuGen
 
-source [file join [perftools_dir] report read-report-dir.tcl]
+# source [file join [perftools_dir] report read-report-dir.tcl]
+ndv::source_once [file join [perftools_dir] report read-report-dir.tcl]
 
 task report {Create report of output.txt in script dir
   Copy output.txt to testruns dir, call vugentools/vuserlog/read-vuserlogs-db.tcl

@@ -19,10 +19,18 @@ set perftools_dir [file normalize [file join [file dirname [info script]] ..]]
 # puts "perftools_dir: $perftools_dir"
 ndv::source_once report-run-dir.tcl
 
+if 0 {
 lappend reader_namespaces [source [file join $perftools_dir autohotkey \
                                        ahklog read-ahklogs-db.tcl]]
 lappend reader_namespaces [source [file join $perftools_dir loadrunner \
                                        vuserlog read-vuserlogs-db.tcl]]
+}
+
+lappend reader_namespaces [ndv::source_once [file join $perftools_dir autohotkey \
+                                       ahklog read-ahklogs-db.tcl]]
+lappend reader_namespaces [ndv::source_once [file join $perftools_dir loadrunner \
+                                       vuserlog read-vuserlogs-db.tcl]]
+
 
 # TODO:
 # * ook level dieper kijken, dat je meteen in alle subdirs van testruns kijkt, zowel RCC, Transact, etc.
@@ -119,7 +127,7 @@ proc read_run_dir {rundir dbname opt} {
   $pg set_items_total [:# $logfiles]
   $pg start
   foreach filename $logfiles {
-    incr nread [read_run_logfile $filename $db $opt]
+    incr nread [read_run_logfile_generic $filename $db $opt]
     incr nhandled
     $pg at_item $nhandled
   }
@@ -130,7 +138,7 @@ proc read_run_dir {rundir dbname opt} {
   log info "Read $nread logfile(s) in $rundir"
 }
 
-proc read_run_logfile {filename db opt} {
+proc read_run_logfile_generic {filename db opt} {
   global reader_namespaces
   set nread 0
   foreach ns $reader_namespaces {

@@ -331,7 +331,7 @@ proc def_handlers {} {
   # [2016-08-09 22:29] introduced a bug here by not calling split_proc in insert-trans_line
   # but in trans split_proc is called, and this is used in report. Could also remove fields
   # in trans_line, also split_proc still is somewhat of a hack now.
-  def_insert_handler trans_line
+  # def_insert_handler trans_line
   def_insert_handler trans
   def_insert_handler error
   def_insert_handler step
@@ -340,17 +340,24 @@ proc def_handlers {} {
   
 }
 
+# global fload file
+# set fload [open "loadfile.txt" w]
+
 # Specific to this project, not in liblogreader.
 # combination of item and file_item
 proc def_insert_handler {table} {
+  global fload
   def_handler "i:$table" [list bof $table] {} [syntax_quote {
+    global fload
     if {[:topic $item] == "bof"} { # 
       # dict_to_vars $item ;    # set db, split_proc, ssl
       # set file_item $item
       set db [:db $item]
       set file_item [dict remove $item db split_proc ssl]
     } else {
+      # FIXME: [2017-03-31 16:29:52] nu even niets in de DB, kijken hoe snel het dan gaat.
       $db insert ~$table [dict remove [dict merge $file_item $item] topic]
+      # puts $fload "~$table [dict remove [dict merge $file_item $item] topic]"
     }
   }]
 }
