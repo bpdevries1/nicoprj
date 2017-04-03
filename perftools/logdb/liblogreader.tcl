@@ -39,6 +39,8 @@ proc readlogfile_coro {logfile {opt ""}} { #
   }
   $to_publish put [dict create topic eof logfile $logfile]; # handle eof topic
   handle_to_publish $to_publish
+  set db [:db $opt]
+  logdb_make_indexes $db
 }
 
 proc remove_cr {line} {

@@ -3,8 +3,6 @@
 # [2016-08-17 09:47:56] Version for vugen logs.
 # TODO: integrate/merge with version for AHK logs (also JMeter?)
 
-# bla generate error
-
 package require ndv
 package require tdbc::sqlite3
 
@@ -12,9 +10,6 @@ package require tdbc::sqlite3
 use libdatetime
 use libfp
 
-
-
-# deze mogelijk in libdb:
 proc get_run_db {db_name opt} {
   global pubsub
   set ssl [:ssl $opt]
@@ -112,6 +107,14 @@ proc define_tables {db opt} {
     # ssl_define_tables $db  ; # [2016-08-19 12:38] not now/here.
   }
 
+}
+
+# vuserid/iteration op zowel error als trans.
+# [2017-04-03 10:02:04] eerdere queries gingen dan veel sneller.
+proc logdb_make_indexes {db} {
+  $db exec "create index ix_error1 on error (vuserid, iteration)"
+  $db exec "create index ix_trans1 on trans (vuserid, iteration_start)"
+  
 }
 
 proc delete_database {dbname} {
