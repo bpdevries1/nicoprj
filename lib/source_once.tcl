@@ -13,7 +13,7 @@ namespace eval ::ndv {
   set _stacktrace_files [dict create]
   set _stacktrace_procs [dict create]
 
-  puts "set _stacktrace_files: $_stacktrace_files"
+  # puts "set _stacktrace_files: $_stacktrace_files"
 
   # @param one or more filenames to source.
   proc source_once {args} {
@@ -67,21 +67,38 @@ namespace eval ::ndv {
     dict set _stacktrace_files $filename 1
     set lines [split [read_file $filename] "\n"]
     set linenr 1
+    set namespace ""
     foreach line $lines {
-      if {[regexp {proc ([^ ]+)} [string trim $line] z procname]} {
-        dict lappend _stacktrace_procs $procname [dict create filename $filename linenr $linenr]
+      set line [string trim $line]
+      if {[regexp {proc ([^ ]+)} $line z procname]} {
+        dict lappend _stacktrace_procs [qualified_procname proc $namespace $procname] [dict create filename $filename linenr $linenr]
       }
-      if {[regexp {task ([^ ]+)} [string trim $line] z procname]} {
+      if {[regexp {task ([^ ]+)} $line z procname]} {
         # [2017-04-02 15:21] apparently for task items need to add 1 to linenr.
-        dict lappend _stacktrace_procs task_$procname [dict create filename $filename linenr [expr $linenr + 1]]
+        dict lappend _stacktrace_procs [qualified_procname task $namespace $procname] [dict create filename $filename linenr [expr $linenr + 1]]
       }
-
+      if {[regexp {namespace eval (::)?([^ ]+)} $line z z ns]} {
+        set namespace $ns
+      } 
       
       incr linenr
     }
     # breakpoint
   }
 
+  proc qualified_procname {type namespace procname} {
+    if {$procname == "read_run_logfile"} {
+      # breakpoint
+    }
+    if {$type == "task"} {
+      set procname "task_$procname"
+    }
+    if {$namespace != ""} {
+      set procname "::${namespace}::${procname}"
+    }
+    return $procname
+  }
+  
   proc stacktrace_info {errorResult errorCode errorInfo} {
     puts stderr "$errorResult (code = $errorCode)"
     puts stderr [stacktrace_add_info $errorInfo]
@@ -104,6 +121,8 @@ namespace eval ::ndv {
         } else {
           # info not found
           lappend res "$line (proc info not read)"
+          puts stderr "$line (proc info not read)"
+          breakpoint
         }
 
       } else {
