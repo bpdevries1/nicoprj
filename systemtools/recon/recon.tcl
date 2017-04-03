@@ -11,7 +11,7 @@ proc main {argv} {
   set options {
 	{user.arg "" "Domain\user if set, otherwise default"}
 	{pass.arg "" "Password if set, otherwise default, not given."}
-	{config.arg {g:\.config\recon\recon-ndv.tcl} "System specific configuration"}
+	{config.arg {C:\Users\vreezen\.config\recon\recon-ndv.tcl} "System specific configuration"}
 	{debug "Breakpoint after showing info, before reconnect"}
   }
   set usage ": [file tail [info script]] \[options] DRIVE:"
