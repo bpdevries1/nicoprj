@@ -369,8 +369,17 @@ proc report_summary_html {db dir} {
 proc report_summary_testrun {db hh} {
   set query "select min(ts_start) min_ts, max(ts_end) max_ts,
        round((max(sec_ts_end) - min(sec_ts_start)) / 60) runtime_minutes from trans"
-  set row [first [$db query $query]]
-  $hh heading 1 "[:min_ts $row] - [:max_ts $row] ([format %.0f [:runtime_minutes $row]] minutes)"
+  set rows [$db query $query]
+  if {[count $rows] > 0} {
+    set row [first $rows]
+    if {[:runtime_minutes $row] != ""} {
+      $hh heading 1 "[:min_ts $row] - [:max_ts $row] ([format %.0f [:runtime_minutes $row]] minutes)"
+    } else {
+      $hh heading 1 "Row 0 has empty runtime_minutes"
+    }
+  } else {
+    $hh heading 1 "No rows found in DB!"
+  }
 }
 
 proc report_summary_html_usecase {db hh row} {
