@@ -43,6 +43,7 @@ proc report_run_dir {dir dbname opt} {
   }
   set report_made 0
   set db [get_run_db $dbname $opt]
+  logdb_make_indexes $db
   # $db load_percentile ; # do in get_run_db
   if {[:full $opt]} {
     report_full $db $dir $opt
