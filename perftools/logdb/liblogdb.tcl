@@ -112,8 +112,8 @@ proc define_tables {db opt} {
 # vuserid/iteration op zowel error als trans.
 # [2017-04-03 10:02:04] eerdere queries gingen dan veel sneller.
 proc logdb_make_indexes {db} {
-  $db exec "create index ix_error1 on error (vuserid, iteration)"
-  $db exec "create index ix_trans1 on trans (vuserid, iteration_start)"
+  $db exec "create index if not exists ix_error1 on error (vuserid, iteration)"
+  $db exec "create index if not exists ix_trans1 on trans (vuserid, iteration_start)"
   
 }
 
