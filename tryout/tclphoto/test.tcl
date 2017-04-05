@@ -3,13 +3,13 @@ package require img::jpeg
 
 # TODO:
 # * mss bij elke 4 foto's alleen 4 cijfers in te typen, niet steeds tab tussendoor. Als je een fout maakt, dan net als met teletekst weer overnieuw beginnen.
-# * v1 als v(1)?
 # * 4 items in een lus maken, niet hardcoded.
 # * tags veld erbij.
 # * Cijfer als label, en met ctrl-cijfer.
 
 # Overwegingen:
 # * conflicterend: wil ook tags kunnen zien en editten, moet wel los veld zijn. Kan mss Ctrl-<cijfer> doen om labels te zetten, en met tabs dan gewoon de tags.
+# * of je moet (net als vi) in modal of edit mode zitten. In modal geef je met cijfers alles weer, in edit kun je alles met tabs doen. Vraag dan wel hoe je wisselt. Je kunt bij volgende 4 foto's weer automatisch in modal-mode komen.
 
 proc main {} {
   # global v1 v2 v3 v4 v
