@@ -19,13 +19,6 @@ set perftools_dir [file normalize [file join [file dirname [info script]] ..]]
 # puts "perftools_dir: $perftools_dir"
 ndv::source_once report-run-dir.tcl
 
-if 0 {
-lappend reader_namespaces [source [file join $perftools_dir autohotkey \
-                                       ahklog read-ahklogs-db.tcl]]
-lappend reader_namespaces [source [file join $perftools_dir loadrunner \
-                                       vuserlog read-vuserlogs-db.tcl]]
-}
-
 lappend reader_namespaces [ndv::source_once [file join $perftools_dir autohotkey \
                                        ahklog read-ahklogs-db.tcl]]
 lappend reader_namespaces [ndv::source_once [file join $perftools_dir loadrunner \
@@ -97,8 +90,12 @@ proc read_report_run_dir {rundir opt} {
   # [2016-11-16 13:28:34] zet de namespaces hier opnieuw, kunnen overschreven zijn door bv sourcedep.tcl
   read_report_set_namespaces $rundir $opt
   if {![file exists $rundir]} {
-    log warn "Dir does not exist, returning: $rundir"
-    return
+    if {[:nodownload $opt]} {
+		log warn "Dir does not exist, and -nodownload set, so returning: $rundir"
+		return
+	} else {
+		
+	}
   }
   set dbname [file join $rundir testrunlog.db]
   if {[:clean $opt]} {
