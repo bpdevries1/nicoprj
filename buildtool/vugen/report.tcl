@@ -3,6 +3,8 @@
 # source [file join [perftools_dir] report read-report-dir.tcl]
 ndv::source_once [file join [perftools_dir] report read-report-dir.tcl]
 
+# TODO: nodownload possibly not needed, when in report task -download is given.
+
 task report {Create report of output.txt in script dir
   Copy output.txt to testruns dir, call vugentools/vuserlog/read-vuserlogs-db.tcl
   and create Html report.
@@ -16,6 +18,8 @@ task report {Create report of output.txt in script dir
     {logdotpng "Create PNG for read log process"}
     {result1 "Copy result1 files and read into DB"}
     {testruns.arg "" "Create report for 'all' or given runs (csv) in testruns dir for project"}
+    {nodownload "Don't try to download run from ALM if not found"}
+    {download "Download run from ALM if not found"}
 } {
   global testruns_dir
   if {[regexp {<FILL IN>} $testruns_dir]} {
@@ -42,8 +46,13 @@ task report {Create report of output.txt in script dir
     copy_step_result_files $subdir
   }
   if {[:result1 $opt]} {
-    
+    # TODO: read result .inf/.html files for headers and cookies.
   }
+
+  if {[:download $opt]} {
+    download_testruns $opt
+  }
+  
   read_report_run_dir $subdir $opt; # in perftools/report/read-report-dir.tcl
 
   report_testruns $opt
