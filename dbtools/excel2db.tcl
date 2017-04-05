@@ -33,8 +33,9 @@ proc excel2db_main {argv} {
   global fill_blanks log
   
   set options {
-    {dir.arg "" "Directory with files to import"}
+    {dir.arg "." "Directory with files to import"}
     {filespecs.arg "*.csv:*.tsv" "File specs of files to import"}
+	{noexcel "Don't convert excel files to csv"}
     {db.arg "auto" "Relative SQLite DB location (auto=create in dir)"}
     {table.arg "auto" "Tablename (prefix) to use"}
     {config.arg "" "Config.tcl file"}
@@ -69,14 +70,17 @@ proc excel2db_main {argv} {
 proc handle_dir {dirname dbname table deletedb opt} {
   global tcl_platform
   if {$tcl_platform(platform) == "windows"} {
-    make_csvs $dirname
+    make_csvs $dirname $opt
   } else {
     log warn "System != windows, cannot extract csv's from Excel" 
   }
   files2sqlite $dirname $dbname $table $deletedb $opt
 }
 
-proc make_csvs {dirname} {
+proc make_csvs {dirname opt} {
+  if {[:noexcel $opt]} {
+	return
+  }
   foreach filename [glob -nocomplain -directory $dirname "*.xls*"] {
     excel2csv $filename 
   }
