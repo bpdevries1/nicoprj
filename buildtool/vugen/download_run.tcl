@@ -9,6 +9,7 @@ task download_run {Download run from PC/ALM
   with task report.
 } {
   {testruns.arg "" "Download 'all' or given runs (csv, also ranges with -) in testruns dir for project"}
+  {force "Force downloading again, even if already downloaded and unzipped before"}
 } {
   global testruns_dir
   if {[regexp {<FILL IN>} $testruns_dir]} {
@@ -33,6 +34,13 @@ proc download_testruns {opt} {
     foreach run [det_runs [:testruns $opt]] {
 #      foreach run [split [:testruns $opt] ","] {}
       set subdir [file join $testruns_dir "run${run}"]
+	  
+	  if {[:force $opt]} {
+		if {[file exists $subdir]} {
+			
+		}
+	  }
+	  
       if {[file exists $subdir]} {
         set nfiles [llength [glob -nocomplain -directory $subdir *]]
         if {$nfiles > 0} {

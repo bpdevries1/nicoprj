@@ -20,6 +20,7 @@ task report {Create report of output.txt in script dir
     {testruns.arg "" "Create report for 'all' or given runs (csv) in testruns dir for project"}
     {nodownload "Don't try to download run from ALM if not found"}
     {download "Download run from ALM if not found"}
+    {force "Force downloading again, even if already downloaded and unzipped before"} 	
 } {
   global testruns_dir
   if {[regexp {<FILL IN>} $testruns_dir]} {
