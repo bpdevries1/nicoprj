@@ -23,7 +23,7 @@ proc det_dir_new {dir_orig} {
   # parse 4 digits as a year, provided they are surrounded by parens, brackets, braces or spaces
   # everything before is the name of the movie, everything after is cruft.
   # hack: space erachter, zodat 'film 2016' ook gesnapt wordt. 
-  if {[regexp {^(.+)[\(\{\[ ](\d{4})[\)\}\] ]} "$dir_new " z name year]} {
+  if {[regexp {^(.+)[\(\{\[_ ](\d{4})[\)\}\]_ ]} "$dir_new " z name year]} {
     return "[string trim $name] ($year)"
   }
   if {[regexp {__YEAR__} $dir_new]} {

@@ -15,7 +15,8 @@ proc main {argv} {
   file delete $move_name
 
   # TODO: eerst even alleen de nieuwe, 00_new.
-  foreach dir [lsort [glob -directory $films_root -type d 00*]] {
+  # deze volgorde net andersom, zou met hernoemen van 2-3-4 naar 1-2-3 beter moeten gaan.
+  foreach dir [lsort -decreasing [glob -directory $films_root -type d 01*]] {
     make_move $dir $move_name  
   }
   
