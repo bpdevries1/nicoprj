@@ -94,7 +94,8 @@ proc read_report_run_dir {rundir opt} {
 		log warn "Dir does not exist, and -nodownload set, so returning: $rundir"
 		return
 	} else {
-		
+		log warn "Dir does not exist, and -nodownload not set (TBD, set -download), so returning: $rundir"
+		return
 	}
   }
   set dbname [file join $rundir testrunlog.db]
