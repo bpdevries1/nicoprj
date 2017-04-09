@@ -82,9 +82,7 @@ proc sync_dirs {opt} {
 
 # merge opt with settings read from unison-key in opt
 proc read_unison {opt} {
-  # set profile_name [file join ~ .unison [:unison $opt].prf]
-  # FiXME: prf.ff weer op .prf zetten, tijdens def even handig.
-  set profile_name [file join ~ .unison [:unison $opt].prf.ff-niet-ivm-gosleep]
+  set profile_name [file join ~ .unison [:unison $opt].prf]
   if {![file exists $profile_name]} {
     puts stderr "Unison profile does not exist: $profile_name"
     exit 2
