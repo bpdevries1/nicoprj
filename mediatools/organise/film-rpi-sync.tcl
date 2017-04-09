@@ -20,14 +20,17 @@ use libfp
 set_log_global info
 
 # Only show duplicate files if they are bigger than ~1MB.
-set SIZE_HANDLE_TRESHOLD 1e6
+# set size_handle_treshold 1e6
+# set size_handle_treshold 0
 
 proc main {argv} {
+  global size_handle_treshold
   set options {
     {unison.arg "" "Read unison profile (just root and force)"}
     {master.arg "" "Master directory"}
     {slave.arg "" "Slave directory"}
     {debug "Set loglevel to debug"}
+    {size_treshold.arg "0" "Only handle files at least this #bytes in size"}
     {n "Do nothing, just show what would be done"}
   }
   set usage ": [file tail [info script]] \[options]:"
@@ -43,6 +46,7 @@ proc main {argv} {
     puts stderr "Got: $opt"
     exit 1
   }
+  set size_handle_treshold [:size_treshold $opt]
   sync_dirs $opt
 }
 
@@ -131,12 +135,12 @@ proc read_items {filename} {
 # check if key occurs more than once: error or warning
 # recurse subdirs
 proc read_dir {root} {
-  global SIZE_HANDLE_TRESHOLD
+  global size_handle_treshold
   # in one dir, we can't have duplicate names, file system will prevent this.
   set res [dict create]
   foreach filename [glob -nocomplain -directory $root -type f *] {
     # values are lists, so they can be merged/concat-ed.
-    if {[file size $filename] >= $SIZE_HANDLE_TRESHOLD} {
+    if {[file size $filename] >= $size_handle_treshold} {
       dict set res [filename_key $filename] [list $filename]
     }
   }
@@ -145,7 +149,7 @@ proc read_dir {root} {
     set res [dict_merge_append $res $subres]
     if 0 {
       if {[dict_has_duplicates $res $subres]} {
-        if {[ dict_show_duplicates $res $subres $SIZE_HANDLE_TRESHOLD]} {
+        if {[ dict_show_duplicates $res $subres $size_handle_treshold]} {
           log warn "Found duplicate keys"; # should be more specific.
           exit 2        
         }
@@ -178,9 +182,9 @@ proc check_slave_files {} {
 
 # Check each file in master:
 proc sync_from_master {master_dir opt} {
-  global slave_files SIZE_HANDLE_TRESHOLD
+  global slave_files size_handle_treshold
   foreach filename [glob -nocomplain -directory $master_dir -type f *] {
-    if {[file size $filename] >= $SIZE_HANDLE_TRESHOLD} {
+    if {[file size $filename] >= $size_handle_treshold} {
       sync_from_master_file $filename $opt
     }
   }
@@ -213,7 +217,7 @@ proc sync_from_master_file {filename opt} {
 
 }
 
-
+# Delete all files from slave which do not have a corresponding file in master.
 # check form current contents of slave_files, should be up-to-date with moving and copying.
 proc sync_from_slave {slave_root opt} {
   global slave_files master_root
@@ -234,7 +238,7 @@ proc sync_from_slave {slave_root opt} {
         }
         if {![:n $opt]} {
           log info "Really delete file"
-          log warn "TODO!"
+          file delete $slave_filename
         } else {
           log info "-n given, do nothing"
         }
