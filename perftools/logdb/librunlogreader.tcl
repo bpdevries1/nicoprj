@@ -74,7 +74,9 @@ proc make_trans_finished {row started_transactions} {
 }
 
 # TODO: merge with make_trans_finished?
-proc make_trans_error {row} {
+
+# [2017-04-11 16:57:52] old version before also handling started_trans
+proc make_trans_error_old {row} {
   set line_fields {linenr ts sec_ts iteration}
   set line_start_fields [map [fn x {return "${x}_start"}] $line_fields]  
   set line_end_fields [map [fn x {return "${x}_end"}] $line_fields]
@@ -83,6 +85,7 @@ proc make_trans_error {row} {
   # breakpoint
   return $d2
 }
+
 
 proc add_read_status {db status} {
   $db insert read_status [dict create ts [now] status $status]

@@ -254,20 +254,21 @@ proc def_handlers {} {
                     # TODO: also unset trans_params? Only if they really are trans params, not iteration params.
                 }
                 1 {
-                    # synthetic error, just insert.
-                    # [2016-08-17 15:07:08] could also have a start trans (-1) for this, so also dict unset.
-                    # res_add res [make_trans_error $item]
-                    set tr [dict merge $trans_params [make_trans_error $item]]
-                    res_add res $tr
-                    dict unset started_transactions [:transname $item]
+                  # synthetic error, just insert.
+                  # [2016-08-17 15:07:08] could also have a start trans (-1) for this, so also dict unset.
+                  # res_add res [make_trans_error $item]
+                  # set tr [dict merge $trans_params [make_trans_error $item]]
+                  # [2017-04-11 16:52:48] use (possible) started transaction for start time
+                  set tr [dict merge $trans_params [make_trans_finished $item $started_transactions]]
+                  res_add res $tr
+                  dict unset started_transactions [:transname $item]
                 }
                 2 {
-                    # [2017-03-15 16:12:47] occurred in RCC_All with ok-pas and error 500. This could be a failed transaction. For now the same as 1/error
-                    # res_add res [make_trans_error $item]
-                    set tr [dict merge $trans_params [make_trans_error $item]]
-                    res_add res $tr
-                    
-                    dict unset started_transactions [:transname $item]
+                  # [2017-03-15 16:12:47] occurred in RCC_All with ok-pas and error 500. This could be a failed transaction. For now the same as 1/error
+                  # res_add res [make_trans_error $item]
+                  set tr [dict merge $trans_params [make_trans_finished $item $started_transactions]]
+                  res_add res $tr
+                  dict unset started_transactions [:transname $item]
                 }
                 4 {
                     # functional warning, eg. no FT's available to approve.
