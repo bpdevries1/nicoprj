@@ -22,6 +22,33 @@ bld remove-comment
 bld remove-empty-lines
 gac -> Put result of these automatic actions in git.
 bld test -> check for errors and inconsistencies
+** Modify existing script
+Die oorspronkelijk van iemand anders is, bv Wim.
+gac -> add to git source control
+bld init
+bld set-prjtype vugen
+Edit .bld/config-<machine> and set testruns dir.
+;; bld split-action -> lijkt gevaarlijk.
+;; bld templates -> lijkt gevaarlijk.
+bld get transaction.c 
+bld get y_core.c dynatrace.c functions.c logger.c
+bld get configfile.c
+bld rb-trans
+manual: char * transaction alleen eenmaal bovenin.
+manual: in vuser_init: set_trans_prefix("<UC>");
+manual: in vuser_init: define and read config file.
+touch scripttest.config
+touch <other config files>
+bld add-file scripttest.config
+bld add-file <other config files>
+bld domains
+Edit domains.ini
+bld domains (to comment out domains to be ignored)
+bld param-domain <main-domain>
+;; bld remove-comment
+;; bld remove-empty-lines
+gac -> Put result of these automatic actions in git.
+bld test -> check for errors and inconsistencies
 ** Manual actions 25-11-2016
 bld get logger.c -> not automatically done correctly yet.
 bld put configfile.c -> possibly some whitespace changes
