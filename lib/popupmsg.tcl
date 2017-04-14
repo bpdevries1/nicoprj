@@ -14,15 +14,19 @@ proc main_popupmsg {argv} {
   } else {
     # puts stderr "text: ***$text***"
   }
-  popup_warning $text
+  if {[string trim $text] != ""} {
+    popup_warning $text; # only popup if something to show, useful for pipelines.
+  }
   exit
-  
 }
 
 proc popup_warning {text} {
   package require Tk
   wm withdraw .
 
+  # [2017-04-14 10:28] in help ook: tk_messageBox
+  # [2017-04-14 10:29] want to set width, maybe also scrollbar, this is not possible
+  # with MessageBox, so use something else.
   set answer [::tk::MessageBox -message "Warning!" \
                   -icon info -type ok \
                   -detail $text]
