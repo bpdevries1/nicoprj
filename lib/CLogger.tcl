@@ -208,6 +208,8 @@ proc set_log_global {level {options {}}} {
   if {![catch {set log}]} {
     #puts "set_log_global already done, returning."
     #puts "info vars log: [info vars log]"
+    # [2017-04-14 12:41] can change the loglevel of an existing logger
+    $log set_log_level $level
     return
   }
   if {[:showfilename $options] == 0} {
@@ -246,7 +248,7 @@ proc set_log_global {level {options {}}} {
     }
   }
   if {[:gmt $options] == 1} {
-	$log set_gmt 1
+    $log set_gmt 1
   }
 }
 
