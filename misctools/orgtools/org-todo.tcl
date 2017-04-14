@@ -28,8 +28,9 @@ set_log_global info
 # -> just pipe results to sort.
 proc main {argv} {
   global log
+  # [2017-04-14 20:13] put default dirs both for PC and laptop:
   set options {
-    {paths.arg "~/Dropbox/org;~/Documents/journal" "; separated list of paths to search for org files and also specific org files"}
+    {paths.arg "~/Dropbox/org;~/Documents/journal;c:/PCC/nico/raboprj/org" "; separated list of paths to search for org files and also specific org files"}
     {dirfile.arg "" "TBD - file with newline separated list of dirs/files"}
     {futuredays.arg "0" "Show items up to # days into the future"}
     {showfile.arg "name" "Which part of filename to show (name, full, none)"}
@@ -90,8 +91,10 @@ proc org_file? {filename} {
 }
 
 proc ignore_file? {filename} {
-  if {[regexp {backups} $filename]} {
-    return 1
+  foreach re {backups -old-} {
+    if {[regexp -- $re $filename]} {
+      return 1
+    }
   }
   return 0
 }
