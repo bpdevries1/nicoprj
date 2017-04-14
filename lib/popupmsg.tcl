@@ -7,6 +7,13 @@ package require ndv
 
 proc main_popupmsg {argv} {
   lassign $argv text
+  if {$text == "-"} {
+    # read stdin
+    # puts stderr "Reading stdin"
+    set text [read stdin]
+  } else {
+    # puts stderr "text: ***$text***"
+  }
   popup_warning $text
   exit
   
