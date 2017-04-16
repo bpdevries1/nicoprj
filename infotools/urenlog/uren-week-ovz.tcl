@@ -6,31 +6,41 @@ package require Tclx
 # own package
 package require ndv
 
+ndv::source_once liburen.tcl
+
 set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 
 proc main {argv} {
   lassign $argv urendir
+  maak_overzichten $urendir
+}
+
+proc maak_overzichten {urendir} {
   sqlite3 db [file join $urendir uren-saldo_uren.tsv.db]
-  set f [open [file join $urendir uren-week-ovz.html] w]
-  set hh [ndv::CHtmlHelper::new]
-  $hh set_channel $f
-  $hh write_header "Uren Week Overzicht" 0
-  maak_uren_week_ovz $hh
-  $hh write_footer  
-  close $f
+
+  maak_overzicht $urendir "uren-week-ovz.html" ""
+  set sql "select distinct target from target_mapping"
+  foreach target [db eval $sql] {
+    maak_overzicht $urendir "uren-week-ovz-$target.html" $target
+  }
+  show_warnings
   db close
 }
 
-proc maak_uren_week_ovz {hh} {
+proc maak_overzicht {urendir html_name target} {
+  set f [open [file join $urendir $html_name] w]
+  set hh [ndv::CHtmlHelper::new]
+  $hh set_channel $f
+  $hh write_header "Uren Week Overzicht $target" 0
+  maak_uren_week_ovz $hh $target
+  $hh write_footer  
+  close $f
+  
+}
+
+proc maak_uren_week_ovz {hh target} {
   try_eval {
-    #$hh heading 1 "Verlof overzicht"
-    #$hh table_start 
-    #$hh table_header "Vrijdag" "Verlof delta" "Verlof som" "Deeltijd delta" "Deeltijd som" "Totaal som" "Totaal dagen" "Opmerkingen"
-    # CREATE TABLE urendag (date, project, hours, comments);
-    set query "select date, project, sum(hours) hours
-               from urendag
-               group by 1,2
-               order by 1,2"
+    set query [det_week_query $target]
     set prev_year 0
     set start_date "2010-01-02" ; # 2010-01-01 is een vrijdag, wil hiervan niets printen. 
     set prev_date $start_date
@@ -88,6 +98,28 @@ proc maak_uren_week_ovz {hh} {
   }
 }
 
+proc det_week_query {target} {
+  if {$target == ""} {
+    set query "select date, project, sum(hours) hours
+               from urendag
+               group by 1,2
+               order by 1,2"
+  } else {
+    # left join will result in empty project field, show as 'Unmapped'
+    # left join does not seem to work in SQLiteSpy
+    # expect 1 empty field (in a row) for combination of unmapped and explicitly (-) mapped projects.
+    set query "select date, m.target_project project, sum(hours) hours
+               from urendag u
+               left join target_mapping m on m.project = u.project
+               and m.target = '$target'
+               and m.target_project <> '-'               
+               group by 1,2
+               order by 1,2"
+  }
+  return $query
+}
+
+
 # determine weeknumber and add.
 proc format_week {date} {
   # %U %V %W leveren voor 2011 en 2012 hetzelfde op, uit docs nu %V kiezen, is ISO nummer.
@@ -144,7 +176,11 @@ proc make_week_report {hh date ar_projects_name ar_days_name ar_prj_day_name} {
   $hh table_header "Day" {*}$lst_days "Total"
   foreach prj [lsort [array names ar_projects]] {
     $hh table_row_start
-    $hh table_data $prj
+    if {$prj == ""} {
+      $hh table_data "Other"
+    } else {
+      $hh table_data $prj      
+    }
     set total 0
     foreach day $lst_days {
       incrnum ar_prj_day($prj,$day) 0
@@ -165,34 +201,6 @@ proc make_week_report {hh date ar_projects_name ar_days_name ar_prj_day_name} {
   $hh table_data $week_total  
   $hh table_row_end
   $hh table_end  
-}
-
-proc notes_to_html {lst_notes} {
-  join $lst_notes "<br/>" 
-}
-
-proc format_values {lst} {
-  set res {}
-  foreach el $lst {
-    lappend res [format %.1f $el] 
-  }
-  return $res
-}
-
-# increase (possibly) float value in var with value (incr only works with integers)
-proc incrnum {var value} {
-   upvar $var var1
-   if {[info exists var1]} {
-     set var1 [expr $var1 + $value]
-   } else {
-     set var1 $value
-   }
-}
-
-proc log {args} {
-  # global log
-  variable log
-  $log {*}$args
 }
 
 main $argv

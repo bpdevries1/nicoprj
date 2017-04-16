@@ -17,7 +17,9 @@ proc main {argv} {
   lassign $argv uren_xls_filename
   set basename [file rootname $uren_xls_filename]
   set uren_filename [convert_tsv $uren_xls_filename $basename]
+  # set uren_filename [file join [file dirname $uren_xls_filename] uren-saldo_Uren.tsv]
   handle_uren $uren_filename
+  handle_mapping [file dirname $uren_xls_filename]
 }
 
 # @return filename of tsv file with uren-tab data. 
@@ -46,6 +48,7 @@ proc create_db {db_name} {
   file delete $db_name
   sqlite3 db $db_name
   db eval "create table urendag (date, project, hours, comments)"
+  db eval "create table target_mapping (project, target, target_project)"
 }
 
 proc read_uren {uren_filename} {
@@ -78,6 +81,23 @@ proc det_sqldate {date} {
     breakpoint
   }
   clock format $sec -format "%Y-%m-%d"
+}
+#   db eval "create table target_mapping (project, target, target_project)"
+proc handle_mapping {dirname} {
+  set mapping_filename [file join $dirname "uren-saldo_Mapping.tsv"]
+  set lst [csv2dictlist $mapping_filename "\t"]
+  db eval "begin transaction"
+  foreach row $lst {
+    set project [dict get $row Project]
+    foreach key [dict keys $row] {
+      if {$key == "Project"} {continue}
+      set target $key
+      set target_project [dict get $row $key]
+      db eval {insert into target_mapping values ($project, $target, $target_project)}
+    }
+  }
+  db eval "commit"
+  # breakpoint
 }
 
 main $argv

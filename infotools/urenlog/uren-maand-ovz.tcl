@@ -6,9 +6,13 @@ package require Tclx
 # own package
 package require ndv
 
+ndv::source_once liburen.tcl
+
 set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 
-proc main {argv} {
+# TODO: merge with uren-week-ovz.tcl. Use this one as basis, has Total as second column.
+
+proc main_old {argv} {
   lassign $argv urendir
   sqlite3 db [file join $urendir uren-saldo_uren.tsv.db]
   set f [open [file join $urendir uren-maand-ovz.html] w]
@@ -21,16 +25,39 @@ proc main {argv} {
   db close
 }
 
-proc maak_uren_maand_ovz {hh} {
+proc main {argv} {
+  lassign $argv urendir
+  maak_overzichten $urendir
+}
+
+proc maak_overzichten {urendir} {
+  sqlite3 db [file join $urendir uren-saldo_uren.tsv.db]
+
+  maak_overzicht $urendir "uren-maand-ovz.html" ""
+  set sql "select distinct target from target_mapping"
+  foreach target [db eval $sql] {
+    maak_overzicht $urendir "uren-maand-ovz-$target.html" $target
+  }
+  show_warnings
+  db close
+}
+
+proc maak_overzicht {urendir html_name target} {
+  set f [open [file join $urendir $html_name] w]
+  set hh [ndv::CHtmlHelper::new]
+  $hh set_channel $f
+  $hh write_header "Uren Maand Overzicht $target" 0
+  maak_uren_maand_ovz $hh $target
+  $hh write_footer  
+  close $f
+  
+}
+
+
+
+proc maak_uren_maand_ovz {hh target} {
   try_eval {
-    #$hh heading 1 "Verlof overzicht"
-    #$hh table_start 
-    #$hh table_header "Vrijdag" "Verlof delta" "Verlof som" "Deeltijd delta" "Deeltijd som" "Totaal som" "Totaal dagen" "Opmerkingen"
-    # CREATE TABLE urendag (date, project, hours, comments);
-    set query "select date, project, sum(hours) hours
-               from urendag
-               group by 1,2
-               order by 1,2"
+    set query [det_maand_query $target]
     set prev_year 0
     set start_date "2010-01-02" ; # 2010-01-01 is een vrijdag, wil hiervan niets printen. 
     set prev_date $start_date
@@ -94,6 +121,30 @@ proc maak_uren_maand_ovz {hh} {
     breakpoint 
   }
 }
+
+# [2017-04-16 14:17] same as det_week_query
+proc det_maand_query {target} {
+  if {$target == ""} {
+    set query "select date, project, sum(hours) hours
+               from urendag
+               group by 1,2
+               order by 1,2"
+  } else {
+    # left join will result in empty project field, show as 'Unmapped'
+    # left join does not seem to work in SQLiteSpy
+    # expect 1 empty field (in a row) for combination of unmapped and explicitly (-) mapped projects.
+    set query "select date, m.target_project project, sum(hours) hours
+               from urendag u
+               left join target_mapping m on m.project = u.project
+               and m.target = '$target'
+               and m.target_project <> '-'               
+               group by 1,2
+               order by 1,2"
+  }
+  return $query
+}
+
+
 
 # determine maandnumber and add.
 proc format_maand {date} {
@@ -159,15 +210,28 @@ proc make_maand_report {hh date ar_projects_name ar_days_name ar_prj_day_name} {
   $hh heading 1 [format_maand $date]
   $hh table_start
   set lst_days [lsort [array names ar_days]]
-  $hh table_header "Day" {*}$lst_days "Total"
+  # $hh table_header "Day" {*}$lst_days "Total"
+  $hh table_header "Day" "Total" {*}$lst_days "Total"
   foreach prj [lsort [array names ar_projects]] {
     $hh table_row_start
-    $hh table_data $prj
+    if {$prj == ""} {
+      $hh table_data "Other"
+    } else {
+      $hh table_data $prj      
+    }
     set total 0
     foreach day $lst_days {
       incrnum ar_prj_day($prj,$day) 0
       incrnum total $ar_prj_day($prj,$day)
       incrnum total_day($day) $ar_prj_day($prj,$day)
+      # $hh table_data $ar_prj_day($prj,$day)
+    }
+    
+    $hh table_data $total
+    foreach day $lst_days {
+      #incrnum ar_prj_day($prj,$day) 0
+      #incrnum total $ar_prj_day($prj,$day)
+      #incrnum total_day($day) $ar_prj_day($prj,$day)
       $hh table_data $ar_prj_day($prj,$day)
     }
     $hh table_data $total
@@ -178,39 +242,15 @@ proc make_maand_report {hh date ar_projects_name ar_days_name ar_prj_day_name} {
   set maand_total 0
   foreach day $lst_days {
     incrnum maand_total $total_day($day)
+  }
+  $hh table_data $maand_total
+  foreach day $lst_days {
+    # incrnum maand_total $total_day($day)
     $hh table_data $total_day($day)
   }
-  $hh table_data $maand_total  
+  $hh table_data $maand_total
   $hh table_row_end
   $hh table_end  
-}
-
-proc notes_to_html {lst_notes} {
-  join $lst_notes "<br/>" 
-}
-
-proc format_values {lst} {
-  set res {}
-  foreach el $lst {
-    lappend res [format %.1f $el] 
-  }
-  return $res
-}
-
-# increase (possibly) float value in var with value (incr only works with integers)
-proc incrnum {var value} {
-   upvar $var var1
-   if {[info exists var1]} {
-     set var1 [expr $var1 + $value]
-   } else {
-     set var1 $value
-   }
-}
-
-proc log {args} {
-  # global log
-  variable log
-  $log {*}$args
 }
 
 main $argv
