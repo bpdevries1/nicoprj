@@ -26,14 +26,6 @@ proc main {argv} {
     }
     cd $dir
   } else {
-    # [2016-11-22 20:52] maybe below from time I had only one repo.
-    if 0 {
-      if {$os == "windows"} {
-        cd "c:/nico/nicoprj"
-      } else {
-        cd ~/nicoprj 
-      }
-    }
     set commit_msg check
     set dir .
   }
@@ -143,7 +135,8 @@ proc puts_changes {f res commit_msg} {
         # puts $f "# git commit -m \"Changes for $prev_dir at $dt\""
         # puts $f "# git commit -m \"$commit_msg\""
         if {$commit_msg != ""} {
-          puts $f "git commit -m \"$commit_msg\""
+          # puts $f "git commit -m \"$commit_msg\""
+		  puts $f "git commit -m \"[det_commit_msg $commit_msg $prev_dir]\""
         } else {
           puts $f "# git commit -m \"<fill in>\""
         }
@@ -158,7 +151,8 @@ proc puts_changes {f res commit_msg} {
     if {$dir != $prev_dir} {
       if {$prev_dir != "<none>"} {
         if {$commit_msg != ""} {
-          puts $f "git commit -m \"$commit_msg\""
+          # puts $f "git commit -m \"$commit_msg\""
+		  puts $f "git commit -m \"[det_commit_msg $commit_msg $prev_dir]\""
         } else {
           puts $f "# git commit -m \"<fill in>\""
         }
@@ -170,12 +164,29 @@ proc puts_changes {f res commit_msg} {
   
   # puts $f "# git commit -m \"Changes for $prev_dir at $dt\""
   if {$commit_msg != ""} {
-    puts $f "git commit -m \"$commit_msg\""
+    # puts $f "git commit -m \"$commit_msg\""
+    puts $f "git commit -m \"[det_commit_msg $commit_msg $prev_dir]\""
   } else {
     puts $f "# git commit -m \"<fill in>\""
   }
   
   return $has_changes
+}
+
+# use default commit messages for certain dirs like 'uren' and 'org'
+proc det_commit_msg {msg dir} {
+  set dir [file tail [file normalize $dir]]
+  if {$msg == "check"} {
+    set msg "check:$dir"
+    # default, so may change based on dir
+	if {$dir == "urenlog"} {
+	  set msg "Urenlog"
+	}
+	if {$dir == "org"} {
+	  set msg "Org files"
+	}
+  }
+  return $msg
 }
 
 proc ignore_file {line} {
