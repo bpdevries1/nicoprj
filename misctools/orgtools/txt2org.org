@@ -1,0 +1,12 @@
+txt2org tool
+* Doel
+** begin toch vaak in een .txt file, bedenk dan dan .org file eigenljik beter is, en wil mezelf ook wel 'dwingen' om org te gebruiken.
+* Probleem
+** Niet 1-op-1 in te lezen, vooral met nested bulleted items.
+* Todo
+** "<n-spaties>* " vervangen door "<n/2-sterretjes>** " dus sterretje erbij. 
+Dus steeds 2 spaties door 1 sterretje vervangen.
+En tekst in een bullet wil nog wel eens lang zijn, dus sowieso splitten op eerste punt(komma) of komma of dubbele punt.
+** eindigend op : -> sterretje ervoor.
+** zonder sterretjes: string trim.
+** mss enkele newlines vervangen door spatie.
