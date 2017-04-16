@@ -1,6 +1,6 @@
 # libcsv.tcl - read csv at ones, return as list of dicts
 # header line must be present.
-# seperator must me given
+# separator default is a command, can be changed.
 package require csv
 
 proc csv2dictlist {filename {sep_char ","}} {
