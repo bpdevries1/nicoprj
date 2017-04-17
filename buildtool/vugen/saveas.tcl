@@ -2,7 +2,7 @@
 # like the save-as function in VuGen, only copy script files, not recording logs and data directory.
 
 task saveas {Save a newly recorded script to another directory
-  Syntax: saveas <new-prj-dir} {
+  Syntax: saveas <new-prj-dir>} {
 } {
   lassign $args target
   if {$target == ""} {
