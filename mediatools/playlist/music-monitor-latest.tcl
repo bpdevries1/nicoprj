@@ -27,7 +27,9 @@ proc main {argv} {
   set usage ": [file tail [info script]] \[options] :"
   set opt [getoptions argv $options $usage]
   array set ar_argv $opt 
-
+  if {[:debug $opt]} {
+    set_log_global debug
+  }
   if {$ar_argv(loglevel) != ""} {
     ::ndv::CLogger::set_log_level_all $ar_argv(loglevel) 
   }
@@ -41,12 +43,12 @@ proc main {argv} {
 proc show_latest {opt} {
   global conn
   set today [clock format [clock seconds] -format "%Y-%m-%d"]
-  set query "select kind, datetime, path
+  set query "select kind, 'album ' tbl, datetime, path, p.id p_id, p.generic p_generic, a.id am_id, '' realpath
 from played p
 join album a on a.generic = p.generic
 where datetime >= '$today'
 union
-select kind, datetime, path
+select kind, 'musicfile' tbl, datetime, path, p.id p_id, p.generic p_generic, m.id am_id, realpath
 from played p
 join musicfile m on m.generic = p.generic
 where datetime >= '$today'
@@ -54,7 +56,22 @@ order by datetime"
   set res [pg_query_dicts $conn $query]
   puts "Played today: $today"
   foreach row $res {
-    puts "[:kind $row]: [:datetime $row]: [:path $row]"
+    if {[:path $row] == ""} {
+      set path [:realpath $row]
+    } else {
+      set path [:path $row]
+    }
+    if {[:debug $opt]} {
+      puts "[:kind $row]: [:datetime $row]: $path ([:p_id $row]/[:p_generic $row]/[:tbl $row]:[:am_id $row])"  
+    } else {
+      puts "[:kind $row]: [:datetime $row]: $path"  
+    }
+    if {[string trim $path] == ""} {
+      log warn "Empty path!"
+      set query2 "select * from [:tbl $row] where id = [:am_id $row]"
+      set res2 [pg_query_dicts $conn $query2]
+      log warn $res2
+    }
   }
 }
 
