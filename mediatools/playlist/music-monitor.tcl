@@ -217,17 +217,20 @@ proc det_playing_path_old {} {
 }
 
 # pre - actually playing, so don't expect an error.
+# had: Got current-playing file, but does not exist: xxxxxxxx.flac?1
+# without ?1 it does exist. So remove everything after question mark.
 proc det_playing_path {} {
   set res ""  
   try_eval {
     # set res [exec qdbus org.kde.amarok /Player org.freedesktop.MediaPlayer.GetMetadata]
     set res [exec audtool --current-song-filename]
+    regsub {\?.*$} $res "" res
   } {}
   if {$res != ""} {
     if {[file exists $res]} {
       return $res
     } else {
-      error "Got current-playing file, but does not exist: $res"
+      log error "Got current-playing file, but does not exist: $res"
       
     }
   }
