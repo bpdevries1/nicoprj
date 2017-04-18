@@ -231,7 +231,6 @@ proc det_playing_path {} {
       return $res
     } else {
       log error "Got current-playing file, but does not exist: $res"
-      
     }
   }
   return ""
