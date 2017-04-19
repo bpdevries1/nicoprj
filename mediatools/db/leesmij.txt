@@ -1,6 +1,0 @@
-DB Structuur van music DB.
-
-25-9-2010 Ook cassette tabel bijgezet, met titels/artiesten van (oude) 
-cassettes. Doel is per cassette bij te houden of ik deze al als MP3 heb, 
-of dit anders nog wil.
-
