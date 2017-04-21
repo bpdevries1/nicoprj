@@ -8,10 +8,20 @@ send_ts() {
 	Send, %ts%
 }
 
+send_date() {
+	FormatTime, time, %A_Now%, yyyy-MM-dd
+	ts := time ": "
+	Send, %ts%
+}
+
 ; send_ts()
 
 F8::
 send_ts()
+return
+
++F8::
+send_date()
 return
 
 ;; [2016-06-17 11:25:33] ineens werkt het in N++ ook weer, dus dingen hieronder zouden dan weg kunnen.
