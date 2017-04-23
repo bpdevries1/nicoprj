@@ -12,9 +12,10 @@ proc main {argv} {
     {configroot.arg "~/nicoprjbb/config/linux/homedir" "Repository location"}
     {home.arg "~" "Home directory to sync with repository"}
     {get "Get config files from repository, by creating new symlink"}
-    {link "Get config files from repository, by replacing file with symlink"}
+    {link "Get config files from repository, by replacing file with symlink (manually copy file to repo first!)"}
     {force "Force writing files, possibly overwriting manual changes"}
     {shell.arg "" "Create shell script for manual actions (diff, rm, cp)"}
+    {n "Do nothing, just show what would be done."}
     {h "Show extended help"}
   }
   set usage ": [file tail [info script]] \[options]"
@@ -38,9 +39,11 @@ proc main {argv} {
 }
 
 proc show_help {} {
+  global argv0
   puts "Extended help"
   puts "============="
   puts "If no options are given, just report status, don't perform any action."
+  puts "I a new file should be put in the repo: 1) manually copy it to the same dir in the repo. 2) run $argv0 -link"
 }
 
 # Check each file in repo with file in home. Recur subdirs.
@@ -126,6 +129,10 @@ proc make_link_config {opt config_filename home_filename} {
       set do_create 1
     }
   }
+  if {[:n $opt]} {
+    set do_create 0
+    log info "opt -n given: file link -symbolic $home_filename $config_filename"
+  }
   if {$do_create} {
     log debug "Really create symlink"
     file delete $home_filename
@@ -137,7 +144,7 @@ proc make_link_config {opt config_filename home_filename} {
       # exit;                       # for test.  
     }
   } else {
-    log debug "Don't create, use -link or -get to create."
+    log debug "Don't create, use -link or -get (and not -n) to create."
   }
 }
 
