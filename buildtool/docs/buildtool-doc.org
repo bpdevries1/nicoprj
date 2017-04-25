@@ -7,10 +7,12 @@ bld init
 bld set-prjtype vugen
 bld saveas <newdir>
 ** In newly created dir
+Make sure libs in other projects are up-to-date; no pending puts to repo needed. We want the latest repo versions in our new script dir.
 gac -> add to git source control
 bld init
 bld set-prjtype vugen
 Edit .bld/config-<machine> and set testruns dir.
+Edit .bld/config.tcl and set ALM domain/project.
 bld split-action
 bld templates
 bld rb-trans
@@ -20,8 +22,17 @@ bld domains (to comment out domains to be ignored)
 bld param-domain <main-domain>
 bld remove-comment
 bld remove-empty-lines
+bld get hashmap.c transaction.c
 gac -> Put result of these automatic actions in git.
+Check other libs, maybe marked as local-new, could be only whitespace.
 bld test -> check for errors and inconsistencies
+compile script
+check domains - if more than one.
+comment web_add_cookie - maybe don't generate, but extra doc can be useful.
+check SSL version - maybe generated in script, may need TLS or TLS1.2
+
+Also:
+<param-check> more correlation needed?
 ** Modify existing script
 Die oorspronkelijk van iemand anders is, bv Wim.
 gac -> add to git source control
