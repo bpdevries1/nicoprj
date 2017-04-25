@@ -7,6 +7,8 @@ package require Tclx
 package require snack
 package require Tk
 
+require libdatetime dt
+
 # set log [::ndv::CLogger::new_logger [file tail [info script]] debug]
 set_log_global info {filename ~/log/pomo.log append 1}
 
@@ -26,6 +28,8 @@ proc main {argv} {
   set after_sec [:after $dargv]
   set task $argv
   log info "Starting pomodore for $after_sec seconds (task: $task)"
+  # [2017-04-24 11:13] apparently log info here does not put anything to the screen/stdout.
+  puts "[dt/now]: Starting pomodore for $after_sec seconds (task: $task)"
   wm withdraw .
   after [expr $after_sec*1000] alarm
   wm withdraw .
