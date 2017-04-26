@@ -8,10 +8,23 @@ task test {Perform tests on script
   {all "Do full check, including todo's and comments"}
 } {
   task_libs {*}$args
+  # task_check {*}[opt_to_cmdline $opt] {*}$args
   task_check {*}$args
   task_check_configs {*}$args
   task_check_lr_params {*}$args
   # abc;                          # to generate error.
+}
+
+# to pass opt from one task to another
+# return list to be spliced by caller.
+proc opt_to_cmdline {opt} {
+  puts "opt: $opt"
+  set res [list]
+  foreach key [dict keys $opt] {
+    lappend res "-$key"
+    lappend res [dict get $opt $key]
+  }
+  return $res
 }
 
 task check {Perform some checks on sources
@@ -22,6 +35,8 @@ task check {Perform some checks on sources
   {misc "Check misc things"}
   {all "Do full check, including todo's and comments"}
 } {
+  #puts "check: opt: $opt; args: $args"
+  #breakpoint
   if {$args != {}} {
     foreach filename $args {
       check_file $filename $opt
@@ -35,6 +50,8 @@ task check {Perform some checks on sources
 }
 
 proc check_file {srcfile opt} {
+  #log debug "check_file: $srcfile"
+  #puts "check_file: $srcfile"
   if {[:all $opt]} {
     set opt [dict merge $opt [dict create includes 1 todos 1 comments 1]]
   }
@@ -46,6 +63,8 @@ proc check_file {srcfile opt} {
   }
   if {[:todos $opt]} {
     check_file_todos $srcfile    
+  } else {
+    check_file_fixmes $srcfile 
   }
   if {[:comments $opt]} {
     check_file_comments $srcfile
@@ -115,6 +134,21 @@ proc check_file_todos {srcfile} {
   }
   close $f
 }
+
+# [2016-02-05 11:16:37] Deze niet std, levert te veel op, evt wel losse task.
+# [2017-04-26 16:48] a hack, should be merged with check_file_todos
+proc check_file_fixmes {srcfile} {
+  set f [open $srcfile r]
+  set linenr 0
+  while {[gets $f line] >= 0} {
+    incr linenr
+    if {[regexp {FIXME} $line]} {
+      puts_warn $srcfile $linenr "FIXME found: $line"
+    }
+  }
+  close $f
+}
+
 
 # [2016-02-05 11:14:23] deze niet std uitvoeren, levert te veel op. Mogelijk wel los, maar dan een task van maken.
 proc check_file_comments {srcfile} {
