@@ -151,17 +151,26 @@ namespace eval ::ndv {
 		}
 		
 		public method log_start_finished {script {loglevel -1}} {
-			perf "start"
+      set txt [string range [string trim  $script] 0 40]
+			perf "start: $txt"
 			uplevel $script
-			perf "finished"
+			perf "finished: $txt"
 		}
 
-		public method start_stop {args} {
+		public method start_stop_old {args} {
 			perf "start: [lindex $args 0]"
 			uplevel {*}$args
 			perf "finished: [lindex $args 0]"
 		}
-		
+
+    # [2017-04-27 13:53] can't read "slave_root": no such variable
+    public method start_stop {args} {
+      set txt [string range [string trim [join $args " "]] 0 40]
+			perf "start: $txt"
+			uplevel {*}$args
+			perf "finished: $txt"
+		}
+
 		public method log_intern {str {level critical} {pref_stacklevel -2}} {
 			global stderr
 			# puts stderr "int_level($level) = $int_level($level) ; log_level = $log_level"
