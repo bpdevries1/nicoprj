@@ -1,0 +1,27 @@
+#! /usr/bin/env bash
+
+source=$1
+destination=$2
+days=$3
+
+mkdir -p $destination
+destination=$(cd -- "$destination" && pwd) # make it an absolute path
+
+echo source: $source
+echo destination: $destination
+echo number of days: $days
+# exit
+
+cd -- "$source" &&
+find . -type f -mtime "+$days" -exec sh -c '
+  for x do
+    echo $x
+    mkdir -p "$0/${x%/*}"
+    mv "$x" "$0/$x"
+    # cp --preserve=timestamps "$x" "$0/$x"
+  done
+' "$destination" {} +
+
+# and then remove empty dirs
+find . -type d -empty -delete
+
