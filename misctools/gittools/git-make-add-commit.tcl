@@ -30,7 +30,7 @@ proc main {argv} {
   puts $f "# $filename"
   puts $f "cd $dir"
   puts $f "# Adding files to git and commit"
-  set has_changes [puts_changes $f $res $commit_msg]
+  set has_changes [puts_changes $f $dir $res $commit_msg]
   puts $f "# remove file after executing"
   puts $f "rm $filename"
   puts $f "cd -"  
@@ -106,7 +106,7 @@ proc det_os {} {
   }
 }
 
-proc puts_changes {f res commit_msg} {
+proc puts_changes {f root_dir res commit_msg} {
   set has_changes 0
   set in_untracked 0
   set files {}
@@ -175,7 +175,10 @@ proc puts_changes {f res commit_msg} {
         }
       }
     }
-    puts $f "# git diff \"$file\""
+    # puts $f "# git diff \"$file\""
+    # [2017-04-28 22:07] need full path now.
+    # puts $f "# git diff \"$root_dir/$file\""
+    puts $f "# git diff \"[file join $root_dir $file]\""
     puts $f "git add \"$file\""
     set prev_dir $dir
   }
