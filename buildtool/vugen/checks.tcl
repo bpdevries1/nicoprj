@@ -7,24 +7,15 @@ task test {Perform tests on script
   {misc "Check misc things"}
   {all "Do full check, including todo's and comments"}
 } {
-  task_libs {*}$args
-  # task_check {*}[opt_to_cmdline $opt] {*}$args
-  task_check {*}$args
-  task_check_configs {*}$args
-  task_check_lr_params {*}$args
-  # abc;                          # to generate error.
-}
+  task_libs;   # task_libs doesn't take cmdline arguments.
 
-# to pass opt from one task to another
-# return list to be spliced by caller.
-proc opt_to_cmdline {opt} {
-  puts "opt: $opt"
-  set res [list]
-  foreach key [dict keys $opt] {
-    lappend res "-$key"
-    lappend res [dict get $opt $key]
-  }
-  return $res
+  # [2017-04-28 12:48] use args_orig, so task_check can do it's own parsing.
+  #                    going back from opt -> args is difficult, wrt options
+  #                    taking 0 or 1 arguments.
+  task_check {*}$args_orig
+
+  task_check_configs;   # task_check_configs doesn't take cmdline arguments.
+  task_check_lr_params;   # task_check_lr_params doesn't take cmdline arguments.
 }
 
 task check {Perform some checks on sources
@@ -35,8 +26,6 @@ task check {Perform some checks on sources
   {misc "Check misc things"}
   {all "Do full check, including todo's and comments"}
 } {
-  #puts "check: opt: $opt; args: $args"
-  #breakpoint
   if {$args != {}} {
     foreach filename $args {
       check_file $filename $opt
@@ -61,11 +50,7 @@ proc check_file {srcfile opt} {
   if {[:includes $opt]} {
     check_file_includes $srcfile  
   }
-  if {[:todos $opt]} {
-    check_file_todos $srcfile    
-  } else {
-    check_file_fixmes $srcfile 
-  }
+  check_file_todos $srcfile $opt
   if {[:comments $opt]} {
     check_file_comments $srcfile
   }
@@ -119,7 +104,8 @@ proc check_file_includes {srcfile} {
 }
 
 # [2016-02-05 11:16:37] Deze niet std, levert te veel op, evt wel losse task.
-proc check_file_todos {srcfile} {
+# [2017-04-28 12:54] Wel std FIXME tonen.
+proc check_file_todos {srcfile opt} {
   set f [open $srcfile r]
   set linenr 0
   while {[gets $f line] >= 0} {
@@ -128,27 +114,13 @@ proc check_file_todos {srcfile} {
       puts_warn $srcfile $linenr "FIXME found: $line"
     }
     if {[regexp {TODO} $line]} {
-      puts_warn $srcfile $linenr "TODO found: $line"
-    }
-
-  }
-  close $f
-}
-
-# [2016-02-05 11:16:37] Deze niet std, levert te veel op, evt wel losse task.
-# [2017-04-26 16:48] a hack, should be merged with check_file_todos
-proc check_file_fixmes {srcfile} {
-  set f [open $srcfile r]
-  set linenr 0
-  while {[gets $f line] >= 0} {
-    incr linenr
-    if {[regexp {FIXME} $line]} {
-      puts_warn $srcfile $linenr "FIXME found: $line"
+      if {[:todos $opt]} {
+        puts_warn $srcfile $linenr "TODO found: $line"  
+      }
     }
   }
   close $f
 }
-
 
 # [2016-02-05 11:14:23] deze niet std uitvoeren, levert te veel op. Mogelijk wel los, maar dan een task van maken.
 proc check_file_comments {srcfile} {
