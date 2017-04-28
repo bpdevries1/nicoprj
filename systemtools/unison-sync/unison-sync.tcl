@@ -29,6 +29,7 @@ proc main {argv} {
     {unison.arg "" "Read unison profile (just name, no dir and ext, or full path. Also read just root and force items)"}
     {master.arg "" "Master directory"}
     {slave.arg "" "Slave directory"}
+    {copy "Also copy files (does not use unison settings for path and ignore, copies all!)"}
     {debug "Set loglevel to debug"}
     {size_treshold.arg "0" "Only handle files at least this number of bytes in size (Unison will handle the rest)"}
     {n "Do nothing, just show what would be done"}
@@ -260,7 +261,7 @@ proc sync_from_master_file {master_filename opt} {
   }
   set l [dict_get $slave_files [filename_key $filename]]
   if {[count $l] == 0} {
-    log info "Slave does not exist anywhere, so copy: $filename"
+    # log info "Slave does not exist anywhere, so copy: $filename"
     copy_slave_file $filename $opt
   } else {
     # file already exists once or more in slave file system, move the first one to
@@ -366,6 +367,9 @@ proc first_non_existing_master {lst} {
 proc copy_slave_file {master_filename opt} {
   global slave_files master_root slave_root nwarnings
   # set filename $master_filename
+  if {![:copy $opt]} {
+    return;                     # -copy param not given, so by default only move, no copy.
+  }
   set target_slave_name [corresponding_path $master_root $slave_root $master_filename]
   log info "Copy file:\n  $master_filename ->\n  $target_slave_name"
   if {![:n $opt]} {
