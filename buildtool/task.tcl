@@ -29,7 +29,7 @@ proc task {args} {
                              desc [make_desc $name $desc $options $params]]
   # [2016-07-30 14:11] Use [list] to ensure options and usage are given as single
   # arguments to getoptions. Syntax_quote as alternative?
-  set body2 "set opt \[getoptions args [list $options] [list [usage $name $params]]\]\n$body"
+  set body2 "set args_orig \$args; set opt \[getoptions args [list $options] [list [usage $name $params]]\]\n$body"
   proc $proc_name {args} $body2
 }
 
