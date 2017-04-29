@@ -31,7 +31,7 @@ proc main {argv} {
     {slave.arg "" "Slave directory"}
     {copy "Also copy files (does not use unison settings for path and ignore, copies all!)"}
     {debug "Set loglevel to debug"}
-    {size_treshold.arg "0" "Only handle files at least this number of bytes in size (Unison will handle the rest)"}
+    {size_treshold.arg "1000000" "Only handle files at least this number of bytes in size (Unison will handle the rest)"}
     {n "Do nothing, just show what would be done"}
     {showunison "Show Unison profile names and dirs"}
   }
