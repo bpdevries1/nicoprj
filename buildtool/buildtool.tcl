@@ -80,6 +80,9 @@ proc handle_script_dir {dir tname trest} {
     }
     # ok, normal situation.
     assert {[file exists [config_tcl_name]]}
+    #puts "before source_dir: generic"
+    #puts "buildtool_dir:"
+    #puts [buildtool_dir]
     source_dir [file join [buildtool_dir] generic]
     uplevel #0 {source [config_tcl_name]}
     source_prjtype;             # load prjtype dependent tasks
@@ -114,6 +117,7 @@ proc source_dir {dir} {
   foreach libfile [lsort [glob -nocomplain -directory $dir *.tcl]] {
     # ndv::source_once?
     # uplevel #0 [list source $libfile]
+    # puts "dynamic source: $libfile"
     uplevel #0 [list ndv::source_once $libfile]
   }
 }
@@ -123,9 +127,16 @@ proc buildtool_dir {} {
   # set res [file dirname [file normalize [info script]]]
   # [2016-08-10 22:31] info script does not work now, because this proc is called from
   # .bld/config.tcl, and returns .bld dir.
-  set res [file dirname [file normalize $argv0]]
+  set res [file dirname [file normalize [file_follow_links $argv0]]]
   log debug "buildtool_dir: $res"
   return $res
+}
+
+proc file_follow_links {path} {
+  while {[file type $path] == "link"} {
+    set path [file link $path]
+  }
+  return $path
 }
 
 # return true iff dir is .bld dir or subdir of this.
