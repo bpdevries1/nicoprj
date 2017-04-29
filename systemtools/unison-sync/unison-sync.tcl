@@ -30,6 +30,7 @@ proc main {argv} {
     {master.arg "" "Master directory"}
     {slave.arg "" "Slave directory"}
     {copy "Also copy files (does not use unison settings for path and ignore, copies all!)"}
+    {delete "Also delete files (dangerous, leave to Unison)"}
     {debug "Set loglevel to debug"}
     {size_treshold.arg "1000000" "Only handle files at least this number of bytes in size (Unison will handle the rest)"}
     {n "Do nothing, just show what would be done"}
@@ -294,7 +295,11 @@ proc sync_from_slave {slave_root opt} {
         }
         if {![:n $opt]} {
           log info "Really delete file"
-          file delete $slave_filename
+          if {[:delete $opt]} {
+            file delete $slave_filename  
+          } else {
+            log info "-delete not given, do nothing"
+          }
         } else {
           log info "-n given, do nothing"
         }
