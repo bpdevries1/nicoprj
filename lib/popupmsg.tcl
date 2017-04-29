@@ -6,7 +6,10 @@
 package require ndv
 
 proc main_popupmsg {argv} {
-  lassign $argv text
+  lassign $argv text title
+  if {$title == ""} {
+    set title "Warning!"
+  }
   if {$text == "-"} {
     # read stdin
     # puts stderr "Reading stdin"
@@ -15,19 +18,19 @@ proc main_popupmsg {argv} {
     # puts stderr "text: ***$text***"
   }
   if {[string trim $text] != ""} {
-    popup_warning $text; # only popup if something to show, useful for pipelines.
+    popup_warning $text $title; # only popup if something to show, useful for pipelines.
   }
   exit
 }
 
-proc popup_warning {text} {
+proc popup_warning {text title} {
   package require Tk
   wm withdraw .
 
   # [2017-04-14 10:28] in help ook: tk_messageBox
   # [2017-04-14 10:29] want to set width, maybe also scrollbar, this is not possible
   # with MessageBox, so use something else.
-  set answer [::tk::MessageBox -message "Warning!" \
+  set answer [::tk::MessageBox -message $title \
                   -icon info -type ok \
                   -detail $text]
 }
