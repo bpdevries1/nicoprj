@@ -33,8 +33,12 @@ namespace eval ::ndv {
     # debugging info
     # puts "source_once: info script: [info script]"
     # [2016-08-19 12:59] ok, put whole path in sources list/array.
-    set file_norm [file normalize [file join [file dirname [info script]] $file]]
-    
+    # puts "info script: [info script]"
+    # set file_norm [file normalize [file join [file dirname [info script]] $file]]
+    set file_norm [find_location $file]
+    if {[regexp {backup.tcl} $file_norm]} {
+      # breakpoint
+    }
     if {![info exists sources($file_norm)]} {
       # don't catch errors, since that may indicate we failed to load it...?
       #     Extra challenge:  Use the techniques outlined in TIP 90
@@ -43,10 +47,11 @@ namespace eval ::ndv {
       # We don't know what command is [source] in the caller's context,
       # so fully qualify to get the [::source] we want.
       # uplevel 1 [list ::source $file_norm]
+      # puts "source: $file_norm"
       set res [uplevel $uplevel [list ::source $file_norm]]
       # mark it as loaded since it was source'd with no error...
       set sources($file_norm) 1
-
+      
       # and read proc names for stacktrace.
       # [2017-04-02 15:16] alternative may be to override proc, and use [info sourceline???], then special handling for eg task would not be needed.
       stacktrace_read_source $file_norm
@@ -86,6 +91,18 @@ namespace eval ::ndv {
     # breakpoint
   }
 
+  # find location/path of file to source relative to the current script file.
+  # this script file can be a symlink, so follow there to the actual file.
+  proc find_location {file} {
+    set script_path [info script]
+    while {[file type $script_path] == "link"} {
+      set script_path [file link $script_path]
+    }
+    set file_norm [file normalize [file join [file dirname $script_path] $file]]
+    return $file_norm
+  }
+
+  
   proc qualified_procname {type namespace procname} {
     if {$procname == "read_run_logfile"} {
       # breakpoint
