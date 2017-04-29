@@ -170,7 +170,8 @@ proc mtime_status {libfile} {
 task diff {Show differences between local version and repo version
   Syntax: diff <filename>
   Show date/time, size, and differences between local and repo version.
-} {{min "Show minimal diff only"}} {
+} {{min "Show minimal diff only"}
+    v   "Use visual diff tool (eskil)"} {
   lassign $args libfile
   set st [show_status $libfile]
   puts "1:local: [file_info $libfile]"
@@ -180,7 +181,11 @@ task diff {Show differences between local version and repo version
     if {[:min $opt]} {
       # log info "min: only show minimal diff"
     } else {
-      diff_files $libfile [repofile $libfile] [basefile $libfile]
+      if {[:v $opt]} {
+        vdiff_files $libfile [repofile $libfile]
+      } else {
+        diff_files $libfile [repofile $libfile] [basefile $libfile]  
+      }
     }
   } else {
     # no use to do diff
@@ -211,6 +216,15 @@ proc diff_files {libfile repofile {basefile ""}} {
   }
   file delete $temp_out
   puts $res
+}
+
+proc vdiff_files {libfile repofile} {
+  global VDIFF_EXE
+  if {[catch {set VDIFF_EXE}]} {
+    log warn "set VDIFF_EXE in system configfile: [buildtool_env_tcl_name]"
+  } else {
+    exec $VDIFF_EXE $libfile $repofile &
+  }
 }
 
 proc file_info {libfile} {
