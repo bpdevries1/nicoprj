@@ -49,6 +49,7 @@ proc check_drives {args} {
 
 proc unison {args} {
   global UNISON_BINARY stdout
+  puts "unison: [join $args " "]"
   catch {
     # stdout net als stderr gewoon doorsturen naar de console, niet als result opvangen.
     # exec -ignorestderr $UNISON_BINARY {*}$args 1>@2
