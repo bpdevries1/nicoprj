@@ -127,7 +127,9 @@ proc show_requests_file {opt hh filename} {
     return
   }
   $hh anchor_name [file tail $filename]
-  $hh heading 1 "Requests in [file tail $filename]"
+  # [2017-05-04 15:30] clear make visible this is an anchor, and a new source file.
+  # $hh heading 1 "*** Requests in [file tail $filename] ***"
+  $hh heading 1 "<hr/>Requests in [file tail $filename]"
   set stmts [read_source_statements $filename]
 
   foreach stmt $stmts {
