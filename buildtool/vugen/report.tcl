@@ -89,7 +89,8 @@ proc copy_step_result_files {target_dir_root} {
   set target_dir [file join $target_dir_root $src_dir]
   file mkdir $target_dir
   foreach filename [glob -nocomplain -directory $src_dir *.inf] {
-    file copy $filename [file join $target_dir [file tail $filename]]
+    # [2017-05-04 15:37] copy over possible old result files.
+    file copy -force $filename [file join $target_dir [file tail $filename]]
     set ref_file [step_get_ref_file $filename]
     set ref_path [file join $src_dir $ref_file]
     if {[file exists $ref_path]} {
