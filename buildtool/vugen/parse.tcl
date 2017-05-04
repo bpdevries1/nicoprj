@@ -357,7 +357,9 @@ proc comment_line? {line} {
 # check if string valuetype is a Loadrunner parameter: {paramname}
 proc det_lr_valuetype {val} {
   set tp [det_valuetype $val]
-  if {[regexp {^\{[A-Za-z0-9_]+\}$} $val]} {
+  # [2017-05-04 15:26] lrparams can also include a dash.
+  # [2017-05-04 16:13] but this is not the place where abs-pad is tested.
+  if {[regexp {^\{[A-Za-z0-9_-]+\}$} $val]} {
     set tp "lrparam"
   }
   return $tp
