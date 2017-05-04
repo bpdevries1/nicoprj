@@ -549,12 +549,12 @@ proc wordwrap_generic {str {wordwrap 60} {splitchars " "}} {
 
 proc corr_ini_init {} {
   global corr_ini
-  set corr_ini [ini/read correlations.ini 0]
+  set corr_ini [ini/read [file join requests correlations.ini] 0]
 }
 
 proc corr_ini_write {} {
   global corr_ini
-  ini/write correlations.ini $corr_ini
+  ini/write [file join requests correlations.ini] $corr_ini
 }
 
 # add a request or parameter to correlations list/ini
