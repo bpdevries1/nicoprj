@@ -113,6 +113,9 @@ source [file join [file dirname [info script]] libtest.tcl]
 # previously used in FB/genvugen
 source [file join [file dirname [info script]] liburl.tcl]
 
+# [2017-05-05 21;46] added
+source [file join [file dirname [info script]] libjson.tcl]
+
 # [2016-12-03 20:55] added.
 source [file join [file dirname [info script]] liblist.tcl]
 
