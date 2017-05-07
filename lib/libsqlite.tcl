@@ -1,7 +1,10 @@
 # sqlite helper procs
 # in Tcl 8.5, use sqlite directly
 # in Tcl 8.6, use tdbc::sqlite, for named parameters in queries.
+package require Tclx
 
+source [file normalize [file join [info script] .. libmacro.tcl]]; # for use.
+source [file normalize [file join [info script] .. libns.tcl]]; # for use.
 use libmacro
 
 if {$tcl_version == "8.5"} {
@@ -89,12 +92,20 @@ if {$tcl_version == "8.5"} {
   }
 
   # [2016-08-22 16:55:38] no error if field already added before.
-  proc add_field {conn table_def fieldname {datatype text}} {
-    db_eval_try $conn [add_field_sql $table_def $fieldname $datatype]
+  proc add_field {conn table_def fieldname {datatype text} {new_table 0}} {
+    if {$new_table} {
+      db_eval_try $conn [create_table_field_sql $table_def $fieldname $datatype]  
+    } else {
+      db_eval_try $conn [add_field_sql $table_def $fieldname $datatype]  
+    }
   }
 
   proc add_field_sql {table_def fieldname datatype} {
     return "alter table [dict get $table_def table] add $fieldname $datatype" 
+  }
+
+  proc create_table_field_sql {table_def fieldname datatype} {
+    return "create table [dict get $table_def table] ($fieldname $datatype)"
   }
   
   proc drop_table_sql {table_def} {
@@ -103,10 +114,15 @@ if {$tcl_version == "8.5"} {
   
   # if fieldname ends with _id, make it an integer field.
   # if fielddef contains 2 items, the second one is the data type.
+  # if fields is an empty list, create an empty statement.
   proc create_table_sql {table_def} {
     # return "create table [dict get $table_def table] ([join [dict get $table_def fields] ", "])" 
     set fields [lmap x [dict get $table_def fields] {fielddef2sql $x}]
-    return "create table [dict get $table_def table] ([join $fields ", "])"
+    if {[llength $fields] == 0} {
+      return ""
+    } else {
+      return "create table [dict get $table_def table] ([join $fields ", "])"  
+    }
   }
 
   set _sqlite_datatypes [list]

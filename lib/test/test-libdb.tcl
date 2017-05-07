@@ -13,6 +13,9 @@ source [file join [file dirname [info script]] .. CLogger.tcl]
 source [file join [file dirname [info script]] .. generallib.tcl]
 
 source [file join [file dirname [info script]] .. libdb.tcl]
+source [file join [file dirname [info script]] .. breakpoint.tcl]
+
+source [file join [file dirname [info script]] .. CLogger.tcl]; # again, so log is ok.
 
 set_log_global info
 log debug "Starting the tests"
@@ -97,5 +100,20 @@ testndv {
 
 $db close
 file delete $dbname
+
+# [2017-05-07 18:42] create DB on the fly and tables also on the fly
+testndv {
+  set dbname "/tmp/test-libdb-fly.db"
+  file delete $dbname
+  set db [dbwrapper new $dbname]
+  $db insert table1 [dict create field1 abc field2 123]
+  $db insert table1 [dict create field1 def field2 456]
+  set query "select count(*) cnt from table1"
+  set res [$db query $query]
+  set cnt [dict get [lindex $res 0] cnt]
+  $db close
+  file delete $dbname
+  iden $cnt
+} 2
 
 cleanupTests
