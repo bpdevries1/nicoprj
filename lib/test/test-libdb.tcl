@@ -116,4 +116,43 @@ testndv {
   iden $cnt
 } 2
 
+set ddl_tcl "proc get_db {db_name opt} {
+  set existing_db \[file exists \$db_name\]
+  set db \[dbwrapper new \$db_name\]
+  # define tables
+  # table table1: 
+  \$db def_datatype {field1} integer 
+  \$db def_datatype {field2} integer 
+  \$db add_tabledef table1 {id} {field1 field2} 
+  # table table2: 
+  \$db def_datatype {field3} integer 
+  \$db def_datatype {field4} integer 
+  \$db add_tabledef table2 {id} {field3 field4}
+
+  \$db create_tables 0 ; # 0: don't drop tables first. Always do create, eg for new table defs. 1: drop tables first.
+  if {!\$existing_db} {
+    log debug \"New db: \$db_name, create tables\"
+    # create_indexes \$db
+  } else {
+    log debug \"Existing db: \$db_name, don't create tables\"
+  }
+  \$db prepare_insert_statements
+  \$db load_percentile
+  
+  return \$db
+}"
+
+
+testndv {
+  set dbname "/tmp/test-libdb-fly.db"
+  file delete $dbname
+  set db [dbwrapper new $dbname]
+  $db insert table1 [dict create field1 abc field2 123]
+  $db insert table2 [dict create field3 abc field4 123]
+  $db close
+  file delete $dbname
+  $db get_ddl_tcl
+} $ddl_tcl
+
+
 cleanupTests

@@ -414,9 +414,53 @@ oo::class create dbwrapper {
     # TODO: ? check if extension already loaded? or keep flag in this db object.
     my query "select load_extension('$ext_path')"
   }
+
+  # helper when flex-fields and tables are used, generate proc get_db
+  method get_ddl_tcl {} {
+    # set table_defs [list "create table t1;" "create table t2;"]
+    set table_defs [my get_create_tables_sql]
+    return "proc get_db {db_name opt} {
+  set existing_db \[file exists \$db_name\]
+  set db \[dbwrapper new \$db_name\]
+  # define tables
+  [join $table_defs " \n  "]
+
+  \$db create_tables 0 ; # 0: don't drop tables first. Always do create, eg for new table defs. 1: drop tables first.
+  if {!\$existing_db} {
+    log debug \"New db: \$db_name, create tables\"
+    # create_indexes \$db
+  } else {
+    log debug \"Existing db: \$db_name, don't create tables\"
+  }
+  \$db prepare_insert_statements
+  \$db load_percentile
+  
+  return \$db
+}"
+  }
+
+  method get_create_tables_sql {} {
+    my variable db_tabledefs
+    set res [list]
+    dict for {tbl tbl_def} $db_tabledefs {
+      if {$tbl == "flexfields"} {
+        continue
+      }
+      # lappend res "create table $tbl;"
+      # lappend res [create_table_sql $tbl_def]
+      lappend res "# table $tbl:"
+      set fields [dict get $tbl_def fields]
+      foreach field $fields {
+        lappend res "\$db def_datatype \{$field\} integer"
+      }
+      lappend res "\$db add_tabledef $tbl {id} \{$fields\}"
+    }
+    return $res
+  }
+}
+
+if 0 {
   
 }
 
-# proc breakpoint_dummy {} {
-#   breakpoint 
-# }
+
