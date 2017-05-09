@@ -1,5 +1,7 @@
 package provide ndv 0.1.1
-package require json::write
+
+# [2017-05-08 09:05] This one not available now on work laptop
+catch {package require json::write}
 
 namespace eval ::libjson {
   namespace export dict2json array2json
