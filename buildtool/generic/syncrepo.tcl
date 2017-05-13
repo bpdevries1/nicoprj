@@ -223,7 +223,7 @@ proc vdiff_files {libfile repofile} {
   if {[catch {set VDIFF_EXE}]} {
     log warn "set VDIFF_EXE in system configfile: [buildtool_env_tcl_name]"
   } else {
-    exec $VDIFF_EXE $libfile $repofile &
+    exec {*}$VDIFF_EXE $libfile $repofile &
   }
 }
 
