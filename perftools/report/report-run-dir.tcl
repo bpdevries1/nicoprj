@@ -124,7 +124,7 @@ proc report_iter_user {db row hh} {
   # [2016-08-02 13:41:59] + 0 for when fields are empty.
   # [2017-03-28 15:52:57] error table does not have iteration_sub (yet)
   #              and iteration_sub = [:iteration_sub $row] + 0
-  set query "select ts, line
+  set query "select ts, linenr, line
              from error
              where vuserid = [:vuserid $row] + 0
              and iteration = [:iteration_start $row] + 0
@@ -134,11 +134,11 @@ proc report_iter_user {db row hh} {
   set res [$db query $query]
   if {[:# $res] > 0} {
     $hh table_start
-    $hh table_header Time Message
+    $hh table_header Time Linenr Message
     foreach erow $res {
       # $hh set_colour red - dan wel ook bij andere dingen dan table te doen.
       # of algemeen een set-option.
-      $hh table_row_class Failure [time_part [:ts $erow]] [:line $erow]
+      $hh table_row_class Failure [time_part [:ts $erow]] [:linenr $erow] [:line $erow]
       # $hh reset_colour
     }
     $hh table_end
@@ -362,6 +362,7 @@ proc report_summary_html {db dir} {
     foreach row [$db query $query] {
       report_summary_html_usecase $db $hh $row
     }
+    report_summary_testrun_errors $db $hh
     $hh write_footer
   }
 }
@@ -402,6 +403,34 @@ proc report_summary_html_usecase {db hh row} {
         [:npass $trow] [:nfail $trow]
   }
   $hh table_end
+}
+
+proc report_summary_testrun_errors {db hh} {
+  $hh heading 1 "Errors summary"
+  $hh table_start
+  $hh table_header Srcfile SrcLinenr ErrorNr ErrorType Details Count
+  set query "select srcfile, srclinenr, errornr, errortype, details, count(*) cnt
+             from error
+             group by 1,2,3,4,5
+             order by 1,2,3,4,5"
+  log debug "Query**: $query"
+  foreach erow [$db query $query] {
+    $hh table_row [:srcfile $erow] [:srclinenr $erow] [:errornr $erow] [:errortype $erow] [:details $erow] [:cnt $erow]
+  }
+  $hh table_end
+
+  $hh heading 1 "Errors details"
+  $hh table_start
+  $hh table_header Srcfile SrcLinenr ErrorNr ErrorType Details Line
+  set query "select ts, srcfile, srclinenr, errornr, errortype, details, line
+             from error
+             order by 1,2,3,4,5,6"
+  log debug "Query**: $query"
+  foreach erow [$db query $query] {
+    $hh table_row [:srcfile $erow] [:srclinenr $erow] [:errornr $erow] [:errortype $erow] [:details $erow] [:line $erow]
+  }
+  $hh table_end
+  
 }
 
 proc count_trans_error {db usecase transname} {
